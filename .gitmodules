@@ -1,0 +1,16 @@
+[submodule "host/py_module/3rdparty/pybind11"]
+	path = host/py_module/3rdparty/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
+[submodule "host/core/3rdparty/loguru"]
+	path = host/core/3rdparty/loguru
+	url = https://github.com/emilk/loguru.git
+[submodule "shared/3rdparty/dldt"]
+	path = shared/3rdparty/dldt
+	url = https://github.com/opencv/dldt.git
+[submodule "shared/3rdparty/json"]
+	path = shared/3rdparty/json
+	url = https://github.com/nlohmann/json.git
+[submodule "shared/3rdparty/json-schema-validator"]
+	path = shared/3rdparty/json-schema-validator
+	url = https://github.com/pboettch/json-schema-validator.git
