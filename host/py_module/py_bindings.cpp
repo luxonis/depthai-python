@@ -90,7 +90,6 @@ bool init_device(
 
         g_xlink = std::unique_ptr<XLinkWrapper>(new XLinkWrapper(true));
 
-        std::cout << "depthai: before xlink init;\n";
         if (!g_xlink->initFromHostSide(
                 &g_xlink_global_handler,
                 &g_xlink_device_handler,
@@ -98,7 +97,7 @@ bool init_device(
                 true)
             )
         {
-            std::cout << "depthai: Error initalizing xlink;\n";
+            std::cout << "depthai: Error initializing xlink\n";
             break;
         }
 
