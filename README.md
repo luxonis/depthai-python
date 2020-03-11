@@ -60,12 +60,14 @@ Host-side DepthAI source code
 ## Troubleshooting
 
 For the depthai-api build failure on Ubuntu 18.04 ("relocation ..."), the solution was to upgrade gcc/g++:
+
       $ gcc --version
       gcc (Ubuntu 8.3.0-6ubuntu1~18.04.1) 8.3.0
 
 (gcc 7.x was installed by default)
 
 Commands used for upgrade were something among the lines:
+
       sudo apt install g++-8
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60
       sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60
