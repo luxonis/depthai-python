@@ -161,6 +161,14 @@ bool init_device(
     return result;
 }
 
+bool deinit_device()
+{
+    g_xlink = nullptr;
+    g_disparity_post_proc = nullptr;
+    g_device_support_listener = nullptr;
+    g_test_data_subjects.clear();
+    return true;
+}
 
 std::vector<std::string> get_available_steams()
 {
@@ -610,6 +618,12 @@ PYBIND11_MODULE(depthai, m)
         "Function that establishes the connection with device and gets configurations from it.",
         py::arg("cmd_file") = device_cmd_file
         );
+    
+    m.def(
+        "deinit_device",
+        &deinit_device,
+        "Function that destroys the connection with device."
+        );
 
     // reboot
     m.def(
@@ -758,10 +772,7 @@ PYBIND11_MODULE(depthai, m)
 
     // module destructor
     auto cleanup_callback = []() {
-        g_xlink = nullptr;
-        g_disparity_post_proc = nullptr;
-        g_device_support_listener = nullptr;
-        g_test_data_subjects.clear();
+        deinit_device();
     };
 
     m.add_object("_cleanup", py::capsule(cleanup_callback));
