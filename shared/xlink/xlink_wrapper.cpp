@@ -204,6 +204,7 @@ uint32_t XLinkWrapper::openReadAndCloseStream(
         if (stream_id == int(INVALID_STREAM_ID))
         {
             printf("Stream not opened: %s\n", stream.name);
+            result = -1;
             break;
         }
 

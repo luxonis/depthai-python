@@ -61,7 +61,16 @@ void wdog_thread(int& wd_timeout_ms)
         {
             std::cout << "watchdog triggered " << std::endl;
             deinit_device();
-            bool init = init_device(cmd_backup);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            bool init;
+            for(int retry = 0; retry < 3; retry++)
+            {
+                init = init_device(cmd_backup);
+                if(init)
+                {
+                    break;
+            }
+            }
             if(!init)
             {
                 exit(1);
@@ -181,7 +190,10 @@ bool init_device(
                     si,
                     config_d2h_str
                     );
-
+            if(config_file_length == -1)
+            {
+                break;
+            }
             if (!getJSONFromString(config_d2h_str, g_config_d2h))
             {
                 std::cout << "depthai: error parsing config_d2h\n";
