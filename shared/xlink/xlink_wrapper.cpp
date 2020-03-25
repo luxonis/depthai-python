@@ -11,9 +11,8 @@
 #include "xlink_wrapper.hpp"
 
 // FIXME use some header
-#if !defined(__PC__)
 extern "C" void wdog_keepalive(void);
-#endif
+
 
 XLinkWrapper::XLinkWrapper(
     bool be_verbose
@@ -218,7 +217,7 @@ uint32_t XLinkWrapper::openReadAndCloseStream(
             memcpy(&stl_container[0], packet->data, packet->length);
 
             result = packet->length;
-
+            wdog_keepalive();
             // release data
             status = XLinkReleaseData(stream_id);
             if (status != X_LINK_SUCCESS)
@@ -276,7 +275,7 @@ uint32_t XLinkWrapper::openReadAndCloseStream(
             uint32_t copy_sz = std::min(buffer_size, packet->length);
             memcpy(buffer, packet->data, copy_sz);
             result = copy_sz;
-
+            wdog_keepalive();
             // release data
             status = XLinkReleaseData(stream_id);
             if (status != X_LINK_SUCCESS)
@@ -511,9 +510,8 @@ bool XLinkWrapper::writeToStream(
         printf("!!! XLink write successful: %s (%d)\n", stream.name, int(write_data_size));
 #endif
 
-#if !defined(__PC__)
-        wdog_keepalive();
-#endif
+    wdog_keepalive();
+
     }
 
     return status == X_LINK_SUCCESS;
@@ -615,7 +613,7 @@ void XLinkWrapper::openAndReadDataThreadFunc(
                 //     printf ("Stream id #%d | Name %10s | Packet size: %8u | No.: %4u\n",
                 //             stream_id, stream_info.name, packet->length, packet_counter);
                 // }
-
+                wdog_keepalive();
                 notifyObservers(stream_info, data);
 
                 packet_counter += 1;
