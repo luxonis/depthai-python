@@ -36,13 +36,15 @@ namespace py = pybind11;
 
 std::string config_backup;
 std::string cmd_backup;
+std::string usb_device_backup;
 std::shared_ptr<CNNHostPipeline> gl_result = nullptr;
 
 static volatile std::atomic<int> wdog_keep;
 
 bool deinit_device();
 bool init_device(
-    const std::string &device_cmd_file
+    const std::string &device_cmd_file,
+    const std::string &usb_device
 );
 std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
@@ -63,7 +65,7 @@ void wdog_thread(int& wd_timeout_ms)
             bool init;
             for(int retry = 0; retry < 3; retry++)
             {
-                init = init_device(cmd_backup);
+                init = init_device(cmd_backup, usb_device_backup);
                 if(init)
                 {
                     break;
@@ -144,10 +146,12 @@ std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
 
 
 bool init_device(
-    const std::string &device_cmd_file
+    const std::string &device_cmd_file,
+    const std::string &usb_device
 )
 {
     cmd_backup = device_cmd_file;
+    usb_device_backup = usb_device;
     bool result = false;
     std::string error_msg;
 
@@ -167,6 +171,7 @@ bool init_device(
                 &g_xlink_global_handler,
                 &g_xlink_device_handler,
                 device_cmd_file,
+                usb_device,
                 false)
             )
         {
@@ -642,11 +647,13 @@ PYBIND11_MODULE(depthai, m)
 
     // init device
     std::string device_cmd_file = "./depthai.cmd";
+    std::string usb_device = "";
     m.def(
         "init_device",
         &init_device,
         "Function that establishes the connection with device and gets configurations from it.",
-        py::arg("cmd_file") = device_cmd_file
+        py::arg("cmd_file") = device_cmd_file,
+        py::arg("usb_device") = usb_device
         );
     
     m.def(
