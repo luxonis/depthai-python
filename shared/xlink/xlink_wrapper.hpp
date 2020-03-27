@@ -84,7 +84,7 @@ private:
     void closeAllObserverStreams();
 
 
-    const int              c_stream_open_tries = 10;
+    const int              c_stream_open_tries = 5;
     const unsigned         c_stream_write_timeout_ms = 5000;
     const unsigned         c_stream_write_wait_ms = 1;
     // const int              c_stream_write_tries = 20;

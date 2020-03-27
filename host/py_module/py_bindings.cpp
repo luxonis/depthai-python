@@ -29,7 +29,6 @@
 #include "../../shared/json_helper.hpp"
 #include "../../shared/version.hpp"
 #include "../../shared/xlink/xlink_wrapper.hpp"
-#include "test_data_subject.hpp"
 #include "../core/host_json_helper.hpp"
 
 
@@ -61,7 +60,6 @@ void wdog_thread(int& wd_timeout_ms)
         {
             std::cout << "watchdog triggered " << std::endl;
             deinit_device();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             bool init;
             for(int retry = 0; retry < 3; retry++)
             {
@@ -142,7 +140,6 @@ json g_config_d2h;
 
 std::unique_ptr<DisparityStreamPostProcessor> g_disparity_post_proc;
 std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
-std::vector<std::unique_ptr<TestDataSubject>> g_test_data_subjects;
 
 
 
@@ -170,7 +167,7 @@ bool init_device(
                 &g_xlink_global_handler,
                 &g_xlink_device_handler,
                 device_cmd_file,
-                true)
+                false)
             )
         {
             std::cout << "depthai: Error initializing xlink\n";
@@ -246,7 +243,6 @@ bool deinit_device()
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
-    g_test_data_subjects.clear();
     return true;
 }
 
@@ -263,53 +259,6 @@ std::vector<std::string> get_available_steams()
         {
             result.push_back(obj.get<std::string>());
         }
-    }
-
-    return result;
-}
-
-
-std::unique_ptr<CNNHostPipeline> create_pipeline_TEST(
-    const std::vector<std::string> &streams,
-    const std::string &blob_file_config
-)
-{
-    std::unique_ptr<CNNHostPipeline> result;
-
-    bool init_ok = false;
-    do
-    {
-        // read
-        std::vector<TensorInfo>       tensors_info;
-        if (parseTensorInfosFromJsonFile(blob_file_config, tensors_info))
-        {
-            printf("CNN configurations read: %s", blob_file_config.c_str());
-        }
-        else
-        {
-            printf("There is no cnn configuration file or error in it\'s parsing: %s", blob_file_config.c_str());
-        }
-
-        // pipeline
-        result = std::unique_ptr<CNNHostPipeline>(new CNNHostPipeline(tensors_info));
-
-        for (const std::string &stream_name : streams)
-        {
-            g_test_data_subjects.push_back(std::unique_ptr<TestDataSubject>(new TestDataSubject));
-            g_test_data_subjects.back()->runInThread(c_streams_myriad_to_pc.at(stream_name));
-
-            result->makeStreamPublic(stream_name);
-            result->observe(*g_test_data_subjects.back(), c_streams_myriad_to_pc.at(stream_name));
-        }
-
-        init_ok = true;
-        std::cout << "depthai: INIT OK!\n";
-    }
-    while (false);
-
-    if (!init_ok)
-    {
-        result = nullptr;
     }
 
     return result;
@@ -724,12 +673,6 @@ PYBIND11_MODULE(depthai, m)
         "Returns available streams, that possible to retreive from the device."
         );
 
-    std::vector<std::string> streams_default_cnn = {"metaout"};
-    std::string device_calibration_file_cnn = "./depthai.calib";
-    std::string blob_file_cnn = "./mobilenet-ssd-4b17b0a707.blob";
-    std::string blob_file_config_cnn = "./mobilenet_ssd.json";
-    std::string depth_type_cnn = "";
-
     // cnn pipeline
     m.def(
         "create_pipeline",
@@ -748,15 +691,6 @@ PYBIND11_MODULE(depthai, m)
         },
         "Function for pipeline creation",
         py::arg("config") = py::dict()
-        );
-
-
-    m.def(
-        "create_pipeline_TEST",
-        &create_pipeline_TEST,
-        "Function for development tests",
-        py::arg("streams") = streams_default_cnn,
-        py::arg("blob_file_config") = blob_file_config_cnn
         );
 
 
@@ -855,6 +789,7 @@ PYBIND11_MODULE(depthai, m)
     auto cleanup_callback = []() {
         wdog_stop();
         deinit_device();
+        gl_result = nullptr;
     };
 
     m.add_object("_cleanup", py::capsule(cleanup_callback));
