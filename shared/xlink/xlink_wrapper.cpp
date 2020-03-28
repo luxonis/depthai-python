@@ -49,6 +49,7 @@ bool XLinkWrapper::initFromHostSide(
     XLinkGlobalHandler_t* global_handler,
     XLinkHandler_t* device_handler,
     const std::string &device_cmd_file,
+    const std::string &usb_device,
     bool reboot_device_on_destructor
 )
 {
@@ -80,17 +81,40 @@ bool XLinkWrapper::initFromHostSide(
             break;
         }
 
+        if (usb_device == "list") {
+            const int MAX_DEVICES = 32;
+            unsigned int numdev = 0;
+            deviceDesc_t deviceDescAll[MAX_DEVICES] = {};
+            rc = XLinkFindAllSuitableDevices(X_LINK_ANY_STATE, in_deviceDesc,
+                    deviceDescAll, MAX_DEVICES, &numdev);
+            printf("Detected %d device(s):\n", numdev);
+            for (int i = 0; i < numdev; i++) {
+                char *port = strdup(deviceDescAll[i].name);
+                strtok(port, "-");
+                printf("  %-12s on USB port: %s\n", deviceDescAll[i].name, port);
+                free(port);
+            }
+            exit(0);
+        }
+
+        if (!usb_device.empty())
+            snprintf(in_deviceDesc.name, sizeof in_deviceDesc.name,
+                    "%s-ma2480", usb_device.c_str());
+
         // boot device
         if (!device_cmd_file.empty()) {
             // Find un-booted device
-            static bool print_found = false;
+            bool print_found = false;
             tstart = std::chrono::steady_clock::now();
             do {
                 rc = XLinkFindFirstSuitableDevice(X_LINK_UNBOOTED, in_deviceDesc, &deviceDesc);
                 tdiff = std::chrono::steady_clock::now() - tstart;
                 if (rc != X_LINK_SUCCESS) {
                     print_found = true;
-                    printf("\rNo USB device [03e7:2485], still looking... %.3fs ", tdiff.count());
+                    printf("\rNo USB device [03e7:2485], still looking");
+                    if (!usb_device.empty())
+                        printf(" on port %s", usb_device.c_str());
+                    printf("... %.3fs ", tdiff.count());
                     fflush(stdout);
                 } else {
                     if (print_found)
@@ -114,6 +138,10 @@ bool XLinkWrapper::initFromHostSide(
             // Development option, the firmware is loaded via JTAG
             printf("Device boot is skipped. (\"cmd_file\" NOT SPECIFIED !)\n");
         }
+
+        if (!usb_device.empty())
+            snprintf(in_deviceDesc.name, sizeof in_deviceDesc.name,
+                    "%s-", usb_device.c_str());
 
         // Search for booted device
         tstart = std::chrono::steady_clock::now();

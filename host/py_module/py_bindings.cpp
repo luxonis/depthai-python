@@ -72,7 +72,8 @@ std::vector<std::unique_ptr<TestDataSubject>> g_test_data_subjects;
 
 
 bool init_device(
-    const std::string &device_cmd_file
+    const std::string &device_cmd_file,
+    const std::string &usb_device
 )
 {
     bool result = false;
@@ -94,6 +95,7 @@ bool init_device(
                 &g_xlink_global_handler,
                 &g_xlink_device_handler,
                 device_cmd_file,
+                usb_device,
                 true)
             )
         {
@@ -604,11 +606,13 @@ PYBIND11_MODULE(depthai, m)
 
     // init device
     std::string device_cmd_file = "./depthai.cmd";
+    std::string usb_device = "";
     m.def(
         "init_device",
         &init_device,
         "Function that establishes the connection with device and gets configurations from it.",
-        py::arg("cmd_file") = device_cmd_file
+        py::arg("cmd_file") = device_cmd_file,
+        py::arg("usb_device") = usb_device
         );
 
     // reboot

@@ -49,6 +49,7 @@ public:
         XLinkGlobalHandler_t* global_handler,
         XLinkHandler_t* device_handler,
         const std::string &path_to_mvcmd = "",
+        const std::string &usb_device = "",
         bool reboot_device_on_destructor = true
         );
 #endif // __PC__
