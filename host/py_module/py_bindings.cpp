@@ -73,7 +73,7 @@ void wdog_thread(int& wd_timeout_ms)
             }
             if(!init)
             {
-                exit(1);
+                exit(9);
             }
             create_pipeline(config_backup);
         }
