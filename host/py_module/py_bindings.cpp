@@ -63,7 +63,7 @@ void wdog_thread(int& wd_timeout_ms)
             std::cout << "watchdog triggered " << std::endl;
             deinit_device();
             bool init;
-            for(int retry = 0; retry < 3; retry++)
+            for(int retry = 0; retry < 1; retry++)
             {
                 init = init_device(cmd_backup, usb_device_backup);
                 if(init)
