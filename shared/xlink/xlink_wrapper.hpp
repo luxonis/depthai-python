@@ -85,7 +85,7 @@ private:
     void closeAllObserverStreams();
 
 
-    const int              c_stream_open_tries = -1;
+    const int              c_stream_open_tries = 5;
     const unsigned         c_stream_write_timeout_ms = 5000;
     const unsigned         c_stream_write_wait_ms = 1;
     // const int              c_stream_write_tries = 20;
@@ -101,7 +101,7 @@ private:
 
     int                    _device_link_id = -1; // -1 stands for undefined
 
-    bool                   _threads_exit       = false;
+    volatile bool                   _threads_exit       = false;
     std::mutex             _threads_subject_list_lock; // used in: openStreamInThreadAndNotifyObservers, waitForThreads
     std::list<std::thread> _threads_subject;
 
