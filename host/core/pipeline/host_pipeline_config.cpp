@@ -117,6 +117,21 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
         {
             auto& board_conf_obj = json_obj.at("board_config");
 
+            if (board_conf_obj.contains("store_to_eeprom"))
+            {
+                board_config.store_to_eeprom = board_conf_obj.at("store_to_eeprom").get<bool>();
+            }
+
+            if (board_conf_obj.contains("clear_eeprom"))
+            {
+                board_config.clear_eeprom = board_conf_obj.at("clear_eeprom").get<bool>();
+            }
+
+            if (board_conf_obj.contains("override_eeprom_calib"))
+            {
+                board_config.override_eeprom_calib = board_conf_obj.at("override_eeprom_calib").get<bool>();
+            }
+
             // "blob_file_config"
             if (board_conf_obj.contains("swap_left_and_right_cameras"))
             {
