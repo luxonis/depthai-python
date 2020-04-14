@@ -36,6 +36,7 @@ include_directories(
     ../core/
     ../../shared/
     ${XLINK_INCLUDE_DIRECTORIES}
+    ${XLINK_PLATFORM_INCLUDE}
     ../../shared/3rdparty/boost_1_71_0/
     ../../shared/3rdparty/json/include/
 )
@@ -104,6 +105,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../shared/version.hpp.in ${CMAKE_C
 target_link_libraries(
    ${APP_NAME}
    PRIVATE
+   -L/usr/local/lib  # For macOS
    -lusb-1.0
    -lpthread
    nlohmann_json::nlohmann_json
