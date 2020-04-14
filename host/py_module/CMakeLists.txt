@@ -15,6 +15,8 @@ add_definitions(-DXLINK_COMMON_TIMEOUT_MSEC=0)
 
 add_definitions(-DHOST_PYTHON_MODULE)
 
+# To avoid many "different visibility" warnings during final link on macOS
+add_definitions(-fvisibility=hidden)
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
