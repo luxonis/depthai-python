@@ -14,15 +14,19 @@ Host-side DepthAI source code
 
 ## Tested platforms
 
-- Ubuntu 16.04;
-- Ubuntu 18.04;
+- Ubuntu 16.04, 18.04;
 - Raspbian 10;
+- macOS 10.14.6, 10.15.4;
 
 ## Setup
 
-- Install development environement dependencies:
+- Install development environment dependencies:
+  - Linux:
 
-      sudo apt-get install -y git python-pip cmake cmake-gui libusb-1.0-0-dev
+        sudo apt-get install -y git python-pip cmake cmake-gui libusb-1.0-0-dev
+  - macOS:
+
+        brew install coreutils python3 cmake libusb wget opencv
 
 - After cloning the repo, update the third-party libraries used:
 
@@ -38,7 +42,7 @@ Host-side DepthAI source code
       cd build
       cmake ..
       make -j
-  Alternatively, when this repo is used as a submodule in https://github.com/luxonis/depthai-python-extras, the build process can be automated with the script below, that is also copying the generated `.so` back to `depthai-python-extras`:
+  Alternatively, when this repo is used as a submodule in https://github.com/luxonis/depthai, the build process can be automated with the script below, that is also copying the generated `.so` back to `depthai`:
   - `./build_py_module.sh`  
     first it does a full build, then at subsequent runs compiles only the modified source files.
   - `./build_py_module.sh --clean`  

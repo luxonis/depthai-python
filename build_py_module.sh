@@ -9,7 +9,8 @@ BUILD_DIR=build
 NUM_JOBS=`nproc`
 MEM_AVAIL=`grep MemAvailable /proc/meminfo | awk '{print int($2/1024)}'`
 echo "MemAvailable: $MEM_AVAIL MB"
-if   [[ $MEM_AVAIL -lt  900 ]]; then NUM_JOBS=1
+if [ -z $MEM_AVAIL ]; then echo "Unable to get MemAvailable"
+elif [[ $MEM_AVAIL -lt  900 ]]; then NUM_JOBS=1
 elif [[ $MEM_AVAIL -lt 1400 ]]; then NUM_JOBS=2
 fi
 
