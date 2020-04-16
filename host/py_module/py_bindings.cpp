@@ -342,6 +342,9 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
 
         json json_config_obj;
+        json_config_obj["board"]["clear-eeprom"] = config.board_config.clear_eeprom;
+        json_config_obj["board"]["store-to-eeprom"] = config.board_config.store_to_eeprom;
+        json_config_obj["board"]["override-eeprom"] = config.board_config.override_eeprom_calib;
         json_config_obj["board"]["swap-left-and-right-cameras"] = config.board_config.swap_left_and_right_cameras;
         json_config_obj["board"]["left_fov_deg"] = config.board_config.left_fov_deg;
         json_config_obj["board"]["left_to_right_distance_m"] = config.board_config.left_to_right_distance_m;
