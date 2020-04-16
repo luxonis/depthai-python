@@ -31,5 +31,7 @@ std::unordered_map<std::string, StreamInfo> c_streams_myriad_to_pc =
     {"metaout",     StreamInfo("metaout",    2*2816)}, // 1408
     {"previewout",  StreamInfo("previewout", 1920256)},
 
-    {"meta_d2h",    StreamInfo("meta_d2h",   1024*1024)}
+    {"meta_d2h",    StreamInfo("meta_d2h",   1024*1024)},
+    {"jpegout",    StreamInfo("jpegout",   1024*1024)}
+
 };
