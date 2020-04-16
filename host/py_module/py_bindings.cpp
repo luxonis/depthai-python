@@ -700,6 +700,12 @@ PYBIND11_MODULE(depthai, m)
         py::arg("config") = py::dict()
         );
 
+    // TODO fill out the rest of the binding
+    // for FrameMetadata struct
+    py::class_<FrameMetadata>(m, "FrameMetadata")
+        .def(py::init<>())
+        .def("getTimestamp", &FrameMetadata::getTimestamp)
+        ;
 
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
@@ -707,6 +713,7 @@ PYBIND11_MODULE(depthai, m)
         .def("size", &HostDataPacket::size)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
+        .def("getMetadata", &HostDataPacket::getMetadata)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()

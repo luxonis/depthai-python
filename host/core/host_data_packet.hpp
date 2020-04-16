@@ -10,6 +10,8 @@
 
 #include "../../shared/timer.hpp"
 
+#include "metadata/frame_metadata.hpp"
+
 
 #ifdef HOST_PYTHON_MODULE
 #include <pybind11/pybind11.h>
@@ -29,12 +31,26 @@ struct HostDataPacket
         std::vector<int> dimensions_,
         int elem_size_
     )
-        : data(size)
-        , stream_name(stream_name_)
+        : stream_name(stream_name_)
         , dimensions(dimensions_)
         , elem_size(elem_size_)
     {
-        memcpy(data.data(), in_data, size);
+        int frameSize = size;
+
+        // Copy metadata structure from end of packet
+        memcpy( &metadata, ((uint8_t*) in_data) + size - sizeof(FrameMetadata), sizeof(FrameMetadata) );
+        // Check if metadata is valid
+        if(metadata.isValid()){
+            // copy only frame data
+            frameSize = metadata.frameSize;
+            //printf("Stream: %s, metadata packet valid: w:%d, h:%d, t:%d, %6.3f\n", stream_name_.c_str(), metadata.specs.width,metadata.specs.height, metadata.specs.type, metadata.getTimestamp());
+        } else {
+            //printf("Stream: %s, Metadata packet NOT valid\n", stream_name_.c_str());
+        }
+
+        data.resize(frameSize);
+        memcpy(data.data(), in_data, frameSize);
+
         constructor_timer = Timer();
     }
 
@@ -121,7 +137,11 @@ struct HostDataPacket
         return reinterpret_cast<const char*>(&data[0]);
     }
 
+    FrameMetadata getMetadata(){
+        return metadata;
+    }
 
+    FrameMetadata metadata;
     std::vector<unsigned char> data;
     std::string stream_name;
     const std::vector<int> dimensions;
