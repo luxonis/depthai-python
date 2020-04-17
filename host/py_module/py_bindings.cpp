@@ -96,9 +96,11 @@ int  wdog_start(void)
 }
 int  wdog_stop(void)
 {
-    wdog_thread_alive = 0;
-    wd_thread.join();
- 
+    if(wdog_thread_alive)
+    {
+        wdog_thread_alive = 0;
+        wd_thread.join();
+    }
     return 0;
 }
 
