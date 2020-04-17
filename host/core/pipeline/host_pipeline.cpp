@@ -29,8 +29,7 @@ void HostPipeline::onNewData(
 
     if(data.size > info.size)
     {
-        // TODO: temporary, might not be needed (because of metadata)
-        //keep_frame = false;
+        keep_frame = false;
     }
 
     if(keep_frame == false)

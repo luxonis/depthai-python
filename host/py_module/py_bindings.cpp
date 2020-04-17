@@ -703,11 +703,19 @@ PYBIND11_MODULE(depthai, m)
         py::arg("config") = py::dict()
         );
 
-    // TODO fill out the rest of the binding
-    // for FrameMetadata struct
+
+    // FrameMetadata struct binding
     py::class_<FrameMetadata>(m, "FrameMetadata")
         .def(py::init<>())
         .def("getTimestamp", &FrameMetadata::getTimestamp)
+        .def("getFrameType", &FrameMetadata::getFrameType)
+        .def("getFrameWidth", &FrameMetadata::getFrameWidth)
+        .def("getFrameHeight", &FrameMetadata::getFrameHeight)
+        .def("getFrameBytesPP", &FrameMetadata::getFrameBytesPP)
+        .def("getStride", &FrameMetadata::getStride)
+        .def("getCategory", &FrameMetadata::getCategory)
+        .def("getInstanceNum", &FrameMetadata::getInstanceNum)
+        .def("getSequenceNum", &FrameMetadata::getSequenceNum)
         ;
 
     // for PACKET in data_packets:
