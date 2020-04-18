@@ -144,6 +144,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 board_config.left_fov_deg = board_conf_obj.at("left_fov_deg").get<float>();
             }
 
+            if (board_conf_obj.contains("rgb_fov_deg"))
+            {
+                board_config.rgb_fov_deg = board_conf_obj.at("rgb_fov_deg").get<float>();
+            }
+
             // "left_to_right_distance_cm"
             if (board_conf_obj.contains("left_to_right_distance_cm"))
             {
@@ -155,6 +160,16 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 board_config.left_to_rgb_distance_m =
                     board_conf_obj.at("left_to_rgb_distance_cm").get<float>() / 100.f; // cm -> m
+            }
+
+            if (board_conf_obj.contains("name"))
+            {
+                board_config.name = board_conf_obj.at("name").get<std::string>();
+            }
+
+            if (board_conf_obj.contains("revision"))
+            {
+                board_config.revision = board_conf_obj.at("revision").get<std::string>();
             }
         }
 
