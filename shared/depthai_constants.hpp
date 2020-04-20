@@ -13,7 +13,8 @@
 // TODO: remove next constant
 std::unordered_map<std::string, StreamInfo> g_streams_pc_to_myriad =
 {
-    {"config_h2d",     StreamInfo("config_h2d",     1000)}
+    {"config_h2d",     StreamInfo("config_h2d",     1000)},
+    {"host_capture",     StreamInfo("host_capture",     4)}
 };
 
 

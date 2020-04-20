@@ -55,6 +55,7 @@ pybind11_add_module(
     ../../shared/stream/stream_info.cpp
     ../../shared/xlink/xlink_wrapper.cpp
     ../../shared/disparity_luts.cpp
+    ../core/host_capture_command.cpp
     ${XLINK_SOURCES}
 )
 
