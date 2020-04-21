@@ -350,6 +350,9 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
 
         json json_config_obj;
+        json_config_obj["board"]["clear-eeprom"] = config.board_config.clear_eeprom;
+        json_config_obj["board"]["store-to-eeprom"] = config.board_config.store_to_eeprom;
+        json_config_obj["board"]["override-eeprom"] = config.board_config.override_eeprom_calib;
         json_config_obj["board"]["swap-left-and-right-cameras"] = config.board_config.swap_left_and_right_cameras;
         json_config_obj["board"]["left_fov_deg"] = config.board_config.left_fov_deg;
         json_config_obj["board"]["left_to_right_distance_m"] = config.board_config.left_to_right_distance_m;
@@ -722,12 +725,27 @@ PYBIND11_MODULE(depthai, m)
     );
 
 
+    // FrameMetadata struct binding
+    py::class_<FrameMetadata>(m, "FrameMetadata")
+        .def(py::init<>())
+        .def("getTimestamp", &FrameMetadata::getTimestamp)
+        .def("getFrameType", &FrameMetadata::getFrameType)
+        .def("getFrameWidth", &FrameMetadata::getFrameWidth)
+        .def("getFrameHeight", &FrameMetadata::getFrameHeight)
+        .def("getFrameBytesPP", &FrameMetadata::getFrameBytesPP)
+        .def("getStride", &FrameMetadata::getStride)
+        .def("getCategory", &FrameMetadata::getCategory)
+        .def("getInstanceNum", &FrameMetadata::getInstanceNum)
+        .def("getSequenceNum", &FrameMetadata::getSequenceNum)
+        ;
+
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
         .def("size", &HostDataPacket::size)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
+        .def("getMetadata", &HostDataPacket::getMetadata)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()
