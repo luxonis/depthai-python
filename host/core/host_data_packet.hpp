@@ -8,7 +8,11 @@
 #include <numeric>
 #include <vector>
 
+#include "boost/optional.hpp"
+
 #include "../../shared/timer.hpp"
+
+#include "metadata/frame_metadata.hpp"
 
 
 #ifdef HOST_PYTHON_MODULE
@@ -29,12 +33,29 @@ struct HostDataPacket
         std::vector<int> dimensions_,
         int elem_size_
     )
-        : data(size)
-        , stream_name(stream_name_)
+        : stream_name(stream_name_)
         , dimensions(dimensions_)
         , elem_size(elem_size_)
     {
-        memcpy(data.data(), in_data, size);
+        int frameSize = size;
+
+        FrameMetadata metadata;
+        // Copy metadata structure from end of packet
+        memcpy( &metadata, ((uint8_t*) in_data) + size - sizeof(FrameMetadata), sizeof(FrameMetadata) );
+        // Check if metadata is valid
+        if(metadata.isValid()){
+            // copy only frame data
+            frameSize = metadata.frameSize;
+            //printf("Stream: %s (size: %d, frameSize: %d), metadata packet valid: w:%d, h:%d, t:%d, %6.3f\n", stream_name_.c_str(),size, frameSize, metadata.spec.width,metadata.spec.height, metadata.spec.type, metadata.getTimestamp());
+            // set opt_metadata
+            opt_metadata = metadata;
+        } else {
+            //printf("Stream: %s (size: %d), Metadata packet NOT valid\n",stream_name_.c_str(), size);
+        }
+
+        data.resize(frameSize);
+        memcpy(data.data(), in_data, frameSize);
+
         constructor_timer = Timer();
     }
 
@@ -121,7 +142,15 @@ struct HostDataPacket
         return reinterpret_cast<const char*>(&data[0]);
     }
 
+    py::object getMetadata(){
+        if(opt_metadata){
+            return py::cast<FrameMetadata>(*opt_metadata);
+        }
 
+        return py::cast<py::none>(Py_None);
+    }
+
+    boost::optional<FrameMetadata> opt_metadata;
     std::vector<unsigned char> data;
     std::string stream_name;
     const std::vector<int> dimensions;
