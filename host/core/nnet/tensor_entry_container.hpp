@@ -43,7 +43,7 @@ public:
     {
         assert(nullptr != _tensors_info);
         // assert(nullptr != _tensors_raw_data);
-        assert(_tensors_info->size() == _tensors_raw_data.size());
+        // assert(_tensors_info->size() == _tensors_raw_data.size());
 
         std::vector<TensorEntry> entry;
 
@@ -52,11 +52,14 @@ public:
             TensorEntry te;
 
             const TensorInfo& ti = (*_tensors_info)[tensor_index];
-            const auto& trd = _tensors_raw_data[tensor_index];
+            const auto& trd = _tensors_raw_data[ti.offset == 0 ? tensor_index : 0];
 
             auto entry_byte_size = ti.getEntryByteSize();
-
-            te.raw_data = trd->data.data() + entry_index * entry_byte_size; // TODO: check whether it works for all outputs
+            if(ti.offset == 0)
+                te.raw_data = trd->data.data() + entry_index * entry_byte_size; // TODO: check whether it works for all outputs
+            else
+                te.raw_data = trd->data.data() + ti.offset;
+            
             te.output_properties_type = ti.output_properties_type;
             te.output_properties_type_size = size_of_type(te.output_properties_type);
             te.properties_number = entry_byte_size / te.output_properties_type_size;

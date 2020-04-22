@@ -39,15 +39,6 @@ public:
         }
     }
 
-    std::vector<std::shared_ptr<HostDataPacket>> getTensors()
-    {
-        return _tensors_raw_data;
-    }
-
-    unsigned getTensorsNumber() const
-    {
-        return _tensors_raw_data.size();
-    }
 
 #ifdef HOST_PYTHON_MODULE
     py::array* getTensor(unsigned index)
