@@ -9,6 +9,7 @@
 
 #include "stream/stream_info.hpp"
 
+#include "metadata/frame_metadata.hpp"
 
 // TODO: remove next constant
 std::unordered_map<std::string, StreamInfo> g_streams_pc_to_myriad =
@@ -19,8 +20,8 @@ std::unordered_map<std::string, StreamInfo> g_streams_pc_to_myriad =
 
 std::unordered_map<std::string, StreamInfo> c_streams_myriad_to_pc =
 {
-    {"left",        StreamInfo("left",      921600, { 720, 1280}    )},
-    {"right",       StreamInfo("right",     921600, { 720, 1280}    )},
+    {"left",        StreamInfo("left",      921600 + sizeof(FrameMetadata), { 720, 1280}    )},
+    {"right",       StreamInfo("right",     921600 + sizeof(FrameMetadata), { 720, 1280}    )},
     {"disparity",   StreamInfo("disparity", 921600, { 720, 1280}    )},
 
     {"depth",       StreamInfo("depth",     921600, { 720, 1280}    )},

@@ -709,12 +709,27 @@ PYBIND11_MODULE(depthai, m)
         );
 
 
+    // FrameMetadata struct binding
+    py::class_<FrameMetadata>(m, "FrameMetadata")
+        .def(py::init<>())
+        .def("getTimestamp", &FrameMetadata::getTimestamp)
+        .def("getFrameType", &FrameMetadata::getFrameType)
+        .def("getFrameWidth", &FrameMetadata::getFrameWidth)
+        .def("getFrameHeight", &FrameMetadata::getFrameHeight)
+        .def("getFrameBytesPP", &FrameMetadata::getFrameBytesPP)
+        .def("getStride", &FrameMetadata::getStride)
+        .def("getCategory", &FrameMetadata::getCategory)
+        .def("getInstanceNum", &FrameMetadata::getInstanceNum)
+        .def("getSequenceNum", &FrameMetadata::getSequenceNum)
+        ;
+
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
         .def("size", &HostDataPacket::size)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
+        .def("getMetadata", &HostDataPacket::getMetadata)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()
