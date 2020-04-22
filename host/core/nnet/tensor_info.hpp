@@ -20,6 +20,8 @@ struct TensorInfo
     int nnet_input_width  = 0;
     int nnet_input_height = 0;
 
+    uint32_t offset = 0;
+
     std::vector<int> output_properties_dimensions;
 
     std::vector<std::vector<std::string>>                               output_property_key_index_to_string;

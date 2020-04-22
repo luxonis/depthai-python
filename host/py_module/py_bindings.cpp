@@ -96,9 +96,11 @@ int  wdog_start(void)
 }
 int  wdog_stop(void)
 {
-    wdog_thread_alive = 0;
-    wd_thread.join();
- 
+    if(wdog_thread_alive)
+    {
+        wdog_thread_alive = 0;
+        wd_thread.join();
+    }
     return 0;
 }
 
@@ -479,10 +481,13 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             printf("CNN input num channels: %d\n", cnn_input_info.cnn_input_num_channels);
 
             // update tensor infos
-            for (auto &ti : tensors_info)
+            assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
+
+            for (int i = 0; i < tensors_info.size(); i++)
             {
-                ti.nnet_input_width  = cnn_input_info.cnn_input_width;
-                ti.nnet_input_height = cnn_input_info.cnn_input_height;
+                tensors_info[i].nnet_input_width  = cnn_input_info.cnn_input_width;
+                tensors_info[i].nnet_input_height = cnn_input_info.cnn_input_height;
+                tensors_info[i].offset = cnn_input_info.offsets[i];
             }
 
             c_streams_myriad_to_pc["previewout"].dimensions = {
@@ -752,8 +757,6 @@ PYBIND11_MODULE(depthai, m)
     py::class_<NNetPacket, std::shared_ptr<NNetPacket>>(m, "NNetPacket")
         .def("get_tensor", &NNetPacket::getTensor, py::return_value_policy::copy)
         .def("get_tensor", &NNetPacket::getTensorByName, py::return_value_policy::copy)
-        .def("get_tensors_number", &NNetPacket::getTensorsNumber)
-        .def("tensors", &NNetPacket::getTensors, py::return_value_policy::copy)
         .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
         ;
 
