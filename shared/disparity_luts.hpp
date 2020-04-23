@@ -70,16 +70,3 @@ static unsigned char c_disp_to_color[DISPARITY_SIZE][3] =
     {0, 0, 148}
 };
 
-
-float calculateDisparityToDepthMM(
-    unsigned disparity,
-    unsigned width,
-    float fov,
-    float base_line_dist
-);
-
-std::vector<uint16_t> generateLUTDisparityToDepthMM(
-    unsigned width,
-    float fov,
-    float base_line_dist
-);
