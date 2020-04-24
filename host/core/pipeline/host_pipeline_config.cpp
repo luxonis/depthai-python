@@ -132,6 +132,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 board_config.override_eeprom = board_conf_obj.at("override_eeprom").get<bool>();
             }
 
+            if (board_conf_obj.contains("stereo_center_crop"))
+            {
+                board_config.stereo_center_crop = board_conf_obj.at("stereo_center_crop").get<bool>();
+            }
+
             // "blob_file_config"
             if (board_conf_obj.contains("swap_left_and_right_cameras"))
             {

@@ -324,6 +324,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             -8.7650679e-03,  9.9214733e-01, -8.7952757e+00,
             -8.4495878e-06, -3.6034894e-06,  1.0000000e+00
         };
+        bool stereo_center_crop = false;
 
         if (config.depth.calibration_file.empty())
         {
@@ -338,9 +339,16 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 break;
             }
 
+            const int homography_size = sizeof(float) * 9;
             int sz = calibration_reader.getSize();
-            assert(sz == sizeof(float) * 9);
-            std::cout << "Read: " << calibration_reader.readData(reinterpret_cast<unsigned char*>(homography_buff.data()), sz) << std::endl;
+            assert(sz >= homography_size);
+            calibration_reader.readData(reinterpret_cast<unsigned char*>(homography_buff.data()), homography_size);
+            int flags_size = sz - homography_size;
+            if (flags_size > 0)
+            {
+                assert(flags_size == 1);
+                calibration_reader.readData(reinterpret_cast<unsigned char*>(&stereo_center_crop), 1);
+            }
         }
 
         json json_config_obj;
@@ -352,6 +360,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["board"]["rgb_fov_deg"] = config.board_config.rgb_fov_deg;
         json_config_obj["board"]["left_to_right_distance_m"] = config.board_config.left_to_right_distance_m;
         json_config_obj["board"]["left_to_rgb_distance_m"] = config.board_config.left_to_rgb_distance_m;
+        json_config_obj["board"]["stereo_center_crop"] = config.board_config.stereo_center_crop || stereo_center_crop;
         json_config_obj["board"]["name"] = config.board_config.name;
         json_config_obj["board"]["revision"] = config.board_config.revision;
         json_config_obj["_board"] =

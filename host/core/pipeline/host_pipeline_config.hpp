@@ -42,6 +42,7 @@ struct HostPipelineConfig
         float rgb_fov_deg = 69.f;
         float left_to_right_distance_m = 0.035f; // meters, not centimeters
         float left_to_rgb_distance_m = 0;
+        bool stereo_center_crop = false;
         std::string name;
         std::string revision;
     } board_config;
