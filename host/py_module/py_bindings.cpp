@@ -223,6 +223,44 @@ bool init_device(
             }
         }
 
+        uint32_t version = g_config_d2h.at("eeprom").at("version").get<int>();
+        printf("EEPROM data:");
+        if (version == -1) {
+            printf(" invalid / unprogrammed\n");
+        } else {
+            printf(" valid (v%d)\n", version);
+            std::string board_name;
+            std::string board_rev;
+            float rgb_fov_deg = 0;
+            bool stereo_center_crop = false;
+            if (version >= 2) {
+                board_name = g_config_d2h.at("eeprom").at("board_name").get<std::string>();
+                board_rev  = g_config_d2h.at("eeprom").at("board_rev").get<std::string>();
+                rgb_fov_deg= g_config_d2h.at("eeprom").at("rgb_fov_deg").get<float>();
+            }
+            if (version >= 3) {
+                stereo_center_crop = g_config_d2h.at("eeprom").at("stereo_center_crop").get<bool>();
+            }
+            float left_fov_deg = g_config_d2h.at("eeprom").at("left_fov_deg").get<float>();
+            float left_to_right_distance_m = g_config_d2h.at("eeprom").at("left_to_right_distance_m").get<float>();
+            float left_to_rgb_distance_m = g_config_d2h.at("eeprom").at("left_to_rgb_distance_m").get<float>();
+            bool swap_left_and_right_cameras = g_config_d2h.at("eeprom").at("swap_left_and_right_cameras").get<bool>();
+            std::vector<float> calib = g_config_d2h.at("eeprom").at("calib").get<std::vector<float>>();
+            printf("  Board name     : %s\n", board_name.empty() ? "<NOT-SET>" : board_name.c_str());
+            printf("  Board rev      : %s\n", board_rev.empty()  ? "<NOT-SET>" : board_rev.c_str());
+            printf("  HFOV L/R       : %g deg\n", left_fov_deg);
+            printf("  HFOV RGB       : %g deg\n", rgb_fov_deg);
+            printf("  L-R   distance : %g cm\n", 100 * left_to_right_distance_m);
+            printf("  L-RGB distance : %g cm\n", 100 * left_to_rgb_distance_m);
+            printf("  L/R swapped    : %s\n", swap_left_and_right_cameras ? "yes" : "no");
+            printf("  L/R crop region: %s\n", stereo_center_crop ? "center" : "top");
+            printf("  Calibration homography:\n");
+            for (int i = 0; i < 9; i++) {
+                printf(" %11.6f,", calib.at(i));
+                if (i % 3 == 2) printf("\n");
+            }
+        }
+
         // device support listener
         g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
 
