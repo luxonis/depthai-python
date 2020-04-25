@@ -127,9 +127,14 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 board_config.clear_eeprom = board_conf_obj.at("clear_eeprom").get<bool>();
             }
 
-            if (board_conf_obj.contains("override_eeprom_calib"))
+            if (board_conf_obj.contains("override_eeprom"))
             {
-                board_config.override_eeprom_calib = board_conf_obj.at("override_eeprom_calib").get<bool>();
+                board_config.override_eeprom = board_conf_obj.at("override_eeprom").get<bool>();
+            }
+
+            if (board_conf_obj.contains("stereo_center_crop"))
+            {
+                board_config.stereo_center_crop = board_conf_obj.at("stereo_center_crop").get<bool>();
             }
 
             // "blob_file_config"
