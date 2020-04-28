@@ -30,6 +30,7 @@
 #include "../../shared/version.hpp"
 #include "../../shared/xlink/xlink_wrapper.hpp"
 #include "../core/host_json_helper.hpp"
+#include "host_capture_command.hpp"
 
 
 namespace py = pybind11;
@@ -82,7 +83,7 @@ void wdog_thread(int& wd_timeout_ms)
 }
 
 static std::thread wd_thread;
-static int wd_timeout_ms = 1000;
+static int wd_timeout_ms = 3000;
 int  wdog_start(void)
 {
     static int once = 1;
@@ -144,7 +145,7 @@ json g_config_d2h;
 
 std::unique_ptr<DisparityStreamPostProcessor> g_disparity_post_proc;
 std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
-
+std::unique_ptr<HostCaptureCommand>           g_host_caputure_command;
 
 
 bool init_device(
@@ -288,6 +289,7 @@ bool deinit_device()
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
+    g_host_caputure_command = nullptr;
     return true;
 }
 
@@ -307,6 +309,12 @@ std::vector<std::string> get_available_steams()
     }
 
     return result;
+}
+
+void request_jpeg(){
+    if(g_host_caputure_command != nullptr){
+        g_host_caputure_command->capture();
+    }
 }
 
 
@@ -470,6 +478,11 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             std::cout << "depthai: pipelineConfig write error;\n";
             break;
         }
+
+        // host -> "host_capture" -> device
+        auto stream = g_streams_pc_to_myriad.at("host_capture");
+        g_host_caputure_command = std::unique_ptr<HostCaptureCommand>(new HostCaptureCommand((stream)));
+        g_xlink->observe(*g_host_caputure_command, stream);
 
 
         // read & pass blob file
@@ -727,6 +740,14 @@ PYBIND11_MODULE(depthai, m)
         "Function for pipeline creation",
         py::arg("config") = py::dict()
         );
+
+    
+    // depthai.request_jpeg()
+    m.def(
+        "request_jpeg",
+        &request_jpeg,
+        "Function to request a still JPEG encoded image ('jpeg' stream must be enabled)"
+    );
 
 
     // FrameMetadata struct binding

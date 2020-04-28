@@ -535,7 +535,7 @@ bool XLinkWrapper::writeToStream(
     }
     else
     {
-#if defined(__PC__) || 1 // Set to 0 if too verbose on device...
+#if defined(__PC__) || 0 // Set to 0 if too verbose on device...
         printf("!!! XLink write successful: %s (%d)\n", stream.name, int(write_data_size));
 #endif
 
