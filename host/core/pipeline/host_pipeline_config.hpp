@@ -36,11 +36,15 @@ struct HostPipelineConfig
     {
         bool  clear_eeprom = false;
         bool  store_to_eeprom = false;
-        bool  override_eeprom_calib = false;
+        bool  override_eeprom = false;
         bool  swap_left_and_right_cameras = false;
         float left_fov_deg = 69.f;
+        float rgb_fov_deg = 69.f;
         float left_to_right_distance_m = 0.035f; // meters, not centimeters
         float left_to_rgb_distance_m = 0;
+        bool stereo_center_crop = false;
+        std::string name;
+        std::string revision;
     } board_config;
 
 

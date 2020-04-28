@@ -26,7 +26,6 @@ unsigned size_of_type(const Type& type)
 
 
 
-#define MAX_NUM_FACES      32
 #define EXP_MASK_F32 0x7F800000U
 #define EXP_MASK_F16     0x7C00U
 float float16to32(uint16_t x)

@@ -10,7 +10,6 @@
 #include "tensor_info.hpp"
 #include "tensor_entry_container.hpp"
 #include "../host_data_packet.hpp"
-#include "../pipeline/depth_calculation_interface.hpp"
 
 
 class NNetPacket
@@ -18,16 +17,13 @@ class NNetPacket
 public:
     NNetPacket(
               std::vector<std::shared_ptr<HostDataPacket>> &tensors_raw_data,
-        const std::vector<TensorInfo>                      &tensors_info,
-              DepthCalculationInterface*                    depth_calculation_interface
+        const std::vector<TensorInfo>                      &tensors_info
     )
         : _tensors_raw_data(tensors_raw_data)
         , _tensors_info(&tensors_info)
         , _tensor_entry_container(new TensorEntryContainer(
-                tensors_raw_data, tensors_info, depth_calculation_interface))
+                tensors_raw_data, tensors_info))
     {
-        assert(nullptr != depth_calculation_interface);
-
         for (size_t i = 0; i < tensors_info.size(); ++i)
         {
             _tensor_name_to_index[ tensors_info.at(i).output_tensor_name ] = i;
@@ -39,15 +35,6 @@ public:
         }
     }
 
-    std::vector<std::shared_ptr<HostDataPacket>> getTensors()
-    {
-        return _tensors_raw_data;
-    }
-
-    unsigned getTensorsNumber() const
-    {
-        return _tensors_raw_data.size();
-    }
 
 #ifdef HOST_PYTHON_MODULE
     py::array* getTensor(unsigned index)
