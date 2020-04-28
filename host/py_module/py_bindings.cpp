@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <pybind11/pybind11.h>
@@ -145,6 +146,12 @@ json g_config_d2h;
 std::unique_ptr<DisparityStreamPostProcessor> g_disparity_post_proc;
 std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
 
+std::map<std::string, int> nn_to_depth_mapping = {
+    { "off_x", 0 },
+    { "off_y", 0 },
+    { "max_w", 0 },
+    { "max_h", 0 },
+};
 
 
 bool init_device(
@@ -309,6 +316,10 @@ std::vector<std::string> get_available_steams()
     return result;
 }
 
+std::map<std::string, int> get_nn_to_depth_bbox_mapping()
+{
+    return nn_to_depth_mapping;
+}
 
 std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
@@ -523,6 +534,15 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             printf("CNN input width: %d\n", cnn_input_info.cnn_input_width);
             printf("CNN input height: %d\n", cnn_input_info.cnn_input_height);
             printf("CNN input num channels: %d\n", cnn_input_info.cnn_input_num_channels);
+            printf("CNN to depth bounding-box mapping: start(%d, %d), max_size(%d, %d)\n",
+                    cnn_input_info.nn_to_depth.offset_x,
+                    cnn_input_info.nn_to_depth.offset_y,
+                    cnn_input_info.nn_to_depth.max_width,
+                    cnn_input_info.nn_to_depth.max_height);
+            nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
+            nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
+            nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
+            nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
 
             // update tensor infos
             assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
@@ -706,6 +726,12 @@ PYBIND11_MODULE(depthai, m)
         "get_available_steams",
         &get_available_steams,
         "Returns available streams, that possible to retreive from the device."
+        );
+
+    m.def(
+        "get_nn_to_depth_bbox_mapping",
+        &get_nn_to_depth_bbox_mapping,
+        "Returns NN bounding-box to depth mapping as a dict of coords: off_x, off_y, max_w, max_h."
         );
 
     // cnn pipeline
