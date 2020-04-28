@@ -53,6 +53,7 @@ pybind11_add_module(
     ../core/types.cpp
     ../core/host_json_helper.cpp
     ../core/host_data_reader.cpp
+    ../core/host_capture_command.cpp
     ../core/disparity_stream_post_processor.cpp
     ../../shared/json_helper.cpp
     ../../shared/stream/stream_info.cpp
