@@ -39,6 +39,13 @@ XLinkWrapper::~XLinkWrapper()
             XLinkWrapper::rebootDevice(_device_link_id);
         }
 #endif
+    
+        XLinkError_t err = XLinkResetRemote(_device_link_id);
+        if (err) 
+        {
+            printf("Failed to deinitialize xlink w/ error: %s!\n",XLinkErrorToStr(err));
+        }
+        _device_link_id = -1;
     }
 }
 

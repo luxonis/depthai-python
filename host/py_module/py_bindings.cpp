@@ -41,7 +41,7 @@ std::shared_ptr<CNNHostPipeline> gl_result = nullptr;
 
 static volatile std::atomic<int> wdog_keep;
 
-bool deinit_device();
+bool soft_deinit_device();
 bool init_device(
     const std::string &device_cmd_file,
     const std::string &usb_device
@@ -61,7 +61,7 @@ void wdog_thread(int& wd_timeout_ms)
         if(wdog_keep == 0 && wdog_thread_alive == 1)
         {
             std::cout << "watchdog triggered " << std::endl;
-            deinit_device();
+            soft_deinit_device();
             bool init;
             for(int retry = 0; retry < 1; retry++)
             {
@@ -283,11 +283,21 @@ bool init_device(
     return result;
 }
 
-bool deinit_device()
+bool soft_deinit_device()
 {
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
+    return true;
+}
+
+bool deinit_device()
+{
+    wdog_stop();       
+    g_xlink = nullptr;
+    g_disparity_post_proc = nullptr;
+    g_device_support_listener = nullptr;
+    gl_result = nullptr;
     return true;
 }
 
@@ -826,7 +836,7 @@ PYBIND11_MODULE(depthai, m)
         .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         ;
 
-    py::class_<CNNHostPipeline>(m, "CNNPipeline")
+    py::class_<CNNHostPipeline, std::shared_ptr<CNNHostPipeline>>(m, "CNNPipeline")
         .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
         ;
