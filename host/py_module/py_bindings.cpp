@@ -416,7 +416,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
 
         bool add_disparity_post_processing_color = false;
-        bool add_disparity_post_processing_mm = false;
         std::vector<std::string> pipeline_device_streams;
 
         for (const auto &stream : config.streams)
@@ -425,12 +424,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             {
                 add_disparity_post_processing_color = true;
                 json obj = { {"name", "disparity"} };
-                json_config_obj["_pipeline"]["_streams"].push_back(obj);
-            }
-            else if (stream.name == "depth_mm_h")
-            {
-                add_disparity_post_processing_mm = true;
-                json obj = { {"name", "disparity"} };
+                if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
                 json_config_obj["_pipeline"]["_streams"].push_back(obj);
             }
             else
@@ -625,19 +619,14 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
 
         // disparity post processor
-        if (add_disparity_post_processing_mm ||
-            add_disparity_post_processing_color
-        )
+        if (add_disparity_post_processing_color)
         {
             g_disparity_post_proc = std::unique_ptr<DisparityStreamPostProcessor>(
                 new DisparityStreamPostProcessor(
-                    add_disparity_post_processing_color,
-                    add_disparity_post_processing_mm
-                ));
+                    add_disparity_post_processing_color));
 
             const std::string stream_in_name = "disparity";
             const std::string stream_out_color_name = "depth_color_h";
-            const std::string stream_out_mm_name = "depth_mm_h";
 
             if (g_xlink->openStreamInThreadAndNotifyObservers(c_streams_myriad_to_pc.at(stream_in_name)))
             {
@@ -648,12 +637,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                     gl_result->makeStreamPublic(stream_out_color_name);
                     gl_result->observe(*g_disparity_post_proc.get(), c_streams_myriad_to_pc.at(stream_out_color_name));
                 }
-
-                if (add_disparity_post_processing_mm)
-                {
-                    gl_result->makeStreamPublic(stream_out_mm_name);
-                    gl_result->observe(*g_disparity_post_proc.get(), c_streams_myriad_to_pc.at(stream_out_mm_name));
-                }
             }
             else
             {
@@ -662,19 +645,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 break;
             }
         }
-
-        if (!gl_result->setHostCalcDepthConfigs(
-                config.depth.type,
-                config.depth.padding_factor,
-                config.board_config.left_fov_deg,
-                config.board_config.left_to_right_distance_m
-                ))
-        {
-            std::cout << "depthai: Cant set depth;\n";
-            break;
-        }
-
-
         init_ok = true;
         std::cout << "depthai: INIT OK!\n";
     }
@@ -831,7 +801,6 @@ PYBIND11_MODULE(depthai, m)
         .def("__len__", &TensorEntry::getPropertiesNumber)
         .def("__getitem__", &TensorEntry::getFloat)
         .def("__getitem__", &TensorEntry::getFloatByIndex)
-        .def("distance", &TensorEntry::getDistance)
         ;
 
 

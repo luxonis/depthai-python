@@ -67,15 +67,6 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 depth.type = depth_obj.at("type").get<std::string>();
             }
 
-            if (depth.type == "average" && !hasStream("depth_mm_h"))
-            {
-                streams.emplace_back("depth_mm_h");
-            }
-            else if (depth.type == "median" && !hasStream("disparity"))
-            {
-                streams.emplace_back("disparity");
-            }
-
             // "padding_factor"
             if (depth_obj.contains("padding_factor"))
             {

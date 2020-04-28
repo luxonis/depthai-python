@@ -57,7 +57,6 @@ pybind11_add_module(
     ../../shared/json_helper.cpp
     ../../shared/stream/stream_info.cpp
     ../../shared/xlink/xlink_wrapper.cpp
-    ../../shared/disparity_luts.cpp
     ${XLINK_SOURCES}
 )
 
