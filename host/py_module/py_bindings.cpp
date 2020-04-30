@@ -55,10 +55,19 @@ static int wdog_thread_alive = 1;
 void wdog_thread(int& wd_timeout_ms)
 {
     std::cout << "watchdog started " << wd_timeout_ms << std::endl;
+    const int sleep_chunk = 100;
+    const int sleep_nr = wd_timeout_ms / sleep_chunk;
     while(wdog_thread_alive)
     {
         wdog_keep = 0;
-        std::this_thread::sleep_for(std::chrono::milliseconds(wd_timeout_ms));
+        for(int i = 0; i < sleep_nr; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_chunk));
+            if(wdog_thread_alive == 0)
+            {
+                break;
+            }
+        }
         if(wdog_keep == 0 && wdog_thread_alive == 1)
         {
             std::cout << "watchdog triggered " << std::endl;
@@ -175,7 +184,7 @@ bool init_device(
                 &g_xlink_device_handler,
                 device_cmd_file,
                 usb_device,
-                false)
+                true)
             )
         {
             std::cout << "depthai: Error initializing xlink\n";
@@ -263,12 +272,12 @@ bool init_device(
         }
 
         // device support listener
-        g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
+        // g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
 
-        g_device_support_listener->observe(
-            *g_xlink.get(),
-            c_streams_myriad_to_pc.at("meta_d2h")
-            );
+        // g_device_support_listener->observe(
+        //     *g_xlink.get(),
+        //     c_streams_myriad_to_pc.at("meta_d2h")
+        //     );
 
 
         result = true;
@@ -866,9 +875,7 @@ PYBIND11_MODULE(depthai, m)
 
     // module destructor
     auto cleanup_callback = []() {
-        wdog_stop();
         deinit_device();
-        gl_result = nullptr;
     };
 
     m.add_object("_cleanup", py::capsule(cleanup_callback));

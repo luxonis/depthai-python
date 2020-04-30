@@ -45,10 +45,10 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
         }
 
         // if 'meta_d2h' not specified - add it
-        if (!hasStream("meta_d2h"))
-        {
-            streams.emplace_back("meta_d2h");
-        }
+        // if (!hasStream("meta_d2h"))
+        // {
+        //     streams.emplace_back("meta_d2h");
+        // }
 
         // "depth"
         if (json_obj.contains("depth"))

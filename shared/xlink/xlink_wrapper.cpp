@@ -25,24 +25,27 @@ XLinkWrapper::~XLinkWrapper()
 {
     if (_device_link_id != -1)
     {
+        std::chrono::steady_clock::time_point tstart;
+        std::chrono::duration<double> tdiff;
+        tstart = std::chrono::steady_clock::now();
+
         if (_be_verbose) { printf("Stopping threads: ...\n"); }
         stopThreads();
+        tdiff = std::chrono::steady_clock::now() - tstart;
+        printf("... %.3fs ", tdiff.count());
         if (_be_verbose) { printf("Stopping threads: DONE.\n"); }
+        tstart = std::chrono::steady_clock::now();
 
         if (_be_verbose) { printf("Closing all observer streams: ...\n"); }
         closeAllObserverStreams();
         if (_be_verbose) { printf("Closing all observer streams: DONE.\n"); }
+        tdiff = std::chrono::steady_clock::now() - tstart;
+        printf("... %.3fs ", tdiff.count());
 
 #ifdef __PC__
         if (_reboot_device_on_destructor)
         {
             XLinkWrapper::rebootDevice(_device_link_id);
-        }
-
-        XLinkError_t err = XLinkResetRemote(_device_link_id);
-        if (err) 
-        {
-            printf("Failed to deinitialize xlink w/ error: %s!\n",XLinkErrorToStr(err));
         }
 #endif
         _device_link_id = -1;
@@ -669,6 +672,7 @@ void XLinkWrapper::openAndReadDataThreadFunc(
             else
             {
                 printf("Device get data failed: %x\n", status);
+                break;
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(c_stream_read_thread_wait_ms));
