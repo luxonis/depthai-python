@@ -27,20 +27,21 @@ XLinkWrapper::~XLinkWrapper()
     {
         std::chrono::steady_clock::time_point tstart;
         std::chrono::duration<double> tdiff;
-        tstart = std::chrono::steady_clock::now();
-
-        if (_be_verbose) { printf("Stopping threads: ...\n"); }
+        if (_be_verbose) 
+        { 
+            printf("Stopping threads: ...\n"); 
+            tstart = std::chrono::steady_clock::now();
+        }
         stopThreads();
-        tdiff = std::chrono::steady_clock::now() - tstart;
-        printf("... %.3fs ", tdiff.count());
-        if (_be_verbose) { printf("Stopping threads: DONE.\n"); }
-        tstart = std::chrono::steady_clock::now();
+        if (_be_verbose) 
+        { 
+            tdiff = std::chrono::steady_clock::now() - tstart;
+            printf("Stopping threads: DONE %.3fs.\n",tdiff.count()); 
+        }
 
         if (_be_verbose) { printf("Closing all observer streams: ...\n"); }
         closeAllObserverStreams();
         if (_be_verbose) { printf("Closing all observer streams: DONE.\n"); }
-        tdiff = std::chrono::steady_clock::now() - tstart;
-        printf("... %.3fs ", tdiff.count());
 
 #ifdef __PC__
         if (_reboot_device_on_destructor)
