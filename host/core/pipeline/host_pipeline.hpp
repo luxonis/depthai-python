@@ -20,7 +20,7 @@ class HostPipeline
     : public DataObserver<StreamInfo, StreamData>
 {
 protected:
-    const unsigned c_data_queue_size = 100;
+    const unsigned c_data_queue_size = 30;
 
     boost::lockfree::spsc_queue<std::shared_ptr<HostDataPacket>> _data_queue_lf;
     std::list<std::shared_ptr<HostDataPacket>> _consumed_packets; // TODO: temporary solution

@@ -67,6 +67,7 @@ struct TensorInfo
         {
             assert(output_entry_iteration_index < output_dimensions.size());
             //assert(false); // TODO: correct ?
+            assert(output_dimensions[output_entry_iteration_index] != 0);
             return getTensorSize() / output_dimensions[output_entry_iteration_index];
         }
     }
