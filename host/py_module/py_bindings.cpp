@@ -262,13 +262,7 @@ bool init_device(
             }
         }
 
-        // device support listener
-        g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
 
-        g_device_support_listener->observe(
-            *g_xlink.get(),
-            c_streams_myriad_to_pc.at("meta_d2h")
-            );
 
 
         result = true;
@@ -424,6 +418,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
 
         bool add_disparity_post_processing_color = false;
+        bool temp_measurement = false;
+
         std::vector<std::string> pipeline_device_streams;
 
         for (const auto &stream : config.streams)
@@ -437,6 +433,10 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             }
             else
             {
+                if (stream.name == "meta_d2h")
+                {
+                    temp_measurement = true;
+                }
                 json obj = { {"name" ,stream.name} };
 
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
@@ -658,6 +658,18 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 break;
             }
         }
+
+        if(temp_measurement)
+        {
+            // device support listener
+            g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
+
+            g_device_support_listener->observe(
+                *g_xlink.get(),
+                c_streams_myriad_to_pc.at("meta_d2h")
+                );
+        }
+
         init_ok = true;
         std::cout << "depthai: INIT OK!\n";
     }
