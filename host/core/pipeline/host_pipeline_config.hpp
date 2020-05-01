@@ -23,6 +23,7 @@ struct HostPipelineConfig
         std::string calibration_file;
         std::string type;
         float       padding_factor = 0.3f;
+        float       depth_limit_m = 10.0f;
     } depth;
 
     struct AI

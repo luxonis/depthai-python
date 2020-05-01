@@ -78,6 +78,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                     break;
                 }
             }
+
+            if (depth_obj.contains("depth_limit_m"))
+            {
+                depth.depth_limit_m = depth_obj.at("depth_limit_m").get<float>();
+            }
         }
 
         // "ai"
