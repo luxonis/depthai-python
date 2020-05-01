@@ -25,9 +25,19 @@ XLinkWrapper::~XLinkWrapper()
 {
     if (_device_link_id != -1)
     {
-        if (_be_verbose) { printf("Stopping threads: ...\n"); }
+        std::chrono::steady_clock::time_point tstart;
+        std::chrono::duration<double> tdiff;
+        if (_be_verbose) 
+        { 
+            printf("Stopping threads: ...\n"); 
+            tstart = std::chrono::steady_clock::now();
+        }
         stopThreads();
-        if (_be_verbose) { printf("Stopping threads: DONE.\n"); }
+        if (_be_verbose) 
+        { 
+            tdiff = std::chrono::steady_clock::now() - tstart;
+            printf("Stopping threads: DONE %.3fs.\n",tdiff.count()); 
+        }
 
         if (_be_verbose) { printf("Closing all observer streams: ...\n"); }
         closeAllObserverStreams();
@@ -39,6 +49,7 @@ XLinkWrapper::~XLinkWrapper()
             XLinkWrapper::rebootDevice(_device_link_id);
         }
 #endif
+        _device_link_id = -1;
     }
 }
 
@@ -662,6 +673,7 @@ void XLinkWrapper::openAndReadDataThreadFunc(
             else
             {
                 printf("Device get data failed: %x\n", status);
+                break;
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(c_stream_read_thread_wait_ms));
