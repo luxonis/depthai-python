@@ -101,6 +101,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 ai.calc_dist_to_bb = ai_obj.at("calc_dist_to_bb").get<bool>();
             }
+
+            if (ai_obj.contains("keep_aspect_ratio"))
+            {
+                ai.keep_aspect_ratio = ai_obj.at("keep_aspect_ratio").get<bool>();
+            }
         }
 
         // "board_config"
