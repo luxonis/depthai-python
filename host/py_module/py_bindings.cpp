@@ -42,7 +42,7 @@ std::shared_ptr<CNNHostPipeline> gl_result = nullptr;
 
 static volatile std::atomic<int> wdog_keep;
 
-bool deinit_device();
+bool soft_deinit_device();
 bool init_device(
     const std::string &device_cmd_file,
     const std::string &usb_device
@@ -55,14 +55,23 @@ static int wdog_thread_alive = 1;
 void wdog_thread(int& wd_timeout_ms)
 {
     std::cout << "watchdog started " << wd_timeout_ms << std::endl;
+    const int sleep_chunk = 100;
+    const int sleep_nr = wd_timeout_ms / sleep_chunk;
     while(wdog_thread_alive)
     {
         wdog_keep = 0;
-        std::this_thread::sleep_for(std::chrono::milliseconds(wd_timeout_ms));
+        for(int i = 0; i < sleep_nr; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_chunk));
+            if(wdog_thread_alive == 0)
+            {
+                break;
+            }
+        }
         if(wdog_keep == 0 && wdog_thread_alive == 1)
         {
             std::cout << "watchdog triggered " << std::endl;
-            deinit_device();
+            soft_deinit_device();
             bool init;
             for(int retry = 0; retry < 1; retry++)
             {
@@ -175,7 +184,7 @@ bool init_device(
                 &g_xlink_device_handler,
                 device_cmd_file,
                 usb_device,
-                false)
+                true)
             )
         {
             std::cout << "depthai: Error initializing xlink\n";
@@ -262,13 +271,7 @@ bool init_device(
             }
         }
 
-        // device support listener
-        g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
 
-        g_device_support_listener->observe(
-            *g_xlink.get(),
-            c_streams_myriad_to_pc.at("meta_d2h")
-            );
 
 
         result = true;
@@ -284,12 +287,23 @@ bool init_device(
     return result;
 }
 
-bool deinit_device()
+bool soft_deinit_device()
 {
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
+	g_host_caputure_command = nullptr;
+    return true;
+}
+
+bool deinit_device()
+{
+    wdog_stop();       
+    g_xlink = nullptr;
+    g_disparity_post_proc = nullptr;
+    g_device_support_listener = nullptr;
     g_host_caputure_command = nullptr;
+	gl_result = nullptr;
     return true;
 }
 
@@ -424,6 +438,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
 
         bool add_disparity_post_processing_color = false;
+        bool temp_measurement = false;
+
         std::vector<std::string> pipeline_device_streams;
 
         for (const auto &stream : config.streams)
@@ -437,6 +453,10 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             }
             else
             {
+                if (stream.name == "meta_d2h")
+                {
+                    temp_measurement = true;
+                }
                 json obj = { {"name" ,stream.name} };
 
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
@@ -658,6 +678,18 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 break;
             }
         }
+
+        if(temp_measurement)
+        {
+            // device support listener
+            g_device_support_listener = std::unique_ptr<DeviceSupportListener>(new DeviceSupportListener);
+
+            g_device_support_listener->observe(
+                *g_xlink.get(),
+                c_streams_myriad_to_pc.at("meta_d2h")
+                );
+        }
+
         init_ok = true;
         std::cout << "depthai: INIT OK!\n";
     }
@@ -847,7 +879,7 @@ PYBIND11_MODULE(depthai, m)
         .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         ;
 
-    py::class_<CNNHostPipeline>(m, "CNNPipeline")
+    py::class_<CNNHostPipeline, std::shared_ptr<CNNHostPipeline>>(m, "CNNPipeline")
         .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
         ;
@@ -855,9 +887,7 @@ PYBIND11_MODULE(depthai, m)
 
     // module destructor
     auto cleanup_callback = []() {
-        wdog_stop();
         deinit_device();
-        gl_result = nullptr;
     };
 
     m.add_object("_cleanup", py::capsule(cleanup_callback));
