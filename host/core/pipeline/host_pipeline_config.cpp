@@ -73,6 +73,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                     break;
                 }
             }
+
+            if (depth_obj.contains("depth_limit_m"))
+            {
+                depth.depth_limit_m = depth_obj.at("depth_limit_m").get<float>();
+            }
         }
 
         // "ai"
@@ -95,6 +100,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             if (ai_obj.contains("calc_dist_to_bb"))
             {
                 ai.calc_dist_to_bb = ai_obj.at("calc_dist_to_bb").get<bool>();
+            }
+
+            if (ai_obj.contains("keep_aspect_ratio"))
+            {
+                ai.keep_aspect_ratio = ai_obj.at("keep_aspect_ratio").get<bool>();
             }
         }
 
