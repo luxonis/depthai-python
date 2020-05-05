@@ -101,7 +101,7 @@ std::list<std::shared_ptr<HostDataPacket>> HostPipeline::getConsumedDataPackets(
 
     for (auto &packet : _consumed_packets)
     {
-        if ((packet->size() > 16) && (packet->stream_name != "metaout"))
+        if ((packet->size() > 0) && (packet->stream_name != "metaout"))
         {
             result.push_back(packet);
         }
