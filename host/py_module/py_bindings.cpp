@@ -450,6 +450,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
+        json_config_obj["ai"]["camera_input"] = config.ai.camera_input;
 
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
