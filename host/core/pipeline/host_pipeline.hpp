@@ -6,6 +6,7 @@
 #include <set>
 #include <tuple>
 #include <vector>
+#include <mutex>
 
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/lockfree/queue.hpp>
@@ -44,6 +45,7 @@ public:
     std::list<std::shared_ptr<HostDataPacket>> getConsumedDataPackets();
 
 private:
+    std::mutex     q_lock;
     // from DataObserver<StreamInfo, StreamData>
     virtual void onNewData(const StreamInfo& info, const StreamData& data) final;
     // from DataObserver<StreamInfo, StreamData>
