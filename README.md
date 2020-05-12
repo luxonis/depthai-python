@@ -35,6 +35,14 @@ Host-side DepthAI source code
 
 ## Build and run
 
+- **Windows (x64)**
+In seconds step, remove parameter *-A x64* for 32bit variant (Python must also be 32bit)
+```
+mkdir -p build && cd build
+cmake .. -A x64 -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_BINARY_DIR="C:/.hunter_bin" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%CD%\..\cmake\ToolchainConfig.cmake"
+cmake --build . --parallel
+```
+
 - **host/py_module**
 
       cd host/py_module
