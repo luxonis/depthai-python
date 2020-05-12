@@ -6,6 +6,7 @@
 #include <set>
 #include <tuple>
 #include <vector>
+#include <mutex>
 
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/lockfree/queue.hpp>
@@ -20,7 +21,7 @@ class HostPipeline
     : public DataObserver<StreamInfo, StreamData>
 {
 protected:
-    const unsigned c_data_queue_size = 100;
+    const unsigned c_data_queue_size = 30;
 
     boost::lockfree::spsc_queue<std::shared_ptr<HostDataPacket>> _data_queue_lf;
     std::list<std::shared_ptr<HostDataPacket>> _consumed_packets; // TODO: temporary solution
@@ -44,6 +45,7 @@ public:
     std::list<std::shared_ptr<HostDataPacket>> getConsumedDataPackets();
 
 private:
+    std::mutex     q_lock;
     // from DataObserver<StreamInfo, StreamData>
     virtual void onNewData(const StreamInfo& info, const StreamData& data) final;
     // from DataObserver<StreamInfo, StreamData>

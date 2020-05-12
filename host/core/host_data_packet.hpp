@@ -125,9 +125,9 @@ struct HostDataPacket
         } catch (const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
-            result = new py::array(py::dtype("f"), {1}, {});
+            result = nullptr;
         }
-
+       
         //py::gil_scoped_release release; // REUIRED ???
 
         // std::cout << "===> c++ getPythonNumpyArray " << t.ellapsed_us() << " us\n";
