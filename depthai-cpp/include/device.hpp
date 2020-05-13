@@ -99,13 +99,6 @@ private:
     std::unique_ptr<DisparityStreamPostProcessor> g_disparity_post_proc;
     std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
 
-    XLinkHandler_t g_xlink_device_handler =
-    {
-        .devicePath  = NULL,
-        .devicePath2 = NULL,
-        .linkId      = 0
-    };
-
-
+    XLinkHandler_t g_xlink_device_handler = {};
 
 };

@@ -1,6 +1,7 @@
 # Microsoft Visual Studio Code
 .project
 .vscode/
+.vs/
 build*/*
 # Auto-generated
 shared/version.hpp

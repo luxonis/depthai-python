@@ -26,3 +26,10 @@ hunter_config(
     CMAKE_ARGS
         CMAKE_POSITION_INDEPENDENT_CODE=ON
 )
+
+hunter_config(
+    Boost
+    VERSION "1.72.0-p0"
+    CMAKE_ARGS
+        CMAKE_POSITION_INDEPENDENT_CODE=ON
+)

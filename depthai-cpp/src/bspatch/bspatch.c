@@ -30,10 +30,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum block_type {
+	CONTROL_BLOCK = 0,
+	DIFF_BLOCK,
+	EXTRA_BLOCK,
+	NUM_BLOCKS
+};
 
-static off_t offtin(u_char *buf)
+static int64_t offtin(uint8_t* buf)
 {
-	off_t y;
+	int64_t y;
 
 	y=buf[7]&0x7F;
 	y=y*256;y+=buf[6];
@@ -67,10 +73,12 @@ int64_t bspatch_mem_get_newsize(uint8_t* patchfile_bin, int64_t patchfile_size){
 
 int bspatch_mem(uint8_t* oldfile_bin, int64_t oldfile_size, uint8_t* patchfile_bin, int64_t patchfile_size, uint8_t* newfile_bin){
 	
-	int64_t oldsize = oldfile_size,newsize;
+	int64_t oldsize = oldfile_size;
+	int64_t newsize;
 	int64_t bzctrllen,bzdatalen;
 	uint8_t header[32],buf[8];
-	uint8_t *old = oldfile_bin, *new = newfile_bin;
+	uint8_t* old = oldfile_bin;
+	uint8_t* new = newfile_bin;
 	int64_t oldpos,newpos;
 	int64_t ctrl[3];
 	int64_t lenread;
@@ -113,12 +121,7 @@ int bspatch_mem(uint8_t* oldfile_bin, int64_t oldfile_size, uint8_t* patchfile_b
 
 
 	/* Decompress control block, diff block and extra block */
-	enum block_type {
-		CONTROL_BLOCK = 0,
-		DIFF_BLOCK,
-		EXTRA_BLOCK,
-		NUM_BLOCKS
-	};
+	
 	int64_t block_offset_bz2[NUM_BLOCKS] = {cpOffset, dpOffset, epOffset};
 	int64_t block_size_bz2[NUM_BLOCKS] = {bzctrllen, bzdatalen, patchfile_size - epOffset};
 	uint8_t* p_decompressed_block_original[NUM_BLOCKS] = {NULL, NULL, NULL};
@@ -133,7 +136,7 @@ int bspatch_mem(uint8_t* oldfile_bin, int64_t oldfile_size, uint8_t* patchfile_b
 		unsigned int bzip_data_size = patchfile_size - sizeof(header);
 		int ret = 0;
 	    if( ( ret = BZ2_bzBuffToBuffDecompress(p_decompressed_block_original[i], &decompressed_size, patchfile_bin + block_offset_bz2[i], block_size_bz2[i], 0, 0)) != BZ_OK){
-			error = 1;
+			error = -1;
 			break;
 		}
 

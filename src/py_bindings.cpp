@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+#ifdef _MSC_VER 
+    #define HAVE_SNPRINTF
+#endif
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>

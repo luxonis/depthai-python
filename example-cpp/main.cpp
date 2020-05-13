@@ -6,7 +6,7 @@ int main(){
     using namespace std;
     cout << "Hello World!" << endl;
 
-    Device d("");
+    Device d("", true);
 
     //d.create_pipeline("");
 

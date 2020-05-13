@@ -25,63 +25,68 @@ constexpr static auto cmrc_depthai_cmd_path = "depthai.cmd";
 constexpr static auto cmrc_depthai_usb2_cmd_path = "depthai-usb2.cmd";
 constexpr static auto cmrc_depthai_usb2_patch_path = "depthai-usb2-patch.patch";
 
-
-
-
+// GLOBAL
+static XLinkGlobalHandler_t g_xlink_global_handler = {};
 
 
 Device::Device(std::string usb_device, bool usb2_mode){
+    
+    // Binaries are resource compiled
+    #ifdef DEPTHAI_RESOURCE_COMPILED_BINARIES
 
-// Binaries are resource compiled
-#ifdef DEPTHAI_RESOURCE_COMPILED_BINARIES
+        // Get binaries from internal sources
+        auto fs = cmrc::depthai::get_filesystem();
 
-    // Get binaries from internal sources
-    auto fs = cmrc::depthai::get_filesystem();
+        if(usb2_mode){
 
-    if(usb2_mode){
-
-        #ifdef DEPTHAI_PATCH_ONLY_MODE
+            #ifdef DEPTHAI_PATCH_ONLY_MODE
             
-            // Get size of original
+                // Get size of original
+                auto depthai_binary = fs.open(cmrc_depthai_cmd_path);
+
+                // Open patch
+                auto depthai_usb2_patch = fs.open(cmrc_depthai_usb2_patch_path);
+
+                // Get new size
+                int64_t patched_size = bspatch_mem_get_newsize( (uint8_t*) depthai_usb2_patch.begin(), depthai_usb2_patch.size());
+
+                // Reserve space for patched binary
+                patched_cmd.resize(patched_size);
+
+                // Patch
+                int error = bspatch_mem( (uint8_t*) depthai_binary.begin(), depthai_binary.size(), (uint8_t*) depthai_usb2_patch.begin(), depthai_usb2_patch.size(), patched_cmd.data());
+
+                // if patch successful
+                if(!error){
+                    // Boot
+                    init_device("", usb_device, patched_cmd.data(), patched_size);
+                } else {
+                    std::cout << "Error while patching..." << std::endl;
+                    // TODO handle error (throw most likely)
+                }
+
+            #else
+                auto depthai_usb2_binary = fs.open(cmrc_depthai_usb2_cmd_path);
+                uint8_t* binary = (uint8_t*) depthai_usb2_binary.begin();
+                long size = depthai_usb2_binary.size();
+                init_device("", usb_device, binary, size);
+
+            #endif
+
+        } else {
+
             auto depthai_binary = fs.open(cmrc_depthai_cmd_path);
-
-            // Open patch
-            auto depthai_usb2_patch = fs.open(cmrc_depthai_usb2_patch_path);
-
-            // Get new size
-            int64_t patched_size = bspatch_mem_get_newsize( (uint8_t*) depthai_usb2_patch.begin(), depthai_usb2_patch.size());
-
-            // Reserve space for patched binary
-            patched_cmd.resize(patched_size);
-
-            // Patch
-            bspatch_mem( (uint8_t*) depthai_binary.begin(), depthai_binary.size(), (uint8_t*) depthai_usb2_patch.begin(), depthai_usb2_patch.size(), patched_cmd.data());
-
-            // Boot
-            init_device("", usb_device, patched_cmd.data(), patched_size);
-
-        #else
-            auto depthai_usb2_binary = fs.open(cmrc_depthai_usb2_cmd_path);
-            uint8_t* binary = (uint8_t*) depthai_usb2_binary.begin();
-            long size = depthai_usb2_binary.size();
+            uint8_t* binary = (uint8_t*) depthai_binary.begin();
+            long size = depthai_binary.size();
             init_device("", usb_device, binary, size);
 
-        #endif
-
-    } else {
-
-        auto depthai_binary = fs.open(cmrc_depthai_cmd_path);
-        uint8_t* binary = (uint8_t*) depthai_binary.begin();
-        long size = depthai_binary.size();
-        init_device("", usb_device, binary, size);
-
-    }
+        }
 
 
-#else
-// Binaries from default path (TODO)
+    #else
+    // Binaries from default path (TODO)
 
-#endif
+    #endif
 
 
 }
@@ -100,24 +105,6 @@ Device::Device(std::string cmd_file, std::string usb_device){
 Device::~Device(){
     deinit_device();
 }
-
-
-
-// GLOBAL
-static XLinkGlobalHandler_t g_xlink_global_handler =
-{
-    .profEnable = 0,  
-    .profilingData = {
-        .totalReadTime   = 0.f,
-        .totalWriteTime  = 0.f,
-        .totalReadBytes  = 0,
-        .totalWriteBytes = 0,
-        .totalBootCount  = 0,
-        .totalBootTime   = 0.f
-    },
-    .loglevel   = 0,
-    .protocol   = USB_VSC
-};
 
 
 

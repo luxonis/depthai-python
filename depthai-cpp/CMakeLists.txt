@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.2) # For Hunter
 
+# Set defaults
+set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
+
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.253.tar.gz"
     SHA1 "88ea6d37c897a81a080eb9ae0f69d7807bbb3c73"
     LOCAL # Local config for dependencies
 )
+
+# Move binary dir if windows, to shorten the path
+if(WIN32)
+    set(HUNTER_BINARY_DIR "${HUNTER_GATE_ROOT}/_hunter_bin" CACHE STRING "Hunter binary directory")
+endif()
 
 set(TARGET_NAME depthai-cpp)
 project(${TARGET_NAME})
