@@ -69,6 +69,8 @@ add_library(${TARGET_NAME}
     src/bspatch/bspatch.c
 )
 
+# Set compiler features (c++11)
+set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
 # Add cmake folder to modules path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake")
