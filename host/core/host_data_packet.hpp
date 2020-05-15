@@ -134,13 +134,6 @@ struct HostDataPacket
 
         return result;
     }
-#endif
-
-    std::string getDataAsString()
-    {
-        assert(data[data.size() - 1] == 0); // checking '\0'
-        return reinterpret_cast<const char*>(&data[0]);
-    }
 
     py::object getMetadata(){
         if(opt_metadata){
@@ -148,6 +141,13 @@ struct HostDataPacket
         }
 
         return py::cast<py::none>(Py_None);
+    }
+#endif
+
+    std::string getDataAsString()
+    {
+        assert(data[data.size() - 1] == 0); // checking '\0'
+        return reinterpret_cast<const char*>(&data[0]);
     }
 
     boost::optional<FrameMetadata> opt_metadata;
