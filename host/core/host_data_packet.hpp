@@ -125,21 +125,14 @@ struct HostDataPacket
         } catch (const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
-            result = new py::array(py::dtype("f"), {1}, {});
+            result = nullptr;
         }
-
+       
         //py::gil_scoped_release release; // REUIRED ???
 
         // std::cout << "===> c++ getPythonNumpyArray " << t.ellapsed_us() << " us\n";
 
         return result;
-    }
-#endif
-
-    std::string getDataAsString()
-    {
-        assert(data[data.size() - 1] == 0); // checking '\0'
-        return reinterpret_cast<const char*>(&data[0]);
     }
 
     py::object getMetadata(){
@@ -148,6 +141,13 @@ struct HostDataPacket
         }
 
         return py::cast<py::none>(Py_None);
+    }
+#endif
+
+    std::string getDataAsString()
+    {
+        assert(data[data.size() - 1] == 0); // checking '\0'
+        return reinterpret_cast<const char*>(&data[0]);
     }
 
     boost::optional<FrameMetadata> opt_metadata;
