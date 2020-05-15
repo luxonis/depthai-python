@@ -306,6 +306,9 @@ bool soft_deinit_device()
 
 bool deinit_device()
 {
+#ifdef __APPLE__
+    _exit(0); //workaround for Xlink nullptr error on deinit
+#endif
     wdog_stop();       
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
