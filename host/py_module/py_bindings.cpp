@@ -441,6 +441,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         };
         json_config_obj["depth"]["padding_factor"] = config.depth.padding_factor;
         json_config_obj["depth"]["depth_limit_mm"] = (int)(config.depth.depth_limit_m * 1000);
+        json_config_obj["depth"]["confidence_threshold"] = config.depth.confidence_threshold;
 
         json_config_obj["_load_inBlob"] = true;
         json_config_obj["_pipeline"] =

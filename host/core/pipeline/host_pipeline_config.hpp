@@ -24,6 +24,7 @@ struct HostPipelineConfig
         std::string type;
         float       padding_factor = 0.3f;
         float       depth_limit_m = 10.0f;
+        float       confidence_threshold = 0.5f;
     } depth;
 
     struct AI
