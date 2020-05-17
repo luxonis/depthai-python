@@ -52,7 +52,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
 );
 
-static int wdog_thread_alive = 1;
+static int wdog_thread_alive = 0;
 void wdog_thread(int& wd_timeout_ms)
 {
     std::cout << "watchdog started " << wd_timeout_ms << std::endl;
