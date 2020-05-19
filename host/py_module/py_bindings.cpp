@@ -796,6 +796,46 @@ PYBIND11_MODULE(depthai, m)
         ;
 
 
+    // --------------------------------------
+    // Apriltag bindings. 
+    // --------------------------------------
+    py::class_<AprilInfo>(m, "AprilInfo")
+        .def_readonly("el_sz", &AprilInfo::el_sz)
+        .def_readonly("size", &AprilInfo::size)
+        .def_readonly("alloc", &AprilInfo::alloc)
+        .def_readonly("detections", &AprilInfo::detections)
+        ;
+
+    py::class_<std::list<AprilInfo>>(m, "AprilInfoList")
+        .def(py::init<>())
+        .def("__len__",  [](const std::list<AprilInfo> &v) { return v.size(); })
+        .def("__iter__", [](std::list<AprilInfo> &v)
+        {
+            return py::make_iterator(v.begin(), v.end());
+        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
+        ;
+
+    py::class_<AprilDetection>(m, "AprilDetection")
+        .def_readonly("id", &AprilDetection::id)
+        .def_readonly("hamming", &AprilDetection::hamming)
+        .def_readonly("decision_margin", &AprilDetection::decision_margin)
+        .def("getCenter", &AprilDetection::getCenter, py::return_value_policy::copy)
+        .def("getCorners", &AprilDetection::getCorners, py::return_value_policy::copy)
+        ;
+
+    py::class_<std::list<AprilDetection>>(m, "AprilDetectionList")
+        .def(py::init<>())
+        .def("__len__",  [](const std::list<AprilDetection> &v) { return v.size(); })
+        .def("__iter__", [](std::list<AprilDetection> &v)
+        {
+            return py::make_iterator(v.begin(), v.end());
+        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
+        ;
+    // --------------------------------------
+
+
+
+
     // NNET_PACKETS, data_packets = p.get_available_nnet_and_data_packets()
     py::class_<std::list<std::shared_ptr<NNetPacket>>>(m, "NNetPacketList")
         .def(py::init<>())
@@ -862,6 +902,10 @@ PYBIND11_MODULE(depthai, m)
     py::class_<CNNHostPipeline>(m, "CNNPipeline")
         .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
+        .def("consume_packets", &CNNHostPipeline::consumePackets)
+        .def("get_consumed_april_packets", &CNNHostPipeline::getConsumedAprilPackets, py::return_value_policy::copy)
+        .def("get_consumed_nnet_packets", &CNNHostPipeline::getConsumedNNetPackets, py::return_value_policy::copy)
+        .def("get_consumed_data_packets", &CNNHostPipeline::getConsumedDataPackets, py::return_value_policy::copy)
         ;
 
 

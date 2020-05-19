@@ -41,6 +41,8 @@ include_directories(
     ${XLINK_PLATFORM_INCLUDE}
     ../../shared/3rdparty/boost_1_71_0/
     ../../shared/3rdparty/json/include/
+    ../../shared/3rdparty/apriltag/
+    ../../shared/3rdparty/apriltag/common/
 )
 
 pybind11_add_module(

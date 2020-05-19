@@ -1,7 +1,9 @@
 #include <iostream>
 
 #include "cnn_host_pipeline.hpp"
-#include "../../../shared/timer.hpp"
+#include "cnn_host_pipeline.hpp"
+#include "../apriltag/april_info.hpp"
+#include <apriltag.h>
 
 
 
@@ -24,6 +26,82 @@ std::list<std::shared_ptr<NNetPacket>> CNNHostPipeline::getConsumedNNetPackets()
     }
 
     return result;
+}
+
+
+std::list<AprilInfo> CNNHostPipeline::getConsumedAprilPackets()
+{
+    std::list<std::shared_ptr<HostDataPacket>> result;
+    std::list<AprilInfo> resultApril;
+
+    // search for cnn result packet
+    for (auto &packet : _consumed_packets)
+    {
+        if (packet->stream_name == april_stream_name)
+        {
+            // TODO: deserialize the packet and stick it in a zarray.
+            zarray_t* detections;
+            int headerOffset = 0;
+            
+            std::cout << "asdfasdftest: CNNHostPipeline::getConsumedAprilPackets\n";
+
+            AprilInfo aprilInfo;
+            std::vector<AprilDetection> packetDetections;
+
+            // create a zarray to access data before packing it into our output type
+            memcpy(&aprilInfo.el_sz, &packet->data[headerOffset], sizeof(int));
+            headerOffset = headerOffset + sizeof(int);
+
+            memcpy(&aprilInfo.size, &packet->data[headerOffset], sizeof(int));
+            headerOffset = headerOffset + sizeof(int);
+
+            memcpy(&aprilInfo.alloc, &packet->data[headerOffset], sizeof(int));
+            headerOffset = headerOffset + sizeof(int);
+
+            for (int i = 0; i < aprilInfo.size; i++) {
+                int dataSize = sizeof(int)+sizeof(int)+sizeof(float)+2*sizeof(double)+4*2*sizeof(double);
+
+                AprilDetection currDetection;
+                int id;
+                int hamming;
+                float decision_margin;
+                double c[2];
+                double p[4][2];
+
+                unsigned char* dataPtr = (unsigned char*) &packet->data[headerOffset];
+
+                // adding id
+                memcpy(&currDetection.id, dataPtr, sizeof(int));
+                dataPtr = dataPtr + sizeof(int);
+
+                // adding hamming (how many error bits were corrected)
+                memcpy(&currDetection.hamming, dataPtr, sizeof(int));
+                dataPtr = dataPtr + sizeof(int);
+
+                // adding decision margin
+                memcpy(&currDetection.decision_margin, dataPtr, sizeof(float));
+                dataPtr = dataPtr + sizeof(float);
+
+                // adding center
+                memcpy(&currDetection.c[0], dataPtr, 2*sizeof(double));
+                dataPtr = dataPtr + 2*sizeof(double);
+
+                // reading points for the 4 corners
+                memcpy(&currDetection.p[0][0], dataPtr, 4*2*sizeof(double));
+                dataPtr = dataPtr + 4*2*sizeof(double);
+
+                packetDetections.push_back(currDetection);
+
+                headerOffset = headerOffset + dataSize;
+            }
+
+            aprilInfo.detections = packetDetections;
+
+            resultApril.push_back(aprilInfo);
+        }
+    }
+
+    return resultApril;
 }
 
 
@@ -50,4 +128,3 @@ CNNHostPipeline::getAvailableNNetAndDataPackets()
 
     return result;
 }
-
