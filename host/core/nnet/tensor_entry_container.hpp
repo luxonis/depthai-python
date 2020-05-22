@@ -80,8 +80,10 @@ public:
                 //             &ti.output_property_value_string_to_index[ti.output_properties_dimensions[0]];
                 // }
             }
-
-            entry.push_back(te);
+            if(te.checkValidTensorEntry() == true)
+            {
+                entry.push_back(te);
+            }
         }
 
         return entry;
@@ -112,12 +114,20 @@ struct PyTensorEntryContainerIterator
 
     std::vector<TensorEntry> next()
     {
-        if (index == seq.size())
+        while(true)
         {
-            throw py::stop_iteration();
+            if (index == seq.size())
+            {
+                throw py::stop_iteration();
+            }
+            std::vector<TensorEntry> next_entry = seq.getByIndex(index++);
+            if(next_entry.empty())
+            {
+                continue;
+            }
+            
+            return next_entry;
         }
-
-        return seq.getByIndex(index++);
     }
 
     TensorEntryContainer &seq;

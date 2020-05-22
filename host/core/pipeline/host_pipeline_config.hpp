@@ -23,6 +23,8 @@ struct HostPipelineConfig
         std::string calibration_file;
         std::string type;
         float       padding_factor = 0.3f;
+        float       depth_limit_m = 10.0f;
+        float       confidence_threshold = 0.5f;
     } depth;
 
     struct AI
@@ -30,6 +32,7 @@ struct HostPipelineConfig
         std::string blob_file;
         std::string blob_file_config;
         bool calc_dist_to_bb = false;
+        bool keep_aspect_ratio = true;
     } ai;
 
     struct BoardConfig

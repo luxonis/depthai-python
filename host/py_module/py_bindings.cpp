@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <pybind11/pybind11.h>
@@ -42,7 +43,7 @@ std::shared_ptr<CNNHostPipeline> gl_result = nullptr;
 
 static volatile std::atomic<int> wdog_keep;
 
-bool deinit_device();
+bool soft_deinit_device();
 bool init_device(
     const std::string &device_cmd_file,
     const std::string &usb_device
@@ -51,18 +52,27 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
 );
 
-static int wdog_thread_alive = 1;
+static int wdog_thread_alive = 0;
 void wdog_thread(int& wd_timeout_ms)
 {
     std::cout << "watchdog started " << wd_timeout_ms << std::endl;
+    const int sleep_chunk = 100;
+    const int sleep_nr = wd_timeout_ms / sleep_chunk;
     while(wdog_thread_alive)
     {
         wdog_keep = 0;
-        std::this_thread::sleep_for(std::chrono::milliseconds(wd_timeout_ms));
+        for(int i = 0; i < sleep_nr; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_chunk));
+            if(wdog_thread_alive == 0)
+            {
+                break;
+            }
+        }
         if(wdog_keep == 0 && wdog_thread_alive == 1)
         {
             std::cout << "watchdog triggered " << std::endl;
-            deinit_device();
+            soft_deinit_device();
             bool init;
             for(int retry = 0; retry < 1; retry++)
             {
@@ -147,6 +157,13 @@ std::unique_ptr<DisparityStreamPostProcessor> g_disparity_post_proc;
 std::unique_ptr<DeviceSupportListener>        g_device_support_listener;
 std::unique_ptr<HostCaptureCommand>           g_host_caputure_command;
 
+std::map<std::string, int> nn_to_depth_mapping = {
+    { "off_x", 0 },
+    { "off_y", 0 },
+    { "max_w", 0 },
+    { "max_h", 0 },
+};
+
 
 bool init_device(
     const std::string &device_cmd_file,
@@ -175,7 +192,7 @@ bool init_device(
                 &g_xlink_device_handler,
                 device_cmd_file,
                 usb_device,
-                false)
+                true)
             )
         {
             std::cout << "depthai: Error initializing xlink\n";
@@ -278,12 +295,23 @@ bool init_device(
     return result;
 }
 
-bool deinit_device()
+bool soft_deinit_device()
 {
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
+	g_host_caputure_command = nullptr;
+    return true;
+}
+
+bool deinit_device()
+{
+    wdog_stop();       
+    g_xlink = nullptr;
+    g_disparity_post_proc = nullptr;
+    g_device_support_listener = nullptr;
     g_host_caputure_command = nullptr;
+	gl_result = nullptr;
     return true;
 }
 
@@ -311,6 +339,10 @@ void request_jpeg(){
     }
 }
 
+std::map<std::string, int> get_nn_to_depth_bbox_mapping()
+{
+    return nn_to_depth_mapping;
+}
 
 std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
@@ -408,6 +440,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             {"_homography_right_to_left", homography_buff}
         };
         json_config_obj["depth"]["padding_factor"] = config.depth.padding_factor;
+        json_config_obj["depth"]["depth_limit_mm"] = (int)(config.depth.depth_limit_m * 1000);
+        json_config_obj["depth"]["confidence_threshold"] = config.depth.confidence_threshold;
 
         json_config_obj["_load_inBlob"] = true;
         json_config_obj["_pipeline"] =
@@ -416,6 +450,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         };
 
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
+        json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
 
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
@@ -536,6 +571,15 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             printf("CNN input width: %d\n", cnn_input_info.cnn_input_width);
             printf("CNN input height: %d\n", cnn_input_info.cnn_input_height);
             printf("CNN input num channels: %d\n", cnn_input_info.cnn_input_num_channels);
+            printf("CNN to depth bounding-box mapping: start(%d, %d), max_size(%d, %d)\n",
+                    cnn_input_info.nn_to_depth.offset_x,
+                    cnn_input_info.nn_to_depth.offset_y,
+                    cnn_input_info.nn_to_depth.max_width,
+                    cnn_input_info.nn_to_depth.max_height);
+            nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
+            nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
+            nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
+            nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
 
             // update tensor infos
             assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
@@ -733,6 +777,12 @@ PYBIND11_MODULE(depthai, m)
         "Returns available streams, that possible to retreive from the device."
         );
 
+    m.def(
+        "get_nn_to_depth_bbox_mapping",
+        &get_nn_to_depth_bbox_mapping,
+        "Returns NN bounding-box to depth mapping as a dict of coords: off_x, off_y, max_w, max_h."
+        );
+
     // cnn pipeline
     m.def(
         "create_pipeline",
@@ -899,7 +949,7 @@ PYBIND11_MODULE(depthai, m)
         .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         ;
 
-    py::class_<CNNHostPipeline>(m, "CNNPipeline")
+    py::class_<CNNHostPipeline, std::shared_ptr<CNNHostPipeline>>(m, "CNNPipeline")
         .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
         .def("consume_packets", &CNNHostPipeline::consumePackets)
@@ -911,9 +961,7 @@ PYBIND11_MODULE(depthai, m)
 
     // module destructor
     auto cleanup_callback = []() {
-        wdog_stop();
         deinit_device();
-        gl_result = nullptr;
     };
 
     m.add_object("_cleanup", py::capsule(cleanup_callback));

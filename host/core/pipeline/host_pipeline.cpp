@@ -49,7 +49,13 @@ void HostPipeline::onNewData(
 
     if (!_data_queue_lf.push(host_data))
     {
-        std::cout << "Data queue is full " << info.name << ":\n";
+        std::unique_lock<std::mutex> guard(q_lock);
+        _data_queue_lf.pop();
+        guard.unlock();
+        if (!_data_queue_lf.push(host_data))
+        {
+            std::cerr << "Data queue is full " << info.name << ":\n";
+        }
     }
 
     // std::cout << "===> onNewData " << t.ellapsed_us() << " us\n";
@@ -80,6 +86,7 @@ void HostPipeline::consumePackets()
     Timer consume_dur;
     _consumed_packets.clear();
 
+    std::unique_lock<std::mutex> guard(q_lock);
     _data_queue_lf.consume_all(
         [this]
         (std::shared_ptr<HostDataPacket>& data)
@@ -88,6 +95,7 @@ void HostPipeline::consumePackets()
             this->_consumed_packets.push_back(data);
         }
     );
+    guard.unlock();
 
     if (!this->_consumed_packets.empty())
     {
@@ -101,7 +109,7 @@ std::list<std::shared_ptr<HostDataPacket>> HostPipeline::getConsumedDataPackets(
 
     for (auto &packet : _consumed_packets)
     {
-        if ((packet->size() > 16) && (packet->stream_name != "metaout") && (packet->stream_name != "aprilout"))
+        if ((packet->size() > 0) && (packet->stream_name != "metaout") && (packet->stream_name != "aprilout"))
         {
             result.push_back(packet);
         }

@@ -14,7 +14,7 @@ std::list<std::shared_ptr<NNetPacket>> CNNHostPipeline::getConsumedNNetPackets()
     // search for cnn result packet
     for (auto &packet : _consumed_packets)
     {
-        if ((packet->size() > 16) && (packet->stream_name == cnn_result_stream_name))
+        if ((packet->size() > 0) && (packet->stream_name == cnn_result_stream_name))
         {
             std::vector<std::shared_ptr<HostDataPacket>> tensors;
             tensors.push_back(packet);
