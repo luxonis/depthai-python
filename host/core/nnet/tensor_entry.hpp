@@ -45,4 +45,18 @@ struct TensorEntry
         return getFloatByIndex(arr_index);
     }
 
+    bool checkValidTensorEntry() const
+    {
+        for(int idx = 0; idx < getPropertiesNumber(); idx++)
+        {
+            float tensorValue = getFloatByIndex(idx);
+            if(isnan(tensorValue) || isinf(tensorValue))
+            {
+                printf("invalid tensor packet, discarding \n");
+                return false;
+            }
+        }
+        return true;
+    }
+
 };
