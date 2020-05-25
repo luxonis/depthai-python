@@ -34,6 +34,9 @@
 #include "host_capture_command.hpp"
 
 
+#include "capture_af_bindings.hpp"
+#include "../../shared/metadata/capture_metadata.hpp"
+
 namespace py = pybind11;
 
 std::string config_backup;
@@ -333,11 +336,6 @@ std::vector<std::string> get_available_steams()
     return result;
 }
 
-void request_jpeg(){
-    if(g_host_caputure_command != nullptr){
-        g_host_caputure_command->capture();
-    }
-}
 
 std::map<std::string, int> get_nn_to_depth_bbox_mapping()
 {
@@ -740,6 +738,8 @@ PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
 
 PYBIND11_MODULE(depthai, m)
 {
+    init_binding_capture_af(m);
+
     // TODO: test ownership in python
 
     std::string _version = c_depthai_version;
@@ -810,13 +810,6 @@ PYBIND11_MODULE(depthai, m)
         );
 
     
-    // depthai.request_jpeg()
-    m.def(
-        "request_jpeg",
-        &request_jpeg,
-        "Function to request a still JPEG encoded image ('jpeg' stream must be enabled)"
-    );
-
 
     // FrameMetadata struct binding
     py::class_<FrameMetadata>(m, "FrameMetadata")

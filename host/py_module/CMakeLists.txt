@@ -46,6 +46,7 @@ include_directories(
 pybind11_add_module(
     ${APP_NAME}
     py_bindings.cpp
+    capture_af_bindings.cpp
     ../core/device_support_listener.cpp
     ../core/pipeline/host_pipeline.cpp
     ../core/pipeline/host_pipeline_config.cpp
