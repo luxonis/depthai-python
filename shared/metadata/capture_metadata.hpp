@@ -6,14 +6,14 @@
 // POD
 struct CaptureMetadata {
 
-    enum class Command : unsigned uint8_t {
-        NOP = 0,
+    enum class Command : uint8_t {
+        NO_COMMAND = 0,
         CAPTURE_STILL,
         AUTOFOCUS_TRIGGER,
         AUTOFOCUS_MODE
     };
 
-    enum class AutofocusMode : unsigned uint8_t {
+    enum class AutofocusMode : uint8_t {
         AF_MODE_AUTO = 0,
         AF_MODE_MACRO, 
         AF_MODE_CONTINUOUS_VIDEO,
