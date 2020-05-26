@@ -93,7 +93,7 @@ void wdog_thread(int& wd_timeout_ms)
 }
 
 static std::thread wd_thread;
-static int wd_timeout_ms = 3000;
+static int wd_timeout_ms = 10000;
 int  wdog_start(void)
 {
     static int once = 1;
@@ -862,6 +862,7 @@ PYBIND11_MODULE(depthai, m)
         .def("get_tensor", &NNetPacket::getTensor, py::return_value_policy::copy)
         .def("get_tensor", &NNetPacket::getTensorByName, py::return_value_policy::copy)
         .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
+        .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
         ;
 
     // for te in nnet_packet.ENTRIES()
