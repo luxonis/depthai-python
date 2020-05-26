@@ -824,6 +824,7 @@ PYBIND11_MODULE(depthai, m)
         .def("getCategory", &FrameMetadata::getCategory)
         .def("getInstanceNum", &FrameMetadata::getInstanceNum)
         .def("getSequenceNum", &FrameMetadata::getSequenceNum)
+        .def("getCameraName", &FrameMetadata::getCameraName)
         ;
 
     // for PACKET in data_packets:
