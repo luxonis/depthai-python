@@ -52,7 +52,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
 );
 
-static int wdog_thread_alive = 1;
+static int wdog_thread_alive = 0;
 void wdog_thread(int& wd_timeout_ms)
 {
     std::cout << "watchdog started " << wd_timeout_ms << std::endl;
@@ -424,6 +424,12 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
 
         json json_config_obj;
+
+        // Add video configuration if specified
+        if(config_json.count("video_config") > 0){
+            json_config_obj["video_config"] = config_json["video_config"]; 
+        }
+
         json_config_obj["board"]["clear-eeprom"] = config.board_config.clear_eeprom;
         json_config_obj["board"]["store-to-eeprom"] = config.board_config.store_to_eeprom;
         json_config_obj["board"]["override-eeprom"] = config.board_config.override_eeprom;
@@ -441,6 +447,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         };
         json_config_obj["depth"]["padding_factor"] = config.depth.padding_factor;
         json_config_obj["depth"]["depth_limit_mm"] = (int)(config.depth.depth_limit_m * 1000);
+        json_config_obj["depth"]["confidence_threshold"] = config.depth.confidence_threshold;
 
         json_config_obj["_load_inBlob"] = true;
         json_config_obj["_pipeline"] =

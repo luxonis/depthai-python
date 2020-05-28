@@ -67,9 +67,9 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 depth.padding_factor = depth_obj.at("padding_factor").get<float>();
 
-                if (depth.padding_factor < 0.f || depth.padding_factor >= 0.5)
+                if (depth.padding_factor < 0.f || depth.padding_factor > 1.f)
                 {
-                    std::cout << "padding_factor should be in the range [0 .. 0.5)\n";
+                    std::cout << "padding_factor should be in the range [0 .. 1]\n";
                     break;
                 }
             }
@@ -77,6 +77,17 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             if (depth_obj.contains("depth_limit_m"))
             {
                 depth.depth_limit_m = depth_obj.at("depth_limit_m").get<float>();
+            }
+
+            if (depth_obj.contains("confidence_threshold"))
+            {
+                depth.confidence_threshold = depth_obj.at("confidence_threshold").get<float>();
+
+                if (depth.confidence_threshold < 0.f || depth.confidence_threshold > 1.f)
+                {
+                    std::cout << "confidence_threshold should be in the range [0 .. 1]\n";
+                    break;
+                }
             }
         }
 

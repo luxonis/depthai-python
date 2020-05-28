@@ -66,7 +66,8 @@ bool XLinkWrapper::initFromHostSide(
     _reboot_device_on_destructor = reboot_device_on_destructor;
 
     assert(_device_link_id == -1);
-
+    extern int usb_loglevel; //usb log level in xlink
+    usb_loglevel = 1;
     bool result = false;
     do
     {
