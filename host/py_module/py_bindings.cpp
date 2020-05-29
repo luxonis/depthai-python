@@ -826,6 +826,19 @@ PYBIND11_MODULE(depthai, m)
         .def("getSequenceNum", &FrameMetadata::getSequenceNum)
         ;
 
+    // ObjectTracker struct binding
+    py::class_<ObjectTracker>(m, "ObjectTracker")
+        .def(py::init<>())
+        .def("getNrTracklets", &ObjectTracker::getNrTracklets)
+        .def("getId", &ObjectTracker::getId)
+        .def("getLabel", &ObjectTracker::getLabel)
+        .def("getStatus", &ObjectTracker::getStatus)
+        .def("getLeftCoord", &ObjectTracker::getLeftCoord)
+        .def("getTopCoord", &ObjectTracker::getTopCoord)
+        .def("getRightCoord", &ObjectTracker::getRightCoord)
+        .def("getBottomCoord", &ObjectTracker::getBottomCoord)
+        ;
+
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
@@ -833,6 +846,7 @@ PYBIND11_MODULE(depthai, m)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
         .def("getMetadata", &HostDataPacket::getMetadata)
+        .def("getObjectTracker", &HostDataPacket::getObjectTracker, py::return_value_policy::take_ownership)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()
