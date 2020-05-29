@@ -3,6 +3,13 @@
 #include <cstdint>
 #include <unordered_map>
 
+#ifdef HOST_PYTHON_MODULE
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+
+namespace py = pybind11;
+#endif
+
 #define MAX_OBJECTS (20)
 
 enum TrackingStatus
@@ -20,63 +27,80 @@ typedef struct ImgRoi
     int32_t bottom;
 }ImgRoi;
 
-typedef struct RoiObject
-{
+struct Tracklet {
     ImgRoi roi;
     int64_t id;
     int32_t label;
     int32_t status;
-}RoiObject;
-
-
-struct ObjectTracker {
-
-    int nr_tracklet;
-    RoiObject tracklet[MAX_OBJECTS];
 
 private:
 
 public:
 
-    int getNrTracklets(){
-        assert(nr_tracklet < MAX_OBJECTS);
-        return nr_tracklet;
+    int64_t getId(void){
+        return id;
     }
 
-    int64_t getId(int tracklet_no){
-        return tracklet[tracklet_no].id;
+    int32_t getLabel(void){
+        return label;
     }
 
-    int32_t getLabel(int tracklet_no){
-        return tracklet[tracklet_no].label;
-    }
-
-    std::string getStatus(int tracklet_no){
-        TrackingStatus status = (TrackingStatus)tracklet[tracklet_no].status;
+    std::string getStatus(void){
+        TrackingStatus tr_status = (TrackingStatus)status;
         std::unordered_map<enum TrackingStatus, std::string> trackletStatusMap =
         {
             {NEW,     "NEW"},
             {TRACKED, "TRACKED"},
             {LOST,    "LOST"}
         };
-        std::string trackletStatusStr = trackletStatusMap.at(status);
+        std::string trackletStatusStr = trackletStatusMap.at(tr_status);
         return trackletStatusStr;
     }
 
-    int32_t getLeftCoord(int tracklet_no){
-        return tracklet[tracklet_no].roi.left;
+    int32_t getLeftCoord(void){
+        return roi.left;
     }
 
-    int32_t getTopCoord(int tracklet_no){
-        return tracklet[tracklet_no].roi.top;
+    int32_t getTopCoord(void){
+        return roi.top;
     }
 
-    int32_t getRightCoord(int tracklet_no){
-        return tracklet[tracklet_no].roi.right;
+    int32_t getRightCoord(void){
+        return roi.right;
     }
 
-    int32_t getBottomCoord(int tracklet_no){
-        return tracklet[tracklet_no].roi.bottom;
+    int32_t getBottomCoord(void){
+        return roi.bottom;
     }
+
+};
+
+struct ObjectTracker {
+
+    int nr_tracklets;
+    Tracklet tracklet[MAX_OBJECTS];
+
+private:
+
+public:
+
+    int getNrTracklets(){
+        assert(nr_tracklets < MAX_OBJECTS);
+        return nr_tracklets;
+    }
+#ifdef HOST_PYTHON_MODULE
+    py::object getTracklet(int tracklet_nr)
+    {
+        assert(tracklet_nr < nr_tracklets);
+        return py::cast<Tracklet>(tracklet[tracklet_nr]);
+    }
+#else
+    Tracklet getTracklet(int tracklet_nr)
+    {
+        assert(tracklet_nr < nr_tracklets);
+        return tracklet[tracklet_nr];
+    }
+#endif
+
 
 };

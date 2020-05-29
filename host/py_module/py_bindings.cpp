@@ -835,14 +835,19 @@ PYBIND11_MODULE(depthai, m)
     // ObjectTracker struct binding
     py::class_<ObjectTracker>(m, "ObjectTracker")
         .def(py::init<>())
+        .def("__len__",        &ObjectTracker::getNrTracklets)
         .def("getNrTracklets", &ObjectTracker::getNrTracklets)
-        .def("getId", &ObjectTracker::getId)
-        .def("getLabel", &ObjectTracker::getLabel)
-        .def("getStatus", &ObjectTracker::getStatus)
-        .def("getLeftCoord", &ObjectTracker::getLeftCoord)
-        .def("getTopCoord", &ObjectTracker::getTopCoord)
-        .def("getRightCoord", &ObjectTracker::getRightCoord)
-        .def("getBottomCoord", &ObjectTracker::getBottomCoord)
+        .def("getTracklet",    &ObjectTracker::getTracklet)
+        ;
+    
+    py::class_<Tracklet>(m, "Tracklet")
+        .def("getId",          &Tracklet::getId)
+        .def("getLabel",       &Tracklet::getLabel)
+        .def("getStatus",      &Tracklet::getStatus)
+        .def("getLeftCoord",   &Tracklet::getLeftCoord)
+        .def("getTopCoord",    &Tracklet::getTopCoord)
+        .def("getRightCoord",  &Tracklet::getRightCoord)
+        .def("getBottomCoord", &Tracklet::getBottomCoord)
         ;
 
     // for PACKET in data_packets:
