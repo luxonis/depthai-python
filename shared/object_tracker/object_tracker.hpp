@@ -1,15 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <unordered_map>
 
 #define MAX_OBJECTS (20)
 
-/**
- * @enum TrackingStatus
- *
- * Tracking status.
- */
-enum struct TrackingStatus
+enum TrackingStatus
 {
     NEW = 0,         /**< The object is newly added. */
     TRACKED,     /**< The object is being tracked. */
@@ -55,8 +51,16 @@ public:
         return tracklet[tracklet_no].label;
     }
 
-    int32_t getStatus(int tracklet_no){
-        return tracklet[tracklet_no].status;
+    std::string getStatus(int tracklet_no){
+        TrackingStatus status = (TrackingStatus)tracklet[tracklet_no].status;
+        std::unordered_map<enum TrackingStatus, std::string> trackletStatusMap =
+        {
+            {NEW,     "NEW"},
+            {TRACKED, "TRACKED"},
+            {LOST,    "LOST"}
+        };
+        std::string trackletStatusStr = trackletStatusMap.at(status);
+        return trackletStatusStr;
     }
 
     int32_t getLeftCoord(int tracklet_no){
