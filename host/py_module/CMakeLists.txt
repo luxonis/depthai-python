@@ -39,6 +39,7 @@ if(PYTHON_ERROR)
 endif(PYTHON_ERROR)
 
 find_package(PythonLibs   ${PYTHON_VERSION} EXACT REQUIRED)
+find_package(PythonInterp ${PYTHON_VERSION} EXACT REQUIRED)
 # set(PYTHON_EXECUTABLE "/usr/bin/python3.6-dbg")
 # set(PYTHON_EXECUTABLE "/usr/bin/python")
 
