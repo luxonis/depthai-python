@@ -96,7 +96,7 @@ void wdog_thread(int& wd_timeout_ms)
 }
 
 static std::thread wd_thread;
-static int wd_timeout_ms = 3000;
+static int wd_timeout_ms = 10000;
 int  wdog_start(void)
 {
     static int once = 1;
@@ -455,6 +455,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
+        json_config_obj["ai"]["camera_input"] = config.ai.camera_input;
 
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
@@ -823,6 +824,7 @@ PYBIND11_MODULE(depthai, m)
         .def("getCategory", &FrameMetadata::getCategory)
         .def("getInstanceNum", &FrameMetadata::getInstanceNum)
         .def("getSequenceNum", &FrameMetadata::getSequenceNum)
+        .def("getCameraName", &FrameMetadata::getCameraName)
         ;
 
     // ObjectTracker struct binding
@@ -879,6 +881,7 @@ PYBIND11_MODULE(depthai, m)
         .def("get_tensor", &NNetPacket::getTensor, py::return_value_policy::copy)
         .def("get_tensor", &NNetPacket::getTensorByName, py::return_value_policy::copy)
         .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
+        .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
         ;
 
     // for te in nnet_packet.ENTRIES()
