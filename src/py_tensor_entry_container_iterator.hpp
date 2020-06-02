@@ -1,8 +1,9 @@
 #pragma once
 
-#include "nnet/tensor_entry_container.hpp"
 #include <vector>
 #include <pybind11/pybind11.h>
+
+#include "depthai/nnet/tensor_entry_container.hpp"
 
 struct PyTensorEntryContainerIterator
 {

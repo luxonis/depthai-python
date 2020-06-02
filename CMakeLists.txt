@@ -10,7 +10,7 @@ include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.253.tar.gz"
     SHA1 "88ea6d37c897a81a080eb9ae0f69d7807bbb3c73"
-    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-cpp/cmake/Hunter/config.cmake # Add depthai-cpp config (hunter limitation)
+    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-cpp config (hunter limitation)
 )
 
 # Move binary dir if windows, to shorten the path
@@ -23,7 +23,7 @@ set(TARGET_NAME depthai)
 project(${TARGET_NAME})
 
 # Add depthai-cpp dependency
-add_subdirectory(depthai-cpp EXCLUDE_FROM_ALL)
+add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
@@ -49,5 +49,5 @@ target_link_libraries(${TARGET_NAME}
     PUBLIC 
         # pybind11
         pybind11::pybind11
-        depthai-cpp
+        depthai-core
 )

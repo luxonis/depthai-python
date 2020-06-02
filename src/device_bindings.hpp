@@ -5,6 +5,6 @@
 #include <pybind11/numpy.h>
 
 // depthai-api
-#include "device.hpp"
+#include "depthai/device.hpp"
 
 void init_binding_device(pybind11::module& m);

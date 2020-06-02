@@ -5,7 +5,7 @@
 #include <pybind11/numpy.h>
 
 // depthai-api
-#include "nnet/nnet_packet.hpp"
+#include "depthai/nnet/nnet_packet.hpp"
 
 void init_binding_nnet_packet(pybind11::module& m);
 

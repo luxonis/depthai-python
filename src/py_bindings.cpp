@@ -15,7 +15,9 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "device.hpp"
+// depthai-core
+#include "depthai/device.hpp"
+
 #include "host_data_packet_bindings.hpp"
 #include "nnet_packet_bindings.hpp"
 #include "py_tensor_entry_container_iterator.hpp"
@@ -100,7 +102,6 @@ PYBIND11_MODULE(depthai,m)
         .def("__len__", &TensorEntry::getPropertiesNumber)
         .def("__getitem__", &TensorEntry::getFloat)
         .def("__getitem__", &TensorEntry::getFloatByIndex)
-        .def("distance", &TensorEntry::getDistance)
         ;
 
 
