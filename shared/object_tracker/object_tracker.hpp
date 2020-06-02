@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <unordered_map>
 
 #ifdef HOST_PYTHON_MODULE
 #include <pybind11/pybind11.h>
@@ -46,15 +45,9 @@ public:
     }
 
     std::string getStatus(void){
-        TrackingStatus tr_status = (TrackingStatus)status;
-        std::unordered_map<enum TrackingStatus, std::string> trackletStatusMap =
-        {
-            {NEW,     "NEW"},
-            {TRACKED, "TRACKED"},
-            {LOST,    "LOST"}
-        };
-        std::string trackletStatusStr = trackletStatusMap.at(tr_status);
-        return trackletStatusStr;
+        std::vector<std::string> status_str = {"NEW", "TRACKED", "LOST"};
+        if(status < 0 || status > 3) assert(0);
+        return status_str.at(status);
     }
 
     int32_t getLeftCoord(void){
