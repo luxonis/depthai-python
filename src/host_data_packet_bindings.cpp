@@ -3,11 +3,15 @@
 //std
 #include <iostream>
 
+//depthai-shared
+#include "depthai-shared/object_tracker/object_tracker.hpp"
+
 // Binding for HostDataPacket
 namespace py = pybind11;
 
 
 void init_binding_host_data_packet(pybind11::module& m){
+    
     
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
@@ -16,10 +20,11 @@ void init_binding_host_data_packet(pybind11::module& m){
         .def("getData", static_cast<py::array* (HostDataPacket::*)()>(&PyHostDataPacket::getPythonNumpyArray), py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
         .def("getMetadata", &HostDataPacket::getMetadata)
+        .def("getObjectTracker", &HostDataPacket::getObjectTracker, py::return_value_policy::take_ownership)
         ;
 
 
-    // FrameMetadata struct binding
+     // FrameMetadata struct binding
     py::class_<FrameMetadata>(m, "FrameMetadata")
         .def(py::init<>())
         .def("getTimestamp", &FrameMetadata::getTimestamp)
@@ -31,8 +36,27 @@ void init_binding_host_data_packet(pybind11::module& m){
         .def("getCategory", &FrameMetadata::getCategory)
         .def("getInstanceNum", &FrameMetadata::getInstanceNum)
         .def("getSequenceNum", &FrameMetadata::getSequenceNum)
+        .def("getCameraName", &FrameMetadata::getCameraName)
         ;
 
+
+    // ObjectTracker struct binding
+    py::class_<ObjectTracker>(m, "ObjectTracker")
+        .def(py::init<>())
+        .def("__len__",        &ObjectTracker::getNrTracklets)
+        .def("getNrTracklets", &ObjectTracker::getNrTracklets)
+        .def("getTracklet",    &ObjectTracker::getTracklet)
+        ;
+    
+    py::class_<Tracklet>(m, "Tracklet")
+        .def("getId",          &Tracklet::getId)
+        .def("getLabel",       &Tracklet::getLabel)
+        .def("getStatus",      &Tracklet::getStatus)
+        .def("getLeftCoord",   &Tracklet::getLeftCoord)
+        .def("getTopCoord",    &Tracklet::getTopCoord)
+        .def("getRightCoord",  &Tracklet::getRightCoord)
+        .def("getBottomCoord", &Tracklet::getBottomCoord)
+        ;
 
 }
 

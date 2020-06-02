@@ -12,7 +12,7 @@ namespace py = pybind11;
 
 void init_binding_nnet_packet(pybind11::module& m){
     
-   
+
     // NNET_PACKETS, data_packets = p.get_available_nnet_and_data_packets()
     py::class_<std::list<std::shared_ptr<NNetPacket>>>(m, "NNetPacketList")
         .def(py::init<>())
@@ -23,14 +23,12 @@ void init_binding_nnet_packet(pybind11::module& m){
         }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
-    
-    
-
     // for NNET_PACKET in nnet_packets:
     py::class_<NNetPacket, std::shared_ptr<NNetPacket>>(m, "NNetPacket")
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(unsigned)>(&PyNNetPacket::getTensor), py::return_value_policy::copy)
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(const std::string&)>(&PyNNetPacket::getTensorByName), py::return_value_policy::copy)
         .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
+        .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
         ;
 
 }
@@ -53,3 +51,4 @@ pybind11::array* PyNNetPacket::getTensorByName(const std::string &name)
         return getTensor(it->second);
     }
 }
+

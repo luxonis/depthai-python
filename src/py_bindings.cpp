@@ -18,36 +18,14 @@
 // depthai-core
 #include "depthai/device.hpp"
 
+// project
 #include "host_data_packet_bindings.hpp"
 #include "nnet_packet_bindings.hpp"
 #include "py_tensor_entry_container_iterator.hpp"
 #include "device_bindings.hpp"
 
-/*
-#include "device_support_listener.hpp"
-#include "host_data_packet.hpp"
-#include "host_data_reader.hpp"
-#include "nnet/tensor_info.hpp"
-#include "nnet/tensor_info_helper.hpp"
-#include "nnet/tensor_entry.hpp"
-#include "nnet/nnet_packet.hpp"
-#include "nnet/tensor_entry_container.hpp"
-#include "pipeline/host_pipeline.hpp"
-#include "pipeline/host_pipeline_config.hpp"
-#include "pipeline/cnn_host_pipeline.hpp"
-#include "disparity_stream_post_processor.hpp"
-#include "host_json_helper.hpp"
-#include "depthai-shared/cnn_info.hpp"
-#include "depthai-shared/depthai_constants.hpp"
-#include "depthai-shared/json_helper.hpp"
-//#include "depthai-shared/version.hpp"
-#include "depthai-shared/xlink/xlink_wrapper.hpp"
-
-
-*/
 
 namespace py = pybind11;
-
 
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<HostDataPacket>>);
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
@@ -127,7 +105,7 @@ PYBIND11_MODULE(depthai,m)
         .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         ;
 
-    py::class_<CNNHostPipeline>(m, "CNNPipeline")
+    py::class_<CNNHostPipeline, std::shared_ptr<CNNHostPipeline>>(m, "CNNPipeline")
         .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
         .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
         ;
