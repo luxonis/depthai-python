@@ -78,7 +78,7 @@ private:
 public:
 
     int getNrTracklets(){
-        assert(nr_tracklets < MAX_OBJECTS);
+        assert(nr_tracklets <= MAX_OBJECTS);
         return nr_tracklets;
     }
 #ifdef HOST_PYTHON_MODULE
