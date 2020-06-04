@@ -7,12 +7,14 @@
 #include "depthai-shared/object_tracker/object_tracker.hpp"
 
 // Binding for HostDataPacket
+#include "pybind11/stl.h" // bindings for boost::optional
 namespace py = pybind11;
 
+PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<HostDataPacket>>);
 
 void init_binding_host_data_packet(pybind11::module& m){
     
-    
+        
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
@@ -21,6 +23,17 @@ void init_binding_host_data_packet(pybind11::module& m){
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
         .def("getMetadata", &HostDataPacket::getMetadata)
         .def("getObjectTracker", &HostDataPacket::getObjectTracker, py::return_value_policy::take_ownership)
+        ;
+
+
+     // DataPacketList
+    py::class_<std::list<std::shared_ptr<HostDataPacket>>>(m, "DataPacketList")
+        .def(py::init<>())
+        .def("__len__",  [](const std::list<std::shared_ptr<HostDataPacket>> &v) { return v.size(); })
+        .def("__iter__", [](std::list<std::shared_ptr<HostDataPacket>> &v)
+        {
+            return py::make_iterator(v.begin(), v.end());
+        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
 

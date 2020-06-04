@@ -67,6 +67,14 @@ void init_binding_device(pybind11::module& m){
             &Device::request_af_mode,
             "Function to request a certain autofocus mode (Check 'AutofocusMode.__members__')"
         )
+        .def(
+            "get_nn_to_depth_bbox_mapping",
+            &Device::get_nn_to_depth_bbox_mapping,
+            "Returns NN bounding-box to depth mapping as a dict of coords: off_x, off_y, max_w, max_h."
+        )
+
+
+        
         ;
 
 

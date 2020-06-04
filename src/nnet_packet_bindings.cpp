@@ -8,12 +8,15 @@
 //project
 #include "host_data_packet_bindings.hpp"
 
+#include "pybind11/stl.h" // bindings for boost::optional
 namespace py = pybind11;
+
+
+PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
 
 void init_binding_nnet_packet(pybind11::module& m){
     
-
-    // NNET_PACKETS, data_packets = p.get_available_nnet_and_data_packets()
+ // NNET_PACKETS, data_packets = p.get_available_nnet_and_data_packets()
     py::class_<std::list<std::shared_ptr<NNetPacket>>>(m, "NNetPacketList")
         .def(py::init<>())
         .def("__len__",  [](const std::list<std::shared_ptr<NNetPacket>> &v) { return v.size(); })
@@ -22,6 +25,7 @@ void init_binding_nnet_packet(pybind11::module& m){
             return py::make_iterator(v.begin(), v.end());
         }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
+
 
     // for NNET_PACKET in nnet_packets:
     py::class_<NNetPacket, std::shared_ptr<NNetPacket>>(m, "NNetPacket")

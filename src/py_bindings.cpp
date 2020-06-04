@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+#include "pybind11_common.hpp"
+
+
 #ifdef _MSC_VER 
     #define HAVE_SNPRINTF
 #endif
@@ -25,12 +28,9 @@
 #include "device_bindings.hpp"
 
 
+
+
 namespace py = pybind11;
-
-PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<HostDataPacket>>);
-PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
-
-
 PYBIND11_MODULE(depthai,m)
 {
 
@@ -45,18 +45,6 @@ PYBIND11_MODULE(depthai,m)
     m.attr("__version__") = "0.0.1";
     //std::string _dev_version = c_depthai_dev_version;
     m.attr("__dev_version__") = "badf00d";
-
-
-    // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()
-    py::class_<std::list<std::shared_ptr<HostDataPacket>>>(m, "DataPacketList")
-        .def(py::init<>())
-        .def("__len__",  [](const std::list<std::shared_ptr<HostDataPacket>> &v) { return v.size(); })
-        .def("__iter__", [](std::list<std::shared_ptr<HostDataPacket>> &v)
-        {
-            return py::make_iterator(v.begin(), v.end());
-        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
-        ;
-
 
 
     // for te in nnet_packet.ENTRIES()
@@ -102,12 +90,12 @@ PYBIND11_MODULE(depthai,m)
 
 
     py::class_<HostPipeline>(m, "Pipeline")
-        .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
+        .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::arg("blocking") = false, py::return_value_policy::copy)
         ;
 
     py::class_<CNNHostPipeline, std::shared_ptr<CNNHostPipeline>>(m, "CNNPipeline")
-        .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::return_value_policy::copy)
-        .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::return_value_policy::copy)
+        .def("get_available_data_packets", &CNNHostPipeline::getAvailableDataPackets, py::arg("blocking") = false, py::return_value_policy::copy)
+        .def("get_available_nnet_and_data_packets", &CNNHostPipeline::getAvailableNNetAndDataPackets, py::arg("blocking") = false, py::return_value_policy::copy)
         ;
 
 

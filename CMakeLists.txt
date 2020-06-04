@@ -10,7 +10,7 @@ include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.253.tar.gz"
     SHA1 "88ea6d37c897a81a080eb9ae0f69d7807bbb3c73"
-    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-cpp config (hunter limitation)
+    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-core config (hunter limitation)
 )
 
 # Move binary dir if windows, to shorten the path
