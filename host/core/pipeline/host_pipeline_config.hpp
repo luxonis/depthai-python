@@ -35,6 +35,12 @@ struct HostPipelineConfig
         bool keep_aspect_ratio = true;
     } ai;
 
+    struct OT
+    {
+        int32_t max_tracklets        = 20;
+        float   confidence_threshold = 0.5;
+    } ot;
+
     struct BoardConfig
     {
         bool  clear_eeprom = false;
