@@ -456,6 +456,9 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
 
+        json_config_obj["ot"]["max_tracklets"] = config.ot.max_tracklets;
+        json_config_obj["ot"]["confidence_threshold"] = config.ot.confidence_threshold;
+
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
 
@@ -825,6 +828,24 @@ PYBIND11_MODULE(depthai, m)
         .def("getSequenceNum", &FrameMetadata::getSequenceNum)
         ;
 
+    // ObjectTracker struct binding
+    py::class_<ObjectTracker>(m, "ObjectTracker")
+        .def(py::init<>())
+        .def("__len__",        &ObjectTracker::getNrTracklets)
+        .def("getNrTracklets", &ObjectTracker::getNrTracklets)
+        .def("getTracklet",    &ObjectTracker::getTracklet)
+        ;
+    
+    py::class_<Tracklet>(m, "Tracklet")
+        .def("getId",          &Tracklet::getId)
+        .def("getLabel",       &Tracklet::getLabel)
+        .def("getStatus",      &Tracklet::getStatus)
+        .def("getLeftCoord",   &Tracklet::getLeftCoord)
+        .def("getTopCoord",    &Tracklet::getTopCoord)
+        .def("getRightCoord",  &Tracklet::getRightCoord)
+        .def("getBottomCoord", &Tracklet::getBottomCoord)
+        ;
+
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
@@ -832,6 +853,7 @@ PYBIND11_MODULE(depthai, m)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
         .def("getMetadata", &HostDataPacket::getMetadata)
+        .def("getObjectTracker", &HostDataPacket::getObjectTracker, py::return_value_policy::take_ownership)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <cmath>
+#include <cfloat>
 
 #include "tensor_info.hpp"
 #include "../types.hpp"
@@ -50,7 +52,7 @@ struct TensorEntry
         for(int idx = 0; idx < getPropertiesNumber(); idx++)
         {
             float tensorValue = getFloatByIndex(idx);
-            if(isnan(tensorValue) || isinf(tensorValue))
+            if(std::isnan(tensorValue) || std::isinf(tensorValue))
             {
                 printf("invalid tensor packet, discarding \n");
                 return false;
