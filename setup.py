@@ -9,22 +9,6 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
-class memoryCheck():
-    """Checks memory of a given system"""
- 
-    def __init__(self):
- 
-        if os.name == "posix":
-            self.value = self.linuxRam()
-        else:
-            self.value = -1
-
-    def linuxRam(self):
-        """Returns the RAM of a linux system"""
-        totalMemory = os.popen("free -m").readlines()[1].split()[1]
-        return int(totalMemory)
-
-
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -59,6 +43,16 @@ class CMakeBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
 
+        # Memcheck (guard if it fails)
+        totalMemory = 4000
+        if platform.system() == "Linux":
+            try:
+                totalMemory = int(os.popen("free -m").readlines()[1].split()[1])
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except:
+                totalMemory = 4000
+
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             if sys.maxsize > 2**32:
@@ -66,17 +60,16 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-
+           
             #Memcheck
-            M = memoryCheck()
-            if M.value < 1000:
-                build_args += ['--', '-j1']
+            parallel_args = ['--', '-j']
+            if totalMemory < 1000:
+                parallel_args = ['--', '-j1']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif M.value < 2000:
-                build_args += ['--', '-j2']
+            elif totalMemory < 2000:
+                parallel_args = ['--', '-j2']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
-            else:
-                build_args += ['--', '-j']
+            build_args += parallel_args
 
         # Hunter configuration to release only
         cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=Release']
