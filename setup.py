@@ -9,6 +9,22 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
+class memoryCheck():
+    """Checks memory of a given system"""
+ 
+    def __init__(self):
+ 
+        if os.name == "posix":
+            self.value = self.linuxRam()
+        else:
+            self.value = -1
+
+    def linuxRam(self):
+        """Returns the RAM of a linux system"""
+        totalMemory = os.popen("free -m").readlines()[1].split()[1]
+        return int(totalMemory)
+
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -50,7 +66,17 @@ class CMakeBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2']
+
+            #Memcheck
+            M = memoryCheck()
+            if M.value < 1000:
+                build_args += ['--', '-j1']
+                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
+            elif M.value < 2000:
+                build_args += ['--', '-j2']
+                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
+            else:
+                build_args += ['--', '-j']
 
         # Hunter configuration to release only
         cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=Release']
@@ -61,7 +87,7 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.', '--parallel'] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 setup(
     name='depthai',
