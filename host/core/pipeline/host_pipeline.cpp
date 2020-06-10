@@ -51,7 +51,6 @@ void HostPipeline::onNewData(
     if (!_data_queue_lf.push(host_data))
     {
         _data_queue_lf.pop();
-        guard.unlock();
         if (!_data_queue_lf.push(host_data))
         {
             std::cerr << "Data queue is full " << info.name << ":\n";
