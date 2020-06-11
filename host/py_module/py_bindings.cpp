@@ -424,6 +424,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
 
         json json_config_obj;
+        int num_stages = config.ai.blob_file2.empty() ? 1 : 2;
 
         // Add video configuration if specified
         if(config_json.count("video_config") > 0){
@@ -458,6 +459,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
         json_config_obj["ai"]["camera_input"] = config.ai.camera_input;
+        json_config_obj["ai"]["num_stages"] = num_stages;
 
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
@@ -534,91 +536,100 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
         else
         {
-            HostDataReader _blob_reader;
-            if (!_blob_reader.init(config.ai.blob_file))
-            {
-                std::cout << "depthai: Error opening blob file: " << config.ai.blob_file << "\n";
-                break;
-            }
-            int size_blob = _blob_reader.getSize();
+            std::string blob_file[] = {config.ai.blob_file, config.ai.blob_file2};
+            std::string blob_file_config[] = {config.ai.blob_file_config, config.ai.blob_file_config2};
 
-            std::vector<uint8_t> buff_blob(size_blob);
+            for (int stage = 0; stage < num_stages; stage++) {
+                HostDataReader _blob_reader;
+                if (!_blob_reader.init(blob_file[stage]))
+                {
+                    std::cout << "depthai: Error opening blob file: " << blob_file[stage] << "\n";
+                    break;
+                }
+                int size_blob = _blob_reader.getSize();
 
-            std::cout << "Read: " << _blob_reader.readData(buff_blob.data(), size_blob) << std::endl;
+                std::vector<uint8_t> buff_blob(size_blob);
 
-            // inBlob
-            StreamInfo blobInfo;
-            blobInfo.name = "inBlob";
-            blobInfo.size = size_blob;
+                std::cout << "Read: " << _blob_reader.readData(buff_blob.data(), size_blob) << std::endl;
 
-            if (!g_xlink->openWriteAndCloseStream(blobInfo, buff_blob.data()))
-            {
-                std::cout << "depthai: pipelineConfig write error;\n";
-                break;
-            }
-            printf("depthai: done sending Blob file %s\n", config.ai.blob_file.c_str());
+                // inBlob
+                StreamInfo blobInfo;
+                blobInfo.name = "inBlob";
+                blobInfo.size = size_blob;
 
-            // outBlob
-            StreamInfo outBlob;
-            outBlob.name = "outBlob";
-            //TODO: remove asserts considering StreamInfo size
-            outBlob.size = 1;
+                if (!g_xlink->openWriteAndCloseStream(blobInfo, buff_blob.data()))
+                {
+                    std::cout << "depthai: pipelineConfig write error;\n";
+                    break;
+                }
+                printf("depthai: done sending Blob file %s\n", blob_file[stage].c_str());
 
-            cnn_info cnn_input_info;
+                // outBlob
+                StreamInfo outBlob;
+                outBlob.name = "outBlob";
+                //TODO: remove asserts considering StreamInfo size
+                outBlob.size = 1;
 
-            static char cnn_info_arr[sizeof(cnn_info)];
-            g_xlink->openReadAndCloseStream(
-                outBlob,
-                (void*)cnn_info_arr,
-                sizeof(cnn_info)
-                );
+                cnn_info cnn_input_info;
 
-            memcpy(&cnn_input_info, &cnn_info_arr, sizeof(cnn_input_info));
+                static char cnn_info_arr[sizeof(cnn_info)];
+                g_xlink->openReadAndCloseStream(
+                    outBlob,
+                    (void*)cnn_info_arr,
+                    sizeof(cnn_info)
+                    );
 
-            printf("CNN input width: %d\n", cnn_input_info.cnn_input_width);
-            printf("CNN input height: %d\n", cnn_input_info.cnn_input_height);
-            printf("CNN input num channels: %d\n", cnn_input_info.cnn_input_num_channels);
-            printf("CNN to depth bounding-box mapping: start(%d, %d), max_size(%d, %d)\n",
-                    cnn_input_info.nn_to_depth.offset_x,
-                    cnn_input_info.nn_to_depth.offset_y,
-                    cnn_input_info.nn_to_depth.max_width,
-                    cnn_input_info.nn_to_depth.max_height);
-            nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
-            nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
-            nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
-            nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
+                memcpy(&cnn_input_info, &cnn_info_arr, sizeof(cnn_input_info));
 
-            // update tensor infos
-            assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
+                printf("CNN input width: %d\n", cnn_input_info.cnn_input_width);
+                printf("CNN input height: %d\n", cnn_input_info.cnn_input_height);
+                printf("CNN input num channels: %d\n", cnn_input_info.cnn_input_num_channels);
+                if (stage == 0) {
+                    printf("CNN to depth bounding-box mapping: start(%d, %d), max_size(%d, %d)\n",
+                            cnn_input_info.nn_to_depth.offset_x,
+                            cnn_input_info.nn_to_depth.offset_y,
+                            cnn_input_info.nn_to_depth.max_width,
+                            cnn_input_info.nn_to_depth.max_height);
+                    nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
+                    nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
+                    nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
+                    nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
+                }
 
-            for (int i = 0; i < tensors_info.size(); i++)
-            {
-                tensors_info[i].nnet_input_width  = cnn_input_info.cnn_input_width;
-                tensors_info[i].nnet_input_height = cnn_input_info.cnn_input_height;
-                tensors_info[i].offset = cnn_input_info.offsets[i];
-            }
+                // update tensor infos
+                assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
 
-            c_streams_myriad_to_pc["previewout"].dimensions = {
-                                                               cnn_input_info.cnn_input_num_channels,
-                                                               cnn_input_info.cnn_input_height,
-                                                               cnn_input_info.cnn_input_width
-                                                               };
+                if (stage == 0) {
+                    for (int i = 0; i < tensors_info.size(); i++)
+                    {
+                        tensors_info[i].nnet_input_width  = cnn_input_info.cnn_input_width;
+                        tensors_info[i].nnet_input_height = cnn_input_info.cnn_input_height;
+                        tensors_info[i].offset = cnn_input_info.offsets[i];
+                    }
 
-            // check CMX slices & used shaves
-            int device_cmx_for_nnet = g_config_d2h.at("_resources").at("cmx").at("for_nnet").get<int>();
-            if (cnn_input_info.number_of_cmx_slices != device_cmx_for_nnet)
-            {
-                std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
-                          << " cmx slices but device can calculate on " << device_cmx_for_nnet << "\n";
-                break;
-            }
+                    c_streams_myriad_to_pc["previewout"].dimensions = {
+                                                                       cnn_input_info.cnn_input_num_channels,
+                                                                       cnn_input_info.cnn_input_height,
+                                                                       cnn_input_info.cnn_input_width
+                                                                       };
+                }
 
-            int device_shaves_for_nnet = g_config_d2h.at("_resources").at("shaves").at("for_nnet").get<int>();
-            if (cnn_input_info.number_of_shaves != device_shaves_for_nnet)
-            {
-                std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
-                          << " shaves but device can calculate on " << device_shaves_for_nnet << "\n";
-                break;
+                // check CMX slices & used shaves
+                int device_cmx_for_nnet = g_config_d2h.at("_resources").at("cmx").at("for_nnet").get<int>();
+                if (cnn_input_info.number_of_cmx_slices != device_cmx_for_nnet)
+                {
+                    std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
+                              << " cmx slices but device can calculate on " << device_cmx_for_nnet << "\n";
+                    break;
+                }
+
+                int device_shaves_for_nnet = g_config_d2h.at("_resources").at("shaves").at("for_nnet").get<int>();
+                if (cnn_input_info.number_of_shaves != device_shaves_for_nnet)
+                {
+                    std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
+                              << " shaves but device can calculate on " << device_shaves_for_nnet << "\n";
+                    break;
+                }
             }
         }
 

@@ -31,6 +31,8 @@ struct HostPipelineConfig
     {
         std::string blob_file;
         std::string blob_file_config;
+        std::string blob_file2;
+        std::string blob_file_config2;
         std::string camera_input = "rgb";
         bool calc_dist_to_bb = false;
         bool keep_aspect_ratio = true;

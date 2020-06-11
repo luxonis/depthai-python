@@ -108,6 +108,16 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 ai.blob_file_config = ai_obj.at("blob_file_config").get<std::string>();
             }
 
+            if (ai_obj.contains("blob_file2"))
+            {
+                ai.blob_file2 = ai_obj.at("blob_file2").get<std::string>();
+            }
+
+            if (ai_obj.contains("blob_file_config2"))
+            {
+                ai.blob_file_config2 = ai_obj.at("blob_file_config2").get<std::string>();
+            }
+
             if (ai_obj.contains("camera_input"))
             {
                 ai.camera_input = ai_obj.at("camera_input").get<std::string>();
