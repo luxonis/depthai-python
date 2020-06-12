@@ -15,7 +15,7 @@ HunterGate(
 
 # Move binary dir if windows, to shorten the path
 if(WIN32)
-    set(HUNTER_BINARY_DIR "${HUNTER_GATE_ROOT}/_hunter_bin" CACHE STRING "Hunter binary directory")
+    set(HUNTER_BINARY_DIR "${HUNTER_GATE_ROOT}/_bin" CACHE STRING "Hunter binary directory")
 endif()
 
 # Pybindings project

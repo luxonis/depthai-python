@@ -6,15 +6,8 @@
 #include <string>
 #include <vector>
 
+// pybind11
 #include "pybind11_common.hpp"
-
-
-#ifdef _MSC_VER 
-    #define HAVE_SNPRINTF
-#endif
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/numpy.h>
 
 #include <boost/algorithm/string/replace.hpp>
 

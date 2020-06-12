@@ -3,16 +3,14 @@
 //std
 #include <iostream>
 
-
 //depthai-core
 #include "depthai/host_capture_command.hpp"
 
 //depthai-shared
 #include "depthai-shared/metadata/capture_metadata.hpp"
 
-
 //project
-#include <pybind11/stl.h>
+#include "pybind11_common.hpp"
 #include <boost/algorithm/string/replace.hpp>
 
 

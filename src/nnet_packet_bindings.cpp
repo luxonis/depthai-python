@@ -8,7 +8,9 @@
 //project
 #include "host_data_packet_bindings.hpp"
 
-#include "pybind11/stl.h" // bindings for boost::optional
+// pybind11
+#include "pybind11_common.hpp"
+
 namespace py = pybind11;
 
 

@@ -6,12 +6,12 @@
 //depthai-shared
 #include "depthai-shared/object_tracker/object_tracker.hpp"
 
-// Binding for HostDataPacket
-#include "pybind11/stl.h" // bindings for boost::optional
+// pybind11
+#include "pybind11_common.hpp"
 namespace py = pybind11;
 
+// Binding for HostDataPacket
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<HostDataPacket>>);
-
 void init_binding_host_data_packet(pybind11::module& m){
     
         
