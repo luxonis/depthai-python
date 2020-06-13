@@ -1,0 +1,14 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+build:armhf:
+  tags: 
+    - luxonis-armhf
+  image: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
+  stage: build
+  script:
+    - python3 -m pip wheel . -w wheelhouse/
+    - for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat "linux_armv7l" -w wheelhouse/audited/; done
+  artifacts:
+    paths:
+      - wheelhouse/audited/

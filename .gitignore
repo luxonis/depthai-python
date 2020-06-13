@@ -16,9 +16,12 @@ _generate/
 *.py[cod]
 *.egg-info
 
-#depthai-cpp
-depthai-cpp/.vscode/
-depthai-cpp/build/
+#depthai c++ core library
+depthai-core/.vscode/
+depthai-core/build/
+
+# builds
+_builds/
 
 #ci
 wheelhouse/
