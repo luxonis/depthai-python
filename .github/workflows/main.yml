@@ -17,6 +17,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: 'true'
-    - run: yum install -y libusb1-devel
-    - run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
-    - run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
+    - name: Installing libusb1-devel dependency
+      run: yum install -y libusb1-devel
+    - name: Installing cmake dependency
+      run: |
+        /opt/python/cp38-cp38m/bin/python -m pip install cmake 
+        ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+    - name: Building wheels
+      run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+    - name: Auditing wheels
+      run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
