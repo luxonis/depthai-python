@@ -35,9 +35,9 @@ jobs:
       run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
     - name: Archive wheel artifacts
       uses: actions/upload-artifact@v2
-        with:
-          name: audited-wheels
-          path: wheelhouse/audited/
+      with:
+        name: audited-wheels
+        path: wheelhouse/audited/
 
   # This job builds wheels for armhf arch
   build-armhf:
@@ -58,6 +58,6 @@ jobs:
       run: for whl in wheelhouse/*.whl; auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
     - name: Archive wheel artifacts
       uses: actions/upload-artifact@v2
-        with:
-          name: audited-wheels
-          path: wheelhouse/audited/
+      with:
+        name: audited-wheels
+        path: wheelhouse/audited/
