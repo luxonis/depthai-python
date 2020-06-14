@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        submodules: 'true'
+        submodules: 'recursive'
     - name: Installing libusb1-devel dependency
       run: yum install -y libusb1-devel
     - name: Installing cmake dependency
