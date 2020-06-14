@@ -1,0 +1,22 @@
+name: Python Wheel CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [push, pull_request]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: quay.io/pypa/manylinux2014_x86_64
+      env: 
+        PLAT: manylinux2014_x86_64
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - run: yum install -y libusb1-devel
+    - run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+    - run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
