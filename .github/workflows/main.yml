@@ -24,7 +24,7 @@ jobs:
       with:
         submodules: 'recursive'
     - name: Installing libusb1-devel dependency
-      run: yum install -y libusb1-devel
+      run: yum install -y --disableplugin=fastestmirror libusb1-devel
     - name: Installing cmake dependency
       run: |
         /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
@@ -61,3 +61,4 @@ jobs:
       with:
         name: audited-wheels
         path: wheelhouse/audited/
+
