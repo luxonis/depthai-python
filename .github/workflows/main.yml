@@ -55,7 +55,7 @@ jobs:
     - name: Building wheel 
       run: python3 -m pip wheel . -w ./wheelhouse/
     - name: Auditing wheel
-      run: for whl in wheelhouse/*.whl; auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
+      run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
     - name: Archive wheel artifacts
       uses: actions/upload-artifact@v2
       with:
