@@ -21,7 +21,7 @@ jobs:
       run: yum install -y libusb1-devel
     - name: Installing cmake dependency
       run: |
-        /opt/python/cp38-cp38m/bin/python -m pip install cmake 
+        /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
         ln -s /opt/python/cp38-cp38/bin/cmake /bin/
     - name: Building wheels
       run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
