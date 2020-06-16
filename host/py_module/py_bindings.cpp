@@ -616,19 +616,17 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
                 // check CMX slices & used shaves
                 int device_cmx_for_nnet = g_config_d2h.at("_resources").at("cmx").at("for_nnet").get<int>();
-                if (cnn_input_info.number_of_cmx_slices != device_cmx_for_nnet)
+                if (cnn_input_info.number_of_cmx_slices != device_cmx_for_nnet/num_stages)
                 {
-                    std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
-                              << " cmx slices but device can calculate on " << device_cmx_for_nnet << "\n";
-                    break;
+                    std::cout << "Note: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
+                              << " cmx slices but device can calculate on " << device_cmx_for_nnet << " (total)\n";
                 }
 
                 int device_shaves_for_nnet = g_config_d2h.at("_resources").at("shaves").at("for_nnet").get<int>();
-                if (cnn_input_info.number_of_shaves != device_shaves_for_nnet)
+                if (cnn_input_info.number_of_shaves != device_shaves_for_nnet/num_stages)
                 {
-                    std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
-                              << " shaves but device can calculate on " << device_shaves_for_nnet << "\n";
-                    break;
+                    std::cout << "Note: Blob is compiled for " << cnn_input_info.number_of_shaves
+                              << " shaves but device can calculate on " << device_shaves_for_nnet << " (total)\n";
                 }
             }
         }
