@@ -10,76 +10,91 @@ jobs:
   # This job builds wheels for x86_64 arch
   build-x86_64:
     runs-on: ubuntu-latest
-    container: 
+    container:
       image: quay.io/pypa/manylinux2014_x86_64
-      env: 
+      env:
         PLAT: manylinux2014_x86_64
     steps:
-    - name: Cache .hunter folder
-      uses: actions/cache@v2
-      with:
-        path: ~/.hunter/
-        key: hunter-x86_64
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
-    - name: Installing libusb1-devel dependency
-      run: yum install -y --disableplugin=fastestmirror libusb1-devel
-    - name: Installing cmake dependency
-      run: |
-        /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
-        ln -s /opt/python/cp38-cp38/bin/cmake /bin/
-    - name: Building wheels
-      run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
-    - name: Auditing wheels
-      run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
-    - name: Archive wheel artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: audited-wheels
-        path: wheelhouse/audited/
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter/
+          key: hunter-x86_64
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Building wheels
+        run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+      - name: Auditing wheels
+        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: audited-wheels
+          path: wheelhouse/audited/
 
   # This job builds wheels for armhf arch
   build-armhf:
     runs-on: luxonis-armhf
     container: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
     steps:
-    - name: Cache .hunter folder
-      uses: actions/cache@v2
-      with:
-        path: ~/.hunter/
-        key: hunter-armhf
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
-    - name: Building wheel 
-      run: python3 -m pip wheel . -w ./wheelhouse/
-    - name: Auditing wheel
-      run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
-    - name: Archive wheel artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: audited-wheels
-        path: wheelhouse/audited/
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter/
+          key: hunter-armhf
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Building wheel
+        run: python3 -m pip wheel . -w ./wheelhouse/
+      - name: Auditing wheel
+        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: audited-wheels
+          path: wheelhouse/audited/
 
   tests:
     runs-on: luxonis-armhf
     needs: [build-armhf, build-x86_64]
     steps:
-    - name: Run tests
-      run: python3 -c "print('testing...')"
+      - uses: actions/download-artifact@v2
+        with:
+          name: audited-wheels
+      - name: List files
+        run: ls -lahR
+      - name: Run tests
+        run: python3 -c "print('testing...')"
 
   deploy-artifacts:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-    - name: Run deploy to artifacts
-      run: python3 -c "print('deploy-artifacts...')"
+      - uses: actions/download-artifact@v2
+        with:
+          name: audited-wheels
+      - name: List files
+        run: ls -lahR
+      - name: Run deploy to artifacts
+        run: python3 -c "print('deploy-artifacts...')"
 
   deploy-pypi:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-    - name: Run deploy to PyPi
-      run: python3 -c "print('deploy-pypi...')"
+      - uses: actions/download-artifact@v2
+        with:
+          name: audited-wheels
+      - name: List files
+        run: ls -lahR
+      - name: Run deploy to PyPi
+        run: python3 -c "print('deploy-pypi...')"
 
