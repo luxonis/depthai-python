@@ -104,7 +104,11 @@ jobs:
         with:
           name: audited-wheels
       - name: List files
-        run: ls -lah && ls -lah wheelhouse
+        run: ls -lah
       - name: Run deploy to PyPi
-        run: python3 -c "print('deploy-pypi...')"
+        run: bash ./ci/upload-pypi.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.PYPI_SERVER }}
+          ARTIFACTORY_USER: ${{ secrets.PYPI_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.PYPI_PASSWORD }}
 
