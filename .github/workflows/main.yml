@@ -70,7 +70,7 @@ jobs:
         with:
           name: audited-wheels
       - name: List files
-        run: ls -lahR
+        run: ls -lah
       - name: Run tests
         run: python3 -c "print('testing...')"
 
@@ -81,10 +81,13 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: audited-wheels
-      - name: List files
-        run: ls -lahR
+      - uses: secrethub/actions/env-export@v0.1.0
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
       - name: Run deploy to artifacts
-        run: python3 -c "print('deploy-artifacts...')"
+        run: bash ci/upload-artifactory.sh
 
   deploy-pypi:
     runs-on: ubuntu-latest
@@ -94,7 +97,7 @@ jobs:
         with:
           name: audited-wheels
       - name: List files
-        run: ls -lahR
+        run: ls -lahR wheelhouse
       - name: Run deploy to PyPi
         run: python3 -c "print('deploy-pypi...')"
 
