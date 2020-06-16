@@ -66,9 +66,6 @@ jobs:
     runs-on: luxonis-armhf
     needs: [build-armhf, build-x86_64]
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
     - name: Run tests
       run: python3 -c "print('testing...')"
 
@@ -76,9 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
     - name: Run deploy to artifacts
       run: python3 -c "print('deploy-artifacts...')"
 
@@ -86,9 +80,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
     - name: Run deploy to PyPi
       run: python3 -c "print('deploy-pypi...')"
 
