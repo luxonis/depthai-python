@@ -86,13 +86,12 @@ jobs:
           name: audited-wheels
       - name: List files
         run: ls -lah && ls -lah ci
-      - uses: secrethub/actions/env-export@v0.1.0
+      - name: Run deploy to artifacts
+        run: bash ./ci/upload-artifactory.sh
         env:
           ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
-      - name: Run deploy to artifacts
-        run: bash ./ci/upload-artifactory.sh
 
   deploy-pypi:
     runs-on: ubuntu-latest
