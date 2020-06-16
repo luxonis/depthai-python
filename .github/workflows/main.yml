@@ -108,7 +108,7 @@ jobs:
       - name: Run deploy to PyPi
         run: bash ./ci/upload-pypi.sh
         env:
-          ARTIFACTORY_URL: ${{ secrets.PYPI_SERVER }}
-          ARTIFACTORY_USER: ${{ secrets.PYPI_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.PYPI_PASSWORD }}
+          PYPI_SERVER: ${{ secrets.PYPI_SERVER }}
+          PYPI_USER: ${{ secrets.PYPI_USER }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
 
