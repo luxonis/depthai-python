@@ -20,7 +20,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Append build hash if not a tagged commit
-        if: github.ref != refs/tags/*
+        if: github.ref != 'refs/tags/*'
         run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
       - name: Building wheels
         run: for PYBIN in C:\hostedtoolcache\windows\Python\*\x64\python.exe; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
@@ -55,7 +55,7 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
       - name: Append build hash if not a tagged commit
-        if: github.ref != refs/tags/*
+        if: github.ref != 'refs/tags/*'
         run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
       - name: Building a source distribution
         run: |
@@ -85,7 +85,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Append build hash if not a tagged commit
-        if: github.ref != refs/tags/*
+        if: github.ref != 'refs/tags/*'
         run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
       - name: Building wheel
         run: python3 -m pip wheel . -w ./wheelhouse/
@@ -132,7 +132,7 @@ jobs:
 
   # Deploy to PyPi. Only when a commit is tagged
   deploy-pypi:
-    if: github.ref == refs/tags/*
+    if: github.ref == 'refs/tags/*'
     runs-on: ubuntu-latest
     needs: tests
     steps:
