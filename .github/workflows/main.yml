@@ -143,6 +143,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: audited-wheels
+          path: wheelhouse/audited/
       - name: List files
         run: ls -lah
       - name: Run deploy to PyPi
