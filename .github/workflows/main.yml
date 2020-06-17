@@ -32,7 +32,7 @@ jobs:
 
   # This job builds wheels for macOS x86_64 arch
   build-macosx-x86_64:
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v2
