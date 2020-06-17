@@ -3,11 +3,11 @@ import re
 import sys
 import platform
 import subprocess
+import find_version
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
-
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -16,6 +16,7 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
+    
     def run(self):
         try:
             out = subprocess.check_output(['cmake', '--version'])
@@ -32,6 +33,7 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
+
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         # required for auto-detection of auxiliary "native" libs
         if not extdir.endswith(os.path.sep):
@@ -55,6 +57,9 @@ class CMakeBuild(build_ext):
 
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+            cmake_args += ['-DCMAKE_TOOLCHAIN_FILE={}'.format(os.path.dirname(os.path.abspath(__file__)) + '/ci/msvc_toolchain.cmake')]
+            
+            # Detect whether 32 / 64 bit Python is used and compile accordingly
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
@@ -77,19 +82,31 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
+        # Add additional cmake args
+        if 'CMAKE_ARGS' in os.environ:
+            cmake_args += [os.environ['CMAKE_ARGS']]
+
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
+
+### GENERATED VERSION - Do not modify
+final_version = find_version.get_package_version()
+if 'BUILD_COMMIT_HASH' in os.environ:
+    final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
+
 setup(
     name='depthai',
-    version='0.0.1',
+    version=final_version,
     author='Martin Peterlin',
     author_email='martin@luxonis.com',
     description='DepthAI Python Library',
     long_description='',
     ext_modules=[CMakeExtension('depthai')],
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass={
+        'build_ext': CMakeBuild
+    },
     zip_safe=False,
 )

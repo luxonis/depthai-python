@@ -4,11 +4,38 @@ name: Python Wheel CI
 # events but only for the master branch
 on: [push]
 
+
+# Environment variables to be set when non tagged commit is triggered
+env:
+  if: github.ref != refs/tags/*
+    BUILD_COMMIT_HASH: ${{ github.sha }}
+
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
+  # This job builds wheels for Windows x86_64 arch
+  build-windows-x86_64:
+    runs-on: windows-latest
+    steps:
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter/
+          key: hunter-msvc
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Building wheels
+        run: for PYBIN in C:\hostedtoolcache\windows\Python\*\x64\python.exe; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: audited-wheels
+          path: wheelhouse/
+
   # This job builds wheels for x86_64 arch
-  build-x86_64:
+  build-linux-x86_64:
     runs-on: ubuntu-latest
     container:
       image: quay.io/pypa/manylinux2014_x86_64
@@ -29,6 +56,12 @@ jobs:
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
           ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+      - name: Building a source distribution
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=bztar,zip
+          mv dist/* wheelhouse/audited/
       - name: Building wheels
         run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
       - name: Auditing wheels
@@ -40,7 +73,7 @@ jobs:
           path: wheelhouse/audited/
 
   # This job builds wheels for armhf arch
-  build-armhf:
+  build-linux-armhf:
     runs-on: luxonis-armhf
     container: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
     steps:
@@ -62,9 +95,10 @@ jobs:
           name: audited-wheels
           path: wheelhouse/audited/
 
+  # Run tests
   tests:
     runs-on: luxonis-armhf
-    needs: [build-armhf, build-x86_64]
+    needs: [build-linux-armhf, build-windows-x86_64, build-linux-x86_64]
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -74,6 +108,7 @@ jobs:
       - name: Run tests
         run: python3 -c "print('testing...')"
 
+  # Deploy to artifactory
   deploy-artifacts:
     runs-on: ubuntu-latest
     needs: tests
@@ -93,7 +128,9 @@ jobs:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
+  # Deploy to PyPi. Only when a commit is tagged
   deploy-pypi:
+    if: github.ref == refs/tags/*
     runs-on: ubuntu-latest
     needs: tests
     steps:

@@ -2,7 +2,8 @@ include README.md LICENSE
 global-include CMakeLists.txt *.cmake
 recursive-include src *
 recursive-include pybind11/include *.h
-graft depthai-cpp
-prune depthai-cpp/build
-prune example-cpp
+graft depthai-core
+prune depthai-core/build
 prune build
+prune wheelhouse
+prune dist
