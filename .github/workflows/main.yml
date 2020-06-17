@@ -115,6 +115,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: tests
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
       - uses: actions/download-artifact@v2
         with:
           name: audited-wheels
