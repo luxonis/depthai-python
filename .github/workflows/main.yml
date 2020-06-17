@@ -45,10 +45,10 @@ jobs:
       - name: Append build hash if not a tagged commit
         if: github.ref != 'refs/tags/*'
         run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
-      - name: Print out path to python3.7
-        run: which python3.7
+      - name: Install libusb dependency
+        run: brew install libusb
       - name: Building wheels
-        run: for PYBIN in /usr/local/bin/python3.*; do "${PYBIN}" -m pip wheel . -w ./wheelhouse/; done
+        run: for PYBIN in python3.5 python3.6 python3.7 python3.8; do "${PYBIN}" -m pip wheel . -w ./wheelhouse/; done
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
