@@ -21,7 +21,7 @@ jobs:
           submodules: 'recursive'
       - name: Append build hash if not a tagged commit
         if: github.ref != 'refs/tags/*'
-        run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
+        run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building wheels
         run: Get-ChildItem "C:/hostedtoolcache/windows/Python/*/x64/python.exe" | foreach { iex "$_ -m pip wheel . -w ./wheelhouse/" }
       - name: Archive wheel artifacts
@@ -56,7 +56,7 @@ jobs:
         run: mkdir -p wheelhouse/audited/
       - name: Append build hash if not a tagged commit
         if: github.ref != 'refs/tags/*'
-        run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
+        run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building a source distribution
         run: |
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=bztar,zip
@@ -86,7 +86,7 @@ jobs:
           submodules: 'recursive'
       - name: Append build hash if not a tagged commit
         if: github.ref != 'refs/tags/*'
-        run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
+        run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building wheel
         run: python3 -m pip wheel . -w ./wheelhouse/
       - name: Auditing wheel
