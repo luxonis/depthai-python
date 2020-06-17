@@ -8,8 +8,8 @@ set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list 
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.257.tar.gz"
-    SHA1 "52203b35dfc2f975f4c22fc89f055476726e4288"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.258.tar.gz"
+    SHA1 "062a19ab13ce8dffa9a882b6ce3e43bdabdf75d3"
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-core config (hunter limitation)
 )
 
