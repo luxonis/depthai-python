@@ -23,7 +23,7 @@ jobs:
         if: github.ref != 'refs/tags/*'
         run: echo '::set-env BUILD_COMMIT_HASH=${{github.sha}}'
       - name: Building wheels
-        run: for PYBIN in C:\hostedtoolcache\windows\Python\*\x64\python.exe; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+        run: Get-ChildItem "C:/hostedtoolcache/windows/Python/*/x64/python.exe" | foreach { iex "$_ -m pip wheel . -w ./wheelhouse/" }
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
