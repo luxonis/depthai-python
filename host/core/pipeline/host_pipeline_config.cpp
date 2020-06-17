@@ -127,6 +127,44 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 ai.keep_aspect_ratio = ai_obj.at("keep_aspect_ratio").get<bool>();
             }
+
+            if (ai_obj.contains("shaves"))
+            {
+                ai.shaves = ai_obj.at("shaves").get<int32_t>();
+            }
+            if (ai.shaves <= 0 || ai.shaves > 16)
+            {
+                std::cerr << WARNING "ai.shaves should be in the range (0 .. 16]\n" ENDC;
+                break;
+            }
+
+            if (ai_obj.contains("cmx_slices"))
+            {
+                ai.cmx_slices = ai_obj.at("cmx_slices").get<int32_t>();
+            }
+            if (ai.cmx_slices <= 0 || ai.cmx_slices > 19)
+            {
+                std::cerr << WARNING "ai.cmx_slices should be in the range (0 .. 19]\n" ENDC;
+                break;
+            }
+
+            if (ai.shaves > ai.cmx_slices)
+            {
+                std::cerr << WARNING "ai.shaves should be <= than ai.cmx_slices\n" ENDC;
+                break;
+            }
+
+
+            if (ai_obj.contains("NCEs"))
+            {
+                ai.NCEs = ai_obj.at("NCEs").get<int32_t>();
+            }
+            if (ai.NCEs <= 0 || ai.NCEs > 20)
+            {
+                std::cerr << WARNING "ai.NCEs should be in the range [0 .. 2]\n" ENDC;
+                break;
+            }
+
         }
 
         // "ot"

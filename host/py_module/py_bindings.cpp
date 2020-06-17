@@ -456,6 +456,9 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
+        json_config_obj["ai"]["shaves"] = config.ai.shaves;
+        json_config_obj["ai"]["cmx_slices"] = config.ai.cmx_slices;
+        json_config_obj["ai"]["NCEs"] = config.ai.NCEs;
 
         json_config_obj["ot"]["max_tracklets"] = config.ot.max_tracklets;
         json_config_obj["ot"]["confidence_threshold"] = config.ot.confidence_threshold;
@@ -606,21 +609,26 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                                                                };
 
             // check CMX slices & used shaves
-            int device_cmx_for_nnet = g_config_d2h.at("_resources").at("cmx").at("for_nnet").get<int>();
-            if (cnn_input_info.number_of_cmx_slices != device_cmx_for_nnet)
+            if (cnn_input_info.number_of_cmx_slices != config.ai.cmx_slices)
             {
                 std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
-                          << " cmx slices but device can calculate on " << device_cmx_for_nnet << "\n";
+                          << " cmx slices but device is configured to calculate on " << config.ai.cmx_slices << "\n";
                 break;
             }
 
-            int device_shaves_for_nnet = g_config_d2h.at("_resources").at("shaves").at("for_nnet").get<int>();
-            if (cnn_input_info.number_of_shaves != device_shaves_for_nnet)
+            if (cnn_input_info.number_of_shaves != config.ai.shaves)
             {
                 std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
-                          << " shaves but device can calculate on " << device_shaves_for_nnet << "\n";
+                          << " shaves but device is configured to calculate on " << config.ai.shaves << "\n";
                 break;
             }
+            
+            if(!cnn_input_info.satisfied_resources)
+            {
+                std::cout << "requested CNN resources overlaps with RGB camera \n";
+                break;
+            }
+
         }
 
 
