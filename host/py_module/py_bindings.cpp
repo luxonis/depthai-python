@@ -37,6 +37,9 @@
 #include "capture_af_bindings.hpp"
 #include "../../shared/metadata/capture_metadata.hpp"
 
+#define WARNING "\033[1;5;31m"
+#define ENDC "\033[0m"
+
 namespace py = pybind11;
 
 std::string config_backup;
@@ -354,7 +357,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         // check xlink
         if (nullptr == g_xlink)
         {
-            std::cout << "device is not initialized\n";
+            std::cerr << WARNING "device is not initialized\n" ENDC;
             break;
         }
 
@@ -362,7 +365,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json config_json;
         if (!getJSONFromString(config_json_str, config_json))
         {
-            std::cout << "Error: Cant parse json config :" << config_json_str << "\n";
+            std::cerr << WARNING "Error: Cant parse json config :" << config_json_str << "\n" ENDC;
             break;
         }
 
@@ -370,7 +373,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         HostPipelineConfig config;
         if (!config.initWithJSON(config_json))
         {
-            std::cout << "Error: Cant init configs with json: " << config_json.dump() << "\n";
+            std::cerr << WARNING "Error: Cant init configs with json: " << config_json.dump() << "\n" ENDC;
             break;
         }
 
@@ -405,7 +408,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             HostDataReader calibration_reader;
             if (!calibration_reader.init(config.depth.calibration_file))
             {
-                std::cout << "depthai: Error opening calibration file: " << config.depth.calibration_file << "\n";
+                std::cerr << WARNING "depthai: Error opening calibration file: " << config.depth.calibration_file << "\n" ENDC;
                 break;
             }
 
@@ -521,7 +524,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 pipeline_config_str_packed.data())
             )
         {
-            std::cout << "depthai: pipelineConfig write error;\n";
+            std::cerr << WARNING "depthai: pipelineConfig write error\n" ENDC;
             break;
         }
 
@@ -541,7 +544,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             HostDataReader _blob_reader;
             if (!_blob_reader.init(config.ai.blob_file))
             {
-                std::cout << "depthai: Error opening blob file: " << config.ai.blob_file << "\n";
+                std::cerr << WARNING "depthai: Error opening blob file: " << config.ai.blob_file << "\n" ENDC;
                 break;
             }
             int size_blob = _blob_reader.getSize();
@@ -611,21 +614,21 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             // check CMX slices & used shaves
             if (cnn_input_info.number_of_cmx_slices != config.ai.cmx_slices)
             {
-                std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
-                          << " cmx slices but device is configured to calculate on " << config.ai.cmx_slices << "\n";
+                std::cerr << WARNING "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
+                          << " cmx slices but device is configured to calculate on " << config.ai.cmx_slices << "\n" ENDC;
                 break;
             }
 
             if (cnn_input_info.number_of_shaves != config.ai.shaves)
             {
-                std::cout << "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
-                          << " shaves but device is configured to calculate on " << config.ai.shaves << "\n";
+                std::cerr << WARNING "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
+                          << " shaves but device is configured to calculate on " << config.ai.shaves << "\n" ENDC;
                 break;
             }
             
             if(!cnn_input_info.satisfied_resources)
             {
-                std::cout << "requested CNN resources overlaps with RGB camera \n";
+                std::cerr << WARNING "ERROR: requested CNN resources overlaps with RGB camera \n" ENDC;
                 break;
             }
 
