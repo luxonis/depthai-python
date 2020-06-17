@@ -54,6 +54,7 @@ struct HostPipelineConfig
         bool stereo_center_crop = false;
         std::string name;
         std::string revision;
+        std::string rgb_cam_config;
     } board_config;
 
 

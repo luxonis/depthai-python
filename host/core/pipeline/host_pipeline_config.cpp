@@ -3,6 +3,12 @@
 #include "host_pipeline_config.hpp"
 
 
+static std::unordered_map<std::string, int> rgb_cam_supported_configs =
+{
+    {"1080p_30hz",       0},
+    {"4k_30hz"   ,       1}
+};
+
 #define WARNING "\033[1;5;31m"
 #define ENDC "\033[0m"
 
@@ -212,6 +218,23 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             if (board_conf_obj.contains("revision"))
             {
                 board_config.revision = board_conf_obj.at("revision").get<std::string>();
+            }
+
+            if (board_conf_obj.contains("rgb_cam_config"))
+            {
+                board_config.rgb_cam_config = board_conf_obj.at("rgb_cam_config").get<std::string>();
+                auto it = rgb_cam_supported_configs.find(board_config.rgb_cam_config);
+
+                if (it == rgb_cam_supported_configs.end()) {
+                    std::cerr << WARNING "Requested rgb cam config not available!\n" ENDC;
+
+                    std::cerr << "Supported configs.\n";
+                    for(auto elem : rgb_cam_supported_configs)
+                    {
+                        std::cerr << elem.first << "\n";
+                    }
+                    break;
+                }
             }
         }
 
