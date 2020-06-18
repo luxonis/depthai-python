@@ -64,6 +64,12 @@ class CMakeBuild(build_ext):
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
         else:
+            # if macos
+            if sys.platform == 'darwin':
+                from distutils import util
+                os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
+                os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
+
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
            
             #Memcheck
