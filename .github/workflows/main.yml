@@ -154,7 +154,7 @@ jobs:
       - name: List files
         run: ls -lah
       - name: install DepthAI
-        run: python3 -m pip wheel . && python3 -m pip install $(find . -type f -iname "*.whl")
+        run: pip install depthai --no-index --find-links file://`pwd`/wheelhouse/audited/
       - name: Run tests
         run: python3 tests/test.py
 
