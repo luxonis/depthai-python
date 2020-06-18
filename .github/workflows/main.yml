@@ -66,13 +66,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          python -m pip install delocate
+      - name: Set macos deployment target
+        run: echo '::set-env name=MACOSX_DEPLOYMENT_TARGET::10.9' 
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/
+      - name: Auditing wheels
+        run: ci/repair-whl-macos `pwd`/wheelhouse/* `pwd`/wheelhouse/audited      
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
           name: audited-wheels
-          path: wheelhouse/
+          path: wheelhouse/audited/
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
