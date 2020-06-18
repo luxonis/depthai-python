@@ -72,7 +72,7 @@ jobs:
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/
       - name: Auditing wheels
-        run: ci/repair-whl-macos `pwd`/wheelhouse/* `pwd`/wheelhouse/audited      
+        run: ci/repair-whl-macos.sh `pwd`/wheelhouse/* `pwd`/wheelhouse/audited      
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
