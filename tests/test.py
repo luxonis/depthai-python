@@ -9,15 +9,6 @@ class TestDepthAI(unittest.TestCase):
             print("Unable to import DepthAI module!")
             raise
 
-    def test_init_device(self):
-        import depthai
-        try:
-            device = depthai.Device("", False)
-            del device
-        except:
-            print("Unable to init DepthAI device!")
-            raise
-
 
 if __name__ == "__main__":
     unittest.main()
