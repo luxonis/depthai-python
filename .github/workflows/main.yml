@@ -1,8 +1,15 @@
 name: Python Wheel CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
-on: [push]
+# Controls when the action will run. Triggers the workflow on push
+
+###################################
+# WARNING #########################
+# as self-hosted runners are used, and security policy for them has not been yet determined by GitHub
+# pay close attention to not enable workflows on pull_request events
+# TLDR: do NOT add 'pull_request' here for the time being
+on: [push] 
+###################################
+###################################
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
