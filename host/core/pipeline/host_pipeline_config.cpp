@@ -159,7 +159,7 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 ai.NCEs = ai_obj.at("NCEs").get<int32_t>();
             }
-            if (ai.NCEs <= 0 || ai.NCEs > 2)
+            if (ai.NCEs < 0 || ai.NCEs > 2)
             {
                 std::cerr << WARNING "ai.NCEs should be in the range [0 .. 2]\n" ENDC;
                 break;
