@@ -155,9 +155,12 @@ jobs:
 
   # Run tests
   tests:
-    runs-on: luxonis-armhf
+    runs-on: luxonis-arm-tests
     needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
       - uses: actions/download-artifact@v2
         with:
           name: audited-wheels
