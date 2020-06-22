@@ -463,6 +463,19 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             {"_streams", json::array()}
         };
 
+        HostDataReader _blob_reader;
+        int size_blob = 0;
+        if (!config.ai.blob_file.empty())
+        { 
+            if (!_blob_reader.init(config.ai.blob_file))
+            {
+                std::cerr << WARNING "depthai: Error opening blob file: " << config.ai.blob_file << "\n" ENDC;
+                break;
+            }
+            size_blob = _blob_reader.getSize();
+        }
+
+        json_config_obj["ai"]["blob_size"] = size_blob;
         json_config_obj["ai"]["calc_dist_to_bb"] = config.ai.calc_dist_to_bb;
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
         json_config_obj["ai"]["shaves"] = config.ai.shaves;
@@ -547,14 +560,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
         else
         {
-            HostDataReader _blob_reader;
-            if (!_blob_reader.init(config.ai.blob_file))
-            {
-                std::cerr << WARNING "depthai: Error opening blob file: " << config.ai.blob_file << "\n" ENDC;
-                break;
-            }
-            int size_blob = _blob_reader.getSize();
-
             std::vector<uint8_t> buff_blob(size_blob);
 
             std::cout << "Read: " << _blob_reader.readData(buff_blob.data(), size_blob) << std::endl;
@@ -566,7 +571,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
             if (!g_xlink->openWriteAndCloseStream(blobInfo, buff_blob.data()))
             {
-                std::cout << "depthai: pipelineConfig write error;\n";
+                std::cout << "depthai: pipelineConfig write error: Blob size too big: " << size_blob << "\n";
                 break;
             }
             printf("depthai: done sending Blob file %s\n", config.ai.blob_file.c_str());
