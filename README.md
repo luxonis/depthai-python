@@ -23,10 +23,10 @@ Host-side DepthAI source code
 - Install development environment dependencies:
   - Linux:
 
-        sudo apt-get install -y git python-pip cmake cmake-gui libusb-1.0-0-dev
+        sudo apt-get install -y git python-pip cmake cmake-gui libusb-1.0-0-dev libcurl4-openssl-dev
   - macOS:
 
-        brew install coreutils python3 cmake libusb wget opencv
+        brew install coreutils python3 cmake libusb wget opencv curl
 
 - After cloning the repo, update the third-party libraries used:
 
