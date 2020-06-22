@@ -32,6 +32,7 @@
 #include "../../shared/xlink/xlink_wrapper.hpp"
 #include "../core/host_json_helper.hpp"
 #include "host_capture_command.hpp"
+#include "model_downloader.hpp"
 
 
 #include "capture_af_bindings.hpp"
@@ -345,6 +346,11 @@ std::map<std::string, int> get_nn_to_depth_bbox_mapping()
     return nn_to_depth_mapping;
 }
 
+int download_blob(std::string model_name, int nr_shaves, int nr_cmx_slices, int nr_NCEs, std::string output_folder_path)
+{
+    return download_model(model_name, nr_shaves, nr_cmx_slices, nr_NCEs, output_folder_path);
+}
+
 std::shared_ptr<CNNHostPipeline> create_pipeline(
     const std::string &config_json_str
 )
@@ -373,7 +379,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         HostPipelineConfig config;
         if (!config.initWithJSON(config_json))
         {
-            std::cerr << WARNING "Error: Cant init configs with json: " << config_json.dump() << "\n" ENDC;
+            std::cerr << "Error: Cant init configs with json: " << config_json.dump() << "\n";
             break;
         }
 
@@ -824,7 +830,11 @@ PYBIND11_MODULE(depthai, m)
         py::arg("config") = py::dict()
         );
 
-    
+    m.def(
+        "download_blob",
+        &download_blob,
+        "Function that downloads and saves blob file from cloud."
+         );
 
     // FrameMetadata struct binding
     py::class_<FrameMetadata>(m, "FrameMetadata")

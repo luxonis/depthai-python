@@ -1,4 +1,4 @@
 #pragma once
  
-const char *c_depthai_dev_version = "1faef5bfbdde3d8471e78a13fb73f9e8d9384427";
+const char *c_depthai_dev_version = "b58e80af1e45d0483fdb7e03b621f3f07b000190";
 const char *c_depthai_version = "0.1.0";

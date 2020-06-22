@@ -56,6 +56,7 @@ pybind11_add_module(
     ../core/host_data_reader.cpp
     ../core/host_capture_command.cpp
     ../core/disparity_stream_post_processor.cpp
+    ../core/model_downloader.cpp
     ../../shared/json_helper.cpp
     ../../shared/stream/stream_info.cpp
     ../../shared/xlink/xlink_wrapper.cpp
@@ -102,7 +103,9 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../shared/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/../../shared/version.hpp @ONLY)
 
-
+set(CURL_LIBRARY "-lcurl") 
+find_package(CURL REQUIRED) 
+include_directories(${CURL_INCLUDE_DIR})
 
 # link libraries
 target_link_libraries(
@@ -111,6 +114,7 @@ target_link_libraries(
    -L/usr/local/lib  # For macOS
    -lusb-1.0
    -lpthread
+   ${CURL_LIBRARIES}
    nlohmann_json::nlohmann_json
    nlohmann_json_schema_validator
 )
