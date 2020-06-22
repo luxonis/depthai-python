@@ -53,6 +53,17 @@ struct HostPipelineConfig
         std::string revision;
     } board_config;
 
+    struct Camera {
+        struct CameraRgb {
+            // TODO
+        } rgb;
+
+        struct CameraMono {
+            int resolution_w = 0; //auto
+            int resolution_h = 720;
+            float fps = 30.f;
+        } mono;
+    } camera;
 
     bool initWithJSON(const json &json_obj);
     bool hasStream(const std::string &stream_name) const;

@@ -461,6 +461,12 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["camera_input"] = config.ai.camera_input;
         json_config_obj["ai"]["num_stages"] = num_stages;
 
+        // TODO json_config_obj["camera"]["rgb"]
+
+        json_config_obj["camera"]["mono"]["resolution_w"] = config.camera.mono.resolution_w;
+        json_config_obj["camera"]["mono"]["resolution_h"] = config.camera.mono.resolution_h;
+        json_config_obj["camera"]["mono"]["fps"] = config.camera.mono.fps;
+
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
 

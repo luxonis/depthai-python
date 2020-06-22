@@ -200,6 +200,28 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             }
         }
 
+        if (json_obj.contains("camera"))
+        {
+            auto& camera_obj = json_obj.at("camera");
+
+            if (camera_obj.contains("rgb"))
+            {
+                auto& rgb_obj = json_obj.at("rgb");
+                // TODO
+            }
+
+            if (camera_obj.contains("mono"))
+            {
+                auto& mono_obj = camera_obj.at("mono");
+                if (mono_obj.contains("resolution_w"))
+                     camera.mono.resolution_w = mono_obj.at("resolution_w").get<int>();
+                if (mono_obj.contains("resolution_h"))
+                     camera.mono.resolution_h = mono_obj.at("resolution_h").get<int>();
+                if (mono_obj.contains("fps"))
+                     camera.mono.fps = mono_obj.at("fps").get<float>();
+            }
+        }
+
         result = true;
     }
     while (false);
