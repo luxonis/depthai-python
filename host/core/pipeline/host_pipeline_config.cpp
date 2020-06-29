@@ -222,6 +222,14 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             }
         }
 
+        // Defaults if the resolution width is not specified
+        if (camera.mono.resolution_w == 0) {
+            if (camera.mono.resolution_h == 400)
+                camera.mono.resolution_w =  640;
+            if (camera.mono.resolution_h == 720 || camera.mono.resolution_h == 800)
+                camera.mono.resolution_w = 1280;
+        }
+
         result = true;
     }
     while (false);

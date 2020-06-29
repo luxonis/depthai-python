@@ -474,6 +474,11 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
         for (const auto &stream : config.streams)
         {
+            if (c_streams_myriad_to_pc[stream.name].dimensions[0] == MONO_RES_AUTO) {
+                c_streams_myriad_to_pc[stream.name].dimensions[0] = config.camera.mono.resolution_h;
+                c_streams_myriad_to_pc[stream.name].dimensions[1] = config.camera.mono.resolution_w;
+            }
+
             if (stream.name == "depth_color_h")
             {
                 add_disparity_post_processing_color = true;
@@ -492,7 +497,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
                 if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
 
-                // TODO: temporary solution
+                // TODO: temporary solution. REMOVE
                 if (stream.name == "depth_sipp")
                         // {
                         //     obj["data_type"] = "uint8";
