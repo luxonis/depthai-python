@@ -47,11 +47,10 @@ void HostPipeline::onNewData(
             info.elem_size
             ));
 
+    std::unique_lock<std::mutex> guard(q_lock);
     if (!_data_queue_lf.push(host_data))
     {
-        std::unique_lock<std::mutex> guard(q_lock);
         _data_queue_lf.pop();
-        guard.unlock();
         if (!_data_queue_lf.push(host_data))
         {
             std::cerr << "Data queue is full " << info.name << ":\n";

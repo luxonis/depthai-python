@@ -10,12 +10,14 @@
 #include "stream/stream_info.hpp"
 
 #include "metadata/frame_metadata.hpp"
+#include "metadata/capture_metadata.hpp"
+
 
 // TODO: remove next constant
 std::unordered_map<std::string, StreamInfo> g_streams_pc_to_myriad =
 {
     {"config_h2d",     StreamInfo("config_h2d",     1000)},
-    {"host_capture",     StreamInfo("host_capture",     4)}
+    {"host_capture",     StreamInfo("host_capture",     sizeof(CaptureMetadata))}
 };
 
 
@@ -37,5 +39,8 @@ std::unordered_map<std::string, StreamInfo> c_streams_myriad_to_pc =
     {"video",    StreamInfo("video",   2*1024*1024)},
 
     {"aprilout",     StreamInfo("aprilout",    2*2816)} // asdfasdf TODO: pick a good size for this. Why is meta out 2*2816? Is this file even used?
+
+    {"object_tracker",    StreamInfo("object_tracker",   2000)}
+
 
 };
