@@ -44,8 +44,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "common/postscript_utils.h"
 #include "common/math_util.h"
 
-#include "apriltag_quad_thresh.h"
-
 #ifdef _WIN32
 static inline long int random(void)
 {
