@@ -57,8 +57,19 @@ struct HostPipelineConfig
         bool stereo_center_crop = false;
         std::string name;
         std::string revision;
-        std::string rgb_cam_config;
     } board_config;
+
+    struct RGBCamConfig
+    {
+        int32_t resolution_h;
+        int32_t fps;
+    } rgb_cam_config;
+
+    struct MonoCamConfig
+    {
+        int32_t resolution_h;
+        int32_t fps;
+    } mono_cam_config;
 
 
     bool initWithJSON(const json &json_obj);

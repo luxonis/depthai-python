@@ -3,10 +3,15 @@
 #include "host_pipeline_config.hpp"
 
 
-static std::unordered_map<std::string, int> rgb_cam_supported_configs =
+static std::unordered_map<int, int> rgb_cam_supported_configs =
 {
-    {"1080p_30hz",       0},
-    {"4k_30hz"   ,       1}
+    {1080, 0},
+    {2160, 1}
+};
+
+static std::unordered_map<int, int> mono_cam_supported_configs =
+{
+    {720, 0},
 };
 
 #define WARNING "\033[1;5;31m"
@@ -257,17 +262,47 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 board_config.revision = board_conf_obj.at("revision").get<std::string>();
             }
+        }
 
-            if (board_conf_obj.contains("rgb_cam_config"))
+        if (json_obj.contains("camera"))
+        {
+            auto& camera_conf_obj = json_obj.at("camera");
+
+            if (camera_conf_obj.contains("rgb"))
             {
-                board_config.rgb_cam_config = board_conf_obj.at("rgb_cam_config").get<std::string>();
-                auto it = rgb_cam_supported_configs.find(board_config.rgb_cam_config);
+                auto& rgb_camera_conf_obj = camera_conf_obj.at("rgb");
+
+                rgb_cam_config.resolution_h = rgb_camera_conf_obj.at("resolution_h").get<int32_t>();
+                rgb_cam_config.fps = rgb_camera_conf_obj.at("fps").get<int32_t>();
+
+                auto it = rgb_cam_supported_configs.find(rgb_cam_config.resolution_h);
 
                 if (it == rgb_cam_supported_configs.end()) {
                     std::cerr << WARNING "Requested rgb cam config not available!\n" ENDC;
 
                     std::cerr << "Supported configs.\n";
                     for(auto elem : rgb_cam_supported_configs)
+                    {
+                        std::cerr << elem.first << "\n";
+                    }
+                    break;
+                }
+            }
+
+            if (camera_conf_obj.contains("mono"))
+            {
+                auto& mono_camera_conf_obj = camera_conf_obj.at("mono");
+
+                mono_cam_config.resolution_h = mono_camera_conf_obj.at("resolution_h").get<int32_t>();
+                mono_cam_config.fps = mono_camera_conf_obj.at("fps").get<int32_t>();
+
+                auto it = mono_cam_supported_configs.find(mono_cam_config.resolution_h);
+
+                if (it == mono_cam_supported_configs.end()) {
+                    std::cerr << WARNING "Requested mono cam config not available!\n" ENDC;
+
+                    std::cerr << "Supported configs.\n";
+                    for(auto elem : mono_cam_supported_configs)
                     {
                         std::cerr << elem.first << "\n";
                     }

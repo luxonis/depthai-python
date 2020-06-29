@@ -448,7 +448,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["board"]["stereo_center_crop"] = config.board_config.stereo_center_crop || stereo_center_crop;
         json_config_obj["board"]["name"] = config.board_config.name;
         json_config_obj["board"]["revision"] = config.board_config.revision;
-        json_config_obj["board"]["rgb_cam_config"] = config.board_config.rgb_cam_config;
         json_config_obj["_board"] =
         {
             {"_homography_right_to_left", homography_buff}
@@ -462,6 +461,11 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         {
             {"_streams", json::array()}
         };
+
+        json_config_obj["camera"]["rgb"]["resolution_h"]  = config.rgb_cam_config.resolution_h;
+        json_config_obj["camera"]["rgb"]["fps"]           = config.rgb_cam_config.fps;
+        json_config_obj["camera"]["mono"]["resolution_h"] = config.mono_cam_config.resolution_h;
+        json_config_obj["camera"]["mono"]["fps"]          = config.mono_cam_config.fps;
 
         HostDataReader _blob_reader;
         int size_blob = 0;
