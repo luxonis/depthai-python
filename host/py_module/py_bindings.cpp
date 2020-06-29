@@ -481,6 +481,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
             if (stream.name == "depth_color_h")
             {
+                c_streams_myriad_to_pc["disparity"].dimensions[0] = c_streams_myriad_to_pc[stream.name].dimensions[0];
+                c_streams_myriad_to_pc["disparity"].dimensions[1] = c_streams_myriad_to_pc[stream.name].dimensions[1];
                 add_disparity_post_processing_color = true;
                 json obj = { {"name", "disparity"} };
                 if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
@@ -497,20 +499,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
                 if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
 
-                // TODO: temporary solution. REMOVE
-                if (stream.name == "depth_sipp")
-                        // {
-                        //     obj["data_type"] = "uint8";
-                        //     c_streams_myriad_to_pc["depth_sipp"] = StreamInfo("depth_sipp",     0, { 720, 1280}  );
-                        // }
-                        {
-                            obj["data_type"] = "uint16";
-                            c_streams_myriad_to_pc["depth_sipp"] = StreamInfo("depth_sipp",     0, { 720, 1280}, 2  );
-                        }
-                        // {
-                        //     obj["data_type"] = "rgb";
-                        //     c_streams_myriad_to_pc["depth_sipp"] = StreamInfo("depth_sipp",     2764800, { 720, 1280, 3} );
-                        // }
+                if (stream.name == "depth_sipp"){obj["data_type"] = "uint16"; }
 
                 json_config_obj["_pipeline"]["_streams"].push_back(obj);
                 pipeline_device_streams.push_back(stream.name);
