@@ -39,7 +39,7 @@ std::list<AprilInfo> CNNHostPipeline::getConsumedAprilPackets()
     {
         if (packet->stream_name == april_stream_name)
         {
-            // TODO: deserialize the packet and stick it in a zarray.
+            // deserialize the packet and stick it in a zarray.
             zarray_t* detections;
             int headerOffset = 0;
             
@@ -49,6 +49,7 @@ std::list<AprilInfo> CNNHostPipeline::getConsumedAprilPackets()
             std::vector<AprilDetection> packetDetections;
 
             // create a zarray to access data before packing it into our output type
+// asdfasdf TODO: we're making some assumptions about sizes of things. Do we want to standardize these somewhere since the reciever could be running on a processor/compiler with differring sizes?
             memcpy(&aprilInfo.el_sz, &packet->data[headerOffset], sizeof(int));
             headerOffset = headerOffset + sizeof(int);
 
