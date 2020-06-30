@@ -42,14 +42,12 @@ std::list<AprilInfo> CNNHostPipeline::getConsumedAprilPackets()
             // deserialize the packet and stick it in a zarray.
             zarray_t* detections;
             int headerOffset = 0;
-            
-            std::cout << "asdfasdftest: CNNHostPipeline::getConsumedAprilPackets\n";
 
             AprilInfo aprilInfo;
             std::vector<AprilDetection> packetDetections;
 
             // create a zarray to access data before packing it into our output type
-// asdfasdf TODO: we're making some assumptions about sizes of things. Do we want to standardize these somewhere since the reciever could be running on a processor/compiler with differring sizes?
+// asdfasdf TODO: we're making some assumptions about type sizes and endian. Do we care to handle it and how do we want to do that?
             memcpy(&aprilInfo.el_sz, &packet->data[headerOffset], sizeof(int));
             headerOffset = headerOffset + sizeof(int);
 
