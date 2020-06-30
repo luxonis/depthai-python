@@ -38,7 +38,7 @@ std::unordered_map<std::string, StreamInfo> c_streams_myriad_to_pc =
     {"jpegout",    StreamInfo("jpegout",   1*1024*1024)},
     {"video",    StreamInfo("video",   2*1024*1024)},
 
-    {"aprilout",     StreamInfo("aprilout",    2*2816)} // asdfasdf TODO: pick a good size for this. Why is meta out 2*2816? Is this file even used?
+    {"aprilout",     StreamInfo("aprilout",    2*2816)}, // asdfasdf TODO: pick a good size for this. Why is meta out 2*2816? Is this file even used?
 
     {"object_tracker",    StreamInfo("object_tracker",   2000)}
 
