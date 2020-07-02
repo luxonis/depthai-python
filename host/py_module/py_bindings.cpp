@@ -627,14 +627,14 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                                                                };
 
             // check CMX slices & used shaves
-            if (cnn_input_info.number_of_cmx_slices != config.ai.cmx_slices)
+            if (cnn_input_info.number_of_cmx_slices > config.ai.cmx_slices)
             {
                 std::cerr << WARNING "Error: Blob is compiled for " << cnn_input_info.number_of_cmx_slices
                           << " cmx slices but device is configured to calculate on " << config.ai.cmx_slices << "\n" ENDC;
                 break;
             }
 
-            if (cnn_input_info.number_of_shaves != config.ai.shaves)
+            if (cnn_input_info.number_of_shaves > config.ai.shaves)
             {
                 std::cerr << WARNING "Error: Blob is compiled for " << cnn_input_info.number_of_shaves
                           << " shaves but device is configured to calculate on " << config.ai.shaves << "\n" ENDC;
