@@ -89,12 +89,22 @@ bool parseTensorInfosFromJsonString(const std::string& json_str, std::vector<Ten
             break;
         }
 
+        // Try to determine the current stage based on the size of tensor_infos
+        int stage = tensor_infos.size() + 1;
+
         for (auto &tensor_it : json_obj.at("tensors"))
         {
             // TODO: check content format !!!
 
             TensorInfo tensor_info;
             tensor_info.output_tensor_name = tensor_it.at("output_tensor_name").get<std::string>();
+            if (stage > 1) {
+                printf("INFO: Suffixing output_tensor_name for stage %d: %s",
+                        stage, tensor_info.output_tensor_name.c_str());
+                tensor_info.output_tensor_name += "_stage";
+                tensor_info.output_tensor_name += '0' + stage;
+                printf(" -> %s\n", tensor_info.output_tensor_name.c_str());
+            }
             for (auto &v : tensor_it.at("output_dimensions")) { tensor_info.output_dimensions.push_back(v.get<unsigned>()); }
             tensor_info.output_entry_iteration_index = tensor_it.at("output_entry_iteration_index").get<unsigned>();
             for (auto &v : tensor_it.at("output_properties_dimensions")) { tensor_info.output_properties_dimensions.push_back(v.get<unsigned>()); }
