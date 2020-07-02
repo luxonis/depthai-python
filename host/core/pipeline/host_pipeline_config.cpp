@@ -3,6 +3,10 @@
 #include "host_pipeline_config.hpp"
 
 
+#define WARNING "\033[1;5;31m"
+#define ENDC "\033[0m"
+
+
 bool HostPipelineConfig::initWithJSON(const json &json_obj)
 {
     bool result = false;
@@ -69,7 +73,7 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
 
                 if (depth.padding_factor < 0.f || depth.padding_factor > 1.f)
                 {
-                    std::cout << "padding_factor should be in the range [0 .. 1]\n";
+                    std::cerr << WARNING "padding_factor should be in the range [0 .. 1]\n" ENDC;
                     break;
                 }
             }
@@ -85,7 +89,7 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
 
                 if (depth.confidence_threshold < 0.f || depth.confidence_threshold > 1.f)
                 {
-                    std::cout << "confidence_threshold should be in the range [0 .. 1]\n";
+                    std::cerr << WARNING "confidence_threshold should be in the range [0 .. 1]\n" ENDC;
                     break;
                 }
             }
@@ -131,6 +135,32 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             if (ai_obj.contains("keep_aspect_ratio"))
             {
                 ai.keep_aspect_ratio = ai_obj.at("keep_aspect_ratio").get<bool>();
+            }
+        }
+
+        // "ot"
+        if (json_obj.contains("ot"))
+        {
+            auto& ot_obj = json_obj.at("ot");
+            
+            if (ot_obj.contains("max_tracklets"))
+            {
+                ot.max_tracklets = ot_obj.at("max_tracklets").get<int32_t>();
+                if (ot.max_tracklets < 0 || ot.max_tracklets > 20)
+                {
+                    std::cerr << WARNING "ot max_tracklets should be in the range [0 .. 20]\n" ENDC;
+                    break;
+                }
+            }
+
+            if (ot_obj.contains("confidence_threshold"))
+            {
+                ot.confidence_threshold = ot_obj.at("confidence_threshold").get<float>();
+                if (ot.confidence_threshold < 0.f || ot.confidence_threshold > 1.f)
+                {
+                    std::cerr << WARNING "ot confidence_threshold should be in the range [0 .. 1]\n" ENDC;
+                    break;
+                }
             }
         }
 

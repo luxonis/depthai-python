@@ -10,6 +10,8 @@
 #include "stream/stream_info.hpp"
 
 #include "metadata/frame_metadata.hpp"
+#include "metadata/capture_metadata.hpp"
+
 
 #define MONO_RES_AUTO  (-2)
 #define MONO_MAX_W  1280
@@ -21,7 +23,7 @@
 std::unordered_map<std::string, StreamInfo> g_streams_pc_to_myriad =
 {
     {"config_h2d",     StreamInfo("config_h2d",     1000)},
-    {"host_capture",     StreamInfo("host_capture",     4)}
+    {"host_capture",     StreamInfo("host_capture",     sizeof(CaptureMetadata))}
 };
 
 
@@ -40,6 +42,7 @@ std::unordered_map<std::string, StreamInfo> c_streams_myriad_to_pc =
 
     {"meta_d2h",    StreamInfo("meta_d2h",   1024*1024)},
     {"jpegout",    StreamInfo("jpegout",   1*1024*1024)},
-    {"video",    StreamInfo("video",   2*1024*1024)}
+    {"video",    StreamInfo("video",   2*1024*1024)},
+    {"object_tracker",    StreamInfo("object_tracker",   2000)}
 
 };

@@ -1,18 +1,24 @@
 #include "host_capture_command.hpp"
 
-HostCaptureCommand::HostCaptureCommand(const StreamInfo& streamToSendCommand) : stream(streamToSendCommand){
+HostCaptureCommand::HostCaptureCommand(const StreamInfo& streamToSendCommand) : stream(streamToSendCommand){ /* empty body */ }
 
+void HostCaptureCommand::sendCaptureMetadata(CaptureMetadata meta){
+    StreamData captureMetadata;
+    captureMetadata.packet_number = 0;
+    captureMetadata.data = &meta;
+    captureMetadata.size = sizeof(CaptureMetadata);
+    notifyObservers(stream, captureMetadata);
 }
 
-void HostCaptureCommand::capture()
-{
-    command = 1;
-
-    StreamData captureCommand;
-    captureCommand.packet_number = 0;
-    captureCommand.data = &command;
-    captureCommand.size = 4;
-
-    notifyObservers(stream, captureCommand);
+void HostCaptureCommand::capture(){
+    sendCaptureMetadata(CaptureMetadata::createStillCapture());
 }
 
+
+void HostCaptureCommand::afMode(CaptureMetadata::AutofocusMode mode){
+    sendCaptureMetadata(CaptureMetadata::createAfMode(mode));
+}
+
+void HostCaptureCommand::afTrigger(){
+    sendCaptureMetadata(CaptureMetadata::createAfTrigger());
+}

@@ -34,6 +34,9 @@
 #include "host_capture_command.hpp"
 
 
+#include "capture_af_bindings.hpp"
+#include "../../shared/metadata/capture_metadata.hpp"
+
 namespace py = pybind11;
 
 std::string config_backup;
@@ -333,11 +336,6 @@ std::vector<std::string> get_available_steams()
     return result;
 }
 
-void request_jpeg(){
-    if(g_host_caputure_command != nullptr){
-        g_host_caputure_command->capture();
-    }
-}
 
 std::map<std::string, int> get_nn_to_depth_bbox_mapping()
 {
@@ -479,6 +477,9 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["camera"]["mono"]["resolution_w"] = config.camera.mono.resolution_w;
         json_config_obj["camera"]["mono"]["resolution_h"] = config.camera.mono.resolution_h;
         json_config_obj["camera"]["mono"]["fps"] = config.camera.mono.fps;
+
+        json_config_obj["ot"]["max_tracklets"] = config.ot.max_tracklets;
+        json_config_obj["ot"]["confidence_threshold"] = config.ot.confidence_threshold;
 
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
@@ -763,6 +764,8 @@ PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
 
 PYBIND11_MODULE(depthai, m)
 {
+    init_binding_capture_af(m);
+
     // TODO: test ownership in python
 
     std::string _version = c_depthai_version;
@@ -833,13 +836,6 @@ PYBIND11_MODULE(depthai, m)
         );
 
     
-    // depthai.request_jpeg()
-    m.def(
-        "request_jpeg",
-        &request_jpeg,
-        "Function to request a still JPEG encoded image ('jpeg' stream must be enabled)"
-    );
-
 
     // FrameMetadata struct binding
     py::class_<FrameMetadata>(m, "FrameMetadata")
@@ -856,6 +852,24 @@ PYBIND11_MODULE(depthai, m)
         .def("getCameraName", &FrameMetadata::getCameraName)
         ;
 
+    // ObjectTracker struct binding
+    py::class_<ObjectTracker>(m, "ObjectTracker")
+        .def(py::init<>())
+        .def("__len__",        &ObjectTracker::getNrTracklets)
+        .def("getNrTracklets", &ObjectTracker::getNrTracklets)
+        .def("getTracklet",    &ObjectTracker::getTracklet)
+        ;
+    
+    py::class_<Tracklet>(m, "Tracklet")
+        .def("getId",          &Tracklet::getId)
+        .def("getLabel",       &Tracklet::getLabel)
+        .def("getStatus",      &Tracklet::getStatus)
+        .def("getLeftCoord",   &Tracklet::getLeftCoord)
+        .def("getTopCoord",    &Tracklet::getTopCoord)
+        .def("getRightCoord",  &Tracklet::getRightCoord)
+        .def("getBottomCoord", &Tracklet::getBottomCoord)
+        ;
+
     // for PACKET in data_packets:
     py::class_<HostDataPacket, std::shared_ptr<HostDataPacket>>(m, "DataPacket")
         .def_readonly("stream_name", &HostDataPacket::stream_name)
@@ -863,6 +877,7 @@ PYBIND11_MODULE(depthai, m)
         .def("getData", &HostDataPacket::getPythonNumpyArray, py::return_value_policy::take_ownership)
         .def("getDataAsStr", &HostDataPacket::getDataAsString, py::return_value_policy::take_ownership)
         .def("getMetadata", &HostDataPacket::getMetadata)
+        .def("getObjectTracker", &HostDataPacket::getObjectTracker, py::return_value_policy::take_ownership)
         ;
 
     // nnet_packets, DATA_PACKETS = p.get_available_nnet_and_data_packets()

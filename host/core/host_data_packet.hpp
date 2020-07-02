@@ -13,6 +13,7 @@
 #include "../../shared/timer.hpp"
 
 #include "metadata/frame_metadata.hpp"
+#include "object_tracker/object_tracker.hpp"
 
 
 #ifdef HOST_PYTHON_MODULE
@@ -141,6 +142,13 @@ struct HostDataPacket
         }
 
         return py::cast<py::none>(Py_None);
+    }
+
+    py::object getObjectTracker(){
+        ObjectTracker ot_tracklets;
+        assert(data.size() == sizeof(ObjectTracker));
+        memcpy(&ot_tracklets, data.data(), sizeof(ObjectTracker));
+        return py::cast<ObjectTracker>(ot_tracklets);
     }
 #endif
 
