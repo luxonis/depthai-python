@@ -376,6 +376,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             break;
         }
 
+        int num_stages = config.ai.blob_file2.empty() ? 1 : 2;
+
         // read tensor info
         std::vector<TensorInfo>       tensors_info;
         if (parseTensorInfosFromJsonFile(config.ai.blob_file_config, tensors_info))
@@ -385,6 +387,18 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         else
         {
             std::cout << "There is no cnn configuration file or error in it\'s parsing: " << config.ai.blob_file_config.c_str() << "\n";
+        }
+
+        if (num_stages > 1)
+        {
+            if (parseTensorInfosFromJsonFile(config.ai.blob_file_config2, tensors_info))
+            {
+                std::cout << "CNN configurations read: " << config.ai.blob_file_config2.c_str() << "\n";
+            }
+            else
+            {
+                std::cout << "There is no cnn configuration file or error in it\'s parsing: " << config.ai.blob_file_config2.c_str() << "\n";
+            }
         }
 
 
@@ -424,7 +438,6 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
 
         json json_config_obj;
-        int num_stages = config.ai.blob_file2.empty() ? 1 : 2;
 
         // Add video configuration if specified
         if(config_json.count("video_config") > 0){
