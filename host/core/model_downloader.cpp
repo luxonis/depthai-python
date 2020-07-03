@@ -76,7 +76,7 @@ int download_model(std::string model_name, int nr_shaves, int nr_cmx_slices, int
 
     curl_easy_setopt(hnd, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13");
     curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_easy_setopt(hnd, CURLOPT_URL, "http://69.164.214.171:8080/");
+    curl_easy_setopt(hnd, CURLOPT_URL, "http://luxonis.com:8080/");
 
     std::string readBuffer;
 
