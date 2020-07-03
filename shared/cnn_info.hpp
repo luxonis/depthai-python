@@ -19,4 +19,5 @@ struct cnn_info
     uint16_t number_of_shaves;
     uint32_t offsets[7];
     nn_to_depth_bbox_map nn_to_depth;
+    int32_t satisfied_resources;
 };

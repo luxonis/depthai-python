@@ -33,6 +33,9 @@ struct HostPipelineConfig
         std::string blob_file_config;
         bool calc_dist_to_bb = false;
         bool keep_aspect_ratio = true;
+        int32_t shaves = 4;
+        int32_t cmx_slices = 4;
+        int32_t NCEs = 1;
     } ai;
 
     struct OT
@@ -55,6 +58,18 @@ struct HostPipelineConfig
         std::string name;
         std::string revision;
     } board_config;
+
+    struct RGBCamConfig
+    {
+        int32_t resolution_h;
+        int32_t fps;
+    } rgb_cam_config;
+
+    struct MonoCamConfig
+    {
+        int32_t resolution_h;
+        int32_t fps;
+    } mono_cam_config;
 
 
     bool initWithJSON(const json &json_obj);

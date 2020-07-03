@@ -125,8 +125,9 @@ bool XLinkWrapper::initFromHostSide(
                     printf("\rNo USB device [03e7:2485], still looking");
                     if (!usb_device.empty())
                         printf(" on port %s", usb_device.c_str());
-                    printf("... %.3fs ", tdiff.count());
+                    printf("... %.1fs ", tdiff.count());
                     fflush(stdout);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 } else {
                     if (print_found)
                         printf("[FOUND]\n");
