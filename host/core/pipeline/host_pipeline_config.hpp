@@ -36,6 +36,9 @@ struct HostPipelineConfig
         std::string camera_input = "rgb";
         bool calc_dist_to_bb = false;
         bool keep_aspect_ratio = true;
+        int32_t shaves = 4;
+        int32_t cmx_slices = 4;
+        int32_t NCEs = 1;
     } ai;
 
     struct OT
@@ -59,17 +62,20 @@ struct HostPipelineConfig
         std::string revision;
     } board_config;
 
-    struct Camera {
-        struct CameraRgb {
-            // TODO
-        } rgb;
+    struct RGBCamConfig
+    {
+        int32_t resolution_w = 0; //auto
+        int32_t resolution_h = 1080;
+        float fps = 30.f;
+    } rgb_cam_config;
 
-        struct CameraMono {
-            int resolution_w = 0; //auto
-            int resolution_h = 720;
-            float fps = 30.f;
-        } mono;
-    } camera;
+    struct MonoCamConfig
+    {
+        int32_t resolution_w = 0; //auto
+        int32_t resolution_h = 720;
+        float fps = 30.f;
+    } mono_cam_config;
+
 
     bool initWithJSON(const json &json_obj);
     bool hasStream(const std::string &stream_name) const;

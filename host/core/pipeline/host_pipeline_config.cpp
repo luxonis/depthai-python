@@ -3,6 +3,19 @@
 #include "host_pipeline_config.hpp"
 
 
+static std::unordered_map<int, int> rgb_cam_supported_configs =
+{
+    {1080, 0},
+    {2160, 1}
+};
+
+static std::unordered_map<int, int> mono_cam_supported_configs =
+{
+    {720, 0},
+    {800, 1},
+    {400, 2},
+};
+
 #define WARNING "\033[1;5;31m"
 #define ENDC "\033[0m"
 
@@ -136,6 +149,44 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             {
                 ai.keep_aspect_ratio = ai_obj.at("keep_aspect_ratio").get<bool>();
             }
+
+            if (ai_obj.contains("shaves"))
+            {
+                ai.shaves = ai_obj.at("shaves").get<int32_t>();
+            }
+            if (ai.shaves <= 0 || ai.shaves > 16)
+            {
+                std::cerr << WARNING "ai.shaves should be in the range (0 .. 16]\n" ENDC;
+                break;
+            }
+
+            if (ai_obj.contains("cmx_slices"))
+            {
+                ai.cmx_slices = ai_obj.at("cmx_slices").get<int32_t>();
+            }
+            if (ai.cmx_slices <= 0 || ai.cmx_slices > 19)
+            {
+                std::cerr << WARNING "ai.cmx_slices should be in the range (0 .. 19]\n" ENDC;
+                break;
+            }
+
+            if (ai.shaves > ai.cmx_slices)
+            {
+                std::cerr << WARNING "ai.shaves should be <= than ai.cmx_slices\n" ENDC;
+                break;
+            }
+
+
+            if (ai_obj.contains("NCEs"))
+            {
+                ai.NCEs = ai_obj.at("NCEs").get<int32_t>();
+            }
+            if (ai.NCEs < 0 || ai.NCEs > 2)
+            {
+                std::cerr << WARNING "ai.NCEs should be in the range [0 .. 2]\n" ENDC;
+                break;
+            }
+
         }
 
         // "ot"
@@ -232,32 +283,64 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
 
         if (json_obj.contains("camera"))
         {
-            auto& camera_obj = json_obj.at("camera");
+            auto& camera_conf_obj = json_obj.at("camera");
 
-            if (camera_obj.contains("rgb"))
+            if (camera_conf_obj.contains("rgb"))
             {
-                auto& rgb_obj = json_obj.at("rgb");
-                // TODO
+                auto& rgb_camera_conf_obj = camera_conf_obj.at("rgb");
+
+                rgb_cam_config.resolution_h = rgb_camera_conf_obj.at("resolution_h").get<int32_t>();
+                rgb_cam_config.fps = rgb_camera_conf_obj.at("fps").get<float>();
+
+                auto it = rgb_cam_supported_configs.find(rgb_cam_config.resolution_h);
+
+                if (it == rgb_cam_supported_configs.end()) {
+                    std::cerr << WARNING "Requested rgb cam config not available!\n" ENDC;
+
+                    std::cerr << "Supported configs.\n";
+                    for(auto elem : rgb_cam_supported_configs)
+                    {
+                        std::cerr << elem.first << "\n";
+                    }
+                    break;
+                }
+            }
+            // Defaults if the resolution width is not specified
+            if (rgb_cam_config.resolution_w == 0) {
+                if (rgb_cam_config.resolution_h == 1080)
+                    rgb_cam_config.resolution_w =  1920;
+                if (rgb_cam_config.resolution_h == 2160)
+                    rgb_cam_config.resolution_w =  3840;
             }
 
-            if (camera_obj.contains("mono"))
+            if (camera_conf_obj.contains("mono"))
             {
-                auto& mono_obj = camera_obj.at("mono");
-                if (mono_obj.contains("resolution_w"))
-                     camera.mono.resolution_w = mono_obj.at("resolution_w").get<int>();
-                if (mono_obj.contains("resolution_h"))
-                     camera.mono.resolution_h = mono_obj.at("resolution_h").get<int>();
-                if (mono_obj.contains("fps"))
-                     camera.mono.fps = mono_obj.at("fps").get<float>();
-            }
-        }
+                auto& mono_camera_conf_obj = camera_conf_obj.at("mono");
+                if (mono_camera_conf_obj.contains("resolution_w"))
+                    mono_cam_config.resolution_w = mono_camera_conf_obj.at("resolution_w").get<int32_t>();
+                mono_cam_config.resolution_h = mono_camera_conf_obj.at("resolution_h").get<int32_t>();
+                mono_cam_config.fps = mono_camera_conf_obj.at("fps").get<float>();
 
-        // Defaults if the resolution width is not specified
-        if (camera.mono.resolution_w == 0) {
-            if (camera.mono.resolution_h == 400)
-                camera.mono.resolution_w =  640;
-            if (camera.mono.resolution_h == 720 || camera.mono.resolution_h == 800)
-                camera.mono.resolution_w = 1280;
+                auto it = mono_cam_supported_configs.find(mono_cam_config.resolution_h);
+
+                if (it == mono_cam_supported_configs.end()) {
+                    std::cerr << WARNING "Requested mono cam config not available!\n" ENDC;
+
+                    std::cerr << "Supported configs.\n";
+                    for(auto elem : mono_cam_supported_configs)
+                    {
+                        std::cerr << elem.first << "\n";
+                    }
+                    break;
+                }
+            }
+            // Defaults if the resolution width is not specified
+            if (mono_cam_config.resolution_w == 0) {
+                if (mono_cam_config.resolution_h == 400)
+                    mono_cam_config.resolution_w =  640;
+                if (mono_cam_config.resolution_h == 720 || mono_cam_config.resolution_h == 800)
+                    mono_cam_config.resolution_w = 1280;
+            }
         }
 
         result = true;
