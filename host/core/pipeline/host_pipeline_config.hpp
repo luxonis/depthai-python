@@ -36,8 +36,8 @@ struct HostPipelineConfig
         std::string camera_input = "rgb";
         bool calc_dist_to_bb = false;
         bool keep_aspect_ratio = true;
-        int32_t shaves = 4;
-        int32_t cmx_slices = 4;
+        int32_t shaves = 7;
+        int32_t cmx_slices = 7;
         int32_t NCEs = 1;
     } ai;
 
