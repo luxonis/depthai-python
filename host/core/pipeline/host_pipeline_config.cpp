@@ -40,6 +40,11 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                         stream.data_type = it.at("data_type").get<std::string>();
                     }
 
+                    if (it.contains("april_type"))
+                    {
+                        stream.april_type = it.at("april_type").get<std::string>();
+                    }
+
                     if (it.contains("max_fps"))
                     {
                         stream.max_fps   = it.at("max_fps").get<float>();

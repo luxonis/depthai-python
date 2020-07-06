@@ -11,6 +11,7 @@ struct HostPipelineConfig
     struct StreamRequest {
         std::string name;
         std::string data_type;
+        std::string april_type;
         float       max_fps   = 0.f;
 
         StreamRequest(const std::string &name_) : name(name_) {}

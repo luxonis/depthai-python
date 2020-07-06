@@ -96,7 +96,7 @@ void wdog_thread(int& wd_timeout_ms)
 }
 
 static std::thread wd_thread;
-static int wd_timeout_ms = 3000;
+static int wd_timeout_ms = 10000;
 int  wdog_start(void)
 {
     static int once = 1;
@@ -483,6 +483,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
 
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
                 if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
+                if (!stream.april_type.empty()) { obj["april_type"] = stream.april_type; };
 
                 // TODO: temporary solution
                 if (stream.name == "depth_sipp")
