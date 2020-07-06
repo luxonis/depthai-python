@@ -506,7 +506,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ai"]["keep_aspect_ratio"] = config.ai.keep_aspect_ratio;
         json_config_obj["ai"]["shaves"] = config.ai.shaves;
         json_config_obj["ai"]["cmx_slices"] = config.ai.cmx_slices;
-        json_config_obj["ai"]["NCEs"] = config.ai.NCEs;
+        json_config_obj["ai"]["NCEs"] = config.ai.NN_engines;
         json_config_obj["ai"]["camera_input"] = config.ai.camera_input;
         json_config_obj["ai"]["num_stages"] = num_stages;
 

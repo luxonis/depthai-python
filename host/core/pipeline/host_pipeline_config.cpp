@@ -177,13 +177,13 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             }
 
 
-            if (ai_obj.contains("NCEs"))
+            if (ai_obj.contains("NN_engines"))
             {
-                ai.NCEs = ai_obj.at("NCEs").get<int32_t>();
+                ai.NN_engines = ai_obj.at("NN_engines").get<int32_t>();
             }
-            if (ai.NCEs < 0 || ai.NCEs > 2)
+            if (ai.NN_engines < 0 || ai.NN_engines > 2)
             {
-                std::cerr << WARNING "ai.NCEs should be in the range [0 .. 2]\n" ENDC;
+                std::cerr << WARNING "ai.NN_engines should be in the range [0 .. 2]\n" ENDC;
                 break;
             }
 

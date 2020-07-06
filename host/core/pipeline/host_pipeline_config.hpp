@@ -38,7 +38,7 @@ struct HostPipelineConfig
         bool keep_aspect_ratio = true;
         int32_t shaves = 7;
         int32_t cmx_slices = 7;
-        int32_t NCEs = 1;
+        int32_t NN_engines = 1;
     } ai;
 
     struct OT
