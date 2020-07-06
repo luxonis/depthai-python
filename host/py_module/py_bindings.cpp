@@ -627,12 +627,11 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                             cnn_input_info.nn_to_depth.offset_y,
                             cnn_input_info.nn_to_depth.max_width,
                             cnn_input_info.nn_to_depth.max_height);
+                    nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
+                    nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
+                    nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
+                    nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
                 }
-                nn_to_depth_mapping["off_x"] = cnn_input_info.nn_to_depth.offset_x;
-                nn_to_depth_mapping["off_y"] = cnn_input_info.nn_to_depth.offset_y;
-                nn_to_depth_mapping["max_w"] = cnn_input_info.nn_to_depth.max_width;
-                nn_to_depth_mapping["max_h"] = cnn_input_info.nn_to_depth.max_height;
-
                 // update tensor infos
                 assert(!(tensors_info.size() > (sizeof(cnn_input_info.offsets)/sizeof(cnn_input_info.offsets[0]))));
 
@@ -643,14 +642,13 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                         tensors_info[i].nnet_input_height = cnn_input_info.cnn_input_height;
                         tensors_info[i].offset = cnn_input_info.offsets[i];
                     }
+
+                    c_streams_myriad_to_pc["previewout"].dimensions = {
+                                                                       cnn_input_info.cnn_input_num_channels,
+                                                                       cnn_input_info.cnn_input_height,
+                                                                       cnn_input_info.cnn_input_width
+                                                                       };
                 }
-
-                c_streams_myriad_to_pc["previewout"].dimensions = {
-                                                                   cnn_input_info.cnn_input_num_channels,
-                                                                   cnn_input_info.cnn_input_height,
-                                                                   cnn_input_info.cnn_input_width
-                                                                   };
-
                 // check CMX slices & used shaves
                 if (cnn_input_info.number_of_cmx_slices > config.ai.cmx_slices)
                 {
