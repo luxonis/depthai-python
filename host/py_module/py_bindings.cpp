@@ -304,6 +304,8 @@ bool init_device(
 
 bool soft_deinit_device()
 {
+    if(g_host_caputure_command != nullptr)
+        g_host_caputure_command->sendCustomDeviceResetRequest();
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
@@ -314,11 +316,8 @@ bool soft_deinit_device()
 bool deinit_device()
 {
     wdog_stop();       
-    g_xlink = nullptr;
-    g_disparity_post_proc = nullptr;
-    g_device_support_listener = nullptr;
-    g_host_caputure_command = nullptr;
-	gl_result = nullptr;
+    soft_deinit_device();
+    gl_result = nullptr;
     return true;
 }
 
