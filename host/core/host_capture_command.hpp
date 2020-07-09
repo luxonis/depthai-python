@@ -14,6 +14,7 @@ public:
     void afMode(CaptureMetadata::AutofocusMode mode);
     void afTrigger();
     void sendDisparityConfidenceThreshold(uint8_t confidence_thr);
+    void sendCustomDeviceResetRequest(void);
 
 private:
     StreamInfo stream;
