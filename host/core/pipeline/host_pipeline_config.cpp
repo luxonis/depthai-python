@@ -6,7 +6,8 @@
 static std::unordered_map<int, int> rgb_cam_supported_configs =
 {
     {1080, 0},
-    {2160, 1}
+    {2160, 1},
+    {3040, 2}
 };
 
 static std::unordered_map<int, int> mono_cam_supported_configs =
