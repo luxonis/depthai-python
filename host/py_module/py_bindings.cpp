@@ -304,6 +304,8 @@ bool init_device(
 
 bool soft_deinit_device()
 {
+    if(g_host_caputure_command != nullptr)
+        g_host_caputure_command->sendCustomDeviceResetRequest();
     g_xlink = nullptr;
     g_disparity_post_proc = nullptr;
     g_device_support_listener = nullptr;
@@ -314,11 +316,8 @@ bool soft_deinit_device()
 bool deinit_device()
 {
     wdog_stop();       
-    g_xlink = nullptr;
-    g_disparity_post_proc = nullptr;
-    g_device_support_listener = nullptr;
-    g_host_caputure_command = nullptr;
-	gl_result = nullptr;
+    soft_deinit_device();
+    gl_result = nullptr;
     return true;
 }
 
@@ -785,6 +784,11 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
     return gl_result;
 }
 
+static void send_DisparityConfidenceThreshold(uint8_t confidence){
+    if(g_host_caputure_command != nullptr){
+        g_host_caputure_command->sendDisparityConfidenceThreshold(confidence);
+    }
+}
 
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<HostDataPacket>>);
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
@@ -793,6 +797,12 @@ PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
 PYBIND11_MODULE(depthai, m)
 {
     init_binding_capture_af(m);
+
+    m.def(
+        "send_DisparityConfidenceThreshold",
+        &send_DisparityConfidenceThreshold,
+        "Function to send disparity confidence threshold for SGBM"
+    );
 
     // TODO: test ownership in python
 
