@@ -23,12 +23,6 @@
 #include "depthai/model_downloader.hpp"
 
 
-int download_blob(std::string model_name, int nr_shaves, int nr_cmx_slices, int nr_NCEs, std::string output_folder_path)
-{
-    return download_model(model_name, nr_shaves, nr_cmx_slices, nr_NCEs, output_folder_path);
-}
-
-
 namespace py = pybind11;
 PYBIND11_MODULE(depthai,m)
 {
@@ -39,7 +33,7 @@ PYBIND11_MODULE(depthai,m)
 
     m.def(
         "download_blob",
-        &download_blob,
+        &download_model,
         "Function that downloads and saves blob file from cloud."
     );
 
