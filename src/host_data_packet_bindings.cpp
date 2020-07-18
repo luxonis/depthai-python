@@ -118,8 +118,8 @@ py::array* PyHostDataPacket::getPythonNumpyArray()
                         sizeof(std::uint16_t),                          /* size of one scalar        */
                         py::format_descriptor<std::uint16_t>::format(), /* data type          */
                         2, //ndim,                                    /* number of dimensions      */
-                        {720, 1280}, //shape,                                   /* shape of the matrix       */
-                        {1280*2, 1*2} //strides                                  /* strides for each axis     */
+                        {dimensions[0], dimensions[1]}, //shape,                                   /* shape of the matrix       */
+                        {dimensions[1]*2, 1*2} //strides                                  /* strides for each axis     */
                     ));
         }
         else
@@ -129,7 +129,7 @@ py::array* PyHostDataPacket::getPythonNumpyArray()
     } catch (const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
-        result = new py::array(py::dtype("f"), {1}, {});
+        result = nullptr;
     }
 
     //py::gil_scoped_release release; // REUIRED ???

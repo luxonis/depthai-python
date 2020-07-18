@@ -2,10 +2,18 @@
 
 std::vector<TensorEntry> PyTensorEntryContainerIterator::next()
 {
-    if (index == seq.size())
+    while(true)
     {
-        throw pybind11::stop_iteration();
+        if (index == seq.size())
+        {
+            throw pybind11::stop_iteration();
+        }
+        std::vector<TensorEntry> next_entry = seq.getByIndex(index++);
+        if(next_entry.empty())
+        {
+            continue;
+        }
+        
+        return next_entry;
     }
-
-    return seq.getByIndex(index++);
 }
