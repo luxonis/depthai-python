@@ -32,7 +32,7 @@ PYBIND11_MODULE(depthai,m)
     init_binding_device(m);
 
     m.def(
-        "download_blob",
+        "download_model",
         &download_model,
         "Function that downloads and saves blob file from cloud."
     );
