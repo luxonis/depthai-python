@@ -100,7 +100,7 @@ void wdog_thread(int& wd_timeout_ms)
 }
 
 static std::thread wd_thread;
-static int wd_timeout_ms = 10000;
+static int wd_timeout_ms = 6000;
 int  wdog_start(void)
 {
     static int once = 1;
