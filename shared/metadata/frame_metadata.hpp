@@ -85,5 +85,9 @@ public:
         return seqNo;
     }
 
+    std::string getCameraName() {
+        const std::string camName[] = {"rgb", "left", "right"};
+        return camName[instNo];
+    }
 
 };
