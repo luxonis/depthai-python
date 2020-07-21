@@ -76,6 +76,10 @@ struct HostPipelineConfig
         float fps = 30.f;
     } mono_cam_config;
 
+    struct AppConfig
+    {
+        bool sync_video_meta_streams = false;
+    } app_config;
 
     bool initWithJSON(const json &json_obj);
     bool hasStream(const std::string &stream_name) const;

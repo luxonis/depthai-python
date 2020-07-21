@@ -512,6 +512,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         json_config_obj["ot"]["max_tracklets"] = config.ot.max_tracklets;
         json_config_obj["ot"]["confidence_threshold"] = config.ot.confidence_threshold;
 
+        json_config_obj["app"]["sync_video_meta_streams"] = config.app_config.sync_video_meta_streams;
+
         bool add_disparity_post_processing_color = false;
         bool temp_measurement = false;
 
