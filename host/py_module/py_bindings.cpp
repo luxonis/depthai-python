@@ -392,7 +392,8 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         }
         else
         {
-            std::cout << "There is no cnn configuration file or error in it\'s parsing: " << config.ai.blob_file_config.c_str() << "\n";
+            std::cerr << WARNING "ERROR: There is no cnn configuration file or error in it\'s parsing: " << config.ai.blob_file_config.c_str() << "\n";
+            break;
         }
 
         if (num_stages > 1)
