@@ -54,6 +54,11 @@ public:
             return getTensor(it->second);
         }
     }
+
+    py::object getMetadata() {
+        // TODO
+        return _tensors_raw_data[0]->getMetadata();
+    }
 #endif
 
     std::shared_ptr<TensorEntryContainer> getTensorEntryContainer()

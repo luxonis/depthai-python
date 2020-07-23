@@ -6,12 +6,15 @@
 static std::unordered_map<int, int> rgb_cam_supported_configs =
 {
     {1080, 0},
-    {2160, 1}
+    {2160, 1},
+    {3040, 2}
 };
 
 static std::unordered_map<int, int> mono_cam_supported_configs =
 {
     {720, 0},
+    {800, 1},
+    {400, 2},
 };
 
 #define WARNING "\033[1;5;31m"
@@ -123,6 +126,21 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 ai.blob_file_config = ai_obj.at("blob_file_config").get<std::string>();
             }
 
+            if (ai_obj.contains("blob_file2"))
+            {
+                ai.blob_file2 = ai_obj.at("blob_file2").get<std::string>();
+            }
+
+            if (ai_obj.contains("blob_file_config2"))
+            {
+                ai.blob_file_config2 = ai_obj.at("blob_file_config2").get<std::string>();
+            }
+
+            if (ai_obj.contains("camera_input"))
+            {
+                ai.camera_input = ai_obj.at("camera_input").get<std::string>();
+            }
+
             if (ai_obj.contains("calc_dist_to_bb"))
             {
                 ai.calc_dist_to_bb = ai_obj.at("calc_dist_to_bb").get<bool>();
@@ -160,13 +178,13 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             }
 
 
-            if (ai_obj.contains("NCEs"))
+            if (ai_obj.contains("NN_engines"))
             {
-                ai.NCEs = ai_obj.at("NCEs").get<int32_t>();
+                ai.NN_engines = ai_obj.at("NN_engines").get<int32_t>();
             }
-            if (ai.NCEs < 0 || ai.NCEs > 2)
+            if (ai.NN_engines < 0 || ai.NN_engines > 2)
             {
-                std::cerr << WARNING "ai.NCEs should be in the range [0 .. 2]\n" ENDC;
+                std::cerr << WARNING "ai.NN_engines should be in the range [0 .. 2]\n" ENDC;
                 break;
             }
 
@@ -273,7 +291,7 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                 auto& rgb_camera_conf_obj = camera_conf_obj.at("rgb");
 
                 rgb_cam_config.resolution_h = rgb_camera_conf_obj.at("resolution_h").get<int32_t>();
-                rgb_cam_config.fps = rgb_camera_conf_obj.at("fps").get<int32_t>();
+                rgb_cam_config.fps = rgb_camera_conf_obj.at("fps").get<float>();
 
                 auto it = rgb_cam_supported_configs.find(rgb_cam_config.resolution_h);
 
@@ -288,13 +306,21 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                     break;
                 }
             }
+            // Defaults if the resolution width is not specified
+            if (rgb_cam_config.resolution_w == 0) {
+                if (rgb_cam_config.resolution_h == 1080)
+                    rgb_cam_config.resolution_w =  1920;
+                if (rgb_cam_config.resolution_h == 2160)
+                    rgb_cam_config.resolution_w =  3840;
+            }
 
             if (camera_conf_obj.contains("mono"))
             {
                 auto& mono_camera_conf_obj = camera_conf_obj.at("mono");
-
+                if (mono_camera_conf_obj.contains("resolution_w"))
+                    mono_cam_config.resolution_w = mono_camera_conf_obj.at("resolution_w").get<int32_t>();
                 mono_cam_config.resolution_h = mono_camera_conf_obj.at("resolution_h").get<int32_t>();
-                mono_cam_config.fps = mono_camera_conf_obj.at("fps").get<int32_t>();
+                mono_cam_config.fps = mono_camera_conf_obj.at("fps").get<float>();
 
                 auto it = mono_cam_supported_configs.find(mono_cam_config.resolution_h);
 
@@ -308,6 +334,13 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
                     }
                     break;
                 }
+            }
+            // Defaults if the resolution width is not specified
+            if (mono_cam_config.resolution_w == 0) {
+                if (mono_cam_config.resolution_h == 400)
+                    mono_cam_config.resolution_w =  640;
+                if (mono_cam_config.resolution_h == 720 || mono_cam_config.resolution_h == 800)
+                    mono_cam_config.resolution_w = 1280;
             }
         }
 
