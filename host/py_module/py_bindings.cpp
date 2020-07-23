@@ -524,7 +524,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 c_streams_myriad_to_pc[stream.name].dimensions[1] = config.mono_cam_config.resolution_w;
             }
 
-            if (stream.name == "depth_color_h")
+            if (stream.name == "disparity_color")
             {
                 c_streams_myriad_to_pc["disparity"].dimensions[0] = c_streams_myriad_to_pc[stream.name].dimensions[0];
                 c_streams_myriad_to_pc["disparity"].dimensions[1] = c_streams_myriad_to_pc[stream.name].dimensions[1];
@@ -544,7 +544,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                 if (!stream.data_type.empty()) { obj["data_type"] = stream.data_type; };
                 if (0.f != stream.max_fps)     { obj["max_fps"]   = stream.max_fps;   };
 
-                if (stream.name == "depth_sipp"){obj["data_type"] = "uint16"; }
+                if (stream.name == "depth_raw"){obj["data_type"] = "uint16"; }
 
                 json_config_obj["_pipeline"]["_streams"].push_back(obj);
                 pipeline_device_streams.push_back(stream.name);
@@ -740,7 +740,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
                     add_disparity_post_processing_color));
 
             const std::string stream_in_name = "disparity";
-            const std::string stream_out_color_name = "depth_color_h";
+            const std::string stream_out_color_name = "disparity_color";
 
             if (g_xlink->openStreamInThreadAndNotifyObservers(c_streams_myriad_to_pc.at(stream_in_name)))
             {
