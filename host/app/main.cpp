@@ -236,9 +236,9 @@ try
 
         // update depth size
         assert(false && "dev app is outdated (read of streams, stream elem size)");
-        c_streams_myriad_to_pc.at("depth_sipp") = StreamInfo("depth_sipp", 720*1280*2, { 720, 1280}, 2);
+        c_streams_myriad_to_pc.at("depth_raw") = StreamInfo("depth_raw", 720*1280*2, { 720, 1280}, 2);
 
-        std::cout << "SIZE of depth pkg: " << c_streams_myriad_to_pc.at("depth_sipp").size << "\n";
+        std::cout << "SIZE of depth pkg: " << c_streams_myriad_to_pc.at("depth_raw").size << "\n";
 
 
         // open Myriad -> PC streams

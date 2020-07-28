@@ -27,7 +27,19 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 include(${dldt_dir}/inference-engine/thirdparty/movidius/XLink/XLink.cmake)
 
 
-find_package(PythonLibs 3 REQUIRED)
+execute_process(
+    COMMAND python3 -c "v = __import__('sys').version_info; \
+                        print(v.major, v.minor, sep = '.', end = ''); \
+                       "
+    OUTPUT_VARIABLE PYTHON_VERSION
+    RESULT_VARIABLE PYTHON_ERROR
+)
+if(PYTHON_ERROR)
+    message(FATAL_ERROR "python3 get version error: " ${PYTHON_ERROR})
+endif(PYTHON_ERROR)
+
+find_package(PythonLibs   ${PYTHON_VERSION} EXACT REQUIRED)
+find_package(PythonInterp ${PYTHON_VERSION} EXACT REQUIRED)
 # set(PYTHON_EXECUTABLE "/usr/bin/python3.6-dbg")
 # set(PYTHON_EXECUTABLE "/usr/bin/python")
 

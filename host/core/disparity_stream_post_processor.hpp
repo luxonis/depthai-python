@@ -23,7 +23,7 @@ protected:
 
 private:
     const std::string c_stream_in        = "disparity";
-    const std::string c_stream_out_color = "depth_color_h";
+    const std::string c_stream_out_color = "disparity_color";
 
     const bool _produce_depth_color = false;
 
