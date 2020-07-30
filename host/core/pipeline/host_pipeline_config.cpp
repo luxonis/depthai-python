@@ -344,6 +344,17 @@ bool HostPipelineConfig::initWithJSON(const json &json_obj)
             }
         }
 
+        if (json_obj.contains("app"))
+        {
+            auto& app_conf_obj = json_obj.at("app");
+
+            if (app_conf_obj.contains("sync_video_meta_streams"))
+            {
+                app_config.sync_video_meta_streams = app_conf_obj.at("sync_video_meta_streams").get<bool>();
+            }
+        }
+
+
         result = true;
     }
     while (false);
