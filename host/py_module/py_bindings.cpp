@@ -248,6 +248,21 @@ bool init_device(
             }
         }
 
+        bool rgb_connected = g_config_d2h.at("_cams").at("rgb").get<bool>();
+        bool left_connected = g_config_d2h.at("_cams").at("left").get<bool>();
+        bool right_connected = g_config_d2h.at("_cams").at("right").get<bool>();
+
+        if(!rgb_connected)
+        {
+            printf(WARNING "WARNING: RGB camera is not connected or broken! \n" ENDC);
+            break;
+        }
+        if(left_connected ^ right_connected)
+        {
+            printf(WARNING "WARNING: one of stereo cameras is not connected or broken! \n" ENDC);
+            break;
+        }
+    
         uint32_t version = g_config_d2h.at("eeprom").at("version").get<int>();
         printf("EEPROM data:");
         if (version == -1) {
