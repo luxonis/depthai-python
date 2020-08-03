@@ -30,7 +30,8 @@ public:
 
         for (size_t i = 1; i < _tensors_info->size(); ++i)
         {
-            assert((*_tensors_info)[i].getEntriesNumber() == number);
+            // TODO do we really need this assert?
+            //assert((*_tensors_info)[i].getEntriesNumber() == number);
         }
 
         return number;

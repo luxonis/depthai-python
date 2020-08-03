@@ -31,9 +31,21 @@ struct HostPipelineConfig
     {
         std::string blob_file;
         std::string blob_file_config;
+        std::string blob_file2;
+        std::string blob_file_config2;
+        std::string camera_input = "rgb";
         bool calc_dist_to_bb = false;
         bool keep_aspect_ratio = true;
+        int32_t shaves = 7;
+        int32_t cmx_slices = 7;
+        int32_t NN_engines = 1;
     } ai;
+
+    struct OT
+    {
+        int32_t max_tracklets        = 20;
+        float   confidence_threshold = 0.5;
+    } ot;
 
     struct BoardConfig
     {
@@ -50,6 +62,24 @@ struct HostPipelineConfig
         std::string revision;
     } board_config;
 
+    struct RGBCamConfig
+    {
+        int32_t resolution_w = 0; //auto
+        int32_t resolution_h = 1080;
+        float fps = 30.f;
+    } rgb_cam_config;
+
+    struct MonoCamConfig
+    {
+        int32_t resolution_w = 0; //auto
+        int32_t resolution_h = 720;
+        float fps = 30.f;
+    } mono_cam_config;
+
+    struct AppConfig
+    {
+        bool sync_video_meta_streams = false;
+    } app_config;
 
     bool initWithJSON(const json &json_obj);
     bool hasStream(const std::string &stream_name) const;

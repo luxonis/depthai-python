@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <cmath>
+#include <cfloat>
 
 #include "tensor_info.hpp"
 #include "../types.hpp"
@@ -39,7 +41,9 @@ struct TensorEntry
     {
         assert(output_properties_type == Type::F16); // TODO: remove this
         assert(nullptr != output_property_key_string_to_index);
-        assert(output_property_key_string_to_index->find(str_index) != output_property_key_string_to_index->end());
+        if(output_property_key_string_to_index->find(str_index) == output_property_key_string_to_index->end()) {
+		      throw std::runtime_error("There is no \"" + str_index + "\" property defined in 'property_key_mapping' field, check blob config file.");
+        }
 
         auto arr_index = output_property_key_string_to_index->at(str_index);
         return getFloatByIndex(arr_index);
@@ -50,7 +54,7 @@ struct TensorEntry
         for(int idx = 0; idx < getPropertiesNumber(); idx++)
         {
             float tensorValue = getFloatByIndex(idx);
-            if(isnan(tensorValue) || isinf(tensorValue))
+            if(std::isnan(tensorValue) || std::isinf(tensorValue))
             {
                 printf("invalid tensor packet, discarding \n");
                 return false;

@@ -13,6 +13,7 @@
 #include "../../shared/timer.hpp"
 
 #include "metadata/frame_metadata.hpp"
+#include "object_tracker/object_tracker.hpp"
 
 
 #ifdef HOST_PYTHON_MODULE
@@ -114,8 +115,8 @@ struct HostDataPacket
                             sizeof(std::uint16_t),                          /* size of one scalar        */
                             py::format_descriptor<std::uint16_t>::format(), /* data type          */
                             2, //ndim,                                    /* number of dimensions      */
-                            {720, 1280}, //shape,                                   /* shape of the matrix       */
-                            {1280*2, 1*2} //strides                                  /* strides for each axis     */
+                            {dimensions[0], dimensions[1]}, //shape,                                   /* shape of the matrix       */
+                            {dimensions[1]*2, 1*2} //strides                                  /* strides for each axis     */
                         ));
             }
             else
@@ -141,6 +142,13 @@ struct HostDataPacket
         }
 
         return py::cast<py::none>(Py_None);
+    }
+
+    py::object getObjectTracker(){
+        ObjectTracker ot_tracklets;
+        assert(data.size() == sizeof(ObjectTracker));
+        memcpy(&ot_tracklets, data.data(), sizeof(ObjectTracker));
+        return py::cast<ObjectTracker>(ot_tracklets);
     }
 #endif
 

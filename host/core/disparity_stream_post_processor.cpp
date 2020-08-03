@@ -34,8 +34,9 @@ void DisparityStreamPostProcessor::prepareDepthColorAndNotifyObservers(
     const StreamData &data
 )
 {
-    // TODO: remove hardcode
-    StreamInfo depth_si(c_stream_out_color.c_str(), 720*1280*3, { 720, 1280, 3});
+    StreamInfo depth_si(c_stream_out_color.c_str(),
+            data_info.dimensions[0] * data_info.dimensions[1] * 3,
+            {data_info.dimensions[0], data_info.dimensions[1], 3});
 
     std::vector<unsigned char> depth_raw(depth_si.size);
     const unsigned char* disp_uc = (const unsigned char*) data.data;

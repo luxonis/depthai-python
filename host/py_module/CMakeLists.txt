@@ -27,7 +27,19 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 include(${dldt_dir}/inference-engine/thirdparty/movidius/XLink/XLink.cmake)
 
 
-find_package(PythonLibs 3 REQUIRED)
+execute_process(
+    COMMAND python3 -c "v = __import__('sys').version_info; \
+                        print(v.major, v.minor, sep = '.', end = ''); \
+                       "
+    OUTPUT_VARIABLE PYTHON_VERSION
+    RESULT_VARIABLE PYTHON_ERROR
+)
+if(PYTHON_ERROR)
+    message(FATAL_ERROR "python3 get version error: " ${PYTHON_ERROR})
+endif(PYTHON_ERROR)
+
+find_package(PythonLibs   ${PYTHON_VERSION} EXACT REQUIRED)
+find_package(PythonInterp ${PYTHON_VERSION} EXACT REQUIRED)
 # set(PYTHON_EXECUTABLE "/usr/bin/python3.6-dbg")
 # set(PYTHON_EXECUTABLE "/usr/bin/python")
 
@@ -46,6 +58,7 @@ include_directories(
 pybind11_add_module(
     ${APP_NAME}
     py_bindings.cpp
+    capture_af_bindings.cpp
     ../core/device_support_listener.cpp
     ../core/pipeline/host_pipeline.cpp
     ../core/pipeline/host_pipeline_config.cpp
@@ -55,6 +68,7 @@ pybind11_add_module(
     ../core/host_data_reader.cpp
     ../core/host_capture_command.cpp
     ../core/disparity_stream_post_processor.cpp
+    ../core/model_downloader.cpp
     ../../shared/json_helper.cpp
     ../../shared/stream/stream_info.cpp
     ../../shared/xlink/xlink_wrapper.cpp
@@ -101,7 +115,9 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../shared/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/../../shared/version.hpp @ONLY)
 
-
+set(CURL_LIBRARY "-lcurl") 
+find_package(CURL REQUIRED) 
+include_directories(${CURL_INCLUDE_DIR})
 
 # link libraries
 target_link_libraries(
@@ -110,6 +126,7 @@ target_link_libraries(
    -L/usr/local/lib  # For macOS
    -lusb-1.0
    -lpthread
+   ${CURL_LIBRARIES}
    nlohmann_json::nlohmann_json
    nlohmann_json_schema_validator
 )
