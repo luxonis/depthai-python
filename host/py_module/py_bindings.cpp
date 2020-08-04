@@ -229,6 +229,14 @@ bool init_device(
             }
         }
 
+        bool rgb_connected = g_config_d2h.at("_cams").at("rgb").get<bool>();
+        bool left_connected = g_config_d2h.at("_cams").at("left").get<bool>();
+        bool right_connected = g_config_d2h.at("_cams").at("right").get<bool>();
+        if(!rgb_connected && (left_connected ^ right_connected))
+        {
+            std::cerr << WARNING "FATAL ERROR: No cameras detected on the board. \n" ENDC;
+            break;
+        }
 
         // check version
         {
@@ -467,7 +475,7 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
         if(left_connected ^ right_connected)
         {
             std::string cam_not_connected = (left_connected == false) ? "Left" : "Right";
-            std::cerr << WARNING "WARNING:  "<< cam_not_connected << " stereo camera (OV9282) is not detected on board! \n" ENDC;
+            std::cerr << WARNING "WARNING: "<< cam_not_connected << " stereo camera (OV9282) is not detected on board! \n" ENDC;
             if(config.ai.camera_input != "rgb")
             {
                 std::cerr << WARNING "WARNING: NN inference was requested on " << config.ai.camera_input << " stereo camera (OV9282), defaulting to RGB camera (IMX378)! \n" ENDC;
