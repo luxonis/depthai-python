@@ -247,21 +247,6 @@ bool init_device(
                     device_dev_version.c_str(), c_depthai_dev_version);
             }
         }
-
-        bool rgb_connected = g_config_d2h.at("_cams").at("rgb").get<bool>();
-        bool left_connected = g_config_d2h.at("_cams").at("left").get<bool>();
-        bool right_connected = g_config_d2h.at("_cams").at("right").get<bool>();
-
-        if(!rgb_connected)
-        {
-            printf(WARNING "WARNING: RGB camera is not connected or broken! \n" ENDC);
-            break;
-        }
-        if(left_connected ^ right_connected)
-        {
-            printf(WARNING "WARNING: one of stereo cameras is not connected or broken! \n" ENDC);
-            break;
-        }
     
         uint32_t version = g_config_d2h.at("eeprom").at("version").get<int>();
         printf("EEPROM data:");
@@ -456,6 +441,37 @@ std::shared_ptr<CNNHostPipeline> create_pipeline(
             {
                 assert(flags_size == 1);
                 calibration_reader.readData(reinterpret_cast<unsigned char*>(&stereo_center_crop), 1);
+            }
+        }
+
+        bool rgb_connected = g_config_d2h.at("_cams").at("rgb").get<bool>();
+        bool left_connected = g_config_d2h.at("_cams").at("left").get<bool>();
+        bool right_connected = g_config_d2h.at("_cams").at("right").get<bool>();
+        if(config.board_config.swap_left_and_right_cameras)
+        {
+            bool temp = left_connected;
+            left_connected = right_connected;
+            right_connected = temp;
+        }
+
+
+        if(!rgb_connected)
+        {
+            std::cout << "RGB camera (IMX378) is not detected on board! \n";
+            if(config.ai.camera_input == "rgb")
+            {
+                std::cerr << WARNING "WARNING: NN inference was requested on RGB camera (IMX378), defaulting to right stereo camera (OV9282)! \n" ENDC;
+                config.ai.camera_input = "right";
+            }
+        }
+        if(left_connected ^ right_connected)
+        {
+            std::string cam_not_connected = (left_connected == false) ? "Left" : "Right";
+            std::cerr << WARNING "WARNING:  "<< cam_not_connected << " stereo camera (OV9282) is not detected on board! \n" ENDC;
+            if(config.ai.camera_input != "rgb")
+            {
+                std::cerr << WARNING "WARNING: NN inference was requested on " << config.ai.camera_input << " stereo camera (OV9282), defaulting to RGB camera (IMX378)! \n" ENDC;
+                config.ai.camera_input = "rgb";
             }
         }
 
