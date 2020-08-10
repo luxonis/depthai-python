@@ -13,6 +13,7 @@ from distutils.version import LooseVersion
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
 version_file = os.path.join(here, "generated", "version.py")
+os.makedirs(os.path.join(here, "generated"), exist_ok=True)
 if os.environ.get('CI') != None : 
     ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
     final_version = find_version.get_package_version()
