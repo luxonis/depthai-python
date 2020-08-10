@@ -9,6 +9,50 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
+
+### VERSION
+here = os.path.abspath(os.path.dirname(__file__))
+version_file = os.path.join(here, "generated", "version.py")
+if os.environ.get('CI') != None : 
+    ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
+    final_version = find_version.get_package_version()
+    if os.environ.get('BUILD_COMMIT_HASH') != None  :
+        final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
+    with open(version_file, 'w') as vf :
+        vf.write("__version__ = '" + final_version + "'")
+elif os.path.exists(".git"):
+    ### else if .git folder exists, create depthai with commit hash retrieved from git rev-parse HEAD
+    commit_hash = ''
+    try:
+        commit_hash = (
+            subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], stderr=subprocess.STDOUT
+            )
+            .splitlines()[0]
+            .decode()
+        )
+    except subprocess.CalledProcessError as e:
+        # cannot get commit hash, leave empty
+        commit_hash = ''
+    final_version = find_version.get_package_version() + '+' + commit_hash
+
+    with open(version_file, 'w') as vf :
+        vf.write("__version__ = '" + final_version + "'")
+
+
+# If not generated, generate from find_version
+if os.path.isfile(version_file) == False :
+    # generate from find_version
+    final_version = find_version.get_package_version()
+    with open(version_file, 'w') as vf :
+        vf.write("__version__ = '" + final_version + "'")
+
+### Get version from version.py (sdist will have this pregenerated)
+exec(open(version_file).read())
+buildCommitHash = None
+if len(__version__.split("+")) > 1 :
+    buildCommitHash = __version__.split("+")[1]
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -41,6 +85,9 @@ class CMakeBuild(build_ext):
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
+
+        if buildCommitHash != None :
+            cmake_args += ['-DDEPTHAI_PYTHON_COMMIT_HASH=' + buildCommitHash]
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -98,14 +145,10 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 
-### GENERATED VERSION - Do not modify
-final_version = find_version.get_package_version()
-if 'BUILD_COMMIT_HASH' in os.environ:
-    final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
 
 setup(
     name='depthai',
-    version=final_version,
+    version=__version__,
     author='Martin Peterlin',
     author_email='martin@luxonis.com',
     description='DepthAI Python Library',
