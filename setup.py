@@ -110,6 +110,10 @@ class CMakeBuild(build_ext):
             # Detect whether 32 / 64 bit Python is used and compile accordingly
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
+            else:
+                cmake_args += ['-A', 'Win32']
+            
+            # Add flag to build with maximum available threads
             build_args += ['--', '/m']
         else:
             # if macos
