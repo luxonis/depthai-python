@@ -21,8 +21,6 @@
 #include "py_tensor_entry_container_iterator.hpp"
 #include "device_bindings.hpp"
 
-#include "depthai/model_downloader.hpp"
-
 
 namespace py = pybind11;
 PYBIND11_MODULE(depthai,m)
@@ -31,12 +29,6 @@ PYBIND11_MODULE(depthai,m)
     init_binding_host_data_packet(m);
     init_binding_nnet_packet(m);
     init_binding_device(m);
-
-    m.def(
-        "download_model",
-        &download_model,
-        "Function that downloads and saves blob file from cloud."
-    );
 
     // TODO: test ownership in python
 

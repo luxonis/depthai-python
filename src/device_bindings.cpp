@@ -66,8 +66,8 @@ void init_binding_device(pybind11::module& m){
             "Function to request a certain autofocus mode (Check 'AutofocusMode.__members__')"
         )
         .def(
-            "send_DisparityConfidenceThreshold",
-            &Device::send_DisparityConfidenceThreshold,
+            "send_disparity_confidence_threshold",
+            &Device::send_disparity_confidence_threshold,
             "Function to send disparity confidence threshold for SGBM"
         )
 
