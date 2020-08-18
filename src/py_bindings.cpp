@@ -22,8 +22,6 @@
 #include "device_bindings.hpp"
 
 
-
-
 namespace py = pybind11;
 PYBIND11_MODULE(depthai,m)
 {

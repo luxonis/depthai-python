@@ -57,4 +57,3 @@ pybind11::array* PyNNetPacket::getTensorByName(const std::string &name)
         return getTensor(it->second);
     }
 }
-
