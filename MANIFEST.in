@@ -1,4 +1,6 @@
 include README.md LICENSE
+include find_version.py
+graft generated
 global-include CMakeLists.txt *.cmake
 recursive-include src *
 recursive-include pybind11/include *.h

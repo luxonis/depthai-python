@@ -51,3 +51,11 @@ target_link_libraries(${TARGET_NAME}
         pybind11::pybind11
         depthai-core
 )
+
+# Add bindings revision
+target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
+# Add commit hash
+if(DEPTHAI_PYTHON_COMMIT_HASH)
+    target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
+endif()
+

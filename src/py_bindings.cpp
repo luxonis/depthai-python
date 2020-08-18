@@ -13,6 +13,7 @@
 
 // depthai-core
 #include "depthai/device.hpp"
+#include "depthai/build/version.hpp"
 
 // project
 #include "host_data_packet_bindings.hpp"
@@ -39,11 +40,19 @@ PYBIND11_MODULE(depthai,m)
 
     // TODO: test ownership in python
 
-    // TODO
     //std::string _version = c_depthai_version;
-    m.attr("__version__") = "0.0.1";
+    std::string version = std::string(dai::build::VERSION) + "." + std::string(DEPTHAI_PYTHON_BINDINGS_REVISION);
+
+    #ifdef DEPTHAI_PYTHON_COMMIT_HASH
+        version += "+" + std::string(DEPTHAI_PYTHON_COMMIT_HASH);
+    #endif
+
+    m.attr("__version__") = version;
+
+
+    // TODO
     //std::string _dev_version = c_depthai_dev_version;
-    m.attr("__dev_version__") = "badf00d";
+    //m.attr("__dev_version__") = "badf00d";
 
 
     // for te in nnet_packet.ENTRIES()

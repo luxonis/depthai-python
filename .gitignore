@@ -4,7 +4,7 @@
 .vs/
 build*/*
 # Auto-generated
-shared/version.hpp
+generated/*
 
 #pybind11
 pybind11-2.5.0/
