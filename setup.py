@@ -1,4 +1,5 @@
 import os
+import io
 import re
 import sys
 import platform
@@ -53,6 +54,10 @@ exec(open(version_file).read())
 buildCommitHash = None
 if len(__version__.split("+")) > 1 :
     buildCommitHash = __version__.split("+")[1]
+
+
+## Read description (README.md)
+long_description = io.open("README.md", encoding="utf-8").read()
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -157,10 +162,35 @@ setup(
     author='Martin Peterlin',
     author_email='martin@luxonis.com',
     description='DepthAI Python Library',
-    long_description='',
+    license="MIT",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/luxonis/depthai-python",
     ext_modules=[CMakeExtension('depthai')],
     cmdclass={
         'build_ext': CMakeBuild
     },
     zip_safe=False,
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: C++",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development",
+    ],
+    python_requires='>=3.5',
 )

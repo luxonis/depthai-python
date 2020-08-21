@@ -1,74 +1,52 @@
-# depthai-api
+# DepthAI Python Library
 
-Host-side DepthAI source code
+Python bindings for C++ depthai-core library
 
-## Content description
+## Documentation
 
-- **host** - contains the code which runs on the host computer (Raspberry Pi or a PC that has a DepthAI device connected). This part has:
+Documentation is available over at [Luxonis DepthAI Python API](https://docs.luxonis.com/api/)
 
-  - **py_module** - python module (made only with C++ code with `pybind11`). Builds an `.so` libray that can be imported with python.  
-  - **app** - C++ app for easier debugging and development.  
-  - **core** - main functionality of the host, which is used in `py_module` and `app`.  
+## Installation
 
-- **shared** - code that is shared between host and DepthAI device. This code gets also into the firmware binary `depthai.cmd`  
+Prebuilt wheels are available in [Luxonis repository](https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/)
+Make sure pip is upgraded
+```
+python3 -m pip install -U pip
+python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai
+```
+## Building from source
+
+### Dependencies
+ - cmake >= 3.2
+ - C/C++11 compiler (clang, gcc, msvc, ...)
+ - Python
+
+Along these, dependencies of depthai-core are also required
+See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#dependencies)
+
+
+### Building
+
+To build a shared library from source perform the following:
+```
+mkdir build && cd build
+cmake ..
+cmake --build . --parallel
+```
+
+To build a wheel, execute the following
+```
+python3 -m pip wheel . -w wheelhouse
+```
+
 
 ## Tested platforms
 
+- Windows 10
 - Ubuntu 16.04, 18.04;
 - Raspbian 10;
 - macOS 10.14.6, 10.15.4;
 
-## Setup
-
-- Install development environment dependencies:
-  - Linux:
-
-        sudo apt-get install -y git python-pip cmake cmake-gui libusb-1.0-0-dev
-  - macOS:
-
-        brew install coreutils python3 cmake libusb wget opencv
-
-- After cloning the repo, update the third-party libraries used:
-
-      ./install_dependencies.sh
-
-
-## Build and run
-
-- **Windows (x64)**
-In seconds step, remove parameter *-A x64* for 32bit variant (Python must also be 32bit)
-```
-mkdir -p build && cd build
-cmake .. -A x64 -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_BINARY_DIR="C:/.hunter_bin" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="%CD%\..\cmake\ToolchainConfig.cmake"
-cmake --build . --parallel
-```
-
-- **host/py_module**
-
-      cd host/py_module
-      mkdir -p build
-      cd build
-      cmake ..
-      make -j
-  Alternatively, when this repo is used as a submodule in https://github.com/luxonis/depthai, the build process can be automated with the script below, that is also copying the generated `.so` back to `depthai`:
-  - `./build_py_module.sh`  
-    first it does a full build, then at subsequent runs compiles only the modified source files.
-  - `./build_py_module.sh --clean`  
-    cleans up the build folder and does a full rebuild.
-
-
-- **host/app**  
-  (Note: this is currently outdated and doesn't run properly)  
-  `DEPTHAI_EXTRAS_PATH` in `main.cpp` may have to be adjusted first.
-
-      cd host/app
-      mkdir -p build
-      cd build
-      cmake ..
-      make -j
-      ./depthai_app
-      
-      
 ## Troubleshooting
 
 1. Build failure on Ubuntu 18.04 ("relocation ..." link error) with gcc 7.4.0 (default) - [**issue #3**](https://github.com/luxonis/depthai-api/issues/3)
