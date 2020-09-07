@@ -13,9 +13,30 @@ on: [push]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
+  # This job builds wheels for x86_64 arch
+  testtag:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/pypa/manylinux2014_x86_64
+      env:
+        PLAT: manylinux2014_x86_64
+    steps:
+      - name: Test01
+        run: echo "01"
+        on:
+          push:
+            tags:
+              - '*'
+      - name: Test02
+        run: echo "02 $github.ref"
+      - name: Test03
+        run: echo "03"
+        if: github.ref != 'refs/tags/*'
+      - name: End tests
+        run: exit 1
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
+    needs: testtag
     runs-on: windows-latest
     strategy:
       matrix:
@@ -49,6 +70,7 @@ jobs:
 
   # This job builds wheels for macOS x86_64 arch
   build-macos-x86_64:
+    needs: testtag
     runs-on: macos-latest
     strategy:
       matrix:
@@ -88,6 +110,7 @@ jobs:
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
+    needs: testtag
     runs-on: ubuntu-latest
     container:
       image: quay.io/pypa/manylinux2014_x86_64
@@ -129,6 +152,7 @@ jobs:
 
   # This job builds wheels for armhf arch
   build-linux-armhf:
+    needs: testtag
     runs-on: luxonis-armhf
     container: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
     steps:
@@ -195,7 +219,10 @@ jobs:
 
   # Deploy to PyPi. Only when a commit is tagged
   deploy-pypi:
-    if: github.ref == 'refs/tags/*'
+    on:
+      push:
+        tags:
+          - '*'
     runs-on: ubuntu-latest
     needs: tests
     steps:
