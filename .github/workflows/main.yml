@@ -33,7 +33,7 @@ jobs:
         with: 
           python-version: ${{ matrix.python-version }}
       - name: Append build hash if not a tagged commit
-        if: github.ref != 'refs/tags/*'
+        if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Install dependencies
         run: |
@@ -110,7 +110,7 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
       - name: Append build hash if not a tagged commit
-        if: github.ref != 'refs/tags/*'
+        if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building a source distribution
         run: |
