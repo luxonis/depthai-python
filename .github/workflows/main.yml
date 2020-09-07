@@ -23,10 +23,6 @@ jobs:
     steps:
       - name: Test01
         run: echo "01"
-        on:
-          push:
-            tags:
-              - '*'
       - name: Test02
         run: echo "02 $github.ref"
       - name: Test03
@@ -34,6 +30,19 @@ jobs:
         if: github.ref != 'refs/tags/*'
       - name: End tests
         run: exit 1
+  testtag2:
+    runs-on: ubuntu-latest
+    on:
+      push:
+        tags:
+          - '*'
+    container:
+      image: quay.io/pypa/manylinux2014_x86_64
+      env:
+        PLAT: manylinux2014_x86_64
+    steps:
+      - name: Test01
+        run: echo "01"
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     needs: testtag
