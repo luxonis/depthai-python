@@ -140,7 +140,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Append build hash if not a tagged commit
-        if: github.ref != 'refs/tags/*'
+        if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building wheel
         run: python3 -m pip wheel . -w ./wheelhouse/
