@@ -30,19 +30,6 @@ jobs:
         if: github.ref != 'refs/tags/*'
       - name: End tests
         run: exit 1
-  testtag2:
-    runs-on: ubuntu-latest
-    on:
-      push:
-        tags:
-          - '*'
-    container:
-      image: quay.io/pypa/manylinux2014_x86_64
-      env:
-        PLAT: manylinux2014_x86_64
-    steps:
-      - name: Test01
-        run: echo "01"
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     needs: testtag
@@ -228,10 +215,6 @@ jobs:
 
   # Deploy to PyPi. Only when a commit is tagged
   deploy-pypi:
-    on:
-      push:
-        tags:
-          - '*'
     runs-on: ubuntu-latest
     needs: tests
     steps:
