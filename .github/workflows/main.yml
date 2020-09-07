@@ -23,11 +23,9 @@ jobs:
     steps:
       - name: Test01
         run: echo "01"
-      - name: Test02
-        run: echo "02 ${github.ref}"
       - name: Test03
         run: echo "03"
-        if: github.ref != 'refs/tags/*'
+        if: startsWith(github.ref, 'refs/tags/v')
       - name: End tests
         run: exit 1
   # This job builds wheels for Windows x86_64 arch
