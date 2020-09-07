@@ -24,7 +24,7 @@ jobs:
       - name: Test01
         run: echo "01"
       - name: Test02
-        run: echo "02 $github.ref"
+        run: echo "02 ${github.ref}"
       - name: Test03
         run: echo "03"
         if: github.ref != 'refs/tags/*'
