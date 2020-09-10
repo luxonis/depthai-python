@@ -13,8 +13,8 @@ for file in wheelhouse/audited/*.zip; do
     python3 -m twine upload --repository-url "$PYPI_SERVER" --username "$PYPI_USER" --password "$PYPI_PASSWORD" "$file"
 done
 
-# Uploads tar.bz2 source distribution
-for file in wheelhouse/audited/*.tar.bz2; do
+# Uploads tar.gz source distribution
+for file in wheelhouse/audited/*.tar.gz; do
     echo "Uploading $file"
     python3 -m twine upload --repository-url "$PYPI_SERVER" --username "$PYPI_USER" --password "$PYPI_PASSWORD" "$file"
 done

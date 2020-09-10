@@ -114,7 +114,7 @@ jobs:
         run: echo '::set-env name=BUILD_COMMIT_HASH::${{github.sha}}'
       - name: Building a source distribution
         run: |
-          /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=bztar,zip
+          /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar,zip
           mv dist/* wheelhouse/audited/
       - name: Building wheels
         run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
