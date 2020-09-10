@@ -73,7 +73,9 @@ void init_binding_host_data_packet(pybind11::module& m){
 
 }
 
-
+// TODO - zero copy
+//https://github.com/pybind/pybind11/issues/323#issuecomment-575717041
+//https://github.com/pybind/pybind11/issues/1042#issuecomment-642215028
 py::array* PyHostDataPacket::getPythonNumpyArray()
 {
     assert(!dimensions.empty());
