@@ -109,8 +109,8 @@ void init_binding_device(pybind11::module& m){
         )
 
         .def(
-            "get_Translation",
-            &Device::get_Translation,
+            "get_translation",
+            &Device::get_translation,
             "Returns a vector defining how much the right camera is translated w.r.t left camera."
         )
 
