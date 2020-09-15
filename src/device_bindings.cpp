@@ -77,6 +77,43 @@ void init_binding_device(pybind11::module& m){
             "Returns NN bounding-box to depth mapping as a dict of coords: off_x, off_y, max_w, max_h."
         )
 
+        // calibration data bindings
+        .def(
+            "get_left_intrinsic",
+            &Device::get_left_intrinsic,
+            "Returns 3x3 matrix defining the intrinsic parameters of the left camera of the stereo setup."
+        )
+
+        .def(
+            "get_left_homography",
+            &Device::get_left_homography,
+            "Returns 3x3 matrix defining the homography to rectify the left camera of the stereo setup."
+        )
+
+        .def(
+            "get_right_intrinsic",
+            &Device::get_right_intrinsic,
+            "Returns 3x3 matrix defining the intrinsic parameters of the right camera of the stereo setup."
+        )
+
+        .def(
+            "get_right_homography",
+            &Device::get_right_homography,
+            "Returns 3x3 matrix defining the homography to rectify the right camera of the stereo setup."
+        )
+
+        .def(
+            "get_rotation",
+            &Device::get_rotation,
+            "Returns 3x3 matrix defining how much the right camera is rotated w.r.t left camera."
+        )
+
+        .def(
+            "get_translation",
+            &Device::get_translation,
+            "Returns a vector defining how much the right camera is translated w.r.t left camera."
+        )
+
 
         
         ;
