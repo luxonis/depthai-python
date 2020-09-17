@@ -19,7 +19,7 @@
 #include "host_data_packet_bindings.hpp"
 #include "nnet_packet_bindings.hpp"
 #include "py_tensor_entry_container_iterator.hpp"
-#include "device_bindings.hpp"
+//#include "device_bindings.hpp"
 
 
 namespace py = pybind11;
@@ -28,7 +28,7 @@ PYBIND11_MODULE(depthai,m)
 
     init_binding_host_data_packet(m);
     init_binding_nnet_packet(m);
-    init_binding_device(m);
+//    init_binding_device(m);
 
     // TODO: test ownership in python
 

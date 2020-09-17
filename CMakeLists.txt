@@ -41,7 +41,7 @@ pybind11_add_module(${TARGET_NAME}
     src/host_data_packet_bindings.cpp
     src/nnet_packet_bindings.cpp
     src/py_tensor_entry_container_iterator.cpp
-    src/device_bindings.cpp
+#     src/device_bindings.cpp
 )
 
 # Link with libraries
