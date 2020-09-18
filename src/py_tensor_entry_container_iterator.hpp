@@ -1,27 +1,27 @@
-#pragma once
+// #pragma once
 
-// std
-#include <vector>
+// // std
+// #include <vector>
 
-// pybind11
-#include "pybind11_common.hpp"
+// // pybind11
+// #include "pybind11_common.hpp"
 
-//project
-#include "depthai/nnet/tensor_entry_container.hpp"
+// //project
+// #include "depthai/nnet/tensor_entry_container.hpp"
 
-struct PyTensorEntryContainerIterator
-{
-    PyTensorEntryContainerIterator(
-        TensorEntryContainer &seq,
-        pybind11::object ref
-    )
-        : seq(seq)
-        , ref(ref)
-    {}
+// struct PyTensorEntryContainerIterator
+// {
+//     PyTensorEntryContainerIterator(
+//         TensorEntryContainer &seq,
+//         pybind11::object ref
+//     )
+//         : seq(seq)
+//         , ref(ref)
+//     {}
 
-    std::vector<TensorEntry> next();
+//     std::vector<TensorEntry> next();
 
-    TensorEntryContainer &seq;
-    pybind11::object ref;
-    size_t index = 0;
-};
+//     TensorEntryContainer &seq;
+//     pybind11::object ref;
+//     size_t index = 0;
+// };

@@ -48,27 +48,27 @@ PYBIND11_MODULE(depthai,m)
 
 
     // for te in nnet_packet.ENTRIES()
-    py::class_<TensorEntryContainer, std::shared_ptr<TensorEntryContainer>>(m, "TensorEntryContainer")
-        .def("__len__", &TensorEntryContainer::size)
-        .def("__getitem__", &TensorEntryContainer::getByIndex)
-        .def("__getitem__", &TensorEntryContainer::getByName)
-        .def("__iter__", [](py::object s) { return PyTensorEntryContainerIterator(s.cast<TensorEntryContainer &>(), s); })
-        ;
+    // py::class_<TensorEntryContainer, std::shared_ptr<TensorEntryContainer>>(m, "TensorEntryContainer")
+    //     .def("__len__", &TensorEntryContainer::size)
+    //     .def("__getitem__", &TensorEntryContainer::getByIndex)
+    //     .def("__getitem__", &TensorEntryContainer::getByName)
+    //     .def("__iter__", [](py::object s) { return PyTensorEntryContainerIterator(s.cast<TensorEntryContainer &>(), s); })
+    //     ;
 
-    // for e in nnet_packet.entries():
-    //     e <--- (type(e) == list)
-    py::class_<PyTensorEntryContainerIterator>(m, "PyTensorEntryContainerIterator")
-        .def("__iter__", [](PyTensorEntryContainerIterator &it) -> PyTensorEntryContainerIterator& { return it; })
-        .def("__next__", &PyTensorEntryContainerIterator::next)
-        ;
+    // // for e in nnet_packet.entries():
+    // //     e <--- (type(e) == list)
+    // py::class_<PyTensorEntryContainerIterator>(m, "PyTensorEntryContainerIterator")
+    //     .def("__iter__", [](PyTensorEntryContainerIterator &it) -> PyTensorEntryContainerIterator& { return it; })
+    //     .def("__next__", &PyTensorEntryContainerIterator::next)
+    //     ;
 
     // for e in nnet_packet.entries():
     //     e[0] <--
-    py::class_<TensorEntry, std::shared_ptr<TensorEntry>>(m, "TensorEntry")
-        .def("__len__", &TensorEntry::getPropertiesNumber)
-        .def("__getitem__", &TensorEntry::getFloat)
-        .def("__getitem__", &TensorEntry::getFloatByIndex)
-        ;
+    // py::class_<TensorEntry, std::shared_ptr<TensorEntry>>(m, "TensorEntry")
+    //     .def("__len__", &TensorEntry::getPropertiesNumber)
+    //     .def("__getitem__", &TensorEntry::getFloat)
+    //     .def("__getitem__", &TensorEntry::getFloatByIndex)
+    //     ;
 
 
     // while True:
