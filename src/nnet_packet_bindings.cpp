@@ -36,8 +36,8 @@ void init_binding_nnet_packet(pybind11::module& m){
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(const std::string&)>(&PyNNetPacket::getTensorByName), py::return_value_policy::take_ownership)
         // .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
         .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
-        .def("getOutputsList", static_cast<py::list (NNetPacket::*)()>(&PyNNetPacket::getOutputsList), py::return_value_policy::copy)     
-        .def("getOutputsDict", static_cast<py::dict (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::copy)     
+        .def("getOutputsList", static_cast<std::list<py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsList), py::return_value_policy::take_ownership)     
+        .def("getOutputsDict", static_cast<std::unordered_map<std::string, py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::take_ownership)     
         .def("getTensorsSize", &NNetPacket::getTensorsSize, py::return_value_policy::copy)     
         .def("getDetectionCount", &NNetPacket::getDetectionCount, py::return_value_policy::copy)
         .def("getDetectedObject",  static_cast<py::object (NNetPacket::*)(int)>(&PyNNetPacket::getDetectedObject), py::return_value_policy::copy)
@@ -83,7 +83,7 @@ template <>
     };
 }} // namespace pybind11::detail
 
-const std::map<TensorDataType, std::string> type_to_numpy_format = {
+const std::unordered_map<TensorDataType, std::string> type_to_numpy_format = {
     {TensorDataType::_fp16,     pybind11::format_descriptor<float16>::format()},
     {TensorDataType::_u8f,      pybind11::format_descriptor<std::uint8_t>::format()},
     {TensorDataType::_int,      pybind11::format_descriptor<std::int32_t>::format()},
@@ -170,22 +170,24 @@ py::array* PyNNetPacket::getTensorByName(const std::string &name)
 }
 
 
-py::list PyNNetPacket::getOutputsList() {
-    py::list outputList;
+std::list<py::array*> PyNNetPacket::getOutputsList() {
+
+    std::list<py::array*> outputList;
     for (size_t i = 0; i < _tensors_info.size(); ++i)
     {
-        outputList.append(getTensor(i));
+        outputList.push_back(getTensor(i));
     }
     return outputList;
 }
 
 
-py::dict PyNNetPacket::getOutputsDict() {
-    py::dict outputs;
+std::unordered_map<std::string, py::array*> PyNNetPacket::getOutputsDict() {
+    std::unordered_map<std::string, py::array*> outputs;
     for (size_t i = 0; i < _tensors_info.size(); ++i)
     {
         std::string tensor_name = getTensorName(i);
-        outputs[tensor_name.c_str()] = getTensor(i);
+        // outputs[tensor_name.c_str()] = getTensor(i);
+        outputs.insert({tensor_name,getTensor(i)});
     }
     
     return outputs;
