@@ -7,6 +7,7 @@
 
 //project
 #include "host_data_packet_bindings.hpp"
+#include "depthai-shared/cnn_info.hpp"
 
 // pybind11
 #include "pybind11_common.hpp"
