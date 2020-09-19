@@ -38,7 +38,7 @@ void init_binding_nnet_packet(pybind11::module& m){
         // .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
         .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
         .def("getOutputsList", static_cast<std::list<py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsList), py::return_value_policy::take_ownership)     
-        .def("getOutputsDict", static_cast<std::unordered_map<std::string, py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::take_ownership)     
+        .def("getOutputsDict", static_cast<std::map<std::string, py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::take_ownership)     
         .def("getTensorsSize", &NNetPacket::getTensorsSize, py::return_value_policy::copy)     
         .def("getDetectionCount", &NNetPacket::getDetectionCount, py::return_value_policy::copy)
         .def("getDetectedObject",  static_cast<py::object (NNetPacket::*)(int)>(&PyNNetPacket::getDetectedObject), py::return_value_policy::copy)
@@ -84,7 +84,7 @@ template <>
     };
 }} // namespace pybind11::detail
 
-const std::unordered_map<TensorDataType, std::string> type_to_numpy_format = {
+const std::map<TensorDataType, std::string> type_to_numpy_format = {
     {TensorDataType::_fp16,     pybind11::format_descriptor<float16>::format()},
     {TensorDataType::_u8f,      pybind11::format_descriptor<std::uint8_t>::format()},
     {TensorDataType::_int,      pybind11::format_descriptor<std::int32_t>::format()},
@@ -182,8 +182,8 @@ std::list<py::array*> PyNNetPacket::getOutputsList() {
 }
 
 
-std::unordered_map<std::string, py::array*> PyNNetPacket::getOutputsDict() {
-    std::unordered_map<std::string, py::array*> outputs;
+std::map<std::string, py::array*> PyNNetPacket::getOutputsDict() {
+    std::map<std::string, py::array*> outputs;
     for (size_t i = 0; i < _tensors_info.size(); ++i)
     {
         std::string tensor_name = getTensorName(i);

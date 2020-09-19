@@ -16,7 +16,7 @@ struct PyNNetPacket : public NNetPacket {
     py::array* getTensor(unsigned index);
     pybind11::array* getTensorByName(const std::string &name);
     std::list<py::array*> getOutputsList();
-    std::unordered_map<std::string, py::array*> getOutputsDict();
+    std::map<std::string, py::array*> getOutputsDict();
     
 public:
     using NNetPacket::_tensors_raw_data;
