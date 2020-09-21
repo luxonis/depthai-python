@@ -12,7 +12,6 @@ namespace py = pybind11;
 
 struct PyNNetPacket : public NNetPacket {
 
-    py::object getDetectedObject(int detected_nr);
     py::array* getTensor(unsigned index);
     pybind11::array* getTensorByName(const std::string &name);
     std::list<py::array*> getOutputsList();

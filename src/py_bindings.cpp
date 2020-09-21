@@ -71,24 +71,6 @@ PYBIND11_MODULE(depthai,m)
     //     ;
 
 
-    // while True:
-    //     nnet_packets, data_packets = p.get_available_nnet_and_data_packets()
-    //     # nnet_packets: depthai.NNetPacketList
-    //     # data_packets: depthai.DataPacketList
-
-    //     for t in nnet_packets.getTensors():
-    //         pass
-
-    //     for nnet_packet in nnet_packets:
-    //         # nnet_packet: depthai.NNetPacket
-    //         # nnet_packet.entries(): depthai.TensorEntryContainer
-
-    //         for e in nnet_packet.entries():
-    //             # e: list
-    //             # e[0]: depthai.TensorEntry
-    //             # e[0][0]: float
-
-
     py::class_<HostPipeline>(m, "Pipeline")
         .def("get_available_data_packets", &HostPipeline::getAvailableDataPackets, py::arg("blocking") = false, py::return_value_policy::copy)
         ;

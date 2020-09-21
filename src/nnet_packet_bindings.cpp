@@ -41,33 +41,76 @@ void init_binding_nnet_packet(pybind11::module& m){
         .def("getOutputsDict", static_cast<std::map<std::string, py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::take_ownership)     
         .def("getTensorsSize", &NNetPacket::getTensorsSize, py::return_value_policy::copy)     
         .def("getDetectionCount", &NNetPacket::getDetectionCount, py::return_value_policy::copy)
-        .def("getDetectedObject",  static_cast<py::object (NNetPacket::*)(int)>(&PyNNetPacket::getDetectedObject), py::return_value_policy::copy)
+        .def("getDetectedObject",  &NNetPacket::getDetectedObject, py::return_value_policy::copy)
+        .def("getOutputLayersInfo", &NNetPacket::getOutputLayersInfo, py::return_value_policy::copy)
+        .def("getInputLayersInfo", &NNetPacket::getInputLayersInfo, py::return_value_policy::copy)
+    
         ;
     
-    py::class_<detection_t>(m, "Detection")
-    .def_readonly("label", &detection_t::label)
-    .def_readonly("confidence", &detection_t::confidence)
-    .def_readonly("x_min", &detection_t::x_min)
-    .def_readonly("y_min", &detection_t::y_min)
-    .def_readonly("x_max", &detection_t::x_max)
-    .def_readonly("y_max", &detection_t::y_max)
-    .def_readonly("depth_x", &detection_t::depth_x)
-    .def_readonly("depth_y", &detection_t::depth_y)
-    .def_readonly("depth_z", &detection_t::depth_z)
-    .def("get_dict", []() {
+    py::class_<TensorDataType>(m, "TensorDataType")
+        .def("__str__", [](const TensorDataType& v) {
+            return type_to_string.at(v);
+        })
+        .def("__repr__", [](const TensorDataType& v) {
+            return type_to_string.at(v);
+        })
+        ;
+
+    py::class_<TensorInfo>(m, "TensorInfo")
+        .def_readonly("tensor_name", &TensorInfo::tensor_name)
+        .def_readonly("tensor_dimensions", &TensorInfo::tensor_dimensions)
+        .def_readonly("tensor_strides", &TensorInfo::tensor_strides)
+        .def_readonly("tensor_data_type", &TensorInfo::tensor_data_type)
+        .def_readonly("tensor_offset", &TensorInfo::tensor_offset)
+        .def_readonly("tensor_element_size", &TensorInfo::tensor_element_size)
+        .def_readonly("tensor_idx", &TensorInfo::tensor_idx)
+        .def("get_dict", []() {
             py::dict d;
-            d["label"] = &detection_t::label;
-            d["confidence"] = &detection_t::confidence;
-            d["x_min"] = &detection_t::x_min;
-            d["y_min"] = &detection_t::y_min;
-            d["x_max"] = &detection_t::x_max;
-            d["y_max"] = &detection_t::y_max;
-            d["depth_x"] = &detection_t::depth_x;
-            d["depth_y"] = &detection_t::depth_y;
-            d["depth_z"] = &detection_t::depth_z;
+            d["tensor_name"] = &TensorInfo::tensor_name;
+            d["tensor_dimensions"] = &TensorInfo::tensor_dimensions;
+            d["tensor_strides"] = &TensorInfo::tensor_strides;
+            d["tensor_data_type"] = &TensorInfo::tensor_data_type;
+            d["tensor_offset"] = &TensorInfo::tensor_offset;
+            d["tensor_element_size"] = &TensorInfo::tensor_element_size;
+            d["tensor_idx"] = &TensorInfo::tensor_idx;
             return d;
         })
-    ;
+        .def("__str__", [](const TensorInfo& v) {
+            std::stringstream stream;
+            stream << v;
+            return stream.str(); 
+        })
+        .def("__repr__", [](const TensorInfo& v) {
+            std::stringstream stream;
+            stream << v;
+            return stream.str(); 
+        })
+        ;
+
+    py::class_<detection_t>(m, "Detection")
+        .def_readonly("label", &detection_t::label)
+        .def_readonly("confidence", &detection_t::confidence)
+        .def_readonly("x_min", &detection_t::x_min)
+        .def_readonly("y_min", &detection_t::y_min)
+        .def_readonly("x_max", &detection_t::x_max)
+        .def_readonly("y_max", &detection_t::y_max)
+        .def_readonly("depth_x", &detection_t::depth_x)
+        .def_readonly("depth_y", &detection_t::depth_y)
+        .def_readonly("depth_z", &detection_t::depth_z)
+        .def("get_dict", []() {
+                py::dict d;
+                d["label"] = &detection_t::label;
+                d["confidence"] = &detection_t::confidence;
+                d["x_min"] = &detection_t::x_min;
+                d["y_min"] = &detection_t::y_min;
+                d["x_max"] = &detection_t::x_max;
+                d["y_max"] = &detection_t::y_max;
+                d["depth_x"] = &detection_t::depth_x;
+                d["depth_y"] = &detection_t::depth_y;
+                d["depth_z"] = &detection_t::depth_z;
+                return d;
+            })
+        ;
 
 }
 
@@ -100,13 +143,7 @@ std::string type_to_npy_format_descriptor(const TensorDataType& type)
 };
 
 
-py::object PyNNetPacket::getDetectedObject(int detected_nr)
-{
-    unsigned char * data = _tensors_raw_data->data.data();
-    detection_out_t * detections = (detection_out_t *)data;
-    assert(detected_nr < detections->detection_count);
-    return py::cast<detection_t>(detections->detections[detected_nr]);
-}
+
 
 // TODO - zero copy
 //https://github.com/pybind/pybind11/issues/323#issuecomment-575717041
@@ -117,7 +154,7 @@ static py::array* _getTensorPythonNumpyArray(unsigned char *data, TensorInfo ti)
     py::array* result = nullptr;
 
     ssize_t              ndim    = ti.tensor_dimensions.size();
-    ssize_t              element_size = size_of_type(ti.tensor_data_type);
+    ssize_t              element_size = c_type_size.at(ti.tensor_data_type);
     std::string          numpy_format_descriptor = type_to_npy_format_descriptor(ti.tensor_data_type);
     std::vector<ssize_t> shape;
     std::vector<ssize_t> strides;
