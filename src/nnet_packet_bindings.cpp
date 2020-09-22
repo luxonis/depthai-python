@@ -30,17 +30,6 @@ void init_binding_nnet_packet(pybind11::module& m){
         }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
-    py::class_<detection_out_t, std::shared_ptr<detection_out_t>>(m, "Detections")
-        .def_readonly("size", &detection_out_t::detection_count)
-        .def("__len__",  [](const detection_out_t &det) { return det.detection_count; })
-        .def("__getitem__", [](const detection_out_t &det, int idx) { return det.detections[idx]; })
-        .def("__iter__", [](std::shared_ptr<detection_out_t> &v)
-        {
-            const detection_t *detection_vec = v->detections;
-            return py::make_iterator(&detection_vec[0], &detection_vec[v->detection_count]);
-        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
-        ;
-
     // for NNET_PACKET in nnet_packets:
     py::class_<NNetPacket, std::shared_ptr<NNetPacket>>(m, "NNetPacket")
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(unsigned)>(&PyNNetPacket::getTensor), py::return_value_policy::take_ownership)
@@ -95,6 +84,17 @@ void init_binding_nnet_packet(pybind11::module& m){
             stream << v;
             return stream.str(); 
         })
+        ;
+
+    py::class_<detection_out_t, std::shared_ptr<detection_out_t>>(m, "Detections")
+        .def_readonly("size", &detection_out_t::detection_count)
+        .def("__len__",  [](const detection_out_t &det) { return det.detection_count; })
+        .def("__getitem__", [](const detection_out_t &det, int idx) { return det.detections[idx]; })
+        .def("__iter__", [](std::shared_ptr<detection_out_t> &v)
+        {
+            const detection_t *detection_vec = v->detections;
+            return py::make_iterator(&detection_vec[0], &detection_vec[v->detection_count]);
+        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
     py::class_<detection_t>(m, "Detection")
