@@ -30,21 +30,31 @@ void init_binding_nnet_packet(pybind11::module& m){
         }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
+    py::class_<detection_out_t, std::shared_ptr<detection_out_t>>(m, "Detections")
+        .def_readonly("size", &detection_out_t::detection_count)
+        .def("__len__",  [](const detection_out_t &det) { return det.detection_count; })
+        .def("__getitem__", [](const detection_out_t &det, int idx) { return det.detections[idx]; })
+        .def("__iter__", [](std::shared_ptr<detection_out_t> &v)
+        {
+            const detection_t *detection_vec = v->detections;
+            return py::make_iterator(&detection_vec[0], &detection_vec[v->detection_count]);
+        }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
+        ;
 
     // for NNET_PACKET in nnet_packets:
     py::class_<NNetPacket, std::shared_ptr<NNetPacket>>(m, "NNetPacket")
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(unsigned)>(&PyNNetPacket::getTensor), py::return_value_policy::take_ownership)
         .def("get_tensor", static_cast<py::array* (NNetPacket::*)(const std::string&)>(&PyNNetPacket::getTensorByName), py::return_value_policy::take_ownership)
+        .def("__getitem__", static_cast<py::array* (NNetPacket::*)(unsigned)>(&PyNNetPacket::getTensor), py::return_value_policy::take_ownership)
+        .def("__getitem__", static_cast<py::array* (NNetPacket::*)(const std::string&)>(&PyNNetPacket::getTensorByName), py::return_value_policy::take_ownership)
         // .def("entries", &NNetPacket::getTensorEntryContainer, py::return_value_policy::copy)
         .def("getMetadata", &NNetPacket::getMetadata, py::return_value_policy::copy)
         .def("getOutputsList", static_cast<std::list<py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsList), py::return_value_policy::take_ownership)     
         .def("getOutputsDict", static_cast<std::map<std::string, py::array*> (NNetPacket::*)()>(&PyNNetPacket::getOutputsDict), py::return_value_policy::take_ownership)     
         .def("getTensorsSize", &NNetPacket::getTensorsSize, py::return_value_policy::copy)     
-        .def("getDetectionCount", &NNetPacket::getDetectionCount, py::return_value_policy::copy)
-        .def("getDetectedObject",  &NNetPacket::getDetectedObject, py::return_value_policy::copy)
         .def("getOutputLayersInfo", &NNetPacket::getOutputLayersInfo, py::return_value_policy::copy)
         .def("getInputLayersInfo", &NNetPacket::getInputLayersInfo, py::return_value_policy::copy)
-    
+        .def("getDetectedObjects", &NNetPacket::getDetectedObjects)  
         ;
     
     py::class_<TensorDataType>(m, "TensorDataType")
@@ -190,7 +200,7 @@ py::array* PyNNetPacket::getTensor(unsigned index)
 {
     assert(index < _tensors_info.size());
     TensorInfo ti = _tensors_info[index];
-    unsigned char * data = _tensors_raw_data->data.data();
+    unsigned char * data = _tensors_raw_data->data->data();
     return _getTensorPythonNumpyArray(data, ti);
 }
 
