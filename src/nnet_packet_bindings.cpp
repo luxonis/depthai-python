@@ -55,7 +55,22 @@ void init_binding_nnet_packet(pybind11::module& m){
         })
         ;
 
+    py::enum_<dimension>(m, "dimension")
+        .value("W", dimension::W)
+        .value("H", dimension::H)
+        .value("C ", dimension::C)
+        .value("N", dimension::N)
+        .value("B", dimension::B)
+        .value("WIDTH", dimension::WIDTH)
+        .value("HEIGHT", dimension::HEIGHT)
+        .value("CHANNEL", dimension::CHANNEL)
+        .value("NUMBER", dimension::NUMBER)
+        .value("BATCH", dimension::BATCH)
+        .export_values()
+        ;
+
     py::class_<TensorInfo>(m, "TensorInfo")
+        .def("get_dimension", &TensorInfo::get_dimension)
         .def_readonly("tensor_name", &TensorInfo::tensor_name)
         .def_readonly("tensor_dimensions", &TensorInfo::tensor_dimensions)
         .def_readonly("tensor_strides", &TensorInfo::tensor_strides)
