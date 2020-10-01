@@ -38,11 +38,20 @@ find_package(pybind11 CONFIG REQUIRED)
 # Add files for python module
 pybind11_add_module(${TARGET_NAME} 
     src/py_bindings.cpp
-    src/host_data_packet_bindings.cpp
-    src/nnet_packet_bindings.cpp
-    src/py_tensor_entry_container_iterator.cpp
-    src/device_bindings.cpp
+    #src/host_data_packet_bindings.cpp
+    #src/nnet_packet_bindings.cpp
+    #src/py_tensor_entry_container_iterator.cpp
+    #src/device_bindings.cpp
+    src/XLinkConnectionBindings.cpp
+    src/DeviceBindings.cpp
+    src/DatatypeBindings.cpp
+    src/DataQueueBindings.cpp
+    src/pipeline/PipelineBindings.cpp
+    src/pipeline/NodeBindings.cpp
 )
+
+# Add include directory (src)
+target_include_directories(${TARGET_NAME} PRIVATE src)
 
 # Link with libraries
 target_link_libraries(${TARGET_NAME} 

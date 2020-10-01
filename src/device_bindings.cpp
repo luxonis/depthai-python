@@ -4,14 +4,14 @@
 #include <iostream>
 
 //depthai-core
-#include "depthai/host_capture_command.hpp"
+#include "depthai/device.hpp"
+//#include "depthai/host_capture_command.hpp"
 
 //depthai-shared
-#include "depthai-shared/metadata/capture_metadata.hpp"
+//#include "depthai-shared/metadata/capture_metadata.hpp"
 
 //project
 #include "pybind11_common.hpp"
-#include <boost/algorithm/string/replace.hpp>
 
 
 
@@ -21,6 +21,8 @@ namespace py = pybind11;
 
 void init_binding_device(pybind11::module& m){
       
+    using namespace dai;
+
     py::class_<Device>(m, "Device")
         .def(py::init<>())
         .def(py::init<std::string, bool>())
