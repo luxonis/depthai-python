@@ -14,7 +14,9 @@
 
 
 namespace py = pybind11;
-
+using TensorInfo = dai::TensorInfo;
+using Detection = dai::Detection;
+using Detections = dai::Detections;
 
 PYBIND11_MAKE_OPAQUE(std::list<std::shared_ptr<NNetPacket>>);
 
@@ -46,27 +48,26 @@ void init_binding_nnet_packet(pybind11::module& m){
         .def("getDetectedObjects", &NNetPacket::getDetectedObjects)  
         ;
     
-    py::class_<TensorDataType>(m, "TensorDataType")
-        .def("__str__", [](const TensorDataType& v) {
-            return type_to_string.at(v);
+    py::class_<TensorInfo::TensorDataType>(m, "TensorDataType")
+        .def("__str__", [](const TensorInfo::TensorDataType& v) {
+            return TensorInfo::type_to_string.at(v);
         })
-        .def("__repr__", [](const TensorDataType& v) {
-            return type_to_string.at(v);
+        .def("__repr__", [](const TensorInfo::TensorDataType& v) {
+            return TensorInfo::type_to_string.at(v);
         })
         ;
 
-    py::enum_<dimension>(m, "dimension")
-        .value("W", dimension::W)
-        .value("H", dimension::H)
-        .value("C ", dimension::C)
-        .value("N", dimension::N)
-        .value("B", dimension::B)
-        .value("WIDTH", dimension::WIDTH)
-        .value("HEIGHT", dimension::HEIGHT)
-        .value("CHANNEL", dimension::CHANNEL)
-        .value("NUMBER", dimension::NUMBER)
-        .value("BATCH", dimension::BATCH)
-        .export_values()
+    py::enum_<TensorInfo::Dimension>(m, "Dimension")
+        .value("W", TensorInfo::Dimension::W)
+        .value("H", TensorInfo::Dimension::H)
+        .value("C ", TensorInfo::Dimension::C)
+        .value("N", TensorInfo::Dimension::N)
+        .value("B", TensorInfo::Dimension::B)
+        .value("WIDTH", TensorInfo::Dimension::WIDTH)
+        .value("HEIGHT", TensorInfo::Dimension::HEIGHT)
+        .value("CHANNEL", TensorInfo::Dimension::CHANNEL)
+        .value("NUMBER", TensorInfo::Dimension::NUMBER)
+        .value("BATCH", TensorInfo::Dimension::BATCH)
         ;
 
     py::class_<TensorInfo>(m, "TensorInfo")
@@ -101,38 +102,38 @@ void init_binding_nnet_packet(pybind11::module& m){
         })
         ;
 
-    py::class_<detection_out_t, std::shared_ptr<detection_out_t>>(m, "Detections")
-        .def_readonly("size", &detection_out_t::detection_count)
-        .def("__len__",  [](const detection_out_t &det) { return det.detection_count; })
-        .def("__getitem__", [](const detection_out_t &det, int idx) { return det.detections[idx]; })
-        .def("__iter__", [](std::shared_ptr<detection_out_t> &v)
+    py::class_<Detections, std::shared_ptr<Detections>>(m, "Detections")
+        .def_readonly("size", &Detections::detection_count)
+        .def("__len__",  [](const Detections &det) { return det.detection_count; })
+        .def("__getitem__", [](const Detections &det, int idx) { return det.detections[idx]; })
+        .def("__iter__", [](std::shared_ptr<Detections> &v)
         {
-            const detection_t *detection_vec = v->detections;
+            const Detection *detection_vec = v->detections;
             return py::make_iterator(&detection_vec[0], &detection_vec[v->detection_count]);
         }, py::keep_alive<0, 1>()) /* Keep list alive while iterator is used */
         ;
 
-    py::class_<detection_t>(m, "Detection")
-        .def_readonly("label", &detection_t::label)
-        .def_readonly("confidence", &detection_t::confidence)
-        .def_readonly("x_min", &detection_t::x_min)
-        .def_readonly("y_min", &detection_t::y_min)
-        .def_readonly("x_max", &detection_t::x_max)
-        .def_readonly("y_max", &detection_t::y_max)
-        .def_readonly("depth_x", &detection_t::depth_x)
-        .def_readonly("depth_y", &detection_t::depth_y)
-        .def_readonly("depth_z", &detection_t::depth_z)
+    py::class_<Detection>(m, "Detection")
+        .def_readonly("label", &Detection::label)
+        .def_readonly("confidence", &Detection::confidence)
+        .def_readonly("x_min", &Detection::x_min)
+        .def_readonly("y_min", &Detection::y_min)
+        .def_readonly("x_max", &Detection::x_max)
+        .def_readonly("y_max", &Detection::y_max)
+        .def_readonly("depth_x", &Detection::depth_x)
+        .def_readonly("depth_y", &Detection::depth_y)
+        .def_readonly("depth_z", &Detection::depth_z)
         .def("get_dict", []() {
                 py::dict d;
-                d["label"] = &detection_t::label;
-                d["confidence"] = &detection_t::confidence;
-                d["x_min"] = &detection_t::x_min;
-                d["y_min"] = &detection_t::y_min;
-                d["x_max"] = &detection_t::x_max;
-                d["y_max"] = &detection_t::y_max;
-                d["depth_x"] = &detection_t::depth_x;
-                d["depth_y"] = &detection_t::depth_y;
-                d["depth_z"] = &detection_t::depth_z;
+                d["label"] = &Detection::label;
+                d["confidence"] = &Detection::confidence;
+                d["x_min"] = &Detection::x_min;
+                d["y_min"] = &Detection::y_min;
+                d["x_max"] = &Detection::x_max;
+                d["y_max"] = &Detection::y_max;
+                d["depth_x"] = &Detection::depth_x;
+                d["depth_y"] = &Detection::depth_y;
+                d["depth_z"] = &Detection::depth_z;
                 return d;
             })
         ;
@@ -152,15 +153,15 @@ template <>
     };
 }} // namespace pybind11::detail
 
-const std::map<TensorDataType, std::string> type_to_numpy_format = {
-    {TensorDataType::_fp16,     pybind11::format_descriptor<float16>::format()},
-    {TensorDataType::_u8f,      pybind11::format_descriptor<std::uint8_t>::format()},
-    {TensorDataType::_int,      pybind11::format_descriptor<std::int32_t>::format()},
-    {TensorDataType::_fp32,     pybind11::format_descriptor<float>::format()},
-    {TensorDataType::_i8,       pybind11::format_descriptor<std::int8_t>::format()},
+static const std::map<TensorInfo::TensorDataType, std::string> type_to_numpy_format = {
+    {TensorInfo::TensorDataType::_fp16,     pybind11::format_descriptor<float16>::format()},
+    {TensorInfo::TensorDataType::_u8f,      pybind11::format_descriptor<std::uint8_t>::format()},
+    {TensorInfo::TensorDataType::_int,      pybind11::format_descriptor<std::int32_t>::format()},
+    {TensorInfo::TensorDataType::_fp32,     pybind11::format_descriptor<float>::format()},
+    {TensorInfo::TensorDataType::_i8,       pybind11::format_descriptor<std::int8_t>::format()},
 };
 
-std::string type_to_npy_format_descriptor(const TensorDataType& type)
+static std::string type_to_npy_format_descriptor(const TensorInfo::TensorDataType& type)
 {
     auto it = type_to_numpy_format.find(type);
     assert(it != type_to_numpy_format.end());
@@ -179,7 +180,7 @@ static py::array* _getTensorPythonNumpyArray(unsigned char *data, TensorInfo ti)
     py::array* result = nullptr;
 
     ssize_t              ndim    = ti.tensor_dimensions.size();
-    ssize_t              element_size = c_type_size.at(ti.tensor_data_type);
+    ssize_t              element_size = TensorInfo::c_type_size.at(ti.tensor_data_type);
     std::string          numpy_format_descriptor = type_to_npy_format_descriptor(ti.tensor_data_type);
     std::vector<ssize_t> shape;
     std::vector<ssize_t> strides;
