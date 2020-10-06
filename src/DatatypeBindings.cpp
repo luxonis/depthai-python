@@ -13,6 +13,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     // Bind RawBuffer
     py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
+        .def(py::init<>())
         .def_readwrite("data", &RawBuffer::data)
         ;
 
