@@ -5,6 +5,8 @@
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
+#include "depthai/pipeline/node/VideoEncoder.hpp"
+
 
 void NodeBindings::bind(pybind11::module& m){
 
@@ -21,6 +23,8 @@ void NodeBindings::bind(pybind11::module& m){
 
     py::class_<Node, std::shared_ptr<Node>>(m, "Node");
 
+
+    // XLinkIn node
     py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn")
         .def_readonly("out", &XLinkIn::out)
         .def("setStreamName", &XLinkIn::setStreamName)
@@ -28,15 +32,16 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setNumFrames",  &XLinkIn::setNumFrames)   
         ;
 
-
+    // XLinkOut node
     py::class_<XLinkOut, Node, std::shared_ptr<XLinkOut>>(m, "XLinkOut")
-        .def_readonly("input", &XLinkOut::in)
+        .def_readonly("input", &XLinkOut::input)
         .def("setStreamName", &XLinkOut::setStreamName)
         .def("setFpsLimit", &XLinkOut::setFpsLimit)
         ;
 
+    // NeuralNetwork node
     py::class_<NeuralNetwork, Node, std::shared_ptr<NeuralNetwork>>(m, "NeuralNetwork")
-        .def_readonly("input", &NeuralNetwork::in)
+        .def_readonly("input", &NeuralNetwork::input)
         .def_readonly("out", &NeuralNetwork::out)
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
@@ -66,6 +71,8 @@ void NodeBindings::bind(pybind11::module& m){
         .export_values()
         ;
         
+
+    // ColorCamera node
     py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
         .def_readonly("video", &ColorCamera::video)
         .def_readonly("preview", &ColorCamera::preview)
@@ -78,6 +85,42 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
 
+    // VideoEncoder props
+    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
+    videoEncoderProperties
+        .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
+        .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
+        .def_readwrite("maxBitrate", &VideoEncoderProperties::maxBitrate)
+        .def_readwrite("numBFrames", &VideoEncoderProperties::numBFrames)
+        .def_readwrite("numFramesPool", &VideoEncoderProperties::numFramesPool)
+        .def_readwrite("profile", &VideoEncoderProperties::profile)
+        .def_readwrite("quality", &VideoEncoderProperties::quality)
+        .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
+        .def_readwrite("width", &VideoEncoderProperties::width)
+        .def_readwrite("height", &VideoEncoderProperties::height)
+        ;
+
+    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile")
+        .value("H264_BASELINE", VideoEncoderProperties::Profile::H264_BASELINE)
+        .value("H264_HIGH", VideoEncoderProperties::Profile::H264_HIGH)
+        .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
+        .value("H265_MAIN", VideoEncoderProperties::Profile::H265_MAIN)
+        .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
+        .export_values()
+        ;
+
+    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode")
+        .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
+        .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
+        .export_values()
+        ;     
+
+    // VideoEncoder node
+    py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder")
+        .def_readonly("input", &VideoEncoder::input)
+        .def_readonly("bitstream", &VideoEncoder::bitstream)
+        .def("setDefaultProfilePreset", &VideoEncoder::setDefaultProfilePreset)
+        ;
 
 
 }
