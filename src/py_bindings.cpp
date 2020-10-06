@@ -10,7 +10,7 @@
 // pybind11
 
 // depthai-core
-#include "depthai/device.hpp"
+#include "depthai/Device.hpp"
 #include "depthai/build/version.hpp"
 
 // project
