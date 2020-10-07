@@ -1,5 +1,6 @@
 #include "DatatypeBindings.hpp"
 
+#include <unordered_map>
 #include <memory>
 
 // depthai-shared
@@ -7,15 +8,47 @@
 #include "depthai-shared/datatype/ImgFrame.hpp"
 #include "depthai-shared/datatype/NNTensor.hpp"
 
+
+//pybind
+#include <pybind11/stl_bind.h>
+
+
 void DatatypeBindings::bind(pybind11::module& m){
+
 
     using namespace dai;
 
     // Bind RawBuffer
+
+    /* No copy, numpy way
+    static std::unordered_map<void*, std::shared_ptr<RawBuffer>> pointers;
+    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
+        .def(py::init<>())
+        .def_property_readonly("data", 
+            [](std::shared_ptr<RawBuffer>& p){
+
+                auto size = p->data.size();
+                auto data = p->data.data();
+
+                // store this usage
+                pointers[p.get()] = p;
+                // Create a deleter
+                auto capsule = py::capsule(p.get(), [](void *m) { pointers.erase(m); });
+                
+                // return numpy array which points to this data
+                return py::array(size, data, capsule);
+            }
+        )
+        ;
+    */
+
+    // No copy, opaque std::vector<std::uint8_t> way
+    py::bind_vector<std::vector<std::uint8_t>>(m, "VectorByte");
     py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
         .def(py::init<>())
         .def_readwrite("data", &RawBuffer::data)
         ;
+
 
 
     // Bind ImgFrame
@@ -106,7 +139,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .export_values()
         ;
         
-    py::enum_<TensorInfo::StorageOrder>(tensorInfo, "TensorInfo")
+    py::enum_<TensorInfo::StorageOrder>(tensorInfo, "StorageOrder")
         .value("NHWC", TensorInfo::StorageOrder::NHWC)
         .value("NHCW", TensorInfo::StorageOrder::NHCW)
         .value("NCHW", TensorInfo::StorageOrder::NCHW)

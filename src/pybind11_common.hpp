@@ -7,6 +7,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
+#include <cstdint>
+
+// Opaque types
+PYBIND11_MAKE_OPAQUE(std::vector<std::uint8_t>);
 
 
 #include "tl/optional.hpp"
@@ -17,3 +21,5 @@ namespace pybind11 { namespace detail {
 }}
 
 namespace py = pybind11;
+
+
