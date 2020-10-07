@@ -72,6 +72,16 @@ void init_binding_device(pybind11::module& m){
         )
 
         .def(
+            "send_camera_control",
+            &Device::send_camera_control,
+            "Function to send an ISP 3A camera control command. "
+            "args: 'Cam3A.__members__', 'Isp3A.__members__', extra_args: 'string, space separated values https://git.io/JUpnJ '",
+            py::arg("camera_id"),
+            py::arg("command_id"),
+            py::arg("extra_args")
+        )
+
+        .def(
             "get_nn_to_depth_bbox_mapping",
             &Device::get_nn_to_depth_bbox_mapping,
             "Returns NN bounding-box to depth mapping as a dict of coords: off_x, off_y, max_w, max_h."
@@ -125,6 +135,52 @@ void init_binding_device(pybind11::module& m){
         .value("AF_MODE_CONTINUOUS_VIDEO", CaptureMetadata::AutofocusMode::AF_MODE_CONTINUOUS_VIDEO)
         .value("AF_MODE_CONTINUOUS_PICTURE", CaptureMetadata::AutofocusMode::AF_MODE_CONTINUOUS_PICTURE)
         .value("AF_MODE_EDOF", CaptureMetadata::AutofocusMode::AF_MODE_EDOF)
+    ;
+
+    py::class_<CameraControl> cameraControl(m, "CameraControl");
+
+    py::enum_<CameraControl::CamId>(cameraControl, "CamId")
+        .value("RGB",   CameraControl::CamId::RGB)
+        .value("LEFT",  CameraControl::CamId::LEFT)
+        .value("RIGHT", CameraControl::CamId::RIGHT)
+    ;
+
+    py::enum_<CameraControl::Command>(cameraControl, "Command")
+        .value("START_STREAM",             CameraControl::Command::START_STREAM)
+        .value("STOP_STREAM",              CameraControl::Command::STOP_STREAM)
+        .value("REQUEST_STILL",            CameraControl::Command::REQUEST_STILL)
+        .value("MOVE_LENS",                CameraControl::Command::MOVE_LENS)
+        .value("FOCUS_TRIGGER",            CameraControl::Command::FOCUS_TRIGGER)
+        .value("AE_MANUAL",                CameraControl::Command::AE_MANUAL)
+        .value("AE_AUTO",                  CameraControl::Command::AE_AUTO)
+        .value("SET_AWB_MODE",             CameraControl::Command::SET_AWB_MODE)
+        .value("SCENE_MODES",              CameraControl::Command::SCENE_MODES)
+        .value("ANTIBANDING_MODES",        CameraControl::Command::ANTIBANDING_MODES)
+        .value("EXPOSURE_COMPENSATION",    CameraControl::Command::EXPOSURE_COMPENSATION)
+        .value("AE_LOCK",                  CameraControl::Command::AE_LOCK)
+        .value("AE_TARGET_FPS_RANGE",      CameraControl::Command::AE_TARGET_FPS_RANGE)
+        .value("AWB_LOCK",                 CameraControl::Command::AWB_LOCK)
+        .value("CAPTURE_INTENT",           CameraControl::Command::CAPTURE_INTENT)
+        .value("CONTROL_MODE",             CameraControl::Command::CONTROL_MODE)
+        .value("FRAME_DURATION",           CameraControl::Command::FRAME_DURATION)
+        .value("SENSITIVITY",              CameraControl::Command::SENSITIVITY)
+        .value("EFFECT_MODE",              CameraControl::Command::EFFECT_MODE)
+        .value("AF_MODE",                  CameraControl::Command::AF_MODE)
+        .value("NOISE_REDUCTION_STRENGTH", CameraControl::Command::NOISE_REDUCTION_STRENGTH)
+        .value("SATURATION",               CameraControl::Command::SATURATION)
+        .value("BRIGHTNESS",               CameraControl::Command::BRIGHTNESS)
+        .value("STREAM_FORMAT",            CameraControl::Command::STREAM_FORMAT)
+        .value("CAM_RESOLUTION",           CameraControl::Command::CAM_RESOLUTION)
+        .value("SHARPNESS",                CameraControl::Command::SHARPNESS)
+        .value("CUSTOM_USECASE",           CameraControl::Command::CUSTOM_USECASE)
+        .value("CUSTOM_CAPT_MODE",         CameraControl::Command::CUSTOM_CAPT_MODE)
+        .value("CUSTOM_EXP_BRACKETS",      CameraControl::Command::CUSTOM_EXP_BRACKETS)
+        .value("CUSTOM_CAPTURE",           CameraControl::Command::CUSTOM_CAPTURE)
+        .value("CONTRAST",                 CameraControl::Command::CONTRAST)
+        .value("AE_REGION",                CameraControl::Command::AE_REGION)
+        .value("AF_REGION",                CameraControl::Command::AF_REGION)
+        .value("LUMA_DENOISE",             CameraControl::Command::LUMA_DENOISE)
+        .value("CHROMA_DENOISE",           CameraControl::Command::CHROMA_DENOISE)
     ;
 
 }
