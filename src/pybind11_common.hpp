@@ -10,7 +10,7 @@
 #include <cstdint>
 
 // Opaque types
-PYBIND11_MAKE_OPAQUE(std::vector<std::uint8_t>);
+//PYBIND11_MAKE_OPAQUE(std::vector<std::uint8_t>);
 
 
 #include "tl/optional.hpp"

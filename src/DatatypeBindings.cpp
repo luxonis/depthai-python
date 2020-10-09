@@ -10,7 +10,7 @@
 
 
 //pybind
-#include <pybind11/stl_bind.h>
+//#include <pybind11/stl_bind.h>
 
 
 void DatatypeBindings::bind(pybind11::module& m){
@@ -43,7 +43,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     */
 
     // No copy, opaque std::vector<std::uint8_t> way
-    py::bind_vector<std::vector<std::uint8_t>>(m, "VectorByte");
+    //py::bind_vector<std::vector<std::uint8_t>>(m, "VectorByte");
     py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
         .def(py::init<>())
         .def_readwrite("data", &RawBuffer::data)
