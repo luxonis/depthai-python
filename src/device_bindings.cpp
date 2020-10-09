@@ -114,6 +114,12 @@ void init_binding_device(pybind11::module& m){
             "Returns a vector defining how much the right camera is translated w.r.t left camera."
         )
 
+        .def(
+            "is_usb3",
+            &Device::is_usb3,
+            "Return true if connected over usb3 or else false."
+        )
+
 
         
         ;
