@@ -134,6 +134,12 @@ void init_binding_device(pybind11::module& m){
             "get_mx_id",
             &Device::get_mx_id,
             "Return the Myraid X serial number of the device."
+        )
+        
+        .def(
+            "is_eeprom_loaded",
+            &Device::is_eeprom_loaded,
+            "Return true if EEPROM has both intrinsic matrixes."
         );
 
 
