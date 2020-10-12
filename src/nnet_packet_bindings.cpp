@@ -50,21 +50,23 @@ void init_binding_nnet_packet(pybind11::module& m){
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
     tensorInfo.def("get_dimension", &TensorInfo::get_dimension);
     tensorInfo.def_readonly("name", &TensorInfo::name);
+    tensorInfo.def_readonly("order", &TensorInfo::order);
     tensorInfo.def_readonly("dimensions", &TensorInfo::dimensions);
     tensorInfo.def_readonly("strides", &TensorInfo::strides);
     tensorInfo.def_readonly("data_type", &TensorInfo::data_type);
     tensorInfo.def_readonly("offset", &TensorInfo::offset);
     tensorInfo.def_readonly("element_size", &TensorInfo::element_size);
     tensorInfo.def_readonly("index", &TensorInfo::index);
-    tensorInfo.def("get_dict", []() {
+    tensorInfo.def("get_dict", [](TensorInfo &self) {
         py::dict d;
-        d["name"] = &TensorInfo::name;
-        d["dimensions"] = &TensorInfo::dimensions;
-        d["strides"] = &TensorInfo::strides;
-        d["data_type"] = &TensorInfo::data_type;
-        d["offset"] = &TensorInfo::offset;
-        d["element_size"] = &TensorInfo::element_size;
-        d["index"] = &TensorInfo::index;
+        d["name"] = self.name;
+        d["order"] = self.order;
+        d["dimensions"] = self.dimensions;
+        d["strides"] = self.strides;
+        d["data_type"] = self.data_type;
+        d["offset"] = self.offset;
+        d["element_size"] = self.element_size;
+        d["index"] = self.index;
         return d;
     });
     tensorInfo.def("__str__", [](const TensorInfo& v) {
@@ -121,17 +123,17 @@ void init_binding_nnet_packet(pybind11::module& m){
         .def_readonly("depth_x", &Detection::depth_x)
         .def_readonly("depth_y", &Detection::depth_y)
         .def_readonly("depth_z", &Detection::depth_z)
-        .def("get_dict", []() {
+        .def("get_dict", [](Detection &self) {
                 py::dict d;
-                d["label"] = &Detection::label;
-                d["confidence"] = &Detection::confidence;
-                d["x_min"] = &Detection::x_min;
-                d["y_min"] = &Detection::y_min;
-                d["x_max"] = &Detection::x_max;
-                d["y_max"] = &Detection::y_max;
-                d["depth_x"] = &Detection::depth_x;
-                d["depth_y"] = &Detection::depth_y;
-                d["depth_z"] = &Detection::depth_z;
+                d["label"] = self.label;
+                d["confidence"] = self.confidence;
+                d["x_min"] = self.x_min;
+                d["y_min"] = self.y_min;
+                d["x_max"] = self.x_max;
+                d["y_max"] = self.y_max;
+                d["depth_x"] = self.depth_x;
+                d["depth_y"] = self.depth_y;
+                d["depth_z"] = self.depth_z;
                 return d;
             })
         ;
