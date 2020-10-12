@@ -130,9 +130,11 @@ void init_binding_device(pybind11::module& m){
             "Return true if connected over usb3 or else false."
         )
 
-
-        
-        ;
+        .def(
+            "get_mx_id",
+            &Device::get_mx_id,
+            "Return the Myraid X serial number of the device."
+        );
 
 
     py::enum_<CaptureMetadata::AutofocusMode>(m, "AutofocusMode")
