@@ -8,6 +8,7 @@
 #include <vector>
 
 // pybind11
+#include "pybind11_common.hpp"
 
 // depthai-core
 #include "depthai/Device.hpp"
@@ -18,6 +19,7 @@
 //#include "nnet_packet_bindings.hpp"
 //#include "py_tensor_entry_container_iterator.hpp"
 //#include "device_bindings.hpp"
+
 
 #include "pipeline/PipelineBindings.hpp"
 #include "pipeline/NodeBindings.hpp"

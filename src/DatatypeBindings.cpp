@@ -6,7 +6,7 @@
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/ImgFrame.hpp"
-#include "depthai-shared/datatype/NNTensor.hpp"
+#include "depthai-shared/datatype/NNData.hpp"
 
 
 //pybind
@@ -112,11 +112,11 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
 
-    // NNTensor
-    py::class_<NNTensor, RawBuffer, std::shared_ptr<NNTensor>> nnTensor(m, "NNTensor");
-    nnTensor
-        .def_readwrite("tensors", &NNTensor::tensors)
-        .def_readwrite("batchSize", &NNTensor::batchSize)
+    // NNData
+    py::class_<NNData, RawBuffer, std::shared_ptr<NNData>> nnData(m, "NNData");
+    nnData
+        .def_readwrite("tensors", &NNData::tensors)
+        .def_readwrite("batchSize", &NNData::batchSize)
         ;
 
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
@@ -136,7 +136,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("INT", TensorInfo::DataType::INT)
         .value("FP32", TensorInfo::DataType::FP32)
         .value("I8", TensorInfo::DataType::I8)
-        .export_values()
         ;
         
     py::enum_<TensorInfo::StorageOrder>(tensorInfo, "StorageOrder")
@@ -154,7 +153,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("C", TensorInfo::StorageOrder::C)
         .value("H", TensorInfo::StorageOrder::H)
         .value("W", TensorInfo::StorageOrder::W)
-        .export_values()
         ;
 
 
