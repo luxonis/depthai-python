@@ -115,12 +115,14 @@ void DatatypeBindings::bind(pybind11::module& m){
     // NNTensor
     py::class_<NNTensor, RawBuffer, std::shared_ptr<NNTensor>> nnTensor(m, "NNTensor");
     nnTensor
+        .def(py::init<>())
         .def_readwrite("tensors", &NNTensor::tensors)
         .def_readwrite("batchSize", &NNTensor::batchSize)
         ;
 
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
     tensorInfo
+        .def(py::init<>())
         .def_readwrite("order", &TensorInfo::order)
         .def_readwrite("dataType", &TensorInfo::dataType)
         .def_readwrite("numDimensions", &TensorInfo::numDimensions)
