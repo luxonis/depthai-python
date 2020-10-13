@@ -62,13 +62,11 @@ void NodeBindings::bind(pybind11::module& m){
     py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution")
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
-        .export_values()
         ;
 
     py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder")
         .value("BGR", ColorCameraProperties::ColorOrder::BGR)
         .value("RGB", ColorCameraProperties::ColorOrder::RGB)
-        .export_values()
         ;
         
 
@@ -106,13 +104,11 @@ void NodeBindings::bind(pybind11::module& m){
         .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
         .value("H265_MAIN", VideoEncoderProperties::Profile::H265_MAIN)
         .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
-        .export_values()
         ;
 
     py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode")
         .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
-        .export_values()
         ;     
 
     // VideoEncoder node

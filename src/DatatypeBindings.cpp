@@ -96,7 +96,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("BITSTREAM", ImgFrame::Type::BITSTREAM)
         .value("HDR", ImgFrame::Type::HDR)
         .value("NONE", ImgFrame::Type::NONE)
-        .export_values()
         ;
 
     py::class_<ImgFrame::Specs>(imgFrame, "Specs")
@@ -115,12 +114,14 @@ void DatatypeBindings::bind(pybind11::module& m){
     // NNData
     py::class_<NNData, RawBuffer, std::shared_ptr<NNData>> nnData(m, "NNData");
     nnData
+        .def(py::init<>())
         .def_readwrite("tensors", &NNData::tensors)
         .def_readwrite("batchSize", &NNData::batchSize)
         ;
 
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
     tensorInfo
+        .def(py::init<>())
         .def_readwrite("order", &TensorInfo::order)
         .def_readwrite("dataType", &TensorInfo::dataType)
         .def_readwrite("numDimensions", &TensorInfo::numDimensions)
