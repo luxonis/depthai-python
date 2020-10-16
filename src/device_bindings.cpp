@@ -136,9 +136,11 @@ void init_binding_device(pybind11::module& m){
             "Return the Myraid X serial number of the device."
         )
         
-        .def("deinit",
-            &Device::~Device,
-            "Destory the device.");
+        .def(
+            "is_eeprom_loaded",
+            &Device::is_eeprom_loaded,
+            "Return true if EEPROM has both intrinsic matrixes."
+        );
 
 
     py::enum_<CaptureMetadata::AutofocusMode>(m, "AutofocusMode")
