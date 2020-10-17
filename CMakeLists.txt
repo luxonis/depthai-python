@@ -53,7 +53,10 @@ target_link_libraries(${TARGET_NAME}
 
 # Add bindings revision
 target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
-# Add commit hash
+# Add commit hash, default to "dev"
+if(NOT DEPTHAI_PYTHON_COMMIT_HASH)
+    set(DEPTHAI_PYTHON_COMMIT_HASH dev)
+endif()
 if(DEPTHAI_PYTHON_COMMIT_HASH)
     target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 endif()
