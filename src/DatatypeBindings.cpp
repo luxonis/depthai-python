@@ -209,6 +209,8 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setLayer", py::overload_cast<const std::string&, std::vector<double>>(&NNData::setLayer))
         .def("getLayer", &NNData::getLayer)
         .def("hasLayer", &NNData::hasLayer)
+        .def("getAllLayerNames", &NNData::getAllLayerNames)
+        .def("getAllLayers", &NNData::getAllLayers)
         .def("getLayerDatatype", &NNData::getLayerDatatype)
         .def("getLayerUInt8", &NNData::getLayerUInt8)
         .def("getLayerFp16", &NNData::getLayerFp16)
