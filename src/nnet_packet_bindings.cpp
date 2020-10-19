@@ -218,7 +218,7 @@ py::array* PyNNetPacket::getTensor(unsigned index)
     {
         if(_NN_config[index]["output_format"] != std::string("raw"))
         {
-            assert(0 && "getTensor should be used only when [\"NN_config\"][\"output_format\"] is set to raw! https://docs.luxonis.com/api/#creating-blob-configuration-file");
+            throw std::runtime_error("getTensor should be used only when [\"NN_config\"][\"output_format\"] is set to raw! https://docs.luxonis.com/api/#creating-blob-configuration-file");
         }
     }
     assert(index < _tensors_info.size());
