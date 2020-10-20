@@ -20,6 +20,6 @@ struct PyNNetPacket : public NNetPacket {
 public:
     using NNetPacket::_tensors_raw_data;
     using NNetPacket::_tensor_name_to_index;
-
+    using NNetPacket::_NN_config;
 
 };
