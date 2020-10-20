@@ -214,7 +214,7 @@ static py::array* _getTensorPythonNumpyArray(unsigned char *data, TensorInfo ti)
 
 py::array* PyNNetPacket::getTensor(unsigned index)
 {
-    if(_NN_config[0].contains("output_format"))
+    if(_NN_config[index].contains("output_format"))
     {
         if(_NN_config[index]["output_format"] != std::string("raw"))
         {
