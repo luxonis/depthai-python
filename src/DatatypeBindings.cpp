@@ -203,10 +203,10 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
         .def(py::init<>())
         // setters
-        .def("setLayer", py::overload_cast<const std::string&, std::vector<std::uint8_t>>(&NNData::setLayer))
-        .def("setLayer", py::overload_cast<const std::string&, const std::vector<int>&>(&NNData::setLayer))
-        .def("setLayer", py::overload_cast<const std::string&, std::vector<float>>(&NNData::setLayer))
-        .def("setLayer", py::overload_cast<const std::string&, std::vector<double>>(&NNData::setLayer))
+        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<std::uint8_t>))&NNData::setLayer)
+        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer)
+        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer)
+        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer)
         .def("getLayer", &NNData::getLayer)
         .def("hasLayer", &NNData::hasLayer)
         .def("getAllLayerNames", &NNData::getAllLayerNames)
@@ -217,9 +217,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
         ;
-    
-
-
 
 
 }

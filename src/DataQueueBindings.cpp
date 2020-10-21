@@ -16,6 +16,7 @@ void DataQueueBindings::bind(pybind11::module& m){
 
     // Bind DataOutputQueue
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue")
+        .def("getName", &DataOutputQueue::getName)
         .def("get", [](DataOutputQueue& obj){
             
             std::shared_ptr<ADatatype> d = nullptr;
@@ -34,6 +35,7 @@ void DataQueueBindings::bind(pybind11::module& m){
 
     // Bind DataInputQueue
     py::class_<DataInputQueue, std::shared_ptr<DataInputQueue>>(m, "DataInputQueue")
+        .def("getName", &DataInputQueue::getName)
         .def("send", [](DataInputQueue& obj, std::shared_ptr<ADatatype> d){
             
             bool sent = false;
@@ -46,7 +48,6 @@ void DataQueueBindings::bind(pybind11::module& m){
 
             } while(!sent);
 
-            return d;
         })
         .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::RawBuffer> d){
             
@@ -60,7 +61,6 @@ void DataQueueBindings::bind(pybind11::module& m){
 
             } while(!sent);
 
-            return d;
         })
         ;
 
