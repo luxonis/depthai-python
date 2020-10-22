@@ -140,6 +140,18 @@ void init_binding_device(pybind11::module& m){
             "is_eeprom_loaded",
             &Device::is_eeprom_loaded,
             "Return true if EEPROM has both intrinsic matrixes."
+        )
+
+        .def(
+            "is_device_changed",
+            &Device::is_device_changed,
+            "Return true if device is swapped while running over watchdog thread."
+        )
+        
+        .def(
+            "reset_device_changed",
+            &Device::reset_device_changed,
+            "Sets device_changed var to false to detect the next swap while running over watchdog thread."
         );
 
 
