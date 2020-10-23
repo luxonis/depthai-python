@@ -152,6 +152,24 @@ void init_binding_device(pybind11::module& m){
             "reset_device_changed",
             &Device::reset_device_changed,
             "Sets device_changed var to false to detect the next swap while running over watchdog thread."
+        )
+        
+        .def(
+            "is_rgb_connected",
+            &Device::is_rgb_connected,
+            "Returns true if RGB camera is connected."
+        )
+        
+        .def(
+            "is_left_connected",
+            &Device::is_left_connected,
+            "Returns true if left stereo camera is connected."
+        )
+        
+        .def(
+            "is_right_connected",
+            &Device::is_right_connected,
+            "Returns true if right stereo camera is connected."
         );
 
 
