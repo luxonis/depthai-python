@@ -73,11 +73,13 @@ void init_binding_host_data_packet(pybind11::module& m){
 
 }
 
-
+// TODO - zero copy
+//https://github.com/pybind/pybind11/issues/323#issuecomment-575717041
+//https://github.com/pybind/pybind11/issues/1042#issuecomment-642215028
 py::array* PyHostDataPacket::getPythonNumpyArray()
 {
     assert(!dimensions.empty());
-    assert(!data.empty());
+    assert(!data->empty());
 
     Timer t;
 
@@ -103,7 +105,7 @@ py::array* PyHostDataPacket::getPythonNumpyArray()
         if (elem_size == 1)
         {
             result = new py::array(py::buffer_info(
-                        data.data(),                             /* data as contiguous array  */
+                        data->data(),                             /* data as contiguous array  */
                         sizeof(unsigned char),                   /* size of one scalar        */
                         py::format_descriptor<unsigned char>::format(), /* data type          */
                         ndim,                                    /* number of dimensions      */
@@ -114,7 +116,7 @@ py::array* PyHostDataPacket::getPythonNumpyArray()
         else if (elem_size == 2)
         {
             result = new py::array(py::buffer_info(
-                        data.data(),                             /* data as contiguous array  */
+                        data->data(),                             /* data as contiguous array  */
                         sizeof(std::uint16_t),                          /* size of one scalar        */
                         py::format_descriptor<std::uint16_t>::format(), /* data type          */
                         2, //ndim,                                    /* number of dimensions      */

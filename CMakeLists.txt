@@ -40,7 +40,6 @@ pybind11_add_module(${TARGET_NAME}
     src/py_bindings.cpp
     src/host_data_packet_bindings.cpp
     src/nnet_packet_bindings.cpp
-    src/py_tensor_entry_container_iterator.cpp
     src/device_bindings.cpp
 )
 
@@ -54,7 +53,10 @@ target_link_libraries(${TARGET_NAME}
 
 # Add bindings revision
 target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
-# Add commit hash
+# Add commit hash, default to "dev"
+if(NOT DEPTHAI_PYTHON_COMMIT_HASH)
+    set(DEPTHAI_PYTHON_COMMIT_HASH dev)
+endif()
 if(DEPTHAI_PYTHON_COMMIT_HASH)
     target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 endif()
