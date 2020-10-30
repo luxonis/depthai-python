@@ -170,6 +170,29 @@ void init_binding_device(pybind11::module& m){
             "is_right_connected",
             &Device::is_right_connected,
             "Returns true if right stereo camera is connected."
+        )
+        .def(
+            "set_eeprom",
+            [](Device& device, py::dict config)
+            {
+                // str(dict) for string representation uses ['] , but JSON requires ["]
+                // fast & dirty solution:
+                std::string str = py::str(config);
+                boost::replace_all(str, "\'", "\"");
+                boost::replace_all(str, "None", "null");
+                boost::replace_all(str, "True", "true");
+                boost::replace_all(str, "False", "false");
+                // TODO: make better json serialization
+
+                return device.set_eeprom(str);
+            },
+            "Takes board config and calibration data as input and writes to eeprom",
+            py::arg("config") = py::dict()
+        )
+        .def(
+            "get_pipeline",
+            &Device::get_pipeline,
+            "Returns shared ptr of CNNHostPipeline created using cerate_pipeline."
         );
 
 
