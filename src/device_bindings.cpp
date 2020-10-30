@@ -172,7 +172,7 @@ void init_binding_device(pybind11::module& m){
             "Returns true if right stereo camera is connected."
         )
         .def(
-            "set_eeprom",
+            "write_eeprom_data",
             [](Device& device, py::dict config)
             {
                 // str(dict) for string representation uses ['] , but JSON requires ["]
@@ -184,7 +184,7 @@ void init_binding_device(pybind11::module& m){
                 boost::replace_all(str, "False", "false");
                 // TODO: make better json serialization
 
-                return device.set_eeprom(str);
+                return device.write_eeprom_data(str);
             },
             "Takes board config and calibration data as input and writes to eeprom",
             py::arg("config") = py::dict()
