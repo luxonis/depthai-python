@@ -36,7 +36,7 @@ jobs:
           architecture: ${{ matrix.python-architecture }}
       - name: Append build hash if not a tagged commit
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
