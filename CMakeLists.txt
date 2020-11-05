@@ -20,7 +20,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
+project(${TARGET_NAME} VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Add depthai-cpp dependency
 add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
@@ -53,10 +53,13 @@ target_link_libraries(${TARGET_NAME}
 
 # Add bindings revision
 target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
-# Add commit hash, default to "dev"
-if(NOT DEPTHAI_PYTHON_COMMIT_HASH)
+
+# Add default commit hash (dev) if not build by CI
+if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)   
     set(DEPTHAI_PYTHON_COMMIT_HASH dev)
 endif()
+
+# Add compile definition for bindings
 if(DEPTHAI_PYTHON_COMMIT_HASH)
     target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 endif()
