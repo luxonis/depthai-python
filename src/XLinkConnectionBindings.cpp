@@ -23,13 +23,13 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
             [](deviceDesc_t& o){return std::string(o.name);},
             [](deviceDesc_t& o, std::string n){ std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE,(int) n.size()));}
         )
-
         ;
 
     py::enum_<XLinkDeviceState_t>(m, "XLinkDeviceState")
         .value("X_LINK_ANY_STATE", X_LINK_ANY_STATE)
         .value("X_LINK_BOOTED", X_LINK_BOOTED)
         .value("X_LINK_UNBOOTED", X_LINK_UNBOOTED)
+        .value("X_LINK_BOOTLOADER", X_LINK_BOOTLOADER)
         .export_values();
         ;
 
@@ -55,7 +55,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         .def(py::init<const DeviceInfo&, std::vector<std::uint8_t>>())
         .def(py::init<const DeviceInfo&, std::string>())
         .def(py::init<const DeviceInfo&>())
-        .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices)
+        .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice)
         ;
 
