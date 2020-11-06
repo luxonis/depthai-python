@@ -124,9 +124,76 @@ void init_binding_device(pybind11::module& m){
             "Returns a vector defining how much the right camera is translated w.r.t left camera."
         )
 
+        .def(
+            "is_usb3",
+            &Device::is_usb3,
+            "Return true if connected over usb3 or else false."
+        )
 
+        .def(
+            "get_mx_id",
+            &Device::get_mx_id,
+            "Return the Myraid X serial number of the device."
+        )
         
-        ;
+        .def(
+            "is_eeprom_loaded",
+            &Device::is_eeprom_loaded,
+            "Return true if EEPROM has both intrinsic matrixes."
+        )
+
+        .def(
+            "is_device_changed",
+            &Device::is_device_changed,
+            "Return true if device is swapped while running over watchdog thread."
+        )
+        
+        .def(
+            "reset_device_changed",
+            &Device::reset_device_changed,
+            "Sets device_changed var to false to detect the next swap while running over watchdog thread."
+        )
+        
+        .def(
+            "is_rgb_connected",
+            &Device::is_rgb_connected,
+            "Returns true if RGB camera is connected."
+        )
+        
+        .def(
+            "is_left_connected",
+            &Device::is_left_connected,
+            "Returns true if left stereo camera is connected."
+        )
+        
+        .def(
+            "is_right_connected",
+            &Device::is_right_connected,
+            "Returns true if right stereo camera is connected."
+        )
+        .def(
+            "write_eeprom_data",
+            [](Device& device, py::dict config)
+            {
+                // str(dict) for string representation uses ['] , but JSON requires ["]
+                // fast & dirty solution:
+                std::string str = py::str(config);
+                boost::replace_all(str, "\'", "\"");
+                boost::replace_all(str, "None", "null");
+                boost::replace_all(str, "True", "true");
+                boost::replace_all(str, "False", "false");
+                // TODO: make better json serialization
+
+                return device.write_eeprom_data(str);
+            },
+            "Takes board config and calibration data as input and writes to eeprom",
+            py::arg("config") = py::dict()
+        )
+        .def(
+            "get_pipeline",
+            &Device::get_pipeline,
+            "Returns shared ptr of CNNHostPipeline created using cerate_pipeline."
+        );
 
 
     py::enum_<CaptureMetadata::AutofocusMode>(m, "AutofocusMode")
