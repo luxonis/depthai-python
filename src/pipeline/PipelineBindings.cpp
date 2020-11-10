@@ -5,6 +5,8 @@
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
+#include "depthai/pipeline/node/MonoCamera.hpp"
+#include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 
 // depthai-shared
@@ -39,6 +41,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
+        .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
+        .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
         ;
     
 

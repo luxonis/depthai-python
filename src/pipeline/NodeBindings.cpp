@@ -4,6 +4,8 @@
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
+#include "depthai/pipeline/node/MonoCamera.hpp"
+#include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 
@@ -57,11 +59,13 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
         .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
         .def_readwrite("resolution", &ColorCameraProperties::resolution)
+        .def_readwrite("fps", &ColorCameraProperties::fps)
     ;
 
     py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution")
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
+        .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
         ;
 
     py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder")
@@ -76,12 +80,84 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("preview", &ColorCamera::preview)
         .def_readonly("still", &ColorCamera::still)
         .def("setCamId", &ColorCamera::setCamId)
+        .def("getCamId", &ColorCamera::getCamId)
         .def("setColorOrder", &ColorCamera::setColorOrder)
         .def("setInterleaved", &ColorCamera::setInterleaved)
         .def("setPreviewSize", &ColorCamera::setPreviewSize)
         .def("setResolution", &ColorCamera::setResolution)
+        .def("setFps", &ColorCamera::setFps)
         ;
 
+    // MonoCamera props
+    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
+    monoCameraProperties
+        .def_readwrite("camId",      &MonoCameraProperties::camId)
+        .def_readwrite("resolution", &MonoCameraProperties::resolution)
+        .def_readwrite("fps",        &MonoCameraProperties::fps)
+    ;
+
+    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution")
+        .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
+        .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
+        .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
+        ;
+
+    // MonoCamera node
+    py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera")
+        .def_readonly("out",  &MonoCamera::out)
+        .def("setCamId",      &MonoCamera::setCamId)
+        .def("getCamId",      &MonoCamera::getCamId)
+        .def("setResolution", &MonoCamera::setResolution)
+        .def("setFps",        &MonoCamera::setFps)
+        ;
+
+    // StereoDepth props
+    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties");
+    stereoDepthProperties
+        .def_readwrite("calibration",             &StereoDepthProperties::calibration)
+        .def_readwrite("median",                  &StereoDepthProperties::median)
+        .def_readwrite("confidenceThreshold",     &StereoDepthProperties::confidenceThreshold)
+        .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
+        .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
+        .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
+        .def_readwrite("rectifyMirrorFrame",      &StereoDepthProperties::rectifyMirrorFrame)
+        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
+        .def_readwrite("enableOutputRectified",   &StereoDepthProperties::enableOutputRectified)
+        .def_readwrite("enableOutputDepth",       &StereoDepthProperties::enableOutputDepth)
+        .def_readwrite("width",                   &StereoDepthProperties::width)
+        .def_readwrite("height",                  &StereoDepthProperties::height)
+        ;
+
+    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter")
+        .value("MEDIAN_OFF", StereoDepthProperties::MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", StereoDepthProperties::MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", StereoDepthProperties::MedianFilter::KERNEL_7x7)
+        ;
+
+    // StereoDepth node
+    py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth")
+        .def_readonly("left",           &StereoDepth::left)
+        .def_readonly("right",          &StereoDepth::right)
+        .def_readonly("depth",          &StereoDepth::depth)
+        .def_readonly("disparity",      &StereoDepth::disparity)
+        .def_readonly("syncedLeft",     &StereoDepth::syncedLeft)
+        .def_readonly("syncedRight",    &StereoDepth::syncedRight)
+        .def_readonly("rectifiedLeft",  &StereoDepth::rectifiedLeft)
+        .def_readonly("rectifiedRight", &StereoDepth::rectifiedRight)
+        .def("loadCalibrationFile",     &StereoDepth::loadCalibrationFile)
+        .def("loadCalibrationData",     &StereoDepth::loadCalibrationData)
+        .def("setInputResolution",      &StereoDepth::setInputResolution)
+        .def("setMedianFilter",         &StereoDepth::setMedianFilter)
+        .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold)
+        .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck)
+        .def("setSubpixel",             &StereoDepth::setSubpixel)
+        .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity)
+        .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor)
+        .def("setRectifyMirrorFrame",   &StereoDepth::setRectifyMirrorFrame)
+        .def("setOutputRectified",      &StereoDepth::setOutputRectified)
+        .def("setOutputDepth",          &StereoDepth::setOutputDepth)
+        ;
 
     // VideoEncoder props
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
