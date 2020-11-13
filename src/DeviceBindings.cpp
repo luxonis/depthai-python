@@ -13,6 +13,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def_static("getFirstAvailableDevice", &Device::getFirstAvailableDevice)
         .def_static("getAllAvailableDevices", &Device::getAllAvailableDevices)
         .def_static("getEmbeddedDeviceBinary", &Device::getEmbeddedDeviceBinary)
+        .def_static("getDeviceByMxId", &Device::getDeviceByMxId, py::arg("mxId"))
         .def(py::init<>())
         .def(py::init<bool>(), py::arg("usb2Mode"))
         .def(py::init<const char*>(), py::arg("pathToCmd"))
