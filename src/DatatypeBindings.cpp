@@ -24,44 +24,20 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     using namespace dai;
 
-    // Bind RawBuffer
-
-    /* No copy, numpy way
-    static std::unordered_map<void*, std::shared_ptr<RawBuffer>> pointers;
-    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
-        .def(py::init<>())
-        .def_property_readonly("data", 
-            [](std::shared_ptr<RawBuffer>& p){
-
-                auto size = p->data.size();
-                auto data = p->data.data();
-
-                // store this usage
-                pointers[p.get()] = p;
-                // Create a deleter
-                auto capsule = py::capsule(p.get(), [](void *m) { pointers.erase(m); });
-                
-                // return numpy array which points to this data
-                return py::array(size, data, capsule);
-            }
-        )
-        ;
-    */
-
-    // No copy, opaque std::vector<std::uint8_t> way
-
-
     // Bind Raw datatypes
-
-    //py::bind_vector<std::vector<std::uint8_t>>(m, "VectorByte");
     py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
         .def(py::init<>())
-        .def_readwrite("data", &RawBuffer::data)
+        .def_property("data", [](py::object &obj){
+            dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
+            return py::array_t<uint8_t>(a.data.size(), a.data.data(), obj);
+        }, [](py::object &obj, py::array_t<std::uint8_t, py::array::c_style> array){
+            dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
+            a.data = {array.data(), array.data() + array.size()};
+        })
         ;
 
 
-
-    // Bind ImgFrame
+    // Bind RawImgFrame
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame");
     rawImgFrame
         .def_readwrite("fb", &RawImgFrame::fb)
@@ -173,7 +149,13 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>>(m, "Buffer")
         .def(py::init<>())
-        .def("getData", &Buffer::getData)
+
+        // obj is "Python" object, which we used then to bind the numpy arrays lifespan to
+        .def("getData", [](py::object &obj){
+            // creates numpy array (zero-copy) which holds correct information such as shape, ...
+            dai::Buffer &a = obj.cast<dai::Buffer&>();
+            return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
+        })
         .def("setData", &Buffer::setData)
         ;
 
@@ -188,6 +170,33 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getWidth", &ImgFrame::getWidth)
         .def("getHeight", &ImgFrame::getHeight)
         .def("getType", &ImgFrame::getType)
+
+        /* TODO(themarpe) - Convinience function which constructs array with correct datatype, shape, ...
+        .def("getFrame", [](py::object &obj){
+            // obj is "Python" object, which we used then to bind the numpy view lifespan to
+            // creates numpy array (zero-copy) which holds correct information such as shape, ...
+            dai::ImgFrame &a = obj.cast<dai::ImgFrame&>();
+            
+            // shape
+            std::vector<std::size_t> shape = {a.getData().size()};
+
+            // TODO
+            switch(a.getType()){
+                case dai::RawImgFrame::Type::BITSTREAM :
+                    //shape = {return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
+                break;
+
+                case dai::RawImgFrame::Type::RGB888 :
+                    shape = {a.getWidth(), a.getHeight(), 3};
+                    //return py::array_t<uint8_t>(py::array::ShapeContainer(a.getWidth(), a.getHeight(), 3), a.getData().data(), obj);
+                break;
+
+            }
+            
+
+            return py::array_t<uint8_t>(shape, a.getData().data(), obj);
+        })
+        */
 
         // setters
         .def("setTimestamp", &ImgFrame::setTimestamp)
