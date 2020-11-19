@@ -147,6 +147,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("rectifiedRight", &StereoDepth::rectifiedRight)
         .def("loadCalibrationFile",     &StereoDepth::loadCalibrationFile)
         .def("loadCalibrationData",     &StereoDepth::loadCalibrationData)
+        .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration)
         .def("setInputResolution",      &StereoDepth::setInputResolution)
         .def("setMedianFilter",         &StereoDepth::setMedianFilter)
         .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold)
