@@ -36,12 +36,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         })
         ;
 
-    py::class_<Timestamp>(m, "Timestamp")
-        .def(py::init<>())
-        .def_readwrite("sec", &Timestamp::sec)
-        .def_readwrite("nsec", &Timestamp::nsec)
-        ;
-
 
     // Bind RawImgFrame
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame");
@@ -212,6 +206,12 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setWidth", &ImgFrame::setWidth)
         .def("setHeight", &ImgFrame::setHeight)
         .def("setType", &ImgFrame::setType)
+        ;
+
+    py::class_<Timestamp>(m, "Timestamp")
+        .def(py::init<>())
+        .def_readwrite("sec", &Timestamp::sec)
+        .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
     // Bind NNData

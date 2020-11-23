@@ -25,6 +25,7 @@
 #include "pipeline/NodeBindings.hpp"
 #include "XLinkConnectionBindings.hpp"
 #include "DeviceBindings.hpp"
+#include "DeviceBootloaderBindings.hpp"
 #include "DatatypeBindings.hpp"
 #include "DataQueueBindings.hpp"
 
@@ -48,6 +49,7 @@ PYBIND11_MODULE(depthai,m)
     PipelineBindings::bind(m);
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
+    DeviceBootloaderBindings::bind(m);
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
 
