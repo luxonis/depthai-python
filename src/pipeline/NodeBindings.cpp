@@ -6,6 +6,7 @@
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
+#include "depthai/pipeline/node/ImageManip.hpp"
 
 
 void NodeBindings::bind(pybind11::module& m){
@@ -13,14 +14,14 @@ void NodeBindings::bind(pybind11::module& m){
     using namespace dai;
     using namespace dai::node;
 
-
+    // Input and Output bindings
     py::class_<Node::Input>(m, "Input");
-
     py::class_<Node::Output>(m, "Output")
         .def("canConnect", &dai::Node::Output::canConnect)
         .def("link", &dai::Node::Output::link)
     ;
 
+    // Base 'Node' class binding
     py::class_<Node, std::shared_ptr<Node>>(m, "Node");
 
 
@@ -39,6 +40,25 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setFpsLimit", &XLinkOut::setFpsLimit)
         ;
 
+    // ColorCamera node
+    py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
+        .def_readonly("video", &ColorCamera::video)
+        .def_readonly("preview", &ColorCamera::preview)
+        .def_readonly("still", &ColorCamera::still)
+        .def("setCamId", &ColorCamera::setCamId)
+        .def("setColorOrder", &ColorCamera::setColorOrder)
+        .def("setInterleaved", &ColorCamera::setInterleaved)
+        .def("setPreviewSize", &ColorCamera::setPreviewSize)
+        .def("setResolution", &ColorCamera::setResolution)
+        ;
+
+    // VideoEncoder node
+    py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder")
+        .def_readonly("input", &VideoEncoder::input)
+        .def_readonly("bitstream", &VideoEncoder::bitstream)
+        .def("setDefaultProfilePreset", &VideoEncoder::setDefaultProfilePreset)
+        ;
+
     // NeuralNetwork node
     py::class_<NeuralNetwork, Node, std::shared_ptr<NeuralNetwork>>(m, "NeuralNetwork")
         .def_readonly("input", &NeuralNetwork::input)
@@ -47,8 +67,28 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
         ;
 
-    // properties
 
+    // ImageManip node
+    py::class_<ImageManip, Node, std::shared_ptr<ImageManip>>(m, "ImageManip")
+        .def_readonly("inputConfig", &ImageManip::inputConfig)
+        .def_readonly("inputImage", &ImageManip::inputImage)
+        .def_readonly("out", &ImageManip::out)
+        // setters
+        .def("setCropRect", &ImageManip::setCropRect)
+        .def("setCenterCrop", &ImageManip::setCenterCrop)
+        .def("setResize", &ImageManip::setResize)
+        .def("setResizeThumbnail", &ImageManip::setResizeThumbnail)
+        .def("setFrameType", &ImageManip::setFrameType)
+        .def("setHorizontalFlip", &ImageManip::setHorizontalFlip)
+        .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput)
+        .def("setNumFramesPool", &ImageManip::setNumFramesPool)
+        .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize)
+        ;
+
+
+    ////////////////////////////////////
+    // Node properties bindings
+    ////////////////////////////////////
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
     colorCameraProperties
         .def_readwrite("camId", &ColorCameraProperties::camId)
@@ -69,19 +109,6 @@ void NodeBindings::bind(pybind11::module& m){
         .value("RGB", ColorCameraProperties::ColorOrder::RGB)
         ;
         
-
-    // ColorCamera node
-    py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
-        .def_readonly("video", &ColorCamera::video)
-        .def_readonly("preview", &ColorCamera::preview)
-        .def_readonly("still", &ColorCamera::still)
-        .def("setCamId", &ColorCamera::setCamId)
-        .def("setColorOrder", &ColorCamera::setColorOrder)
-        .def("setInterleaved", &ColorCamera::setInterleaved)
-        .def("setPreviewSize", &ColorCamera::setPreviewSize)
-        .def("setResolution", &ColorCamera::setResolution)
-        ;
-
 
     // VideoEncoder props
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
@@ -111,12 +138,6 @@ void NodeBindings::bind(pybind11::module& m){
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
 
-    // VideoEncoder node
-    py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder")
-        .def_readonly("input", &VideoEncoder::input)
-        .def_readonly("bitstream", &VideoEncoder::bitstream)
-        .def("setDefaultProfilePreset", &VideoEncoder::setDefaultProfilePreset)
-        ;
 
 
 }

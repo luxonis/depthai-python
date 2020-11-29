@@ -8,11 +8,13 @@
 #include "depthai/pipeline/datatype/Buffer.hpp"
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
+#include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
+#include "depthai-shared/datatype/RawImageManipConfig.hpp"
 
 
 //pybind
@@ -56,7 +58,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         )
         ;
 
-
     py::enum_<RawImgFrame::Type>(rawImgFrame, "Type")
         .value("YUV422i", RawImgFrame::Type::YUV422i)
         .value("YUV444p", RawImgFrame::Type::YUV444p)
@@ -65,7 +66,16 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("YUV400p", RawImgFrame::Type::YUV400p)
         .value("RGBA8888", RawImgFrame::Type::RGBA8888)
         .value("RGB161616", RawImgFrame::Type::RGB161616)
-        .value("RGB888", RawImgFrame::Type::RGB888)
+        .value("RGB888p", RawImgFrame::Type::RGB888p)
+        .value("BGR888p", RawImgFrame::Type::BGR888p)
+        .value("RGB888i", RawImgFrame::Type::RGB888i)
+        .value("BGR888i", RawImgFrame::Type::BGR888i)
+        .value("RGBF16F16F16p", RawImgFrame::Type::RGBF16F16F16p)
+        .value("BGRF16F16F16p", RawImgFrame::Type::BGRF16F16F16p)
+        .value("RGBF16F16F16i", RawImgFrame::Type::RGBF16F16F16i)
+        .value("BGRF16F16F16i", RawImgFrame::Type::BGRF16F16F16i)
+        .value("GRAY8", RawImgFrame::Type::GRAY8)
+        .value("GRAYF16", RawImgFrame::Type::GRAYF16)
         .value("LUT2", RawImgFrame::Type::LUT2)
         .value("LUT4", RawImgFrame::Type::LUT4)
         .value("LUT16", RawImgFrame::Type::LUT16)
@@ -93,8 +103,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("p1Offset", &RawImgFrame::Specs::p1Offset)
         .def_readwrite("p2Offset", &RawImgFrame::Specs::p2Offset)
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
-        ;   
-
+        ;
 
 
     // NNData
@@ -141,6 +150,48 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("H", TensorInfo::StorageOrder::H)
         .value("W", TensorInfo::StorageOrder::W)
         ;
+
+
+    
+    // Bind RawImageManipConfig
+    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
+    rawImageManipConfig
+        .def_readwrite("enableFormat", &RawImageManipConfig::enableFormat)
+        .def_readwrite("enableResize", &RawImageManipConfig::enableResize)
+        .def_readwrite("enableCrop", &RawImageManipConfig::enableCrop)
+        .def_readwrite("cropConfig", &RawImageManipConfig::cropConfig)
+        .def_readwrite("resizeConfig", &RawImageManipConfig::resizeConfig)
+        .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
+        ;
+
+    py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect")
+        .def_readwrite("xmin", &RawImageManipConfig::CropRect::xmin)
+        .def_readwrite("ymin", &RawImageManipConfig::CropRect::ymin)
+        .def_readwrite("xmax", &RawImageManipConfig::CropRect::xmax)
+        .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
+        ;
+
+    py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
+        .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
+        .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
+        .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
+        .def_readwrite("widthHeightAspectRatio", &RawImageManipConfig::CropConfig::widthHeightAspectRatio)
+        ;
+
+    py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
+        .def_readwrite("width", &RawImageManipConfig::ResizeConfig::width)
+        .def_readwrite("height", &RawImageManipConfig::ResizeConfig::height)
+        .def_readwrite("lockAspectRatioFill", &RawImageManipConfig::ResizeConfig::lockAspectRatioFill)
+        .def_readwrite("bgRed", &RawImageManipConfig::ResizeConfig::bgRed)
+        .def_readwrite("bgGreen", &RawImageManipConfig::ResizeConfig::bgGreen)
+        .def_readwrite("bgBlue", &RawImageManipConfig::ResizeConfig::bgBlue)
+        ;
+
+    py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
+        .def_readwrite("type", &RawImageManipConfig::FormatConfig::type)
+        .def_readwrite("flipHorizontal", &RawImageManipConfig::FormatConfig::flipHorizontal)
+        ;
+
 
 
     // Bind non-raw 'helper' datatypes
@@ -212,6 +263,10 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
         .def(py::init<>())
         // setters
+        .def("setLayer", [](NNData& obj, const std::string& key, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
+            std::vector<std::uint8_t> vec(array.data(), array.data() + array.size());
+            obj.setLayer(key, std::move(vec));
+        })
         .def("setLayer", (void(NNData::*)(const std::string&, std::vector<std::uint8_t>))&NNData::setLayer)
         .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer)
         .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer)
@@ -227,5 +282,25 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
         ;
 
+     // Bind ImageManipConfig
+    py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig")
+        .def(py::init<>())
+        // setters
+        .def("setCropRect", &ImageManipConfig::setCropRect)
+        .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
+        .def("setResize", &ImageManipConfig::setResize)
+        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
+        .def("setFrameType", &ImageManipConfig::setFrameType)
+        .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
+
+        // getters
+        .def("getCropXMin", &ImageManipConfig::getCropXMin)
+        .def("getCropYMin", &ImageManipConfig::getCropYMin)
+        .def("getCropXMax", &ImageManipConfig::getCropXMax)
+        .def("getCropYMax", &ImageManipConfig::getCropYMax)
+        .def("getResizeWidth", &ImageManipConfig::getResizeWidth)
+        .def("getResizeHeight", &ImageManipConfig::getResizeHeight)
+        .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail)
+        ;
 
 }
