@@ -18,11 +18,20 @@ void DataQueueBindings::bind(pybind11::module& m){
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue")
         .def("getName", &DataOutputQueue::getName)
         .def("get", [](DataOutputQueue& obj){
-            
+          
+
             std::shared_ptr<ADatatype> d = nullptr;
             do {
-                // block for 100ms
-                d = obj.get(milliseconds(100));
+                {          
+                    // releases python GIL
+                    py::gil_scoped_release release;
+
+                    // block for 100ms                    
+                    d = obj.get(milliseconds(100));
+                }
+
+                // reacquires python GIL for PyErr_CheckSignals call
+
                 // check if interrupt triggered in between
                 if (PyErr_CheckSignals() != 0) throw py::error_already_set();
             } while(d == nullptr);
@@ -40,8 +49,15 @@ void DataQueueBindings::bind(pybind11::module& m){
             
             bool sent = false;
             do {
+
                 // block for 100ms
-                sent = obj.send(d, milliseconds(100));
+                {
+                    // Release GIL, then block
+                    py::gil_scoped_release release;
+                    sent = obj.send(d, milliseconds(100));
+                }
+
+                // reacquires GIL as PyErr_CheckSignals requires GIL
 
                 // check if interrupt triggered in between
                 if (PyErr_CheckSignals() != 0) throw py::error_already_set();
@@ -50,11 +66,16 @@ void DataQueueBindings::bind(pybind11::module& m){
 
         })
         .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::RawBuffer> d){
-            
+
             bool sent = false;
             do {
-                // block for 100ms
-                sent = obj.send(d, milliseconds(100));
+                 // block for 100ms
+                {
+                    // Release GIL, then block
+                    py::gil_scoped_release release;
+                    sent = obj.send(d, milliseconds(100));
+                }
+                // reacquires GIL as PyErr_CheckSignals requires GIL
 
                 // check if interrupt triggered in between
                 if (PyErr_CheckSignals() != 0) throw py::error_already_set();
