@@ -45,6 +45,8 @@ pybind11_add_module(${TARGET_NAME}
     src/DataQueueBindings.cpp
     src/pipeline/PipelineBindings.cpp
     src/pipeline/NodeBindings.cpp
+    src/pipeline/AssetManagerBindings.cpp
+    src/openvino/OpenVINOBindings.cpp
 )
 
 # Add include directory (src)

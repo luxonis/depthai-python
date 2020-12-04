@@ -21,7 +21,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def("link", &dai::Node::Output::link)
     ;
 
-    py::class_<Node, std::shared_ptr<Node>>(m, "Node");
+    py::class_<Node, std::shared_ptr<Node>>(m, "Node")
+        .def("getName", &dai::Node::getName)
+        .def("getOutputs", &dai::Node::getOutputs)
+        .def("getInputs", &dai::Node::getInputs)
+        .def("getAssets", &dai::Node::getAssets)
+    ;
 
 
     // XLinkIn node
@@ -116,7 +121,28 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("input", &VideoEncoder::input)
         .def_readonly("bitstream", &VideoEncoder::bitstream)
         .def("setDefaultProfilePreset", &VideoEncoder::setDefaultProfilePreset)
-        ;
-
+        .def("setNumFramesPool", &VideoEncoder::setNumFramesPool)
+        .def("getNumFramesPool", &VideoEncoder::getNumFramesPool)
+        .def("setRateControlMode", &VideoEncoder::setRateControlMode)
+        .def("setProfile", &VideoEncoder::setProfile)
+        .def("setBitrate", &VideoEncoder::setBitrate)
+        .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency)
+        //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
+        .def("setNumBFrames", &VideoEncoder::setNumBFrames)
+        .def("setQuality", &VideoEncoder::setQuality)
+        .def("setWidth", &VideoEncoder::setWidth)
+        .def("setHeight", &VideoEncoder::setHeight)
+        .def("setFrameRate", &VideoEncoder::setFrameRate)
+        .def("getRateControlMode", &VideoEncoder::getRateControlMode)
+        .def("getProfile", &VideoEncoder::getProfile)
+        .def("getBitrate", &VideoEncoder::getBitrate)
+        .def("getKeyframeFrequency", &VideoEncoder::getKeyframeFrequency)
+        //.def("getMaxBitrate", &VideoEncoder::getMaxBitrate)
+        .def("getNumBFrames", &VideoEncoder::getNumBFrames)
+        .def("getQuality", &VideoEncoder::getQuality)
+        .def("getWidth", &VideoEncoder::getWidth)
+        .def("getHeight", &VideoEncoder::getHeight)
+        .def("getFrameRate", &VideoEncoder::getFrameRate)
+    ;
 
 }

@@ -4,7 +4,7 @@
 #include <chrono>
 
 // depthai
-#include "depthai/DataQueue.hpp"
+#include "depthai/device/DataQueue.hpp"
 
 void DataQueueBindings::bind(pybind11::module& m){
 

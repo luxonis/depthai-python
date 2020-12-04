@@ -1,7 +1,7 @@
 #include "DeviceBootloaderBindings.hpp"
 
 // depthai
-#include "depthai/DeviceBootloader.hpp"
+#include "depthai/device/DeviceBootloader.hpp"
 
 // pybind for functions
 #include "pybind11/functional.h"

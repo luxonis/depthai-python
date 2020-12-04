@@ -5,6 +5,8 @@
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
+#include "depthai/pipeline/node/VideoEncoder.hpp"
+#include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 
 // depthai-shared
@@ -29,16 +31,29 @@ void PipelineBindings::bind(pybind11::module& m){
     py::class_<Pipeline>(m, "Pipeline")
         .def(py::init<>())
         .def(py::init<const Pipeline&>())
+        .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal)
+        .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal)
         .def("getGlobalProperties", &Pipeline::getGlobalProperties)
-        //.def("getPipelineSchema", &Pipeline::getPipelineSchema)
-        .def("getNodes", &Pipeline::getNodes)        
-        // TODO - .def("getAssetManager", &Pipeline::getAssetManager)
+        .def("getAllAssets", &Pipeline::getAllAssets)
+        .def("remove", &Pipeline::remove)
+        .def("getAllNodes", static_cast<std::vector<std::shared_ptr<const Node>> (Pipeline::*)() const>(&Pipeline::getAllNodes), py::return_value_policy::reference_internal)
+        .def("getAllNodes", static_cast<std::vector<std::shared_ptr< Node>> (Pipeline::*)()>(&Pipeline::getAllNodes), py::return_value_policy::reference_internal)
+        
+        .def("getNode", static_cast<std::shared_ptr<const Node> (Pipeline::*)(Node::Id) const>(&Pipeline::getNode), py::return_value_policy::reference_internal)
+        .def("getNode", static_cast<std::shared_ptr<Node> (Pipeline::*)(Node::Id)>(&Pipeline::getNode), py::return_value_policy::reference_internal)
+
+        .def("getConnections", &Pipeline::getConnections)
+        .def("link", &Pipeline::link)
+        .def("unlink", &Pipeline::unlink)
+
 
          // templated create<NODE> function 
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
+        .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
+        .def("createSPIOut", &Pipeline::create<node::SPIOut>)
         ;
     
 

@@ -11,16 +11,10 @@
 #include "pybind11_common.hpp"
 
 // depthai-core
-#include "depthai/Device.hpp"
 #include "depthai/build/version.hpp"
 
 // project
-//#include "host_data_packet_bindings.hpp"
-//#include "nnet_packet_bindings.hpp"
-//#include "py_tensor_entry_container_iterator.hpp"
-//#include "device_bindings.hpp"
-
-
+#include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
 #include "pipeline/NodeBindings.hpp"
 #include "XLinkConnectionBindings.hpp"
@@ -28,6 +22,7 @@
 #include "DeviceBootloaderBindings.hpp"
 #include "DatatypeBindings.hpp"
 #include "DataQueueBindings.hpp"
+#include "openvino/OpenVINOBindings.hpp"
 
 
 PYBIND11_MODULE(depthai,m)
@@ -45,6 +40,8 @@ PYBIND11_MODULE(depthai,m)
 
 
     // Add bindings 
+    OpenVINOBindings::bind(m);
+    AssetManagerBindings::bind(m);
     NodeBindings::bind(m);
     PipelineBindings::bind(m);
     XLinkConnectionBindings::bind(m);
