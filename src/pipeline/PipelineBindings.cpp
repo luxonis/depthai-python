@@ -1,13 +1,17 @@
 #include "PipelineBindings.hpp"
 
 // depthai
+#include "depthai/pipeline/Pipeline.hpp"
+
+// depthai - nodes
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
-#include "depthai/pipeline/Pipeline.hpp"
+#include "depthai/pipeline/node/ImageManip.hpp"
+
 
 // depthai-shared
 #include "depthai-shared/pb/properties/GlobalProperties.hpp"
@@ -54,6 +58,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
+        .def("createImageManip", &Pipeline::create<node::ImageManip>)
         ;
     
 
