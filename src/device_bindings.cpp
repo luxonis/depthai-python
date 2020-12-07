@@ -88,6 +88,30 @@ void init_binding_device(pybind11::module& m){
         )
 
         // calibration data bindings
+         .def(
+            "get_intrinsic",
+            &Device::get_intrinsic,
+            "Function to get intrinic parameters of the camera. "
+            "args: 'Cam3A.__members__'",
+            py::arg("cam")
+        )
+        .def(
+            "get_distortion_coeffs",
+            &Device::get_distortion_coeffs,
+            "Function to get distortion co-efficients of the camera. "
+            "args: 'Cam3A.__members__'",
+            py::arg("cam")
+        )
+        .def(
+            "get_rgb_rotation",
+            &Device::get_rgb_rotation,
+            "Returns 3x3 matrix defining the Rotation matrix between right and rgb camera."
+        )
+        .def(
+            "get_rgb_translation",
+            &Device::get_rgb_translation,
+            "Returns a vector defining how much the right camera is translated w.r.t rgb camera."
+        )
         .def(
             "get_left_intrinsic",
             &Device::get_left_intrinsic,
