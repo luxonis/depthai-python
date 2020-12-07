@@ -14,6 +14,7 @@
 #include "depthai/build/version.hpp"
 
 // project
+#include "depthai/depthai.hpp"
 #include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
 #include "pipeline/NodeBindings.hpp"
@@ -50,6 +51,9 @@ PYBIND11_MODULE(depthai,m)
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
 
+
+    // Call dai::initialize on 'import depthai' to initialize asap
+    dai::initialize();
 
 }
 
