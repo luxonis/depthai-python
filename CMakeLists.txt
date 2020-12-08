@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.2) # For Hunter
 
-# Set compile with -fPIC (on all targets)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 # Set defaults
+# PIC toolchain as we are building an shared library
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" CACHE STRING "")
+# Build dependencies as 'Release' only by default
 set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
 
 include("cmake/HunterGate.cmake")
