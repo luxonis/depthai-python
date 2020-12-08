@@ -11,7 +11,8 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
-
+#include "depthai/pipeline/node/MonoCamera.hpp"
+#include "depthai/pipeline/node/StereoDepth.hpp"
 
 // depthai-shared
 #include "depthai-shared/pb/properties/GlobalProperties.hpp"
@@ -59,6 +60,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
         .def("createImageManip", &Pipeline::create<node::ImageManip>)
+        .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
+        .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
         ;
     
 
