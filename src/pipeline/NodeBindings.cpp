@@ -16,20 +16,29 @@ void NodeBindings::bind(pybind11::module& m){
     using namespace dai;
     using namespace dai::node;
 
-    // Input and Output bindings
-    py::class_<Node::Input>(m, "Input");
-    py::class_<Node::Output>(m, "Output")
-        .def("canConnect", &dai::Node::Output::canConnect)
-        .def("link", &dai::Node::Output::link)
-    ;
 
     // Base 'Node' class binding
-    py::class_<Node, std::shared_ptr<Node>>(m, "Node")
-        .def("getName", &dai::Node::getName)
-        .def("getOutputs", &dai::Node::getOutputs)
-        .def("getInputs", &dai::Node::getInputs)
-        .def("getAssets", &dai::Node::getAssets)
+    py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node");
+    pyNode 
+        .def("getName", &Node::getName)
+        .def("getOutputs", &Node::getOutputs)
+        .def("getInputs", &Node::getInputs)
+        .def("getAssets", &Node::getAssets)
     ;
+
+    // Input and Output bindings (Node::Input && Node::Output)
+    py::class_<Node::Input>(pyNode, "Input")
+        .def("setBlocking", &Node::Input::setBlocking)
+        .def("getBlocking", &Node::Input::getBlocking)
+    ;
+    
+    py::class_<Node::Output>(pyNode, "Output")
+        .def("canConnect", &Node::Output::canConnect)
+        .def("link", &Node::Output::link)
+        .def("unlink", &Node::Output::unlink)
+        .def("getConnections", &Node::Output::getConnections)
+    ;
+
 
     // XLinkIn node
     py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn")
