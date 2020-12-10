@@ -196,6 +196,11 @@ void init_binding_device(pybind11::module& m){
             "Returns true if right stereo camera is connected."
         )
         .def(
+            "override_device_changed",
+            &Device::override_device_changed,
+            "Manually assigns device_changed to true even though device is not changed."
+        )
+        .def(
             "write_eeprom_data",
             [](Device& device, py::dict config)
             {
