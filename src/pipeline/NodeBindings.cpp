@@ -64,6 +64,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getCamId", &ColorCamera::getCamId)
         .def("setColorOrder", &ColorCamera::setColorOrder)
         .def("setInterleaved", &ColorCamera::setInterleaved)
+        .def("setFp16", &ColorCamera::setFp16)
         .def("setPreviewSize", &ColorCamera::setPreviewSize)
         .def("setResolution", &ColorCamera::setResolution)
         .def("setFps", &ColorCamera::setFps)
