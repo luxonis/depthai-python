@@ -9,6 +9,7 @@
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
+#include "depthai/pipeline/node/SPIOut.hpp"
 
 
 void NodeBindings::bind(pybind11::module& m){
@@ -253,5 +254,11 @@ void NodeBindings::bind(pybind11::module& m){
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
 
+    // SPIOut node
+    py::class_<SPIOut, Node, std::shared_ptr<SPIOut>>(m, "SPIOut")
+        .def_readonly("input", &SPIOut::input)
+        .def("setStreamName", &SPIOut::setStreamName)
+        .def("setBusId", &SPIOut::setBusId)
+        ;
 
 }
