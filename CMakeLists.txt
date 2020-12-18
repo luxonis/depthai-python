@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2) # For Hunter
 
 # Set defaults
-# PIC toolchain as we are building an shared library
+# PIC toolchain as we are building a shared library
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" CACHE STRING "")
 # Build dependencies as 'Release' only by default
 set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
