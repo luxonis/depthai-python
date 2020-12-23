@@ -27,6 +27,8 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getOutputQueue", &Device::getOutputQueue, py::arg("name"), py::arg("maxSize") = 120, py::arg("overwrite") = false )
         .def("getInputQueue", &Device::getInputQueue,  py::arg("name"), py::arg("maxSize") = 120, py::arg("overwrite") = false )
         .def("setCallback", &Device::setCallback)
+        .def("setLogLevel", &Device::setLogLevel)
+        .def("getLogLevel", &Device::getLogLevel)
         ;
 
 }

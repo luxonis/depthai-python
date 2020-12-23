@@ -47,6 +47,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/NodeBindings.cpp
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
+    src/log/LogBindings.cpp
 )
 
 # Add include directory (src)

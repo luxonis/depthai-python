@@ -24,13 +24,13 @@
 #include "DatatypeBindings.hpp"
 #include "DataQueueBindings.hpp"
 #include "openvino/OpenVINOBindings.hpp"
+#include "log/LogBindings.hpp"
 
 
 PYBIND11_MODULE(depthai,m)
 {
 
-
-    //std::string _version = c_depthai_version;
+    // Version consists of: (depthai-core).(bindings revision)[+bindings hash]
     std::string version = std::string(dai::build::VERSION) + "." + std::string(DEPTHAI_PYTHON_BINDINGS_REVISION);
 
     #ifdef DEPTHAI_PYTHON_COMMIT_HASH
@@ -38,7 +38,6 @@ PYBIND11_MODULE(depthai,m)
     #endif
 
     m.attr("__version__") = version;
-
 
     // Add bindings 
     OpenVINOBindings::bind(m);
@@ -50,7 +49,7 @@ PYBIND11_MODULE(depthai,m)
     DeviceBootloaderBindings::bind(m);
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
-
+    LogBindings::bind(m);
 
     // Call dai::initialize on 'import depthai' to initialize asap
     dai::initialize();
