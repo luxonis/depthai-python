@@ -41,6 +41,41 @@ jobs:
           name: audited-wheels
           path: wheelhouse/audited/
 
+  # This job builds wheels for ARM64 arch
+  build-linux-arm64:
+    runs-on: luxonis-arm64
+    container:
+      image: quay.io/pypa/manylinux2014_aarch64
+      env:
+        PLAT: manylinux2014_aarch64
+      # Mount local hunter cache directory, instead of transfering to Github and back
+      volumes:
+        - /.hunter:/github/home/.hunter
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+      - name: Append build hash if not a tagged commit
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
+      - name: Building wheels
+        run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+      - name: Auditing wheels
+        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: audited-wheels
+          path: wheelhouse/audited/
+
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     runs-on: windows-latest
