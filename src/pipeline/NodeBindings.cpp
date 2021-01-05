@@ -10,6 +10,7 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/DetectionNetwork.hpp"
 
 
 void NodeBindings::bind(pybind11::module& m){
@@ -259,6 +260,31 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("input", &SPIOut::input)
         .def("setStreamName", &SPIOut::setStreamName)
         .def("setBusId", &SPIOut::setBusId)
+        ;
+
+    // MobileNetDetectionNetwork node
+    py::class_<MobileNetDetectionNetwork, Node, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
+        .def_readonly("input", &MobileNetDetectionNetwork::input)
+        .def_readonly("out", &MobileNetDetectionNetwork::out)
+        .def("setStreamName", &MobileNetDetectionNetwork::setStreamName)
+        .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
+        .def("setNNBlobPath", &MobileNetDetectionNetwork::setNNBlobPath)
+        .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
+        ;
+
+    // YoloDetectionNetwork node
+    py::class_<YoloDetectionNetwork, Node, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
+        .def_readonly("input", &YoloDetectionNetwork::input)
+        .def_readonly("out", &YoloDetectionNetwork::out)
+        .def("setStreamName", &YoloDetectionNetwork::setStreamName)
+        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
+        .def("setNNBlobPath", &YoloDetectionNetwork::setNNBlobPath)
+        .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
+        .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
+        .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
+        .def("setAnchors", &YoloDetectionNetwork::setAnchors)
+        .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks)
+        .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
         ;
 
 }
