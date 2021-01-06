@@ -47,11 +47,20 @@ void NodeBindings::bind(pybind11::module& m){
 
     // Node::Connection bindings
     py::class_<Node::Connection>(pyNode, "Connection")
-        .def_readwrite("outputId", &Node::Connection::outputId)
-        .def_readwrite("outputName", &Node::Connection::outputName)
-        .def_readwrite("inputId", &Node::Connection::inputId)
-        .def_readwrite("inputName", &Node::Connection::inputName)
+        .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; })
+        .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; })
+        .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; })
+        .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; })
     ;
+    // MSVC errors out with: 
+    // Error C2326 'void NodeBindings::bind(pybind11::module &)': function cannot access 'dai::Node::Connection::outputId'
+    // ...
+    // py::class_<Node::Connection>(pyNode, "Connection")
+    //     .def_readwrite("outputId", &dai::Node::Connection::outputId)
+    //     .def_readwrite("outputName", &dai::Node::Connection::outputName)
+    //     .def_readwrite("inputId", &dai::Node::Connection::inputId)
+    //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
+    // ;
 
     //// Bindings for actual nodes
 
