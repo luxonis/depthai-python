@@ -120,28 +120,86 @@ Python API Reference
 
   **Node creation methods**
 
-  .. function:: createXLinkIn()
+  .. function:: createXLinkIn() -> XLinkIn
 
-    Creates :class:
+    Creates :class:`XLinkIn` node
 
-  .. function:: createXLinkOut()
+  .. function:: createXLinkOut() -> XLinkOut
 
-  .. function:: createNeuralNetwork()
+    Creates :class:`XLinkOut` node
 
-  .. function:: createColorCamera()
+  .. function:: createNeuralNetwork() -> NeuralNetwork
 
-  .. function:: createVideoEncoder()
+    Creates :class:`NeuralNetwork` node
 
-  .. function:: createSPIOut()
+  .. function:: createColorCamera() -> ColorCamera
 
-  .. function:: createImageManip()
+    Creates :class:`ColorCamera` node
 
-  .. function:: createMonoCamera()
+  .. function:: createVideoEncoder() -> VideoEncoder
 
-  .. function:: createStereoDepth()
+    Creates :class:`VideoEncoder` node
+
+  .. function:: createSPIOut() -> SPIOut
+
+    Creates :class:`SPIOut` node
+
+  .. function:: createImageManip() -> ImageManip
+
+    Creates :class:`ImageManip` node
+
+  .. function:: createMonoCamera() -> MonoCamera
+
+    Creates :class:`MonoCamera` node
+
+  .. function:: createStereoDepth() -> StereoDepth
+
+    Creates :class:`StereoDepth` node
 
 
 .. include::  /references/python_nodes.rst
+
+
+.. class:: Asset
+  :canonical: depthai.Asset
+
+  Represents the pipeline, being a set of nodes and connections between them, that represents the desired flow of data
+
+  **General methods**
+
+  .. attribute:: key
+    :type: string
+
+  .. attribute:: data
+    :type: list
+
+  .. attribute:: alignment
+    :type: int
+
+
+.. class:: AssetManager
+  :canonical: depthai.AssetManager
+
+  Represents the pipeline, being a set of nodes and connections between them, that represents the desired flow of data
+
+  **General methods**
+
+  .. function:: add(asset: Asset)
+
+  .. function:: add(key: str, asset: Asset)
+
+  .. function:: addExisting(assets: List[Asset])
+
+  .. function:: set(key: str, asset: Asset)
+
+  .. function:: get(key: str) -> Asset
+
+  .. function:: getAll() -> List[Asset]
+
+  .. function:: size() -> int
+
+  .. function:: remove(key: str)
+
 
 
 
