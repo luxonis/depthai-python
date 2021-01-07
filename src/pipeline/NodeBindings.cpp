@@ -94,6 +94,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("video", &ColorCamera::video)
         .def_readonly("preview", &ColorCamera::preview)
         .def_readonly("still", &ColorCamera::still)
+        .def_readonly("isp", &ColorCamera::isp)
+        .def_readonly("raw", &ColorCamera::raw)
         .def("setCamId", [](ColorCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
