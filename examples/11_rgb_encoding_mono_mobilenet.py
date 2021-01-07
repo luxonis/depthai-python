@@ -19,23 +19,23 @@ videoOut = pipeline.createXLinkOut()
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
 
-cam_left = pipeline.createMonoCamera()
-cam_left.setCamId(1)
-cam_left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+cam_right = pipeline.createMonoCamera()
+cam_right.setCamId(2)
+cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet-ssd.blob')).resolve().absolute()))
+detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
 
 manip = pipeline.createImageManip()
 manip.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
-cam_left.out.link(manip.inputImage)
+cam_right.out.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
-xout_left = pipeline.createXLinkOut()
-xout_left.setStreamName("left")
-cam_left.out.link(xout_left.input)
+xout_right = pipeline.createXLinkOut()
+xout_right.setStreamName("right")
+cam_right.out.link(xout_right.input)
 
 xout_manip = pipeline.createXLinkOut()
 xout_manip.setStreamName("manip")
@@ -50,7 +50,7 @@ device.startPipeline()
 
 queue_size = 8
 overwriteLRU = True #overwrite least recently used frame in queue if it gets full (not blocking)
-q_left = device.getOutputQueue("left", queue_size, overwriteLRU)
+q_right = device.getOutputQueue("right", queue_size, overwriteLRU)
 q_manip = device.getOutputQueue("manip", queue_size, overwriteLRU)
 q_nn = device.getOutputQueue("nn", queue_size, overwriteLRU)
 q_rgb_enc = device.getOutputQueue('h265', queue_size, overwriteLRU)
@@ -67,7 +67,7 @@ def frame_norm(frame, bbox):
 videoFile = open('video.h265','wb')
 
 while True:
-    in_left = q_left.tryGet()
+    in_right = q_right.tryGet()
     in_manip = q_manip.tryGet()
     in_nn = q_nn.tryGet()
     in_rgb_enc = q_rgb_enc.tryGet()
@@ -75,9 +75,9 @@ while True:
     if in_rgb_enc is not None: 
         in_rgb_enc.getData().tofile(videoFile)
 
-    if in_left is not None:
-        shape = (in_left.getHeight(), in_left.getWidth())
-        frame = in_left.getData().reshape(shape).astype(np.uint8)
+    if in_right is not None:
+        shape = (in_right.getHeight(), in_right.getWidth())
+        frame = in_right.getData().reshape(shape).astype(np.uint8)
         frame = np.ascontiguousarray(frame)
 
     if in_manip is not None:
@@ -92,7 +92,7 @@ while True:
         bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
 
     if frame is not None:
-        cv2.imshow("left", frame)
+        cv2.imshow("right", frame)
 
     if frame_manip is not None:
         for raw_bbox in bboxes:

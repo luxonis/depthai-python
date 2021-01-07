@@ -37,22 +37,22 @@ left.out.link(depth.left)
 right.out.link(depth.right)
 
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet-ssd.blob')).resolve().absolute()))
+detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
 depth.rectifiedLeft.link(detection_nn.input)
 
 xout_depth = pipeline.createXLinkOut()
 xout_depth.setStreamName("depth")
 depth.disparity.link(xout_depth.input)
 
-xout_left = pipeline.createXLinkOut()
-xout_left.setStreamName("rect_left")
-depth.rectifiedLeft.link(xout_left.input)
+xout_right = pipeline.createXLinkOut()
+xout_right.setStreamName("rect_right")
+depth.rectifiedRight.link(xout_right.input)
 
 manip = pipeline.createImageManip()
 manip.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
-depth.rectifiedLeft.link(manip.inputImage)
+depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
 xout_manip = pipeline.createXLinkOut()
@@ -66,13 +66,13 @@ detection_nn.out.link(xout_nn.input)
 device = dai.Device(pipeline)
 device.startPipeline()
 
-q_left = device.getOutputQueue(name="rect_left", maxSize=8, overwrite=True)
+q_right = device.getOutputQueue(name="rect_right", maxSize=8, overwrite=True)
 q_manip = device.getOutputQueue(name="manip", maxSize=8, overwrite=True)
 q_depth = device.getOutputQueue(name="depth", maxSize=8, overwrite=True)
 q_nn = device.getOutputQueue(name="nn", maxSize=8, overwrite=True)
 q_rgb_enc = device.getOutputQueue(name="h265", maxSize=8, overwrite=True)
 
-frame_left = None
+frame_right = None
 frame_manip = None
 frame_depth = None
 bboxes = []
@@ -84,7 +84,7 @@ def frame_norm(frame, bbox):
 videoFile = open('video.h265','wb')
 
 while True:
-    in_left = q_left.tryGet()
+    in_right = q_right.tryGet()
     in_manip = q_manip.tryGet()
     in_nn = q_nn.tryGet()
     in_depth = q_depth.tryGet()
@@ -93,10 +93,10 @@ while True:
     if in_rgb_enc is not None: 
         in_rgb_enc.getData().tofile(videoFile)
 
-    if in_left is not None:
-        shape = (in_left.getHeight(), in_left.getWidth())
-        frame_left = in_left.getData().reshape(shape).astype(np.uint8)
-        frame_left = np.ascontiguousarray(frame_left)
+    if in_right is not None:
+        shape = (in_right.getHeight(), in_right.getWidth())
+        frame_right = in_right.getData().reshape(shape).astype(np.uint8)
+        frame_right = np.ascontiguousarray(frame_right)
 
     if in_manip is not None:
         shape = (3, in_manip.getHeight(), in_manip.getWidth())
@@ -114,8 +114,8 @@ while True:
         frame_depth = np.ascontiguousarray(frame_depth)
         frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
 
-    if frame_left is not None:
-        cv2.imshow("rectif_left", frame_left)
+    if frame_right is not None:
+        cv2.imshow("rectif_right", frame_right)
 
     if frame_manip is not None:
         for raw_bbox in bboxes:

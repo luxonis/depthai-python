@@ -9,25 +9,25 @@ import numpy as np
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
-cam_left = pipeline.createMonoCamera()
-cam_left.setCamId(1)
-cam_left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+cam_right = pipeline.createMonoCamera()
+cam_right.setCamId(2)
+cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet-ssd.blob')).resolve().absolute()))
+detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
 manip.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
-cam_left.out.link(manip.inputImage)
+cam_right.out.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
 # Create outputs
 xout_manip = pipeline.createXLinkOut()
-xout_manip.setStreamName("left")
+xout_manip.setStreamName("right")
 manip.out.link(xout_manip.input)
 
 xout_nn = pipeline.createXLinkOut()
@@ -39,7 +39,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
-q_left = device.getOutputQueue("left")
+q_right = device.getOutputQueue("right")
 q_nn = device.getOutputQueue("nn")
 
 frame = None
@@ -53,13 +53,13 @@ def frame_norm(frame, bbox):
 
 while True:
     # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-    in_left = q_left.tryGet()
+    in_right = q_right.tryGet()
     in_nn = q_nn.tryGet()
 
-    if in_left is not None:
+    if in_right is not None:
         # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
-        shape = (3, in_left.getHeight(), in_left.getWidth())
-        frame = in_left.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+        shape = (3, in_right.getHeight(), in_right.getWidth())
+        frame = in_right.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
         frame = np.ascontiguousarray(frame)
 
     if in_nn is not None:
@@ -77,7 +77,7 @@ while True:
         for raw_bbox in bboxes:
             bbox = frame_norm(frame, raw_bbox)
             cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("left", frame)
+        cv2.imshow("right", frame)
 
     if cv2.waitKey(1) == ord('q'):
         break

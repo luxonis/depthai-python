@@ -35,7 +35,7 @@ depth.rectifiedLeft.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet-ssd.blob')).resolve().absolute()))
+detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
 manip.out.link(detection_nn.input)
 
 # Create outputs
@@ -43,9 +43,9 @@ xout_depth = pipeline.createXLinkOut()
 xout_depth.setStreamName("depth")
 depth.disparity.link(xout_depth.input)
 
-xout_left = pipeline.createXLinkOut()
-xout_left.setStreamName("left")
-manip.out.link(xout_left.input)
+xout_right = pipeline.createXLinkOut()
+xout_right.setStreamName("right")
+manip.out.link(xout_right.input)
 
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
@@ -56,11 +56,11 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
-q_left = device.getOutputQueue("left")
+q_right = device.getOutputQueue("right")
 q_depth = device.getOutputQueue("depth")
 q_nn = device.getOutputQueue("nn")
 
-frame_left = None
+frame_right = None
 frame_depth = None
 bboxes = []
 
@@ -72,15 +72,15 @@ def frame_norm(frame, bbox):
 
 while True:
     # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-    in_left = q_left.tryGet()
+    in_right = q_right.tryGet()
     in_nn = q_nn.tryGet()
     in_depth = q_depth.tryGet()
 
-    if in_left is not None:
+    if in_right is not None:
         # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
-        shape = (3, in_left.getHeight(), in_left.getWidth())
-        frame_left = in_left.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame_left = np.ascontiguousarray(frame_left)
+        shape = (3, in_right.getHeight(), in_right.getWidth())
+        frame_right = in_right.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+        frame_right = np.ascontiguousarray(frame_right)
 
     if in_nn is not None:
         # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
@@ -99,12 +99,12 @@ while True:
         # frame is transformed, the color map will be applied to highlight the depth info
         frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
 
-    if frame_left is not None:
+    if frame_right is not None:
         # if the frame is available, draw bounding boxes on it and show the frame
         for raw_bbox in bboxes:
-            bbox = frame_norm(frame_left, raw_bbox)
-            cv2.rectangle(frame_left, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("left", frame_left)
+            bbox = frame_norm(frame_right, raw_bbox)
+            cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+        cv2.imshow("right", frame_right)
 
     if frame_depth is not None:
         cv2.imshow("depth", frame_depth)
