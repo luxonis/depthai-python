@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import subprocess
 import depthai as dai
 
 # Start defining a pipeline
@@ -39,7 +38,5 @@ with open('video.h265','wb') as videoFile:
         # Keyboard interrupt (Ctrl + C) detected
         pass
 
-print("Converting stream file (.h265) into a video file (.mp4)...")
-# ffmpeg is used to convert a raw .h265 file to the playable .mp4 one
-subprocess.check_call("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4".split())
-print("Conversion successful, check video.mp4")
+print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
+print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

@@ -5,7 +5,6 @@ from pathlib import Path
 import cv2
 import depthai as dai
 import numpy as np
-import subprocess
 
 pipeline = dai.Pipeline()
 
@@ -132,6 +131,5 @@ while True:
 
 videoFile.close()
 
-print("Converting stream file (.h265) into a video file (.mp4)...")
-subprocess.check_call("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4".split())
-print("Conversion successful, check video.mp4")
+print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
+print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

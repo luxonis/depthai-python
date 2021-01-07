@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import subprocess
 import depthai as dai
 
 # Start defining a pipeline
@@ -67,10 +66,8 @@ with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as fi
             # Keyboard interrupt (Ctrl + C) detected
             break
 
-print("Converting stream file (.h264/.h265) into a video file (.mp4)...")
-# ffmpeg is used to convert a raw stream file to the playable .mp4 one
+print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
 cmd = "ffmpeg -framerate 30 -i {} -c copy {}"
-subprocess.check_call(cmd.format("mono1.h264", "mono1.mp4").split())
-subprocess.check_call(cmd.format("mono2.h264", "mono2.mp4").split())
-subprocess.check_call(cmd.format("color.h265", "color.mp4").split())
-print("Conversion successful, check mono1.mp4 / mono2.mp4 / color.mp4")
+print(cmd.format("mono1.h264", "mono1.mp4"))
+print(cmd.format("mono2.h264", "mono2.mp4"))
+print(cmd.format("color.h265", "color.mp4"))

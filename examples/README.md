@@ -11,6 +11,13 @@ cd depthai-python
 ./build_module.sh
 ```
 
+- Install python dependencies
+
+```
+cd depthai-python
+python3 -m pip install -r requirements.txt
+```
+
 - Export `PYTHONPATH` variable to the build directory
 
 ```
@@ -31,5 +38,6 @@ wget https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/networ
 To run e.g. `01_rgb_preview.py` simply run
 
 ```
+cd depthai-python/examples
 python3 01_rgb_preview.py
 ```
