@@ -237,8 +237,6 @@ void NodeBindings::bind(pybind11::module& m){
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
         .def("setNumBFrames", &VideoEncoder::setNumBFrames)
         .def("setQuality", &VideoEncoder::setQuality)
-        .def("setWidth", &VideoEncoder::setWidth)
-        .def("setHeight", &VideoEncoder::setHeight)
         .def("setFrameRate", &VideoEncoder::setFrameRate)
         .def("getRateControlMode", &VideoEncoder::getRateControlMode)
         .def("getProfile", &VideoEncoder::getProfile)
@@ -250,6 +248,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWidth", &VideoEncoder::getWidth)
         .def("getHeight", &VideoEncoder::getHeight)
         .def("getFrameRate", &VideoEncoder::getFrameRate)
+        .def("getSize", &VideoEncoder::getSize)
     ;
 
     ////////////////////////////////////
