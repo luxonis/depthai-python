@@ -9,12 +9,14 @@
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
+#include "depthai/pipeline/datatype/CameraControl.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
+#include "depthai-shared/datatype/RawCameraControl.hpp"
 
 
 //pybind
@@ -193,6 +195,13 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
 
+    // Bind RawCameraControl
+    py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
+    rawCameraControl
+        .def_readwrite("captureStill", &RawCameraControl::captureStill)
+        ;
+
+
 
     // Bind non-raw 'helper' datatypes
     py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype")
@@ -308,5 +317,15 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getResizeHeight", &ImageManipConfig::getResizeHeight)
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail)
         ;
+
+    // Bind CameraControl
+    py::class_<CameraControl, Buffer, std::shared_ptr<CameraControl>>(m, "CameraControl")
+        .def(py::init<>())
+        // setters
+        .def("setCaptureStill", &CameraControl::setCaptureStill)
+        // getters
+        .def("getCaptureStill", &CameraControl::getCaptureStill)
+        ;
+
 
 }

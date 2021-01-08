@@ -11,6 +11,8 @@
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
 
+// Libraries
+#include "hedley/hedley.h"
 
 void NodeBindings::bind(pybind11::module& m){
 
@@ -21,25 +23,46 @@ void NodeBindings::bind(pybind11::module& m){
     // Base 'Node' class binding
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node");
     pyNode 
+        .def_readonly("id", &Node::id)
         .def("getName", &Node::getName)
         .def("getOutputs", &Node::getOutputs)
         .def("getInputs", &Node::getInputs)
         .def("getAssets", &Node::getAssets)
     ;
 
-    // Input and Output bindings (Node::Input && Node::Output)
+    // Node::Input bindings
     py::class_<Node::Input>(pyNode, "Input")
         .def("setBlocking", &Node::Input::setBlocking)
         .def("getBlocking", &Node::Input::getBlocking)
     ;
-    
+    // Node::Output bindings
     py::class_<Node::Output>(pyNode, "Output")
         .def("canConnect", &Node::Output::canConnect)
         .def("link", &Node::Output::link)
         .def("unlink", &Node::Output::unlink)
         .def("getConnections", &Node::Output::getConnections)
     ;
+    // Node::Id bindings
+    py::class_<Node::Id>(pyNode, "Id");
 
+    // Node::Connection bindings
+    py::class_<Node::Connection>(pyNode, "Connection")
+        .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; })
+        .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; })
+        .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; })
+        .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; })
+    ;
+    // MSVC errors out with: 
+    // Error C2326 'void NodeBindings::bind(pybind11::module &)': function cannot access 'dai::Node::Connection::outputId'
+    // ...
+    // py::class_<Node::Connection>(pyNode, "Connection")
+    //     .def_readwrite("outputId", &dai::Node::Connection::outputId)
+    //     .def_readwrite("outputName", &dai::Node::Connection::outputName)
+    //     .def_readwrite("inputId", &dai::Node::Connection::inputId)
+    //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
+    // ;
+
+    //// Bindings for actual nodes
 
     // XLinkIn node
     py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn")
@@ -58,17 +81,63 @@ void NodeBindings::bind(pybind11::module& m){
 
     // ColorCamera node
     py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
+        .def_readonly("inputConfig", &ColorCamera::inputConfig)
+        .def_readonly("inputControl", &ColorCamera::inputControl)
         .def_readonly("video", &ColorCamera::video)
         .def_readonly("preview", &ColorCamera::preview)
         .def_readonly("still", &ColorCamera::still)
-        .def("setCamId", &ColorCamera::setCamId)
-        .def("getCamId", &ColorCamera::getCamId)
+        .def("setCamId", [](ColorCamera& c, int64_t id) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            c.setCamId(id);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("getCamId", [](ColorCamera& c) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "getCamId() is deprecated, use getBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return c.getCamId();            
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setBoardSocket", &ColorCamera::setBoardSocket)
+        .def("getBoardSocket", &ColorCamera::getBoardSocket)
         .def("setColorOrder", &ColorCamera::setColorOrder)
+        .def("getColorOrder", &ColorCamera::getColorOrder)
         .def("setInterleaved", &ColorCamera::setInterleaved)
+        .def("getInterleaved", &ColorCamera::getInterleaved)
         .def("setFp16", &ColorCamera::setFp16)
+        .def("getFp16", &ColorCamera::getFp16)
         .def("setPreviewSize", &ColorCamera::setPreviewSize)
+        .def("setVideoSize", &ColorCamera::setVideoSize)
+        .def("setStillSize", &ColorCamera::setStillSize)
         .def("setResolution", &ColorCamera::setResolution)
+        .def("getResolution", &ColorCamera::getResolution)
         .def("setFps", &ColorCamera::setFps)
+        .def("getFps", &ColorCamera::getFps)
+        .def("getPreviewSize", &ColorCamera::getPreviewSize)
+        .def("getPreviewWidth", &ColorCamera::getPreviewWidth)
+        .def("getPreviewHeight", &ColorCamera::getPreviewHeight)
+        .def("getVideoSize", &ColorCamera::getVideoSize)
+        .def("getVideoWidth", &ColorCamera::getVideoWidth)
+        .def("getVideoHeight", &ColorCamera::getVideoHeight)
+        .def("getStillSize", &ColorCamera::getStillSize)
+        .def("getStillWidth", &ColorCamera::getStillWidth)
+        .def("getStillHeight", &ColorCamera::getStillHeight)
+        .def("getResolutionSize", &ColorCamera::getResolutionSize)
+        .def("getResolutionWidth", &ColorCamera::getResolutionWidth)
+        .def("getResolutionHeight", &ColorCamera::getResolutionHeight)
+        .def("sensorCenterCrop", &ColorCamera::sensorCenterCrop)
+        .def("setSensorCrop", &ColorCamera::setSensorCrop)
+        .def("getSensorCrop", &ColorCamera::getSensorCrop)
+        .def("getSensorCropX", &ColorCamera::getSensorCropX)
+        .def("getSensorCropY", &ColorCamera::getSensorCropY)
+        .def("setWaitForConfigInput", &ColorCamera::setWaitForConfigInput)
+        .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput)
+        .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio)
+        .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio)
         ;
 
     // NeuralNetwork node
@@ -99,11 +168,34 @@ void NodeBindings::bind(pybind11::module& m){
      // MonoCamera node
     py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera")
         .def_readonly("out",  &MonoCamera::out)
-        .def("setCamId",      &MonoCamera::setCamId)
-        .def("getCamId",      &MonoCamera::getCamId)
+        .def("setCamId", [](MonoCamera& c, int64_t id) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            c.setCamId(id);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("getCamId", [](MonoCamera& c) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "getCamId() is deprecated, use getBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return c.getCamId();
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setBoardSocket", &MonoCamera::setBoardSocket)
+        .def("getBoardSocket", &MonoCamera::getBoardSocket)
         .def("setResolution", &MonoCamera::setResolution)
+        .def("getResolution", &MonoCamera::getResolution)
         .def("setFps",        &MonoCamera::setFps)
+        .def("getFps",        &MonoCamera::getFps)
+        .def("getResolutionSize", &MonoCamera::getResolutionSize)
+        .def("getResolutionWidth", &MonoCamera::getResolutionWidth)
+        .def("getResolutionHeight", &MonoCamera::getResolutionHeight)
         ;
+        
+
 
     // StereoDepth node
     py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth")
@@ -133,8 +225,9 @@ void NodeBindings::bind(pybind11::module& m){
     // VideoEncoder node
     py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder")
         .def_readonly("input", &VideoEncoder::input)
-        .def_readonly("bitstream", &VideoEncoder::bitstream)
-        .def("setDefaultProfilePreset", &VideoEncoder::setDefaultProfilePreset)
+        .def_readonly("bitstream", &VideoEncoder::bitstream)        
+        .def("setDefaultProfilePreset", (void(VideoEncoder::*)(std::tuple<int,int>, float, VideoEncoderProperties::Profile))&VideoEncoder::setDefaultProfilePreset)
+        .def("setDefaultProfilePreset", (void(VideoEncoder::*)(int, int, float, VideoEncoderProperties::Profile))&VideoEncoder::setDefaultProfilePreset)
         .def("setNumFramesPool", &VideoEncoder::setNumFramesPool)
         .def("getNumFramesPool", &VideoEncoder::getNumFramesPool)
         .def("setRateControlMode", &VideoEncoder::setRateControlMode)
@@ -144,8 +237,6 @@ void NodeBindings::bind(pybind11::module& m){
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
         .def("setNumBFrames", &VideoEncoder::setNumBFrames)
         .def("setQuality", &VideoEncoder::setQuality)
-        .def("setWidth", &VideoEncoder::setWidth)
-        .def("setHeight", &VideoEncoder::setHeight)
         .def("setFrameRate", &VideoEncoder::setFrameRate)
         .def("getRateControlMode", &VideoEncoder::getRateControlMode)
         .def("getProfile", &VideoEncoder::getProfile)
@@ -157,6 +248,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWidth", &VideoEncoder::getWidth)
         .def("getHeight", &VideoEncoder::getHeight)
         .def("getFrameRate", &VideoEncoder::getFrameRate)
+        .def("getSize", &VideoEncoder::getSize)
     ;
 
     ////////////////////////////////////
@@ -164,13 +256,19 @@ void NodeBindings::bind(pybind11::module& m){
     ////////////////////////////////////
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
     colorCameraProperties
-        .def_readwrite("camId", &ColorCameraProperties::camId)
+        .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
         .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
         .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
         .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
         .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
+        .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
+        .def_readwrite("videoWidth", &ColorCameraProperties::videoWidth)
+        .def_readwrite("stillHeight", &ColorCameraProperties::stillHeight)
+        .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
         .def_readwrite("resolution", &ColorCameraProperties::resolution)
         .def_readwrite("fps", &ColorCameraProperties::fps)
+        .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
+        .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
     ;
 
     py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution")
@@ -188,7 +286,7 @@ void NodeBindings::bind(pybind11::module& m){
     // MonoCamera props
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
     monoCameraProperties
-        .def_readwrite("camId",      &MonoCameraProperties::camId)
+        .def_readwrite("boardSocket",      &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
         .def_readwrite("fps",        &MonoCameraProperties::fps)
     ;
