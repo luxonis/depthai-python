@@ -51,7 +51,7 @@ python3 01_rgb_preview.py
 ![example_2](https://user-images.githubusercontent.com/5244214/104040960-959fdd80-51d8-11eb-8bde-fd706b5c8670.gif)
 
 ### 03_depth_preview.py
-![example_3](https://user-images.githubusercontent.com/5244214/104040936-90db2980-51d8-11eb-8e71-3dbd0a3b1ab9.gif)
+![example_3](https://user-images.githubusercontent.com/5244214/104055993-fdadee00-51ef-11eb-9c52-882e1b0e734b.gif)
 
 ### 04_rgb_encoding.py
 ![example_4](https://user-images.githubusercontent.com/5244214/104040930-8f116600-51d8-11eb-888a-88272c34aed4.gif)
@@ -72,4 +72,4 @@ python3 01_rgb_preview.py
 ![example_9](https://user-images.githubusercontent.com/5244214/104040898-8456d100-51d8-11eb-9498-e316b71d41e6.gif)
 
 ### 10_mono_depth_mobilenetssd.py
-![example_10](https://user-images.githubusercontent.com/5244214/104040871-7d2fc300-51d8-11eb-951b-0325def8b111.gif)
+![example_10](https://user-images.githubusercontent.com/5244214/104056108-35b53100-51f0-11eb-9677-63e5fb5bcb83.gif)
