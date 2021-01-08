@@ -22,6 +22,9 @@ endif()
 set(TARGET_NAME depthai)
 project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
 
+# Add external dependencies
+add_subdirectory(external)
+
 # Add depthai-cpp dependency
 add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
 
@@ -45,6 +48,7 @@ pybind11_add_module(${TARGET_NAME}
     src/DataQueueBindings.cpp
     src/pipeline/PipelineBindings.cpp
     src/pipeline/NodeBindings.cpp
+    src/pipeline/CommonBindings.cpp
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
     src/log/LogBindings.cpp
@@ -59,6 +63,7 @@ target_link_libraries(${TARGET_NAME}
         # pybind11
         pybind11::pybind11
         depthai-core
+        hedley
 )
 
 # Add bindings revision
