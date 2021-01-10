@@ -92,11 +92,13 @@ Python API Reference
 
     Returns :class:`GlobalProperties` instance assigned to the current pipeline
 
-  .. function:: getAllAssets()
+  .. function:: getAllAssets() -> AssetManager
 
-    Returns all assets that were added to the current pipeline
+    Returns AssetManager with all objects added to the pipeline
 
-  .. function:: remove()
+  .. function:: remove(node: object)
+
+    Removes specified node from the pipeline
 
   .. function:: getAllNodes() -> List[object]
 
@@ -104,7 +106,7 @@ Python API Reference
 
   .. function:: getNode(idx: int) -> object
 
-    Returns the pipeline node with specified index or :code:`None` otherwise
+    Returns the pipeline node with specified id or :code:`None` otherwise
 
   .. function:: getConnections() -> List[Connection]
 
@@ -156,6 +158,14 @@ Python API Reference
 
     Creates :class:`StereoDepth` node
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Contents:
+
+   depthai.Device <?dummy=http://#Device>
+   depthai.Pipeline <?dummy=http://#Pipeline>
+
 
 .. include::  /references/python_nodes.rst
 
@@ -163,15 +173,20 @@ Python API Reference
 .. class:: Asset
   :canonical: depthai.Asset
 
-  Represents the pipeline, being a set of nodes and connections between them, that represents the desired flow of data
+  Asset is any arbitrary object that needs to be stored along with the pipeline e.g. neural network
+  blobs
 
-  **General methods**
+  **Fields**
 
   .. attribute:: key
     :type: string
 
+    String value under which the asset will be stored
+
   .. attribute:: data
     :type: list
+
+    The file itself (e.g. neural network blob) to be stored
 
   .. attribute:: alignment
     :type: int
@@ -182,23 +197,40 @@ Python API Reference
 
   Represents the pipeline, being a set of nodes and connections between them, that represents the desired flow of data
 
-  **General methods**
+  **Methods**
 
   .. function:: add(asset: Asset)
 
+    Adds an asset object to AssetManager
+
   .. function:: add(key: str, asset: Asset)
+
+    Adds an asset object to AssetManager under a specific key. Key value will be assigned to an Asset field :code:`key`
 
   .. function:: addExisting(assets: List[Asset])
 
+    Adds all assets in an array to the AssetManager
+
   .. function:: set(key: str, asset: Asset)
+
+    Will add an asset under a specific key. Unlike :func:`add`, if any asset is already present under the specified key,
+    this method will replace it instead of reporting an error
 
   .. function:: get(key: str) -> Asset
 
+    Returns an asset assigned to the specified key or throws an error otherwise
+
   .. function:: getAll() -> List[Asset]
+
+    Returns all assets stored in the current pipeline
 
   .. function:: size() -> int
 
+    Returns the count of an objects stored in the current pipelien
+
   .. function:: remove(key: str)
+
+    Removes an asset under specified key
 
 
 
@@ -213,5 +245,5 @@ Python API Reference
    :hidden:
    :caption: Contents:
 
-   depthai.Device <?dummy=http://#Device>
-   depthai.Pipeline <?dummy=http://#Pipeline>
+   depthai.Asset <?dummy=http://#Asset>
+   depthai.AssetManager <?dummy=http://#AssetManager>

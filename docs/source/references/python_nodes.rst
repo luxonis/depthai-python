@@ -9,31 +9,35 @@
 
     Output where the data received from the host is being sent
 
-  .. function:: setStreamName()
+  **Methods**
+
+  .. function:: setStreamName(name: string)
 
     Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
 
-  .. function:: setMaxDataSize()
+  .. function:: setMaxDataSize(maxDataSize: int)
 
-  .. function:: setNumFrames()
+  .. function:: setNumFrames(numFrames: int)
 
 
 .. class:: XLinkOut
   :canonical: depthai.XLinkOut
 
-  Represents an XLink stream of data from host into device
+  Represents an XLink stream of data from device into host
 
-  **Outputs**
+  **Inputs**
 
   .. attribute:: input
 
-    Output where the data received from the host is being sent
+    Input which receives the data and send it to host
 
-  .. function:: setStreamName()
+  .. function:: setStreamName(name: string)
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+    Sets the stream name, needed for :func:`getOutputQueue` to transfer data from it.
 
-  .. function:: setFpsLimit()
+  .. function:: setFpsLimit(fps: float)
+
+    Limits the stream throughput
 
 
 .. class:: ColorCamera
@@ -536,3 +540,10 @@
     Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
 
 
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Contents:
+
+   depthai.SPIOut <?dummy=http://#SPIOut>
