@@ -17,6 +17,7 @@
 #include "depthai/depthai.hpp"
 #include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
+#include "pipeline/CommonBindings.hpp"
 #include "pipeline/NodeBindings.hpp"
 #include "XLinkConnectionBindings.hpp"
 #include "DeviceBindings.hpp"
@@ -47,6 +48,7 @@ PYBIND11_MODULE(depthai,m)
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
+    CommonBindings::bind(m);
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
     LogBindings::bind(m);

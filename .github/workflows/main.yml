@@ -156,24 +156,25 @@ jobs:
           name: audited-wheels
           path: wheelhouse/audited/
 
-  # Run tests
-#  tests:
-#    runs-on: luxonis-arm-tests
-#    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          submodules: 'recursive'
-#      - uses: actions/download-artifact@v2
-#        with:
-#          name: audited-wheels
-#          path: wheels/depthai/
-#      - name: List files
-#        run: ls -lah
-#      - name: install DepthAI
-#        run: python3.7 -m pip install depthai --no-index --find-links file://`pwd`/wheels/depthai/
-#      - name: Run tests
-#        run: python3.7 tests/test.py
+
+  # # Run tests
+  # tests:
+  #   runs-on: luxonis-arm-tests
+  #   needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'recursive'
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: audited-wheels
+  #         path: wheels/depthai/
+  #     - name: List files
+  #       run: ls -lah
+  #     - name: install DepthAI
+  #       run: python3.7 -m pip install depthai --no-index --find-links file://`pwd`/wheels/depthai/
+  #     - name: Run tests
+  #       run: python3.7 tests/test.py
 
   # Deploy to artifactory
   deploy-artifacts:

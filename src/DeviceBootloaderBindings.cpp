@@ -25,7 +25,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
     deviceBootloader
         .def_static("getFirstAvailableDevice", &DeviceBootloader::getFirstAvailableDevice)
         .def_static("getAllAvailableDevices", &DeviceBootloader::getAllAvailableDevices)
-        .def_static("createDepthaiApplicationPackage", &DeviceBootloader::createDepthaiApplicationPackage)
+        .def_static("saveDepthaiApplicationPackage", &DeviceBootloader::saveDepthaiApplicationPackage, py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "")
+        .def_static("createDepthaiApplicationPackage", &DeviceBootloader::createDepthaiApplicationPackage, py::arg("pipeline"), py::arg("pathToCmd") = "")
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion)
         .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary)
         .def(py::init<const DeviceInfo&>(), py::arg("deviceDesc"))

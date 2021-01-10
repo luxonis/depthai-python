@@ -17,29 +17,53 @@ void DataQueueBindings::bind(pybind11::module& m){
     // Bind DataOutputQueue
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue")
         .def("getName", &DataOutputQueue::getName)
-        .def("get", [](DataOutputQueue& obj){
+        .def("getAll", [](DataOutputQueue& obj){
           
-
-            std::shared_ptr<ADatatype> d = nullptr;
+            std::vector<std::shared_ptr<ADatatype>> messages;
+            bool timedout = true;
             do {
                 {          
                     // releases python GIL
                     py::gil_scoped_release release;
 
-                    // block for 100ms                    
-                    d = obj.get(milliseconds(100));
+                    // block for 100ms
+                    messages = obj.getAll(milliseconds(100), timedout);
                 }
 
                 // reacquires python GIL for PyErr_CheckSignals call
 
                 // check if interrupt triggered in between
                 if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-            } while(d == nullptr);
+
+            } while(timedout); // Keep reiterating until a message is received (not timedout)
+
+            return messages;
+        })
+        .def("get", [](DataOutputQueue& obj){
+          
+            std::shared_ptr<ADatatype> d = nullptr;
+            bool timedout = true;
+            do {
+                {          
+                    // releases python GIL
+                    py::gil_scoped_release release;
+
+                    // block for 100ms                    
+                    d = obj.get(milliseconds(100), timedout);
+                }
+
+                // reacquires python GIL for PyErr_CheckSignals call
+
+                // check if interrupt triggered in between
+                if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+
+            } while(timedout);
 
             return d;
         })
         .def("has", static_cast<bool(DataOutputQueue::*)()>(&DataOutputQueue::has))
         .def("tryGet", static_cast<std::shared_ptr<ADatatype>(DataOutputQueue::*)()>(&DataOutputQueue::tryGet))
+        .def("tryGetAll", static_cast<std::vector<std::shared_ptr<ADatatype>>(DataOutputQueue::*)()>(&DataOutputQueue::tryGetAll))
         ;
 
     // Bind DataInputQueue
