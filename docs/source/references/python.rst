@@ -47,7 +47,8 @@ Python API Reference
 
   .. function:: getDeviceByMxId(mx_id: str) -> bool, DeviceInfo
 
-    Returns the device based on the device serial number as a hexadecimal string (e.g. :code:`41440410B1933CBC00`)
+    Returns the device based on the device serial number as a hexadecimal string (e.g. :code:`41440410B1933CBC00`).
+    Can be obtained using :func:`DeviceInfo.getMxId`
 
 
   **Member methods**
@@ -60,11 +61,11 @@ Python API Reference
 
     Returns :code:`True` if the :func:`startPipeline` method was called, otherwise returns :code:`False`
 
-  .. function:: getOutputQueue(name: str, mazSize: int = 120, overwrite: bool = False) -> DataOutputQueue
+  .. function:: getOutputQueue(name: str, mazSize: int, overwrite: bool) -> DataOutputQueue
 
     Creates :class:`DataOutputQueue` object that consumes the data from the queue with specified name
 
-  .. function:: getInputQueue(name: str, mazSize: int = 120, overwrite: bool = False) -> DataInputQueue
+  .. function:: getInputQueue(name: str, mazSize: int, overwrite: bool) -> DataInputQueue
 
     Creates :class:`DataInputQueue` object that sends the data into the queue with specified name
 
@@ -106,7 +107,8 @@ Python API Reference
 
   .. function:: getNode(idx: int) -> object
 
-    Returns the pipeline node with specified id or :code:`None` otherwise
+    Returns the pipeline node with specified id or :code:`None` otherwise. Each node has :code:`id` field that is used
+    in this method
 
   .. function:: getConnections() -> List[Connection]
 
@@ -157,6 +159,22 @@ Python API Reference
   .. function:: createStereoDepth() -> StereoDepth
 
     Creates :class:`StereoDepth` node
+
+
+.. class:: Connection
+  :canonical: depthai.Pipeline
+
+  Represents the pipeline, being a set of nodes and connections between them, that represents the desired flow of data
+
+  **Attributes**
+
+  .. attribute:: outputId
+
+  .. attribute:: outputName
+
+  .. attribute:: inputId
+
+  .. attribute:: inputName
 
 .. toctree::
    :maxdepth: 1

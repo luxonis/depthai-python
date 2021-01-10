@@ -45,6 +45,16 @@
 
   Represents an XLink stream of data from host into device
 
+  **Inputs**
+
+  .. attribute:: inputConfig
+
+    Output where the data received from the host is being sent
+
+  .. attribute:: inputControl
+
+    Output where the data received from the host is being sent
+
   **Outputs**
 
   .. attribute:: video
@@ -53,29 +63,121 @@
 
   .. attribute:: preview
 
-    Output where the data received from the host is being sent
+    Color camera video stream scaled to the preview size, set using :func:`setPreviewSize`
 
   .. attribute:: still
 
     Output where the data received from the host is being sent
 
-  .. function:: setCamId()
+  **Methods**
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+  .. function:: setBoardSocket(boardSocket: CameraBoardSocket)
 
-  .. function:: getCamId()
+    Assigns the camera socket to the node
 
-  .. function:: setColorOrder()
+  .. function:: getBoardSocket() -> CameraBoardSocket
 
-  .. function:: setInterleaved()
+    Returns the assigned board socket
 
-  .. function:: setFp16()
+  .. function:: setColorOrder(colorOrder: ColorCameraProperties.ColorOrder)
 
-  .. function:: setPreviewSize()
+    Sets the color order of the frame
 
-  .. function:: setResolution()
+  .. function:: getColorOrder() -> ColorCameraProperties.ColorOrder
 
-  .. function:: setFps()
+    Returns the color order of the frame
+
+  .. function:: setFp16(fp16: bool)
+
+    Forces the frame values to be in FP16 format
+
+  .. function:: getFp16() -> bool
+
+    Returns information if the output values were forced to be in FP16 format
+
+  .. function:: setFps(fps: float)
+
+    Limits the FPS of the node, allowing e.g. to decrease the amount of frames being produced by this node
+
+  .. function:: getFps() -> float
+
+    Returns the current FPS limit
+
+  .. function:: setPreviewSize(width: int, height: int)
+
+    Sets the desired preview dimensions, available as :attr:`preview` output
+
+  .. function:: getPreviewSize() -> Tuple[int, int]
+
+    Returns the preview dimensions previously set using :func:`setPreviewSize`
+
+  .. function:: getPreviewWidth() -> int
+
+    Returns width of the preview previously set using :func:`setPreviewSize`
+
+  .. function:: getPreviewHeight() -> int
+
+    Returns height of the preview previously set using :func:`setPreviewSize`
+
+  .. function:: setVideoSize(width: int, height: int)
+
+    Sets the desired video dimensions, available as :attr:`video` output
+
+  .. function:: getVideoSize() -> Tuple[int, int]
+
+    Returns the video dimensions previously set using :func:`getVideoSize`
+
+  .. function:: getVideoWidth() -> int
+
+    Returns width of the video previously set using :func:`getVideoSize`
+
+  .. function:: getVideoHeight() -> int
+
+    Returns height of the video previously set using :func:`getVideoSize`
+
+  .. function:: setStillSize()
+
+  .. function:: getStillSize()
+
+  .. function:: getStillWidth()
+
+  .. function:: setResolution(resolution: ColorCameraProperties.SensorResolution)
+
+    Sets the camera sensor resolution, determining the maximum resolution that can be obtained from this node
+
+  .. function:: getResolution() -> ColorCameraProperties.SensorResolution
+
+    Returns camera resolution previously set using :func:`setResolution`
+
+  .. function:: getResolutionSize() -> Tuple[int, int]
+
+    Returns the sensor resolution dimensions
+
+  .. function:: getResolutionWidth() -> int
+
+    Returns the sensor resolution width
+
+  .. function:: getResolutionHeight() -> int
+
+    Returns the sensor resolution height
+
+  .. function:: sensorCenterCrop()
+
+  .. function:: setSensorCrop()
+
+  .. function:: getSensorCrop()
+
+  .. function:: getSensorCropX()
+
+  .. function:: getSensorCropY()
+
+  .. function:: setWaitForConfigInput()
+
+  .. function:: getWaitForConfigInput()
+
+  .. function:: setPreviewKeepAspectRatio(keep: bool)
+
+  .. function:: getPreviewKeepAspectRatio() -> bool
 
 
 .. class:: MonoCamera
@@ -87,17 +189,45 @@
 
   .. attribute:: out
 
-    Output where the data received from the host is being sent
+    Mono camera video stream, sending grayscale frames
 
-  .. function:: setCamId()
+  **Methods**
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+  .. function:: setBoardSocket()
 
-  .. function:: getCamId()
+    Assigns the camera socket to the node
 
-  .. function:: setResolution()
+  .. function:: getBoardSocket()
 
-  .. function:: setFps()
+    Returns the assigned board socket
+
+  .. function:: setResolution(resolution: MonoCameraProperties.SensorResolution)
+
+    Sets the camera sensor resolution, determining the maximum resolution that can be obtained from this node
+
+  .. function:: getResolution() -> MonoCameraProperties.SensorResolution
+
+    Returns camera resolution previously set using :func:`setResolution`
+
+  .. function:: setFps(fps: float)
+
+    Limits the FPS of the node, allowing e.g. to decrease the amount of frames being produced by this node
+
+  .. function:: getFps() -> float
+
+    Returns the current FPS limit
+
+  .. function:: getResolutionSize() -> Tuple[int, int]
+
+    Returns the sensor resolution dimensions
+
+  .. function:: getResolutionWidth() -> int
+
+    Returns the sensor resolution width
+
+  .. function:: getResolutionHeight() -> int
+
+    Returns the sensor resolution height
 
 
 .. class:: NeuralNetwork
@@ -105,19 +235,21 @@
 
   Represents an XLink stream of data from host into device
 
-  **Outputs**
+  **Inputs**
 
   .. attribute:: input
 
-    Output where the data received from the host is being sent
+    Neural network input, on which the inference will be ran
+
+  **Outputs**
 
   .. attribute:: out
 
-    Output where the data received from the host is being sent
+    Inference results output, all neural network outputs will be send through this output
 
-  .. function:: setBlobPath()
+  .. function:: setBlobPath(path: str)
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+    Sets the neural network blob path, being the actual neural network to be ran
 
   .. function:: setNumPoolFrames()
 
@@ -127,7 +259,7 @@
 
   Represents an XLink stream of data from host into device
 
-  **Outputs**
+  **Inputs**
 
   .. attribute:: inputConfig
 
@@ -137,9 +269,13 @@
 
     Output where the data received from the host is being sent
 
+  **Outputs**
+
   .. attribute:: out
 
     Output where the data received from the host is being sent
+
+  **Methods**
 
   .. function:: setCropRect()
 
@@ -265,17 +401,31 @@
 
   .. function:: getQuality()
 
-  .. function:: setWidth()
-
   .. function:: getWidth()
 
-  .. function:: setHeight()
-
   .. function:: getHeight()
+
+  .. function:: getSize() -> Tuple[int, int]
 
   .. function:: setFrameRate()
 
   .. function:: getFrameRate()
+
+
+.. class:: CameraBoardSocket
+  :canonical: depthai.CameraBoardSocket
+
+  Represents an XLink stream of data from host into device
+
+  **Outputs**
+
+  .. attribute:: AUTO
+
+  .. attribute:: RGB
+
+  .. attribute:: LEFT
+
+  .. attribute:: RIGHT
 
 
 .. class:: ColorCameraProperties
@@ -285,7 +435,7 @@
 
   **Outputs**
 
-  .. attribute:: camId
+  .. attribute:: boardSocket
 
     Output where the data received from the host is being sent
 
@@ -312,6 +462,18 @@
   .. attribute:: fps
 
     Output where the data received from the host is being sent
+
+  .. attribute:: videoHeight
+
+  .. attribute:: videoWidth
+
+  .. attribute:: stillHeight
+
+  .. attribute:: stillWidth
+
+  .. attribute:: sensorCropX
+
+  .. attribute:: sensorCropY
 
 
 .. class:: ColorCameraProperties.SensorResolution
@@ -357,7 +519,7 @@
 
   **Outputs**
 
-  .. attribute:: camId
+  .. attribute:: boardSocket
 
     Output where the data received from the host is being sent
 
