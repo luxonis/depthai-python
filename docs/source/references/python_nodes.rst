@@ -17,7 +17,11 @@
 
   .. function:: setMaxDataSize(maxDataSize: int)
 
+    Maximum data size of a message to be allowed to go through the stream
+
   .. function:: setNumFrames(numFrames: int)
+
+    Sets the stream buffer size, determining how many frames can be stored before sending to the connected node
 
 
 .. class:: XLinkOut
@@ -49,17 +53,17 @@
 
   .. attribute:: inputConfig
 
-    Output where the data received from the host is being sent
+    Linkable to :class:`ImageManipConfig`, allowing to modify crop area, horizontal flip, frame datatype etc.
 
   .. attribute:: inputControl
 
-    Output where the data received from the host is being sent
+    Linkable to :class:`CameraControl`, allowing to send signals to the camera, e.g. to capture a still image
 
   **Outputs**
 
   .. attribute:: video
 
-    Output where the data received from the host is being sent
+    Color camera video stream NV12-encoded (YUV420, UV plane interleaved) output, suitable for VideoEncoder
 
   .. attribute:: preview
 
@@ -67,7 +71,8 @@
 
   .. attribute:: still
 
-    Output where the data received from the host is being sent
+    Color camera output, NV12-encoded (YUV420, UV plane interleaved), captured when "take still" command is sent
+    from :attr:`inputControl` input
 
   **Methods**
 
@@ -125,21 +130,31 @@
 
   .. function:: getVideoSize() -> Tuple[int, int]
 
-    Returns the video dimensions previously set using :func:`getVideoSize`
+    Returns the video dimensions previously set using :func:`setVideoSize`
 
   .. function:: getVideoWidth() -> int
 
-    Returns width of the video previously set using :func:`getVideoSize`
+    Returns width of the video previously set using :func:`setVideoSize`
 
   .. function:: getVideoHeight() -> int
 
-    Returns height of the video previously set using :func:`getVideoSize`
+    Returns height of the video previously set using :func:`setVideoSize`
 
   .. function:: setStillSize()
 
+    Sets the desired image dimensions produced by :attr:`still` output
+
   .. function:: getStillSize()
 
+    Returns the frame dimensions previously set using :func:`setStillSize`
+
   .. function:: getStillWidth()
+
+    Returns width of the frame previously set using :func:`setStillSize`
+
+  .. function:: getStillHeight()
+
+    Returns height of the frame previously set using :func:`setStillSize`
 
   .. function:: setResolution(resolution: ColorCameraProperties.SensorResolution)
 
@@ -163,21 +178,42 @@
 
   .. function:: sensorCenterCrop()
 
-  .. function:: setSensorCrop()
+    Enables center cropping from the original sensor resolution (set using :func:`setResolution`)
 
-  .. function:: getSensorCrop()
+  .. function:: setSensorCrop(x: float, y: float)
 
-  .. function:: getSensorCropX()
+    Sets values in range :code:`[0, 1]` as the cropping parameters, determining the size of the cropped box
 
-  .. function:: getSensorCropY()
+  .. function:: getSensorCrop() -> Tuple[float, float]
 
-  .. function:: setWaitForConfigInput()
+    Returns the x and y parameters of the sensor crop set previously using :func:`setSensorCrop`
 
-  .. function:: getWaitForConfigInput()
+  .. function:: getSensorCropX() -> float
+
+    Returns the x parameter of the sensor crop set previously using :func:`setSensorCrop`
+
+  .. function:: getSensorCropY() -> float
+
+    Returns the y parameter of the sensor crop set previously using :func:`setSensorCrop`
+
+  .. function:: setWaitForConfigInput(wait: bool)
+
+    If set to :code:`True`, frames from the camera sensor will only be processed and sent to outputs when the config
+    information arrives
+
+  .. function:: getWaitForConfigInput() -> bool
+
+    Returns the value previously set using :func:`setWaitForConfigInput`
 
   .. function:: setPreviewKeepAspectRatio(keep: bool)
 
+    If set to :code:`True`, the :attr:`preview` output will be cropped and resized to retain the h/w proportion of the
+    camera resolution. Otherwise, the image will be squished in either direction to achieve exact output specified using
+    :func:`setPreviewSize`
+
   .. function:: getPreviewKeepAspectRatio() -> bool
+
+    Returns the value previously set using :func:`setPreviewKeepAspectRatio`
 
 
 .. class:: MonoCamera
@@ -251,7 +287,10 @@
 
     Sets the neural network blob path, being the actual neural network to be ran
 
-  .. function:: setNumPoolFrames()
+  .. function:: setNumPoolFrames(numFrames: int)
+
+    Specifies how many nn results will the node keep buffered if not received by a consumer. Upon reaching the limit,
+    the node stops and waits for the results to be consumed before producing new ones
 
 
 .. class:: ImageManip
@@ -263,39 +302,52 @@
 
   .. attribute:: inputConfig
 
-    Output where the data received from the host is being sent
+    Linkable to :class:`ImageManipConfig`, allowing to modify crop area, horizontal flip, frame datatype etc.
 
   .. attribute:: inputImage
 
-    Output where the data received from the host is being sent
+    Receives the frames that should be manipulated in this node
 
   **Outputs**
 
   .. attribute:: out
 
-    Output where the data received from the host is being sent
+    Result frame, after manipulation
 
   **Methods**
 
-  .. function:: setCropRect()
+  .. function:: setCropRect(xmin: float, ymin: float, xmax: float, ymax: float)
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+    Allows to crop only the desired section of the image
 
-  .. function:: setCenterCrop()
+  .. function:: setCenterCrop(ratio: float, whRatio: float)
 
-  .. function:: setResize()
+  .. function:: setResize(w: int, h: int)
 
-  .. function:: setResizeThumbnail()
+      Resizes the frame to specified width and height
 
-  .. function:: setFrameType()
+  .. function:: setResizeThumbnail(w: int, h: int, bgRed: int, bgGreen: int, bgBlue: int)
 
-  .. function:: setHorizontalFlip()
+  .. function:: setFrameType(type: RawImgFrame.Type)
 
-  .. function:: setWaitForConfigInput()
+      Modifies the input frame to be in the specified image frame type (one of :class:`RawImgFrame.Type`)
+
+  .. function:: setHorizontalFlip(flip: bool)
+
+      If set to :code:`True`, flips the received frame horizontally
+
+  .. function:: setWaitForConfigInput(wait: bool)
+
+    If set to :code:`True`, frames will only be processed when the config information arrives
 
   .. function:: setNumFramesPool()
 
-  .. function:: setMaxOutputFrameSize()
+    Specifies how many results will the node keep buffered if not received by a consumer. Upon reaching the limit,
+    the node stops and waits for the results to be consumed before producing new ones
+
+  .. function:: setMaxOutputFrameSize(maxFrameSize: int)
+
+    Limits the maximum frame size that is allowed to be send as an output of the node
 
 
 .. class:: StereoDepth
@@ -303,55 +355,94 @@
 
   Represents an XLink stream of data from host into device
 
-  **Outputs**
+  **Inputs**
 
   .. attribute:: left
 
-    Output where the data received from the host is being sent
+    Input for frames from left grayscale camera
 
   .. attribute:: right
 
-    Output where the data received from the host is being sent
+    Input for frames from right grayscale camera
+
+  **Outputs**
 
   .. attribute:: depth
 
+    Outputs a raw depth frame, enabled by calling :func:`setOutputDepth` with :code:`True`. Cannot be used together with :attr:`disparity: output
+
   .. attribute:: disparity
+
+    Outputs a disparity matrix. Cannot be used together with :attr:`depth`
 
   .. attribute:: syncedLeft
 
+    Outputs left frame used in depth calculations
+
   .. attribute:: syncedRight
+
+    Outputs right frame used in depth calculations
 
   .. attribute:: rectifiedLeft
 
+    Outputs left rectified frame, see `more info about rectification <https://en.wikipedia.org/wiki/Image_rectification>`__
+
   .. attribute:: rectifiedRight
 
-  .. function:: loadCalibrationFile()
+    Outputs right rectified frame, see `more info about rectification <https://en.wikipedia.org/wiki/Image_rectification>`__
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
+  **Methods**
 
-  .. function:: loadCalibrationData()
+  .. function:: loadCalibrationFile(path: str)
+
+    Specifies a calibration file path to be loaded for depth calculations. Uses :func:`loadCalibrationData` internally
+
+  .. function:: loadCalibrationData(data: List[int])
+
+    Specifies a calibration data to be loaded for depth calculations
 
   .. function:: setEmptyCalibration()
 
-  .. function:: setInputResolution()
+    Replaces any loaded calibration data with an empty array
 
-  .. function:: setMedianFilter()
+  .. function:: setInputResolution(width: int, height: int)
 
-  .. function:: setConfidenceThreshold()
+  .. function:: setMedianFilter(median: StereoDepthProperties.MedianFilter)
 
-  .. function:: setLeftRightCheck()
+    Specifies which median filter should be used during depth calculations. May be one of the :class:`StereoDepthProperties.MedianFilter`
 
-  .. function:: setSubpixel()
+  .. function:: setConfidenceThreshold(confThr: int)
 
-  .. function:: setExtendedDisparity()
+    Sets the confidence threshold of the depth calculating algorithm, specifying when a point on the depth projection will
+    be considered a valid or not
 
-  .. function:: setRectifyEdgeFillColor()
+  .. function:: setLeftRightCheck(enable: bool)
 
-  .. function:: setRectifyMirrorFrame()
+    Enables Left/Right check during depth calculations
 
-  .. function:: setOutputRectified()
+  .. function:: setSubpixel(enable: bool)
 
-  .. function:: setOutputDepth()
+    Enables subpixel filtering during depth calculations
+
+  .. function:: setExtendedDisparity(enable: bool)
+
+    Enables extended disparity during depth calculations
+
+  .. function:: setRectifyEdgeFillColor(color: int)
+
+    Sets the color of the rectification edge (cropped part during `rectification <https://en.wikipedia.org/wiki/Image_rectification>`__)
+
+  .. function:: setRectifyMirrorFrame(enable: bool)
+
+    Enables mirroring of the rectified frames
+
+  .. function:: setOutputRectified(enable: bool)
+
+    Enables :attr:`rectifiedLeft` and :attr:`rectifiedRight` outputs
+
+  .. function:: setOutputDepth(enable: bool)
+
+    If set to :code:`True`, the :attr:`depth` output will be produced, otherwise :attr:`disparity` will be active
 
 
 .. class:: VideoEncoder
@@ -359,15 +450,19 @@
 
   Represents an XLink stream of data from host into device
 
-  **Outputs**
+  **Inputs**
 
   .. attribute:: input
 
     Output where the data received from the host is being sent
 
+  **Outputs**
+
   .. attribute:: bitstream
 
     Output where the data received from the host is being sent
+
+  **Methods**
 
   .. function:: setDefaultProfilePreset()
 

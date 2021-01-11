@@ -87,7 +87,8 @@ Python API Reference
 
   .. function:: getAssetManager() -> AssetManager
 
-    Returns :class:`AssetManager` instance assigned to the current pipeline
+    Returns :class:`AssetManager` instance assigned to the current pipeline. Note that it's not populated with nodes'
+    assets - to get a populated instance, use :func:`getAllAssets`
 
   .. function:: getGlobalProperties() -> GlobalProperties
 
@@ -95,7 +96,7 @@ Python API Reference
 
   .. function:: getAllAssets() -> AssetManager
 
-    Returns AssetManager with all objects added to the pipeline
+    Returns AssetManager with all nodes' assets populated
 
   .. function:: remove(node: object)
 
@@ -208,6 +209,9 @@ Python API Reference
 
   .. attribute:: alignment
     :type: int
+
+    *[Advanced]* Tells AssetManaget to place that asset to the location/address (offset) so that, on device,
+    the data will be aligned by specified amount - allows the device to use the asset without moving/copying it
 
 
 .. class:: AssetManager
