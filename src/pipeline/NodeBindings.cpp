@@ -366,7 +366,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &MobileNetDetectionNetwork::out)
         .def("setStreamName", &MobileNetDetectionNetwork::setStreamName)
         .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
-        .def("setNNBlobPath", &MobileNetDetectionNetwork::setNNBlobPath)
+        .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
         .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
         ;
 
@@ -376,7 +376,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &YoloDetectionNetwork::out)
         .def("setStreamName", &YoloDetectionNetwork::setStreamName)
         .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
-        .def("setNNBlobPath", &YoloDetectionNetwork::setNNBlobPath)
+        .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
         .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
         .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
         .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
