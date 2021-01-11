@@ -25,7 +25,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queue will be used to get the grayscale frames from the output defined above
-q_right = device.getOutputQueue(name="right", maxSize=4, overwrite=True)
+q_right = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
 # Make sure the destination path is present before starting to store the examples
 Path('07_data').mkdir(parents=True)

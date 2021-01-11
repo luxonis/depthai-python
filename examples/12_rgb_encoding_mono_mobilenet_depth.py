@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-
+import sys
 import cv2
 import depthai as dai
 import numpy as np
+
+
+# Get argument first
+mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+if len(sys.argv) == 2:
+    mobilenet_path = sys.argv[1]
 
 pipeline = dai.Pipeline()
 
@@ -37,7 +43,7 @@ left.out.link(depth.left)
 right.out.link(depth.right)
 
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
+detection_nn.setBlobPath(mobilenet_path)
 depth.rectifiedLeft.link(detection_nn.input)
 
 xout_depth = pipeline.createXLinkOut()
@@ -66,11 +72,11 @@ detection_nn.out.link(xout_nn.input)
 device = dai.Device(pipeline)
 device.startPipeline()
 
-q_right = device.getOutputQueue(name="rect_right", maxSize=8, overwrite=True)
-q_manip = device.getOutputQueue(name="manip", maxSize=8, overwrite=True)
-q_depth = device.getOutputQueue(name="depth", maxSize=8, overwrite=True)
-q_nn = device.getOutputQueue(name="nn", maxSize=8, overwrite=True)
-q_rgb_enc = device.getOutputQueue(name="h265", maxSize=8, overwrite=True)
+q_right = device.getOutputQueue(name="rect_right", maxSize=8, blocking=False)
+q_manip = device.getOutputQueue(name="manip", maxSize=8, blocking=False)
+q_depth = device.getOutputQueue(name="depth", maxSize=8, blocking=False)
+q_nn = device.getOutputQueue(name="nn", maxSize=8, blocking=False)
+q_rgb_enc = device.getOutputQueue(name="h265", maxSize=8, blocking=False)
 
 frame_right = None
 frame_manip = None

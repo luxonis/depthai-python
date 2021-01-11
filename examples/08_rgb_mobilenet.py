@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import sys
 import cv2
 import depthai as dai
 import numpy as np
+
+# Get argument first
+mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+if len(sys.argv) == 2:
+    mobilenet_path = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -15,7 +21,7 @@ cam_rgb.setInterleaved(False)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
+detection_nn.setBlobPath(sys.argv[1])
 cam_rgb.preview.link(detection_nn.input)
 
 # Create outputs
@@ -32,8 +38,8 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-q_rgb = device.getOutputQueue(name="rgb", maxSize=4, overwrite=True)
-q_nn = device.getOutputQueue(name="nn", maxSize=4, overwrite=True)
+q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
 frame = None
 bboxes = []

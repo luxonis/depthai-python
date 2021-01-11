@@ -24,7 +24,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queue will be used to get the rgb frames from the output defined above
-q_rgb = device.getOutputQueue(name="rgb", maxSize=4, overwrite=True)
+q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 
 while True:
     in_rgb = q_rgb.get()  # blocking call, will wait until a new data has arrived

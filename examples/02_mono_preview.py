@@ -29,8 +29,8 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale frames from the outputs defined above
-q_left = device.getOutputQueue(name="left", maxSize=4, overwrite=True)
-q_right = device.getOutputQueue(name="right", maxSize=4, overwrite=True)
+q_left = device.getOutputQueue(name="left", maxSize=4, blocking=False)
+q_right = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
 frame_left = None
 frame_right = None

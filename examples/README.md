@@ -4,42 +4,24 @@ In this directory there are usage examples of depthai-python repository.
 
 ## Setup
 
-- Build python module 
+- Configure and build python module with DEPTHAI_PYTHON_TEST_EXAMPLES option enabled
 
 ```
-cd depthai-python
-./build_module.sh
-```
-
-- Install python dependencies
-
-```
-cd depthai-python
-python3 -m pip install -r requirements.txt
-```
-
-- Export `PYTHONPATH` variable to the build directory
-
-```
-export PYTHONPATH=/path/to/depthai-python/build
-```
-
-- Download `mobilenet-ssd` blob
-
-```
-cd depthai-python/examples
-mkdir models
-cd models
-wget https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob
+mkdir -p build && cd build
+cmake .. -DDEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake --build . --parallel
 ```
 
 ## Usage
 
-To run e.g. `01_rgb_preview.py` simply run
-
+To test all examples
 ```
-cd depthai-python/examples
-python3 01_rgb_preview.py
+ctest
+```
+
+To execute a specific example (without timeout)
+```
+TEST_TIMEOUT=0 ctest -R "01_rgb_preview" --verbose
 ```
 
 ## Demo

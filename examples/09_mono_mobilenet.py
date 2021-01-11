@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import sys
 import cv2
 import depthai as dai
 import numpy as np
+
+# Get argument first
+mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+if len(sys.argv) == 2:
+    mobilenet_path = sys.argv[1]
+
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -15,7 +22,7 @@ cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
+detection_nn.setBlobPath(mobilenet_path)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()

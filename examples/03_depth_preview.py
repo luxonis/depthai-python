@@ -32,7 +32,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queue will be used to get the disparity frames from the outputs defined above
-q = device.getOutputQueue(name="disparity", maxSize=4, overwrite=True)
+q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
 while True:
     in_rgb = q.get() # blocking call, will wait until a new data has arrived

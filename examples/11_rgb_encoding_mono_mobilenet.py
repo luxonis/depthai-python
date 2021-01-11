@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import sys
 import cv2
 import depthai as dai
 import numpy as np
+
+# Get argument first
+mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+if len(sys.argv) == 2:
+    mobilenet_path = sys.argv[1]
+
 
 pipeline = dai.Pipeline()
 
@@ -24,7 +31,7 @@ cam_right.setCamId(2)
 cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
+detection_nn.setBlobPath(mobilenet_path)
 
 manip = pipeline.createImageManip()
 manip.setResize(300, 300)
@@ -49,11 +56,11 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 queue_size = 8
-overwriteLRU = True #overwrite least recently used frame in queue if it gets full (not blocking)
-q_right = device.getOutputQueue("right", queue_size, overwriteLRU)
-q_manip = device.getOutputQueue("manip", queue_size, overwriteLRU)
-q_nn = device.getOutputQueue("nn", queue_size, overwriteLRU)
-q_rgb_enc = device.getOutputQueue('h265', queue_size, overwriteLRU)
+blockingQueue = False # Non blocking host queue - overwrite least recently used frame in queue if it gets full
+q_right = device.getOutputQueue("right", queue_size, blockingQueue)
+q_manip = device.getOutputQueue("manip", queue_size, blockingQueue)
+q_nn = device.getOutputQueue("nn", queue_size, blockingQueue)
+q_rgb_enc = device.getOutputQueue('h265', queue_size, blockingQueue)
 
 frame = None
 frame_manip = None
