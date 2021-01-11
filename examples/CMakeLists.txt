@@ -8,7 +8,6 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         # parse the rest of the arguments
         set(arguments ${ARGV})
         list(REMOVE_AT arguments 0 1)
-        message(STATUS "arguments are: ${arguments}")
 
         add_test(NAME ${test_name} COMMAND ${CMAKE_COMMAND} 
             -DTIMEOUT_SECONDS=5
