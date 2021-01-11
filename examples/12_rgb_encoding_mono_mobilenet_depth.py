@@ -44,7 +44,6 @@ right.out.link(depth.right)
 
 detection_nn = pipeline.createNeuralNetwork()
 detection_nn.setBlobPath(mobilenet_path)
-depth.rectifiedLeft.link(detection_nn.input)
 
 xout_depth = pipeline.createXLinkOut()
 xout_depth.setStreamName("depth")
