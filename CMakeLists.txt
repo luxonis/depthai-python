@@ -22,6 +22,10 @@ endif()
 set(TARGET_NAME depthai)
 project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
 
+# First specify options
+option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
+option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a part of the test suite" OFF)
+
 # Add external dependencies
 add_subdirectory(external)
 
@@ -77,5 +81,29 @@ endif()
 # Add compile definition for bindings
 if(DEPTHAI_PYTHON_COMMIT_HASH)
     target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
+endif()
+
+
+########################
+# Testing
+########################
+if(DEPTHAI_PYTHON_ENABLE_TESTS OR DEPTHAI_PYTHON_TEST_EXAMPLES)
+    include(CTest)
+    enable_testing()
+endif()
+
+
+########################
+# Tests
+########################
+if (DEPTHAI_PYTHON_ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
+
+########################
+# Examples (can also act as tests)
+########################
+if (DEPTHAI_PYTHON_TEST_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
