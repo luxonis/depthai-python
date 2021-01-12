@@ -8,7 +8,7 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 
@@ -17,7 +17,7 @@ pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
 cam_right = pipeline.createMonoCamera()
-cam_right.setCamId(2)
+cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Define a neural network that will make predictions based on the source frames

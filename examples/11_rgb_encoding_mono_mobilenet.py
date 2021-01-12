@@ -8,14 +8,14 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 
 pipeline = dai.Pipeline()
 
 cam = pipeline.createColorCamera()
-cam.setCamId(0)
+cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
 videoEncoder = pipeline.createVideoEncoder()
@@ -27,7 +27,7 @@ videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
 
 cam_right = pipeline.createMonoCamera()
-cam_right.setCamId(2)
+cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 detection_nn = pipeline.createNeuralNetwork()
@@ -56,11 +56,11 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 queue_size = 8
-blockingQueue = False # Non blocking host queue - overwrite least recently used frame in queue if it gets full
-q_right = device.getOutputQueue("right", queue_size, blockingQueue)
-q_manip = device.getOutputQueue("manip", queue_size, blockingQueue)
-q_nn = device.getOutputQueue("nn", queue_size, blockingQueue)
-q_rgb_enc = device.getOutputQueue('h265', queue_size, blockingQueue)
+overwriteLRU = True #overwrite least recently used frame in queue if it gets full (not blocking)
+q_right = device.getOutputQueue("right", queue_size, overwriteLRU)
+q_manip = device.getOutputQueue("manip", queue_size, overwriteLRU)
+q_nn = device.getOutputQueue("nn", queue_size, overwriteLRU)
+q_rgb_enc = device.getOutputQueue('h265', queue_size, overwriteLRU)
 
 frame = None
 frame_manip = None

@@ -9,13 +9,13 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 pipeline = dai.Pipeline()
 
 cam = pipeline.createColorCamera()
-cam.setCamId(0)
+cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
 videoEncoder = pipeline.createVideoEncoder()
@@ -28,11 +28,11 @@ videoEncoder.bitstream.link(videoOut.input)
 
 left = pipeline.createMonoCamera()
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setCamId(1)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
 right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setCamId(2)
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
