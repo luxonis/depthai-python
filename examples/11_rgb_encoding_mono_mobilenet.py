@@ -56,11 +56,10 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 queue_size = 8
-overwriteLRU = True #overwrite least recently used frame in queue if it gets full (not blocking)
-q_right = device.getOutputQueue("right", queue_size, overwriteLRU)
-q_manip = device.getOutputQueue("manip", queue_size, overwriteLRU)
-q_nn = device.getOutputQueue("nn", queue_size, overwriteLRU)
-q_rgb_enc = device.getOutputQueue('h265', queue_size, overwriteLRU)
+q_right = device.getOutputQueue("right", queue_size)
+q_manip = device.getOutputQueue("manip", queue_size)
+q_nn = device.getOutputQueue("nn", queue_size)
+q_rgb_enc = device.getOutputQueue('h265', queue_size, blocking=True)
 
 frame = None
 frame_manip = None
@@ -77,10 +76,9 @@ while True:
     in_right = q_right.tryGet()
     in_manip = q_manip.tryGet()
     in_nn = q_nn.tryGet()
-    in_rgb_enc = q_rgb_enc.tryGet()
 
-    if in_rgb_enc is not None: 
-        in_rgb_enc.getData().tofile(videoFile)
+    while q_rgb_enc.has():
+        q_rgb_enc.get().getData().tofile(videoFile)
 
     if in_right is not None:
         shape = (in_right.getHeight(), in_right.getWidth())
