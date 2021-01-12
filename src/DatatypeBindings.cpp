@@ -173,11 +173,39 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
         ;
 
+    py::class_<RawImageManipConfig::Point2f>(rawImageManipConfig, "Point2f")
+        .def_readwrite("x", &RawImageManipConfig::Point2f::x)
+        .def_readwrite("y", &RawImageManipConfig::Point2f::y)
+        ;
+
+    py::class_<RawImageManipConfig::Size2f>(rawImageManipConfig, "Size2f")
+        .def_readwrite("width", &RawImageManipConfig::Size2f::width)
+        .def_readwrite("height", &RawImageManipConfig::Size2f::height)
+        ;
+
+    py::class_<RawImageManipConfig::RotatedRect>(rawImageManipConfig, "RotatedRect")
+        .def(py::init<>())
+        .def_readwrite("center", &RawImageManipConfig::RotatedRect::center)
+        .def_readwrite("size", &RawImageManipConfig::RotatedRect::size)
+        .def_readwrite("angle", &RawImageManipConfig::RotatedRect::angle)
+        ;
+
+    py::class_<RawImageManipConfig::CropQuadrilateral>(rawImageManipConfig, "CropQuadrilateral")
+        .def(py::init<>())
+        .def_readwrite("pt", &RawImageManipConfig::CropQuadrilateral::pt)
+        .def_readwrite("outSize", &RawImageManipConfig::CropQuadrilateral::outSize)
+        ;
+
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
+        .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
+        .def_readwrite("cropQuadrilateral", &RawImageManipConfig::CropConfig::cropQuadrilateral)
         .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
         .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
         .def_readwrite("widthHeightAspectRatio", &RawImageManipConfig::CropConfig::widthHeightAspectRatio)
+        .def_readwrite("enableRotatedRect", &RawImageManipConfig::CropConfig::enableRotatedRect)
+        .def_readwrite("enableCropQuadrilateral", &RawImageManipConfig::CropConfig::enableCropQuadrilateral)
+        .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
         ;
 
     py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
@@ -302,6 +330,8 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // setters
         .def("setCropRect", &ImageManipConfig::setCropRect)
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect)
+        .def("setCropQuadrilateral", &ImageManipConfig::setCropQuadrilateral)
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
         .def("setResize", &ImageManipConfig::setResize)
         .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)

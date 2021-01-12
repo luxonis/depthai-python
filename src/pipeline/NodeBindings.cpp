@@ -157,6 +157,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &ImageManip::out)
         // setters
         .def("setCropRect", &ImageManip::setCropRect)
+        .def("setCropRotatedRect", &ImageManip::setCropRotatedRect)
+        .def("setCropQuadrilateral", &ImageManip::setCropQuadrilateral)
         .def("setCenterCrop", &ImageManip::setCenterCrop)
         .def("setResize", &ImageManip::setResize)
         .def("setResizeThumbnail", &ImageManip::setResizeThumbnail)
