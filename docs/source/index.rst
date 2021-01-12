@@ -165,6 +165,18 @@ Now, pick an example from the table below and start utilizing Gen2 capabilities
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Tutorials:
+
+   tutorials/hello_world.rst
+   tutorials/pretrained_openvino.rst
+   tutorials/multiple.rst
+   tutorials/local_convert_openvino.rst
+   tutorials/windows_install.rst
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
    :caption: References:
 
    references/python.rst
