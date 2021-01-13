@@ -322,11 +322,22 @@
 
   .. function:: setCenterCrop(ratio: float, whRatio: float)
 
+    Allows to specify arbitrary crop to the image.
+
+    :code:`whRatio` determines width/height ratio of the cropped section (white box in the image below, :code:`whRatio` is set to :code:`1`),
+
+    :code:`ratio` is determining the actual size of the cropped section (green box in the image below, :code:`ratio` is set to :code:`0.7`)
+
+    .. image:: /_static/images/references/centerCrop.png
+      :alt: 1097 top
+
   .. function:: setResize(w: int, h: int)
 
       Resizes the frame to specified width and height
 
   .. function:: setResizeThumbnail(w: int, h: int, bgRed: int, bgGreen: int, bgBlue: int)
+
+      Resizes the frame, preserving the original aspect ratio, filling in the missing space with specified color
 
   .. function:: setFrameType(type: RawImgFrame.Type)
 
@@ -406,6 +417,9 @@
     Replaces any loaded calibration data with an empty array
 
   .. function:: setInputResolution(width: int, height: int)
+
+    Specifies input size of the :code:`left` / :code:`right` inputs. Most of the time, calling this function is not needed,
+    useful when input frames don't come from mono cameras but directly from host
 
   .. function:: setMedianFilter(median: StereoDepthProperties.MedianFilter)
 
