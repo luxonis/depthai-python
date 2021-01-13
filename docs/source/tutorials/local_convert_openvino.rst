@@ -190,12 +190,8 @@ This means we are ready to compile the model for the MyriadX!
 Compile the model
 #################
 
-The MyriadX chip used on our DepthAI board does not use the IR format files directly. Instead, we need to generate two files:
-
-* :code:`face-detection-retail-0004.blob` - We'll create this file with the :code:`myriad_compile` command.
-* :code:`face-detection-retail-0004.json` - A :code:`blob_file_config` file in JSON format. This describes the format of the output tensors. You can read more about this file structure and examples :ref:`here <Creating Blob configuration file>`
-
-We'll start by creating the :code:`blob` file.
+The MyriadX chip used on our DepthAI board does not use the IR format files directly. Instead, we need to generate
+:code:`face-detection-retail-0004.blob` using :code:`myriad_compile` command.
 
 Locate myriad_compile
 *********************
@@ -269,54 +265,18 @@ Where's the blob file? It's located in the same folder as :code:`face-detection-
   -rw-r--r-- 1 root root 1.3M Jul 28 12:50 face-detection-retail-0004.blob
   -rw-r--r-- 1 root root 100K Jul 28 12:40 face-detection-retail-0004.xml
 
-Create the blob config file
-###########################
-
-The MyriadX needs both a :code:`blob` file (which we just created) and a `blob_file_config` in JSON format.
-We'll create this config file manually. In your terminal:
-
-.. code-block:: bash
-
-  cd ~/open_model_zoo_downloads/intel/face-detection-retail-0004/FP16/
-  touch face-detection-retail-0004.json
-
-Copy and paste the following into :code:`face-detection-retail-0004.json`:
-
-.. code-block:: json
-
-  {
-      "NN_config": {
-          "output_format" : "detection",
-          "NN_family" : "mobilenet",
-          "confidence_threshold" : 0.5
-      }
-  }
-
-What do these values mean?
-
-- :code:`output_format` - is either :code:`detection` or :code:`raw`. Detection tells the DepthAI to parse the NN results and make a detection objects out of them, which you can access by running :code:`getDetectedObjects` method. Raw means "do not parse, I will handle the parsing on host", requiring you to parse raw tensors
-- :code:`NN_family` - only needed when :code:`output_format` is :code:`detection`. Two supported NN families are right now :code:`mobilenet` and :code:`YOLO`
-- :code:`confidence_threshold` - DepthAI will only return the results which confidence is above the threshold.
-
 Run and display the model output
 ################################
 
-With both :code:`blob` and a :code:`json` blob config file, we're ready to roll!
+With neural network :code:`blob` in place, we're ready to roll!
 To verify that the model is running correctly, let's modify a bit the program we've created in :ref:`Hello World` tutorial
 
-In particular, let's change the :code:`create_pipeline` invocation to load our model. **Remember to replace the paths to correct ones that you have!**
+In particular, let's change the :code:`setBlobPath` invocation to load our model. **Remember to replace the paths to correct ones that you have!**
 
 .. code-block:: diff
 
-  pipeline = device.create_pipeline(config={
-      'streams': ['previewout', 'metaout'],
-      'ai': {
-  -        'blob_file': "/path/to/mobilenet-ssd.blob",
-  +        'blob_file': "/path/to/open_model_zoo_downloads/intel/face-detection-retail-0004/FP16/face-detection-retail-0004.blob",
-  -        'blob_file_config': "/path/to/mobilenet-ssd.json"
-  +        'blob_file_config': "/path/to/open_model_zoo_downloads/intel/face-detection-retail-0004/FP16/face-detection-retail-0004.json"
-      }
-  })
+  - detection_nn.setBlobPath("/path/to/mobilenet-ssd.blob")
+  - detection_nn.setBlobPath("/path/to/face-detection-retail-0004.blob")
 
 And that's all!
 
@@ -342,7 +302,6 @@ The flow we walked through works for other pre-trained object detection models i
 
       $MYRIAD_COMPILE -m [INSERT PATH TO MODEL XML FILE] -ip U8 -VPU_MYRIAD_PLATFORM VPU_MYRIAD_2480 -VPU_NUMBER_OF_SHAVES 4 -VPU_NUMBER_OF_CMX_SLICES 4
 
-#. :ref:`Create the blob config file` based on the model output.
 #. Use this model in your script
 
 You’re on your way! You can find the `complete code for this tutorial on GitHub. <https://github.com/luxonis/depthai-tutorials/blob/master/2-face-detection-retail/face-detection-retail-0004.py>`__
