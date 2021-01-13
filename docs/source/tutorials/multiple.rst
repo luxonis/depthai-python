@@ -15,7 +15,7 @@ Dependencies
 ############
 
 You have already set up the Python API on your system (if you have a Raspberry Pi Compute Module it came pre-setup).
-See :ref:`here <Python API>` if you have not yet installed the DepthAI Python API on your system.
+See :ref:`here <Python API Reference>` if you have not yet installed the DepthAI Python API on your system.
 
 Discover DepthAI-USB Port Mapping
 #################################
