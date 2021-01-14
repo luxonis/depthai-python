@@ -171,11 +171,19 @@ Python API Reference
 
   .. attribute:: outputId
 
+    Specifies id of the output node
+
   .. attribute:: outputName
+
+    Specifies the node's output name
 
   .. attribute:: inputId
 
+    Specifies id of the input node
+
   .. attribute:: inputName
+
+    Specifies the node's input name
 
 .. toctree::
    :maxdepth: 1
@@ -184,6 +192,7 @@ Python API Reference
 
    depthai.Device <?dummy=http://#Device>
    depthai.Pipeline <?dummy=http://#Pipeline>
+   depthai.Connection <?dummy=http://#Pipeline>
 
 
 .. include::  /references/python_nodes.rst

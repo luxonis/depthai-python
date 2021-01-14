@@ -462,25 +462,17 @@
 .. class:: VideoEncoder
   :canonical: depthai.VideoEncoder
 
-  Represents an XLink stream of data from host into device
-
   **Inputs**
 
   .. attribute:: input
-
-    Output where the data received from the host is being sent
 
   **Outputs**
 
   .. attribute:: bitstream
 
-    Output where the data received from the host is being sent
-
   **Methods**
 
   .. function:: setDefaultProfilePreset()
-
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
 
   .. function:: setNumFramesPool()
 
@@ -524,8 +516,6 @@
 .. class:: CameraBoardSocket
   :canonical: depthai.CameraBoardSocket
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: AUTO
@@ -540,37 +530,21 @@
 .. class:: ColorCameraProperties
   :canonical: depthai.ColorCameraProperties
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: boardSocket
 
-    Output where the data received from the host is being sent
-
   .. attribute:: colorOrder
-
-    Output where the data received from the host is being sent
 
   .. attribute:: interleaved
 
-    Output where the data received from the host is being sent
-
   .. attribute:: previewHeight
-
-    Output where the data received from the host is being sent
 
   .. attribute:: previewWidth
 
-    Output where the data received from the host is being sent
-
   .. attribute:: resolution
 
-    Output where the data received from the host is being sent
-
   .. attribute:: fps
-
-    Output where the data received from the host is being sent
 
   .. attribute:: videoHeight
 
@@ -588,97 +562,59 @@
 .. class:: ColorCameraProperties.SensorResolution
   :canonical: depthai.ColorCameraProperties.SensorResolution
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: THE_1080_P
 
-    Output where the data received from the host is being sent
-
   .. attribute:: THE_4_K
 
-    Output where the data received from the host is being sent
-
   .. attribute:: THE_12_MP
-
-    Output where the data received from the host is being sent
 
 
 .. class:: ColorCameraProperties.ColorOrder
   :canonical: depthai.ColorCameraProperties.ColorOrder
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: BGR
 
-    Output where the data received from the host is being sent
-
   .. attribute:: RGB
-
-    Output where the data received from the host is being sent
 
 
 .. class:: MonoCameraProperties
   :canonical: depthai.MonoCameraProperties
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: boardSocket
 
-    Output where the data received from the host is being sent
-
   .. attribute:: resolution
 
-    Output where the data received from the host is being sent
-
   .. attribute:: fps
-
-    Output where the data received from the host is being sent
 
 
 .. class:: MonoCameraProperties.SensorResolution
   :canonical: depthai.MonoCameraProperties.SensorResolution
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: THE_720_P
 
-    Output where the data received from the host is being sent
-
   .. attribute:: THE_800_P
 
-    Output where the data received from the host is being sent
-
   .. attribute:: THE_400_P
-
-    Output where the data received from the host is being sent
 
 
 .. class:: StereoDepthProperties
   :canonical: depthai.StereoDepthProperties
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: calibration
 
-    Output where the data received from the host is being sent
-
   .. attribute:: median
 
-    Output where the data received from the host is being sent
-
   .. attribute:: confidenceThreshold
-
-    Output where the data received from the host is being sent
 
   .. attribute:: enableLeftRightCheck
 
@@ -702,21 +638,13 @@
 .. class:: StereoDepthProperties.MedianFilter
   :canonical: depthai.StereoDepthProperties.MedianFilter
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: MEDIAN_OFF
 
-    Output where the data received from the host is being sent
-
   .. attribute:: KERNEL_3x3
 
-    Output where the data received from the host is being sent
-
   .. attribute:: KERNEL_5x5
-
-    Output where the data received from the host is being sent
 
   .. attribute:: KERNEL_7x7
 
@@ -724,21 +652,13 @@
 .. class:: VideoEncoderProperties
   :canonical: depthai.VideoEncoderProperties
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: bitrate
 
-    Output where the data received from the host is being sent
-
   .. attribute:: keyframeFrequency
 
-    Output where the data received from the host is being sent
-
   .. attribute:: maxBitrate
-
-    Output where the data received from the host is being sent
 
   .. attribute:: numBFrames
 
@@ -758,21 +678,13 @@
 .. class:: VideoEncoderProperties.Profile
   :canonical: depthai.VideoEncoderProperties.Profile
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: H264_BASELINE
 
-    Output where the data received from the host is being sent
-
   .. attribute:: H264_HIGH
 
-    Output where the data received from the host is being sent
-
   .. attribute:: H264_MAIN
-
-    Output where the data received from the host is being sent
 
   .. attribute:: H265_MAIN
 
@@ -782,13 +694,9 @@
 .. class:: VideoEncoderProperties.RateControlMode
   :canonical: depthai.VideoEncoderProperties.RateControlMode
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: CBR
-
-    Output where the data received from the host is being sent
 
   .. attribute:: VBR
 
@@ -796,19 +704,13 @@
 .. class:: SPIOut
   :canonical: depthai.SPIOut
 
-  Represents an XLink stream of data from host into device
-
   **Outputs**
 
   .. attribute:: input
 
   .. function:: setStreamName()
 
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
-
   .. function:: setBusId()
-
-    Sets the stream name, needed for :func:`getInputQueue` to transfer data to it.
 
 
 
@@ -817,4 +719,10 @@
    :hidden:
    :caption: Contents:
 
-   depthai.SPIOut <?dummy=http://#SPIOut>
+   depthai.XLinkIn <?dummy=http://#XLinkIn>
+   depthai.XLinkOut <?dummy=http://#XLinkOut>
+   depthai.ColorCamera <?dummy=http://#ColorCamera>
+   depthai.MonoCamera <?dummy=http://#MonoCamera>
+   depthai.NeuralNetwork <?dummy=http://#NeuralNetwork>
+   depthai.ImageManip <?dummy=http://#ImageManip>
+   depthai.StereoDepth <?dummy=http://#StereoDepth>
