@@ -294,4 +294,4 @@ Putting it all together, only thing left to do is to run the file we've prepared
 
 You're on your way! You can find the `complete code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/blob/master/1-hello-world/hello_world.py>`__.
 
-.. include::  /pages/includes/footer-short.rst
+.. include::  /includes/footer-short.rst

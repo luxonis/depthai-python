@@ -18,3 +18,5 @@ Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_d
 .. literalinclude:: ../../../examples/10_mono_depth_mobilenetssd.py
    :language: python
    :linenos:
+
+.. include::  /includes/footer-short.rst

@@ -57,4 +57,4 @@ Now use as many DepthAI devices as you need!
 And since DepthAI does all the heavy lifting, you can usually use quite a
 few of them with very little burden to the host.
 
-.. include::  /pages/includes/footer-short.rst
+.. include::  /includes/footer-short.rst

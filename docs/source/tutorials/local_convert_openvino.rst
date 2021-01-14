@@ -306,6 +306,6 @@ The flow we walked through works for other pre-trained object detection models i
 
 You’re on your way! You can find the `complete code for this tutorial on GitHub. <https://github.com/luxonis/depthai-tutorials/blob/master/2-face-detection-retail/face-detection-retail-0004.py>`__
 
-.. include::  /pages/includes/footer-short.rst
+.. include::  /includes/footer-short.rst
 
 

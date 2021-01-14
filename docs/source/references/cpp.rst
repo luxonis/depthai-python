@@ -5,3 +5,9 @@ C++ API Reference
   :canonical: depthai.Device
 
   Represents the DepthAI device with the methods to interact with it.
+
+
+
+
+
+.. include::  /includes/footer-short.rst

@@ -268,6 +268,8 @@ Python API Reference
 
 
 
+.. include::  /includes/footer-short.rst
+
 ..
   Below you can see ?dummy=http://, this is a workaround for a Sphinx, see here - https://github.com/sphinx-doc/sphinx/issues/701#issuecomment-697116337
 
