@@ -44,117 +44,7 @@ Before running the example, install the DepthAI Python library using the command
    python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d436ec6b629c09b92c58d869e80aac52367a3aa9
 
 
-Now, pick an example from the table below and start utilizing Gen2 capabilities
-
-.. raw:: html
-
-   <table class="colwidths-given docutils align-center" id="id1">
-      <caption><span class="caption-text">Examples listing</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
-      <colgroup>
-      <col style="width: 25%">
-      <col style="width: 50%">
-      <col style="width: 25%">
-      </colgroup>
-      <thead>
-         <tr class="row-odd">
-            <th class="head"><p>Link</p></th>
-            <th class="head"><p>Example name</p></th>
-            <th class="head"><p>Features covered</p></th>
-         </tr>
-      </thead>
-      <tbody>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/01_rgb_preview.py">GitHub</a></p></td>
-            <td><p>Color camera preview</p></td>
-            <td><p>4K RGB Camera, Display</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/02_mono_preview.py">GitHub</a></p></td>
-            <td><p>Mono camera preview</p></td>
-            <td><p>Mono Camera, Display</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/03_depth_preview.py">GitHub</a></p></td>
-            <td><p>Depth preview</p></td>
-            <td><p>Mono Camera, Stereo Disparity, Display</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/04_rgb_encoding.py">GitHub</a></p></td>
-            <td><p>RGB Encoding</p></td>
-            <td><p>4K RGB Camera, Encoding</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/05_rgb_mono_encoding.py">GitHub</a></p></td>
-            <td><p>Color &amp; Mono Camera Encoding</p></td>
-            <td><p>4K RGB Camera, Mono Camera, Encoding</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/06_rgb_full_resolution_saver.py">GitHub</a></p></td>
-            <td><p>4K Color Camera full-resolution frames saver</p></td>
-            <td><p>4K RGB Camera, Display</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/07_mono_full_resolution_saver.py">GitHub</a></p></td>
-            <td><p>Mono Camera full-resolution frames saver</p></td>
-            <td><p>Mono Camera, Display</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/08_rgb_mobilenet.py">GitHub</a></p></td>
-            <td><p>4K Color Camera with Neural Network inference</p></td>
-            <td><p>4K RGB Camera, Display, Neural Network</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/09_mono_mobilenet.py">GitHub</a></p></td>
-            <td><p>Mono Camera with Neural Network inference</p></td>
-            <td><p>Mono Camera, Display, Neural Network</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/10_mono_depth_mobilenetssd.py">GitHub</a></p></td>
-            <td><p>Mono Camera with Neural Network inference<br/> and Depth preview</p></td>
-            <td><p>Mono Camera, Display, Neural Network, Stereo Disparity</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/11_rgb_encoding_mono_mobilenet.py">GitHub</a></p></td>
-            <td><p>4K Color Camera Encoding with <br/>Mono Camera Neural Network inference</p></td>
-            <td><p>4K RGB Camera, Mono Camera, Display, Neural Network, Encoding</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/12_rgb_encoding_mono_mobilenet_depth.py">GitHub</a></p></td>
-            <td><p>4K Color Camera Encoding with Mono Camera <br/>Neural Network inference and Depth preview</p></td>
-            <td><p>4K RGB Camera, Mono Camera, Display, Neural Network, Encoding, Stereo Disparity</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/blob/master/gen2_examples/13_encoding_max_limit.py">GitHub</a></p></td>
-            <td><p>Color &amp; Mono camera encoding with <br/>maximum resolution &amp; fps available</p></td>
-            <td><p>4K RGB Camera, Mono Camera, Encoding</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo">GitHub</a></p></td>
-            <td><p>Color &amp; Mono camera with <br/>Point Cloud Projection and Depth preview</p></td>
-            <td><p>4K RGB Camera, Mono Camera, Display, Point Cloud</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/tree/master/gaze-estimation">GitHub</a></p></td>
-            <td><p>Gaze estimation</p></td>
-            <td><p>4K RGB Camera, Display, Neural Network, Multi-stage inference</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi/gen2-spi-jpeg">GitHub</a></p></td>
-            <td><p>Color Camera over SPI</p></td>
-            <td><p>4K RGB Camera, Encoding, SPI</p></td>
-         </tr>
-         <tr class="row-even">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi/gen2-spi-standalone">GitHub</a></p></td>
-            <td><p>Color Camera over SPI (without host)</p></td>
-            <td><p>4K RGB Camera, Encoding, SPI, Standalone</p></td>
-         </tr>
-         <tr class="row-odd">
-            <td><p><a class="reference external" href="https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi/gen2-spi-stereo">GitHub</a></p></td>
-            <td><p>Depth preview with cropping over SPI</p></td>
-            <td><p>Mono Camera, Stereo Disparity, Display, SPI</p></td>
-         </tr>
-      </tbody>
-   </table>
+Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 
 .. toctree::
    :maxdepth: 0
@@ -177,7 +67,16 @@ Now, pick an example from the table below and start utilizing Gen2 capabilities
    :hidden:
    :caption: Code samples:
 
-   samples/minimal.rst
+   samples/01_rgb_preview.rst
+   samples/02_mono_preview.rst
+   samples/03_depth_preview.rst
+   samples/04_rgb_encoding.rst
+   samples/05_rgb_mono_encoding.rst
+   samples/06_rgb_full_resolution_saver.rst
+   samples/07_mono_full_resolution_saver.rst
+   samples/08_rgb_mobilenet.rst
+   samples/09_mono_mobilenet.rst
+   samples/10_mono_depth_mobilenetssd.rst
 
 
 .. toctree::
