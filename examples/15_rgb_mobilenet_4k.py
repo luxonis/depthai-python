@@ -19,7 +19,7 @@ cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(300, 300)    # NN input
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 cam_rgb.setInterleaved(False)
-cam_rgb.setPreviewKeepAspectRatio(True)
+cam_rgb.setPreviewKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
@@ -63,7 +63,7 @@ def display_frame(name, frame, bboxes):
         bbox = frame_norm(frame, raw_bbox)
         cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]),
                       (255, 0, 0), 2)
-        cv2.imshow(name, frame)
+    cv2.imshow(name, frame)
 
 
 while True:
