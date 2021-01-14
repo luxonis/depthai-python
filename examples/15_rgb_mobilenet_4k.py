@@ -16,24 +16,19 @@ pipeline = dai.Pipeline()
 
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(3840, 2160)
+cam_rgb.setPreviewSize(300, 300)    # NN input
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 cam_rgb.setInterleaved(False)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
 detection_nn.setBlobPath(mobilenet_path)
-
-# Scale 4K frames to 300x300 for NN
-manip = pipeline.createImageManip()
-manip.setResize(300, 300)
-cam_rgb.preview.link(manip.inputImage)
-manip.out.link(detection_nn.input)
+cam_rgb.preview.link(detection_nn.input)
 
 # Create outputs
-xout_rgb = pipeline.createXLinkOut()
-xout_rgb.setStreamName("rgb")
-cam_rgb.preview.link(xout_rgb.input)
+xout_video = pipeline.createXLinkOut()
+xout_video.setStreamName("video")
+cam_rgb.video.link(xout_video.input)
 
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
@@ -43,8 +38,8 @@ detection_nn.out.link(xout_nn.input)
 device = dai.Device(pipeline)
 device.startPipeline()
 
-# Output queues will be used to get the rgb frames and nn data from the outputs defined above
-q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+# Output queues will be used to get the video frames and nn data from the outputs defined above
+q_video = device.getOutputQueue(name="video", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
 frame = None
@@ -58,14 +53,16 @@ def frame_norm(frame, bbox):
 
 while True:
     # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-    in_rgb = q_rgb.tryGet()
+    in_video = q_video.tryGet()
     in_nn = q_nn.tryGet()
 
-    if in_rgb is not None:
-        # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-        shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-        frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame = np.ascontiguousarray(frame)
+    if in_video is not None:
+        # if the data from the video camera is available, transform the 1D data into a HxWxC frame
+        packetData = in_video.getData()
+        w = in_video.getWidth()
+        h = in_video.getHeight()
+        yuv420p = packetData.reshape((h * 3 // 2, w))
+        frame = cv2.cvtColor(yuv420p, cv2.COLOR_YUV2BGR_NV12)
 
     if in_nn is not None:
         # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
