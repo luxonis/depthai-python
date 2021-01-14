@@ -172,6 +172,13 @@ Now, pick an example from the table below and start utilizing Gen2 capabilities
    tutorials/local_convert_openvino.rst
    tutorials/windows_install.rst
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Code samples:
+
+   samples/minimal.rst
+
 
 .. toctree::
    :maxdepth: 1
