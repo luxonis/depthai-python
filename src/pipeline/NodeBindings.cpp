@@ -10,6 +10,7 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/DetectionNetwork.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -104,6 +105,8 @@ void NodeBindings::bind(pybind11::module& m){
         })
         .def("setBoardSocket", &ColorCamera::setBoardSocket)
         .def("getBoardSocket", &ColorCamera::getBoardSocket)
+        .def("setImageOrientation", &ColorCamera::setImageOrientation)
+        .def("getImageOrientation", &ColorCamera::getImageOrientation)
         .def("setColorOrder", &ColorCamera::setColorOrder)
         .def("getColorOrder", &ColorCamera::getColorOrder)
         .def("setInterleaved", &ColorCamera::setInterleaved)
@@ -186,6 +189,8 @@ void NodeBindings::bind(pybind11::module& m){
         })
         .def("setBoardSocket", &MonoCamera::setBoardSocket)
         .def("getBoardSocket", &MonoCamera::getBoardSocket)
+        .def("setImageOrientation", &MonoCamera::setImageOrientation)
+        .def("getImageOrientation", &MonoCamera::getImageOrientation)
         .def("setResolution", &MonoCamera::setResolution)
         .def("getResolution", &MonoCamera::getResolution)
         .def("setFps",        &MonoCamera::setFps)
@@ -357,6 +362,29 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("input", &SPIOut::input)
         .def("setStreamName", &SPIOut::setStreamName)
         .def("setBusId", &SPIOut::setBusId)
+        ;
+
+    // MobileNetDetectionNetwork node
+    py::class_<MobileNetDetectionNetwork, Node, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
+        .def_readonly("input", &MobileNetDetectionNetwork::input)
+        .def_readonly("out", &MobileNetDetectionNetwork::out)
+        .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
+        .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
+        .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
+        ;
+
+    // YoloDetectionNetwork node
+    py::class_<YoloDetectionNetwork, Node, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
+        .def_readonly("input", &YoloDetectionNetwork::input)
+        .def_readonly("out", &YoloDetectionNetwork::out)
+        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
+        .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
+        .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
+        .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
+        .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
+        .def("setAnchors", &YoloDetectionNetwork::setAnchors)
+        .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks)
+        .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
         ;
 
 }
