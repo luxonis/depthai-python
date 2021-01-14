@@ -30,6 +30,10 @@ xout_video = pipeline.createXLinkOut()
 xout_video.setStreamName("video")
 cam_rgb.video.link(xout_video.input)
 
+xout_preview = pipeline.createXLinkOut()
+xout_preview.setStreamName("preview")
+cam_rgb.preview.link(xout_preview.input)
+
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
@@ -38,11 +42,13 @@ detection_nn.out.link(xout_nn.input)
 device = dai.Device(pipeline)
 device.startPipeline()
 
-# Output queues will be used to get the video frames and nn data from the outputs defined above
+# Output queues will be used to get the frames and nn data from the outputs defined above
 q_video = device.getOutputQueue(name="video", maxSize=4, blocking=False)
+q_preview = device.getOutputQueue(name="preview", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
-frame = None
+preview_frame = None
+video_frame = None
 bboxes = []
 
 
@@ -51,9 +57,18 @@ def frame_norm(frame, bbox):
     return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
 
 
+def display_frame(name, frame, bboxes):
+    for raw_bbox in bboxes:
+        bbox = frame_norm(frame, raw_bbox)
+        cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]),
+                      (255, 0, 0), 2)
+        cv2.imshow(name, frame)
+
+
 while True:
     # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
     in_video = q_video.tryGet()
+    in_preview = q_preview.tryGet()
     in_nn = q_nn.tryGet()
 
     if in_video is not None:
@@ -62,7 +77,12 @@ while True:
         w = in_video.getWidth()
         h = in_video.getHeight()
         yuv420p = packetData.reshape((h * 3 // 2, w))
-        frame = cv2.cvtColor(yuv420p, cv2.COLOR_YUV2BGR_NV12)
+        video_frame = cv2.cvtColor(yuv420p, cv2.COLOR_YUV2BGR_NV12)
+
+    if in_preview is not None:
+        shape = (3, in_preview.getHeight(), in_preview.getWidth())
+        preview_frame = in_preview.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+        preview_frame = np.ascontiguousarray(preview_frame)
 
     if in_nn is not None:
         # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
@@ -74,12 +94,12 @@ while True:
         # filter out the results which confidence less than a defined threshold
         bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
 
-    if frame is not None:
-        # if the frame is available, draw bounding boxes on it and show the frame
-        for raw_bbox in bboxes:
-            bbox = frame_norm(frame, raw_bbox)
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("rgb", frame)
+    # if the frame is available, draw bounding boxes on it and show the frame
+    if video_frame is not None:
+        display_frame("video", video_frame, bboxes)
+
+    if preview_frame is not None:
+        display_frame("preview", preview_frame, bboxes)
 
     if cv2.waitKey(1) == ord('q'):
         break
