@@ -10,7 +10,7 @@ pipeline = dai.Pipeline()
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(300, 300)
-cam_rgb.setCamId(0)
+cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 cam_rgb.setInterleaved(False)
 
