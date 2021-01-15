@@ -150,6 +150,18 @@ Having the pipeline defined, we can now initialize a device and start it
   device = depthai.Device(pipeline)
   device.startPipeline()
 
+.. note::
+
+  By default, the DepthAI is accessed as a USB3 device. This comes with `several limitations <https://docs.luxonis.com/en/latest/pages/troubleshooting/#intermittent-connectivity-with-long-2-meter-usb3-cables>`__.
+
+  If you'd like to communicate via USB2, being free from these but having a limited bandwidth, initialize the DepthAI with the following code
+
+  .. code-block:: python
+
+    device = depthai.Device(pipeline, True)
+
+
+
 From this point on, the pipeline will be running on the device, producing results we requested. Let's grab them
 
 Adding helpers
