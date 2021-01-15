@@ -46,8 +46,8 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
-q_right = device.getOutputQueue("right")
-q_nn = device.getOutputQueue("nn")
+q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
+q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
 frame = None
 bboxes = []

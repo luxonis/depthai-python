@@ -75,7 +75,7 @@ q_right = device.getOutputQueue(name="rect_right", maxSize=8, blocking=False)
 q_manip = device.getOutputQueue(name="manip", maxSize=8, blocking=False)
 q_depth = device.getOutputQueue(name="depth", maxSize=8, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=8, blocking=False)
-q_rgb_enc = device.getOutputQueue(name="h265", maxSize=8, blocking=False)
+q_rgb_enc = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
 
 frame_right = None
 frame_manip = None
