@@ -1,5 +1,5 @@
-10 - Mono & MobilenetSSD & Encoding
-===================================
+11 - RGB & Encoding & Mono & MobilenetSSD
+=========================================
 
 .. warning::
 
@@ -12,15 +12,15 @@ Demo
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="//www.youtube.com/embed/D_hefNl134M" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="//www.youtube.com/embed/qzwt9XXNsow" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/10_mono_depth_mobilenetssd.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/11_rgb_encoding_mono_mobilenet.py>`__
 
-.. literalinclude:: ../../../examples/10_mono_depth_mobilenetssd.py
+.. literalinclude:: ../../../examples/11_rgb_encoding_mono_mobilenet.py
    :language: python
    :linenos:
 

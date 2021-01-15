@@ -61,3 +61,18 @@ TEST_TIMEOUT=0 ctest -R "01_rgb_preview" --verbose
 **NOTE** For clearness, a `disparity` output is used instead of `depth`, as disparity is better to visualize
 
 ![example_10](https://user-images.githubusercontent.com/5244214/104056108-35b53100-51f0-11eb-9677-63e5fb5bcb83.gif)
+
+### 11_rgb_encoding_mono_mobilenet.py
+![example_11](https://user-images.githubusercontent.com/5244214/104740909-cb007a00-5748-11eb-8250-c07ee6bf980a.gif)
+
+### 12_rgb_encoding_mono_mobilenet_depth.py
+
+**NOTE** For clearness, a `disparity` output is used instead of `depth`, as disparity is better to visualize
+
+![example_12](https://user-images.githubusercontent.com/5244214/104741001-e9667580-5748-11eb-92d3-39dd726b0992.gif)
+
+### 13_encoding_max_limit.py
+![example_13](https://user-images.githubusercontent.com/5244214/104741072-0307bd00-5749-11eb-97f3-9422c8b0d8da.gif)
+
+### 14_color_camera_control.py
+![example_14](https://user-images.githubusercontent.com/5244214/104741150-187ce700-5749-11eb-8bd5-3d4f37d2d22a.gif)
