@@ -77,6 +77,10 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/08_rgb_mobilenet.rst
    samples/09_mono_mobilenet.rst
    samples/10_mono_depth_mobilenetssd.rst
+   samples/11_rgb_encoding_mono_mobilenet.rst
+   samples/12_rgb_encoding_mono_mobilenet_depth.rst
+   samples/13_encoding_max_limit.rst
+   samples/14_color_camera_control.rst
 
 
 .. toctree::
