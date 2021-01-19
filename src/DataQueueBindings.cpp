@@ -17,6 +17,12 @@ void DataQueueBindings::bind(pybind11::module& m){
     // Bind DataOutputQueue
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue")
         .def("getName", &DataOutputQueue::getName)
+
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::string, std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void()>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("removeCallback", &DataOutputQueue::removeCallback, py::arg("callbackId"))
+
         .def("setBlocking", &DataOutputQueue::setBlocking, py::arg("blocking"))
         .def("getBlocking", &DataOutputQueue::getBlocking)
         .def("setMaxSize", &DataOutputQueue::setMaxSize, py::arg("maxSize"))
