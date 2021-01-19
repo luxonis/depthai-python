@@ -45,5 +45,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(13_encoding_max_limit 13_encoding_max_limit.py)
     dai_add_python_test(14_color_camera_control 14_color_camera_control.py)
     
+    dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
+    
 
 endif()
