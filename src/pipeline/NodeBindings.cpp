@@ -67,16 +67,21 @@ void NodeBindings::bind(pybind11::module& m){
     // XLinkIn node
     py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn")
         .def_readonly("out", &XLinkIn::out)
-        .def("setStreamName", &XLinkIn::setStreamName)
-        .def("setMaxDataSize", &XLinkIn::setMaxDataSize)
-        .def("setNumFrames",  &XLinkIn::setNumFrames)   
+        .def("setStreamName", &XLinkIn::setStreamName, py::arg("streamName"))
+        .def("setMaxDataSize", &XLinkIn::setMaxDataSize, py::arg("maxDataSize"))
+        .def("setNumFrames",  &XLinkIn::setNumFrames, py::arg("numFrames")) 
+        .def("getStreamName", &XLinkIn::getStreamName)
+        .def("getMaxDataSize", &XLinkIn::getMaxDataSize)
+        .def("getNumFrames",  &XLinkIn::getNumFrames)     
         ;
 
     // XLinkOut node
     py::class_<XLinkOut, Node, std::shared_ptr<XLinkOut>>(m, "XLinkOut")
         .def_readonly("input", &XLinkOut::input)
-        .def("setStreamName", &XLinkOut::setStreamName)
-        .def("setFpsLimit", &XLinkOut::setFpsLimit)
+        .def("setStreamName", &XLinkOut::setStreamName, py::arg("streamName"))
+        .def("setFpsLimit", &XLinkOut::setFpsLimit, py::arg("fpsLimit"))
+        .def("getStreamName", &XLinkOut::getStreamName)
+        .def("getFpsLimit", &XLinkOut::getFpsLimit)
         ;
 
     // ColorCamera node
@@ -146,6 +151,7 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<NeuralNetwork, Node, std::shared_ptr<NeuralNetwork>>(m, "NeuralNetwork")
         .def_readonly("input", &NeuralNetwork::input)
         .def_readonly("out", &NeuralNetwork::out)
+        .def_readonly("passthrough", &NeuralNetwork::passthrough)
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
         ;

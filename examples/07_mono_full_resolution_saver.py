@@ -28,7 +28,7 @@ device.startPipeline()
 q_right = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
 # Make sure the destination path is present before starting to store the examples
-Path('07_data').mkdir(parents=True)
+Path('07_data').mkdir(parents=True, exist_ok=True)
 
 while True:
     in_right = q_right.get()  # blocking call, will wait until a new data has arrived

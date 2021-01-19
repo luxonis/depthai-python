@@ -29,7 +29,7 @@ device.startPipeline()
 q_rgb = device.getOutputQueue(name="rgb")
 
 # Make sure the destination path is present before starting to store the examples
-Path('06_data').mkdir(parents=True)
+Path('06_data').mkdir(parents=True, exist_ok=True)
 
 while True:
     in_rgb = q_rgb.get()  # blocking call, will wait until a new data has arrived
