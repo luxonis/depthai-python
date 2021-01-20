@@ -188,7 +188,7 @@ Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/d
 
       brew install coreutils python3 cmake libusb wget
 
-And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ from Github and build it for Mac OS X.
+And now you're ready to clone the `depthai-python gen2_develop branch <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ from Github and build it for Mac OS X.
 
 Using/Testing a Specific Branch/PR
 **********************************

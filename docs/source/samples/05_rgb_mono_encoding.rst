@@ -15,11 +15,6 @@ Setup
 
 Please follow :ref:`Python API installation guide <Installation - Python>`
 
-Setup
-#####
-
-Please follow :ref:`Python API installation guide <Installation - Python>`
-
 Source code
 ###########
 
