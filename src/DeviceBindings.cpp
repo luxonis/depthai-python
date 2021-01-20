@@ -139,10 +139,14 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("setCallback", &Device::setCallback, py::arg("name"), py::arg("callback"))
         .def("setLogLevel", &Device::setLogLevel, py::arg("level"))
         .def("getLogLevel", &Device::getLogLevel)
+        .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"))
+        .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate)
         .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage)
         .def("getLeonOsHeapUsage", &Device::getLeonOsHeapUsage)
         .def("getLeonRtHeapUsage", &Device::getLeonRtHeapUsage)
         .def("getChipTemperature", &Device::getChipTemperature)
+        .def("getLeonOsCpuUsage", &Device::getLeonOsCpuUsage)
+        .def("getLeonRtCpuUsage", &Device::getLeonRtCpuUsage)
         ;
 
 }
