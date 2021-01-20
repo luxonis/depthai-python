@@ -21,14 +21,6 @@ Please run the following command to install the required dependencies
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
-Please run the following command to install the required dependencies
-
-.. code-block:: bash
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+6ec3f3181b4e46fa6a9f9b20a5b4a3dac5e876b4 numpy==1.19.5 opencv-python==4.5.1.48
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
-
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
 
