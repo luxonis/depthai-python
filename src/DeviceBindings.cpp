@@ -19,12 +19,7 @@ static std::unique_ptr<dai::Device> deviceConstructorHelper(const dai::Pipeline&
             std::tie(found, deviceInfo) = dai::Device::getFirstAvailableDevice();
             // Check if found
             if(found){
-                // Check if pathToCmd supplied
-                if(pathToCmd.empty()){
-                    return std::unique_ptr<dai::Device>(new dai::Device(pipeline, deviceInfo, usb2Mode));
-                } else {
-                    return std::unique_ptr<dai::Device>(new dai::Device(pipeline, deviceInfo, pathToCmd));
-                }
+                break;
             } else {
                 // block for 100ms                    
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -38,7 +33,15 @@ static std::unique_ptr<dai::Device> deviceConstructorHelper(const dai::Pipeline&
     // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
     if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
 
+    // if no devices found, then throw
     if(!found) throw std::runtime_error("No available devices");
+
+    // Check if pathToCmd supplied
+    if(pathToCmd.empty()){
+        return std::unique_ptr<dai::Device>(new dai::Device(pipeline, deviceInfo, usb2Mode));
+    } else {
+        return std::unique_ptr<dai::Device>(new dai::Device(pipeline, deviceInfo, pathToCmd));
+    }
     return nullptr;
 } 
 
