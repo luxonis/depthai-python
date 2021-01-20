@@ -89,7 +89,7 @@ Install using pip
 #################
 
 Our packages are available to download using our `Artifactory server <https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/>`__.
-These are built for every commit in the `depthai-python <https://github.com/luxonis/depthai-python>`__ repository and are suffixed
+These are built for every commit in the `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ repository and are suffixed
 with a commit SHA.
 
 Note that we recommend installing the dependencies in a virtual environment, so that they don't interfere with other Python
@@ -147,3 +147,79 @@ If all goes well a small window video display will appear with color camera prev
   Some of the examples needs additional setup to be ran. Please be sure to follow `setup instructions in README.md <https://github.com/luxonis/depthai-python/tree/gen2_develop/examples#depthai-python-examples>`__
   to run different examples
 
+Other installation methods
+##########################
+
+To get the latest features from our source code, you can go ahead and compile depthai package manually.
+
+Dependencies to build from source
+*********************************
+
+- CMake > 3.2.0
+- Generation tool (Ninja, make, ...)
+- C/C++ compiler
+- libusb1 development package
+
+.. _raspbian:
+
+Ubuntu, Raspberry Pi OS, ... (Debian based systems)
+---------------------------------------------------
+
+On Debian based systems (Raspberry Pi OS, Ubuntu, ...) these can be acquired by running:
+
+.. code-block:: bash
+
+  sudo apt-get -y install cmake libusb-1.0-0-dev build-essential
+
+macOS (Mac OS X)
+----------------
+
+Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ library needs following dependencies
+
+- Homebrew (If it's not installed already)
+
+  .. code-block:: bash
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+- Python, libusb, CMake, wget
+
+  .. code-block:: bash
+
+      brew install coreutils python3 cmake libusb wget
+
+And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ from Github and build it for Mac OS X.
+
+Using/Testing a Specific Branch/PR
+**********************************
+
+From time to time, it may be of interest to use a specific branch.  This may occur, for example,
+because we have listened to your feature request and implemented a quick implementation in a branch.
+Or it could be to get early access to a feature that is soaking in for stability purposes before being merged.
+
+So when working in the `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ repository, using a branch can be accomplished
+with the following commands.
+
+Prior to running the following, you can either clone the repository independently
+(for not over-writing any of your local changes) or simply do a :code:`git pull` first.
+
+.. code-block:: bash
+
+  git checkout <branch>
+  git submodule update --init --recursive
+  python3 setup.py develop
+
+Install from source
+*******************
+
+If desired, you can also install the package from the source code itself - it will allow you to make the changes
+to the API and see them live in action.
+
+To do so, first download the repository and then add the package to your python interpreter in development mode
+
+.. code-block:: bash
+
+  git clone https://github.com/luxonis/depthai-python.git --branch gen2_develop
+  cd depthai-python
+  git submodule update --init --recursive
+  python3 setup.py develop  # you may need to add sudo if using system interpreter instead of virtual environment
