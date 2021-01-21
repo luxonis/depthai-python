@@ -12,7 +12,7 @@ pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
 cam_right = pipeline.createMonoCamera()
-cam_right.setCamId(2)
+cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Create output

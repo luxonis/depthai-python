@@ -18,8 +18,8 @@ ve2Out = pipeline.createXLinkOut()
 ve3Out = pipeline.createXLinkOut()
 
 # Properties
-monoCam.setCamId(1)
-monoCam2.setCamId(2)
+monoCam.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoCam2.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 ve1Out.setStreamName('ve1Out')
 ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
@@ -67,7 +67,7 @@ with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as fi
             break
 
 print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
-cmd = "ffmpeg -framerate 30 -i {} -c copy {}"
+cmd = "ffmpeg -framerate 25 -i {} -c copy {}"
 print(cmd.format("mono1.h264", "mono1.mp4"))
 print(cmd.format("mono2.h264", "mono2.mp4"))
 print(cmd.format("color.h265", "color.mp4"))

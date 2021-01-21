@@ -10,11 +10,11 @@ pipeline = dai.Pipeline()
 # Define a source - two mono (grayscale) cameras
 left = pipeline.createMonoCamera()
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setCamId(1)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
 right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setCamId(2)
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map
 depth = pipeline.createStereoDepth()

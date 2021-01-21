@@ -8,9 +8,9 @@ pipeline = dai.Pipeline()
 # Define a source - color and mono cameras
 colorCam = pipeline.createColorCamera()
 monoCam = pipeline.createMonoCamera()
-monoCam.setCamId(1)
+monoCam.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoCam2 = pipeline.createMonoCamera()
-monoCam2.setCamId(2)
+monoCam2.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create encoders, one for each camera, consuming the frames and encoding them using H.264 / H.265 encoding
 ve1 = pipeline.createVideoEncoder()
