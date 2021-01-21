@@ -8,7 +8,7 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 # Start defining a pipeline
@@ -21,7 +21,7 @@ cam_rgb.setInterleaved(False)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(sys.argv[1])
+detection_nn.setBlobPath(mobilenet_path)
 cam_rgb.preview.link(detection_nn.input)
 
 # Create outputs

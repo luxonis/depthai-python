@@ -10,13 +10,13 @@ pipeline = dai.Pipeline()
 # Define a source - two mono (grayscale) cameras
 left = pipeline.createMonoCamera()
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setCamId(1)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
 right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setCamId(2)
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-# Create a node that will produce the depth map
+# Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
 left.out.link(depth.left)
