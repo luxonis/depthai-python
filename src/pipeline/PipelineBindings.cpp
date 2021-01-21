@@ -25,8 +25,8 @@ void PipelineBindings::bind(pybind11::module& m){
 
     // Bind global properties
     py::class_<GlobalProperties>(m, "GlobalProperties")
-        .def_readwrite("leonOsFrequencyHz", &GlobalProperties::leonOsFrequencyHz)
-        .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonRtFrequencyHz)
+        .def_readwrite("leonOsFrequencyHz", &GlobalProperties::leonCssFrequencyHz)
+        .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonMssFrequencyHz)
         .def_readwrite("pipelineName", &GlobalProperties::pipelineName)
         .def_readwrite("pipelineVersion", &GlobalProperties::pipelineVersion)
         ;

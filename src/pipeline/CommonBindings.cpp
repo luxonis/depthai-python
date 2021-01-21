@@ -41,8 +41,8 @@ void CommonBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("css", &ChipTemperature::css)
         .def_readwrite("mss", &ChipTemperature::mss)
-        .def_readwrite("upa0", &ChipTemperature::upa0)
-        .def_readwrite("upa1", &ChipTemperature::upa1)
+        .def_readwrite("upa", &ChipTemperature::upa)
+        .def_readwrite("dss", &ChipTemperature::dss)
         .def_readwrite("average", &ChipTemperature::average)
     ;
     
