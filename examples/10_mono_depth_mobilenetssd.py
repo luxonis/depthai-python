@@ -8,7 +8,7 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 
@@ -24,7 +24,7 @@ right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-# Create a node that will produce the depth map
+# Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
 depth.setOutputRectified(True) # The rectified streams are horizontally mirrored by default
@@ -62,9 +62,9 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
-q_right = device.getOutputQueue("right")
-q_depth = device.getOutputQueue("depth")
-q_nn = device.getOutputQueue("nn")
+q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
+q_depth = device.getOutputQueue("depth", maxSize=4, blocking=False)
+q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
 frame_right = None
 frame_depth = None

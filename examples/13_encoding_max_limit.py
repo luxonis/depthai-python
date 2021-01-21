@@ -42,9 +42,9 @@ ve3.bitstream.link(ve3Out.input)
 dev = dai.Device(pipeline)
 
 # Prepare data queues
-outQ1 = dev.getOutputQueue('ve1Out')
-outQ2 = dev.getOutputQueue('ve2Out')
-outQ3 = dev.getOutputQueue('ve3Out')
+outQ1 = dev.getOutputQueue('ve1Out', maxSize=30, blocking=True)
+outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
+outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)
 
 # Start the pipeline
 dev.startPipeline()

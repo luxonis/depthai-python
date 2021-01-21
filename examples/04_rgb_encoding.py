@@ -25,7 +25,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queue will be used to get the encoded data from the output defined above
-q = device.getOutputQueue(name="h265")
+q = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
 
 # The .h265 file is a raw stream file (not playable yet)
 with open('video.h265','wb') as videoFile:

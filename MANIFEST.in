@@ -4,6 +4,7 @@ graft generated
 global-include CMakeLists.txt *.cmake
 recursive-include src *
 recursive-include pybind11/include *.h
+graft external
 graft depthai-core
 prune depthai-core/build
 prune build

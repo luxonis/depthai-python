@@ -26,7 +26,7 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queue will be used to get the rgb frames from the output defined above
-q_rgb = device.getOutputQueue(name="rgb")
+q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 
 # Make sure the destination path is present before starting to store the examples
 Path('06_data').mkdir(parents=True, exist_ok=True)

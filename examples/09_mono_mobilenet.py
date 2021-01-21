@@ -8,7 +8,7 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 
@@ -46,8 +46,8 @@ device = dai.Device(pipeline)
 device.startPipeline()
 
 # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
-q_right = device.getOutputQueue("right")
-q_nn = device.getOutputQueue("nn")
+q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
+q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
 frame = None
 bboxes = []
