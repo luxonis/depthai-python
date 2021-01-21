@@ -44,7 +44,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(12_rgb_encoding_mono_mobilenet_depth 12_rgb_encoding_mono_mobilenet_depth.py "${mobilenet_blob}")
     dai_add_python_test(13_encoding_max_limit 13_encoding_max_limit.py)
     dai_add_python_test(14_color_camera_control 14_color_camera_control.py)
-    
+    dai_add_python_test(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_blob}")
     dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
     
 
