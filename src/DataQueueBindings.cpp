@@ -17,6 +17,16 @@ void DataQueueBindings::bind(pybind11::module& m){
     // Bind DataOutputQueue
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue")
         .def("getName", &DataOutputQueue::getName)
+
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::string, std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void()>)>(&DataOutputQueue::addCallback), py::arg("callback"))
+        .def("removeCallback", &DataOutputQueue::removeCallback, py::arg("callbackId"))
+
+        .def("setBlocking", &DataOutputQueue::setBlocking, py::arg("blocking"))
+        .def("getBlocking", &DataOutputQueue::getBlocking)
+        .def("setMaxSize", &DataOutputQueue::setMaxSize, py::arg("maxSize"))
+        .def("getMaxSize", &DataOutputQueue::getMaxSize)
         .def("getAll", [](DataOutputQueue& obj){
           
             std::vector<std::shared_ptr<ADatatype>> messages;
@@ -69,6 +79,10 @@ void DataQueueBindings::bind(pybind11::module& m){
     // Bind DataInputQueue
     py::class_<DataInputQueue, std::shared_ptr<DataInputQueue>>(m, "DataInputQueue")
         .def("getName", &DataInputQueue::getName)
+        .def("setBlocking", &DataInputQueue::setBlocking, py::arg("blocking"))
+        .def("getBlocking", &DataInputQueue::getBlocking)
+        .def("setMaxSize", &DataInputQueue::setMaxSize, py::arg("maxSize"))
+        .def("getMaxSize", &DataInputQueue::getMaxSize)
         .def("send", [](DataInputQueue& obj, std::shared_ptr<ADatatype> d){
             
             bool sent = false;

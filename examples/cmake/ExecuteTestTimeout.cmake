@@ -28,7 +28,7 @@ execute_process(COMMAND timeout -s SIGINT -k 5 ${TIMEOUT_SECONDS} ${arguments} R
 message(STATUS "After timeout, ${PATH_TO_TEST_EXECUTABLE} produced the following exit code: ${error_variable}")
 
 # After that, wait for ~3 seconds
-execute_process(COMMAND sleep 3)
+#execute_process(COMMAND sleep 3)
 
 if(error_variable MATCHES "timeout" OR error_variable EQUAL 128 OR error_variable EQUAL 124)
     # Okay
