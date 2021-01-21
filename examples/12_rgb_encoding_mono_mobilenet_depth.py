@@ -9,13 +9,13 @@ import numpy as np
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
-if len(sys.argv) == 2:
+if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
 pipeline = dai.Pipeline()
 
 cam = pipeline.createColorCamera()
-cam.setCamId(0)
+cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
 videoEncoder = pipeline.createVideoEncoder()
@@ -28,11 +28,11 @@ videoEncoder.bitstream.link(videoOut.input)
 
 left = pipeline.createMonoCamera()
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setCamId(1)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
 right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setCamId(2)
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
@@ -75,7 +75,7 @@ q_right = device.getOutputQueue(name="rect_right", maxSize=8, blocking=False)
 q_manip = device.getOutputQueue(name="manip", maxSize=8, blocking=False)
 q_depth = device.getOutputQueue(name="depth", maxSize=8, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=8, blocking=False)
-q_rgb_enc = device.getOutputQueue(name="h265", maxSize=8, blocking=False)
+q_rgb_enc = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
 
 frame_right = None
 frame_manip = None
@@ -93,10 +93,9 @@ while True:
     in_manip = q_manip.tryGet()
     in_nn = q_nn.tryGet()
     in_depth = q_depth.tryGet()
-    in_rgb_enc = q_rgb_enc.tryGet()
 
-    if in_rgb_enc is not None: 
-        in_rgb_enc.getData().tofile(videoFile)
+    while q_rgb_enc.has():
+        q_rgb_enc.get().getData().tofile(videoFile)
 
     if in_right is not None:
         shape = (in_right.getHeight(), in_right.getWidth())
