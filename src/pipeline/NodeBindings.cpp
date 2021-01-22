@@ -146,6 +146,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput)
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio)
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio)
+        .def("setAutoFocusMode", &ColorCamera::setAutoFocusMode)
         ;
 
     // NeuralNetwork node
@@ -155,6 +156,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("passthrough", &NeuralNetwork::passthrough)
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
+        .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads)
         ;
 
     // ImageManip node

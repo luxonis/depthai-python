@@ -227,8 +227,18 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
     rawCameraControl
         .def_readwrite("captureStill", &RawCameraControl::captureStill)
+        .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         ;
 
+    // CameraControl enum bindings
+    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode")
+        .value("OFF", RawCameraControl::AutoFocusMode::OFF)
+        .value("AUTO", RawCameraControl::AutoFocusMode::AUTO)
+        .value("MACRO", RawCameraControl::AutoFocusMode::MACRO)
+        .value("CONTINUOUS_VIDEO", RawCameraControl::AutoFocusMode::CONTINUOUS_VIDEO)
+        .value("CONTINUOUS_PICTURE", RawCameraControl::AutoFocusMode::CONTINUOUS_PICTURE)
+        .value("EDOF", RawCameraControl::AutoFocusMode::EDOF)
+    ;
 
 
     // Bind non-raw 'helper' datatypes
@@ -337,6 +347,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
         .def("setFrameType", &ImageManipConfig::setFrameType)
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
+        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)
