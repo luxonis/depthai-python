@@ -41,7 +41,7 @@ Path('06_data').mkdir(parents=True, exist_ok=True)
 
 while True:
     in_rgb = q_rgb.tryGet()  # non-blocking call, will return a new data that has arrived or None otherwise
-    print(in_rgb)
+
     if in_rgb is not None:
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
         shape = (in_rgb.getHeight() * 3 // 2, in_rgb.getWidth())
