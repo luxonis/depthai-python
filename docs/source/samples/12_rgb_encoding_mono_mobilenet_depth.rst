@@ -1,5 +1,5 @@
-10 - RGB & Encoding & Mono & MobilenetSSD & Depth
-=================================================
+12 - RGB Encoding & Mono with MobilenetSSD & Depth
+================================================
 
 Demo
 ####
