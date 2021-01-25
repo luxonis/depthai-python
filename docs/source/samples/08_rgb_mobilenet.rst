@@ -1,8 +1,6 @@
 08 - RGB & MobilenetSSD
 =======================
 
-.. warning::
-
 Demo
 ####
 
