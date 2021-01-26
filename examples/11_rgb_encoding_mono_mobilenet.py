@@ -52,63 +52,64 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
-device = dai.Device(pipeline)
-device.startPipeline()
 
-queue_size = 8
-q_right = device.getOutputQueue("right", queue_size)
-q_manip = device.getOutputQueue("manip", queue_size)
-q_nn = device.getOutputQueue("nn", queue_size)
-q_rgb_enc = device.getOutputQueue('h265', maxSize=30, blocking=True)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as device:
+    # Start pipeline
+    device.startPipeline()
 
-frame = None
-frame_manip = None
-bboxes = []
+    queue_size = 8
+    q_right = device.getOutputQueue("right", queue_size)
+    q_manip = device.getOutputQueue("manip", queue_size)
+    q_nn = device.getOutputQueue("nn", queue_size)
+    q_rgb_enc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
+    frame = None
+    frame_manip = None
+    bboxes = []
 
-def frame_norm(frame, bbox):
-    return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+    def frame_norm(frame, bbox):
+        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
 
+    videoFile = open('video.h265','wb')
 
-videoFile = open('video.h265','wb')
+    while True:
+        in_right = q_right.tryGet()
+        in_manip = q_manip.tryGet()
+        in_nn = q_nn.tryGet()
 
-while True:
-    in_right = q_right.tryGet()
-    in_manip = q_manip.tryGet()
-    in_nn = q_nn.tryGet()
+        while q_rgb_enc.has():
+            q_rgb_enc.get().getData().tofile(videoFile)
 
-    while q_rgb_enc.has():
-        q_rgb_enc.get().getData().tofile(videoFile)
+        if in_right is not None:
+            shape = (in_right.getHeight(), in_right.getWidth())
+            frame = in_right.getData().reshape(shape).astype(np.uint8)
+            frame = np.ascontiguousarray(frame)
 
-    if in_right is not None:
-        shape = (in_right.getHeight(), in_right.getWidth())
-        frame = in_right.getData().reshape(shape).astype(np.uint8)
-        frame = np.ascontiguousarray(frame)
+        if in_manip is not None:
+            shape = (3, in_manip.getHeight(), in_manip.getWidth())
+            frame_manip = in_manip.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+            frame_manip = np.ascontiguousarray(frame_manip)
 
-    if in_manip is not None:
-        shape = (3, in_manip.getHeight(), in_manip.getWidth())
-        frame_manip = in_manip.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame_manip = np.ascontiguousarray(frame_manip)
+        if in_nn is not None:
+            bboxes = np.array(in_nn.getFirstLayerFp16())
+            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
+            bboxes = bboxes.reshape((bboxes.size // 7, 7))
+            bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
 
-    if in_nn is not None:
-        bboxes = np.array(in_nn.getFirstLayerFp16())
-        bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
-        bboxes = bboxes.reshape((bboxes.size // 7, 7))
-        bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+        if frame is not None:
+            cv2.imshow("right", frame)
 
-    if frame is not None:
-        cv2.imshow("right", frame)
+        if frame_manip is not None:
+            for raw_bbox in bboxes:
+                bbox = frame_norm(frame_manip, raw_bbox)
+                cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.imshow("manip", frame_manip)
 
-    if frame_manip is not None:
-        for raw_bbox in bboxes:
-            bbox = frame_norm(frame_manip, raw_bbox)
-            cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("manip", frame_manip)
+        if cv2.waitKey(1) == ord('q'):
+            break
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+    videoFile.close()
 
-videoFile.close()
-
-print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
-print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")
+    print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
+    print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

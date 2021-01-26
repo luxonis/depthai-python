@@ -7,10 +7,8 @@ import depthai as dai
 import cv2
 import numpy as np
 
-
 # Step size ('W','A','S','D' controls)
 STEP_SIZE = 8
-
 
 pipeline = dai.Pipeline()
 
@@ -47,71 +45,71 @@ videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 
 
-# Connect to device
-dev = dai.Device(pipeline)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as dev:
 
-# Create data queues
-controlQueue = dev.getInputQueue('control')
-configQueue = dev.getInputQueue('config')
-previewQueue = dev.getOutputQueue('preview')
-videoQueue = dev.getOutputQueue('video')
-stillQueue = dev.getOutputQueue('still')
+    # Get data queues
+    controlQueue = dev.getInputQueue('control')
+    configQueue = dev.getInputQueue('config')
+    previewQueue = dev.getOutputQueue('preview')
+    videoQueue = dev.getOutputQueue('video')
+    stillQueue = dev.getOutputQueue('still')
 
-# Start pipeline
-dev.startPipeline()
+    # Start pipeline
+    dev.startPipeline()
 
-# Max crop_x & crop_y
-max_crop_x = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()
-max_crop_y = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colorCam.getResolutionHeight()
+    # Max crop_x & crop_y
+    max_crop_x = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()
+    max_crop_y = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colorCam.getResolutionHeight()
 
-# Default crop
-crop_x = 0
-crop_y = 0
+    # Default crop
+    crop_x = 0
+    crop_y = 0
 
-while True:
+    while True:
 
-    previewFrames = previewQueue.tryGetAll()
-    for previewFrame in previewFrames:
-        cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
+        previewFrames = previewQueue.tryGetAll()
+        for previewFrame in previewFrames:
+            cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
 
-    videoFrames = videoQueue.tryGetAll()
-    for videoFrame in videoFrames:
-        # Decode JPEG
-        frame = cv2.imdecode(videoFrame.getData(), cv2.IMREAD_UNCHANGED)
-        # Display
-        cv2.imshow('video', frame)
+        videoFrames = videoQueue.tryGetAll()
+        for videoFrame in videoFrames:
+            # Decode JPEG
+            frame = cv2.imdecode(videoFrame.getData(), cv2.IMREAD_UNCHANGED)
+            # Display
+            cv2.imshow('video', frame)
 
-        # Send new cfg to camera
-        cfg = dai.ImageManipConfig()
-        cfg.setCropRect(crop_x, crop_y, 0, 0)
-        configQueue.send(cfg)
-        print('Sending new crop - x: ', crop_x, ' y: ', crop_y)
+            # Send new cfg to camera
+            cfg = dai.ImageManipConfig()
+            cfg.setCropRect(crop_x, crop_y, 0, 0)
+            configQueue.send(cfg)
+            print('Sending new crop - x: ', crop_x, ' y: ', crop_y)
 
-    stillFrames = stillQueue.tryGetAll()
-    for stillFrame in stillFrames:
-        # Decode JPEG
-        frame = cv2.imdecode(stillFrame.getData(), cv2.IMREAD_UNCHANGED)
-        # Display
-        cv2.imshow('still', frame)
+        stillFrames = stillQueue.tryGetAll()
+        for stillFrame in stillFrames:
+            # Decode JPEG
+            frame = cv2.imdecode(stillFrame.getData(), cv2.IMREAD_UNCHANGED)
+            # Display
+            cv2.imshow('still', frame)
 
 
-    # Update screen
-    key = cv2.waitKey(1)
-    if key == ord('q'):
-        break
-    elif key == ord('c'):
-        ctrl = dai.CameraControl()
-        ctrl.setCaptureStill(True)
-        controlQueue.send(ctrl)
-    elif key == ord('a'):
-        crop_x = crop_x - (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-        if crop_x < 0: crop_x = max_crop_x
-    elif key == ord('d'):
-        crop_x = crop_x + (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-        if crop_x > max_crop_x: crop_x = 0
-    elif key == ord('w'):
-        crop_y = crop_y - (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-        if crop_y < 0: crop_y = max_crop_y
-    elif key == ord('s'):
-        crop_y = crop_y + (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-        if crop_y > max_crop_y: crop_y = 0
+        # Update screen
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+        elif key == ord('c'):
+            ctrl = dai.CameraControl()
+            ctrl.setCaptureStill(True)
+            controlQueue.send(ctrl)
+        elif key == ord('a'):
+            crop_x = crop_x - (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
+            if crop_x < 0: crop_x = max_crop_x
+        elif key == ord('d'):
+            crop_x = crop_x + (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
+            if crop_x > max_crop_x: crop_x = 0
+        elif key == ord('w'):
+            crop_y = crop_y - (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
+            if crop_y < 0: crop_y = max_crop_y
+        elif key == ord('s'):
+            crop_y = crop_y + (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
+            if crop_y > max_crop_y: crop_y = 0
