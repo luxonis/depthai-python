@@ -193,7 +193,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<RawImageManipConfig::CropQuadrilateral>(rawImageManipConfig, "CropQuadrilateral")
         .def(py::init<>())
         .def_readwrite("pt", &RawImageManipConfig::CropQuadrilateral::pt)
-        .def_readwrite("outSize", &RawImageManipConfig::CropQuadrilateral::outSize)
         ;
 
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
@@ -228,6 +227,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     rawCameraControl
         .def_readwrite("captureStill", &RawCameraControl::captureStill)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
+        .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
         ;
 
     // CameraControl enum bindings

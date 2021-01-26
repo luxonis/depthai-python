@@ -147,6 +147,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio)
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio)
         .def("setAutoFocusMode", &ColorCamera::setAutoFocusMode)
+        .def("setInitialLensPosition", &ColorCamera::setInitialLensPosition)
         ;
 
     // NeuralNetwork node
