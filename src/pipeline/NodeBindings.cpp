@@ -11,6 +11,7 @@
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
+#include "depthai/pipeline/node/DepthCalculator.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -393,4 +394,18 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
         ;
 
+    py::class_<DepthCalculatorProperties> DepthCalculatorProperties(m, "DepthCalculatorProperties");
+    DepthCalculatorProperties
+        .def_readwrite("roiConfig", &DepthCalculatorProperties::roiConfig)
+        ;
+
+    // DepthCalculator node
+    py::class_<DepthCalculator, Node, std::shared_ptr<DepthCalculator>>(m, "DepthCalculator")
+        .def_readonly("input", &DepthCalculator::input)
+        .def_readonly("depthInput", &DepthCalculator::depthInput)
+        .def_readonly("out", &DepthCalculator::out)
+        .def("setROIs", &DepthCalculator::setROIs)
+        .def("addROI", &DepthCalculator::addROI)
+
+        ;
 }

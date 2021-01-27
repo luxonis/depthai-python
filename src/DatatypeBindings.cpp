@@ -10,6 +10,7 @@
 #include "depthai/pipeline/datatype/NNData.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
+#include "depthai/pipeline/datatype/DepthCalculatorData.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -17,6 +18,8 @@
 #include "depthai-shared/datatype/RawNNData.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
+#include "depthai-shared/datatype/RawDepthCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawDepthCalculatorData.hpp"
 
 
 //pybind
@@ -327,5 +330,33 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getCaptureStill", &CameraControl::getCaptureStill)
         ;
 
+
+    py::class_<DepthCalculatorDataOut> (m, "DepthCalculatorDataOut")
+        .def(py::init<>())
+        .def_readwrite("config", &DepthCalculatorDataOut::config)
+        .def_readwrite("depth_avg", &DepthCalculatorDataOut::depth_avg)
+        ;
+    
+
+    py::class_<Rect> (m, "Rect")
+        .def(py::init<>())
+        .def_readwrite("xmin", &Rect::xmin)
+        .def_readwrite("ymin", &Rect::ymin)
+        .def_readwrite("xmax", &Rect::xmax)
+        .def_readwrite("ymax", &Rect::ymax)
+        ;
+
+    py::class_<DepthCalculatorConfig> (m, "DepthCalculatorConfig")
+        .def(py::init<>())
+        .def_readwrite("roi", &DepthCalculatorConfig::roi)
+        .def_readwrite("lower_threshold", &DepthCalculatorConfig::lower_threshold)
+        .def_readwrite("upper_threshold", &DepthCalculatorConfig::upper_threshold)
+        ;
+
+    // Bind DepthCalculatorData
+    py::class_<DepthCalculatorData, Buffer, std::shared_ptr<DepthCalculatorData>>(m, "DepthCalculatorData")
+        .def(py::init<>())
+        .def("getDepthData", &DepthCalculatorData::getDepthData)
+        ;
 
 }
