@@ -12,7 +12,6 @@ RUN pip install opencv-python
 COPY . /depthai-python
 RUN mkdir -p depthai-python/build
 RUN cd /depthai-python && \
-    git submodule update --init --recursive && \
     cd build && \
     cmake .. && \
     make -j
