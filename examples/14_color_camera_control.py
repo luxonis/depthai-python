@@ -67,6 +67,7 @@ max_crop_y = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colo
 # Default crop
 crop_x = 0
 crop_y = 0
+send_cam_config = True
 
 while True:
 
@@ -82,10 +83,12 @@ while True:
         cv2.imshow('video', frame)
 
         # Send new cfg to camera
-        cfg = dai.ImageManipConfig()
-        cfg.setCropRect(crop_x, crop_y, 0, 0)
-        configQueue.send(cfg)
-        print('Sending new crop - x: ', crop_x, ' y: ', crop_y)
+        if send_cam_config:
+            cfg = dai.ImageManipConfig()
+            cfg.setCropRect(crop_x, crop_y, 0, 0)
+            configQueue.send(cfg)
+            print('Sending new crop - x: ', crop_x, ' y: ', crop_y)
+            send_cam_config = False
 
     stillFrames = stillQueue.tryGetAll()
     for stillFrame in stillFrames:
@@ -103,15 +106,17 @@ while True:
         ctrl = dai.CameraControl()
         ctrl.setCaptureStill(True)
         controlQueue.send(ctrl)
-    elif key == ord('a'):
-        crop_x = crop_x - (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-        if crop_x < 0: crop_x = max_crop_x
-    elif key == ord('d'):
-        crop_x = crop_x + (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-        if crop_x > max_crop_x: crop_x = 0
-    elif key == ord('w'):
-        crop_y = crop_y - (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-        if crop_y < 0: crop_y = max_crop_y
-    elif key == ord('s'):
-        crop_y = crop_y + (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-        if crop_y > max_crop_y: crop_y = 0
+    elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
+        if key == ord('a'):
+            crop_x = crop_x - (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
+            if crop_x < 0: crop_x = max_crop_x
+        elif key == ord('d'):
+            crop_x = crop_x + (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
+            if crop_x > max_crop_x: crop_x = 0
+        elif key == ord('w'):
+            crop_y = crop_y - (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
+            if crop_y < 0: crop_y = max_crop_y
+        elif key == ord('s'):
+            crop_y = crop_y + (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
+            if crop_y > max_crop_y: crop_y = 0
+        send_cam_config = True
