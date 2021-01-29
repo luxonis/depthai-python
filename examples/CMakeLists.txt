@@ -29,6 +29,14 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         LOCATION mobilenet_blob
     )
 
+    # Construction vest video resource
+    hunter_private_data(
+        URL "http://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/construction_vest.mp4"
+        SHA1 "271d8d0b702e683ce02957db7c100843de5ceaec"
+        FILE "construction_vest.mp4"
+        LOCATION construction_vest
+    )
+
     # Add tests
     dai_add_python_test(01_rgb_preview 01_rgb_preview.py)
     dai_add_python_test(02_mono_preview 02_mono_preview.py)

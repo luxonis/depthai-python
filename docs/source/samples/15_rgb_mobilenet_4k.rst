@@ -1,5 +1,5 @@
-03 - Depth Preview
-==================
+15 - 4K RGB MobileNetSSD
+========================
 
 Demo
 ####
@@ -7,8 +7,9 @@ Demo
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/7oDjG-s-88Y" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/embed/Ww-vLSxOdW8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
+
 
 Setup
 #####
@@ -21,12 +22,15 @@ Please run the following command to install the required dependencies
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
+This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
+`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
+
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/03_depth_preview.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/15_rgb_mobilenet_4k.py>`__
 
-.. literalinclude:: ../../../examples/03_depth_preview.py
+.. literalinclude:: ../../../examples/15_rgb_mobilenet_4k.py
    :language: python
    :linenos:
 

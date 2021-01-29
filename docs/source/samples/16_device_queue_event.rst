@@ -1,5 +1,5 @@
-03 - Depth Preview
-==================
+16 - Device Queue Event
+=======================
 
 Demo
 ####
@@ -7,8 +7,9 @@ Demo
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/7oDjG-s-88Y" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/embed/QsFGPRX5fhw" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
+
 
 Setup
 #####
@@ -24,9 +25,9 @@ For additional information, please follow :ref:`Python API installation guide <I
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/03_depth_preview.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/16_device_queue_event.py>`__
 
-.. literalinclude:: ../../../examples/03_depth_preview.py
+.. literalinclude:: ../../../examples/16_device_queue_event.py
    :language: python
    :linenos:
 
