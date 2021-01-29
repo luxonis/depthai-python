@@ -225,7 +225,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawCameraControl
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
     rawCameraControl
-        .def_readwrite("captureStill", &RawCameraControl::captureStill)
+        .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
         ;
@@ -240,6 +240,56 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("EDOF", RawCameraControl::AutoFocusMode::EDOF)
     ;
 
+    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode")
+        .value("OFF", RawCameraControl::AutoWhiteBalanceMode::OFF)
+        .value("AUTO", RawCameraControl::AutoWhiteBalanceMode::AUTO)
+        .value("INCANDESCENT", RawCameraControl::AutoWhiteBalanceMode::INCANDESCENT)
+        .value("FLUORESCENT", RawCameraControl::AutoWhiteBalanceMode::FLUORESCENT)
+        .value("WARM_FLUORESCENT", RawCameraControl::AutoWhiteBalanceMode::WARM_FLUORESCENT)
+        .value("DAYLIGHT", RawCameraControl::AutoWhiteBalanceMode::DAYLIGHT)
+        .value("CLOUDY_DAYLIGHT", RawCameraControl::AutoWhiteBalanceMode::CLOUDY_DAYLIGHT)
+        .value("TWILIGHT", RawCameraControl::AutoWhiteBalanceMode::TWILIGHT)
+        .value("SHADE", RawCameraControl::AutoWhiteBalanceMode::SHADE)
+    ;
+
+    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode")
+        .value("UNSUPPORTED", RawCameraControl::SceneMode::UNSUPPORTED)
+        .value("FACE_PRIORITY", RawCameraControl::SceneMode::FACE_PRIORITY)
+        .value("ACTION", RawCameraControl::SceneMode::ACTION)
+        .value("PORTRAIT", RawCameraControl::SceneMode::PORTRAIT)
+        .value("LANDSCAPE", RawCameraControl::SceneMode::LANDSCAPE)
+        .value("NIGHT", RawCameraControl::SceneMode::NIGHT)
+        .value("NIGHT_PORTRAIT", RawCameraControl::SceneMode::NIGHT_PORTRAIT)
+        .value("THEATRE", RawCameraControl::SceneMode::THEATRE)
+        .value("BEACH", RawCameraControl::SceneMode::BEACH)
+        .value("SNOW", RawCameraControl::SceneMode::SNOW)
+        .value("SUNSET", RawCameraControl::SceneMode::SUNSET)
+        .value("STEADYPHOTO", RawCameraControl::SceneMode::STEADYPHOTO)
+        .value("FIREWORKS", RawCameraControl::SceneMode::FIREWORKS)
+        .value("SPORTS", RawCameraControl::SceneMode::SPORTS)
+        .value("PARTY", RawCameraControl::SceneMode::PARTY)
+        .value("CANDLELIGHT", RawCameraControl::SceneMode::CANDLELIGHT)
+        .value("BARCODE", RawCameraControl::SceneMode::BARCODE)
+    ;
+
+    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode")
+        .value("OFF", RawCameraControl::AntiBandingMode::OFF)
+        .value("_50HZ", RawCameraControl::AntiBandingMode::_50HZ)
+        .value("_60HZ", RawCameraControl::AntiBandingMode::_60HZ)
+        .value("AUTO", RawCameraControl::AntiBandingMode::AUTO)
+    ;
+
+    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode")
+        .value("OFF", RawCameraControl::EffectMode::OFF)
+        .value("MONO", RawCameraControl::EffectMode::MONO)
+        .value("NEGATIVE", RawCameraControl::EffectMode::NEGATIVE)
+        .value("SOLARIZE", RawCameraControl::EffectMode::SOLARIZE)
+        .value("SEPIA", RawCameraControl::EffectMode::SEPIA)
+        .value("POSTERIZE", RawCameraControl::EffectMode::POSTERIZE)
+        .value("WHITEBOARD", RawCameraControl::EffectMode::WHITEBOARD)
+        .value("BLACKBOARD", RawCameraControl::EffectMode::BLACKBOARD)
+        .value("AQUA", RawCameraControl::EffectMode::AQUA)
+    ;
 
     // Bind non-raw 'helper' datatypes
     py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype")
@@ -364,6 +414,29 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // setters
         .def("setCaptureStill", &CameraControl::setCaptureStill)
+        .def("setStartStreaming", &CameraControl::setStartStreaming)
+        .def("setStopStreaming", &CameraControl::setStopStreaming)
+        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode)
+        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger)
+        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion)
+        .def("setManualFocus", &CameraControl::setManualFocus)
+        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable)
+        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock)
+        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion)
+        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation)
+        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode)
+        .def("setManualExposure", &CameraControl::setManualExposure)
+        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode)
+        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock)
+        .def("setBrightness", &CameraControl::setBrightness)
+        .def("setContrast", &CameraControl::setContrast)
+        .def("setSaturation", &CameraControl::setSaturation)
+        .def("setSharpness", &CameraControl::setSharpness)
+        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength)
+        .def("setLumaDenoise", &CameraControl::setLumaDenoise)
+        .def("setChromaDenoise", &CameraControl::setChromaDenoise)
+        .def("setSceneMode", &CameraControl::setSceneMode)
+        .def("setEffectMode", &CameraControl::setEffectMode)
         // getters
         .def("getCaptureStill", &CameraControl::getCaptureStill)
         ;
