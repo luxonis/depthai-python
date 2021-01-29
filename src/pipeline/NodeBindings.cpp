@@ -181,6 +181,7 @@ void NodeBindings::bind(pybind11::module& m){
 
      // MonoCamera node
     py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera")
+        .def_readonly("inputControl", &MonoCamera::inputControl)
         .def_readonly("out",  &MonoCamera::out)
         .def("setCamId", [](MonoCamera& c, int64_t id) {
             // Issue an deprecation warning
