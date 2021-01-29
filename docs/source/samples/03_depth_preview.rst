@@ -1,6 +1,10 @@
 03 - Depth Preview
 ==================
 
+This example shows how to set the SGBM (semi-global-matching) disparity-depth node, connects
+over XLink to transfer the results to the host real-time, and displays the depth map in OpenCV.
+Note that disparity is used in this case, as it colorizes in a more intuitive way.
+
 Demo
 ####
 

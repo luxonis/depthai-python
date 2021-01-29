@@ -1,6 +1,10 @@
 01 - RGB Preview
 ================
 
+This example shows how to set up a pipeline that outpus a small preview of the RGB camera,
+connects over XLink to transfer these to the host real-time, and displays the RGB frames
+on the host with OpenCV.
+
 Demo
 ####
 

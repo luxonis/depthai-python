@@ -1,6 +1,15 @@
 14 - Color Camera Control
 =========================
 
+This example shows how to controll the device-side crop and camera triggers.
+An output is a displayed RGB cropped frame, that can be manipulated using the following keys:
+
+#. `a` will move the crop left
+#. `d` will move the crop right
+#. `w` will move the crop up
+#. `s` will move the crop down
+#. `c` will trigger a `still` event, causing the current frame to be captured and sent over `still` output from camera node
+
 Demo
 ####
 

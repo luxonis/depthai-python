@@ -1,6 +1,11 @@
 17 - Video & MobilenetSSD
 =========================
 
+This example shows how to MobileNetv2SSD on the RGB input frame, which is read from the specified file,
+and not from the RGB camera, and how to display both the RGB
+frame and the metadata results from the MobileNetv2SSD on the frame.
+DepthAI is used here only as a processing unit
+
 Demo
 ####
 
