@@ -1,6 +1,10 @@
 10 - Mono & MobilenetSSD & Encoding
 ===================================
 
+This example shows how to run MobileNetv2SSD on the left grayscale camera in parallel with running
+the disparity depth results, displaying both the depth map and the right grayscale stream, with the
+bounding box from the neural network overlaid.
+
 Demo
 ####
 

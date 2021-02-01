@@ -1,6 +1,9 @@
 16 - Device Queue Event
 =======================
 
+This example shows how to use :code:`getQueueEvent` function in order to be notified when one of
+the packets from selected streams arrive
+
 Demo
 ####
 

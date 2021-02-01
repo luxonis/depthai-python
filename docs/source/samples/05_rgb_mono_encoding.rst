@@ -1,6 +1,16 @@
 05 - RGB & Mono Encoding
 ========================
 
+This example shows how to set up the encoder node to encode the RGB camera and both grayscale cameras
+(of DepthAI/OAK-D) at the same time. The RGB is set to 1920x1080 and the grayscale are set to 1280x720
+each, all at 30FPS. Each encoded video stream is transferred over XLINK and saved to a respective file.
+
+Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
+playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
+
+Be careful, this example saves encoded video to your host storage. So if you leave them running,
+you could fill up your storage on your host.
+
 Demo
 ####
 
