@@ -29,29 +29,31 @@ cam_rgb.setPreviewSize(300, 300)
 cam_rgb.preview.link(xout_rgb.input)
 cam_mono.out.link(xout_mono.input)
 
-# Pipeline defined, now the device is assigned and pipeline is started
-device = dai.Device(pipeline)
-device.startPipeline()
 
-# Clear queue events
-device.getQueueEvents()
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as device:
+    # Start pipeline
+    device.startPipeline()
+        
+    # Clear queue events
+    device.getQueueEvents()
 
-while True:
-    # Block until a message arrives to any of the specified queues
-    queueName = device.getQueueEvent(("rgb", "mono"))
+    while True:
+        # Block until a message arrives to any of the specified queues
+        queueName = device.getQueueEvent(("rgb", "mono"))
 
-    # try getting that message from queue with name specified by the event
-    # Note: number of events doesn't necessarily match number of messages in queues
-    # because queues can be set to non-blocking (overwriting) behaviour
-    message = device.getOutputQueue(queueName).tryGet()
+        # try getting that message from queue with name specified by the event
+        # Note: number of events doesn't necessarily match number of messages in queues
+        # because queues can be set to non-blocking (overwriting) behaviour
+        message = device.getOutputQueue(queueName).tryGet()
 
-    # process separately
-    if queueName == "rgb" and type(message) == dai.ImgFrame :
-        frame_rgb = message.getData().reshape(message.getHeight(), message.getWidth(), 3)
-        frame_rgb = np.ascontiguousarray(frame_rgb)
-        cv2.imshow("rgb", frame_rgb)
-    elif queueName == "mono" and type(message) == dai.ImgFrame : 
-        cv2.imshow("mono", message.getData().reshape((message.getHeight(), message.getWidth())))
+        # process separately
+        if queueName == "rgb" and type(message) == dai.ImgFrame :
+            frame_rgb = message.getData().reshape(message.getHeight(), message.getWidth(), 3)
+            frame_rgb = np.ascontiguousarray(frame_rgb)
+            cv2.imshow("rgb", frame_rgb)
+        elif queueName == "mono" and type(message) == dai.ImgFrame : 
+            cv2.imshow("mono", message.getData().reshape((message.getHeight(), message.getWidth())))
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        if cv2.waitKey(1) == ord('q'):
+            break
