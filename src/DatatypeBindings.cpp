@@ -10,6 +10,7 @@
 #include "depthai/pipeline/datatype/NNData.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
+#include "depthai/pipeline/datatype/SystemInformation.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -17,6 +18,7 @@
 #include "depthai-shared/datatype/RawNNData.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
+#include "depthai-shared/datatype/RawSystemInformation.hpp"
 
 
 //pybind
@@ -44,6 +46,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawImgFrame
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame");
     rawImgFrame
+        .def(py::init<>())
         .def_readwrite("fb", &RawImgFrame::fb)
         .def_readwrite("category", &RawImgFrame::category)
         .def_readwrite("instanceNum", &RawImgFrame::instanceNum)
@@ -158,6 +161,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawImageManipConfig
     py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
     rawImageManipConfig
+        .def(py::init<>())
         .def_readwrite("enableFormat", &RawImageManipConfig::enableFormat)
         .def_readwrite("enableResize", &RawImageManipConfig::enableResize)
         .def_readwrite("enableCrop", &RawImageManipConfig::enableCrop)
@@ -167,6 +171,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect")
+        .def(py::init<>())
         .def_readwrite("xmin", &RawImageManipConfig::CropRect::xmin)
         .def_readwrite("ymin", &RawImageManipConfig::CropRect::ymin)
         .def_readwrite("xmax", &RawImageManipConfig::CropRect::xmax)
@@ -174,6 +179,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
+        .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
         .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
         .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
@@ -181,6 +187,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
+        .def(py::init<>())
         .def_readwrite("width", &RawImageManipConfig::ResizeConfig::width)
         .def_readwrite("height", &RawImageManipConfig::ResizeConfig::height)
         .def_readwrite("lockAspectRatioFill", &RawImageManipConfig::ResizeConfig::lockAspectRatioFill)
@@ -190,6 +197,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
+        .def(py::init<>())
         .def_readwrite("type", &RawImageManipConfig::FormatConfig::type)
         .def_readwrite("flipHorizontal", &RawImageManipConfig::FormatConfig::flipHorizontal)
         ;
@@ -198,9 +206,21 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawCameraControl
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
     rawCameraControl
+        .def(py::init<>())
         .def_readwrite("captureStill", &RawCameraControl::captureStill)
         ;
 
+    // Bind RawSystemInformation
+    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation");
+    rawSystemInformation
+        .def(py::init<>())
+        .def_readwrite("ddrMemoryUsage", &RawSystemInformation::ddrMemoryUsage)
+        .def_readwrite("leonCssMemoryUsage", &RawSystemInformation::leonCssMemoryUsage)
+        .def_readwrite("leonMssMemoryUsage", &RawSystemInformation::leonMssMemoryUsage)
+        .def_readwrite("leonCssCpuUsage", &RawSystemInformation::leonCssCpuUsage)
+        .def_readwrite("leonMssCpuUsage", &RawSystemInformation::leonMssCpuUsage)
+        .def_readwrite("chipTemperature", &RawSystemInformation::chipTemperature)
+        ;
 
 
     // Bind non-raw 'helper' datatypes
@@ -327,5 +347,15 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getCaptureStill", &CameraControl::getCaptureStill)
         ;
 
+    // Bind SystemInformation
+    py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation")
+        .def(py::init<>())
+        .def_property("ddrMemoryUsage", [](SystemInformation& i) { return &i.ddrMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.ddrMemoryUsage = val; } )
+        .def_property("leonCssMemoryUsage", [](SystemInformation& i) { return &i.leonCssMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.leonCssMemoryUsage = val; } )
+        .def_property("leonMssMemoryUsage", [](SystemInformation& i) { return &i.leonMssMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.leonMssMemoryUsage = val; } )
+        .def_property("leonCssCpuUsage", [](SystemInformation& i) { return &i.leonCssCpuUsage; }, [](SystemInformation& i, CpuUsage val) { i.leonCssCpuUsage = val; } )
+        .def_property("leonMssCpuUsage", [](SystemInformation& i) { return &i.leonMssCpuUsage; }, [](SystemInformation& i, CpuUsage val) { i.leonMssCpuUsage = val; } )
+        .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
+        ;
 
 }
