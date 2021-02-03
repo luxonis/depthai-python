@@ -59,8 +59,8 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
-# Add include directory (src)
-target_include_directories(${TARGET_NAME} PRIVATE src generated)
+# Add include directory # Note generated must be before src/default - for docstring include
+target_include_directories(${TARGET_NAME} PRIVATE src generated src/default)
 
 # Link with libraries
 target_link_libraries(${TARGET_NAME} 

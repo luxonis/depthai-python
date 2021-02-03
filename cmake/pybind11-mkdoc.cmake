@@ -41,9 +41,14 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
         return()
     endif()
 
-    # Create a target
+    # Prepare the output folder for the mkdoc
+    get_filename_component(output_directory "${output_path}" DIRECTORY)
+    # Create the command
     add_custom_command(
         OUTPUT "${output_path}"
+        # Create directory first (if it doesn't exist)
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${output_directory}"
+        # Execute mkdoc
         COMMAND
             ${PYTHON_EXECUTABLE}
             -m ${PYBIND11_MKDOC_MODULE_NAME}
