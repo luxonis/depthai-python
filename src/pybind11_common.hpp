@@ -9,6 +9,9 @@
 #include <pybind11/numpy.h>
 #include <cstdint>
 
+// Include docstring
+#include "depthai_core_docstring.hpp"
+
 // Opaque types
 //PYBIND11_MAKE_OPAQUE(std::vector<std::uint8_t>);
 

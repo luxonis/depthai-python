@@ -59,7 +59,7 @@ pybind11_add_module(${TARGET_NAME}
 )
 
 # Add include directory (src)
-target_include_directories(${TARGET_NAME} PRIVATE src)
+target_include_directories(${TARGET_NAME} PRIVATE src generated)
 
 # Link with libraries
 target_link_libraries(${TARGET_NAME} 
@@ -111,3 +111,19 @@ if (DEPTHAI_PYTHON_TEST_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+########################
+# mkdoc for docstrings
+########################
+if (DEPTHAI_PYTHON_GENERATE_DOCSTRINGS)
+    # HEADER DIRECTORIES
+    #set(header_dirs "${CMAKE_CURRENT_LIST_DIR}/depthai-core/include")
+    #message(FATAL_ERROR "HEADER DIRS ${CMAKE_CURRENT_LIST_DIR}/depthai-core/include;${DEPTHAI_SHARED_PUBLIC_INCLUDE};${DEPTHAI_SHARED_INCLUDE}")
+    include(cmake/pybind11-mkdoc.cmake)
+    target_pybind11_mkdoc_setup("${CMAKE_CURRENT_LIST_DIR}/generated/depthai_core_docstring.hpp" depthai-core)
+    
+    # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
+    add_dependencies(${TARGET_NAME} ${PYBIND11_MKDOC_TARGET_NAME})
+
+    # Add dependency from mkdoc to depthai-core (only recreates docstrings if depthai-core had to be recompiled)
+    #add_dependencies(${PYBIND11_MKDOC_TARGET_NAME} depthai-core)
+endif()

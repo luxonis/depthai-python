@@ -55,6 +55,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_blob}")
     dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
     dai_add_python_test(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
+    dai_add_python_test(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
     
 
 endif()
