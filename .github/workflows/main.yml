@@ -1,4 +1,4 @@
-name: Python Wheel CI
+name: Depthai Python CI/CD
 
 # Controls when the action will run. Triggers the workflow on push
 
@@ -7,7 +7,15 @@ name: Python Wheel CI
 # as self-hosted runners are used, and security policy for them has not been yet determined by GitHub
 # pay close attention to not enable workflows on pull_request events
 # TLDR: do NOT add 'pull_request' here for the time being
-on: [push] 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    - develop
+    - gen2
+    - gen2_develop
+    - releases/*
 ###################################
 ###################################
 
