@@ -1,28 +1,45 @@
-# Copyright Tomas Zeman 2019.
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
+# Helper to create a pybind11_mkdoc target which takes
 
-# constants
-set(PYBIND11_MKDOC_MODULE_NAME "pybind11_mkdoc")
-set(PYBIND11_MKDOC_TARGET_NAME "pybind11_mkdoc")
+# Usage:
+# target_pybind11_mkdoc_setup([path/to/output/docstring.hpp] [Library for which to generate: target-name] [Enforce pybind11_mkdoc existing ON/OFF])
+function(target_pybind11_mkdoc_setup output_file target enforce)
 
-function(pybind11_mkdoc_setup target output_path include_dirs mkdoc_headers)
+    # Get both interface include directories and system include directories
+    get_target_property(header_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(header_system_dirs ${target} INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
+    
+    # Remove system include directories
+    set(non_system_dirs ${header_dirs})
+    foreach(sys_dir ${header_system_dirs})
+        list(REMOVE_ITEM non_system_dirs "${sys_dir}")
+    endforeach()
+    
+    # Get all header files
+    header_directories("${non_system_dirs}" header_files)
+    
+    # Setup mkdoc target
+    pybind11_mkdoc_setup_internal("${target}" "${output_file}" "${header_files}" ${enforce})
 
+endfunction()
+
+# Internal helper, sets up pybind11_mkdoc target
+function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
+
+    # constants
+    set(PYBIND11_MKDOC_MODULE_NAME "pybind11_mkdoc")
+    set(PYBIND11_MKDOC_TARGET_NAME "pybind11_mkdoc")
 
     # Execute module pybind11_mkdoc to check if present
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} RESULT_VARIABLE error OUTPUT_QUIET)
     if(error)
-        message(STATUS "pybind11_mkdoc: Module ${PYBIND11_MKDOC_MODULE_NAME} not found! Target '${PYBIND11_MKDOC_TARGET_NAME}' not available, no docstrings will be generated")
+        set(messageStatus "STATUS")
+        if(enforce)
+            set(messageStatus "FATAL_ERROR")
+        endif()
+        message(${messageStatus} "pybind11_mkdoc: Module ${PYBIND11_MKDOC_MODULE_NAME} not found! Target '${PYBIND11_MKDOC_TARGET_NAME}' not available, no docstrings will be generated")
+        # Exit
+        return()
     endif()
-
-    message(STATUS "pybind11_mkdoc headers: " ${mkdoc_headers})
-
-    # Add include directories as -I to arguments of mkdoc
-    set(inc_dirs "")
-    foreach(include_dir ${include_dirs})
-        list(APPEND inc_dirs "-I${include_dir}")
-    endforeach()
 
     # Create a target
     add_custom_command(
@@ -32,12 +49,18 @@ function(pybind11_mkdoc_setup target output_path include_dirs mkdoc_headers)
             -m ${PYBIND11_MKDOC_MODULE_NAME}
             -o "${output_path}"
             # List of include directories
-            ${inc_dirs}
-            # list of headers
-            ${mkdoc_headers}
+            "-I$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,;-I>"
+            # List of compiler definitions
+            "-D$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>,;-D>"
+            # List of headers for which to generate docstrings
+            "${mkdoc_headers}"
+            # Redirect stderr output to not spam output
+            2> /dev/null
         DEPENDS ${target}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Creating docstrings with ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} ..."
+        VERBATIM
+        COMMAND_EXPAND_LISTS
     )
 
     # Create a target
@@ -46,35 +69,46 @@ function(pybind11_mkdoc_setup target output_path include_dirs mkdoc_headers)
         DEPENDS "${output_path}"
     )
 
-    # if(TARGET ${PYBIND11_MKDOC_TARGET_NAME})
-    #     add_dependencies(${PYBIND11_MKDOC_TARGET_NAME} ${PROJECT_NAME}__${PYBIND11_MKDOC_TARGET_NAME})
-    # else()
-    #     add_custom_target(${PYBIND11_MKDOC_TARGET_NAME} DEPENDS ${PROJECT_NAME}_${PYBIND11_MKDOC_TARGET_NAME})
-    # endif()
+    # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
+    add_dependencies(${TARGET_NAME} ${PYBIND11_MKDOC_TARGET_NAME})
 
 endfunction()
 
-
+# Internal helper, converts header directory list to list of .hpp files
 macro(header_directories header_dirs return_list)
 
-  #message(STATUS "folders: ${header_dirs}")
-  
-  foreach(header_dir ${header_dirs})
-    #message(STATUS "inspecting folder: ${header_dir}")
-    file(GLOB_RECURSE new_list "${header_dir}/*.hpp")
-    set(file_list "")
-    foreach(file_path ${new_list})
-      set(file_list "${file_list}" ${file_path})
+    #message(STATUS "folders: ${header_dirs}")
+    foreach(header_dir ${header_dirs})
+        # only use build_interface includes
+
+        string(REGEX MATCHALL "\\$<BUILD_INTERFACE:([^ \t\n\r]+)>" tmp_output_variable "${header_dir}")
+        #message(STATUS "inspecting folder: ${header_dir}, stripped ${hdir}, regex count ${CMAKE_MATCH_COUNT}, regex match 0 and 1, ${CMAKE_MATCH_0}, ${CMAKE_MATCH_1}")
+        # If regex matched and path is present
+        if(CMAKE_MATCH_COUNT GREATER 0)
+            set(hdir "${CMAKE_MATCH_1}")
+        else()    
+            # Strip generator expresssions
+            string(GENEX_STRIP "${header_dir}" hdir)
+        endif()
+        
+        # if hdir isn't an empty path
+        if(hdir)
+
+            #message(STATUS "inspecting folder: ${hdir}")
+            file(GLOB_RECURSE new_list "${hdir}/*.hpp")
+            set(file_list "")
+
+            foreach(file_path ${new_list})
+                #message(STATUS "inspecting file: ${file_path}")
+                set(file_list "${file_list}" ${file_path})
+            endforeach()
+            
+            list(REMOVE_DUPLICATES file_list)
+            set(${return_list} "${${return_list}}" "${file_list}")
+            
+        endif()
+
     endforeach()
-    list(REMOVE_DUPLICATES file_list)
-    set(${return_list} "${${return_list}}" "${file_list}")
-  endforeach()
 
 endmacro()
 
-function(target_pybind11_mkdoc_setup output_file target)
-  get_target_property(header_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
-  header_directories("${header_dirs}" header_files)
-  # set(target_files_to_format )
-  pybind11_mkdoc_setup("${target}" "${output_file}" "${header_dirs}" "${header_files}")
-endfunction()

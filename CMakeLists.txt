@@ -25,6 +25,7 @@ project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
 # First specify options
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a part of the test suite" OFF)
+option(DEPTHAI_PYTHON_GENERATE_DOCSTRINGS "Generate docstrings from core - pybind11_mkdoc required" ON)
 
 # Add external dependencies
 add_subdirectory(external)
@@ -115,15 +116,8 @@ endif()
 # mkdoc for docstrings
 ########################
 if (DEPTHAI_PYTHON_GENERATE_DOCSTRINGS)
-    # HEADER DIRECTORIES
-    #set(header_dirs "${CMAKE_CURRENT_LIST_DIR}/depthai-core/include")
-    #message(FATAL_ERROR "HEADER DIRS ${CMAKE_CURRENT_LIST_DIR}/depthai-core/include;${DEPTHAI_SHARED_PUBLIC_INCLUDE};${DEPTHAI_SHARED_INCLUDE}")
     include(cmake/pybind11-mkdoc.cmake)
-    target_pybind11_mkdoc_setup("${CMAKE_CURRENT_LIST_DIR}/generated/depthai_core_docstring.hpp" depthai-core)
-    
-    # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
-    add_dependencies(${TARGET_NAME} ${PYBIND11_MKDOC_TARGET_NAME})
 
-    # Add dependency from mkdoc to depthai-core (only recreates docstrings if depthai-core had to be recompiled)
-    #add_dependencies(${PYBIND11_MKDOC_TARGET_NAME} depthai-core)
+    # Check if pybind11_mkdoc available and create target
+    target_pybind11_mkdoc_setup("${CMAKE_CURRENT_LIST_DIR}/generated/depthai_core_docstring.hpp" depthai-core OFF)
 endif()
