@@ -1,6 +1,10 @@
 15 - 4K RGB MobileNetSSD
 ========================
 
+This example shows how to MobileNetv2SSD on the RGB input frame, and how to display both the RGB
+preview and the metadata results from the MobileNetv2SSD on the preview.
+The preview size is set to 4K resolution
+
 Demo
 ####
 

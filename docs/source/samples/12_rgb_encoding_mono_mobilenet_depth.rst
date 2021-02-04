@@ -1,6 +1,19 @@
 12 - RGB Encoding & Mono with MobilenetSSD & Depth
 ================================================
 
+This example shows how to configure the depthai video encoder in h.265 format to encode the RGB camera
+input at Full-HD resolution at 30FPS, and transfers the encoded video over XLINK to the host,
+saving it to disk as a video file. In the same time, a MobileNetv2SSD network is ran on the
+frames from right grayscale camera, while the application also displays the depth map produced by both
+of the grayscale cameras. Note that disparity is used in this case, as it colorizes in a more
+intuitive way.
+
+Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
+playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
+
+Be careful, this example saves encoded video to your host storage. So if you leave them running,
+you could fill up your storage on your host.
+
 Demo
 ####
 

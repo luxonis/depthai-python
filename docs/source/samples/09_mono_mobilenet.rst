@@ -1,6 +1,9 @@
 09 - Mono & MobilenetSSD
 ========================
 
+This example shows how to run MobileNetv2SSD on the left grayscale camera and how to display the
+neural network results on a preview of the right camera stream.
+
 Demo
 ####
 

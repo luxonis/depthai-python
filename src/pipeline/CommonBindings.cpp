@@ -1,11 +1,11 @@
 #include "CommonBindings.hpp"
 
 // depthai-shared
-#include "depthai-shared/pb/common/CameraBoardSocket.hpp"
-#include "depthai-shared/pb/common/CameraImageOrientation.hpp"
-#include "depthai-shared/pb/common/MemoryInfo.hpp"
-#include "depthai-shared/pb/common/ChipTemperature.hpp"
-#include "depthai-shared/pb/common/CpuUsage.hpp"
+#include "depthai-shared/common/CameraBoardSocket.hpp"
+#include "depthai-shared/common/CameraImageOrientation.hpp"
+#include "depthai-shared/common/MemoryInfo.hpp"
+#include "depthai-shared/common/ChipTemperature.hpp"
+#include "depthai-shared/common/CpuUsage.hpp"
 
 void CommonBindings::bind(pybind11::module& m){
 

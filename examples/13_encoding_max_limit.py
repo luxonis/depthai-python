@@ -38,36 +38,37 @@ ve1.bitstream.link(ve1Out.input)
 ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
 
-# Connect to the device
-dev = dai.Device(pipeline)
 
-# Prepare data queues
-outQ1 = dev.getOutputQueue('ve1Out', maxSize=30, blocking=True)
-outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
-outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as dev:
 
-# Start the pipeline
-dev.startPipeline()
+    # Prepare data queues
+    outQ1 = dev.getOutputQueue('ve1Out', maxSize=30, blocking=True)
+    outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
+    outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)
 
-# Processing loop
-with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
-    print("Press Ctrl+C to stop encoding...")
-    while True:
-        try:
-            # Empty each queue
-            while outQ1.has():
-                outQ1.get().getData().tofile(file_mono1_h264)
+    # Start the pipeline
+    dev.startPipeline()
 
-            while outQ2.has():
-                outQ2.get().getData().tofile(file_color_h265)
+    # Processing loop
+    with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
+        print("Press Ctrl+C to stop encoding...")
+        while True:
+            try:
+                # Empty each queue
+                while outQ1.has():
+                    outQ1.get().getData().tofile(file_mono1_h264)
 
-            while outQ3.has():
-                outQ3.get().getData().tofile(file_mono2_h264)
-        except KeyboardInterrupt:
-            break
+                while outQ2.has():
+                    outQ2.get().getData().tofile(file_color_h265)
 
-print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
-cmd = "ffmpeg -framerate 25 -i {} -c copy {}"
-print(cmd.format("mono1.h264", "mono1.mp4"))
-print(cmd.format("mono2.h264", "mono2.mp4"))
-print(cmd.format("color.h265", "color.mp4"))
+                while outQ3.has():
+                    outQ3.get().getData().tofile(file_mono2_h264)
+            except KeyboardInterrupt:
+                break
+
+    print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
+    cmd = "ffmpeg -framerate 25 -i {} -c copy {}"
+    print(cmd.format("mono1.h264", "mono1.mp4"))
+    print(cmd.format("mono2.h264", "mono2.mp4"))
+    print(cmd.format("color.h265", "color.mp4"))

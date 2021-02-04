@@ -27,22 +27,23 @@ xout = pipeline.createXLinkOut()
 xout.setStreamName("disparity")
 depth.disparity.link(xout.input)
 
-# Pipeline defined, now the device is assigned and pipeline is started
-device = dai.Device(pipeline)
-device.startPipeline()
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as device:
+    # Start pipeline
+    device.startPipeline()
 
-# Output queue will be used to get the disparity frames from the outputs defined above
-q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
+    # Output queue will be used to get the disparity frames from the outputs defined above
+    q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
-while True:
-    in_rgb = q.get() # blocking call, will wait until a new data has arrived
-    # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-    frame = in_rgb.getData().reshape((in_rgb.getHeight(), in_rgb.getWidth())).astype(np.uint8)
-    frame = np.ascontiguousarray(frame)
-    # frame is transformed, the color map will be applied to highlight the depth info
-    frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
-    # frame is ready to be shown
-    cv2.imshow("disparity", frame)
+    while True:
+        in_rgb = q.get() # blocking call, will wait until a new data has arrived
+        # data is originally represented as a flat 1D array, it needs to be converted into HxW form
+        frame = in_rgb.getData().reshape((in_rgb.getHeight(), in_rgb.getWidth())).astype(np.uint8)
+        frame = np.ascontiguousarray(frame)
+        # frame is transformed, the color map will be applied to highlight the depth info
+        frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
+        # frame is ready to be shown
+        cv2.imshow("disparity", frame)
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        if cv2.waitKey(1) == ord('q'):
+            break

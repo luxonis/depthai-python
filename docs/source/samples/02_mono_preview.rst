@@ -1,6 +1,9 @@
 02 - Mono Preview
 =================
 
+This example shows how to set up a pipeline that outputs the left and right grayscale camera
+images, connects over XLink to transfer these to the host real-time, and displays both using OpenCV.
+
 Demo
 ####
 

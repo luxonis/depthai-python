@@ -1,6 +1,18 @@
 04 - RGB Encoding
 =================
 
+This example shows how to configure the depthai video encoder in h.265 format to encode the RGB camera
+input at 8MP/4K/2160p (3840x2160) at 30FPS (the maximum possible encoding resolultion possible for the
+encoder, higher frame-rates are possible at lower resolutions, like 1440p at 60FPS), and transfers the
+encoded video over XLINK to the host, saving it to disk as a video file.
+
+Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
+playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
+
+Be careful, this example saves encoded video to your host storage. So if you leave them running,
+you could fill up your storage on your host.
+
+
 Demo
 ####
 

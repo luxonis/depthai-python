@@ -11,6 +11,7 @@
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
+#include "depthai/pipeline/node/SystemLogger.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -268,6 +269,43 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getSize", &VideoEncoder::getSize)
     ;
 
+    // SPIOut node
+    py::class_<SPIOut, Node, std::shared_ptr<SPIOut>>(m, "SPIOut")
+        .def_readonly("input", &SPIOut::input)
+        .def("setStreamName", &SPIOut::setStreamName)
+        .def("setBusId", &SPIOut::setBusId)
+        ;
+
+    // MobileNetDetectionNetwork node
+    py::class_<MobileNetDetectionNetwork, Node, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
+        .def_readonly("input", &MobileNetDetectionNetwork::input)
+        .def_readonly("out", &MobileNetDetectionNetwork::out)
+        .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
+        .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
+        .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
+        ;
+
+    // YoloDetectionNetwork node
+    py::class_<YoloDetectionNetwork, Node, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
+        .def_readonly("input", &YoloDetectionNetwork::input)
+        .def_readonly("out", &YoloDetectionNetwork::out)
+        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
+        .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
+        .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
+        .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
+        .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
+        .def("setAnchors", &YoloDetectionNetwork::setAnchors)
+        .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks)
+        .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
+        ;
+
+    // SystemLogger node
+    py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger")
+        .def_readonly("out", &SystemLogger::out)
+        .def("setRate", &SystemLogger::setRate)
+        ;
+
+
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
@@ -369,34 +407,10 @@ void NodeBindings::bind(pybind11::module& m){
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
 
-    // SPIOut node
-    py::class_<SPIOut, Node, std::shared_ptr<SPIOut>>(m, "SPIOut")
-        .def_readonly("input", &SPIOut::input)
-        .def("setStreamName", &SPIOut::setStreamName)
-        .def("setBusId", &SPIOut::setBusId)
+    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties")
+        .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
         ;
 
-    // MobileNetDetectionNetwork node
-    py::class_<MobileNetDetectionNetwork, Node, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
-        .def_readonly("input", &MobileNetDetectionNetwork::input)
-        .def_readonly("out", &MobileNetDetectionNetwork::out)
-        .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
-        .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
-        .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
-        ;
-
-    // YoloDetectionNetwork node
-    py::class_<YoloDetectionNetwork, Node, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
-        .def_readonly("input", &YoloDetectionNetwork::input)
-        .def_readonly("out", &YoloDetectionNetwork::out)
-        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
-        .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
-        .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
-        .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
-        .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
-        .def("setAnchors", &YoloDetectionNetwork::setAnchors)
-        .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks)
-        .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
-        ;
+    
 
 }
