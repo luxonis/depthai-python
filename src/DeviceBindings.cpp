@@ -232,10 +232,10 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature), DOC(dai, Device, getChipTemperature))
         .def("getLeonCssCpuUsage", DeviceWrapper::wrap(&Device::getLeonCssCpuUsage), DOC(dai, Device, getLeonCssCpuUsage))
         .def("getLeonMssCpuUsage", DeviceWrapper::wrap(&Device::getLeonMssCpuUsage), DOC(dai, Device, getLeonMssCpuUsage))
-        .def("setLogOutputLevel", DeviceWrapper::wrap(&Device::setLogOutputLevel), DOC(dai, Device, setLogOutputLevel))
+        .def("setLogOutputLevel", DeviceWrapper::wrap(&Device::setLogOutputLevel), py::arg("level"), DOC(dai, Device, setLogOutputLevel))
         .def("getLogOutputLevel", DeviceWrapper::wrap(&Device::getLogOutputLevel), DOC(dai, Device, getLogOutputLevel))
-        .def("addLogCallback", DeviceWrapper::wrap(&Device::addLogCallback), DOC(dai, Device, addLogCallback))
-        .def("removeLogCallback", DeviceWrapper::wrap(&Device::removeLogCallback), DOC(dai, Device, removeLogCallback))
+        .def("addLogCallback", DeviceWrapper::wrap(&Device::addLogCallback), py::arg("callback"), DOC(dai, Device, addLogCallback))
+        .def("removeLogCallback", DeviceWrapper::wrap(&Device::removeLogCallback), py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
         ;
 
 }
