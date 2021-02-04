@@ -12,6 +12,7 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
+#include "depthai/pipeline/node/UVC.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -297,6 +298,11 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger")
         .def_readonly("out", &SystemLogger::out)
         .def("setRate", &SystemLogger::setRate)
+        ;
+
+    // UVC node
+    py::class_<UVC, Node, std::shared_ptr<UVC>>(m, "UVC")
+        .def_readonly("input", &UVC::input)
         ;
 
 
