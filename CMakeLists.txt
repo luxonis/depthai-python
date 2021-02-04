@@ -31,7 +31,7 @@ option(DEPTHAI_PYTHON_GENERATE_DOCSTRINGS "Generate docstrings from core - pybin
 add_subdirectory(external)
 
 # Add depthai-cpp dependency
-add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
+add_subdirectory(depthai-core)
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)

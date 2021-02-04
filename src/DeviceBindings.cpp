@@ -218,6 +218,7 @@ void DeviceBindings::bind(pybind11::module& m){
             auto events = deviceGetQueueEventsHelper(dw.get(), dw.get().getOutputQueueNames(), maxNumEvents, timeout);
             if(events.empty()) return std::string("");
             return events[0];
+
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent, 4))
 
         .def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"), DOC(dai, Device, setCallback))
@@ -231,6 +232,10 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature), DOC(dai, Device, getChipTemperature))
         .def("getLeonCssCpuUsage", DeviceWrapper::wrap(&Device::getLeonCssCpuUsage), DOC(dai, Device, getLeonCssCpuUsage))
         .def("getLeonMssCpuUsage", DeviceWrapper::wrap(&Device::getLeonMssCpuUsage), DOC(dai, Device, getLeonMssCpuUsage))
+        .def("setLogOutputLevel", DeviceWrapper::wrap(&Device::setLogOutputLevel), DOC(dai, Device, setLogOutputLevel))
+        .def("getLogOutputLevel", DeviceWrapper::wrap(&Device::getLogOutputLevel), DOC(dai, Device, getLogOutputLevel))
+        .def("addLogCallback", DeviceWrapper::wrap(&Device::addLogCallback), DOC(dai, Device, addLogCallback))
+        .def("removeLogCallback", DeviceWrapper::wrap(&Device::removeLogCallback), DOC(dai, Device, removeLogCallback))
         ;
 
 }
