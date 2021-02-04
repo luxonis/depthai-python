@@ -52,6 +52,10 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -67,6 +71,7 @@ with dai.Device(pipeline) as device:
     frame = None
     frame_manip = None
     bboxes = []
+    labels = []
 
     def frame_norm(frame, bbox):
         return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
@@ -93,17 +98,24 @@ with dai.Device(pipeline) as device:
 
         if in_nn is not None:
             bboxes = np.array(in_nn.getFirstLayerFp16())
-            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
             bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            bboxes = bboxes[:, 3:7]
 
         if frame is not None:
+            for raw_bbox, label in zip(bboxes, labels):
+                bbox = frame_norm(frame, raw_bbox)
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("right", frame)
 
         if frame_manip is not None:
-            for raw_bbox in bboxes:
+            for raw_bbox, label in zip(bboxes, labels):
                 bbox = frame_norm(frame_manip, raw_bbox)
                 cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_manip, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("manip", frame_manip)
 
         if cv2.waitKey(1) == ord('q'):
