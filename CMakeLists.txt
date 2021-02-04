@@ -30,7 +30,7 @@ option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a p
 add_subdirectory(external)
 
 # Add depthai-cpp dependency
-add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
+add_subdirectory(depthai-core)
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
