@@ -41,6 +41,10 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
     # Start pipeline
@@ -52,7 +56,7 @@ with dai.Device(pipeline) as device:
 
     frame = None
     bboxes = []
-
+    labels = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
@@ -78,13 +82,17 @@ with dai.Device(pipeline) as device:
             # transform the 1D array into Nx7 matrix
             bboxes = bboxes.reshape((bboxes.size // 7, 7))
             # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            bboxes = bboxes[:, 3:7]
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox in bboxes:
+            for raw_bbox, label in zip(bboxes, labels):
                 bbox = frame_norm(frame, raw_bbox)
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("right", frame)
 
         if cv2.waitKey(1) == ord('q'):

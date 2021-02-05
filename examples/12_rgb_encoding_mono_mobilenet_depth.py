@@ -68,6 +68,10 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -84,6 +88,7 @@ with dai.Device(pipeline) as device:
     frame_manip = None
     frame_depth = None
     bboxes = []
+    labels = []
 
 
     def frame_norm(frame, bbox):
@@ -112,9 +117,11 @@ with dai.Device(pipeline) as device:
 
         if in_nn is not None:
             bboxes = np.array(in_nn.getFirstLayerFp16())
-            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
             bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            bboxes = bboxes[:, 3:7]
 
         if in_depth is not None:
             frame_depth = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
@@ -122,15 +129,24 @@ with dai.Device(pipeline) as device:
             frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
 
         if frame_right is not None:
+            for raw_bbox, label in zip(bboxes, labels):
+                bbox = frame_norm(frame_right, raw_bbox)
+                cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_right, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("rectif_right", frame_right)
 
         if frame_manip is not None:
-            for raw_bbox in bboxes:
+            for raw_bbox, label in zip(bboxes, labels):
                 bbox = frame_norm(frame_manip, raw_bbox)
                 cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_manip, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("manip", frame_manip)
 
         if frame_depth is not None:
+            for raw_bbox, label in zip(bboxes, labels):
+                bbox = frame_norm(frame_depth, raw_bbox)
+                cv2.rectangle(frame_depth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
+                cv2.putText(frame_depth, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
             cv2.imshow("depth", frame_depth)
 
         if cv2.waitKey(1) == ord('q'):
