@@ -52,6 +52,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("link", &Pipeline::link)
         .def("unlink", &Pipeline::unlink)
 
+        .def("setPipelineOpenVINOVersion", &Pipeline::setPipelineOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION)
+
 
          // templated create<NODE> function 
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)

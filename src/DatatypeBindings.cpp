@@ -311,10 +311,12 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getAllLayerNames", &NNData::getAllLayerNames)
         .def("getAllLayers", &NNData::getAllLayers)
         .def("getLayerDatatype", &NNData::getLayerDatatype)
-        .def("getLayerUInt8", &NNData::getLayerUInt8)
-        .def("getLayerFp16", &NNData::getLayerFp16)
+        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"))
+        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"))
+        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"))
         .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
+        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32)
         ;
 
      // Bind ImageManipConfig
