@@ -50,7 +50,7 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             "-D$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>,;-D>"
             # List of headers for which to generate docstrings
             "${mkdoc_headers}"
-            # Redirect stderr output to not spam output
+            # Redirect stderr to not spam output
             2> /dev/null
         DEPENDS ${target}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

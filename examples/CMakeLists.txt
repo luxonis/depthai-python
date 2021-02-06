@@ -10,13 +10,14 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         list(REMOVE_AT arguments 0 1)
 
         # Adds test with 5 seconds timeout and bumps all python warnings to errors
-        add_test(NAME ${test_name} COMMAND ${CMAKE_COMMAND} 
-            -DTIMEOUT_SECONDS=5
-            -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake ${PYTHON_EXECUTABLE} -Werror "${CMAKE_CURRENT_LIST_DIR}/${python_script_path}" ${arguments}
+        add_test(NAME ${test_name} COMMAND 
+            ${CMAKE_COMMAND} -E env ${ASAN_ENVIRONMENT_VARS} # Set ASAN env variables (if applicable)
+            ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=5 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
+            ${PYTHON_EXECUTABLE} -Werror "${CMAKE_CURRENT_LIST_DIR}/${python_script_path}" ${arguments}
         )
         
         # Points python to our build module
-        set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:depthai>")
+        set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:depthai>;UBSAN_OPTIONS=halt_on_error=1")
 
         # Sets a regex catching any logged warnings, errors or critical (coming either from device or host)
         set_tests_properties (${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "\\[warning\\];\\[error\\];\\[critical\\]") 

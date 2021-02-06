@@ -30,6 +30,10 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/depthai-core/cmake")
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a part of the test suite" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
+option(DEPTHAI_PYTHON_ENABLE_DOCSTRINGS "Generate docstrings from header files if module 'pybind11_mkdoc' available" ON)
+if(DEPTHAI_PYTHON_ENABLE_DOCSTRINGS)
+    option(DEPTHAI_PYTHON_FORCE_DOCSTRINGS "Force that docstrings are generated, module 'pybind11_mkdoc' required" OFF)
+endif()
 
 # Add external dependencies
 add_subdirectory(external)
@@ -63,8 +67,20 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
-# Add include directory # Note generated must be before src/default - for docstring include
-target_include_directories(${TARGET_NAME} PRIVATE src generated src/default)
+# Generate default docstrings
+set(DOCSTRINGS_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set(DOCSTRINGS_OUTPUT_PATH ${DOCSTRINGS_OUTPUT_DIR}/depthai_core_docstring.hpp)
+configure_file(cmake/depthai_core_docstring.hpp.in ${DOCSTRINGS_OUTPUT_PATH} COPYONLY)
+# Add target to generate docstrings
+if (DEPTHAI_PYTHON_ENABLE_DOCSTRINGS)
+    include(pybind11-mkdoc)
+    # Check if pybind11_mkdoc available and create target
+    target_pybind11_mkdoc_setup(${DOCSTRINGS_OUTPUT_PATH} depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+endif()
+
+
+# Add include directory
+target_include_directories(${TARGET_NAME} PRIVATE src ${DOCSTRINGS_OUTPUT_DIR})
 
 # Link with libraries
 target_link_libraries(${TARGET_NAME} 
@@ -92,6 +108,24 @@ endif()
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_EXTENSIONS OFF)
+
+
+# ASAN Settings as we are building and using shared library
+if(SANITIZE_ADDRESS OR SANITIZE_MEMORY OR SANITIZE_THREAD OR SANITIZE_UNDEFINED)
+    # Get asan library to preload
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libclang_rt.asan-${CMAKE_HOST_SYSTEM_PROCESSOR}.so OUTPUT_VARIABLE LIBASAN_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libasan.so OUTPUT_VARIABLE LIBASAN_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+    # Set preload env variable
+    if(APPLE)
+        set(ASAN_ENVIRONMENT_VARS "DYLD_INSERT_LIBRARIES=${LIBASAN_PATH}" "ASAN_OPTIONS=leak_check_at_exit=0")
+    elseif(UNIX)
+        set(ASAN_ENVIRONMENT_VARS "LD_PRELOAD=${LIBASAN_PATH}" "ASAN_OPTIONS=leak_check_at_exit=0")
+    endif()
+    message(STATUS "ASAN environment variables: ${ASAN_ENVIRONMENT_VARS}")
+endif()
 
 ########################
 # Testing
