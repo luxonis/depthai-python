@@ -11,6 +11,23 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
+##### RTD specific case #####
+if os.environ.get('READTHEDOCS', None) == 'True': 
+    # Get path to cmake
+    import site
+    CMAKE_EXECUTABLE=site.getsitepackages()[0]+'/cmake/data/bin/cmake'
+    # Install libusb
+    subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'])
+    subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
+    subprocess.check_call(['./configure', '--disable-udev', '--prefix', '$PWD/../libusb'], cwd='libusb-1.0.24')
+    # Add libusb to path
+    os.environ['PATH'] = os.environ['PATH']+':$PWD/libusb/include:$PWD/libusb/lib'
+    # Add args to build doxygen and to generate docstrings for depthai module
+    extra_cmake_args = ['-DDEPTHAI_DOXYGEN_OUTPUT_DIR=_depthai-core/doxygen', '-DDEPTHAI_PYTHON_GENERATE_DOCSTRINGS=ON']
+##### RTD specific case ##### 
+
+
+
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
 version_file = os.path.join(here, "generated", "version.py")
@@ -145,15 +162,18 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
-        # Add additional cmake args
+        # Add additional cmake args from environment
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [os.environ['CMAKE_ARGS']]
+
+        # Add extra local cmake args
+        if extra_cmake_args != None:
+            cmake_args += extra_cmake_args
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
-
 
 
 setup(

@@ -22,10 +22,14 @@ endif()
 set(TARGET_NAME depthai)
 project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
 
+# Add module paths
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/depthai-core/cmake")
+
 # First specify options
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a part of the test suite" OFF)
-option(DEPTHAI_PYTHON_GENERATE_DOCSTRINGS "Generate docstrings from core - pybind11_mkdoc required" ON)
+option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
 
 # Add external dependencies
 add_subdirectory(external)
@@ -97,7 +101,6 @@ if(DEPTHAI_PYTHON_ENABLE_TESTS OR DEPTHAI_PYTHON_TEST_EXAMPLES)
     enable_testing()
 endif()
 
-
 ########################
 # Tests
 ########################
@@ -113,11 +116,8 @@ if (DEPTHAI_PYTHON_TEST_EXAMPLES)
 endif()
 
 ########################
-# mkdoc for docstrings
+# Documentation
 ########################
-if (DEPTHAI_PYTHON_GENERATE_DOCSTRINGS)
-    include(cmake/pybind11-mkdoc.cmake)
-
-    # Check if pybind11_mkdoc available and create target
-    target_pybind11_mkdoc_setup("${CMAKE_CURRENT_LIST_DIR}/generated/depthai_core_docstring.hpp" depthai-core OFF)
+if(DEPTHAI_PYTHON_BUILD_DOCS)
+    add_subdirectory(docs)
 endif()

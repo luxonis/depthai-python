@@ -1,13 +1,8 @@
 C++ API Reference
 -----------------
 
-.. class:: Device
-  :canonical: depthai.Device
-
-  Represents the DepthAI device with the methods to interact with it.
-
-
-
-
+.. doxygennamespace:: dai
+   :content-only:
+   :members:
 
 .. include::  /includes/footer-short.rst
