@@ -10,25 +10,6 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
-extra_cmake_args = None
-cmake_executable = 'cmake'
-
-##### RTD specific case #####
-if os.environ.get('READTHEDOCS', None) == 'True': 
-    # Get path to cmake
-    import site
-    cmake_executable=site.getsitepackages()[0]+'/cmake/data/bin/cmake'
-    # Build and install libusb
-    subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'])
-    subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
-    subprocess.check_call(['./configure', '--disable-udev', '--prefix', '$PWD/../libusb'], cwd='libusb-1.0.24')
-    # Add libusb to path
-    os.environ['PATH'] = os.environ['PATH']+':$PWD/libusb/include:$PWD/libusb/lib'
-    # Add args to build doxygen and to generate docstrings for depthai module
-    extra_cmake_args = ['-DDEPTHAI_DOXYGEN_OUTPUT_DIR=_depthai-core/doxygen']
-##### RTD specific case ##### 
-
-
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
@@ -85,10 +66,32 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
-    
+
     def run(self):
+        self.extra_cmake_args = None
+        self.cmake_executable = 'cmake'
+                
+        ##### RTD specific case #####
+        if os.environ.get('READTHEDOCS', None) == 'True': 
+            import pathlib
+            pwd = str(pathlib.Path().absolute())
+            # Get path to cmake
+            # import site
+            # self.cmake_executable=site.getsitepackages()[0]+'/cmake/data/bin/cmake'
+            # print('CMAKE EXECUTABLE LOCATION: ', self.cmake_executable)
+            # Build and install libusb
+            subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'])
+            subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
+            subprocess.check_call(['./configure', '--disable-udev', '--prefix', pwd+'/../libusb'], cwd='libusb-1.0.24')
+            # Add libusb to path
+            os.environ['PATH'] = os.environ['PATH']+':'+pwd+'/libusb/include:'+pwd+'/libusb/lib'
+            print('Path set to: ', os.environ['PATH'])
+            # Add args to build doxygen and to generate docstrings for depthai module
+            self.extra_cmake_args = ['-DDEPTHAI_DOXYGEN_OUTPUT_DIR=_depthai-core/doxygen']
+        ##### RTD specific case ##### 
+
         try:
-            out = subprocess.check_output([cmake_executable, '--version'])
+            out = subprocess.check_output([self.cmake_executable, '--version'])
         except OSError:
             raise RuntimeError("CMake must be installed to build the following extensions: " +
                                ", ".join(e.name for e in self.extensions))
@@ -172,13 +175,13 @@ class CMakeBuild(build_ext):
             cmake_args += [os.environ['CMAKE_ARGS']]
 
         # Add extra local cmake args
-        if extra_cmake_args != None:
-            cmake_args += extra_cmake_args
+        if self.extra_cmake_args != None:
+            cmake_args += self.extra_cmake_args
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call([cmake_executable, ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call([cmake_executable, '--build', '.'] + build_args, cwd=self.build_temp)
+        subprocess.check_call([self.cmake_executable, ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call([self.cmake_executable, '--build', '.'] + build_args, cwd=self.build_temp)
 
 setup(
     name='depthai',

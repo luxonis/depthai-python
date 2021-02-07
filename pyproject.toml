@@ -1,2 +1,2 @@
 [build-system]
-requires = ["setuptools", "wheel", "pybind11_mkdoc"] # Must be preinstalled "cmake>=3.2.0"
+requires = ["setuptools", "wheel", "pybind11_mkdoc", "cmake"] # Must be preinstalled "cmake>=3.2.0"
