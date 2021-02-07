@@ -21,15 +21,20 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
     set(PYBIND11_MKDOC_TARGET_NAME "pybind11_mkdoc")
 
     # Execute module pybind11_mkdoc to check if present
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} RESULT_VARIABLE error OUTPUT_QUIET)
+    message(STATUS "Checking for pybind11_mkdoc")
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
     if(error)
-        set(messageStatus "STATUS")
-        if(enforce)
-            set(messageStatus "FATAL_ERROR")
+        set(message "Checking for pybind11_mkdoc - not found, docstrings not available")
+        if(NOT enforce)
+            message(STATUS ${message})
+        else()
+            message(FATAL_ERROR ${message})
         endif()
-        message(${messageStatus} "pybind11_mkdoc: Module ${PYBIND11_MKDOC_MODULE_NAME} not found! Target '${PYBIND11_MKDOC_TARGET_NAME}' not available, no docstrings will be generated")
         # Exit
         return()
+    else()
+        message(STATUS "Checking for pybind11_mkdoc - found, docstrings available")
+
     endif()
 
     # Prepare the output folder for the mkdoc

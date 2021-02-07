@@ -1,16 +1,25 @@
-cmake_minimum_required(VERSION 3.2) # For Hunter
+cmake_minimum_required(VERSION 3.4) # For Hunter
 
 # Set defaults
 # PIC toolchain as we are building a shared library
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" CACHE STRING "")
-# Build dependencies as 'Release' only by default
-set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
+
+# Build dependencies as 'Release' only by default (if not MSVC, as it requires same debug level for libraries to be linked against)
+if(NOT MSVC)
+    set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
+endif()
+
+# Generate combined Hunter config
+file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
+file(READ cmake/Hunter/config.cmake hunter_config)
+string(CONCAT final_hunter_config ${depthai_core_hunter_config} "\n\n" ${hunter_config})
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hunter_config})
 
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.258.tar.gz"
     SHA1 "062a19ab13ce8dffa9a882b6ce3e43bdabdf75d3"
-    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-core config (hunter limitation)
+    FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
 # Move binary dir if windows, to shorten the path
@@ -68,7 +77,7 @@ pybind11_add_module(${TARGET_NAME}
 )
 
 # Generate default docstrings
-set(DOCSTRINGS_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set(DOCSTRINGS_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
 set(DOCSTRINGS_OUTPUT_PATH ${DOCSTRINGS_OUTPUT_DIR}/depthai_core_docstring.hpp)
 configure_file(cmake/depthai_core_docstring.hpp.in ${DOCSTRINGS_OUTPUT_PATH} COPYONLY)
 # Add target to generate docstrings
@@ -77,7 +86,6 @@ if (DEPTHAI_PYTHON_ENABLE_DOCSTRINGS)
     # Check if pybind11_mkdoc available and create target
     target_pybind11_mkdoc_setup(${DOCSTRINGS_OUTPUT_PATH} depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
 endif()
-
 
 # Add include directory
 target_include_directories(${TARGET_NAME} PRIVATE src ${DOCSTRINGS_OUTPUT_DIR})
