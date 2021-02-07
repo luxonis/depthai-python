@@ -34,7 +34,6 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
         return()
     else()
         message(STATUS "Checking for pybind11_mkdoc - found, docstrings available")
-
     endif()
 
     # Prepare the output folder for the mkdoc
@@ -57,7 +56,7 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             "${mkdoc_headers}"
             # Redirect stderr to not spam output
             2> /dev/null
-        DEPENDS ${target}
+        DEPENDS ${mkdoc_headers} #${target}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Creating docstrings with ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} ..."
         VERBATIM

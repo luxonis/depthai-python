@@ -87,7 +87,7 @@ class CMakeBuild(build_ext):
             os.environ['PATH'] = os.environ['PATH']+':'+pwd+'/libusb/include:'+pwd+'/libusb/lib'
             print('Path set to: ', os.environ['PATH'])
             # Add args to build doxygen and to generate docstrings for depthai module
-            self.extra_cmake_args = ['-DDEPTHAI_DOXYGEN_OUTPUT_DIR=_depthai-core/doxygen']
+            self.extra_cmake_args = ['-DDEPTHAI_BUILD_DOCS=ON', '-DDEPTHAI_DOXYGEN_OUTPUT_DIR='+script_dir+'_depthai-core/doxygen']
         ##### RTD specific case ##### 
 
         try:
@@ -114,8 +114,14 @@ class CMakeBuild(build_ext):
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
 
+        # Pass a commit hash
         if buildCommitHash != None :
             cmake_args += ['-DDEPTHAI_PYTHON_COMMIT_HASH=' + buildCommitHash]
+
+        # Pass a docstring option
+        if os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT'] != None:
+            cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
+            cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
 
         # Set build type (debug vs release for library as well as dependencies)
         cfg = 'Debug' if self.debug else 'Release'
@@ -152,7 +158,7 @@ class CMakeBuild(build_ext):
                 cmake_args += ['-A', 'Win32']
             
             # Add flag to build with maximum available threads
-            parallel_args += ['--', '/m']
+            parallel_args = ['--', '/m']
         else:
             # if macos
             if sys.platform == 'darwin':
