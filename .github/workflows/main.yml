@@ -46,6 +46,8 @@ jobs:
         run: cmake -S . -B build -DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=ON -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
         run: cmake --build build --parallel --target pybind11_mkdoc
+      - name: Print docstring
+        run: cat docstrings/depthai_python_docstring.hpp
       - name: Upload docstring artifacts
         uses: actions/upload-artifact@v2
         with:

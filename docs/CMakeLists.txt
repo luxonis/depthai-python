@@ -3,6 +3,12 @@
 # Sphinx is required to build python documentation
 find_package(Sphinx REQUIRED)
 
+# Specify path separator
+set(SYS_PATH_SEPARATOR ";")
+if(UNIX)
+    set(SYS_PATH_SEPARATOR ":")
+endif()
+
 # Set input and output
 set(SPHINX_SOURCE ${CMAKE_CURRENT_LIST_DIR}/source)
 set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
@@ -11,11 +17,12 @@ set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 get_target_property(DOXYGEN_OUTPUT_DIR doxygen DOXYGEN_OUTPUT_DIR)
 message(STATUS "Retrieved doxygen output dir from doxygen target: ${DOXYGEN_OUTPUT_DIR}")
 
-set(SYS_PATH_SEPARATOR ";")
-if(UNIX)
-    set(SYS_PATH_SEPARATOR ":")
-endif()
+# Add year information
+string(TIMESTAMP build_year "%Y")
+# Configure sphinx for the build
+configure_file(conf.py.in "${CMAKE_CURRENT_BINARY_DIR}/conf.py" @ONLY)
 
+# Ready up sphinx - needed values configured in conf.py
 add_custom_target(sphinx ALL
     ${CMAKE_COMMAND} -E env 
     # Environment variables
@@ -24,10 +31,7 @@ add_custom_target(sphinx ALL
     # ASAN in case of sanitizers
     "${ASAN_ENVIRONMENT_VARS}" 
     ############ SPHINX
-    ${SPHINX_EXECUTABLE} -b html
-    # Tell Breathe where to find the Doxygen output
-    -Dbreathe_projects.depthai-core=${DOXYGEN_OUTPUT_DIR}/xml
-    ${SPHINX_SOURCE} ${SPHINX_BUILD}
+    ${SPHINX_EXECUTABLE} -c ${CMAKE_CURRENT_BINARY_DIR} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating documentation with Sphinx"
     VERBATIM

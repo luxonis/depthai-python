@@ -111,24 +111,29 @@ target_link_libraries(${TARGET_NAME}
         hedley
 )
 
-# Add bindings revision
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
+# Version consists of: (depthai-core).(bindings revision)[+bindings hash]
+set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_VERSION}.${PROJECT_VERSION}")
 
-# Add default commit hash (dev) if not build by CI
+# Add default commit hash ('dev') if not build by CI
 if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)   
     set(DEPTHAI_PYTHON_COMMIT_HASH dev)
 endif()
 
-# Add compile definition for bindings
+# Append build info to version
 if(DEPTHAI_PYTHON_COMMIT_HASH)
-    target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
+    set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_PYTHON_VERSION}+${DEPTHAI_PYTHON_COMMIT_HASH}")    
 endif()
+
+# Add version definition
+target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}")
+target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
+target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_VERSION="${DEPTHAI_VERSION}")
+target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 
 # Set compiler features (c++14), and disables extensions
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_EXTENSIONS OFF)
-
 
 # ASAN Settings as we are building and using shared library
 if(SANITIZE_ADDRESS OR SANITIZE_MEMORY OR SANITIZE_THREAD OR SANITIZE_UNDEFINED)
