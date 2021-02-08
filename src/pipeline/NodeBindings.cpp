@@ -169,8 +169,11 @@ void NodeBindings::bind(pybind11::module& m){
         // setters
         .def("setCropRect", &ImageManip::setCropRect)
         .def("setCropRotatedRect", &ImageManip::setCropRotatedRect)
-        .def("setCropQuadrilateral", &ImageManip::setCropQuadrilateral)
         .def("setCenterCrop", &ImageManip::setCenterCrop)
+        .def("setWarpTransformFourPoints", &ImageManip::setWarpTransformFourPoints)
+        .def("setWarpTransformMatrix3x3", &ImageManip::setWarpTransformMatrix3x3)
+        .def("setRotationDegrees", &ImageManip::setRotationDegrees)
+        .def("setRotationRadians", &ImageManip::setRotationRadians)
         .def("setResize", &ImageManip::setResize)
         .def("setResizeThumbnail", &ImageManip::setResizeThumbnail)
         .def("setFrameType", &ImageManip::setFrameType)

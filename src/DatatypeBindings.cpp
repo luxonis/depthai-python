@@ -195,21 +195,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("angle", &RawImageManipConfig::RotatedRect::angle)
         ;
 
-    py::class_<RawImageManipConfig::CropQuadrilateral>(rawImageManipConfig, "CropQuadrilateral")
-        .def(py::init<>())
-        .def_readwrite("pt", &RawImageManipConfig::CropQuadrilateral::pt)
-        ;
-
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
         .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
         .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
-        .def_readwrite("cropQuadrilateral", &RawImageManipConfig::CropConfig::cropQuadrilateral)
         .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
         .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
         .def_readwrite("widthHeightAspectRatio", &RawImageManipConfig::CropConfig::widthHeightAspectRatio)
         .def_readwrite("enableRotatedRect", &RawImageManipConfig::CropConfig::enableRotatedRect)
-        .def_readwrite("enableCropQuadrilateral", &RawImageManipConfig::CropConfig::enableCropQuadrilateral)
         .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
         ;
 
@@ -221,6 +214,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("bgRed", &RawImageManipConfig::ResizeConfig::bgRed)
         .def_readwrite("bgGreen", &RawImageManipConfig::ResizeConfig::bgGreen)
         .def_readwrite("bgBlue", &RawImageManipConfig::ResizeConfig::bgBlue)
+        .def_readwrite("warpFourPoints", &RawImageManipConfig::ResizeConfig::warpFourPoints)
+        .def_readwrite("normalizedCoords", &RawImageManipConfig::ResizeConfig::normalizedCoords)
+        .def_readwrite("enableWarp4pt", &RawImageManipConfig::ResizeConfig::enableWarp4pt)
+        .def_readwrite("warpMatrix3x3", &RawImageManipConfig::ResizeConfig::warpMatrix3x3)
+        .def_readwrite("enableWarpMatrix", &RawImageManipConfig::ResizeConfig::enableWarpMatrix)
+        .def_readwrite("rotationAngle", &RawImageManipConfig::ResizeConfig::rotationAngle)
+        .def_readwrite("angleInRadians", &RawImageManipConfig::ResizeConfig::angleInRadians)
+        .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
@@ -412,13 +413,17 @@ void DatatypeBindings::bind(pybind11::module& m){
         // setters
         .def("setCropRect", &ImageManipConfig::setCropRect)
         .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect)
-        .def("setCropQuadrilateral", &ImageManipConfig::setCropQuadrilateral)
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
+        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints)
+        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3)
+        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees)
+        .def("setRotationRadians", &ImageManipConfig::setRotationRadians)
         .def("setResize", &ImageManipConfig::setResize)
         .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
         .def("setFrameType", &ImageManipConfig::setFrameType)
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
+        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)
