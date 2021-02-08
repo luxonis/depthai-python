@@ -55,7 +55,7 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             # List of headers for which to generate docstrings
             "${mkdoc_headers}"
             # Redirect stderr to not spam output
-            2> /dev/null
+            # 2> /dev/null
         DEPENDS ${mkdoc_headers} #${target}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Creating docstrings with ${PYTHON_EXECUTABLE} -m ${PYBIND11_MKDOC_MODULE_NAME} ..."
@@ -68,6 +68,9 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
         ${PYBIND11_MKDOC_TARGET_NAME}
         DEPENDS "${output_path}"
     )
+
+    # Force target build
+    file(TOUCH_NOCREATE ${mkdoc_headers})
 
     # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
     add_dependencies(${TARGET_NAME} ${PYBIND11_MKDOC_TARGET_NAME})
