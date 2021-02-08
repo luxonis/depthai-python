@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.hunter/
-          key: hunter-ubuntu-latest
+          key: hunter-ubuntu-20.04
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
