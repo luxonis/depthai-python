@@ -271,21 +271,19 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // MobileNetDetectionNetwork node
-    py::class_<MobileNetDetectionNetwork, Node, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
+    py::class_<MobileNetDetectionNetwork, NeuralNetwork, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
         .def_readonly("input", &MobileNetDetectionNetwork::input)
         .def_readonly("out", &MobileNetDetectionNetwork::out)
         .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
         .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
-        .def("setNumPoolFrames", &MobileNetDetectionNetwork::setNumPoolFrames)
         ;
 
     // YoloDetectionNetwork node
-    py::class_<YoloDetectionNetwork, Node, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
+    py::class_<YoloDetectionNetwork, NeuralNetwork, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
         .def_readonly("input", &YoloDetectionNetwork::input)
         .def_readonly("out", &YoloDetectionNetwork::out)
-        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
         .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
-        .def("setNumPoolFrames", &YoloDetectionNetwork::setNumPoolFrames)
+        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
         .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
         .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
         .def("setAnchors", &YoloDetectionNetwork::setAnchors)
