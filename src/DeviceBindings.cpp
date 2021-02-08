@@ -226,6 +226,10 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature))
         .def("getLeonCssCpuUsage", DeviceWrapper::wrap(&Device::getLeonCssCpuUsage))
         .def("getLeonMssCpuUsage", DeviceWrapper::wrap(&Device::getLeonMssCpuUsage))
+        .def("setLogOutputLevel", DeviceWrapper::wrap(&Device::setLogOutputLevel))
+        .def("getLogOutputLevel", DeviceWrapper::wrap(&Device::getLogOutputLevel))
+        .def("addLogCallback", DeviceWrapper::wrap(&Device::addLogCallback))
+        .def("removeLogCallback", DeviceWrapper::wrap(&Device::removeLogCallback))
         ;
 
 }
