@@ -34,8 +34,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Libusb install
-        run: sudo apt-get install libusb-1.0-0-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libusb-1.0-0-dev
+          sudo apt-get install -y clang-11
+      - name: Setup path to libclang
+        run: export LIBCLANG_PATH=/usr/lib/llvm-11/lib/libclang.so.1
       - name: Set up Python
         uses: actions/setup-python@v2
         with: 

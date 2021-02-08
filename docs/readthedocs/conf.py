@@ -1,13 +1,18 @@
 # readthedocs CI build limitation circumvent
 import subprocess
 import os
+import pathlib
+
+# Get current working directory
+cwd = str(pathlib.Path().absolute())
 
 # Prepare dependencies for library
 subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'])
 subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
-subprocess.check_call(['./configure', '--disable-udev', '--prefix', pwd+'/../libusb'], cwd='libusb-1.0.24')
+subprocess.check_call(['./configure', '--disable-udev', '--prefix', cwd+'/../libusb'], cwd='libusb-1.0.24')
+
 # Add libusb to path
-os.environ['PATH'] = os.environ['PATH']+':'+pwd+'/libusb/include:'+pwd+'/libusb/lib'
+os.environ['PATH'] = os.environ['PATH']+':'+cwd+'/libusb/include:'+cwd+'/libusb/lib'
 print('Path set to: ', os.environ['PATH'])
 
 # Build library and generate actual conf.py
