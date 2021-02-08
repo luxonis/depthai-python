@@ -6,6 +6,10 @@ import cv2
 import depthai as dai
 import numpy as np
 
+# MobilenetSSD label texts
+label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 syncNN = True
 
 # Get argument first
@@ -82,8 +86,10 @@ with dai.Device(pipeline) as device:
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
                 y2 = int(bbox.ymax * height)
-
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), cv2.FONT_HERSHEY_SIMPLEX)
+                color = (255, 0, 0)
+                cv2.putText(frame, label_map[bbox.label], (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
