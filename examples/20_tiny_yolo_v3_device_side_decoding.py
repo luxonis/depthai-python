@@ -6,29 +6,55 @@ import cv2
 import depthai as dai
 import numpy as np
 
-# MobilenetSSD label texts
-label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+# tiny yolo v3 label texts
+label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+             "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+             "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+             "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+             "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+             "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+             "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+             "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+             "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+             "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+             "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+             "teddy bear",     "hair drier", "toothbrush"]  
+
 
 syncNN = True
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+tiny_yolo_v3_path = str((Path(__file__).parent / Path('models/tiny_yolo_v3_6shaves.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    tiny_yolo_v3_path = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(300, 300)
+cam_rgb.setPreviewSize(416, 416)
 cam_rgb.setInterleaved(False)
 
-# Define a neural network that will make predictions based on the source frames
-detectionNetwork = pipeline.createMobileNetDetectionNetwork()
+#network specific settings
+detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
-detectionNetwork.setBlobPath(mobilenet_path)
+detectionNetwork.setNumClasses(80)
+detectionNetwork.setCoordinateSize(4)
+anchors = np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+detectionNetwork.setAnchors(anchors)
+anchorMasks26 = np.array([1,2,3])
+anchorMasks13 = np.array([3,4,5])
+anchorMasks = {
+    "side26": anchorMasks26,
+    "side13": anchorMasks13,
+}
+detectionNetwork.setAnchorMasks(anchorMasks)
+detectionNetwork.setIouThreshold(0.5)
+
+
+
+detectionNetwork.setBlobPath(tiny_yolo_v3_path)
 
 cam_rgb.preview.link(detectionNetwork.input)
 

@@ -41,6 +41,13 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         LOCATION construction_vest
     )
 
+    hunter_private_data(
+        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny_yolo_v3_6shaves.blob"
+        SHA1 "7c87d89ab3bc1d58de7f61c0bbd4844a200ddeb5"
+        FILE "tiny_yolo_v3_6shaves.blob"
+        LOCATION tiny_yolo_v3_blob
+    )
+
     # Add tests
     dai_add_python_test(01_rgb_preview 01_rgb_preview.py)
     dai_add_python_test(02_mono_preview 02_mono_preview.py)
@@ -59,6 +66,9 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_blob}")
     dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
     dai_add_python_test(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
-    
+    dai_add_python_test(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
+    dai_add_python_test(19_mobilenet_device_side_decoding 19_mobilenet_device_side_decoding.py "${mobilenet_blob}")
+    dai_add_python_test(20_tiny_yolo_v3_device_side_decoding 20_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")
+
 
 endif()
