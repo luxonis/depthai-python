@@ -12,7 +12,7 @@ subprocess.check_call(['./configure', '--disable-udev', '--prefix', cwd+'/../lib
 
 # Add libusb to path
 env=os.environ.copy()
-env['PATH'] = env['PATH']+':'+cwd+'/libusb/include:'+cwd+'/libusb/lib'
+env['PATH'] = cwd+'/libusb/include:'+cwd+'/libusb/lib'+':'+env['PATH']
 print('Path set to: ', env['PATH'])
 
 # Build library and generate actual conf.py
