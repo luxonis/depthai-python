@@ -53,7 +53,7 @@ mkdoc_lib_patch = '''
          if llvm_dir:
 '''
 p = subprocess.Popen(['patch', 'pybind11_mkdoc/pybind11_mkdoc/mkdoc_lib.py'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-stdout_data = p.communicate(input=mkdoc_lib_patch)[0]
+stdout_data = p.communicate(input=bytes(mkdoc_lib_patch, encoding='utf-8'))[0]
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pybind11_mkdoc/'])
 
 
