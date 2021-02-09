@@ -24,34 +24,29 @@ jobs:
 
   # Job which builds docstrings for the rest of the wheel builds
   build-docstrings:
-    runs-on: ubuntu-20.04
+    runs-on: macos-latest
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
           path: ~/.hunter/
-          key: hunter-ubuntu-20.04
+          key: hunter-clang
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Install dependencies
-        run: |
-          sudo apt-get install libusb-1.0-0-dev
-          sudo apt-get install -y clang-11
-      - name: Setup path to libclang
-        run: export LIBCLANG_PATH=/usr/lib/llvm-11/lib/libclang.so.1
       - name: Set up Python
         uses: actions/setup-python@v2
         with: 
           python-version: 3.8
-      - name: Install pybind11_mkdoc
-        run: python -m pip install git+git://github.com/pybind/pybind11_mkdoc.git@master
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          brew install libusb
+          python -m pip install git+git://github.com/pybind/pybind11_mkdoc.git@master
       - name: Configure project
         run: cmake -S . -B build -DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=ON -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
         run: cmake --build build --parallel --target pybind11_mkdoc
-      - name: Print docstring
-        run: cat docstrings/depthai_python_docstring.hpp
       - name: Upload docstring artifacts
         uses: actions/upload-artifact@v2
         with:
