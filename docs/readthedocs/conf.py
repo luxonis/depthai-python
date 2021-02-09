@@ -18,6 +18,7 @@ env['PATH'] = cwd+'/libusb/include:'+cwd+'/libusb/lib'+':'+env['PATH']
 
 # libclang
 subprocess.check_call(['wget', 'https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/libclang-11_manylinux2014_x86_64.tar.xz'])
+subprocess.check_call(['mkdir', '-p', 'libclang'])
 subprocess.check_call(['tar', 'xf', 'libclang-11_manylinux2014_x86_64.tar.xz', '-C', cwd+'/libclang/'])
 env['LIBCLANG_PATH'] = cwd+'/libclang/usr/lib/llvm-11/lib/libclang.so.1'
 
