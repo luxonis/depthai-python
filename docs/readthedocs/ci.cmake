@@ -2,7 +2,7 @@
 set(project_root "${CMAKE_CURRENT_LIST_DIR}/../..")
 
 # Get buildCommitHash for non release build
-execute_process(COMMAND "git" "rev-parse" "HEAD" WORKING_DIRECTORY ${project_root} OUTPUT_VARIABLE buildCommitHash)
+execute_process(COMMAND "git" "rev-parse" "HEAD" WORKING_DIRECTORY ${project_root} OUTPUT_VARIABLE buildCommitHash OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 # Copy docs/source/ contents to docs/readthedocs/ folder
 file(COPY "${project_root}/docs/source/" DESTINATION ${CMAKE_CURRENT_LIST_DIR})
