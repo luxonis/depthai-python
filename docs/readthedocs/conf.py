@@ -6,6 +6,9 @@ import sys
 # Get current working directory
 cwd = os.path.dirname(os.path.realpath(__file__))
 
+# Specify source directory
+packagedir = cwd+'/../source'
+
 # Prepare dependencies for library
 env=os.environ.copy()
 
