@@ -66,32 +66,10 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
-
+    
     def run(self):
-        self.extra_cmake_args = None
-        self.cmake_executable = 'cmake'
-                
-        ##### RTD specific case #####
-        if os.environ.get('READTHEDOCS', None) == 'True': 
-            import pathlib
-            pwd = str(pathlib.Path().absolute())
-            # Get path to cmake
-            # import site
-            # self.cmake_executable=site.getsitepackages()[0]+'/cmake/data/bin/cmake'
-            # print('CMAKE EXECUTABLE LOCATION: ', self.cmake_executable)
-            # Build and install libusb
-            subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'])
-            subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
-            subprocess.check_call(['./configure', '--disable-udev', '--prefix', pwd+'/../libusb'], cwd='libusb-1.0.24')
-            # Add libusb to path
-            os.environ['PATH'] = os.environ['PATH']+':'+pwd+'/libusb/include:'+pwd+'/libusb/lib'
-            print('Path set to: ', os.environ['PATH'])
-            # Add args to build doxygen and to generate docstrings for depthai module
-            self.extra_cmake_args = ['-DDEPTHAI_BUILD_DOCS=ON', '-DDEPTHAI_DOXYGEN_OUTPUT_DIR='+script_dir+'_depthai-core/doxygen']
-        ##### RTD specific case ##### 
-
         try:
-            out = subprocess.check_output([self.cmake_executable, '--version'])
+            out = subprocess.check_output(['cmake', '--version'])
         except OSError:
             raise RuntimeError("CMake must be installed to build the following extensions: " +
                                ", ".join(e.name for e in self.extensions))
@@ -130,6 +108,7 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         # Memcheck (guard if it fails)
+        totalMemory = 4000
         if platform.system() == "Linux":
             try:
                 totalMemory = int(os.popen("free -m").readlines()[1].split()[1])
@@ -137,16 +116,11 @@ class CMakeBuild(build_ext):
                 raise
             except:
                 totalMemory = 4000
-            
-            # Specify how many threads to use when building, depending on available memory
-            parallel_args = ['--', '-j']
-            if totalMemory < 1000:
-                parallel_args = ['--', '-j1']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif totalMemory < 2000:
-                parallel_args = ['--', '-j2']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
+        # Memcheck (guard if it fails)
 
+
+        # Configure and build
+        # Windows
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             cmake_args += ['-DCMAKE_TOOLCHAIN_FILE={}'.format(os.path.dirname(os.path.abspath(__file__)) + '/cmake/toolchain/msvc.cmake')]
@@ -158,21 +132,25 @@ class CMakeBuild(build_ext):
                 cmake_args += ['-A', 'Win32']
             
             # Add flag to build with maximum available threads
-            parallel_args = ['--', '/m']
+            build_args = ['--', '/m']
+        # Unix
         else:
-            # if macos
+            # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
                 os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
-            # Build with maximum available threads
-            parallel_args = ['--', '-j']
-
-
-        # Add args with how many threads to build
-        build_args += parallel_args
-
+            # Specify how many threads to use when building, depending on available memory
+            if totalMemory < 1000:
+                build_args += ['--', '-j1']
+                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
+            elif totalMemory < 2000:
+                build_args += ['--', '-j2']
+                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
+            else:
+                # Build with maximum available threads
+                build_args += ['--', '-j']
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
@@ -180,14 +158,12 @@ class CMakeBuild(build_ext):
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [os.environ['CMAKE_ARGS']]
 
-        # Add extra local cmake args
-        if self.extra_cmake_args != None:
-            cmake_args += self.extra_cmake_args
-
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call([self.cmake_executable, ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call([self.cmake_executable, '--build', '.'] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+
+
 
 setup(
     name='depthai',
