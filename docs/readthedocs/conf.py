@@ -19,7 +19,7 @@ subprocess.check_call(['mkdir', '-p', tmpdir])
 
 # Libusb
 subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'], cwd=tmpdir)
-subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'])
+subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'], cwd=tmpdir)
 subprocess.check_call(['./configure', '--disable-udev', '--prefix', tmpdir+'/libusb'], cwd=tmpdir+'/libusb-1.0.24')
 subprocess.check_call(['make', '-j'], cwd=tmpdir+'/libusb-1.0.24')
 subprocess.check_call(['make', 'install'], cwd=tmpdir+'/libusb-1.0.24')
