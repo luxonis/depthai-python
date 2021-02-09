@@ -13,7 +13,7 @@ packagedir = cwd+'/../source'
 env=os.environ.copy()
 
 # Temp dir - remove if exists, and create a new one
-tmpdir = cwd+'/__temp_dir/'
+tmpdir = '/home/docs/__temp_dir/'
 subprocess.check_call(['rm', '-rf', tmpdir])
 subprocess.check_call(['mkdir', '-p', tmpdir])
 
@@ -28,7 +28,7 @@ env['PATH'] = tmpdir+'/libusb/include:'+tmpdir+'/libusb/lib'+':'+env['PATH']
 # libclang
 subprocess.check_call(['wget', 'https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/libclang-11_manylinux2014_x86_64.tar.xz'], cwd=tmpdir)
 subprocess.check_call(['mkdir', '-p', 'libclang'], cwd=tmpdir)
-subprocess.check_call(['tar', 'xf', 'libclang-11_manylinux2014_x86_64.tar.xz', '-C', tmpdir+'/libclang/'])
+subprocess.check_call(['tar', 'xf', 'libclang-11_manylinux2014_x86_64.tar.xz', '-C', tmpdir+'/libclang/'], cwd=tmpdir)
 env['LIBCLANG_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/lib/libclang.so.1'
 env['LLVM_DIR_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/'
 
