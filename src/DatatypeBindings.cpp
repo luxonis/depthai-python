@@ -214,6 +214,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("bgRed", &RawImageManipConfig::ResizeConfig::bgRed)
         .def_readwrite("bgGreen", &RawImageManipConfig::ResizeConfig::bgGreen)
         .def_readwrite("bgBlue", &RawImageManipConfig::ResizeConfig::bgBlue)
+        .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
@@ -355,6 +356,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
         .def("setFrameType", &ImageManipConfig::setFrameType)
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
+        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)

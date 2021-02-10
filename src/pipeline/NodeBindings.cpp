@@ -170,6 +170,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setResizeThumbnail", &ImageManip::setResizeThumbnail)
         .def("setFrameType", &ImageManip::setFrameType)
         .def("setHorizontalFlip", &ImageManip::setHorizontalFlip)
+        .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio)
         .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput)
         .def("setNumFramesPool", &ImageManip::setNumFramesPool)
         .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize)
