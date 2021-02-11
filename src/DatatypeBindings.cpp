@@ -178,23 +178,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
         ;
 
-    py::class_<RawImageManipConfig::Point2f>(rawImageManipConfig, "Point2f")
-        .def_readwrite("x", &RawImageManipConfig::Point2f::x)
-        .def_readwrite("y", &RawImageManipConfig::Point2f::y)
-        ;
-
-    py::class_<RawImageManipConfig::Size2f>(rawImageManipConfig, "Size2f")
-        .def_readwrite("width", &RawImageManipConfig::Size2f::width)
-        .def_readwrite("height", &RawImageManipConfig::Size2f::height)
-        ;
-
-    py::class_<RawImageManipConfig::RotatedRect>(rawImageManipConfig, "RotatedRect")
-        .def(py::init<>())
-        .def_readwrite("center", &RawImageManipConfig::RotatedRect::center)
-        .def_readwrite("size", &RawImageManipConfig::RotatedRect::size)
-        .def_readwrite("angle", &RawImageManipConfig::RotatedRect::angle)
-        ;
-
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
         .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
@@ -219,8 +202,8 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("enableWarp4pt", &RawImageManipConfig::ResizeConfig::enableWarp4pt)
         .def_readwrite("warpMatrix3x3", &RawImageManipConfig::ResizeConfig::warpMatrix3x3)
         .def_readwrite("enableWarpMatrix", &RawImageManipConfig::ResizeConfig::enableWarpMatrix)
-        .def_readwrite("rotationAngle", &RawImageManipConfig::ResizeConfig::rotationAngle)
-        .def_readwrite("angleInRadians", &RawImageManipConfig::ResizeConfig::angleInRadians)
+        .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
+        .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
         .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
         ;
 
@@ -237,9 +220,13 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
+        // TODO add more raw types here, not directly used
         ;
 
-    // CameraControl enum bindings
+    // RawCameraControl enum bindings
+    // The enum fields will also be exposed in 'CameraControl', store them for later
+    std::vector<const char *> camCtrlAttr;
+    camCtrlAttr.push_back("AutoFocusMode");
     py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode")
         .value("OFF", RawCameraControl::AutoFocusMode::OFF)
         .value("AUTO", RawCameraControl::AutoFocusMode::AUTO)
@@ -249,6 +236,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("EDOF", RawCameraControl::AutoFocusMode::EDOF)
     ;
 
+    camCtrlAttr.push_back("AutoWhiteBalanceMode");
     py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode")
         .value("OFF", RawCameraControl::AutoWhiteBalanceMode::OFF)
         .value("AUTO", RawCameraControl::AutoWhiteBalanceMode::AUTO)
@@ -261,6 +249,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("SHADE", RawCameraControl::AutoWhiteBalanceMode::SHADE)
     ;
 
+    camCtrlAttr.push_back("SceneMode");
     py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode")
         .value("UNSUPPORTED", RawCameraControl::SceneMode::UNSUPPORTED)
         .value("FACE_PRIORITY", RawCameraControl::SceneMode::FACE_PRIORITY)
@@ -281,13 +270,15 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("BARCODE", RawCameraControl::SceneMode::BARCODE)
     ;
 
+    camCtrlAttr.push_back("AntiBandingMode");
     py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode")
         .value("OFF", RawCameraControl::AntiBandingMode::OFF)
-        .value("_50HZ", RawCameraControl::AntiBandingMode::_50HZ)
-        .value("_60HZ", RawCameraControl::AntiBandingMode::_60HZ)
+        .value("MAINS_50_HZ", RawCameraControl::AntiBandingMode::MAINS_50_HZ)
+        .value("MAINS_60_HZ", RawCameraControl::AntiBandingMode::MAINS_60_HZ)
         .value("AUTO", RawCameraControl::AntiBandingMode::AUTO)
     ;
 
+    camCtrlAttr.push_back("EffectMode");
     py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode")
         .value("OFF", RawCameraControl::EffectMode::OFF)
         .value("MONO", RawCameraControl::EffectMode::MONO)
@@ -384,6 +375,23 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
+    py::class_<Point2f>(m, "Point2f")
+        .def_readwrite("x", &Point2f::x)
+        .def_readwrite("y", &Point2f::y)
+        ;
+
+    py::class_<Size2f>(m, "Size2f")
+        .def_readwrite("width", &Size2f::width)
+        .def_readwrite("height", &Size2f::height)
+        ;
+
+    py::class_<RotatedRect>(m, "RotatedRect")
+        .def(py::init<>())
+        .def_readwrite("center", &RotatedRect::center)
+        .def_readwrite("size", &RotatedRect::size)
+        .def_readwrite("angle", &RotatedRect::angle)
+        ;
+
     // Bind NNData
     py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
         .def(py::init<>())
@@ -466,6 +474,10 @@ void DatatypeBindings::bind(pybind11::module& m){
         // getters
         .def("getCaptureStill", &CameraControl::getCaptureStill)
         ;
+    // Add also enum attributes from RawCameraControl
+    for (const auto& a : camCtrlAttr) {
+        m.attr("CameraControl").attr(a) = m.attr("RawCameraControl").attr(a);
+    }
 
     // Bind SystemInformation
     py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation")
