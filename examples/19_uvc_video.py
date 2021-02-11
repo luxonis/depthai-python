@@ -3,18 +3,26 @@
 import depthai as dai
 import time
 
+enable_4k = True
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 cam_rgb.setInterleaved(False)
+cam_rgb.initialControl.setManualFocus(130)
+
+if enable_4k:
+    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+    cam_rgb.setIspScale(1, 2)
+else:
+    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
 # Create an UVC (USB Video Class) output node
 uvc = pipeline.createUVC()
-cam_rgb.video.link(uvc.input)
+cam_rgb.isp.link(uvc.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
