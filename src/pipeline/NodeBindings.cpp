@@ -154,6 +154,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput, DOC(dai, node, ColorCamera, getWaitForConfigInput))
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, ColorCamera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio, DOC(dai, node, ColorCamera, getPreviewKeepAspectRatio))
+        .def("setIspScale", &ColorCamera::setIspScale)
+        .def("setIspScaleFull", &ColorCamera::setIspScaleFull)
         ;
     
 
