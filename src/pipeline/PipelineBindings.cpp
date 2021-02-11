@@ -17,7 +17,7 @@
 #include "depthai/pipeline/node/UVC.hpp"
 
 // depthai-shared
-#include "depthai-shared/pb/properties/GlobalProperties.hpp"
+#include "depthai-shared/properties/GlobalProperties.hpp"
 
 void PipelineBindings::bind(pybind11::module& m){
 
