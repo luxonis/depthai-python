@@ -26,9 +26,9 @@ detection_nn.setBlobPath(mobilenet_path)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 cam_right.out.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 

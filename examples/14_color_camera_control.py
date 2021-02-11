@@ -134,13 +134,13 @@ with dai.Device(pipeline) as dev:
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
-            ctrl.setAutoFocusMode(dai.RawCameraControl.AutoFocusMode.AUTO)
+            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.AUTO)
             ctrl.setAutoFocusTrigger()
             controlQueue.send(ctrl)
         elif key == ord('f'):
             print("Autofocus enable, continuous")
             ctrl = dai.CameraControl()
-            ctrl.setAutoFocusMode(dai.RawCameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
+            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
             controlQueue.send(ctrl)
         elif key == ord('e'):
             print("Autoexposure enable")

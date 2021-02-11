@@ -54,9 +54,9 @@ xout_right.setStreamName("rect_right")
 depth.rectifiedRight.link(xout_right.input)
 
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
