@@ -13,6 +13,7 @@ cam_rgb.setPreviewSize(300, 300)
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 cam_rgb.setInterleaved(False)
+cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
 
 # Create output
 xout_rgb = pipeline.createXLinkOut()
@@ -29,12 +30,9 @@ with dai.Device(pipeline) as device:
 
     while True:
         in_rgb = q_rgb.get()  # blocking call, will wait until a new data has arrived
-        # data is originally represented as a flat 1D array, it needs to be converted into HxWxC form
-        shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-        frame_rgb = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame_rgb = np.ascontiguousarray(frame_rgb)
-        # frame is transformed and ready to be shown
-        cv2.imshow("rgb", frame_rgb)
+
+        # Retrieve 'bgr' (opencv format) frame
+        cv2.imshow("bgr", in_rgb.getBgrFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
