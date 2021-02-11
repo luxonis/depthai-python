@@ -151,6 +151,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput)
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio)
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio)
+        .def("setIspScale", &ColorCamera::setIspScale)
+        .def("setIspScaleFull", &ColorCamera::setIspScaleFull)
         ;
 
     // NeuralNetwork node
