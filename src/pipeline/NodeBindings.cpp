@@ -270,20 +270,21 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setBusId", &SPIOut::setBusId)
         ;
 
+    py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork")
+        .def_readonly("input", &DetectionNetwork::input)
+        .def_readonly("out", &DetectionNetwork::out)
+        .def_readonly("passthrough", &DetectionNetwork::passthrough)
+        .def("setBlobPath", &DetectionNetwork::setBlobPath)
+        .def("setNumPoolFrames", &DetectionNetwork::setNumPoolFrames)
+        .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold)
+        ;
+
     // MobileNetDetectionNetwork node
-    py::class_<MobileNetDetectionNetwork, NeuralNetwork, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
-        .def_readonly("input", &MobileNetDetectionNetwork::input)
-        .def_readonly("out", &MobileNetDetectionNetwork::out)
-        .def("setConfidenceThreshold", &MobileNetDetectionNetwork::setConfidenceThreshold)
-        .def("setBlobPath", &MobileNetDetectionNetwork::setBlobPath)
+    py::class_<MobileNetDetectionNetwork, DetectionNetwork, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
         ;
 
     // YoloDetectionNetwork node
-    py::class_<YoloDetectionNetwork, NeuralNetwork, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
-        .def_readonly("input", &YoloDetectionNetwork::input)
-        .def_readonly("out", &YoloDetectionNetwork::out)
-        .def("setBlobPath", &YoloDetectionNetwork::setBlobPath)
-        .def("setConfidenceThreshold", &YoloDetectionNetwork::setConfidenceThreshold)
+    py::class_<YoloDetectionNetwork, DetectionNetwork, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
         .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
         .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
         .def("setAnchors", &YoloDetectionNetwork::setAnchors)

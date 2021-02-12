@@ -342,7 +342,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind ImgDetections
     py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections")
         .def(py::init<>())
-        .def("getDetections", &ImgDetections::getDetections)
+        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; } )
         ;
 
      // Bind ImageManipConfig

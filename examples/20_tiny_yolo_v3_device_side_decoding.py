@@ -5,6 +5,7 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
 
 # tiny yolo v3 label texts
 label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
@@ -52,9 +53,8 @@ anchorMasks = {
 detectionNetwork.setAnchorMasks(anchorMasks)
 detectionNetwork.setIouThreshold(0.5)
 
-
-
 detectionNetwork.setBlobPath(tiny_yolo_v3_path)
+detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
 
@@ -83,7 +83,9 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
 
-
+    start_time = time.time()
+    counter = 0
+    fps = 0
     while True:
         if(syncNN):
             in_rgb = q_rgb.get()
@@ -99,8 +101,12 @@ with dai.Device(pipeline) as device:
             frame = np.ascontiguousarray(frame)
 
         if in_nn is not None:
-            bboxes = in_nn.getDetections()
-
+            bboxes = in_nn.detections
+            counter+=1
+            if (time.time() - start_time) > 1 :
+                fps = counter / (time.time() - start_time)
+                counter = 0
+                start_time = time.time()
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -120,6 +126,8 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
+
+            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255, 0, 0))
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

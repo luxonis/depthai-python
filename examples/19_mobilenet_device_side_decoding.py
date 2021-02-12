@@ -5,6 +5,7 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
 
 # MobilenetSSD label texts
 label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
@@ -29,6 +30,7 @@ cam_rgb.setInterleaved(False)
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setBlobPath(mobilenet_path)
+detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
 
@@ -57,7 +59,9 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
 
-
+    start_time = time.time()
+    counter = 0
+    fps = 0
     while True:
         if(syncNN):
             in_rgb = q_rgb.get()
@@ -65,7 +69,7 @@ with dai.Device(pipeline) as device:
         else:
             in_rgb = q_rgb.tryGet()
             in_nn = q_nn.tryGet()
-
+        
         if in_rgb is not None:
             # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
             shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
@@ -73,7 +77,12 @@ with dai.Device(pipeline) as device:
             frame = np.ascontiguousarray(frame)
 
         if in_nn is not None:
-            bboxes = in_nn.getDetections()
+            bboxes = in_nn.detections
+            counter+=1
+            if (time.time() - start_time) > 1 :
+                fps = counter / (time.time() - start_time)
+                counter = 0
+                start_time = time.time()
 
 
         if frame is not None:
@@ -94,6 +103,8 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
+
+            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255, 0, 0))
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
