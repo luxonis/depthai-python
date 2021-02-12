@@ -376,11 +376,13 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<Point2f>(m, "Point2f")
+        .def(py::init<>())
         .def_readwrite("x", &Point2f::x)
         .def_readwrite("y", &Point2f::y)
         ;
 
     py::class_<Size2f>(m, "Size2f")
+        .def(py::init<>())
         .def_readwrite("width", &Size2f::width)
         .def_readwrite("height", &Size2f::height)
         ;
@@ -424,6 +426,8 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
         .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints)
         .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3)
+        .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor)
+        .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels)
         .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees)
         .def("setRotationRadians", &ImageManipConfig::setRotationRadians)
         .def("setResize", &ImageManipConfig::setResize)
