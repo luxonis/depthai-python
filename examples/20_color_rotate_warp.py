@@ -137,12 +137,11 @@ with dai.Device(pipeline) as device:
                 cfg.setWarpTransformFourPoints(point2f_list, normalized)
             else:
                 angle_deg += rotate_rate
+                rotated_rect = ((320, 240), (400, 400), angle_deg)
                 rr = dai.RotatedRect()
-                rr.center.x    = 320
-                rr.center.y    = 240
-                rr.size.width  = 400
-                rr.size.height = 400
-                rr.angle       = angle_deg
+                rr.center.x,   rr.center.y    = rotated_rect[0]
+                rr.size.width, rr.size.height = rotated_rect[1]
+                rr.angle                      = rotated_rect[2]
                 cfg.setCropRotatedRect(rr, False)
             if resize_factor > 0:
                 cfg.setResize(resize_x, resize_y)
@@ -152,8 +151,15 @@ with dai.Device(pipeline) as device:
 
         for q in [q_preview, q_manip]:
             pkt = q.get()
+            name = q.getName()
             shape = (3, pkt.getHeight(), pkt.getWidth())
             frame = pkt.getData().reshape(shape).transpose(1, 2, 0)
             frame = np.ascontiguousarray(frame)
-            cv2.imshow(q.getName(), frame)
+            if name == "preview" and not test_four_pt:
+                # Draw RotatedRect cropped area on input frame
+                points = np.int0(cv2.boxPoints(rotated_rect))
+                cv2.drawContours(frame, [points], 0, (255,0,0), 1)
+                # Mark top-left corner
+                cv2.circle(frame, tuple(points[1]), 10, (255,0,0), 2)
+            cv2.imshow(name, frame)
         key = cv2.waitKey(1)
