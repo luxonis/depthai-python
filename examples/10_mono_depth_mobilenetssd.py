@@ -34,9 +34,9 @@ right.out.link(depth.right)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedLeft.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames

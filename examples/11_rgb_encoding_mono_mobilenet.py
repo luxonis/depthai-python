@@ -34,9 +34,9 @@ detection_nn = pipeline.createNeuralNetwork()
 detection_nn.setBlobPath(mobilenet_path)
 
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 cam_right.out.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
