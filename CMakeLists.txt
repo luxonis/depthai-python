@@ -42,7 +42,7 @@ set(DOCSTRINGS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/include/depthai_pyth
 
 # First specify options
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
-option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a part of the test suite" OFF)
+option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCSTRINGS "Generate docstrings from header files if module 'pybind11_mkdoc' available" ON)
 set(DEPTHAI_PYTHON_DOCSTRINGS_INPUT ${DOCSTRINGS_OUTPUT} CACHE FILEPATH "Path to docstring for bindings") 
@@ -155,7 +155,7 @@ endif()
 ########################
 # Testing
 ########################
-if(DEPTHAI_PYTHON_ENABLE_TESTS OR DEPTHAI_PYTHON_TEST_EXAMPLES)
+if(DEPTHAI_PYTHON_ENABLE_TESTS OR DEPTHAI_PYTHON_ENABLE_EXAMPLES)
     include(CTest)
     enable_testing()
 endif()
@@ -170,7 +170,7 @@ endif()
 ########################
 # Examples (can also act as tests)
 ########################
-if (DEPTHAI_PYTHON_TEST_EXAMPLES)
+if (DEPTHAI_PYTHON_ENABLE_EXAMPLES)
     add_subdirectory(examples)
 endif()
 

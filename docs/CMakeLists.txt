@@ -15,10 +15,21 @@ string(TIMESTAMP build_year "%Y")
 # Configure sphinx for the build
 configure_file(conf.py.in "${CMAKE_CURRENT_BINARY_DIR}/conf.py" @ONLY)
 
-
 # Sphinx is required to build python documentation
-find_package(Sphinx)
-if(Sphinx_FOUND)
+# Find Python sphinx, by checking python -m sphinx
+message(STATUS "Checking for sphinx")
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m sphinx --version RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
+if(error)
+    set(message "Checking for sphinx - not found, target 'sphinx' not available")
+    if(NOT enforce)
+        message(STATUS ${message})
+    else()
+        message(FATAL_ERROR ${message})
+    endif()
+    # Exit
+    return()
+else()
+    message(STATUS "Checking for sphinx - found, target 'sphinx' available")
 
     # Set input and output
     set(SPHINX_SOURCE ${CMAKE_CURRENT_LIST_DIR}/source)
@@ -33,7 +44,7 @@ if(Sphinx_FOUND)
         # ASAN in case of sanitizers
         "${ASAN_ENVIRONMENT_VARS}" 
         ############ SPHINX
-        ${SPHINX_EXECUTABLE} -c ${CMAKE_CURRENT_BINARY_DIR} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
+        ${PYTHON_EXECUTABLE} -m sphinx -c ${CMAKE_CURRENT_BINARY_DIR} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating documentation with Sphinx"
         VERBATIM
@@ -43,6 +54,4 @@ if(Sphinx_FOUND)
     # Add dependency to library
     add_dependencies(sphinx ${TARGET_NAME})
 
-else()
-    message(STATUS "Sphinx not found, 'sphinx' target not available")
 endif()
