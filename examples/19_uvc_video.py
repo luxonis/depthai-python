@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 import depthai as dai
+import argparse
 import time
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
+parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
+args = parser.parse_args()
 
 enable_4k = True
 
@@ -23,6 +29,20 @@ else:
 # Create an UVC (USB Video Class) output node
 uvc = pipeline.createUVC()
 cam_rgb.isp.link(uvc.input)
+
+if args.flash_bootloader or args.flash_app:
+    (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+    bootloader = dai.DeviceBootloader(bl)
+    progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+    if args.flash_bootloader:
+        print("Flashing bootloader...")
+        bootloader.flashBootloader(progress)
+        print("Note: make sure to change DIP switch to 0x8 (001000), if not done already")
+    else:
+        print("Flashing application pipeline...")
+        bootloader.flash(progress, pipeline)
+    print("Done. Exiting.")
+    quit()
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
