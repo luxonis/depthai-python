@@ -25,6 +25,7 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(300, 300)
 cam_rgb.setInterleaved(False)
+cam_rgb.setFps(40)
 
 # Define a neural network that will make predictions based on the source frames
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()

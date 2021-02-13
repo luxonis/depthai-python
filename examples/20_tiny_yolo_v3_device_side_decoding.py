@@ -36,6 +36,7 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(416, 416)
 cam_rgb.setInterleaved(False)
+cam_rgb.setFps(40)
 
 #network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
