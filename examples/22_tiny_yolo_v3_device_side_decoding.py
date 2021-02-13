@@ -7,30 +7,54 @@ import depthai as dai
 import numpy as np
 import time
 
-# MobilenetSSD label texts
-label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+# tiny yolo v3 label texts
+label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+             "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+             "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+             "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+             "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+             "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+             "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+             "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+             "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+             "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+             "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+             "teddy bear",     "hair drier", "toothbrush"]  
+
 
 syncNN = True
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+tiny_yolo_v3_path = str((Path(__file__).parent / Path('models/tiny_yolo_v3_6shaves.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    tiny_yolo_v3_path = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(300, 300)
+cam_rgb.setPreviewSize(416, 416)
 cam_rgb.setInterleaved(False)
 cam_rgb.setFps(40)
 
-# Define a neural network that will make predictions based on the source frames
-detectionNetwork = pipeline.createMobileNetDetectionNetwork()
+#network specific settings
+detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
-detectionNetwork.setBlobPath(mobilenet_path)
+detectionNetwork.setNumClasses(80)
+detectionNetwork.setCoordinateSize(4)
+anchors = np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+detectionNetwork.setAnchors(anchors)
+anchorMasks26 = np.array([1,2,3])
+anchorMasks13 = np.array([3,4,5])
+anchorMasks = {
+    "side26": anchorMasks26,
+    "side13": anchorMasks13,
+}
+detectionNetwork.setAnchorMasks(anchorMasks)
+detectionNetwork.setIouThreshold(0.5)
+
+detectionNetwork.setBlobPath(tiny_yolo_v3_path)
 detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
@@ -70,7 +94,7 @@ with dai.Device(pipeline) as device:
         else:
             in_rgb = q_rgb.tryGet()
             in_nn = q_nn.tryGet()
-        
+
         if in_rgb is not None:
             # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
             shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
@@ -80,11 +104,13 @@ with dai.Device(pipeline) as device:
         if in_nn is not None:
             bboxes = in_nn.detections
             counter+=1
-            if (time.time() - start_time) > 1 :
-                fps = counter / (time.time() - start_time)
+            current_time = time.time()
+            if (current_time - start_time) > 1 :
+                fps = counter / (current_time - start_time)
                 counter = 0
-                start_time = time.time()
+                start_time = current_time
 
+        color = (255, 255, 255)
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -105,7 +131,7 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
-            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255, 0, 0))
+            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

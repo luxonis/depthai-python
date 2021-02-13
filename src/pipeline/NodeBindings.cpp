@@ -90,6 +90,7 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
         .def_readonly("inputConfig", &ColorCamera::inputConfig)
         .def_readonly("inputControl", &ColorCamera::inputControl)
+        .def_readonly("initialControl", &ColorCamera::initialControl)
         .def_readonly("video", &ColorCamera::video)
         .def_readonly("preview", &ColorCamera::preview)
         .def_readonly("still", &ColorCamera::still)
@@ -156,6 +157,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("passthrough", &NeuralNetwork::passthrough)
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
+        .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads)
         ;
 
     // ImageManip node
@@ -163,13 +165,62 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("inputConfig", &ImageManip::inputConfig)
         .def_readonly("inputImage", &ImageManip::inputImage)
         .def_readonly("out", &ImageManip::out)
+        .def_readonly("initialConfig", &ImageManip::initialConfig)
         // setters
-        .def("setCropRect", &ImageManip::setCropRect)
-        .def("setCenterCrop", &ImageManip::setCenterCrop)
-        .def("setResize", &ImageManip::setResize)
-        .def("setResizeThumbnail", &ImageManip::setResizeThumbnail)
-        .def("setFrameType", &ImageManip::setFrameType)
-        .def("setHorizontalFlip", &ImageManip::setHorizontalFlip)
+        
+        .def("setCropRect", [](ImageManip& im, float xmin, float ymin, float xmax, float ymax) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setCropRect() is deprecated, use initialConfig.setCropRect() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setCropRect(xmin, ymin, xmax, ymax);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setCenterCrop", [](ImageManip& im, float ratio, float whRatio = 1.0f) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setCenterCrop() is deprecated, use initialConfig.setCenterCrop() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setCenterCrop(ratio, whRatio);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+
+        .def("setResize", [](ImageManip& im, int w, int h) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setResize() is deprecated, use initialConfig.setResize() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setResize(w, h);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+
+        .def("setResizeThumbnail", [](ImageManip& im, int w, int h, int bgRed = 0, int bgGreen = 0, int bgBlue = 0) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setResizeThumbnail() is deprecated, use initialConfig.setResizeThumbnail() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setResizeThumbnail(w, h, bgRed, bgGreen, bgBlue);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+
+        .def("setFrameType", [](ImageManip& im, dai::RawImgFrame::Type name) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setFrameType() is deprecated, use initialConfig.setFrameType() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setFrameType(name);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+
+        .def("setHorizontalFlip", [](ImageManip& im, bool flip) {
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setHorizontalFlip() is deprecated, use initialConfig.setHorizontalFlip() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            im.setHorizontalFlip(flip);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+
         .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput)
         .def("setNumFramesPool", &ImageManip::setNumFramesPool)
         .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize)
@@ -177,7 +228,9 @@ void NodeBindings::bind(pybind11::module& m){
 
      // MonoCamera node
     py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera")
+        .def_readonly("inputControl", &MonoCamera::inputControl)
         .def_readonly("out",  &MonoCamera::out)
+        .def_readonly("initialControl",  &MonoCamera::initialControl)
         .def("setCamId", [](MonoCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
@@ -274,8 +327,6 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("input", &DetectionNetwork::input)
         .def_readonly("out", &DetectionNetwork::out)
         .def_readonly("passthrough", &DetectionNetwork::passthrough)
-        .def("setBlobPath", &DetectionNetwork::setBlobPath)
-        .def("setNumPoolFrames", &DetectionNetwork::setNumPoolFrames)
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold)
         ;
 
@@ -304,6 +355,7 @@ void NodeBindings::bind(pybind11::module& m){
     ////////////////////////////////////
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
     colorCameraProperties
+        .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
         .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
         .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
@@ -334,9 +386,10 @@ void NodeBindings::bind(pybind11::module& m){
     // MonoCamera props
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
     monoCameraProperties
-        .def_readwrite("boardSocket",      &MonoCameraProperties::boardSocket)
+        .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
+        .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
-        .def_readwrite("fps",        &MonoCameraProperties::fps)
+        .def_readwrite("fps",  &MonoCameraProperties::fps)
     ;
 
     py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution")

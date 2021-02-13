@@ -67,8 +67,10 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
     dai_add_python_test(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
     dai_add_python_test(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
-    dai_add_python_test(19_mobilenet_device_side_decoding 19_mobilenet_device_side_decoding.py "${mobilenet_blob}")
-    dai_add_python_test(20_tiny_yolo_v3_device_side_decoding 20_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")
+    dai_add_python_test(19_mono_camera_control 19_mono_camera_control.py)
+    dai_add_python_test(20_color_rotate_warp 20_color_rotate_warp.py)
+    dai_add_python_test(21_mobilenet_device_side_decoding 21_mobilenet_device_side_decoding.py "${mobilenet_blob}")
+    dai_add_python_test(22_tiny_yolo_v3_device_side_decoding 22_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")
 
 
 endif()
