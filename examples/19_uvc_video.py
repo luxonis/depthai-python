@@ -18,6 +18,7 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setInterleaved(False)
+cam_rgb.setPreviewSize(1920, 1080)
 cam_rgb.initialControl.setManualFocus(130)
 
 if enable_4k:
@@ -28,7 +29,7 @@ else:
 
 # Create an UVC (USB Video Class) output node
 uvc = pipeline.createUVC()
-cam_rgb.isp.link(uvc.input)
+cam_rgb.video.link(uvc.input)
 
 if args.flash_bootloader or args.flash_app:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
