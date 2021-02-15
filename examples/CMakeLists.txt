@@ -27,8 +27,8 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
 
     # Mobilenet resource
     hunter_private_data(
-        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob"
-        SHA1 "e89d3ee9f26d80397e44f89c6b375990064a4a42"
+        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_6_shaves.blob"
+        SHA1 "c72a4902416be329fb0b455d0dcf8fb4f680aff7"
         FILE "mobilenet.blob"
         LOCATION mobilenet_blob
     )

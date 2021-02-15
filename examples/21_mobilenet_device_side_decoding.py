@@ -31,6 +31,7 @@ cam_rgb.setFps(40)
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setBlobPath(mobilenet_path)
+detectionNetwork.setNumInferenceThreads(2)
 detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
