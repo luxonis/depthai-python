@@ -55,6 +55,7 @@ detectionNetwork.setAnchorMasks(anchorMasks)
 detectionNetwork.setIouThreshold(0.5)
 
 detectionNetwork.setBlobPath(tiny_yolo_v3_path)
+detectionNetwork.setNumInferenceThreads(2)
 detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)

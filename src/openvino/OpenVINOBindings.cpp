@@ -30,6 +30,7 @@ void OpenVINOBindings::bind(pybind11::module& m){
         .value("VERSION_2020_3", OpenVINO::Version::VERSION_2020_3)
         .value("VERSION_2020_4", OpenVINO::Version::VERSION_2020_4)
         .value("VERSION_2021_1", OpenVINO::Version::VERSION_2021_1)
+        .value("VERSION_2021_2", OpenVINO::Version::VERSION_2021_2)
         .export_values()
     ;
 
