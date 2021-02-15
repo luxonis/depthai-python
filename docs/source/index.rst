@@ -41,7 +41,7 @@ Before running the example, install the DepthAI Python library using the command
 
 .. code-block:: python
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c
+   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+9b7d9364ccb94e26c8754a2e0a69b2dafe6de145
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
