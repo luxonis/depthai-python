@@ -27,8 +27,8 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
 
     # Mobilenet resource
     hunter_private_data(
-        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob"
-        SHA1 "e89d3ee9f26d80397e44f89c6b375990064a4a42"
+        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_6_shaves.blob"
+        SHA1 "c72a4902416be329fb0b455d0dcf8fb4f680aff7"
         FILE "mobilenet.blob"
         LOCATION mobilenet_blob
     )
@@ -39,6 +39,13 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         SHA1 "271d8d0b702e683ce02957db7c100843de5ceaec"
         FILE "construction_vest.mp4"
         LOCATION construction_vest
+    )
+
+    hunter_private_data(
+        URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny_yolo_v3_6shaves.blob"
+        SHA1 "7c87d89ab3bc1d58de7f61c0bbd4844a200ddeb5"
+        FILE "tiny_yolo_v3_6shaves.blob"
+        LOCATION tiny_yolo_v3_blob
     )
 
     # Add tests
@@ -59,6 +66,11 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_blob}")
     dai_add_python_test(16_device_queue_event 16_device_queue_event.py)
     dai_add_python_test(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
-    
+    dai_add_python_test(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
+    dai_add_python_test(19_mono_camera_control 19_mono_camera_control.py)
+    dai_add_python_test(20_color_rotate_warp 20_color_rotate_warp.py)
+    dai_add_python_test(21_mobilenet_device_side_decoding 21_mobilenet_device_side_decoding.py "${mobilenet_blob}")
+    dai_add_python_test(22_tiny_yolo_v3_device_side_decoding 22_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")
+
 
 endif()

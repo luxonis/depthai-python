@@ -8,6 +8,7 @@
 #include "depthai/pipeline/datatype/Buffer.hpp"
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
+#include "depthai/pipeline/datatype/ImgDetections.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
@@ -16,6 +17,7 @@
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
+#include "depthai-shared/datatype/RawImgDetections.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
@@ -156,6 +158,24 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("W", TensorInfo::StorageOrder::W)
         ;
 
+    py::class_<ImgDetection>(m, "ImgDetection")
+        .def(py::init<>())
+        .def_readwrite("label", &ImgDetection::label)
+        .def_readwrite("confidence", &ImgDetection::confidence)
+        .def_readwrite("xmin", &ImgDetection::xmin)
+        .def_readwrite("ymin", &ImgDetection::ymin)
+        .def_readwrite("xmax", &ImgDetection::xmax)
+        .def_readwrite("ymax", &ImgDetection::ymax)
+        .def_readwrite("xdepth", &ImgDetection::xdepth)
+        .def_readwrite("ydepth", &ImgDetection::ydepth)
+        .def_readwrite("zdepth", &ImgDetection::zdepth)
+        ;
+
+    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections");
+    RawImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawImgDetections::detections)
+        ;
 
     
     // Bind RawImageManipConfig
@@ -411,10 +431,18 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getAllLayerNames", &NNData::getAllLayerNames)
         .def("getAllLayers", &NNData::getAllLayers)
         .def("getLayerDatatype", &NNData::getLayerDatatype)
-        .def("getLayerUInt8", &NNData::getLayerUInt8)
-        .def("getLayerFp16", &NNData::getLayerFp16)
+        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"))
+        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"))
+        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"))
         .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
+        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32)
+        ;
+
+    // Bind ImgDetections
+    py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections")
+        .def(py::init<>())
+        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; } )
         ;
 
      // Bind ImageManipConfig
