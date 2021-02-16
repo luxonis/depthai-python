@@ -56,6 +56,7 @@ with dai.Device(pipeline) as device:
 
     frame = None
     bboxes = []
+    confidences = []
     labels = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
@@ -86,13 +87,15 @@ with dai.Device(pipeline) as device:
             # Cut bboxes and labels
             labels = bboxes[:, 1].astype(int)
             bboxes = bboxes[:, 3:7]
+            confidences = bboxes[:, 2]
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox, label in zip(bboxes, labels):
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
                 bbox = frame_norm(frame, raw_bbox)
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("right", frame)
 
         if cv2.waitKey(1) == ord('q'):
