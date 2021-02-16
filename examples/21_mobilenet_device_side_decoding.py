@@ -7,6 +7,10 @@ import depthai as dai
 import numpy as np
 import time
 
+'''
+Mobilenet SSD device side decoding demo
+'''
+
 # MobilenetSSD label texts
 label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
              "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]

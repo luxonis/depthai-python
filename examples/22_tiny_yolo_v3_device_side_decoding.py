@@ -7,6 +7,10 @@ import depthai as dai
 import numpy as np
 import time
 
+'''
+Tiny-yolo-v3 device side decoding demo
+'''
+
 # tiny yolo v3 label texts
 label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
              "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
