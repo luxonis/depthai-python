@@ -2,7 +2,7 @@
 =========================
 
 This example shows how to dynamically set the Auto Exposure (AE) of the RGB camera dynamically, during application runtime,
-based on bounding box dimension
+based on bounding box position
 
 Demo
 ####
