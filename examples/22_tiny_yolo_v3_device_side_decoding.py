@@ -9,6 +9,9 @@ import time
 
 '''
 Tiny-yolo-v3 device side decoding demo
+  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
+  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
+  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
 '''
 
 # tiny yolo v3 label texts
@@ -127,7 +130,6 @@ with dai.Device(pipeline) as device:
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
                 y2 = int(bbox.ymax * height)
-                color = (255, 0, 0)
                 try:
                     label = label_map[bbox.label]
                 except:
