@@ -27,7 +27,7 @@ Please run the following command to install the required dependencies
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
+`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_5shave.blob>`__
 
 Source code
 ###########

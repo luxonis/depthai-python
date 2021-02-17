@@ -87,8 +87,8 @@ Python API Reference
 
   .. function:: setOpenVINOVersion()
 
-    Sets explicit openvino version. Example: `pipeline = setOpenVINOVersion(version = dai.OpenVINO.Version.VERSION_2021_2)`
-    where `dai` is the depthai package: `import depthai as dai`; `pipeline` is the created pipeline object
+    Sets explicit openvino version. Example: `pipeline.setOpenVINOVersion(version = dai.OpenVINO.Version.VERSION_2021_2)`
+    where `dai` is the depthai package: `import depthai as dai`; `pipeline` is the created pipeline object.
 
   .. function:: getAssetManager() -> AssetManager
 
