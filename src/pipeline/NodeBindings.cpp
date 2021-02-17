@@ -160,6 +160,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads)
+        .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread)
         ;
 
     // ImageManip node
