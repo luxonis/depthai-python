@@ -29,7 +29,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     hunter_private_data(
         URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_6_shaves.blob"
         SHA1 "c72a4902416be329fb0b455d0dcf8fb4f680aff7"
-        FILE "mobilenet.blob"
+        FILE "mobilenet-ssd_6_shaves.blob"
         LOCATION mobilenet_blob
     )
 

@@ -36,6 +36,8 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<Node::Input>(pyNode, "Input")
         .def("setBlocking", &Node::Input::setBlocking)
         .def("getBlocking", &Node::Input::getBlocking)
+        .def("setQueueSize", &Node::Input::setQueueSize)
+        .def("getQueueSize", &Node::Input::getQueueSize)
     ;
     // Node::Output bindings
     py::class_<Node::Output>(pyNode, "Output")
