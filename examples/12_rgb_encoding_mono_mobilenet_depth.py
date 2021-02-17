@@ -92,7 +92,9 @@ with dai.Device(pipeline) as device:
 
 
     def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
     videoFile = open('video.h265','wb')
 
