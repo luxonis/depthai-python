@@ -5,6 +5,14 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
+
+'''
+Mobilenet SSD device side decoding demo
+  The "mobilenet-ssd" model is a Single-Shot multibox Detection (SSD) network intended
+  to perform object detection. This model is implemented using the Caffe* framework.
+  For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
+'''
 
 # MobilenetSSD label texts
 label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
@@ -24,11 +32,14 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(300, 300)
 cam_rgb.setInterleaved(False)
+cam_rgb.setFps(40)
 
 # Define a neural network that will make predictions based on the source frames
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setBlobPath(mobilenet_path)
+detectionNetwork.setNumInferenceThreads(2)
+detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
 
@@ -57,7 +68,9 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
 
-
+    start_time = time.time()
+    counter = 0
+    fps = 0
     while True:
         if(syncNN):
             in_rgb = q_rgb.get()
@@ -65,7 +78,7 @@ with dai.Device(pipeline) as device:
         else:
             in_rgb = q_rgb.tryGet()
             in_nn = q_nn.tryGet()
-
+        
         if in_rgb is not None:
             # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
             shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
@@ -73,8 +86,15 @@ with dai.Device(pipeline) as device:
             frame = np.ascontiguousarray(frame)
 
         if in_nn is not None:
-            bboxes = in_nn.getDetections()
+            bboxes = in_nn.detections
+            counter+=1
+            current_time = time.time()
+            if (current_time - start_time) > 1 :
+                fps = counter / (current_time - start_time)
+                counter = 0
+                start_time = current_time
 
+        color = (255, 255, 255)
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -86,7 +106,6 @@ with dai.Device(pipeline) as device:
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
                 y2 = int(bbox.ymax * height)
-                color = (255, 0, 0)
                 try:
                     label = label_map[bbox.label]
                 except:
@@ -94,6 +113,8 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
+
+            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

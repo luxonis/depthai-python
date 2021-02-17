@@ -5,6 +5,14 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
+
+'''
+Tiny-yolo-v3 device side decoding demo
+  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
+  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
+  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+'''
 
 # tiny yolo v3 label texts
 label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
@@ -35,6 +43,7 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setPreviewSize(416, 416)
 cam_rgb.setInterleaved(False)
+cam_rgb.setFps(40)
 
 #network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
@@ -52,9 +61,9 @@ anchorMasks = {
 detectionNetwork.setAnchorMasks(anchorMasks)
 detectionNetwork.setIouThreshold(0.5)
 
-
-
 detectionNetwork.setBlobPath(tiny_yolo_v3_path)
+detectionNetwork.setNumInferenceThreads(2)
+detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
 
@@ -83,7 +92,9 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
 
-
+    start_time = time.time()
+    counter = 0
+    fps = 0
     while True:
         if(syncNN):
             in_rgb = q_rgb.get()
@@ -99,8 +110,15 @@ with dai.Device(pipeline) as device:
             frame = np.ascontiguousarray(frame)
 
         if in_nn is not None:
-            bboxes = in_nn.getDetections()
+            bboxes = in_nn.detections
+            counter+=1
+            current_time = time.time()
+            if (current_time - start_time) > 1 :
+                fps = counter / (current_time - start_time)
+                counter = 0
+                start_time = current_time
 
+        color = (255, 255, 255)
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -112,7 +130,6 @@ with dai.Device(pipeline) as device:
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
                 y2 = int(bbox.ymax * height)
-                color = (255, 0, 0)
                 try:
                     label = label_map[bbox.label]
                 except:
@@ -120,6 +137,8 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
+
+            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

@@ -34,9 +34,9 @@ right.out.link(depth.right)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedLeft.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
@@ -57,6 +57,10 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
     # Start pipeline
@@ -70,11 +74,15 @@ with dai.Device(pipeline) as device:
     frame_right = None
     frame_depth = None
     bboxes = []
+    labels = []
+    confidences = []
 
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
 
     while True:
@@ -97,7 +105,11 @@ with dai.Device(pipeline) as device:
             # transform the 1D array into Nx7 matrix
             bboxes = bboxes.reshape((bboxes.size // 7, 7))
             # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            confidences = bboxes[:, 2]
+            bboxes = bboxes[:, 3:7]
 
         if in_depth is not None:
             # data is originally represented as a flat 1D array, it needs to be converted into HxW form
@@ -108,12 +120,19 @@ with dai.Device(pipeline) as device:
 
         if frame_right is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox in bboxes:
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
                 bbox = frame_norm(frame_right, raw_bbox)
                 cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_right, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame_depth, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("right", frame_right)
 
         if frame_depth is not None:
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
+                bbox = frame_norm(frame_depth, raw_bbox)
+                cv2.rectangle(frame_depth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
+                cv2.putText(frame_depth, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
+                cv2.putText(frame_depth, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
             cv2.imshow("depth", frame_depth)
 
         if cv2.waitKey(1) == ord('q'):
