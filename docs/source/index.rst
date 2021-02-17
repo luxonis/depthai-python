@@ -41,7 +41,7 @@ Before running the example, install the DepthAI Python library using the command
 
 .. code-block:: python
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+9b7d9364ccb94e26c8754a2e0a69b2dafe6de145
+   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -86,8 +86,9 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/16_device_queue_event.rst
    samples/17_video_mobilenet.rst
    samples/18_rgb_encoding_mobilenet.rst
+   samples/21_mobilenet_decoding_on_device.rst
+   samples/22_tiny_tolo_v3_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
-
 
 .. toctree::
    :maxdepth: 1

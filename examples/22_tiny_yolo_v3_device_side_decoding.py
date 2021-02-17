@@ -7,6 +7,13 @@ import depthai as dai
 import numpy as np
 import time
 
+'''
+Tiny-yolo-v3 device side decoding demo
+  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
+  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
+  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+'''
+
 # tiny yolo v3 label texts
 label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
              "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -55,6 +62,7 @@ detectionNetwork.setAnchorMasks(anchorMasks)
 detectionNetwork.setIouThreshold(0.5)
 
 detectionNetwork.setBlobPath(tiny_yolo_v3_path)
+detectionNetwork.setNumInferenceThreads(2)
 detectionNetwork.input.setBlocking(False)
 
 cam_rgb.preview.link(detectionNetwork.input)
@@ -122,7 +130,6 @@ with dai.Device(pipeline) as device:
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
                 y2 = int(bbox.ymax * height)
-                color = (255, 0, 0)
                 try:
                     label = label_map[bbox.label]
                 except:

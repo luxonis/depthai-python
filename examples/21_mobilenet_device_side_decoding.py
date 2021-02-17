@@ -7,6 +7,13 @@ import depthai as dai
 import numpy as np
 import time
 
+'''
+Mobilenet SSD device side decoding demo
+  The "mobilenet-ssd" model is a Single-Shot multibox Detection (SSD) network intended
+  to perform object detection. This model is implemented using the Caffe* framework.
+  For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
+'''
+
 # MobilenetSSD label texts
 label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
              "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
