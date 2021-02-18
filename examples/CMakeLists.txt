@@ -52,14 +52,20 @@ macro(add_python_example example_name python_script_path)
 
 endmacro() 
 
-## Retrieve resources
+# Mobilenet resource
+hunter_private_data(
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob"
+    SHA1 "f0e14978b3f77a4f93b9f969cd39e58bb7aef490"
+    FILE "mobilenet-ssd_openvino_2021.2_6shave.blob"
+    LOCATION mobilenet_blob
+)
 
 # Mobilenet resource
 hunter_private_data(
-    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob"
-    SHA1 "e89d3ee9f26d80397e44f89c6b375990064a4a42"
-    FILE "mobilenet.blob"
-    LOCATION mobilenet_blob
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_5shave.blob"
+    SHA1 "d715f85e474609cf3f696d7a2e3750804ed6c726"
+    FILE "mobilenet-ssd_openvino_2021.2_5shave.blob"
+    LOCATION mobilenet_5shave_blob
 )
 
 # Construction vest video resource
@@ -70,7 +76,15 @@ hunter_private_data(
     LOCATION construction_vest
 )
 
-# Add tests
+hunter_private_data(
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob"
+    SHA1 "f0ac263a0d55c374e1892eea21c9b7d1170bde46"
+    FILE "tiny-yolo-v3_openvino_2021.2_6shave.blob"
+    LOCATION tiny_yolo_v3_blob
+)
+
+
+# Add examples
 add_python_example(01_rgb_preview 01_rgb_preview.py)
 add_python_example(02_mono_preview 02_mono_preview.py)
 add_python_example(03_depth_preview 03_depth_preview.py)
@@ -85,9 +99,11 @@ add_python_example(11_rgb_encoding_mono_mobilenet 11_rgb_encoding_mono_mobilenet
 add_python_example(12_rgb_encoding_mono_mobilenet_depth 12_rgb_encoding_mono_mobilenet_depth.py "${mobilenet_blob}")
 add_python_example(13_encoding_max_limit 13_encoding_max_limit.py)
 add_python_example(14_color_camera_control 14_color_camera_control.py)
-add_python_example(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_blob}")
+add_python_example(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_5shave_blob}")
 add_python_example(16_device_queue_event 16_device_queue_event.py)
 add_python_example(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
 add_python_example(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
 add_python_example(19_mono_camera_control 19_mono_camera_control.py)
 add_python_example(20_color_rotate_warp 20_color_rotate_warp.py)
+add_python_example(21_mobilenet_device_side_decoding 21_mobilenet_device_side_decoding.py "${mobilenet_blob}")
+add_python_example(22_tiny_yolo_v3_device_side_decoding 22_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")

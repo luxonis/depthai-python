@@ -8,6 +8,7 @@
 #include "depthai/pipeline/datatype/Buffer.hpp"
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
+#include "depthai/pipeline/datatype/ImgDetections.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
@@ -16,6 +17,7 @@
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
+#include "depthai-shared/datatype/RawImgDetections.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
@@ -156,6 +158,24 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("W", TensorInfo::StorageOrder::W)
         ;
 
+    py::class_<ImgDetection>(m, "ImgDetection")
+        .def(py::init<>())
+        .def_readwrite("label", &ImgDetection::label)
+        .def_readwrite("confidence", &ImgDetection::confidence)
+        .def_readwrite("xmin", &ImgDetection::xmin)
+        .def_readwrite("ymin", &ImgDetection::ymin)
+        .def_readwrite("xmax", &ImgDetection::xmax)
+        .def_readwrite("ymax", &ImgDetection::ymax)
+        .def_readwrite("xdepth", &ImgDetection::xdepth)
+        .def_readwrite("ydepth", &ImgDetection::ydepth)
+        .def_readwrite("zdepth", &ImgDetection::zdepth)
+        ;
+
+    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections");
+    RawImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawImgDetections::detections)
+        ;
 
     
     // Bind RawImageManipConfig
@@ -181,9 +201,12 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
         .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
+        .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
         .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
         .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
         .def_readwrite("widthHeightAspectRatio", &RawImageManipConfig::CropConfig::widthHeightAspectRatio)
+        .def_readwrite("enableRotatedRect", &RawImageManipConfig::CropConfig::enableRotatedRect)
+        .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
         ;
 
     py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
@@ -194,6 +217,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("bgRed", &RawImageManipConfig::ResizeConfig::bgRed)
         .def_readwrite("bgGreen", &RawImageManipConfig::ResizeConfig::bgGreen)
         .def_readwrite("bgBlue", &RawImageManipConfig::ResizeConfig::bgBlue)
+        .def_readwrite("warpFourPoints", &RawImageManipConfig::ResizeConfig::warpFourPoints)
+        .def_readwrite("normalizedCoords", &RawImageManipConfig::ResizeConfig::normalizedCoords)
+        .def_readwrite("enableWarp4pt", &RawImageManipConfig::ResizeConfig::enableWarp4pt)
+        .def_readwrite("warpMatrix3x3", &RawImageManipConfig::ResizeConfig::warpMatrix3x3)
+        .def_readwrite("enableWarpMatrix", &RawImageManipConfig::ResizeConfig::enableWarpMatrix)
+        .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
+        .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
+        .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
@@ -206,9 +237,79 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawCameraControl
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
     rawCameraControl
-        .def(py::init<>())
-        .def_readwrite("captureStill", &RawCameraControl::captureStill)
+        .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
+        .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
+        .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
+        // TODO add more raw types here, not directly used
         ;
+
+    // RawCameraControl enum bindings
+    // The enum fields will also be exposed in 'CameraControl', store them for later
+    std::vector<const char *> camCtrlAttr;
+    camCtrlAttr.push_back("AutoFocusMode");
+    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode")
+        .value("OFF", RawCameraControl::AutoFocusMode::OFF)
+        .value("AUTO", RawCameraControl::AutoFocusMode::AUTO)
+        .value("MACRO", RawCameraControl::AutoFocusMode::MACRO)
+        .value("CONTINUOUS_VIDEO", RawCameraControl::AutoFocusMode::CONTINUOUS_VIDEO)
+        .value("CONTINUOUS_PICTURE", RawCameraControl::AutoFocusMode::CONTINUOUS_PICTURE)
+        .value("EDOF", RawCameraControl::AutoFocusMode::EDOF)
+    ;
+
+    camCtrlAttr.push_back("AutoWhiteBalanceMode");
+    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode")
+        .value("OFF", RawCameraControl::AutoWhiteBalanceMode::OFF)
+        .value("AUTO", RawCameraControl::AutoWhiteBalanceMode::AUTO)
+        .value("INCANDESCENT", RawCameraControl::AutoWhiteBalanceMode::INCANDESCENT)
+        .value("FLUORESCENT", RawCameraControl::AutoWhiteBalanceMode::FLUORESCENT)
+        .value("WARM_FLUORESCENT", RawCameraControl::AutoWhiteBalanceMode::WARM_FLUORESCENT)
+        .value("DAYLIGHT", RawCameraControl::AutoWhiteBalanceMode::DAYLIGHT)
+        .value("CLOUDY_DAYLIGHT", RawCameraControl::AutoWhiteBalanceMode::CLOUDY_DAYLIGHT)
+        .value("TWILIGHT", RawCameraControl::AutoWhiteBalanceMode::TWILIGHT)
+        .value("SHADE", RawCameraControl::AutoWhiteBalanceMode::SHADE)
+    ;
+
+    camCtrlAttr.push_back("SceneMode");
+    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode")
+        .value("UNSUPPORTED", RawCameraControl::SceneMode::UNSUPPORTED)
+        .value("FACE_PRIORITY", RawCameraControl::SceneMode::FACE_PRIORITY)
+        .value("ACTION", RawCameraControl::SceneMode::ACTION)
+        .value("PORTRAIT", RawCameraControl::SceneMode::PORTRAIT)
+        .value("LANDSCAPE", RawCameraControl::SceneMode::LANDSCAPE)
+        .value("NIGHT", RawCameraControl::SceneMode::NIGHT)
+        .value("NIGHT_PORTRAIT", RawCameraControl::SceneMode::NIGHT_PORTRAIT)
+        .value("THEATRE", RawCameraControl::SceneMode::THEATRE)
+        .value("BEACH", RawCameraControl::SceneMode::BEACH)
+        .value("SNOW", RawCameraControl::SceneMode::SNOW)
+        .value("SUNSET", RawCameraControl::SceneMode::SUNSET)
+        .value("STEADYPHOTO", RawCameraControl::SceneMode::STEADYPHOTO)
+        .value("FIREWORKS", RawCameraControl::SceneMode::FIREWORKS)
+        .value("SPORTS", RawCameraControl::SceneMode::SPORTS)
+        .value("PARTY", RawCameraControl::SceneMode::PARTY)
+        .value("CANDLELIGHT", RawCameraControl::SceneMode::CANDLELIGHT)
+        .value("BARCODE", RawCameraControl::SceneMode::BARCODE)
+    ;
+
+    camCtrlAttr.push_back("AntiBandingMode");
+    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode")
+        .value("OFF", RawCameraControl::AntiBandingMode::OFF)
+        .value("MAINS_50_HZ", RawCameraControl::AntiBandingMode::MAINS_50_HZ)
+        .value("MAINS_60_HZ", RawCameraControl::AntiBandingMode::MAINS_60_HZ)
+        .value("AUTO", RawCameraControl::AntiBandingMode::AUTO)
+    ;
+
+    camCtrlAttr.push_back("EffectMode");
+    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode")
+        .value("OFF", RawCameraControl::EffectMode::OFF)
+        .value("MONO", RawCameraControl::EffectMode::MONO)
+        .value("NEGATIVE", RawCameraControl::EffectMode::NEGATIVE)
+        .value("SOLARIZE", RawCameraControl::EffectMode::SOLARIZE)
+        .value("SEPIA", RawCameraControl::EffectMode::SEPIA)
+        .value("POSTERIZE", RawCameraControl::EffectMode::POSTERIZE)
+        .value("WHITEBOARD", RawCameraControl::EffectMode::WHITEBOARD)
+        .value("BLACKBOARD", RawCameraControl::EffectMode::BLACKBOARD)
+        .value("AQUA", RawCameraControl::EffectMode::AQUA)
+    ;
 
     // Bind RawSystemInformation
     py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation");
@@ -294,6 +395,25 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
+    py::class_<Point2f>(m, "Point2f")
+        .def(py::init<>())
+        .def_readwrite("x", &Point2f::x)
+        .def_readwrite("y", &Point2f::y)
+        ;
+
+    py::class_<Size2f>(m, "Size2f")
+        .def(py::init<>())
+        .def_readwrite("width", &Size2f::width)
+        .def_readwrite("height", &Size2f::height)
+        ;
+
+    py::class_<RotatedRect>(m, "RotatedRect")
+        .def(py::init<>())
+        .def_readwrite("center", &RotatedRect::center)
+        .def_readwrite("size", &RotatedRect::size)
+        .def_readwrite("angle", &RotatedRect::angle)
+        ;
+
     // Bind NNData
     py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
         .def(py::init<>())
@@ -311,10 +431,18 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getAllLayerNames", &NNData::getAllLayerNames)
         .def("getAllLayers", &NNData::getAllLayers)
         .def("getLayerDatatype", &NNData::getLayerDatatype)
-        .def("getLayerUInt8", &NNData::getLayerUInt8)
-        .def("getLayerFp16", &NNData::getLayerFp16)
+        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"))
+        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"))
+        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"))
         .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
+        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32)
+        ;
+
+    // Bind ImgDetections
+    py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections")
+        .def(py::init<>())
+        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; } )
         ;
 
      // Bind ImageManipConfig
@@ -322,11 +450,20 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // setters
         .def("setCropRect", &ImageManipConfig::setCropRect)
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect)
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
+        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints)
+        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3)
+        .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor)
+        .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels)
+        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees)
+        .def("setRotationRadians", &ImageManipConfig::setRotationRadians)
         .def("setResize", &ImageManipConfig::setResize)
         .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
         .def("setFrameType", &ImageManipConfig::setFrameType)
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
+        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
+        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)
@@ -343,9 +480,36 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // setters
         .def("setCaptureStill", &CameraControl::setCaptureStill)
+        .def("setStartStreaming", &CameraControl::setStartStreaming)
+        .def("setStopStreaming", &CameraControl::setStopStreaming)
+        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode)
+        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger)
+        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion)
+        .def("setManualFocus", &CameraControl::setManualFocus)
+        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable)
+        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock)
+        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion)
+        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation)
+        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode)
+        .def("setManualExposure", &CameraControl::setManualExposure)
+        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode)
+        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock)
+        .def("setBrightness", &CameraControl::setBrightness)
+        .def("setContrast", &CameraControl::setContrast)
+        .def("setSaturation", &CameraControl::setSaturation)
+        .def("setSharpness", &CameraControl::setSharpness)
+        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength)
+        .def("setLumaDenoise", &CameraControl::setLumaDenoise)
+        .def("setChromaDenoise", &CameraControl::setChromaDenoise)
+        .def("setSceneMode", &CameraControl::setSceneMode)
+        .def("setEffectMode", &CameraControl::setEffectMode)
         // getters
         .def("getCaptureStill", &CameraControl::getCaptureStill)
         ;
+    // Add also enum attributes from RawCameraControl
+    for (const auto& a : camCtrlAttr) {
+        m.attr("CameraControl").attr(a) = m.attr("RawCameraControl").attr(a);
+    }
 
     // Bind SystemInformation
     py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation")

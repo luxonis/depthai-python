@@ -31,7 +31,7 @@ For additional information, please follow :ref:`Python API installation guide <I
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) and prerecorded video
 (:code:`construction_vest.mp4` file) to work - you can download them
-here: `mobilenet.blob <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
+here: `mobilenet.blob <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 and `construction_vest.mp4 <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/construction_vest.mp4>`__
 
 Source code
