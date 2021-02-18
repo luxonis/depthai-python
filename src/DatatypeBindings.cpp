@@ -283,7 +283,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setInstanceNum", &ImgFrame::setInstanceNum)
         .def("setCategory", &ImgFrame::setCategory)
         .def("setSequenceNum", &ImgFrame::setSequenceNum)
-        .def("setWidth", &ImgFrame::setWidth)
+        .def("setWidth", &ImgFrame::setWidth, py::arg("width"), DOC(dai, ImgFrame, setWidth))
         .def("setHeight", &ImgFrame::setHeight)
         .def("setType", &ImgFrame::setType)
         ;

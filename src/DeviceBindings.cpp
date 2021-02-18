@@ -139,7 +139,7 @@ void DeviceBindings::bind(pybind11::module& m){
 
 
     // Bind Device, using DeviceWrapper to be able to destruct the object by calling close()
-    py::class_<DeviceWrapper>(m, "Device")
+    py::class_<DeviceWrapper>(m, "Device", DOC(dai, Device))
         // Python only methods
         .def("__enter__", [](py::object obj){ return obj; })
         .def("__exit__", [](DeviceWrapper& dw, py::object type, py::object value, py::object traceback) { dw.close(); })
