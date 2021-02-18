@@ -221,6 +221,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("setSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::setSystemInformationLoggingRate), py::arg("rateHz"))
         .def("getSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::getSystemInformationLoggingRate))
         .def("getDdrMemoryUsage", DeviceWrapper::wrap(&Device::getDdrMemoryUsage))
+        .def("getCmxMemoryUsage", DeviceWrapper::wrap(&Device::getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", DeviceWrapper::wrap(&Device::getLeonCssHeapUsage))
         .def("getLeonMssHeapUsage", DeviceWrapper::wrap(&Device::getLeonMssHeapUsage))
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature))
