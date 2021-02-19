@@ -86,6 +86,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setFpsLimit", &XLinkOut::setFpsLimit, py::arg("fpsLimit"))
         .def("getStreamName", &XLinkOut::getStreamName)
         .def("getFpsLimit", &XLinkOut::getFpsLimit)
+        .def("setMetadataOnly", &XLinkOut::setMetadataOnly)
+        .def("getMetadataOnly", &XLinkOut::getMetadataOnly)
         ;
 
     // ColorCamera node

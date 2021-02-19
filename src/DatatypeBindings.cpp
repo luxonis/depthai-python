@@ -339,6 +339,10 @@ void DatatypeBindings::bind(pybind11::module& m){
             return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
         })
         .def("setData", &Buffer::setData)
+        .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
+            buffer.getData().clear();
+            buffer.getData().insert(buffer.getData().begin(), array.data(), array.data() + array.nbytes());
+        })
         ;
 
     // Bind ImgFrame
