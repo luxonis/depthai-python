@@ -12,6 +12,7 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
+#include "depthai/pipeline/node/Micropython.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -407,4 +408,10 @@ void NodeBindings::bind(pybind11::module& m){
 
     
 
+    // Micropython node
+    py::class_<Micropython, Node, std::shared_ptr<Micropython>>(m, "Micropython")
+        .def_readonly("input", &Micropython::input)
+        .def("setBlobPath", &Micropython::setBlobPath)
+        .def("setNumPoolFrames", &Micropython::setNumPoolFrames)
+        ;
 }
