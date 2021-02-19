@@ -225,6 +225,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
         .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
         .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
+        .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
@@ -464,6 +465,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
+        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)

@@ -223,6 +223,8 @@ void NodeBindings::bind(pybind11::module& m){
             im.setHorizontalFlip(flip);
             HEDLEY_DIAGNOSTIC_POP
         })
+        
+        .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio)
 
         .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput)
         .def("setNumFramesPool", &ImageManip::setNumFramesPool)
