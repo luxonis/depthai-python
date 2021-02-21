@@ -1,8 +1,8 @@
-07 - Mono Full Resolution Saver
-===============================
+16 - Device Queue Event
+=======================
 
-This example shows how to save 1280x720p .png of the right grayscale camera to disk. Left is defined
-as from the boards perspective.
+This example shows how to use :code:`getQueueEvent` function in order to be notified when one of
+the packets from selected streams arrive
 
 Demo
 ####
@@ -10,8 +10,9 @@ Demo
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/h2HaiszQLuE" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/embed/QsFGPRX5fhw" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
+
 
 Setup
 #####
@@ -27,9 +28,9 @@ For additional information, please follow :ref:`Python API installation guide <I
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/07_mono_full_resolution_saver.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/16_device_queue_event.py>`__
 
-.. literalinclude:: ../../../examples/07_mono_full_resolution_saver.py
+.. literalinclude:: ../../../examples/16_device_queue_event.py
    :language: python
    :linenos:
 

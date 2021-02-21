@@ -34,9 +34,9 @@ detection_nn = pipeline.createNeuralNetwork()
 detection_nn.setBlobPath(mobilenet_path)
 
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 cam_right.out.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
@@ -52,63 +52,82 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
-device = dai.Device(pipeline)
-device.startPipeline()
-
-queue_size = 8
-q_right = device.getOutputQueue("right", queue_size)
-q_manip = device.getOutputQueue("manip", queue_size)
-q_nn = device.getOutputQueue("nn", queue_size)
-q_rgb_enc = device.getOutputQueue('h265', maxSize=30, blocking=True)
-
-frame = None
-frame_manip = None
-bboxes = []
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-def frame_norm(frame, bbox):
-    return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as device:
+    # Start pipeline
+    device.startPipeline()
 
+    queue_size = 8
+    q_right = device.getOutputQueue("right", queue_size)
+    q_manip = device.getOutputQueue("manip", queue_size)
+    q_nn = device.getOutputQueue("nn", queue_size)
+    q_rgb_enc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
-videoFile = open('video.h265','wb')
+    frame = None
+    frame_manip = None
+    bboxes = []
+    confidences = []
+    labels = []
 
-while True:
-    in_right = q_right.tryGet()
-    in_manip = q_manip.tryGet()
-    in_nn = q_nn.tryGet()
+    def frame_norm(frame, bbox):
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
-    while q_rgb_enc.has():
-        q_rgb_enc.get().getData().tofile(videoFile)
+    videoFile = open('video.h265','wb')
 
-    if in_right is not None:
-        shape = (in_right.getHeight(), in_right.getWidth())
-        frame = in_right.getData().reshape(shape).astype(np.uint8)
-        frame = np.ascontiguousarray(frame)
+    while True:
+        in_right = q_right.tryGet()
+        in_manip = q_manip.tryGet()
+        in_nn = q_nn.tryGet()
 
-    if in_manip is not None:
-        shape = (3, in_manip.getHeight(), in_manip.getWidth())
-        frame_manip = in_manip.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame_manip = np.ascontiguousarray(frame_manip)
+        while q_rgb_enc.has():
+            q_rgb_enc.get().getData().tofile(videoFile)
 
-    if in_nn is not None:
-        bboxes = np.array(in_nn.getFirstLayerFp16())
-        bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
-        bboxes = bboxes.reshape((bboxes.size // 7, 7))
-        bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+        if in_right is not None:
+            shape = (in_right.getHeight(), in_right.getWidth())
+            frame = in_right.getData().reshape(shape).astype(np.uint8)
+            frame = np.ascontiguousarray(frame)
 
-    if frame is not None:
-        cv2.imshow("right", frame)
+        if in_manip is not None:
+            shape = (3, in_manip.getHeight(), in_manip.getWidth())
+            frame_manip = in_manip.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+            frame_manip = np.ascontiguousarray(frame_manip)
 
-    if frame_manip is not None:
-        for raw_bbox in bboxes:
-            bbox = frame_norm(frame_manip, raw_bbox)
-            cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("manip", frame_manip)
+        if in_nn is not None:
+            bboxes = np.array(in_nn.getFirstLayerFp16())
+            bboxes = bboxes.reshape((bboxes.size // 7, 7))
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            confidences = bboxes[:, 2]
+            bboxes = bboxes[:, 3:7]
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        if frame is not None:
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
+                bbox = frame_norm(frame, raw_bbox)
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("right", frame)
 
-videoFile.close()
+        if frame_manip is not None:
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
+                bbox = frame_norm(frame_manip, raw_bbox)
+                cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_manip, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame_manip, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("manip", frame_manip)
 
-print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
-print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+    videoFile.close()
+
+    print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
+    print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

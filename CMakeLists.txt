@@ -30,7 +30,7 @@ option(DEPTHAI_PYTHON_TEST_EXAMPLES "Test examples - examples will be ran as a p
 add_subdirectory(external)
 
 # Add depthai-cpp dependency
-add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
+add_subdirectory(depthai-core)
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
@@ -83,6 +83,10 @@ if(DEPTHAI_PYTHON_COMMIT_HASH)
     target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 endif()
 
+# Set compiler features (c++14), and disables extensions
+set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${TARGET_NAME} PROPERTY CXX_EXTENSIONS OFF)
 
 ########################
 # Testing

@@ -34,9 +34,9 @@ right.out.link(depth.right)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedLeft.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
@@ -57,63 +57,83 @@ xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
-# Pipeline defined, now the device is assigned and pipeline is started
-device = dai.Device(pipeline)
-device.startPipeline()
+# MobilenetSSD label texts
+texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
-q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
-q_depth = device.getOutputQueue("depth", maxSize=4, blocking=False)
-q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as device:
+    # Start pipeline
+    device.startPipeline()
 
-frame_right = None
-frame_depth = None
-bboxes = []
+    # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
+    q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
+    q_depth = device.getOutputQueue("depth", maxSize=4, blocking=False)
+    q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
+
+    frame_right = None
+    frame_depth = None
+    bboxes = []
+    labels = []
+    confidences = []
 
 
-# nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
-def frame_norm(frame, bbox):
-    return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+    # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
+    def frame_norm(frame, bbox):
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
 
-while True:
-    # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-    in_right = q_right.tryGet()
-    in_nn = q_nn.tryGet()
-    in_depth = q_depth.tryGet()
+    while True:
+        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        in_right = q_right.tryGet()
+        in_nn = q_nn.tryGet()
+        in_depth = q_depth.tryGet()
 
-    if in_right is not None:
-        # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
-        shape = (3, in_right.getHeight(), in_right.getWidth())
-        frame_right = in_right.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame_right = np.ascontiguousarray(frame_right)
+        if in_right is not None:
+            # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
+            shape = (3, in_right.getHeight(), in_right.getWidth())
+            frame_right = in_right.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
+            frame_right = np.ascontiguousarray(frame_right)
 
-    if in_nn is not None:
-        # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
-        bboxes = np.array(in_nn.getFirstLayerFp16())
-        # take only the results before -1 digit
-        bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
-        # transform the 1D array into Nx7 matrix
-        bboxes = bboxes.reshape((bboxes.size // 7, 7))
-        # filter out the results which confidence less than a defined threshold
-        bboxes = bboxes[bboxes[:, 2] > 0.5][:, 3:7]
+        if in_nn is not None:
+            # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
+            bboxes = np.array(in_nn.getFirstLayerFp16())
+            # take only the results before -1 digit
+            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
+            # transform the 1D array into Nx7 matrix
+            bboxes = bboxes.reshape((bboxes.size // 7, 7))
+            # filter out the results which confidence less than a defined threshold
+            bboxes = bboxes[bboxes[:, 2] > 0.5]
+            # Cut bboxes and labels
+            labels = bboxes[:, 1].astype(int)
+            confidences = bboxes[:, 2]
+            bboxes = bboxes[:, 3:7]
 
-    if in_depth is not None:
-        # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame_depth = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
-        frame_depth = np.ascontiguousarray(frame_depth)
-        # frame is transformed, the color map will be applied to highlight the depth info
-        frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
+        if in_depth is not None:
+            # data is originally represented as a flat 1D array, it needs to be converted into HxW form
+            frame_depth = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
+            frame_depth = np.ascontiguousarray(frame_depth)
+            # frame is transformed, the color map will be applied to highlight the depth info
+            frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
 
-    if frame_right is not None:
-        # if the frame is available, draw bounding boxes on it and show the frame
-        for raw_bbox in bboxes:
-            bbox = frame_norm(frame_right, raw_bbox)
-            cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-        cv2.imshow("right", frame_right)
+        if frame_right is not None:
+            # if the frame is available, draw bounding boxes on it and show the frame
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
+                bbox = frame_norm(frame_right, raw_bbox)
+                cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame_right, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame_depth, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("right", frame_right)
 
-    if frame_depth is not None:
-        cv2.imshow("depth", frame_depth)
+        if frame_depth is not None:
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
+                bbox = frame_norm(frame_depth, raw_bbox)
+                cv2.rectangle(frame_depth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
+                cv2.putText(frame_depth, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
+                cv2.putText(frame_depth, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
+            cv2.imshow("depth", frame_depth)
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        if cv2.waitKey(1) == ord('q'):
+            break

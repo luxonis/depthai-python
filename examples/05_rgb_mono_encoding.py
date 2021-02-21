@@ -39,35 +39,37 @@ ve3Out.setStreamName('ve3Out')
 ve3.bitstream.link(ve3Out.input)
 
 
-# Pipeline defined, now the device is assigned and pipeline is started
-dev = dai.Device(pipeline)
-dev.startPipeline()
 
-# Output queues will be used to get the encoded data from the outputs defined above
-outQ1 = dev.getOutputQueue(name='ve1Out', maxSize=30, blocking=True)
-outQ2 = dev.getOutputQueue(name='ve2Out', maxSize=30, blocking=True)
-outQ3 = dev.getOutputQueue(name='ve3Out', maxSize=30, blocking=True)
+# Pipeline defined, now the device is connected to
+with dai.Device(pipeline) as dev:
+    # Start pipeline
+    dev.startPipeline()
 
-# The .h264 / .h265 files are raw stream files (not playable yet)
-with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
-    print("Press Ctrl+C to stop encoding...")
-    while True:
-        try:
-            # Empty each queue
-            while outQ1.has():
-                outQ1.get().getData().tofile(file_mono1_h264)
+    # Output queues will be used to get the encoded data from the outputs defined above
+    outQ1 = dev.getOutputQueue(name='ve1Out', maxSize=30, blocking=True)
+    outQ2 = dev.getOutputQueue(name='ve2Out', maxSize=30, blocking=True)
+    outQ3 = dev.getOutputQueue(name='ve3Out', maxSize=30, blocking=True)
 
-            while outQ2.has():
-                outQ2.get().getData().tofile(file_color_h265)
+    # The .h264 / .h265 files are raw stream files (not playable yet)
+    with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
+        print("Press Ctrl+C to stop encoding...")
+        while True:
+            try:
+                # Empty each queue
+                while outQ1.has():
+                    outQ1.get().getData().tofile(file_mono1_h264)
 
-            while outQ3.has():
-                outQ3.get().getData().tofile(file_mono2_h264)
-        except KeyboardInterrupt:
-            # Keyboard interrupt (Ctrl + C) detected
-            break
+                while outQ2.has():
+                    outQ2.get().getData().tofile(file_color_h265)
 
-print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
-cmd = "ffmpeg -framerate 30 -i {} -c copy {}"
-print(cmd.format("mono1.h264", "mono1.mp4"))
-print(cmd.format("mono2.h264", "mono2.mp4"))
-print(cmd.format("color.h265", "color.mp4"))
+                while outQ3.has():
+                    outQ3.get().getData().tofile(file_mono2_h264)
+            except KeyboardInterrupt:
+                # Keyboard interrupt (Ctrl + C) detected
+                break
+
+    print("To view the encoded data, convert the stream file (.h264/.h265) into a video file (.mp4), using commands below:")
+    cmd = "ffmpeg -framerate 30 -i {} -c copy {}"
+    print(cmd.format("mono1.h264", "mono1.mp4"))
+    print(cmd.format("mono2.h264", "mono2.mp4"))
+    print(cmd.format("color.h265", "color.mp4"))
