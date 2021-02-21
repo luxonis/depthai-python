@@ -540,10 +540,12 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<Rect> (m, "Rect")
         .def(py::init<>())
-        .def_readwrite("xmin", &Rect::xmin)
-        .def_readwrite("ymin", &Rect::ymin)
-        .def_readwrite("xmax", &Rect::xmax)
-        .def_readwrite("ymax", &Rect::ymax)
+        .def(py::init<float, float, float, float>())
+        .def("setRect", &Rect::setRect)
+        .def_readonly("xmin", &Rect::xmin)
+        .def_readonly("ymin", &Rect::ymin)
+        .def_readonly("xmax", &Rect::xmax)
+        .def_readonly("ymax", &Rect::ymax)
         ;
 
     py::class_<DepthCalculatorConfig> (m, "DepthCalculatorConfig")
