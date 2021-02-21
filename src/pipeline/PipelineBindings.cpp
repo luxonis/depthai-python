@@ -17,7 +17,7 @@
 #include "depthai/pipeline/node/Micropython.hpp"
 
 // depthai-shared
-#include "depthai-shared/pb/properties/GlobalProperties.hpp"
+#include "depthai-shared/properties/GlobalProperties.hpp"
 
 void PipelineBindings::bind(pybind11::module& m){
 
@@ -52,6 +52,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("getConnections", &Pipeline::getConnections)
         .def("link", &Pipeline::link)
         .def("unlink", &Pipeline::unlink)
+
+        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION)
 
 
          // templated create<NODE> function 

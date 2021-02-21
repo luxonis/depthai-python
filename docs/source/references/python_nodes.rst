@@ -347,6 +347,11 @@
 
       If set to :code:`True`, flips the received frame horizontally
 
+  .. function:: setKeepAspectRatio(keep: bool)
+
+      If set to :code:`True`, the output will be cropped and resized to retain the h/w proportion of the
+      input resolution. Otherwise, the image will be squished in either direction to achieve exact output specified
+
   .. function:: setWaitForConfigInput(wait: bool)
 
     If set to :code:`True`, frames will only be processed when the config information arrives

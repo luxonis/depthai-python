@@ -221,11 +221,16 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("setSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::setSystemInformationLoggingRate), py::arg("rateHz"))
         .def("getSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::getSystemInformationLoggingRate))
         .def("getDdrMemoryUsage", DeviceWrapper::wrap(&Device::getDdrMemoryUsage))
+        .def("getCmxMemoryUsage", DeviceWrapper::wrap(&Device::getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", DeviceWrapper::wrap(&Device::getLeonCssHeapUsage))
         .def("getLeonMssHeapUsage", DeviceWrapper::wrap(&Device::getLeonMssHeapUsage))
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature))
         .def("getLeonCssCpuUsage", DeviceWrapper::wrap(&Device::getLeonCssCpuUsage))
         .def("getLeonMssCpuUsage", DeviceWrapper::wrap(&Device::getLeonMssCpuUsage))
+        .def("setLogOutputLevel", DeviceWrapper::wrap(&Device::setLogOutputLevel))
+        .def("getLogOutputLevel", DeviceWrapper::wrap(&Device::getLogOutputLevel))
+        .def("addLogCallback", DeviceWrapper::wrap(&Device::addLogCallback))
+        .def("removeLogCallback", DeviceWrapper::wrap(&Device::removeLogCallback))
         ;
 
 }
