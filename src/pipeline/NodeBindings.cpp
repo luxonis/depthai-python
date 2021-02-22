@@ -18,6 +18,9 @@
 // Libraries
 #include "hedley/hedley.h"
 
+// pybind11
+#include "pybind11/stl_bind.h"
+
 // Map of python node classes and call to pipeline to create it
 std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&)>>> pyNodeCreateMap;
 
@@ -38,6 +41,79 @@ py::class_<T> addNode(const char* name){
 std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&)>>> NodeBindings::getNodeCreateMap(){
     return pyNodeCreateMap;
 }
+
+// Bind map - without init method
+template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &name, Args&&... args) {
+    using namespace py;
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+    using Class_ = class_<Map, holder_type>;
+
+    // If either type is a non-module-local bound type then make the map binding non-local as well;
+    // otherwise (e.g. both types are either module-local or converting) the map will be
+    // module-local.
+    auto tinfo = py::detail::get_type_info(typeid(MappedType));
+    bool local = !tinfo || tinfo->module_local;
+    if (local) {
+        tinfo = py::detail::get_type_info(typeid(KeyType));
+        local = !tinfo || tinfo->module_local;
+    }
+
+    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
+
+    // Register stream insertion operator (if possible)
+    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+
+    cl.def("__bool__",
+        [](const Map &m) -> bool { return !m.empty(); },
+        "Check whether the map is nonempty"
+    );
+
+    cl.def("__iter__",
+           [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    cl.def("items",
+           [](Map &m) { return make_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    // Modified __getitem__. Uses operator[] underneath
+    cl.def("__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            return m[k];
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    cl.def("__contains__",
+        [](Map &m, const KeyType &k) -> bool {
+            auto it = m.find(k);
+            if (it == m.end())
+              return false;
+           return true;
+        }
+    );
+
+    // Assignment provided only if the type is copyable
+    detail::map_assignment<Map, Class_>(cl);
+
+    cl.def("__delitem__",
+           [](Map &m, const KeyType &k) {
+               auto it = m.find(k);
+               if (it == m.end())
+                   throw key_error();
+               m.erase(it);
+           }
+    );
+
+    cl.def("__len__", &Map::size);
+
+    return cl;
+}
+
 
 void NodeBindings::bind(pybind11::module& m){
 
@@ -60,6 +136,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setQueueSize", &Node::Input::setQueueSize)
         .def("getQueueSize", &Node::Input::getQueueSize)
     ;
+
     // Node::Output bindings
     py::class_<Node::Output>(pyNode, "Output")
         .def("canConnect", &Node::Output::canConnect)
@@ -87,6 +164,10 @@ void NodeBindings::bind(pybind11::module& m){
     //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
     // ;
 
+    // Node::InputMap bindings
+    bindNodeMap<Node::InputMap>(pyNode, "InputMap");
+    // Node::OutputMap bindings
+    bindNodeMap<Node::OutputMap>(pyNode, "OutputMap");
 
 
     //// Bindings for actual nodes
@@ -95,7 +176,6 @@ void NodeBindings::bind(pybind11::module& m){
     daiNodeModule = m;
     // TODO(themarpe) - move properties into nodes and nodes under 'node' submodule
     //daiNodeModule = m.def_submodule("node");
-
 
     // XLinkIn node
     ADD_NODE(XLinkIn)
@@ -387,8 +467,12 @@ void NodeBindings::bind(pybind11::module& m){
 
     // MicroPython node
     ADD_NODE(MicroPython)
-        .def_readonly("input", &MicroPython::input)
+        .def_readonly("inputs", &MicroPython::inputs)
+        .def_readonly("outputs", &MicroPython::outputs)
         .def("setScriptPath", &MicroPython::setScriptPath)
+        .def("getScriptPath", &MicroPython::getScriptPath)
+        .def("setProcessor", &MicroPython::setProcessor)
+        .def("getProcessor", &MicroPython::getProcessor)
         ;
 
 

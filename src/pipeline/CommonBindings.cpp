@@ -6,6 +6,7 @@
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
 #include "depthai-shared/common/CpuUsage.hpp"
+#include "depthai-shared/common/ProcessorType.hpp"
 
 void CommonBindings::bind(pybind11::module& m){
 
@@ -53,4 +54,9 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("msTime", &CpuUsage::msTime)
     ;
 
+    // ProcessorType
+    py::enum_<ProcessorType>(m, "ProcessorType")
+        .value("LEON_CSS", ProcessorType::LEON_CSS) 
+        .value("LEON_MSS", ProcessorType::LEON_MSS) 
+    ;
 }
