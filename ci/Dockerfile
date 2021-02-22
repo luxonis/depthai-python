@@ -19,4 +19,4 @@ ENV PYTHONPATH=/depthai-python/build
 
 RUN mkdir -p /depthai-python/examples/models/
 RUN cd /depthai-python/examples/models/ && \
-    wget https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob
+    wget https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob

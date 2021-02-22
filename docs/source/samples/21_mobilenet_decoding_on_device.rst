@@ -1,17 +1,16 @@
-08 - RGB & MobilenetSSD
-=======================
+21 - RGB & MobilenetSSD decoding on device
+==========================================
 
 This example shows how to run MobileNetv2SSD on the RGB input frame, and how to display both the RGB
-preview and the metadata results from the MobileNetv2SSD on the preview.
+preview and the metadata results from the MobileNetv2SSD on the preview. It's similar to example '08_rgb_mobilenet' except
+decoding is done on Myriad instead on the host.
+
+
+setConfidenceThreshold - confidence threshold above which objects are detected
 
 Demo
 ####
 
-.. raw:: html
-
-    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/68VkKGO1WX4" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-    </div>
 
 Setup
 #####
@@ -30,9 +29,9 @@ This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to wo
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/08_rgb_mobilenet.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/21_mobilenet_device_side_decoding.py>`__
 
-.. literalinclude:: ../../../examples/08_rgb_mobilenet.py
+.. literalinclude:: ../../../examples/21_mobilenet_device_side_decoding.py
    :language: python
    :linenos:
 

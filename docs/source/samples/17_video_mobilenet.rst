@@ -23,13 +23,13 @@ Please run the following command to install the required dependencies
 
 .. code-block:: bash
 
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c numpy==1.19.5 opencv-python==4.5.1.48
+  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe numpy==1.19.5 opencv-python==4.5.1.48
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) and prerecorded video
 (:code:`construction_vest.mp4` file) to work - you can download them
-here: `mobilenet.blob <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
+here: `mobilenet.blob <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 and `construction_vest.mp4 <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/construction_vest.mp4>`__
 
 Source code

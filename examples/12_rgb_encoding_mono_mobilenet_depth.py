@@ -54,9 +54,9 @@ xout_right.setStreamName("rect_right")
 depth.rectifiedRight.link(xout_right.input)
 
 manip = pipeline.createImageManip()
-manip.setResize(300, 300)
+manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(detection_nn.input)
 
@@ -92,7 +92,9 @@ with dai.Device(pipeline) as device:
 
 
     def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
     videoFile = open('video.h265','wb')
 

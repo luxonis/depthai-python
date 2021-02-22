@@ -26,7 +26,7 @@ Please run the following command to install the required dependencies
 
 .. code-block:: bash
 
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c numpy==1.19.5 opencv-python==4.5.1.48
+  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe numpy==1.19.5 opencv-python==4.5.1.48
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
