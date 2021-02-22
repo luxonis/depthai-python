@@ -401,6 +401,16 @@ void DatatypeBindings::bind(pybind11::module& m){
                     dtype = py::dtype::of<uint8_t>();
                 break;
 
+                case ImgFrame::Type::GRAYF16:
+                    shape = {img.getHeight(), img.getWidth()};  
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::RAW16:
+                    shape = {img.getHeight(), img.getWidth()};  
+                    dtype = py::dtype::of<uint16_t>();
+                break;
+
                 case ImgFrame::Type::RGBF16F16F16i:
                 case ImgFrame::Type::BGRF16F16F16i:
                     shape = {img.getHeight(), img.getWidth(), 3};
