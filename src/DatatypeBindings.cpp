@@ -420,13 +420,24 @@ void DatatypeBindings::bind(pybind11::module& m){
                     break;                
             }
 
-            // Create array with specified dtype, etc..
-            if(valid){
-                return py::array(dtype, shape, img.getData().data(), obj);
-            } else {
-                // if not valid, just specify 1D array with number of items being numbytes / itemsize
-                return py::array(dtype, {img.getData().size() / dtype.itemsize()}, img.getData().data(), obj);
+            // Check if enough data
+            long requiredSize = dtype.itemsize();
+            for(const auto& dim : shape) requiredSize *= dim;
+            if(img.getData().size() < requiredSize){
+                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
             }
+            if(img.getWidth() <= 0 || img.getHeight() <= 0){
+                throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()));
+            }
+
+            if(deepCopy){
+                py::array a(dtype, shape);
+                std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
+                return a; 
+            } else {
+                return py::array(dtype, shape, img.getData().data(), obj);
+            }
+
         }, py::arg("deepCopy") = false)
         
         .def("getBgrFrame", [](py::object &obj){
@@ -455,6 +466,10 @@ void DatatypeBindings::bind(pybind11::module& m){
                     return numpy.attr("ascontiguousarray")(frame.attr("transpose")(1, 2, 0));
                     break;
 
+                case ImgFrame::Type::BGR888i:
+                    return frame.attr("copy")();
+                    break;
+
                 case ImgFrame::Type::RGB888p:
                     // Transpose to RGB888i then convert to BGR
                     return cv2.attr("cvtColor")(frame.attr("transpose")(1, 2, 0), cv2.attr("COLOR_RGB2BGR"));
@@ -476,18 +491,19 @@ void DatatypeBindings::bind(pybind11::module& m){
                     return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV21"));
                     break;
 
-                case ImgFrame::Type::BGR888i:
                 case ImgFrame::Type::RAW8:
+                case ImgFrame::Type::RAW16:
                 case ImgFrame::Type::GRAY8:
+                case ImgFrame::Type::GRAYF16:
                 default:
                     return frame.attr("copy")();
                     break;
             }
 
+            // Default case
             return frame.attr("copy")();
 
         })
-
 
         // setters
         .def("setTimestamp", &ImgFrame::setTimestamp)

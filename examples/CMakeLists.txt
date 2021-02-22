@@ -79,6 +79,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     dai_add_python_test(20_color_rotate_warp 20_color_rotate_warp.py)
     dai_add_python_test(21_mobilenet_device_side_decoding 21_mobilenet_device_side_decoding.py "${mobilenet_blob}")
     dai_add_python_test(22_tiny_yolo_v3_device_side_decoding 22_tiny_yolo_v3_device_side_decoding.py "${tiny_yolo_v3_blob}")
-
+    dai_add_python_test(23_autoexposure_roi 23_autoexposure_roi.py "${mobilenet_blob}")
+    dai_add_python_test(24_opencv_support 24_opencv_support.py)
 
 endif()
