@@ -1,4 +1,6 @@
+
 #include "PipelineBindings.hpp"
+#include "NodeBindings.hpp"
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"
@@ -14,10 +16,24 @@
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
-#include "depthai/pipeline/node/Micropython.hpp"
+#include "depthai/pipeline/node/MicroPython.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
+
+
+
+std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
+    auto nodeCreateMap = NodeBindings::getNodeCreateMap();
+    for(auto& kv : nodeCreateMap){
+        auto& node = kv.first;
+        auto& create = kv.second;
+        if(node.is(class_)){
+            return create(p);
+        }
+    }
+    return nullptr;
+}
 
 void PipelineBindings::bind(pybind11::module& m){
 
@@ -56,6 +72,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION)
 
 
+        // TODO(themarpe), deprecate in favor of 'create'
          // templated create<NODE> function 
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
@@ -68,8 +85,15 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
         .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
         .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
-        .def("createMicropython", &Pipeline::create<node::Micropython>)
+        .def("createMicroPython", &Pipeline::create<node::MicroPython>)
+        
+        .def("create", [](dai::Pipeline& p, py::object class_) {
+            auto node = createNode(p, class_);
+            if(node == nullptr){
+                throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.Node");
+            }
+            return node;
+        })
         ;
     
-
 }

@@ -1,5 +1,6 @@
 #include "NodeBindings.hpp"
 
+#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
@@ -12,16 +13,35 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
-#include "depthai/pipeline/node/Micropython.hpp"
+#include "depthai/pipeline/node/MicroPython.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
 
+// Map of python node classes and call to pipeline to create it
+std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&)>>> pyNodeCreateMap;
+
+py::handle daiNodeModule;
+template<typename T, typename DERIVED = dai::Node>
+py::class_<T> addNode(const char* name){
+    auto node = py::class_<T, DERIVED, std::shared_ptr<T>>(daiNodeModule, name);
+    pyNodeCreateMap.push_back(std::make_pair(node, [](dai::Pipeline& p){
+        return p.create<T>();
+    }));
+    return node;
+}
+
+#define ADD_NODE(NodeName) addNode<NodeName>(#NodeName)
+#define ADD_NODE_DERIVED(NodeName, Derived) addNode<NodeName, Derived>(#NodeName)
+
+
+std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&)>>> NodeBindings::getNodeCreateMap(){
+    return pyNodeCreateMap;
+}
+
 void NodeBindings::bind(pybind11::module& m){
 
     using namespace dai;
-    using namespace dai::node;
-
 
     // Base 'Node' class binding
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node");
@@ -67,10 +87,18 @@ void NodeBindings::bind(pybind11::module& m){
     //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
     // ;
 
+
+
     //// Bindings for actual nodes
+    // Create "namespace" (python submodule) for nodes
+    using namespace dai::node;
+    daiNodeModule = m;
+    // TODO(themarpe) - move properties into nodes and nodes under 'node' submodule
+    //daiNodeModule = m.def_submodule("node");
+
 
     // XLinkIn node
-    py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn")
+    ADD_NODE(XLinkIn)
         .def_readonly("out", &XLinkIn::out)
         .def("setStreamName", &XLinkIn::setStreamName, py::arg("streamName"))
         .def("setMaxDataSize", &XLinkIn::setMaxDataSize, py::arg("maxDataSize"))
@@ -81,7 +109,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // XLinkOut node
-    py::class_<XLinkOut, Node, std::shared_ptr<XLinkOut>>(m, "XLinkOut")
+    ADD_NODE(XLinkOut)
         .def_readonly("input", &XLinkOut::input)
         .def("setStreamName", &XLinkOut::setStreamName, py::arg("streamName"))
         .def("setFpsLimit", &XLinkOut::setFpsLimit, py::arg("fpsLimit"))
@@ -92,7 +120,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // ColorCamera node
-    py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera")
+    ADD_NODE(ColorCamera)
         .def_readonly("inputConfig", &ColorCamera::inputConfig)
         .def_readonly("inputControl", &ColorCamera::inputControl)
         .def_readonly("initialControl", &ColorCamera::initialControl)
@@ -156,7 +184,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // NeuralNetwork node
-    py::class_<NeuralNetwork, Node, std::shared_ptr<NeuralNetwork>>(m, "NeuralNetwork")
+    ADD_NODE(NeuralNetwork)
         .def_readonly("input", &NeuralNetwork::input)
         .def_readonly("out", &NeuralNetwork::out)
         .def_readonly("passthrough", &NeuralNetwork::passthrough)
@@ -167,7 +195,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // ImageManip node
-    py::class_<ImageManip, Node, std::shared_ptr<ImageManip>>(m, "ImageManip")
+    ADD_NODE(ImageManip)
         .def_readonly("inputConfig", &ImageManip::inputConfig)
         .def_readonly("inputImage", &ImageManip::inputImage)
         .def_readonly("out", &ImageManip::out)
@@ -235,7 +263,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
      // MonoCamera node
-    py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera")
+    ADD_NODE(MonoCamera)
         .def_readonly("inputControl", &MonoCamera::inputControl)
         .def_readonly("out",  &MonoCamera::out)
         .def_readonly("initialControl",  &MonoCamera::initialControl)
@@ -271,7 +299,7 @@ void NodeBindings::bind(pybind11::module& m){
 
 
     // StereoDepth node
-    py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth")
+    ADD_NODE(StereoDepth)
         .def_readonly("left",           &StereoDepth::left)
         .def_readonly("right",          &StereoDepth::right)
         .def_readonly("depth",          &StereoDepth::depth)
@@ -296,7 +324,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // VideoEncoder node
-    py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder")
+    ADD_NODE(VideoEncoder)
         .def_readonly("input", &VideoEncoder::input)
         .def_readonly("bitstream", &VideoEncoder::bitstream)        
         .def("setDefaultProfilePreset", (void(VideoEncoder::*)(std::tuple<int,int>, float, VideoEncoderProperties::Profile))&VideoEncoder::setDefaultProfilePreset)
@@ -325,13 +353,14 @@ void NodeBindings::bind(pybind11::module& m){
     ;
 
     // SPIOut node
-    py::class_<SPIOut, Node, std::shared_ptr<SPIOut>>(m, "SPIOut")
+    ADD_NODE(SPIOut)
         .def_readonly("input", &SPIOut::input)
         .def("setStreamName", &SPIOut::setStreamName)
         .def("setBusId", &SPIOut::setBusId)
         ;
 
-    py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork")
+    // Cannot be created
+    py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(daiNodeModule, "DetectionNetwork")
         .def_readonly("input", &DetectionNetwork::input)
         .def_readonly("out", &DetectionNetwork::out)
         .def_readonly("passthrough", &DetectionNetwork::passthrough)
@@ -339,11 +368,10 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // MobileNetDetectionNetwork node
-    py::class_<MobileNetDetectionNetwork, DetectionNetwork, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork")
-        ;
+    ADD_NODE_DERIVED(MobileNetDetectionNetwork, DetectionNetwork);
 
     // YoloDetectionNetwork node
-    py::class_<YoloDetectionNetwork, DetectionNetwork, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork")
+    ADD_NODE_DERIVED(YoloDetectionNetwork, DetectionNetwork)
         .def("setNumClasses", &YoloDetectionNetwork::setNumClasses)
         .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize)
         .def("setAnchors", &YoloDetectionNetwork::setAnchors)
@@ -352,16 +380,24 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // SystemLogger node
-    py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger")
+    ADD_NODE(SystemLogger)
         .def_readonly("out", &SystemLogger::out)
         .def("setRate", &SystemLogger::setRate)
         ;
+
+    // MicroPython node
+    ADD_NODE(MicroPython)
+        .def_readonly("input", &MicroPython::input)
+        .def("setScriptPath", &MicroPython::setScriptPath)
+        ;
+
+
 
 
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
-    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
+    py::class_<ColorCameraProperties> colorCameraProperties(daiNodeModule, "ColorCameraProperties");
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
@@ -392,7 +428,7 @@ void NodeBindings::bind(pybind11::module& m){
         
 
     // MonoCamera props
-    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
+    py::class_<MonoCameraProperties> monoCameraProperties(daiNodeModule, "MonoCameraProperties");
     monoCameraProperties
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
@@ -409,7 +445,7 @@ void NodeBindings::bind(pybind11::module& m){
    
 
     // StereoDepth props
-    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties");
+    py::class_<StereoDepthProperties> stereoDepthProperties(daiNodeModule, "StereoDepthProperties");
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("median",                  &StereoDepthProperties::median)
@@ -434,7 +470,7 @@ void NodeBindings::bind(pybind11::module& m){
 
 
     // VideoEncoder props
-    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
+    py::class_<VideoEncoderProperties> videoEncoderProperties(daiNodeModule, "VideoEncoderProperties");
     videoEncoderProperties
         .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
         .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
@@ -461,16 +497,9 @@ void NodeBindings::bind(pybind11::module& m){
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
 
-    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties")
+    py::class_<SystemLoggerProperties>(daiNodeModule, "SystemLoggerProperties")
         .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
         ;
-
     
 
-    // Micropython node
-    py::class_<Micropython, Node, std::shared_ptr<Micropython>>(m, "Micropython")
-        .def_readonly("input", &Micropython::input)
-        .def("setBlobPath", &Micropython::setBlobPath)
-        .def("setNumPoolFrames", &Micropython::setNumPoolFrames)
-        ;
 }
