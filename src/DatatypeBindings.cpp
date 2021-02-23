@@ -359,8 +359,29 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getType", &ImgFrame::getType)
 
         // OpenCV Support section
-        //TODO(themarpe) - Fill the rest of types
+        .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
+             // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'setFrame' requires 'numpy' module");
+            }
+
+            py::array contiguous = numpy.attr("ascontiguousarray")(arr);
+            frm.getData().resize(contiguous.nbytes());
+            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());     
+
+        })
         .def("getFrame", [](py::object &obj, bool deepCopy){
+
+            // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'getFrame' requires 'numpy' module");
+            }
 
             // obj is "Python" object, which we used then to bind the numpy view lifespan to
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
@@ -437,7 +458,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                 throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
-                throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()));
+                throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
             }
 
             if(deepCopy){
@@ -450,7 +471,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
         }, py::arg("deepCopy") = false)
         
-        .def("getBgrFrame", [](py::object &obj){
+        .def("getCvFrame", [](py::object &obj){
             using namespace pybind11::literals;
 
             // Try importing 'cv2' module
@@ -460,7 +481,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                 cv2 = py::module::import("cv2");
                 numpy = py::module::import("numpy");
             } catch (const py::error_already_set& err){
-                throw std::runtime_error("Function 'getBgrFrame' requires 'opencv-python' package");
+                throw std::runtime_error("Function 'getBgrFrame' requires 'cv2' module (opencv-python package)");
             }
 
             // ImgFrame
