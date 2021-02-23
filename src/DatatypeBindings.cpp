@@ -225,6 +225,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
         .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
         .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
+        .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
     py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
@@ -338,6 +339,10 @@ void DatatypeBindings::bind(pybind11::module& m){
             return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
         })
         .def("setData", &Buffer::setData)
+        .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
+            buffer.getData().clear();
+            buffer.getData().insert(buffer.getData().begin(), array.data(), array.data() + array.nbytes());
+        })
         ;
 
     // Bind ImgFrame
@@ -464,6 +469,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
+        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio)
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin)

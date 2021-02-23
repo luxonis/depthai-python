@@ -36,6 +36,8 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<Node::Input>(pyNode, "Input")
         .def("setBlocking", &Node::Input::setBlocking)
         .def("getBlocking", &Node::Input::getBlocking)
+        .def("setQueueSize", &Node::Input::setQueueSize)
+        .def("getQueueSize", &Node::Input::getQueueSize)
     ;
     // Node::Output bindings
     py::class_<Node::Output>(pyNode, "Output")
@@ -84,6 +86,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setFpsLimit", &XLinkOut::setFpsLimit, py::arg("fpsLimit"))
         .def("getStreamName", &XLinkOut::getStreamName)
         .def("getFpsLimit", &XLinkOut::getFpsLimit)
+        .def("setMetadataOnly", &XLinkOut::setMetadataOnly)
+        .def("getMetadataOnly", &XLinkOut::getMetadataOnly)
         ;
 
     // ColorCamera node
@@ -158,6 +162,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setBlobPath", &NeuralNetwork::setBlobPath)
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames)
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads)
+        .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread)
         ;
 
     // ImageManip node
@@ -220,6 +225,8 @@ void NodeBindings::bind(pybind11::module& m){
             im.setHorizontalFlip(flip);
             HEDLEY_DIAGNOSTIC_POP
         })
+        
+        .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio)
 
         .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput)
         .def("setNumFramesPool", &ImageManip::setNumFramesPool)

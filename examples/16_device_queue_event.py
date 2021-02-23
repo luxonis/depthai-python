@@ -44,7 +44,7 @@ with dai.Device(pipeline) as device:
 
         # try getting that message from queue with name specified by the event
         # Note: number of events doesn't necessarily match number of messages in queues
-        # because queues can be set to non-blocking (overwriting) behaviour
+        # because queues can be set to non-blocking (overwriting) behavior
         message = device.getOutputQueue(queueName).tryGet()
 
         # process separately
