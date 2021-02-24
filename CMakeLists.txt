@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2) # For Hunter
+cmake_minimum_required(VERSION 3.4) # For Hunter
 
 # Set defaults
 # PIC toolchain as we are building a shared library
@@ -6,11 +6,17 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" C
 # Build dependencies as 'Release' only by default
 set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
 
+# Generate combined Hunter config
+file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
+file(READ cmake/Hunter/config.cmake hunter_config)
+string(CONCAT final_hunter_config ${depthai_core_hunter_config} "\n\n" ${hunter_config})
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hunter_config})
+
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/cpp-pm/hunter/archive/v0.23.258.tar.gz"
     SHA1 "062a19ab13ce8dffa9a882b6ce3e43bdabdf75d3"
-    FILEPATH ${CMAKE_CURRENT_LIST_DIR}/depthai-core/cmake/Hunter/config.cmake # Add depthai-core config (hunter limitation)
+    FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
 # Move binary dir if windows, to shorten the path

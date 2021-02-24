@@ -65,7 +65,7 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
         // reacquires python GIL for PyErr_CheckSignals call
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(steady_clock::now() - startTime < timeout || unlimitedTimeout);
+    } while(unlimitedTimeout || steady_clock::now() - startTime < timeout);
     
     return std::vector<std::string>(); 
 }
@@ -196,24 +196,24 @@ void DeviceBindings::bind(pybind11::module& m){
             return deviceGetQueueEventsHelper(dw.get(), dw.get().getOutputQueueNames(), maxNumEvents, timeout);
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1))
 
-        .def("getQueueEvent", [](DeviceWrapper& dw, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
+        .def("getQueueEvent", [](DeviceWrapper& dw, const std::vector<std::string>& queueNames, std::chrono::microseconds timeout) {
             dw.check();
-            auto events = deviceGetQueueEventsHelper(dw.get(), queueNames, maxNumEvents, timeout);
+            auto events = deviceGetQueueEventsHelper(dw.get(), queueNames, std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
             return events[0];
-        }, py::arg("queueNames"), py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1))
-        .def("getQueueEvent", [](DeviceWrapper& dw, std::string queueName, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
+        }, py::arg("queueNames"), py::arg("timeout") = std::chrono::microseconds(-1))
+        .def("getQueueEvent", [](DeviceWrapper& dw, std::string queueName, std::chrono::microseconds timeout) {
             dw.check();
-            auto events = deviceGetQueueEventsHelper(dw.get(), std::vector<std::string>{queueName}, maxNumEvents, timeout);
+            auto events = deviceGetQueueEventsHelper(dw.get(), std::vector<std::string>{queueName}, std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
             return events[0];
-        }, py::arg("queueName"), py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1))
-        .def("getQueueEvent", [](DeviceWrapper& dw, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
+        }, py::arg("queueName"), py::arg("timeout") = std::chrono::microseconds(-1))
+        .def("getQueueEvent", [](DeviceWrapper& dw, std::chrono::microseconds timeout) {
             dw.check();
-            auto events = deviceGetQueueEventsHelper(dw.get(), dw.get().getOutputQueueNames(), maxNumEvents, timeout);
+            auto events = deviceGetQueueEventsHelper(dw.get(), dw.get().getOutputQueueNames(), std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
             return events[0];
-        }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1))
+        }, py::arg("timeout") = std::chrono::microseconds(-1))
 
         .def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
         .def("setLogLevel", DeviceWrapper::wrap(&Device::setLogLevel), py::arg("level"))
