@@ -215,7 +215,7 @@ void DeviceBindings::bind(pybind11::module& m){
             return events[0];
         }, py::arg("timeout") = std::chrono::microseconds(-1))
 
-        .def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
+        //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
         .def("setLogLevel", DeviceWrapper::wrap(&Device::setLogLevel), py::arg("level"))
         .def("getLogLevel", DeviceWrapper::wrap(&Device::getLogLevel))
         .def("setSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::setSystemInformationLoggingRate), py::arg("rateHz"))
