@@ -36,9 +36,9 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
     while True:
-        in_rgb = q.get() # blocking call, will wait until a new data has arrived
+        in_depth = q.get()  # blocking call, will wait until a new data has arrived
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame = in_rgb.getData().reshape((in_rgb.getHeight(), in_rgb.getWidth())).astype(np.uint8)
+        frame = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
         frame = np.ascontiguousarray(frame)
         # frame is transformed, the color map will be applied to highlight the depth info
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
