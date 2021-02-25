@@ -25,6 +25,7 @@
 
 //pybind
 #include <pybind11/chrono.h>
+#include <pybind11/numpy.h>
 
 
 void DatatypeBindings::bind(pybind11::module& m){
@@ -357,32 +358,183 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getHeight", &ImgFrame::getHeight)
         .def("getType", &ImgFrame::getType)
 
-        /* TODO(themarpe) - Convinience function which constructs array with correct datatype, shape, ...
-        .def("getFrame", [](py::object &obj){
+        // OpenCV Support section
+        .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
+             // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'setFrame' requires 'numpy' module");
+            }
+
+            py::array contiguous = numpy.attr("ascontiguousarray")(arr);
+            frm.getData().resize(contiguous.nbytes());
+            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());     
+
+        })
+        .def("getFrame", [](py::object &obj, bool deepCopy){
+
+            // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'getFrame' requires 'numpy' module");
+            }
+
             // obj is "Python" object, which we used then to bind the numpy view lifespan to
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
-            dai::ImgFrame &a = obj.cast<dai::ImgFrame&>();
+            auto& img = obj.cast<dai::ImgFrame&>();
             
             // shape
-            std::vector<std::size_t> shape = {a.getData().size()};
+            bool valid = img.getWidth() > 0 && img.getHeight() > 0;
+            std::vector<std::size_t> shape = {img.getData().size()};
+            py::dtype dtype = py::dtype::of<uint8_t>();
 
-            // TODO
-            switch(a.getType()){
-                case dai::RawImgFrame::Type::BITSTREAM :
-                    //shape = {return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
+            switch(img.getType()){
+                
+                case ImgFrame::Type::RGB888i :
+                case ImgFrame::Type::BGR888i :
+                    // HWC
+                    shape = {img.getHeight(), img.getWidth(), 3};
+                    dtype = py::dtype::of<uint8_t>();
                 break;
 
-                case dai::RawImgFrame::Type::RGB888 :
-                    shape = {a.getWidth(), a.getHeight(), 3};
-                    //return py::array_t<uint8_t>(py::array::ShapeContainer(a.getWidth(), a.getHeight(), 3), a.getData().data(), obj);
+                case ImgFrame::Type::RGB888p :
+                case ImgFrame::Type::BGR888p :
+                    // CHW
+                    shape = {3, img.getHeight(), img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
                 break;
 
+                case ImgFrame::Type::YUV420p:
+                case ImgFrame::Type::NV12:
+                case ImgFrame::Type::NV21:
+                    // Height 1.5x actual size
+                    shape = {img.getHeight() * 3 / 2, img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
+                break;
+
+                case ImgFrame::Type::RAW8:
+                case ImgFrame::Type::GRAY8:
+                    shape = {img.getHeight(), img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
+                break;
+
+                case ImgFrame::Type::GRAYF16:
+                    shape = {img.getHeight(), img.getWidth()};  
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::RAW16:
+                    shape = {img.getHeight(), img.getWidth()};  
+                    dtype = py::dtype::of<uint16_t>();
+                break;
+
+                case ImgFrame::Type::RGBF16F16F16i:
+                case ImgFrame::Type::BGRF16F16F16i:
+                    shape = {img.getHeight(), img.getWidth(), 3};
+                    dtype = py::dtype("half");
+                break;
+                
+                case ImgFrame::Type::RGBF16F16F16p:
+                case ImgFrame::Type::BGRF16F16F16p:
+                    shape = {3, img.getHeight(), img.getWidth()};
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::BITSTREAM :
+                default:
+                    shape = {img.getData().size()};
+                    dtype = py::dtype::of<uint8_t>();
+                    break;                
             }
-            
 
-            return py::array_t<uint8_t>(shape, a.getData().data(), obj);
+            // Check if enough data
+            long requiredSize = dtype.itemsize();
+            for(const auto& dim : shape) requiredSize *= dim;
+            if(img.getData().size() < requiredSize){
+                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
+            }
+            if(img.getWidth() <= 0 || img.getHeight() <= 0){
+                throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
+            }
+
+            if(deepCopy){
+                py::array a(dtype, shape);
+                std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
+                return a; 
+            } else {
+                return py::array(dtype, shape, img.getData().data(), obj);
+            }
+
+        }, py::arg("deepCopy") = false)
+        
+        .def("getCvFrame", [](py::object &obj){
+            using namespace pybind11::literals;
+
+            // Try importing 'cv2' module
+            py::module cv2;
+            py::module numpy;
+            try {
+                cv2 = py::module::import("cv2");
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'getCvFrame' requires 'cv2' module (opencv-python package)");
+            }
+
+            // ImgFrame
+            auto& img = obj.cast<dai::ImgFrame&>();
+
+            // Get numpy frame (python object) by calling getFrame
+            auto frame = obj.attr("getFrame")();
+
+            // Convert numpy array to bgr frame using cv2 module
+            switch(img.getType()) {
+
+                case ImgFrame::Type::BGR888p:
+                    return numpy.attr("ascontiguousarray")(frame.attr("transpose")(1, 2, 0));
+                    break;
+
+                case ImgFrame::Type::BGR888i:
+                    return frame.attr("copy")();
+                    break;
+
+                case ImgFrame::Type::RGB888p:
+                    // Transpose to RGB888i then convert to BGR
+                    return cv2.attr("cvtColor")(frame.attr("transpose")(1, 2, 0), cv2.attr("COLOR_RGB2BGR"));
+                    break;
+
+                case ImgFrame::Type::RGB888i:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_RGB2BGR"));
+                    break;
+
+                case ImgFrame::Type::YUV420p:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV420p2BGR"));
+                    break;
+
+                case ImgFrame::Type::NV12:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV12"));
+                    break;
+
+                case ImgFrame::Type::NV21:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV21"));
+                    break;
+
+                case ImgFrame::Type::RAW8:
+                case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::GRAY8:
+                case ImgFrame::Type::GRAYF16:
+                default:
+                    return frame.attr("copy")();
+                    break;
+            }
+
+            // Default case
+            return frame.attr("copy")();
+
         })
-        */
 
         // setters
         .def("setTimestamp", &ImgFrame::setTimestamp)
@@ -393,6 +545,10 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setHeight", &ImgFrame::setHeight)
         .def("setType", &ImgFrame::setType)
         ;
+    // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
+    m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
+    m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
+
 
     py::class_<Timestamp>(m, "Timestamp")
         .def(py::init<>())

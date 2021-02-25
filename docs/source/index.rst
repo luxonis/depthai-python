@@ -89,6 +89,7 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/21_mobilenet_decoding_on_device.rst
    samples/22_tiny_tolo_v3_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
+   samples/24_opencv_support.rst
 
 .. toctree::
    :maxdepth: 1
