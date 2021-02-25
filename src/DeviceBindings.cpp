@@ -218,7 +218,6 @@ void DeviceBindings::bind(pybind11::module& m){
             auto events = deviceGetQueueEventsHelper(dw.get(), dw.get().getOutputQueueNames(), maxNumEvents, timeout);
             if(events.empty()) return std::string("");
             return events[0];
-
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent, 4))
 
         .def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"), DOC(dai, Device, setCallback))
@@ -227,6 +226,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("setSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::setSystemInformationLoggingRate), py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", DeviceWrapper::wrap(&Device::getSystemInformationLoggingRate), DOC(dai, Device, getSystemInformationLoggingRate))
         .def("getDdrMemoryUsage", DeviceWrapper::wrap(&Device::getDdrMemoryUsage), DOC(dai, Device, getDdrMemoryUsage))
+        .def("getCmxMemoryUsage", DeviceWrapper::wrap(&Device::getCmxMemoryUsage), DOC(dai, Device, getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", DeviceWrapper::wrap(&Device::getLeonCssHeapUsage), DOC(dai, Device, getLeonCssHeapUsage))
         .def("getLeonMssHeapUsage", DeviceWrapper::wrap(&Device::getLeonMssHeapUsage), DOC(dai, Device, getLeonMssHeapUsage))
         .def("getChipTemperature", DeviceWrapper::wrap(&Device::getChipTemperature), DOC(dai, Device, getChipTemperature))
