@@ -37,7 +37,7 @@ with dai.Device(pipeline) as device:
         # Show 'preview' frame as is (already in correct format, no copy is made)
         cv2.imshow("preview", preview.getFrame())
         # Get BGR frame from NV12 encoded video frame to show with opencv
-        cv2.imshow("video", video.getBgrFrame())
+        cv2.imshow("video", video.getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break

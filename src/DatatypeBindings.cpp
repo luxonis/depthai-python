@@ -481,7 +481,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                 cv2 = py::module::import("cv2");
                 numpy = py::module::import("numpy");
             } catch (const py::error_already_set& err){
-                throw std::runtime_error("Function 'getBgrFrame' requires 'cv2' module (opencv-python package)");
+                throw std::runtime_error("Function 'getCvFrame' requires 'cv2' module (opencv-python package)");
             }
 
             // ImgFrame
