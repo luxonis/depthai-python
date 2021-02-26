@@ -20,7 +20,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
+project(${TARGET_NAME} VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Add depthai-cpp dependency
 add_subdirectory(depthai-core EXCLUDE_FROM_ALL)
