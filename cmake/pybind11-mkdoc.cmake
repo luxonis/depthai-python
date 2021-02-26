@@ -47,6 +47,8 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
         COMMAND
             ${PYTHON_EXECUTABLE}
             -m ${PYBIND11_MKDOC_MODULE_NAME}
+            # Docstring wrap width
+            -w 80
             -o "${output_path}"
             # List of include directories
             "-I$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,;-I>"

@@ -42,7 +42,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
-          python -m pip install git+git://github.com/pybind/pybind11_mkdoc.git@master
+          python -m pip install git+git://github.com/luxonis/pybind11_mkdoc.git@master
       - name: Configure project
         run: cmake -S . -B build -DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=ON -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
