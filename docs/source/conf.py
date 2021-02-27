@@ -33,6 +33,7 @@ release = '1.0.2'
 extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosectionlabel",  # https://github.com/sphinx-doc/sphinx/issues/7697 wait for this and implement
+    'sphinx_tabs.tabs',
     "sphinx_rtd_theme",
 ]
 
