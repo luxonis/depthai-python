@@ -475,10 +475,11 @@ void NodeBindings::bind(pybind11::module& m){
     // DepthCalculator node
     py::class_<DepthCalculator, Node, std::shared_ptr<DepthCalculator>>(m, "DepthCalculator")
         .def_readonly("input", &DepthCalculator::input)
+        .def_readonly("inputConfig", &DepthCalculator::inputConfig)       
         .def_readonly("depthInput", &DepthCalculator::depthInput)
         .def_readonly("out", &DepthCalculator::out)
-        .def("setROIs", &DepthCalculator::setROIs)
-        .def("addROI", &DepthCalculator::addROI)
+        .def_readonly("initialConfig", &DepthCalculator::initialConfig)
+        .def("setWaitForConfigInput", &DepthCalculator::setWaitForConfigInput)
 
         ;
 }

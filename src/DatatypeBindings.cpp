@@ -13,6 +13,7 @@
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
 #include "depthai/pipeline/datatype/DepthCalculatorData.hpp"
+#include "depthai/pipeline/datatype/DepthCalculatorConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -24,6 +25,7 @@
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
 #include "depthai-shared/datatype/RawDepthCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawDepthCalculatorData.hpp"
+#include "depthai-shared/datatype/RawDepthCalculatorConfig.hpp"
 
 
 //pybind
@@ -531,6 +533,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
         ;
 
+    //  // Bind ImageManipConfig
+    py::class_<DepthCalculatorConfig, Buffer, std::shared_ptr<DepthCalculatorConfig>>(m, "DepthCalculatorConfig")
+        .def(py::init<>())
+        // setters
+        .def("setROIs", &DepthCalculatorConfig::setROIs)
+        .def("addROI", &DepthCalculatorConfig::addROI)
+        ;
+
     py::class_<DepthCalculatorDataOut> (m, "DepthCalculatorDataOut")
         .def(py::init<>())
         .def_readwrite("config", &DepthCalculatorDataOut::config)
@@ -548,11 +558,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readonly("ymax", &Rect::ymax)
         ;
 
-    py::class_<DepthCalculatorConfig> (m, "DepthCalculatorConfig")
+    py::class_<DepthCalculatorConfigData> (m, "DepthCalculatorConfigData")
         .def(py::init<>())
-        .def_readwrite("roi", &DepthCalculatorConfig::roi)
-        .def_readwrite("lower_threshold", &DepthCalculatorConfig::lower_threshold)
-        .def_readwrite("upper_threshold", &DepthCalculatorConfig::upper_threshold)
+        .def_readwrite("roi", &DepthCalculatorConfigData::roi)
+        .def_readwrite("lower_threshold", &DepthCalculatorConfigData::lower_threshold)
+        .def_readwrite("upper_threshold", &DepthCalculatorConfigData::upper_threshold)
         ;
 
     // Bind DepthCalculatorData
