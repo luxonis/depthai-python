@@ -5,6 +5,7 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+from time import monotonic
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
@@ -48,15 +49,17 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
     labels = []
+    confidences = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
 
-    def to_planar(arr: np.ndarray, shape: tuple) -> list:
-        return [val for channel in cv2.resize(arr, shape).transpose(2, 0, 1) for y_col in channel for val in y_col]
-
+    def to_planar(arr: np.ndarray, shape: tuple) -> np.ndarray:
+        return cv2.resize(arr, shape).transpose(2,0,1).flatten()
 
     cap = cv2.VideoCapture(video_path)
     while cap.isOpened():
@@ -64,9 +67,14 @@ with dai.Device(pipeline) as device:
         if not read_correctly:
             break
 
-        nn_data = dai.NNData()
-        nn_data.setLayer("data", to_planar(frame, (300, 300)))
-        q_in.send(nn_data)
+        tstamp = monotonic()
+        data = to_planar(frame, (300, 300))
+        img = dai.ImgFrame()
+        img.setData(data)
+        img.setTimestamp(tstamp)
+        img.setWidth(300)
+        img.setHeight(300)
+        q_in.send(img)
 
 
         in_nn = q_nn.tryGet()
@@ -80,14 +88,16 @@ with dai.Device(pipeline) as device:
             bboxes = bboxes[bboxes[:, 2] > 0.5]
             # Cut bboxes and labels
             labels = bboxes[:, 1].astype(int)
+            confidences = bboxes[:, 2]
             bboxes = bboxes[:, 3:7]
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox, label in zip(bboxes, labels):
+            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
                 bbox = frame_norm(frame, raw_bbox)
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

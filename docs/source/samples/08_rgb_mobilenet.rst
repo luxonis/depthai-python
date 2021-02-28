@@ -1,7 +1,7 @@
 08 - RGB & MobilenetSSD
 =======================
 
-This example shows how to MobileNetv2SSD on the RGB input frame, and how to display both the RGB
+This example shows how to run MobileNetv2SSD on the RGB input frame, and how to display both the RGB
 preview and the metadata results from the MobileNetv2SSD on the preview.
 
 Demo
@@ -20,12 +20,12 @@ Please run the following command to install the required dependencies
 
 .. code-block:: bash
 
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c numpy==1.19.5 opencv-python==4.5.1.48
+  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+c9a19df719cb668e438d6eafd193cdf60a0d9354 numpy==1.19.5 opencv-python==4.5.1.48
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
+`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 
 Source code
 ###########

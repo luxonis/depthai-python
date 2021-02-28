@@ -20,7 +20,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(${TARGET_NAME} VERSION "1") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
 
 # First specify options
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
@@ -66,7 +66,7 @@ target_link_libraries(${TARGET_NAME}
     PUBLIC 
         # pybind11
         pybind11::pybind11
-        depthai-core
+        depthai::core # Use non-opencv target as we use opencv-python in bindings
         hedley
 )
 
