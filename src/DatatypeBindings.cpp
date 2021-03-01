@@ -327,36 +327,36 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind non-raw 'helper' datatypes
-    py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype")
+    py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype", DOC(dai, ADatatype))
         .def("getRaw", &ADatatype::getRaw);
 
-    py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>>(m, "Buffer")
-        .def(py::init<>())
+    py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>>(m, "Buffer", DOC(dai, Buffer))
+        .def(py::init<>(), DOC(dai, Buffer, Buffer))
 
         // obj is "Python" object, which we used then to bind the numpy arrays lifespan to
         .def("getData", [](py::object &obj){
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
             dai::Buffer &a = obj.cast<dai::Buffer&>();
             return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
-        })
-        .def("setData", &Buffer::setData)
+        }, DOC(dai, Buffer, getData))
+        .def("setData", &Buffer::setData, DOC(dai, Buffer, setData))
         .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
             buffer.getData().clear();
             buffer.getData().insert(buffer.getData().begin(), array.data(), array.data() + array.nbytes());
-        })
+        }, DOC(dai, Buffer, setData))
         ;
 
     // Bind ImgFrame
-    py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>>(m, "ImgFrame")
+    py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>>(m, "ImgFrame", DOC(dai, ImgFrame))
         .def(py::init<>())
         // getters
-        .def("getTimestamp", &ImgFrame::getTimestamp)
-        .def("getInstanceNum", &ImgFrame::getInstanceNum)
-        .def("getCategory", &ImgFrame::getCategory)
-        .def("getSequenceNum", &ImgFrame::getSequenceNum)
-        .def("getWidth", &ImgFrame::getWidth)
-        .def("getHeight", &ImgFrame::getHeight)
-        .def("getType", &ImgFrame::getType)
+        .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
+        .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
+        .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
+        .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
+        .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
+        .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
+        .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
@@ -372,8 +372,8 @@ void DatatypeBindings::bind(pybind11::module& m){
             frm.getData().resize(contiguous.nbytes());
             memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());     
 
-        })
-        .def("getFrame", [](py::object &obj, bool deepCopy){
+        }, py::arg("array"), "Copies array bytes to ImgFrame buffer")
+        .def("getFrame", [](py::object &obj, bool copy){
 
             // Try importing 'numpy' module
             py::module numpy;
@@ -461,7 +461,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
             }
 
-            if(deepCopy){
+            if(copy){
                 py::array a(dtype, shape);
                 std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
                 return a; 
@@ -469,7 +469,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                 return py::array(dtype, shape, img.getData().data(), obj);
             }
 
-        }, py::arg("deepCopy") = false)
+        }, py::arg("copy") = false, "Returns numpy array with shape as specified by width, height and type")
         
         .def("getCvFrame", [](py::object &obj){
             using namespace pybind11::literals;
@@ -534,16 +534,16 @@ void DatatypeBindings::bind(pybind11::module& m){
             // Default case
             return frame.attr("copy")();
 
-        })
+        }, "Returns BGR or grayscale frame compatible with use in other opencv functions")
 
         // setters
-        .def("setTimestamp", &ImgFrame::setTimestamp)
-        .def("setInstanceNum", &ImgFrame::setInstanceNum)
-        .def("setCategory", &ImgFrame::setCategory)
-        .def("setSequenceNum", &ImgFrame::setSequenceNum)
-        .def("setWidth", &ImgFrame::setWidth)
-        .def("setHeight", &ImgFrame::setHeight)
-        .def("setType", &ImgFrame::setType)
+        .def("setTimestamp", &ImgFrame::setTimestamp, py::arg("timestamp"), DOC(dai, ImgFrame, setTimestamp))
+        .def("setInstanceNum", &ImgFrame::setInstanceNum, py::arg("instance"), DOC(dai, ImgFrame, setInstanceNum))
+        .def("setCategory", &ImgFrame::setCategory, py::arg("category"), DOC(dai, ImgFrame, setCategory))
+        .def("setSequenceNum", &ImgFrame::setSequenceNum, py::arg("seq"), DOC(dai, ImgFrame, setSequenceNum))
+        .def("setWidth", &ImgFrame::setWidth, py::arg("width"), DOC(dai, ImgFrame, setWidth))
+        .def("setHeight", &ImgFrame::setHeight, py::arg("height"), DOC(dai, ImgFrame, setHeight))
+        .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
         ;
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
@@ -576,97 +576,96 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     // Bind NNData
-    py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
-        .def(py::init<>())
+    py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData", DOC(dai, NNData))
+        .def(py::init<>(), DOC(dai, NNData, NNData))
         // setters
-        .def("setLayer", [](NNData& obj, const std::string& key, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
-            std::vector<std::uint8_t> vec(array.data(), array.data() + array.size());
-            obj.setLayer(key, std::move(vec));
-        })
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<std::uint8_t>))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer)
-        .def("getLayer", &NNData::getLayer)
-        .def("hasLayer", &NNData::hasLayer)
-        .def("getAllLayerNames", &NNData::getAllLayerNames)
-        .def("getAllLayers", &NNData::getAllLayers)
-        .def("getLayerDatatype", &NNData::getLayerDatatype)
-        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"))
-        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"))
-        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"))
-        .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
-        .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
-        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32)
+        .def("setLayer", [](NNData& obj, const std::string& name, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> data){
+            std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
+            obj.setLayer(name, std::move(vec));
+        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
+        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        .def("getLayer", &NNData::getLayer, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
+        .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
+        .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
+        .def("getAllLayers", &NNData::getAllLayers, DOC(dai, NNData, getAllLayers))
+        .def("getLayerDatatype", &NNData::getLayerDatatype, py::arg("name"), py::arg("datatype"), DOC(dai, NNData, getLayerDatatype))
+        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"), DOC(dai, NNData, getLayerUInt8))
+        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"), DOC(dai, NNData, getLayerFp16))
+        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"), DOC(dai, NNData, getLayerInt32))
+        .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8, DOC(dai, NNData, getFirstLayerUInt8))
+        .def("getFirstLayerFp16", &NNData::getFirstLayerFp16, DOC(dai, NNData, getFirstLayerFp16))
+        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32, DOC(dai, NNData, getFirstLayerInt32))
         ;
 
     // Bind ImgDetections
-    py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections")
-        .def(py::init<>())
-        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; } )
+    py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections", DOC(dai, ImgDetections))
+        .def(py::init<>(), DOC(dai, ImgDetections, ImgDetections))
+        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
         ;
 
      // Bind ImageManipConfig
-    py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig")
+    py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig", DOC(dai, ImageManipConfig))
         .def(py::init<>())
         // setters
-        .def("setCropRect", &ImageManipConfig::setCropRect)
-        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect)
-        .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
-        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints)
-        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3)
-        .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor)
-        .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels)
-        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees)
-        .def("setRotationRadians", &ImageManipConfig::setRotationRadians)
-        .def("setResize", &ImageManipConfig::setResize)
-        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
-        .def("setFrameType", &ImageManipConfig::setFrameType)
-        .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
-        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
-        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
-        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio)
+        .def("setCropRect", &ImageManipConfig::setCropRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setCropRotatedRect))
+        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio"), DOC(dai, ImageManipConfig, setCenterCrop))
+        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints, py::arg("pt"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setWarpTransformFourPoints))
+        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3, py::arg("mat"), DOC(dai, ImageManipConfig, setWarpTransformMatrix3x3))
+        .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels, DOC(dai, ImageManipConfig, setWarpBorderReplicatePixels))
+        .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor, py::arg("red"), py::arg("green"), py::arg("blue"), DOC(dai, ImageManipConfig, setWarpBorderFillColor))
+        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees, py::arg("deg"), DOC(dai, ImageManipConfig, setRotationDegrees))
+        .def("setRotationRadians", &ImageManipConfig::setRotationRadians, py::arg("rad"), DOC(dai, ImageManipConfig, setRotationRadians))
+        .def("setResize", &ImageManipConfig::setResize, py::arg("w"), py::arg("h"), DOC(dai, ImageManipConfig, setResize))
+        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed"), py::arg("bgGreen"), py::arg("bgBlue"), DOC(dai, ImageManipConfig, setResizeThumbnail))
+        .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
+        .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
+        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
+        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
+        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
 
         // getters
-        .def("getCropXMin", &ImageManipConfig::getCropXMin)
-        .def("getCropYMin", &ImageManipConfig::getCropYMin)
-        .def("getCropXMax", &ImageManipConfig::getCropXMax)
-        .def("getCropYMax", &ImageManipConfig::getCropYMax)
-        .def("getResizeWidth", &ImageManipConfig::getResizeWidth)
-        .def("getResizeHeight", &ImageManipConfig::getResizeHeight)
-        .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail)
+        .def("getCropXMin", &ImageManipConfig::getCropXMin, DOC(dai, ImageManipConfig, getCropXMin))
+        .def("getCropYMin", &ImageManipConfig::getCropYMin, DOC(dai, ImageManipConfig, getCropYMin))
+        .def("getCropXMax", &ImageManipConfig::getCropXMax, DOC(dai, ImageManipConfig, getCropXMax))
+        .def("getCropYMax", &ImageManipConfig::getCropYMax, DOC(dai, ImageManipConfig, getCropYMax))
+        .def("getResizeWidth", &ImageManipConfig::getResizeWidth, DOC(dai, ImageManipConfig, getResizeWidth))
+        .def("getResizeHeight", &ImageManipConfig::getResizeHeight, DOC(dai, ImageManipConfig, getResizeHeight))
+        .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         ;
 
     // Bind CameraControl
-    py::class_<CameraControl, Buffer, std::shared_ptr<CameraControl>>(m, "CameraControl")
-        .def(py::init<>())
+    py::class_<CameraControl, Buffer, std::shared_ptr<CameraControl>>(m, "CameraControl", DOC(dai, CameraControl))
+        .def(py::init<>(), DOC(dai, CameraControl, CameraControl))
         // setters
-        .def("setCaptureStill", &CameraControl::setCaptureStill)
-        .def("setStartStreaming", &CameraControl::setStartStreaming)
-        .def("setStopStreaming", &CameraControl::setStopStreaming)
-        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode)
-        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger)
-        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion)
-        .def("setManualFocus", &CameraControl::setManualFocus)
-        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable)
-        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock)
-        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion)
-        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation)
-        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode)
-        .def("setManualExposure", &CameraControl::setManualExposure)
-        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode)
-        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock)
-        .def("setBrightness", &CameraControl::setBrightness)
-        .def("setContrast", &CameraControl::setContrast)
-        .def("setSaturation", &CameraControl::setSaturation)
-        .def("setSharpness", &CameraControl::setSharpness)
-        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength)
-        .def("setLumaDenoise", &CameraControl::setLumaDenoise)
-        .def("setChromaDenoise", &CameraControl::setChromaDenoise)
-        .def("setSceneMode", &CameraControl::setSceneMode)
-        .def("setEffectMode", &CameraControl::setEffectMode)
+        .def("setCaptureStill", &CameraControl::setCaptureStill, py::arg("capture"), DOC(dai, CameraControl, setCaptureStill))
+        .def("setStartStreaming", &CameraControl::setStartStreaming, DOC(dai, CameraControl, setStartStreaming))
+        .def("setStopStreaming", &CameraControl::setStopStreaming, DOC(dai, CameraControl, setStopStreaming))
+        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode, py::arg("mode"), DOC(dai, CameraControl, setAutoFocusMode))
+        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger, DOC(dai, CameraControl, setAutoFocusTrigger))
+        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoFocusRegion))
+        .def("setManualFocus", &CameraControl::setManualFocus, py::arg("lensPosition"), DOC(dai, CameraControl, setManualFocus))
+        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable, DOC(dai, CameraControl, setAutoExposureEnable))
+        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock, py::arg("lock"), DOC(dai, CameraControl, setAutoExposureLock))
+        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoExposureRegion))
+        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation, py::arg("compensation"), DOC(dai, CameraControl, setAutoExposureCompensation))
+        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode, py::arg("mode"), DOC(dai, CameraControl, setAntiBandingMode))
+        .def("setManualExposure", &CameraControl::setManualExposure, py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
+        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode, py::arg("mode"), DOC(dai, CameraControl, setAutoWhiteBalanceMode))
+        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock, py::arg("lock"), DOC(dai, CameraControl, setAutoWhiteBalanceLock))
+        .def("setBrightness", &CameraControl::setBrightness, py::arg("value"), DOC(dai, CameraControl, setBrightness))
+        .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
+        .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
+        .def("setSharpness", &CameraControl::setSharpness, py::arg("value"), DOC(dai, CameraControl, setSharpness))
+        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength, py::arg("value"), DOC(dai, CameraControl, setNoiseReductionStrength))
+        .def("setLumaDenoise", &CameraControl::setLumaDenoise, py::arg("value"), DOC(dai, CameraControl, setLumaDenoise))
+        .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
+        .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
+        .def("setEffectMode", &CameraControl::setEffectMode, py::arg("mode"), DOC(dai, CameraControl, setEffectMode))
         // getters
-        .def("getCaptureStill", &CameraControl::getCaptureStill)
+        .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
         ;
     // Add also enum attributes from RawCameraControl
     for (const auto& a : camCtrlAttr) {
@@ -674,7 +673,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     }
 
     // Bind SystemInformation
-    py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation")
+    py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation", DOC(dai, SystemInformation))
         .def(py::init<>())
         .def_property("ddrMemoryUsage", [](SystemInformation& i) { return &i.ddrMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.ddrMemoryUsage = val; } )
         .def_property("leonCssMemoryUsage", [](SystemInformation& i) { return &i.leonCssMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.leonCssMemoryUsage = val; } )
