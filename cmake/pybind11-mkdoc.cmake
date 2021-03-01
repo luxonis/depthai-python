@@ -75,6 +75,6 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
     file(TOUCH_NOCREATE ${mkdoc_headers})
 
     # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
-    add_dependencies(${TARGET_NAME} ${PYBIND11_MKDOC_TARGET_NAME})
+    add_dependencies(${target} ${PYBIND11_MKDOC_TARGET_NAME})
 
 endfunction()
