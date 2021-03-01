@@ -9,11 +9,11 @@ pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) cameras
 left = pipeline.createMonoCamera()
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
 right = pipeline.createMonoCamera()
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
@@ -36,9 +36,9 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
     while True:
-        in_rgb = q.get() # blocking call, will wait until a new data has arrived
+        in_depth = q.get()  # blocking call, will wait until a new data has arrived
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame = in_rgb.getData().reshape((in_rgb.getHeight(), in_rgb.getWidth())).astype(np.uint8)
+        frame = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
         frame = np.ascontiguousarray(frame)
         # frame is transformed, the color map will be applied to highlight the depth info
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)

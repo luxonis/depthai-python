@@ -117,7 +117,7 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
 
   .. code-block:: bash
 
-    python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe
+    python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+c9a19df719cb668e438d6eafd193cdf60a0d9354
 
 For other installation options, see :ref:`other installation options <Other installation methods>`.
 
