@@ -23,6 +23,11 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
         ;
 
     deviceBootloader
+        // Python only methods
+        .def("__enter__", [](py::object obj){ return obj; })
+        .def("__exit__", [](DeviceBootloader& bl, py::object type, py::object value, py::object traceback) { bl.close(); })
+        .def("close", &DeviceBootloader::close)
+
         .def_static("getFirstAvailableDevice", &DeviceBootloader::getFirstAvailableDevice)
         .def_static("getAllAvailableDevices", &DeviceBootloader::getAllAvailableDevices)
         .def_static("saveDepthaiApplicationPackage", &DeviceBootloader::saveDepthaiApplicationPackage, py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "")
