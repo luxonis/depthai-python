@@ -89,15 +89,19 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+        # initialize cmake_args and build_args
+        cmake_args = []
+        build_args = []
+
+        # Specify output directory and python executable
+        cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
         # Pass a commit hash
         if buildCommitHash != None :
             cmake_args += ['-DDEPTHAI_PYTHON_COMMIT_HASH=' + buildCommitHash]
 
         # Pass a docstring option
-        if os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT'] != None:
+        if 'DEPTHAI_PYTHON_DOCSTRINGS_INPUT' in os.environ:
             cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
             cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
 
@@ -105,7 +109,7 @@ class CMakeBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=' + cfg]
-        build_args = ['--config', cfg]
+        build_args += ['--config', cfg]
 
         # Memcheck (guard if it fails)
         totalMemory = 4000
@@ -132,7 +136,7 @@ class CMakeBuild(build_ext):
                 cmake_args += ['-A', 'Win32']
             
             # Add flag to build with maximum available threads
-            build_args = ['--', '/m']
+            build_args += ['--', '/m']
         # Unix
         else:
             # if macos add some additional env vars
@@ -196,6 +200,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
