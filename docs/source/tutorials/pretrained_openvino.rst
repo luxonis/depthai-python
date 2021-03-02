@@ -1,8 +1,12 @@
 Use a Pre-trained OpenVINO model
 ================================
 
-In this tutorial, you'll learn how to detect faces in realtime, even on a low-powered Raspberry Pi. I'll introduce you
-to the OpenVINO model zoo and running models from this 'zoo'.
+.. warning::
+
+  This example is outdated and we're working on updating, please proceed with caution
+
+In this tutorial, you'll learn how to detect faces in real-time, even on a low-powered Raspberry Pi. I'll introduce you
+to the OpenVINO, the Open Model Zoo and show you how to run models.
 
 .. image:: /_static/images/tutorials/pretrained_openvino/face-1.png
   :alt: preview
@@ -12,45 +16,39 @@ Haven't heard of OpenVINO or the Open Model Zoo? I'll start with a quick introdu
 What is OpenVINO?
 #################
 
-Under-the-hood, DepthAI uses the Intel MyriadX chip to perform high-speed model inference. However, you can't just dump
-your neural net into the chip and get high-performance for free. That's where `OpenVINO <https://docs.openvinotoolkit.org/>`__
-comes in. OpenVINO is a free toolkit that converts a deep learning model into a format that runs on Intel Hardware.
-Once the model is converted, it's common to see Frames Per Second (FPS) improve by 25x or more. Are a couple of small
-steps worth a 25x FPS increase? Often, the answer is yes!
+
+Under-the-hood, DepthAI uses the Intel Myriad X to perform high-speed model inference. However, you can't just dump
+your neural net into the chip and get high-performance for free. That's where `OpenVINO
+<https://docs.openvinotoolkit.org/>`__ comes in. OpenVINO is a free toolkit that converts a deep learning model into a
+format that runs on Intel Hardware. Once the model is converted, it's common to see Frames Per Second (FPS) improve by
+25x or more. Are a couple of small steps worth a 25x FPS increase? Often, the answer is yes!
+
+Check the `OpenVINO toolkit website <https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html>`__
+for installation instructions. OpenVINO should be installed under `/opt/intel`. Verify that the version is supported by
+DepthAI (see :ref:`Is DepthAI OpenVINO Compatible? <Is DepthAI OpenVINO Compatible?>`).
 
 What is the Open Model Zoo?
 ###########################
 
-The `Open Model Zoo <https://github.com/opencv/open_model_zoo>`__ is a library of freely-available pre-trained models.
-Side note: in machine learning/AI the name for a collection of pre-trained models is called a 'model zoo'.
-The Zoo also contains scripts for downloading those models into a compile-ready format to run on DepthAI.
+In machine learning/AI the name for a collection of pre-trained models is called a "model zoo". The `Open Model Zoo
+<https://github.com/opencv/open_model_zoo>`__ is a library of freely-available pre-trained models. The Zoo also contains
+scripts for downloading those models into a compile-ready format to run on DepthAI.
 
-DepthAI is able to run many of the object detection models in the Zoo, and several are pre-included in the DepthAI Github.
-repository.  We will be using one such model in this tutorial, is face-detection-retail-0004 (pre-compiled
-`here <https://github.com/luxonis/depthai/tree/master/resources/nn/face-detection-retail-0004>`__ on our Github, and
-`here <https://docs.openvinotoolkit.org/2020.1/_models_intel_face_detection_retail_0004_description_face_detection_retail_0004.html>`__ on the OpenVINO model zoo).
+DepthAI is able to run many of the object detection models in the Zoo. Several of those models are included in the
+`DepthAI Github repositoy <https://github.com/luxonis/depthai/tree/master/resources/nn/>`__.
 
-We'll cover converting OpenVINO models to run on DepthAI in a later article.  For now, you can find the models we've
-pre-converted `here <https://github.com/luxonis/depthai/tree/master/resources/nn>`__ and brief instructions on how to do
-so `here <https://github.com/luxonis/depthai#conversion-of-existing-trained-models-into-intel-movidius-binary-format>`__.
+Clone the Open Model Zoo repository from Github and `install its dependencies
+<https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/downloader/README.md#prerequisites>`__.
+Optionally, add the scripts to your path:
 
-Dependencies
-############
+.. code-block:: bash
 
-.. warning::
-
-  Using the RPi Compute Edition or a pre-flashed DepthAI Raspberry Pi µSD card? **Skip this step**
-
-  All dependencies are installed and the repository is checked out to :code:`~/Desktop/depthai`.
-
-This tutorial has the same dependencies as the :ref:`Hello World Tutorial <hello_world_dependencies>` - that the DepthAI
-API has been installed and is accessible on the system.  See :ref:`here <Python API>` if you have not yet installed the API.
-
+    export PATH="${PATH}:${PWD}/open_model_zoo/tools/downloader/"
 
 Run DepthAI Default Model
 #########################
 
-The :code:`depthai.py` file can be modified directly to you do your bidding, or you can simply pass arguments to it for
+The :code:`depthai_demo.py` file can be modified directly to you do your bidding, or you can simply pass arguments to it for
 which models you want to run.
 
 For simplicity we will do the latter, simply passing arguments so that DepthAI runs the :code:`face-detection-retail-0004`
@@ -64,12 +62,12 @@ options a spin.  In this case we'll just pass in the same neural network that de
 
   python3 depthai_demo.py -dd
 
-This will then run the a typical demo MobileNetv1 SSD object detector trained on the `PASCAL 2007 VOC <http://host.robots.ox.ac.uk/pascal/VOC/voc2007/>`__ classes, which are:
+This will then run the a typical demo MobileNetv2 SSD object detector trained on the `PASCAL 2007 VOC <http://host.robots.ox.ac.uk/pascal/VOC/voc2007/>`__ classes, which are:
 
 - Person: person
 - Animal: bird, cat, cow, dog, horse, sheep
-- Vehicle: aeroplane, bicycle, boat, bus, car, motorbike, train
-- Indoor: bottle, chair, dining table, potted plant, sofa, tv/monitor
+- Vehicle: airplane, bicycle, boat, bus, car, motorbike, train
+- Indoor: bottle, chair, dining table, potted plant, sofa, TV/monitor
 
 I ran this on my iMac (OS X setup :ref:`here <macOS (Mac OS X)>`) with a `microAI <https://shop.luxonis.com/products/bw1093>`__ sitting on my desk pointing upwards randomly - and it makes out the corner of my iMac (which is barely visible) and correctly identifies it as `tv/monitor`:
 
@@ -87,7 +85,7 @@ To use this model, simply specify the name of the model to be run with the :code
 
   python3 depthai_demo.py -dd -cnn face-detection-retail-0004
 
-Execute the script to see an annotated video stream of face detections:
+Execute the script to see an annotated video stream of face detection:
 
 .. image:: /_static/images/tutorials/pretrained_openvino/face-2.png
   :alt: face
@@ -146,12 +144,12 @@ Let's try out :code:`face-detection-adas-0001`, which is intended for detecting 
 So this model actually has a shorter detection distance than the smaller model despite having a higher resolution.  Why?  Likely because it was intentionally trained to detect only close-in faces since it's intended to be used in the cabin of a vehicle.  (You wouldn't want to be detecting the faces in cars passing by, for example.)
 
 And also you may notice networks like emotion recognition... those networks are actually intended to be run as a second
-stage network (as they are meant to be applied only to images that contain only faces).  So to use the emotions
-recognitions network, use the command below to tell DepthAI/megaAI to run it as the second stage:
+stage network (as they are meant to be applied only to images that contain only faces).  So to use the emotion
+recognition network, use the command below to tell DepthAI/megaAI to run it as the second stage:
 
 .. code-block:: bash
 
-  ./depthai.py -cnn face-detection-retail-0004 -cnn2 emotions-recognition-retail-0003 -dd -sh 12 -cmx 12 -nce 2
+  ./depthai_demo.py -cnn face-detection-retail-0004 -cnn2 emotions-recognition-retail-0003 -dd -sh 12 -cmx 12 -nce 2
 
 .. image:: https://i.imgur.com/uqhdqJG.png
   :alt: face
@@ -165,10 +163,10 @@ as microAI is monocular only - no depth information.)
 
 So you get the **full 3D position** of the **detected object**, in this case, my face.
 
-So that the full xyz position in meters is returned.  See below.
+So that the full three-dimensional position in meters is returned.  See below.
 
-Spatial AI - Augmenting the Model with 3D Postion
-#################################################
+Spatial AI - Augmenting the Model with 3D Position
+##################################################
 
 So by default DepthAI is set to return the full 3D position.  So in the command above, we actually specify for it to not
 be calculated with :code:`-dd` (or :code:`--disable_depth`).
@@ -198,7 +196,7 @@ Monocular Neural Inference fused with Stereo Depth
 We call this mode of spatial AI 'Monocular Neural Inference fused with Stereo Depth'.  To visualize how this mode works,
 it is helpful to overlay the neural inference bounding box over the depth results directly.
 
-To visualize this, let's overlay the results directly onto the raw depth information (visualized in OpenCV HOT colormap):
+To visualize this, let's overlay the results directly onto the raw depth information (visualized in OpenCV HOT :code:`colormap`):
 
 .. code-block:: bash
 

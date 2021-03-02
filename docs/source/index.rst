@@ -66,6 +66,7 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    tutorials/hello_world.rst
    tutorials/multiple.rst
    tutorials/local_convert_openvino.rst
+   tutorials/pretrained_openvino.rst
 
 .. toctree::
    :maxdepth: 1
