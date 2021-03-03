@@ -1,4 +1,4 @@
-21 - RGB & TinyYoloV3 decoding on device
+22.1 - RGB & TinyYoloV3 decoding on device
 ==========================================
 
 This example shows how to run TinyYoloV3 on the RGB input frame, and how to display both the RGB
@@ -29,15 +29,15 @@ Please run the following command to install the required dependencies
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
+This example also requires YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob>`__
 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/22_tiny_yolo_v3_device_side_decoding.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/22_1_tiny_yolo_v3_device_side_decoding.py>`__
 
-.. literalinclude:: ../../../examples/22_tiny_yolo_v3_device_side_decoding.py
+.. literalinclude:: ../../../examples/22_1_tiny_yolo_v3_device_side_decoding.py
    :language: python
    :linenos:
 

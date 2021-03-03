@@ -8,13 +8,12 @@ import numpy as np
 import time
 
 '''
-Tiny-yolo-v3 device side decoding demo
-  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
-  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
-  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+Tiny-yolo-v4 device side decoding demo
+  The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
+  The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
 '''
 
-# tiny yolo v3 label texts
+# tiny yolo v4 label texts
 label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
              "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
              "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
@@ -32,9 +31,9 @@ label_map = ["person",         "bicycle",    "car",           "motorbike",     "
 syncNN = True
 
 # Get argument first
-tiny_yolo_v3_path = str((Path(__file__).parent / Path('models/tiny_yolo_v3_6shaves.blob')).resolve().absolute())
+tiny_yolo_v4_path = str((Path(__file__).parent / Path('models/tiny_yolo_v4_6shaves.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    tiny_yolo_v3_path = sys.argv[1]
+    tiny_yolo_v4_path = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -50,18 +49,11 @@ detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
 detectionNetwork.setCoordinateSize(4)
-anchors = np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-detectionNetwork.setAnchors(anchors)
-anchorMasks26 = np.array([1,2,3])
-anchorMasks13 = np.array([3,4,5])
-anchorMasks = {
-    "side26": anchorMasks26,
-    "side13": anchorMasks13,
-}
-detectionNetwork.setAnchorMasks(anchorMasks)
+detectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
+detectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
 detectionNetwork.setIouThreshold(0.5)
 
-detectionNetwork.setBlobPath(tiny_yolo_v3_path)
+detectionNetwork.setBlobPath(tiny_yolo_v4_path)
 detectionNetwork.setNumInferenceThreads(2)
 detectionNetwork.input.setBlocking(False)
 
@@ -125,7 +117,7 @@ with dai.Device(pipeline) as device:
             height = frame.shape[0]
             width  = frame.shape[1]
             for bbox in bboxes:
-                #denormalize bounging box
+                # denormalize bounding box
                 x1 = int(bbox.xmin * width)
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)
