@@ -5,6 +5,7 @@ import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
 
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
@@ -51,6 +52,9 @@ with dai.Device(pipeline) as device:
     bboxes = []
     confidences = []
     labels = []
+    start_time = time.time()
+    counter = 0
+    fps = 0    
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
@@ -81,6 +85,17 @@ with dai.Device(pipeline) as device:
             labels = bboxes[:, 1].astype(int)
             confidences = bboxes[:, 2]
             bboxes = bboxes[:, 3:7]
+            counter+=1
+            current_time = time.time()            
+            if (current_time - start_time) > 1 :
+                fps = counter / (current_time - start_time)
+                counter = 0
+                start_time = current_time
+
+        color = (255, 255, 255)
+
+
+
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -89,6 +104,8 @@ with dai.Device(pipeline) as device:
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
+        
             cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
