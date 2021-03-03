@@ -21,7 +21,8 @@ cam_rgb.setPreviewSize(300, 300)
 cam_rgb.setInterleaved(False)
 
 # Define a neural network that will make predictions based on the source frames
-detection_nn = pipeline.createNeuralNetwork()
+detection_nn = pipeline.createMobileNetDetectionNetwork()
+detection_nn.setConfidenceThreshold(0.5)
 detection_nn.setBlobPath(mobilenet_path)
 cam_rgb.preview.link(detection_nn.input)
 
@@ -48,13 +49,8 @@ with dai.Device(pipeline) as device:
     q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
-    frame = None
-    bboxes = []
-    confidences = []
-    labels = []
     start_time = time.time()
     counter = 0
-    fps = 0    
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
@@ -64,49 +60,22 @@ with dai.Device(pipeline) as device:
 
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-        in_rgb = q_rgb.tryGet()
-        in_nn = q_nn.tryGet()
+        # use blocking get() call to catch frame and inference result synced
+        in_rgb = q_rgb.get()
+        in_nn = q_nn.get()
 
-        if in_rgb is not None:
-            # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-            frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+        frame = in_rgb.getCvFrame()
+        counter += 1
 
-        if in_nn is not None:
-            # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
-            bboxes = np.array(in_nn.getFirstLayerFp16())
-            # transform the 1D array into Nx7 matrix
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            confidences = bboxes[:, 2]
-            bboxes = bboxes[:, 3:7]
-            counter+=1
-            current_time = time.time()            
-            if (current_time - start_time) > 1 :
-                fps = counter / (current_time - start_time)
-                counter = 0
-                start_time = current_time
-
-        color = (255, 255, 255)
-
-
-
-
-        if frame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
-                bbox = frame_norm(frame, raw_bbox)
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
+        # if the frame is available, draw bounding boxes on it and show the frame
+        for detection in in_nn.detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, texts[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence*100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.time() - start_time)), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color = (255, 255, 255))
         
-            cv2.imshow("rgb", frame)
+        cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
