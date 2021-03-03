@@ -117,14 +117,14 @@ class CMakeBuild(build_ext):
         build_args += ['--config', cfg]
 
         # Memcheck (guard if it fails)
-        totalMemory = 4000
+        freeMemory = 4000
         if platform.system() == "Linux":
             try:
-                totalMemory = int(os.popen("free -m").readlines()[1].split()[1])
+                freeMemory = int(os.popen("free -m").readlines()[1].split()[2])
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
-                totalMemory = 4000
+                freeMemory = 4000
         # Memcheck (guard if it fails)
 
 
@@ -151,10 +151,10 @@ class CMakeBuild(build_ext):
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
-            if totalMemory < 1000:
+            if freeMemory < 1000:
                 build_args += ['--', '-j1']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif totalMemory < 2000:
+            elif freeMemory < 2500:
                 build_args += ['--', '-j2']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
             else:
