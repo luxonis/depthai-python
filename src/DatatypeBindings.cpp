@@ -696,6 +696,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         // setters
         .def("setROIs", &DepthCalculatorConfig::setROIs)
         .def("addROI", &DepthCalculatorConfig::addROI)
+        .def("getConfigData", &DepthCalculatorConfig::getConfigData)
         ;
 
     py::class_<DepthCalculatorDataOut> (m, "DepthCalculatorDataOut")

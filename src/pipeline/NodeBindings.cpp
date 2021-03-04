@@ -367,17 +367,17 @@ void NodeBindings::bind(pybind11::module& m){
 
         ;
 
-    // py::class_<MobileNetDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<MobileNetDetectionNetworkDepth>>(m, "MobileNetDetectionNetworkDepth")
-    //     ;
+    py::class_<MobileNetDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<MobileNetDetectionNetworkDepth>>(m, "MobileNetDetectionNetworkDepth")
+        ;
 
-    // // YoloDetectionNetworkDepth node
-    // py::class_<YoloDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<YoloDetectionNetworkDepth>>(m, "YoloDetectionNetworkDepth")
-    //     .def("setNumClasses", &YoloDetectionNetworkDepth::setNumClasses)
-    //     .def("setCoordinateSize", &YoloDetectionNetworkDepth::setCoordinateSize)
-    //     .def("setAnchors", &YoloDetectionNetworkDepth::setAnchors)
-    //     .def("setAnchorMasks", &YoloDetectionNetworkDepth::setAnchorMasks)
-    //     .def("setIouThreshold", &YoloDetectionNetworkDepth::setIouThreshold)
-    //     ;
+    // YoloDetectionNetworkDepth node
+    py::class_<YoloDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<YoloDetectionNetworkDepth>>(m, "YoloDetectionNetworkDepth")
+        .def("setNumClasses", &YoloDetectionNetworkDepth::setNumClasses)
+        .def("setCoordinateSize", &YoloDetectionNetworkDepth::setCoordinateSize)
+        .def("setAnchors", &YoloDetectionNetworkDepth::setAnchors)
+        .def("setAnchorMasks", &YoloDetectionNetworkDepth::setAnchorMasks)
+        .def("setIouThreshold", &YoloDetectionNetworkDepth::setIouThreshold)
+        ;
 
     // SystemLogger node
     py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger", DOC(dai, node, SystemLogger))

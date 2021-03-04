@@ -93,11 +93,13 @@ with dai.Device(pipeline) as device:
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     frame = None
-    bboxes = []
+    detections = []
 
     start_time = time.time()
     counter = 0
     fps = 0
+    color = (255, 255, 255)
+
     while True:
         in_rgb = q_rgb.get()
         in_nn = q_nn.get()
@@ -110,35 +112,52 @@ with dai.Device(pipeline) as device:
             counter = 0
             start_time = current_time
         
-        # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-        shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-        frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-        frame = np.ascontiguousarray(frame)
+        frame = in_rgb.getCvFrame()
 
-        bboxes = in_nn.detections
+        depthFrame = depth.getFrame()
 
+        depthFramePretty = cv2.normalize(depthFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+        depthFramePretty = cv2.equalizeHist(depthFramePretty)
+        depthFramePretty = cv2.applyColorMap(depthFramePretty, cv2.COLORMAP_HOT)
+        detections = in_nn.detections
+        if len(detections) != 0:
+            passthroughRoi = depthRoiMap.get()
+            roiDatas = passthroughRoi.getConfigData()
 
-        color = (255, 255, 255)
+            for roiData in roiDatas:
+                roi = roiData.roi
+                xmin = (int)(roi.xmin * depth.getWidth())
+                ymin = (int)(roi.ymin * depth.getHeight())
+                xmax = (int)(roi.xmax * depth.getWidth())
+                ymax = (int)(roi.ymax * depth.getHeight())
+
+                cv2.rectangle(depthFramePretty, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+
 
         # if the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]
         width  = frame.shape[1]
-        for bbox in bboxes:
+        for detection in detections:
             #denormalize bounging box
-            x1 = int(bbox.xmin * width)
-            x2 = int(bbox.xmax * width)
-            y1 = int(bbox.ymin * height)
-            y2 = int(bbox.ymax * height)
+            x1 = int(detection.xmin * width)
+            x2 = int(detection.xmax * width)
+            y1 = int(detection.ymin * height)
+            y2 = int(detection.ymax * height)
             try:
-                label = label_map[bbox.label]
+                label = label_map[detection.label]
             except:
-                label = bbox.label
+                label = detection.label
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, "X: {:.2f}".format(detection.xdepth), (x1 + 10, y1 + 60), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, "Y: {:.2f}".format(detection.ydepth), (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, "Z: {:.2f}".format(detection.zdepth), (x1 + 10, y1 + 100), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
+        cv2.imshow("depth", depthFramePretty)
         cv2.imshow("rgb", frame)
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+        if cv2.waitKey(1) == ord('q'):
+            break
