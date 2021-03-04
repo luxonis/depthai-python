@@ -15,6 +15,7 @@
 #include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/DepthCalculator.hpp"
+#include "depthai/pipeline/node/DetectionNetworkDepth.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -69,6 +70,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
         .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
         .def("createDepthCalculator", &Pipeline::create<node::DepthCalculator>)
+        .def("createMobileNetDetectionNetworkDepth", &Pipeline::create<node::MobileNetDetectionNetworkDepth>)
+        .def("createYoloDetectionNetworkDepth", &Pipeline::create<node::YoloDetectionNetworkDepth>)
 
         ;
     

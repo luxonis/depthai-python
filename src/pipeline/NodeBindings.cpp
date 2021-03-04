@@ -13,6 +13,7 @@
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/DepthCalculator.hpp"
+#include "depthai/pipeline/node/DetectionNetworkDepth.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -350,6 +351,29 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks)
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold)
         ;
+
+    py::class_<DetectionNetworkDepth, DetectionNetwork, std::shared_ptr<DetectionNetworkDepth>>(m, "DetectionNetworkDepth")
+        .def_readonly("depthInput", &DetectionNetworkDepth::depthInput)
+        .def_readonly("out", &DetectionNetworkDepth::out)
+        .def_readonly("passthroughRoi", &DetectionNetworkDepth::passthroughRoi)
+        .def("setBoundingBoxScaleFactor", &DetectionNetworkDepth::setBoundingBoxScaleFactor)
+        .def("setDepthLowerThresholdLimit", &DetectionNetworkDepth::setDepthLowerThresholdLimit)
+        .def("setDepthUpperThresholdLimit", &DetectionNetworkDepth::setDepthUpperThresholdLimit)
+        .def("setConfidenceThreshold", &DetectionNetworkDepth::setConfidenceThreshold)
+
+        ;
+
+    // py::class_<MobileNetDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<MobileNetDetectionNetworkDepth>>(m, "MobileNetDetectionNetworkDepth")
+    //     ;
+
+    // // YoloDetectionNetworkDepth node
+    // py::class_<YoloDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<YoloDetectionNetworkDepth>>(m, "YoloDetectionNetworkDepth")
+    //     .def("setNumClasses", &YoloDetectionNetworkDepth::setNumClasses)
+    //     .def("setCoordinateSize", &YoloDetectionNetworkDepth::setCoordinateSize)
+    //     .def("setAnchors", &YoloDetectionNetworkDepth::setAnchors)
+    //     .def("setAnchorMasks", &YoloDetectionNetworkDepth::setAnchorMasks)
+    //     .def("setIouThreshold", &YoloDetectionNetworkDepth::setIouThreshold)
+    //     ;
 
     // SystemLogger node
     py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger")
