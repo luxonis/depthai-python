@@ -115,7 +115,7 @@ class CMakeBuild(build_ext):
         freeMemory = 4000
         if platform.system() == "Linux":
             try:
-                freeMemory = int(os.popen("free -m").readlines()[1].split()[2])
+                freeMemory = int(os.popen("free -m").readlines()[1].split()[3])
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
