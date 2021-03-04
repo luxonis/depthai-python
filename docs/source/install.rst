@@ -116,8 +116,9 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
 #. Install DepthAI Gen2 API, adding commit SHA at the end of a package name, in form of :code:`depthai==0.0.2.1+<sha>`
 
   .. code-block:: bash
+    :substitutions:
 
-    python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe
+    python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release|
 
 For other installation options, see :ref:`other installation options <Other installation methods>`.
 

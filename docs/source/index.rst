@@ -6,6 +6,9 @@
 Welcome to DepthAI Gen2 API Documentation
 =========================================
 
+.. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
+   :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
+
 On this page you can find the details regarding DepthAI API that will allow you to interact with the DepthAI device.
 We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ API Reference>`
 
@@ -40,8 +43,9 @@ with some insightful tutorials.
 Before running the example, install the DepthAI Python library using the command below
 
 .. code-block:: python
+   :substitutions:
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe
+   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release|
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -89,6 +93,7 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/21_mobilenet_decoding_on_device.rst
    samples/22_tiny_tolo_v3_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
+   samples/24_opencv_support.rst
 
 .. toctree::
    :maxdepth: 1

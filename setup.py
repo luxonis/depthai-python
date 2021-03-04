@@ -89,14 +89,27 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+        # initialize cmake_args and build_args
+        cmake_args = []
+        build_args = []
 
+        # Specify output directory and python executable
+        cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
+
+        # Pass a commit hash
         if buildCommitHash != None :
             cmake_args += ['-DDEPTHAI_PYTHON_COMMIT_HASH=' + buildCommitHash]
 
+        # Pass a docstring option
+        if 'DEPTHAI_PYTHON_DOCSTRINGS_INPUT' in os.environ:
+            cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
+            cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
+
+        # Set build type (debug vs release for library as well as dependencies)
         cfg = 'Debug' if self.debug else 'Release'
-        build_args = ['--config', cfg]
+        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+        cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=' + cfg]
+        build_args += ['--config', cfg]
 
         # Memcheck (guard if it fails)
         totalMemory = 4000
@@ -107,7 +120,11 @@ class CMakeBuild(build_ext):
                 raise
             except:
                 totalMemory = 4000
+        # Memcheck (guard if it fails)
 
+
+        # Configure and build
+        # Windows
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             cmake_args += ['-DCMAKE_TOOLCHAIN_FILE={}'.format(os.path.dirname(os.path.abspath(__file__)) + '/cmake/toolchain/msvc.cmake')]
@@ -120,32 +137,28 @@ class CMakeBuild(build_ext):
             
             # Add flag to build with maximum available threads
             build_args += ['--', '/m']
+        # Unix
         else:
-            # if macos
+            # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
                 os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
-            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-           
-            #Memcheck
-            parallel_args = ['--', '-j']
+            # Specify how many threads to use when building, depending on available memory
             if totalMemory < 1000:
-                parallel_args = ['--', '-j1']
+                build_args += ['--', '-j1']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
             elif totalMemory < 2000:
-                parallel_args = ['--', '-j2']
+                build_args += ['--', '-j2']
                 cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
-            build_args += parallel_args
-
-        # Hunter configuration to release only
-        cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=Release']
-
+            else:
+                # Build with maximum available threads
+                build_args += ['--', '-j']
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
-        # Add additional cmake args
+        # Add additional cmake args from environment
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [os.environ['CMAKE_ARGS']]
 
@@ -187,6 +200,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
