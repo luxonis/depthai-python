@@ -56,7 +56,7 @@ with dai.Device(pipeline) as device:
     q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
-    start_time = time.time()
+    start_time = time.monotonic()
     counter = 0
     detections = []
     frame = None
@@ -80,7 +80,7 @@ with dai.Device(pipeline) as device:
 
         if in_rgb is not None:
             frame = in_rgb.getCvFrame()
-            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.time() - start_time)), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(255, 255, 255))
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - start_time)), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(255, 255, 255))
 
         if in_nn is not None:
             detections = in_nn.detections
