@@ -67,9 +67,9 @@ detectionNetwork.passthroughRoi.link(depthRoiMap.input)
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
 stereo = pipeline.createStereoDepth()
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
@@ -147,10 +147,10 @@ with dai.Device(pipeline) as device:
             except:
                 label = detection.label
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(frame, "X: {:.2f}".format(detection.xdepth), (x1 + 10, y1 + 60), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(frame, "Y: {:.2f}".format(detection.ydepth), (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(frame, "Z: {:.2f}".format(detection.zdepth), (x1 + 10, y1 + 100), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"X: {int(detection.xdepth)}", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"Y: {int(detection.ydepth)}", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"Z: {int(detection.zdepth)}", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 

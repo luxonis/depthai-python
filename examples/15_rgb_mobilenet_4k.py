@@ -74,6 +74,9 @@ with dai.Device(pipeline) as device:
                         (255, 0, 0), 2)
         cv2.imshow(name, frame)
 
+    cv2.namedWindow("video", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("video", 1280, 720)
+    print("Resize video window with mouse drag!")
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise

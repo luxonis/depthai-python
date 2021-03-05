@@ -75,6 +75,8 @@ depthCalcConfigInQueue = device.getInputQueue("depthCalcConfig")
 
 color = (255, 255, 255)
 
+print("Use WASD keys to move ROI")
+
 while True:
     inDepth = depthQueue.get() # blocking call, will wait until a new data has arrived
     inDepthAvg = depthCalcQueue.get() # blocking call, will wait until a new data has arrived
