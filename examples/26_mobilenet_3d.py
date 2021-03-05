@@ -15,7 +15,7 @@ Mobilenet SSD device side decoding demo
 '''
 
 # MobilenetSSD label texts
-label_map = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
              "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 syncNN = True
@@ -68,9 +68,9 @@ detectionNetwork.passthroughRoi.link(depthRoiMap.input)
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
 stereo = pipeline.createStereoDepth()
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
@@ -87,8 +87,8 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-    q_nn = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+    previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     depthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
@@ -101,8 +101,8 @@ with dai.Device(pipeline) as device:
     color = (255, 255, 255)
 
     while True:
-        in_rgb = q_rgb.get()
-        in_nn = q_nn.get()
+        in_rgb = previewQueue.get()
+        in_nn = detectionNNQueue.get()
         depth = depthQueue.get()
 
         counter+=1
@@ -144,7 +144,7 @@ with dai.Device(pipeline) as device:
             y1 = int(detection.ymin * height)
             y2 = int(detection.ymax * height)
             try:
-                label = label_map[detection.label]
+                label = labelMap[detection.label]
             except:
                 label = detection.label
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
