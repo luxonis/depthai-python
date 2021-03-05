@@ -10,7 +10,7 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 env=os.environ.copy()
 
 # Temp dir - remove if exists, and create a new one
-tmpdir = '/home/docs/__temp_dir/'
+tmpdir = '/home/docs/__temp_dir'
 subprocess.check_call(['rm', '-rf', tmpdir])
 subprocess.check_call(['mkdir', '-p', tmpdir])
 
