@@ -30,7 +30,7 @@ env['LIBCLANG_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/lib/libclang.so.1'
 env['LLVM_DIR_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/'
 
 # Build library and generate actual conf.py
-subprocess.run(["cmake -P ci.cmake"], cwd=cwd, shell=True, check=True, env=env)
+subprocess.run(["cmake -P ../ci.cmake"], cwd=cwd, shell=True, check=True, env=env)
 
 # Load generated conf.py which includes all needed information to build with sphinx
 with open("../../build/docs/conf.py") as infile:
