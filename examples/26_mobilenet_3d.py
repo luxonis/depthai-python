@@ -32,7 +32,7 @@ pipeline = dai.Pipeline()
 colorCam = pipeline.createColorCamera()
 colorCam.setPreviewSize(300, 300)
 colorCam.setInterleaved(False)
-colorCam.setPreviewKeepAspectRatio(False)
+# colorCam.setPreviewKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
 detectionNetwork = pipeline.createMobileNetDetectionNetworkDepth()
