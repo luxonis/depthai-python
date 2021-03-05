@@ -357,7 +357,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<DetectionNetworkDepth, DetectionNetwork, std::shared_ptr<DetectionNetworkDepth>>(m, "DetectionNetworkDepth")
-        .def_readonly("depthInput", &DetectionNetworkDepth::depthInput)
+        .def_readonly("inputDepth", &DetectionNetworkDepth::inputDepth)
         .def_readonly("out", &DetectionNetworkDepth::out)
         .def_readonly("passthroughRoi", &DetectionNetworkDepth::passthroughRoi)
         .def("setBoundingBoxScaleFactor", &DetectionNetworkDepth::setBoundingBoxScaleFactor)
@@ -514,9 +514,8 @@ void NodeBindings::bind(pybind11::module& m){
 
     // DepthCalculator node
     py::class_<DepthCalculator, Node, std::shared_ptr<DepthCalculator>>(m, "DepthCalculator")
-        .def_readonly("input", &DepthCalculator::input)
         .def_readonly("inputConfig", &DepthCalculator::inputConfig)       
-        .def_readonly("depthInput", &DepthCalculator::depthInput)
+        .def_readonly("inputDepth", &DepthCalculator::inputDepth)
         .def_readonly("out", &DepthCalculator::out)
         .def_readonly("initialConfig", &DepthCalculator::initialConfig)
         .def("setWaitForConfigInput", &DepthCalculator::setWaitForConfigInput)

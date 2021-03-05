@@ -28,11 +28,11 @@ if len(sys.argv) > 1:
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
-colorCam = pipeline.createColorCamera()
-colorCam.setPreviewSize(300, 300)
-colorCam.setInterleaved(False)
-colorCam.setPreviewKeepAspectRatio(False)
+
+manip = pipeline.createImageManip()
+manip.initialConfig.setResize(300, 300)
+# The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
+manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 
 # Define a neural network that will make predictions based on the source frames
 detectionNetwork = pipeline.createMobileNetDetectionNetworkDepth()
@@ -43,15 +43,15 @@ detectionNetwork.setBoundingBoxScaleFactor(0.7)
 detectionNetwork.setDepthLowerThresholdLimit(100)
 detectionNetwork.setDepthUpperThresholdLimit(5000)
 
-colorCam.preview.link(detectionNetwork.input)
+manip.out.link(detectionNetwork.input)
 
 # Create outputs
-xoutRgb = pipeline.createXLinkOut()
-xoutRgb.setStreamName("rgb")
+xoutManip = pipeline.createXLinkOut()
+xoutManip.setStreamName("right")
 if(syncNN):
-    detectionNetwork.passthrough.link(xoutRgb.input)
+    detectionNetwork.passthrough.link(xoutManip.input)
 else:
-    colorCam.preview.link(xoutRgb.input)
+    manip.out.link(xoutManip.input)
 
 depthRoiMap = pipeline.createXLinkOut()
 depthRoiMap.setStreamName("depthRoiMap")
@@ -74,6 +74,8 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
 
+monoRight.out.link(manip.inputImage)
+
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
@@ -86,7 +88,7 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     depthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)

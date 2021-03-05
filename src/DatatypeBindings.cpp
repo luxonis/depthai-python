@@ -712,7 +712,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<Rect> (m, "Rect")
         .def(py::init<>())
         .def(py::init<float, float, float, float>())
-        .def("setRect", &Rect::setRect)
+        .def("set", &Rect::set)
         .def_readonly("xmin", &Rect::xmin)
         .def_readonly("ymin", &Rect::ymin)
         .def_readonly("xmax", &Rect::xmax)

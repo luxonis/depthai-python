@@ -48,7 +48,7 @@ monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 stereo.depth.link(xoutDepth.input)
-stereo.depth.link(depthCalculator.depthInput)
+stereo.depth.link(depthCalculator.inputDepth)
 
 bbXmin = 0.4
 bbXmax = 0.6
