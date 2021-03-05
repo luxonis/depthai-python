@@ -1,5 +1,5 @@
 # Builds library at 'build/' and prepares sphinx configuration at 'build/docs/conf.py'
-set(project_root "${CMAKE_CURRENT_LIST_DIR}/../..")
+set(project_root "${CMAKE_CURRENT_LIST_DIR}/..")
 
 # Get buildCommitHash for non release build
 execute_process(COMMAND "git" "rev-parse" "HEAD" WORKING_DIRECTORY ${project_root} OUTPUT_VARIABLE buildCommitHash OUTPUT_STRIP_TRAILING_WHITESPACE)
