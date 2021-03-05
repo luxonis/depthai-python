@@ -32,13 +32,11 @@ pipeline = dai.Pipeline()
 colorCam = pipeline.createColorCamera()
 colorCam.setPreviewSize(300, 300)
 colorCam.setInterleaved(False)
-colorCam.setFps(40)
 
 # Define a neural network that will make predictions based on the source frames
 detectionNetwork = pipeline.createMobileNetDetectionNetworkDepth()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setBlobPath(mobilenet_path)
-detectionNetwork.setNumInferenceThreads(1)
 detectionNetwork.input.setBlocking(False)
 detectionNetwork.setBoundingBoxScaleFactor(0.5)
 detectionNetwork.setDepthLowerThresholdLimit(100)
@@ -116,9 +114,9 @@ with dai.Device(pipeline) as device:
 
         depthFrame = depth.getFrame()
 
-        depthFramePretty = cv2.normalize(depthFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
-        depthFramePretty = cv2.equalizeHist(depthFramePretty)
-        depthFramePretty = cv2.applyColorMap(depthFramePretty, cv2.COLORMAP_HOT)
+        depthFrameColor = cv2.normalize(depthFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
         detections = in_nn.detections
         if len(detections) != 0:
             passthroughRoi = depthRoiMap.get()
@@ -126,12 +124,12 @@ with dai.Device(pipeline) as device:
 
             for roiData in roiDatas:
                 roi = roiData.roi
-                xmin = (int)(roi.xmin * depth.getWidth())
-                ymin = (int)(roi.ymin * depth.getHeight())
-                xmax = (int)(roi.xmax * depth.getWidth())
-                ymax = (int)(roi.ymax * depth.getHeight())
+                xmin = int(roi.xmin * depth.getWidth())
+                ymin = int(roi.ymin * depth.getHeight())
+                xmax = int(roi.xmax * depth.getWidth())
+                ymax = int(roi.ymax * depth.getHeight())
 
-                cv2.rectangle(depthFramePretty, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
 
         # if the frame is available, draw bounding boxes on it and show the frame
@@ -156,7 +154,7 @@ with dai.Device(pipeline) as device:
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
-        cv2.imshow("depth", depthFramePretty)
+        cv2.imshow("depth", depthFrameColor)
         cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

@@ -703,6 +703,9 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("config", &DepthCalculatorDataOut::config)
         .def_readwrite("depth_avg", &DepthCalculatorDataOut::depth_avg)
+        .def_readwrite("depth_x", &DepthCalculatorDataOut::depth_x)
+        .def_readwrite("depth_y", &DepthCalculatorDataOut::depth_y)
+        .def_readwrite("depth_z", &DepthCalculatorDataOut::depth_z)
         ;
     
 
