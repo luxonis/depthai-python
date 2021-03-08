@@ -9,6 +9,7 @@
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
 #include "depthai/pipeline/datatype/ImgDetections.hpp"
+#include "depthai/pipeline/datatype/SpatialImgDetections.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
@@ -20,6 +21,7 @@
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
 #include "depthai-shared/datatype/RawImgDetections.hpp"
+#include "depthai-shared/datatype/RawSpatialImgDetections.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
@@ -172,9 +174,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymin", &ImgDetection::ymin)
         .def_readwrite("xmax", &ImgDetection::xmax)
         .def_readwrite("ymax", &ImgDetection::ymax)
-        .def_readwrite("xdepth", &ImgDetection::xdepth)
-        .def_readwrite("ydepth", &ImgDetection::ydepth)
-        .def_readwrite("zdepth", &ImgDetection::zdepth)
+        ;
+
+    py::class_<SpatialImgDetection, ImgDetection>(m, "SpatialImgDetection")
+        .def(py::init<>())
+        .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
         ;
 
     py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections");
@@ -183,6 +187,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("detections", &RawImgDetections::detections)
         ;
 
+    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> RawSpatialImgDetections(m, "RawSpatialImgDetections");
+    RawSpatialImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawSpatialImgDetections::detections)
+        ;
     
     // Bind RawImageManipConfig
     py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
@@ -618,6 +627,12 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
         ;
 
+    // Bind SpatialImgDetections
+    py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>>(m, "SpatialImgDetections")
+        .def(py::init<>())
+        .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
+        ;
+
      // Bind ImageManipConfig
     py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig", DOC(dai, ImageManipConfig))
         .def(py::init<>())
@@ -710,7 +725,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("config", &DepthCalculatorDataOut::config)
         .def_readwrite("depthAverage", &DepthCalculatorDataOut::depthAverage)
-        .def_readwrite("depthCoordinates", &DepthCalculatorDataOut::depthCoordinates)
+        .def_readwrite("spatialCoordinates", &DepthCalculatorDataOut::spatialCoordinates)
         ;
     
 
