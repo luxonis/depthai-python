@@ -568,6 +568,13 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("y", &Point2f::y)
         ;
 
+    py::class_<Point3f>(m, "Point3f")
+        .def(py::init<>())
+        .def_readwrite("x", &Point3f::x)
+        .def_readwrite("y", &Point3f::y)
+        .def_readwrite("z", &Point3f::z)
+        ;
+
     py::class_<Size2f>(m, "Size2f")
         .def(py::init<>())
         .def_readwrite("width", &Size2f::width)
@@ -702,28 +709,32 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<DepthCalculatorDataOut> (m, "DepthCalculatorDataOut")
         .def(py::init<>())
         .def_readwrite("config", &DepthCalculatorDataOut::config)
-        .def_readwrite("depth_avg", &DepthCalculatorDataOut::depth_avg)
-        .def_readwrite("depth_x", &DepthCalculatorDataOut::depth_x)
-        .def_readwrite("depth_y", &DepthCalculatorDataOut::depth_y)
-        .def_readwrite("depth_z", &DepthCalculatorDataOut::depth_z)
+        .def_readwrite("depthAverage", &DepthCalculatorDataOut::depthAverage)
+        .def_readwrite("depthCoordinates", &DepthCalculatorDataOut::depthCoordinates)
         ;
     
 
     py::class_<Rect> (m, "Rect")
         .def(py::init<>())
         .def(py::init<float, float, float, float>())
-        .def("set", &Rect::set)
+        .def("setRect", &Rect::setRect)
+        .def("validRect", &Rect::validRect)
         .def_readonly("xmin", &Rect::xmin)
         .def_readonly("ymin", &Rect::ymin)
         .def_readonly("xmax", &Rect::xmax)
         .def_readonly("ymax", &Rect::ymax)
         ;
 
+    py::class_<DepthCalculatorConfigThresholds> (m, "DepthCalculatorConfigThresholds")
+        .def(py::init<>())
+        .def_readwrite("lowerThreshold", &DepthCalculatorConfigThresholds::lowerThreshold)
+        .def_readwrite("upperThreshold", &DepthCalculatorConfigThresholds::upperThreshold)
+        ;
+
     py::class_<DepthCalculatorConfigData> (m, "DepthCalculatorConfigData")
         .def(py::init<>())
         .def_readwrite("roi", &DepthCalculatorConfigData::roi)
-        .def_readwrite("lower_threshold", &DepthCalculatorConfigData::lower_threshold)
-        .def_readwrite("upper_threshold", &DepthCalculatorConfigData::upper_threshold)
+        .def_readwrite("depthThresholds", &DepthCalculatorConfigData::depthThresholds)
         ;
 
     // Bind DepthCalculatorData

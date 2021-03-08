@@ -31,9 +31,9 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 outputDepth = True
 outputRectified = False
-lrcheck = False
+lrcheck = True
 extended = False
-subpixel = False
+subpixel = True
 
 # StereoDepth
 stereo.setOutputDepth(outputDepth)
@@ -57,8 +57,8 @@ bbYmax = 0.6
 
 depthCalculator.setWaitForConfigInput(False)
 config = dai.DepthCalculatorConfigData()
-config.lower_threshold = 100
-config.upper_threshold = 10000
+config.depthThresholds.lowerThreshold = 100
+config.depthThresholds.upperThreshold = 10000
 config.roi = dai.Rect(bbXmin, bbYmin, bbXmax, bbYmax)
 depthCalculator.initialConfig.addROI(config)
 depthCalculator.out.link(xoutDepthData.input)
@@ -96,10 +96,10 @@ while True:
 
         fontType = cv2.FONT_HERSHEY_TRIPLEX
         cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-        cv2.putText(depthFrameColor, f"X: {int(depthData.depth_avg)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"X: {int(depthData.depth_x)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"Y: {int(depthData.depth_y)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"Z: {int(depthData.depth_z)} mm", (xmin + 10, ymin + 65), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"Avg: {int(depthData.depthAverage)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"X: {int(depthData.depthCoordinates.x)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"Y: {int(depthData.depthCoordinates.y)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"Z: {int(depthData.depthCoordinates.z)} mm", (xmin + 10, ymin + 65), fontType, 0.5, color)
 
 
     cv2.imshow("depth", depthFrameColor)

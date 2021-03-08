@@ -361,8 +361,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &DetectionNetworkDepth::out)
         .def_readonly("passthroughRoi", &DetectionNetworkDepth::passthroughRoi)
         .def("setBoundingBoxScaleFactor", &DetectionNetworkDepth::setBoundingBoxScaleFactor)
-        .def("setDepthLowerThresholdLimit", &DetectionNetworkDepth::setDepthLowerThresholdLimit)
-        .def("setDepthUpperThresholdLimit", &DetectionNetworkDepth::setDepthUpperThresholdLimit)
+        .def("setDepthLowerThreshold", &DetectionNetworkDepth::setDepthLowerThreshold)
+        .def("setDepthUpperThreshold", &DetectionNetworkDepth::setDepthUpperThreshold)
         .def("setConfidenceThreshold", &DetectionNetworkDepth::setConfidenceThreshold)
 
         ;
