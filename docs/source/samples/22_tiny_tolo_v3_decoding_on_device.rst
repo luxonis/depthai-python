@@ -29,7 +29,7 @@ Please run the following command to install the required dependencies
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
+This example also requires Tiny YOLO V3 blob (:code:`tiny_yolo_v3_6shaves.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob>`__
 
 Source code
