@@ -35,7 +35,7 @@ colorCam.setInterleaved(False)
 # colorCam.setPreviewKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
-detectionNetwork = pipeline.createMobileNetDetectionNetworkDepth()
+detectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setBlobPath(mobilenet_path)
 detectionNetwork.input.setBlocking(False)

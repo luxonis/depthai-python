@@ -13,7 +13,7 @@
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/DepthCalculator.hpp"
-#include "depthai/pipeline/node/DetectionNetworkDepth.hpp"
+#include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -356,27 +356,20 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
         ;
 
-    py::class_<DetectionNetworkDepth, DetectionNetwork, std::shared_ptr<DetectionNetworkDepth>>(m, "DetectionNetworkDepth")
-        .def_readonly("inputDepth", &DetectionNetworkDepth::inputDepth)
-        .def_readonly("out", &DetectionNetworkDepth::out)
-        .def_readonly("passthroughRoi", &DetectionNetworkDepth::passthroughRoi)
-        .def("setBoundingBoxScaleFactor", &DetectionNetworkDepth::setBoundingBoxScaleFactor)
-        .def("setDepthLowerThreshold", &DetectionNetworkDepth::setDepthLowerThreshold)
-        .def("setDepthUpperThreshold", &DetectionNetworkDepth::setDepthUpperThreshold)
-        .def("setConfidenceThreshold", &DetectionNetworkDepth::setConfidenceThreshold)
-
+    py::class_<SpatialDetectionNetwork, DetectionNetwork, std::shared_ptr<SpatialDetectionNetwork>>(m, "SpatialDetectionNetwork")
+        .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth)
+        .def_readonly("out", &SpatialDetectionNetwork::out)
+        .def_readonly("passthroughRoi", &SpatialDetectionNetwork::passthroughRoi)
+        .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor)
+        .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold)
+        .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold)
         ;
 
-    py::class_<MobileNetDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<MobileNetDetectionNetworkDepth>>(m, "MobileNetDetectionNetworkDepth")
+    py::class_<MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<MobileNetSpatialDetectionNetwork>>(m, "MobileNetSpatialDetectionNetwork")
         ;
 
-    // YoloDetectionNetworkDepth node
-    py::class_<YoloDetectionNetworkDepth, DetectionNetworkDepth, std::shared_ptr<YoloDetectionNetworkDepth>>(m, "YoloDetectionNetworkDepth")
-        .def("setNumClasses", &YoloDetectionNetworkDepth::setNumClasses)
-        .def("setCoordinateSize", &YoloDetectionNetworkDepth::setCoordinateSize)
-        .def("setAnchors", &YoloDetectionNetworkDepth::setAnchors)
-        .def("setAnchorMasks", &YoloDetectionNetworkDepth::setAnchorMasks)
-        .def("setIouThreshold", &YoloDetectionNetworkDepth::setIouThreshold)
+    // YoloSpatialDetectionNetwork node
+    py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork")
         ;
 
     // SystemLogger node
