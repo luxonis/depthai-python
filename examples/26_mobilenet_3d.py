@@ -35,21 +35,21 @@ colorCam.setInterleaved(False)
 # colorCam.setPreviewKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
-detectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
-detectionNetwork.setConfidenceThreshold(0.5)
-detectionNetwork.setBlobPath(mobilenet_path)
-detectionNetwork.input.setBlocking(False)
-detectionNetwork.setBoundingBoxScaleFactor(0.7)
-detectionNetwork.setDepthLowerThreshold(100)
-detectionNetwork.setDepthUpperThreshold(5000)
+spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
+spatialDetectionNetwork.setBlobPath(mobilenet_path)
+spatialDetectionNetwork.input.setBlocking(False)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.7)
+spatialDetectionNetwork.setDepthLowerThreshold(100)
+spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
-colorCam.preview.link(detectionNetwork.input)
+colorCam.preview.link(spatialDetectionNetwork.input)
 
 # Create outputs
 xoutRgb = pipeline.createXLinkOut()
 xoutRgb.setStreamName("rgb")
 if(syncNN):
-    detectionNetwork.passthrough.link(xoutRgb.input)
+    spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 else:
     colorCam.preview.link(xoutRgb.input)
 
@@ -61,8 +61,8 @@ xoutDepth.setStreamName("depth")
 
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("detections")
-detectionNetwork.out.link(xout_nn.input)
-detectionNetwork.passthroughRoi.link(depthRoiMap.input)
+spatialDetectionNetwork.out.link(xout_nn.input)
+spatialDetectionNetwork.passthroughRoi.link(depthRoiMap.input)
 
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
@@ -77,7 +77,7 @@ stereo.setConfidenceThreshold(255)
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-stereo.depth.link(detectionNetwork.inputDepth)
+stereo.depth.link(spatialDetectionNetwork.inputDepth)
 stereo.depth.link(xoutDepth.input)
 
 # Pipeline defined, now the device is connected to
@@ -94,7 +94,7 @@ with dai.Device(pipeline) as device:
     frame = None
     detections = []
 
-    start_time = time.time()
+    start_time = time.monotonic()
     counter = 0
     fps = 0
     color = (255, 255, 255)
@@ -105,7 +105,7 @@ with dai.Device(pipeline) as device:
         depth = depthQueue.get()
 
         counter+=1
-        current_time = time.time()
+        current_time = time.monotonic()
         if (current_time - start_time) > 1 :
             fps = counter / (current_time - start_time)
             counter = 0
