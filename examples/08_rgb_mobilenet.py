@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-import sys
 import cv2
 import depthai as dai
 import numpy as np
 import time
 import argparse
 
+default_nn = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
 parser = argparse.ArgumentParser()
-parser.add_argument('mobilenet_path', nargs='?', help="Path to mobilenet detection network blob", default=str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute()))
+parser.add_argument('mobilenet_path', nargs='?', help="Path to mobilenet detection network blob", default=default_nn)
 parser.add_argument('-s', '--sync', action="store_true", help="Sync RGB output with NN output", default=False)
 args = parser.parse_args()
 
@@ -61,7 +61,7 @@ with dai.Device(pipeline) as device:
     detections = []
     frame = None
 
-    # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
+    # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
         norm_vals = np.full(len(bbox), frame.shape[0])
         norm_vals[::2] = frame.shape[1]
@@ -80,7 +80,8 @@ with dai.Device(pipeline) as device:
 
         if in_rgb is not None:
             frame = in_rgb.getCvFrame()
-            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - start_time)), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(255, 255, 255))
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - start_time)),
+                        (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color=(255, 255, 255))
 
         if in_nn is not None:
             detections = in_nn.detections
@@ -91,8 +92,10 @@ with dai.Device(pipeline) as device:
             for detection in detections:
                 bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(detection.confidence*100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, texts[detection.label], (bbox[0] + 10, bbox[1] + 20),
+                            cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(detection.confidence*100)}%", (bbox[0] + 10, bbox[1] + 40),
+                            cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
 
             cv2.imshow("rgb", frame)
 
