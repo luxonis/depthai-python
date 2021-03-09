@@ -1,22 +1,40 @@
 Installation - Python
 =====================
 
-Instructions for installing, upgrading, and using the DepthAI Python API.
+Please :ref:`install the necessary dependencies <Supported Platforms>` for your
+platform by referring to the table below. Once installed you can :ref:`install
+the DepthAI library <Install from PyPI>`.
+
+We are constantly striving to improve how we release our software to keep up
+with countless platforms and the numerous ways to package it.  If you do not
+see a particular platform or package format listed below please reach out to
+us on `Discord <https://discord.com/channels/790680891252932659/794255653870370857>`__
+or on `Github <https://github.com/luxonis/depthai>`__.
 
 Supported Platforms
 ###################
 
-The DepthAI Gen2 API python module is prebuilt for **Ubuntu**, **macOS** and **Windows**.
-For other operating systems and/or Python versions, DepthAI can be :ref:`built from source <Other installation methods>`.
+We keep up-to-date, pre-compiled, libraries for the following platforms.  Note that a new change is that for Ubuntu now also work unchanged for the Jetson/Xavier series:
 
-Installing system dependencies
-##############################
+======================== =========================================== ================================================= ================================================================================
+Platform                 Instructions                                Tutorial                                          Support
+======================== =========================================== ================================================= ================================================================================
+Windows 10               :ref:`Platform dependencies <Windows>`      `Video tutorial <https://youtu.be/ekopKJfcWiE>`__ `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+macOS                    :ref:`Platform dependencies <macOS>`        `Video tutorial <https://youtu.be/0RGmmjed3Hc>`__ `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
+Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`       `Video tutorial <https://youtu.be/QXeXMaxj4cM>`__ `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
+Raspberry Pi             :ref:`Platform dependencies <Raspberry Pi>` `Video tutorial <https://youtu.be/BpUMT-xqwqE>`__ `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
+======================== =========================================== ================================================= ================================================================================
 
-A couple of basic system dependencies are required to run the DepthAI library. Most of them should be already installed
-in most of the systems, but in case they are not, we prepared :download:`an install script </_static/install_dependencies.sh>`
-that will make sure all dependencies are installed, along with convenient development/programming tools.
-There are also video guides available for macOS (`here <https://youtu.be/0RGmmjed3Hc>`__), Raspberry Pi (`here <https://youtu.be/BpUMT-xqwqE>`__),
-Ubuntu (`here <https://youtu.be/QXeXMaxj4cM>`__), and Windows 10 (`here <https://youtu.be/ekopKJfcWiE>`__).
+And the following platforms are also supported by a combination of the community and Luxonis.
+
+====================== ===================================================== ================================================================================
+Platform               Instructions                                          Support
+====================== ===================================================== ================================================================================
+Fedora                                                                       `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
+Robot Operating System                                                       `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
+Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
+====================== ===================================================== ================================================================================
 
 macOS
 *****
@@ -27,9 +45,7 @@ macOS
 
 Close and re-open the terminal window after this command.
 
-The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1 support.
-In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__
-for some additional troubleshooting steps.
+The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1 support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__ for some additional troubleshooting steps.
 
 Note that if the video streaming window does not appear consider running the
 following:
@@ -40,7 +56,7 @@ following:
 
 See the `Video preview window fails to appear on macOS <https://discuss.luxonis.com/d/95-video-preview-window-fails-to-appear-on-macos>`_ thread on our forum for more information.
 
-Raspberry Pi OS
+Raspberry Pi
 ***************
 
 .. code-block:: bash
@@ -50,16 +66,31 @@ Raspberry Pi OS
 Ubuntu
 ******
 
+Note that these Ubuntu instructions also work for the **Jetson** and **Xavier** series.
+
 .. code-block:: bash
 
   sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
 
+openSUSE
+********
+
+For openSUSE, available `in this official article <https://en.opensuse.org/SDB:Install_OAK_AI_Kit>`__ how to install the OAK device on the openSUSE platform.
+
 Windows
 *******
 
-- Right click on Start
-- Choose Windows PowerShell (Admin)
-- Install Chocolatey package manager (similar to Homebrew for macOS):
+We recommend using the Chocolatey package manager to install DepthAI's
+dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
+Alternatively, it is also possible to :ref:`install DepthAI and its
+dependencies manually <Manually install DepthAI on Windows>`, although it can
+be more time consuming and error prone.
+
+To `install Chocolatey <https://docs.chocolatey.org/en-us/choco/setup>`__ and
+use it to install DepthAI's dependencies do the following:
+
+- Right click on `Start`
+- Choose `Windows PowerShell (Admin)` and run the following:
 
 .. code-block:: bash
 
@@ -71,6 +102,41 @@ Windows
 .. code-block:: bash
 
   choco install cmake git python pycharm-community -y
+
+Windows 7
+---------
+
+Although we do not officially support Windows 7, members of the community `have
+had success <https://discuss.luxonis.com/d/105-run-on-win7-sp1-x64-manual-instal-usb-driver>`__ manually installing WinUSB using `Zadig
+<https://zadig.akeo.ie/>`__. After connecting your DepthAI device look for a
+device with :code:`USB ID: 03E7 2485` and install the WinUSB driver by
+selecting `WinUSB(v6.1.7600.16385)` and then `Install WCID Driver`.
+
+Docker
+******
+
+We maintain a Docker image containing DepthAI, it's dependencies and helpful
+tools in the `luxonis/depthai-library <https://hub.docker.com/r/luxonis/depthai-library>`__
+repository on Docker Hub. It builds upon the `luxonis/depthai-base
+<https://hub.docker.com/r/luxonis/depthai-base>`__ image.
+
+Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux host
+(with the X11 windowing system):
+
+.. code-block:: bash
+
+   docker pull luxonis/depthai-library
+   docker run --rm \
+       --privileged \
+       -v /dev/bus/usb:/dev/bus/usb \
+       --device-cgroup-rule='c 189:* rmw' \
+       -e DISPLAY=$DISPLAY \
+       -v /tmp/.X11-unix:/tmp/.X11-unix \
+       luxonis/depthai-library:latest \
+       python3 /depthai-python/examples/01_rgb_preview.py
+
+To allow the container to update X11 you may need to run :code:`xhost local:root` on
+the host.
 
 Enabling the USB device (only on Linux)
 #######################################
@@ -85,10 +151,21 @@ The following command will add a new udev rule to your system
   echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
   sudo udevadm control --reload-rules && sudo udevadm trigger
 
+Install from PyPI
+#################
+
+Our packages are distributed `via PyPi <https://pypi.org/project/depthai/>`__, to install it in your environment use
+
+.. code-block:: bash
+
+  python3 -m pip install depthai
+
+For other installation options, see :ref:`other installation options <Other installation methods>`.
+
 Install using pip
 #################
 
-Our packages are available to download using our `Artifactory server <https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/>`__.
+Our packages are also available to download using our `Artifactory server <https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/>`__.
 These are built for every commit in the `depthai-python <https://github.com/luxonis/depthai-python/tree/gen2_develop>`__ repository and are suffixed
 with a commit SHA.
 
@@ -113,7 +190,7 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
 
     python3 -m pip install -U pip
 
-#. Install DepthAI Gen2 API, adding commit SHA at the end of a package name, in form of :code:`depthai==0.0.2.1+<sha>`
+#. Install DepthAI Gen2 API, adding commit SHA at the end of a package name, in form of :code:`depthai==<version>+<sha>`
 
   .. code-block:: bash
     :substitutions:
