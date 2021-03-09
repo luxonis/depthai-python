@@ -88,9 +88,11 @@ with dai.Device(pipeline) as device:
             bboxes = bboxes[:, 3:7]
 
             if len(bboxes) > 0 and frame is not None:
-                bbox = frame_norm(frame, bboxes[0])
+                bbox = bboxes[0]
                 ctrl = dai.CameraControl()
-                ctrl.setAutoExposureRegion(*bbox)
+                start_x, start_y = bbox[:2]
+                width, height = bbox[2] - start_x, bbox[3] - start_y
+                ctrl.setAutoExposureRegion(*frame_norm(np.empty((1920, 1080)), (start_x, start_y, width, height)))
                 q_control.send(ctrl)
 
         if frame is not None:
