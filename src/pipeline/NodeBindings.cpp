@@ -98,8 +98,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("video", &ColorCamera::video, DOC(dai, node, ColorCamera, video))
         .def_readonly("preview", &ColorCamera::preview, DOC(dai, node, ColorCamera, preview))
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
-        .def_readonly("isp", &ColorCamera::isp)
-        .def_readonly("raw", &ColorCamera::raw)
+        .def_readonly("isp", &ColorCamera::isp, DOC(dai, node, ColorCamera, isp))
+        .def_readonly("raw", &ColorCamera::raw, DOC(dai, node, ColorCamera, raw))
         .def("setCamId", [](ColorCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
@@ -154,8 +154,11 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput, DOC(dai, node, ColorCamera, getWaitForConfigInput))
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, ColorCamera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio, DOC(dai, node, ColorCamera, getPreviewKeepAspectRatio))
-        .def("setIspScale", &ColorCamera::setIspScale)
-        .def("setIspScaleFull", &ColorCamera::setIspScaleFull)
+        .def("setIspScale", &ColorCamera::setIspScale, py::arg("numerator"), py::arg("denominator"), DOC(dai, node, ColorCamera, setIspScale))
+        .def("setIspScaleFull", &ColorCamera::setIspScaleFull, py::arg("horizNum"), py::arg("horizDenom"), py::arg("vertNum"), py::arg("vertDenom"), DOC(dai, node, ColorCamera, setIspScaleFull))
+        .def("getIspSize", &ColorCamera::getIspSize, DOC(dai, node, ColorCamera, getIspSize))
+        .def("getIspWidth", &ColorCamera::getIspWidth, DOC(dai, node, ColorCamera, getIspWidth))
+        .def("getIspHeight", &ColorCamera::getIspHeight, DOC(dai, node, ColorCamera, getIspHeight))
         ;
     
 
@@ -290,6 +293,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("loadCalibrationFile",     &StereoDepth::loadCalibrationFile, py::arg("path"), DOC(dai, node, StereoDepth, loadCalibrationFile))
         .def("loadCalibrationData",     &StereoDepth::loadCalibrationData, py::arg("data"), DOC(dai, node, StereoDepth, loadCalibrationData))
         .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration, DOC(dai, node, StereoDepth, setEmptyCalibration))
+        .def("setBaselineOverrideCm",   &StereoDepth::setBaselineOverrideCm, py::arg("baseline"), DOC(dai, node, StereoDepth, setBaselineOverrideCm))
+        .def("setFovOverrideDegrees",   &StereoDepth::setFovOverrideDegrees, py::arg("fov"), DOC(dai, node, StereoDepth, setFovOverrideDegrees))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
         .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
         .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold, py::arg("confThr"), DOC(dai, node, StereoDepth, setConfidenceThreshold))
@@ -298,8 +303,22 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
         .def("setRectifyMirrorFrame",   &StereoDepth::setRectifyMirrorFrame, py::arg("enable"), DOC(dai, node, StereoDepth, setRectifyMirrorFrame))
-        .def("setOutputRectified",      &StereoDepth::setOutputRectified, py::arg("enable"), DOC(dai, node, StereoDepth, setOutputRectified))
-        .def("setOutputDepth",          &StereoDepth::setOutputDepth, py::arg("enable"), DOC(dai, node, StereoDepth, setOutputDepth))
+        .def("setOutputRectified", [](StereoDepth& s, bool enable) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setOutputRectified() is deprecated, the output is auto-enabled if used.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setOutputRectified(enable);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setOutputDepth", [](StereoDepth& s, bool enable) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setOutputDepth() is deprecated, the output is auto-enabled if used.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setOutputDepth(enable);
+            HEDLEY_DIAGNOSTIC_POP
+        })
         ;
 
     // VideoEncoder node
@@ -430,10 +449,10 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
         .def_readwrite("rectifyMirrorFrame",      &StereoDepthProperties::rectifyMirrorFrame)
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
-        .def_readwrite("enableOutputRectified",   &StereoDepthProperties::enableOutputRectified)
-        .def_readwrite("enableOutputDepth",       &StereoDepthProperties::enableOutputDepth)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
+        .def_readwrite("baselineOverrideCm",      &StereoDepthProperties::baselineOverrideCm)
+        .def_readwrite("fovOverrideDegrees",      &StereoDepthProperties::fovOverrideDegrees)
         ;
 
     py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter")
