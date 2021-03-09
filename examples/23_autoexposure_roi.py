@@ -21,7 +21,7 @@ cam_rgb.setInterleaved(False)
 
 xin_cam_control = pipeline.createXLinkIn()
 xin_cam_control.setStreamName('cam_control')
-xin_cam_control.out.link(cam_rgb.inputConfig)
+xin_cam_control.out.link(cam_rgb.inputControl)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.createNeuralNetwork()
