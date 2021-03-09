@@ -6,6 +6,9 @@ import cv2
 import depthai as dai
 import numpy as np
 
+# Press WASD to move a manual ROI window for auto-exposure control.
+# Press N to go back to the region controlled by the NN detections.
+
 # Get argument first
 mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -57,12 +60,22 @@ with dai.Device(pipeline) as device:
     confidences = []
     labels = []
 
+    nn_region = True
+    reg_width = 100
+    reg_height = 100
+    reg_step = 30
+    reg_start_x = 0
+    reg_start_y = 0
+    reg_start_x_max = 300 - reg_width
+    reg_start_y_max = 300 - reg_height
+    
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
         norm_vals = np.full(len(bbox), frame.shape[0])
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
+    def clamp(num, v0, v1): return max(v0, min(num, v1))
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
@@ -87,7 +100,7 @@ with dai.Device(pipeline) as device:
             confidences = bboxes[:, 2]
             bboxes = bboxes[:, 3:7]
 
-            if len(bboxes) > 0 and frame is not None:
+            if nn_region and len(bboxes) > 0 and frame is not None:
                 bbox = bboxes[0]
                 ctrl = dai.CameraControl()
                 start_x, start_y = bbox[:2]
@@ -102,7 +115,32 @@ with dai.Device(pipeline) as device:
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            if not nn_region:
+                cv2.rectangle(frame, 
+                              (reg_start_x, reg_start_y),
+                              (reg_start_x + reg_width, reg_start_y + reg_height),
+                              (0, 255, 0), 2)
             cv2.imshow("rgb", frame)
 
-        if cv2.waitKey(1) == ord('q'):
+        key = cv2.waitKey(1)
+        if key == ord('n'):
+            print("AE ROI controlled by NN")
+            nn_region = True
+        elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
+            nn_region = False
+            if key == ord('a'): reg_start_x -= reg_step
+            if key == ord('d'): reg_start_x += reg_step
+            if key == ord('w'): reg_start_y -= reg_step
+            if key == ord('s'): reg_start_y += reg_step
+            reg_start_x = clamp(reg_start_x, 0, reg_start_x_max)
+            reg_start_y = clamp(reg_start_y, 0, reg_start_y_max)
+            ctrl = dai.CameraControl()
+            roi = np.array([reg_start_x, reg_start_y, reg_width, reg_height])
+            # Convert to absolute camera coordinates (1920 x 1080 resolution)
+            roi = roi * 1080 // 300
+            roi[0] += (1920 - 1080) // 2  # x offset for device crop
+            print("Setting static AE ROI:", roi)
+            ctrl.setAutoExposureRegion(*roi)
+            q_control.send(ctrl)
+        elif key == ord('q'):
             break
