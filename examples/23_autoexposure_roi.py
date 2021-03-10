@@ -61,6 +61,7 @@ class AutoExposureRegion:
     step = 10
     position = (0, 0)
     size = (100, 100)
+    resolution = cam_rgb.getResolutionSize()
     max_dims = preview_size[0], preview_size[1]
 
     def grow(self, x=0, y=0):
@@ -83,16 +84,16 @@ class AutoExposureRegion:
 
     def to_roi(self):
         roi = np.array([*self.position, *self.size])
-        # Convert to absolute camera coordinates (1920 x 1080 resolution)
-        roi = roi * 1080 // 300
-        roi[0] += (1920 - 1080) // 2  # x offset for device crop
+        # Convert to absolute camera coordinates
+        roi = roi * self.resolution[1] // 300
+        roi[0] += (self.resolution[0] - self.resolution[1]) // 2  # x offset for device crop
         return roi
 
     @staticmethod
     def bbox_to_roi(bbox):
         start_x, start_y = bbox[:2]
         width, height = bbox[2] - start_x, bbox[3] - start_y
-        roi = frame_norm(np.empty((1920, 1080)), (start_x, start_y, width, height))
+        roi = frame_norm(np.empty(cam_rgb.getResolutionSize()), (start_x, start_y, width, height))
         return roi
 
 
@@ -105,7 +106,6 @@ with dai.Device(pipeline) as device:
     q_control = device.getInputQueue(name="cam_control")
     q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
-
     frame = None
     bboxes = []
     confidences = []
