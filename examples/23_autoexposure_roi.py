@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import cv2
 import depthai as dai
+print(dai.__version__)
 import numpy as np
 
 # Press WASD to move a manual ROI window for auto-exposure control.
@@ -14,12 +15,14 @@ mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).res
 if len(sys.argv) > 1:
     mobilenet_path = sys.argv[1]
 
+preview_size = (300, 300)
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
 cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(300, 300)
+cam_rgb.setPreviewSize(*preview_size)
 cam_rgb.setInterleaved(False)
 
 xin_cam_control = pipeline.createXLinkIn()
@@ -45,6 +48,55 @@ texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", 
          "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
+
+def as_control(roi):
+    cam_control = dai.CameraControl()
+    cam_control.setAutoExposureRegion(*roi)
+    return cam_control
+
+
+class AutoExposureRegion:
+    step = 10
+    position = (0, 0)
+    size = (100, 100)
+    max_dims = preview_size[0], preview_size[1]
+
+    def grow(self, x=0, y=0):
+        self.size = (
+            clamp(x + self.size[0], 1, self.max_dims[0]),
+            clamp(y + self.size[1], 1, self.max_dims[1])
+        )
+
+    def move(self, x=0, y=0):
+        self.position = (
+            clamp(x + self.position[0], 0, self.max_dims[0]),
+            clamp(y + self.position[1], 0, self.max_dims[1])
+        )
+
+    def end_position(self):
+        return (
+            clamp(self.position[0] + self.size[0], 0, self.max_dims[0]),
+            clamp(self.position[1] + self.size[1], 0, self.max_dims[1]),
+        )
+
+    def to_roi(self):
+        roi = np.array([*self.position, *self.size])
+        # Convert to absolute camera coordinates (1920 x 1080 resolution)
+        roi = roi * 1080 // 300
+        roi[0] += (1920 - 1080) // 2  # x offset for device crop
+        return roi
+
+    @staticmethod
+    def bbox_to_roi(bbox):
+        start_x, start_y = bbox[:2]
+        width, height = bbox[2] - start_x, bbox[3] - start_y
+        roi = frame_norm(np.empty((1920, 1080)), (start_x, start_y, width, height))
+        return roi
+
+
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
     # Start pipeline
@@ -61,21 +113,13 @@ with dai.Device(pipeline) as device:
     labels = []
 
     nn_region = True
-    reg_width = 100
-    reg_height = 100
-    reg_step = 30
-    reg_start_x = 0
-    reg_start_y = 0
-    reg_start_x_max = 300 - reg_width
-    reg_start_y_max = 300 - reg_height
+    region = AutoExposureRegion()
     
-    # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
+    # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
         norm_vals = np.full(len(bbox), frame.shape[0])
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
-
-    def clamp(num, v0, v1): return max(v0, min(num, v1))
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
@@ -100,13 +144,8 @@ with dai.Device(pipeline) as device:
             confidences = bboxes[:, 2]
             bboxes = bboxes[:, 3:7]
 
-            if nn_region and len(bboxes) > 0 and frame is not None:
-                bbox = bboxes[0]
-                ctrl = dai.CameraControl()
-                start_x, start_y = bbox[:2]
-                width, height = bbox[2] - start_x, bbox[3] - start_y
-                ctrl.setAutoExposureRegion(*frame_norm(np.empty((1920, 1080)), (start_x, start_y, width, height)))
-                q_control.send(ctrl)
+            if nn_region and len(bboxes) > 0:
+                q_control.send(as_control(AutoExposureRegion.bbox_to_roi(bboxes[0])))
 
         if frame is not None:
             # if the frame is available, draw bounding boxes on it and show the frame
@@ -116,31 +155,30 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             if not nn_region:
-                cv2.rectangle(frame, 
-                              (reg_start_x, reg_start_y),
-                              (reg_start_x + reg_width, reg_start_y + reg_height),
-                              (0, 255, 0), 2)
+                cv2.rectangle(frame, region.position, region.end_position(), (0, 255, 0), 2)
             cv2.imshow("rgb", frame)
 
         key = cv2.waitKey(1)
         if key == ord('n'):
             print("AE ROI controlled by NN")
             nn_region = True
-        elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
+        elif key in [ord('w'), ord('a'), ord('s'), ord('d'), ord('+'), ord('-')]:
             nn_region = False
-            if key == ord('a'): reg_start_x -= reg_step
-            if key == ord('d'): reg_start_x += reg_step
-            if key == ord('w'): reg_start_y -= reg_step
-            if key == ord('s'): reg_start_y += reg_step
-            reg_start_x = clamp(reg_start_x, 0, reg_start_x_max)
-            reg_start_y = clamp(reg_start_y, 0, reg_start_y_max)
-            ctrl = dai.CameraControl()
-            roi = np.array([reg_start_x, reg_start_y, reg_width, reg_height])
-            # Convert to absolute camera coordinates (1920 x 1080 resolution)
-            roi = roi * 1080 // 300
-            roi[0] += (1920 - 1080) // 2  # x offset for device crop
-            print("Setting static AE ROI:", roi)
-            ctrl.setAutoExposureRegion(*roi)
-            q_control.send(ctrl)
+            if key == ord('a'):
+                region.move(x=-region.step)
+            if key == ord('d'):
+                region.move(x=region.step)
+            if key == ord('w'):
+                region.move(y=-region.step)
+            if key == ord('s'):
+                region.move(y=region.step)
+            if key == ord('+'):
+                region.grow(x=10, y=10)
+                region.step = region.step + 1
+            if key == ord('-'):
+                region.grow(x=-10, y=-10)
+                region.step = max(region.step - 1, 1)
+            print(f"Setting static AE ROI: {region.to_roi()} (on frame: {[*region.position, *region.end_position()]})")
+            q_control.send(as_control(region.to_roi()))
         elif key == ord('q'):
             break
