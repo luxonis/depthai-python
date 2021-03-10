@@ -4,7 +4,6 @@ from pathlib import Path
 import sys
 import cv2
 import depthai as dai
-print(dai.__version__)
 import numpy as np
 
 # Press WASD to move a manual ROI window for auto-exposure control.
