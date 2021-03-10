@@ -10,7 +10,7 @@ Demo
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/kibc8xHw8HI" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/embed/aTqUwNL_9Bo" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
 Setup
@@ -28,6 +28,18 @@ For additional information, please follow :ref:`Python API installation guide <I
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
+
+Usage
+#####
+
+By default, AutoExposure region is adjusted based on neural network output. If desired, the region can be set manually.
+You can do so by pressing one of the following buttons:
+
+- `w` - move AE region up
+- `s` - move AE region down
+- `a` - move AE region left
+- `d` - move AE region right
+- `n` - deactivate manual region (switch back to nn-based roi)
 
 Source code
 ###########
