@@ -12,7 +12,7 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
-#include "depthai/pipeline/node/DepthCalculator.hpp"
+#include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 
 // Libraries
@@ -500,18 +500,18 @@ void NodeBindings::bind(pybind11::module& m){
 
     
 
-    py::class_<DepthCalculatorProperties> DepthCalculatorProperties(m, "DepthCalculatorProperties");
-    DepthCalculatorProperties
-        .def_readwrite("roiConfig", &DepthCalculatorProperties::roiConfig)
+    py::class_<SpatialLocationCalculatorProperties> SpatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties");
+    SpatialLocationCalculatorProperties
+        .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
         ;
 
-    // DepthCalculator node
-    py::class_<DepthCalculator, Node, std::shared_ptr<DepthCalculator>>(m, "DepthCalculator")
-        .def_readonly("inputConfig", &DepthCalculator::inputConfig)       
-        .def_readonly("inputDepth", &DepthCalculator::inputDepth)
-        .def_readonly("out", &DepthCalculator::out)
-        .def_readonly("initialConfig", &DepthCalculator::initialConfig)
-        .def("setWaitForConfigInput", &DepthCalculator::setWaitForConfigInput)
+    // SpatialLocationCalculator node
+    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator")
+        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig)       
+        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth)
+        .def_readonly("out", &SpatialLocationCalculator::out)
+        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig)
+        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput)
 
         ;
 }

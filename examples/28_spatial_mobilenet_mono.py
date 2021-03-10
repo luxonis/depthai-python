@@ -41,7 +41,7 @@ spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.setBlobPath(mobilenet_path)
 spatialDetectionNetwork.input.setBlocking(False)
-spatialDetectionNetwork.setBoundingBoxScaleFactor(0.7)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
@@ -105,7 +105,7 @@ with dai.Device(pipeline) as device:
     color = (255, 255, 255)
 
     while True:
-        in_rgb = previewQueue.get()
+        inRectified = previewQueue.get()
         in_nn = detectionNNQueue.get()
         depth = depthQueue.get()
 
@@ -116,7 +116,7 @@ with dai.Device(pipeline) as device:
             counter = 0
             start_time = current_time
         
-        rectifiedRight = in_rgb.getCvFrame()
+        rectifiedRight = inRectified.getCvFrame()
 
         depthFrame = depth.getFrame()
 
@@ -134,7 +134,6 @@ with dai.Device(pipeline) as device:
                 ymin = int(roi.ymin * depth.getHeight())
                 xmax = int(roi.xmax * depth.getWidth())
                 ymax = int(roi.ymax * depth.getHeight())
-
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
         if flipRectified:

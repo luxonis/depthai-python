@@ -13,8 +13,8 @@
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
-#include "depthai/pipeline/datatype/DepthCalculatorData.hpp"
-#include "depthai/pipeline/datatype/DepthCalculatorConfig.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -25,9 +25,9 @@
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
-#include "depthai-shared/datatype/RawDepthCalculatorConfig.hpp"
-#include "depthai-shared/datatype/RawDepthCalculatorData.hpp"
-#include "depthai-shared/datatype/RawDepthCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorData.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 
 
 //pybind
@@ -713,19 +713,19 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     //  // Bind ImageManipConfig
-    py::class_<DepthCalculatorConfig, Buffer, std::shared_ptr<DepthCalculatorConfig>>(m, "DepthCalculatorConfig")
+    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig")
         .def(py::init<>())
         // setters
-        .def("setROIs", &DepthCalculatorConfig::setROIs)
-        .def("addROI", &DepthCalculatorConfig::addROI)
-        .def("getConfigData", &DepthCalculatorConfig::getConfigData)
+        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs)
+        .def("addROI", &SpatialLocationCalculatorConfig::addROI)
+        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData)
         ;
 
-    py::class_<DepthCalculatorDataOut> (m, "DepthCalculatorDataOut")
+    py::class_<SpatialLocationCalculatorDataOut> (m, "SpatialLocationCalculatorDataOut")
         .def(py::init<>())
-        .def_readwrite("config", &DepthCalculatorDataOut::config)
-        .def_readwrite("depthAverage", &DepthCalculatorDataOut::depthAverage)
-        .def_readwrite("spatialCoordinates", &DepthCalculatorDataOut::spatialCoordinates)
+        .def_readwrite("config", &SpatialLocationCalculatorDataOut::config)
+        .def_readwrite("depthAverage", &SpatialLocationCalculatorDataOut::depthAverage)
+        .def_readwrite("spatialCoordinates", &SpatialLocationCalculatorDataOut::spatialCoordinates)
         ;
     
 
@@ -740,21 +740,21 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readonly("ymax", &Rect::ymax)
         ;
 
-    py::class_<DepthCalculatorConfigThresholds> (m, "DepthCalculatorConfigThresholds")
+    py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds")
         .def(py::init<>())
-        .def_readwrite("lowerThreshold", &DepthCalculatorConfigThresholds::lowerThreshold)
-        .def_readwrite("upperThreshold", &DepthCalculatorConfigThresholds::upperThreshold)
+        .def_readwrite("lowerThreshold", &SpatialLocationCalculatorConfigThresholds::lowerThreshold)
+        .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
         ;
 
-    py::class_<DepthCalculatorConfigData> (m, "DepthCalculatorConfigData")
+    py::class_<SpatialLocationCalculatorConfigData> (m, "SpatialLocationCalculatorConfigData")
         .def(py::init<>())
-        .def_readwrite("roi", &DepthCalculatorConfigData::roi)
-        .def_readwrite("depthThresholds", &DepthCalculatorConfigData::depthThresholds)
+        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
+        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
         ;
 
-    // Bind DepthCalculatorData
-    py::class_<DepthCalculatorData, Buffer, std::shared_ptr<DepthCalculatorData>>(m, "DepthCalculatorData")
+    // Bind SpatialLocationCalculatorData
+    py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData")
         .def(py::init<>())
-        .def("getDepthData", &DepthCalculatorData::getDepthData)
+        .def("getDepthData", &SpatialLocationCalculatorData::getDepthData)
         ;
 }

@@ -30,52 +30,56 @@ pipeline = dai.Pipeline()
 
 # Define a source - color camera
 colorCam = pipeline.createColorCamera()
-colorCam.setPreviewSize(300, 300)
-colorCam.setInterleaved(False)
-# colorCam.setPreviewKeepAspectRatio(False)
-
-# Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
-spatialDetectionNetwork.setConfidenceThreshold(0.5)
+monoLeft = pipeline.createMonoCamera()
+monoRight = pipeline.createMonoCamera()
+stereo = pipeline.createStereoDepth()
+
+xoutRgb = pipeline.createXLinkOut()
+xoutNN = pipeline.createXLinkOut()
+xoutDepthRoiMap = pipeline.createXLinkOut()
+xoutDepth = pipeline.createXLinkOut()
+
+xoutRgb.setStreamName("rgb")
+xoutNN.setStreamName("detections")
+xoutDepthRoiMap.setStreamName("depthRoiMap")
+xoutDepth.setStreamName("depth")
+
+
+colorCam.setPreviewSize(300, 300)
+colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+colorCam.setInterleaved(False)
+colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
+# setting node configs
+stereo.setOutputDepth(True)
+stereo.setConfidenceThreshold(255)
+
 spatialDetectionNetwork.setBlobPath(mobilenet_path)
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
-spatialDetectionNetwork.setBoundingBoxScaleFactor(0.7)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
-colorCam.preview.link(spatialDetectionNetwork.input)
-
 # Create outputs
-xoutRgb = pipeline.createXLinkOut()
-xoutRgb.setStreamName("rgb")
+
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+
+colorCam.preview.link(spatialDetectionNetwork.input)
 if(syncNN):
     spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 else:
     colorCam.preview.link(xoutRgb.input)
 
-depthRoiMap = pipeline.createXLinkOut()
-depthRoiMap.setStreamName("depthRoiMap")
-
-xoutDepth = pipeline.createXLinkOut()
-xoutDepth.setStreamName("depth")
-
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("detections")
-spatialDetectionNetwork.out.link(xout_nn.input)
-spatialDetectionNetwork.passthroughRoi.link(depthRoiMap.input)
-
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-stereo.setOutputDepth(True)
-stereo.setConfidenceThreshold(255)
-
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+spatialDetectionNetwork.out.link(xoutNN.input)
+spatialDetectionNetwork.passthroughRoi.link(xoutDepthRoiMap.input)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 stereo.depth.link(xoutDepth.input)
@@ -88,7 +92,7 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    depthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
+    xoutDepthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     frame = None
@@ -120,7 +124,7 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
         detections = in_nn.detections
         if len(detections) != 0:
-            passthroughRoi = depthRoiMap.get()
+            passthroughRoi = xoutDepthRoiMap.get()
             roiDatas = passthroughRoi.getConfigData()
 
             for roiData in roiDatas:
