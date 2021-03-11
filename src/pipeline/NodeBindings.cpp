@@ -356,20 +356,23 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
         ;
 
-    py::class_<SpatialDetectionNetwork, DetectionNetwork, std::shared_ptr<SpatialDetectionNetwork>>(m, "SpatialDetectionNetwork")
-        .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth)
-        .def_readonly("out", &SpatialDetectionNetwork::out)
-        .def_readonly("passthroughRoi", &SpatialDetectionNetwork::passthroughRoi)
-        .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor)
-        .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold)
-        .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold)
+    py::class_<SpatialDetectionNetwork, DetectionNetwork, std::shared_ptr<SpatialDetectionNetwork>>(m, "SpatialDetectionNetwork", DOC(dai, node, SpatialDetectionNetwork))
+        .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, SpatialDetectionNetwork, input))
+        .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth, DOC(dai, node, SpatialDetectionNetwork, inputDepth))
+        .def_readonly("out", &SpatialDetectionNetwork::out, DOC(dai, node, SpatialDetectionNetwork, out))
+        .def_readonly("passthroughRoi", &SpatialDetectionNetwork::passthroughRoi, DOC(dai, node, SpatialDetectionNetwork, passthroughRoi))
+        .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
+
+        .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
+        .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
+        .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold, py::arg("upperThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthUpperThreshold))
         ;
 
-    py::class_<MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<MobileNetSpatialDetectionNetwork>>(m, "MobileNetSpatialDetectionNetwork")
+    py::class_<MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<MobileNetSpatialDetectionNetwork>>(m, "MobileNetSpatialDetectionNetwork", DOC(dai, node, MobileNetSpatialDetectionNetwork))
         ;
 
     // YoloSpatialDetectionNetwork node
-    py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork")
+    py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork", DOC(dai, node, YoloSpatialDetectionNetwork))
         ;
 
     // SystemLogger node
@@ -506,12 +509,12 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // SpatialLocationCalculator node
-    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator")
-        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig)       
-        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth)
-        .def_readonly("out", &SpatialLocationCalculator::out)
-        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig)
-        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput)
+    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
+        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))       
+        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
+        .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
+        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
+        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
 
         ;
 }

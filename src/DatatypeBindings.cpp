@@ -26,7 +26,7 @@
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
-#include "depthai-shared/datatype/RawSpatialLocationCalculatorData.hpp"
+#include "depthai-shared/datatype/RawSpatialLocations.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 
 
@@ -176,7 +176,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymax", &ImgDetection::ymax)
         ;
 
-    py::class_<SpatialImgDetection, ImgDetection>(m, "SpatialImgDetection")
+    py::class_<SpatialImgDetection, ImgDetection>(m, "SpatialImgDetection", DOC(dai, SpatialImgDetection))
         .def(py::init<>())
         .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
         ;
@@ -571,13 +571,13 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
-    py::class_<Point2f>(m, "Point2f")
+    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
         .def(py::init<>())
         .def_readwrite("x", &Point2f::x)
         .def_readwrite("y", &Point2f::y)
         ;
 
-    py::class_<Point3f>(m, "Point3f")
+    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
         .def(py::init<>())
         .def_readwrite("x", &Point3f::x)
         .def_readwrite("y", &Point3f::y)
@@ -628,7 +628,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     // Bind SpatialImgDetections
-    py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>>(m, "SpatialImgDetections")
+    py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>>(m, "SpatialImgDetections", DOC(dai, SpatialImgDetections))
         .def(py::init<>())
         .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
         ;
@@ -713,48 +713,48 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     //  // Bind ImageManipConfig
-    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig")
+    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
         .def(py::init<>())
         // setters
-        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs)
-        .def("addROI", &SpatialLocationCalculatorConfig::addROI)
-        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData)
+        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
+        .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
+        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
         ;
 
-    py::class_<SpatialLocationCalculatorDataOut> (m, "SpatialLocationCalculatorDataOut")
+    py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
         .def(py::init<>())
-        .def_readwrite("config", &SpatialLocationCalculatorDataOut::config)
-        .def_readwrite("depthAverage", &SpatialLocationCalculatorDataOut::depthAverage)
-        .def_readwrite("spatialCoordinates", &SpatialLocationCalculatorDataOut::spatialCoordinates)
+        .def_readwrite("config", &SpatialLocations::config)
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
         ;
     
 
-    py::class_<Rect> (m, "Rect")
+    py::class_<Rect> (m, "Rect", DOC(dai, Rect))
         .def(py::init<>())
         .def(py::init<float, float, float, float>())
-        .def("setRect", &Rect::setRect)
-        .def("validRect", &Rect::validRect)
-        .def_readonly("xmin", &Rect::xmin)
-        .def_readonly("ymin", &Rect::ymin)
-        .def_readonly("xmax", &Rect::xmax)
-        .def_readonly("ymax", &Rect::ymax)
+        .def("setRect", &Rect::setRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("ymax"), DOC(dai, Rect, setRect))
+        .def("validRect", &Rect::validRect, DOC(dai, Rect, validRect))
+        .def_readwrite("xmin", &Rect::xmin)
+        .def_readwrite("ymin", &Rect::ymin)
+        .def_readwrite("xmax", &Rect::xmax)
+        .def_readwrite("ymax", &Rect::ymax)
         ;
 
-    py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds")
+    py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds))
         .def(py::init<>())
         .def_readwrite("lowerThreshold", &SpatialLocationCalculatorConfigThresholds::lowerThreshold)
         .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
         ;
 
-    py::class_<SpatialLocationCalculatorConfigData> (m, "SpatialLocationCalculatorConfigData")
+    py::class_<SpatialLocationCalculatorConfigData> (m, "SpatialLocationCalculatorConfigData", DOC(dai, SpatialLocationCalculatorConfigData))
         .def(py::init<>())
         .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
         .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
         ;
 
     // Bind SpatialLocationCalculatorData
-    py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData")
+    py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData))
         .def(py::init<>())
-        .def("getDepthData", &SpatialLocationCalculatorData::getDepthData)
+        .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
         ;
 }

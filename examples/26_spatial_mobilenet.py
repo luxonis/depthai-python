@@ -104,8 +104,8 @@ with dai.Device(pipeline) as device:
     color = (255, 255, 255)
 
     while True:
-        in_rgb = previewQueue.get()
-        in_nn = detectionNNQueue.get()
+        inPreview = previewQueue.get()
+        inNN = detectionNNQueue.get()
         depth = depthQueue.get()
 
         counter+=1
@@ -115,14 +115,13 @@ with dai.Device(pipeline) as device:
             counter = 0
             start_time = current_time
         
-        frame = in_rgb.getCvFrame()
-
+        frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame()
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        detections = in_nn.detections
+        detections = inNN.detections
         if len(detections) != 0:
             passthroughRoi = xoutDepthRoiMap.get()
             roiDatas = passthroughRoi.getConfigData()

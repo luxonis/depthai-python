@@ -80,11 +80,11 @@ while True:
     inDepthAvg = spatialCalcQueue.get() # blocking call, will wait until a new data has arrived
     
     depthFrame = inDepth.getFrame()
-    depthFrameColor = cv2.normalize(depthFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
     depthFrameColor = cv2.equalizeHist(depthFrameColor)
     depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-    spatialData = inDepthAvg.getDepthData()
+    spatialData = inDepthAvg.getSpatialLocations()
     for depthData in spatialData:
         roi = depthData.config.roi
         xmin = int(roi.xmin * inDepth.getWidth())
