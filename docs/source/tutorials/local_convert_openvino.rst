@@ -14,7 +14,7 @@ Haven't heard of OpenVINO or the Open Model Zoo? I'll start with a quick introdu
 What is OpenVINO?
 #################
 
-Under-the-hood, DepthAI uses the Intel tecnnology to perform high-speed model inference. However, you can't just dump
+Under-the-hood, DepthAI uses the Intel technology to perform high-speed model inference. However, you can't just dump
 your neural net into the chip and get high-performance for free. That's where
 `OpenVINO <https://docs.openvinotoolkit.org/>`__ comes in. OpenVINO is a free toolkit that converts a deep learning
 model into a format that runs on Intel Hardware. Once the model is converted, it's common to see Frames Per Second
