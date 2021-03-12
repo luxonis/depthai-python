@@ -14,7 +14,7 @@ Please run the following command to install the required dependencies
 .. code-block:: python
    :substitutions:
 
-   python3 -m pip install -U depthai numpy opencv-python
+   python3 -m pip install -U depthai opencv-python
 
 
 For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
