@@ -3,7 +3,7 @@
 
 This example shows how to set up the encoder node to encode the RGB camera and both grayscale cameras
 (of DepthAI/OAK-D) at the same time, having all encoder parameters set to maximum quality and FPS.
-The RGB is set to 4K (3840x2160) and the grayscale are set to 1280x720 each, all at 30FPS.
+The RGB is set to 4K (3840x2160) and the grayscale are set to 1280x720 each, all at 25FPS.
 Each encoded video stream is transferred over XLINK and saved to a respective file.
 
 Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
