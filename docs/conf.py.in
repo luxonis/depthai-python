@@ -23,6 +23,7 @@ copyright = u"@build_year@, Luxonis"
 author = "Luxonis"
 version = u"@DEPTHAI_PYTHON_VERSION@"
 release = version
+pypi_release = "2.0.0.1"
 
 
 # -- General configuration ---------------------------------------------------
