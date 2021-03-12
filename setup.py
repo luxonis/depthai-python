@@ -5,6 +5,7 @@ import sys
 import platform
 import subprocess
 import find_version
+import multiprocessing
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -151,15 +152,15 @@ class CMakeBuild(build_ext):
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
-            if freeMemory < 1000:
-                build_args += ['--', '-j1']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif freeMemory < 2500:
-                build_args += ['--', '-j2']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
-            else:
-                # Build with maximum available threads
-                build_args += ['--', '-j']
+            max_threads = multiprocessing.cpu_count()
+            num_threads = (freeMemory // 1000)
+            num_threads = min(num_threads, max_threads)
+            if num_threads <= 0:
+                num_threads = 1            
+            build_args += ['--', '-j' + str(num_threads)]
+            if num_threads <= 2:
+                cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
+
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
