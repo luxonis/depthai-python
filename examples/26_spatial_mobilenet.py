@@ -37,12 +37,12 @@ stereo = pipeline.createStereoDepth()
 
 xoutRgb = pipeline.createXLinkOut()
 xoutNN = pipeline.createXLinkOut()
-xoutDepthRoiMap = pipeline.createXLinkOut()
+xoutBoundingBoxDepthMapping = pipeline.createXLinkOut()
 xoutDepth = pipeline.createXLinkOut()
 
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
-xoutDepthRoiMap.setStreamName("depthRoiMap")
+xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
 
@@ -79,10 +79,10 @@ else:
     colorCam.preview.link(xoutRgb.input)
 
 spatialDetectionNetwork.out.link(xoutNN.input)
-spatialDetectionNetwork.passthroughRoi.link(xoutDepthRoiMap.input)
+spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
-stereo.depth.link(xoutDepth.input)
+spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -92,7 +92,7 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    xoutDepthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
+    xoutBoundingBoxDepthMapping = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     frame = None
@@ -123,8 +123,8 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
         detections = inNN.detections
         if len(detections) != 0:
-            passthroughRoi = xoutDepthRoiMap.get()
-            roiDatas = passthroughRoi.getConfigData()
+            boundingBoxMapping = xoutBoundingBoxDepthMapping.get()
+            roiDatas = boundingBoxMapping.getConfigData()
 
             for roiData in roiDatas:
                 roi = roiData.roi

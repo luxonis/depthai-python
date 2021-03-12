@@ -45,7 +45,7 @@ stereo.setSubpixel(subpixel)
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-stereo.depth.link(xoutDepth.input)
+spatialLocationCalculator.passthroughDepth.link(xoutDepth.input)
 stereo.depth.link(spatialLocationCalculator.inputDepth)
 
 bbXmin = 0.4

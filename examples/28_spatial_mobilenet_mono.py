@@ -56,7 +56,7 @@ else:
     manip.out.link(xoutManip.input)
 
 depthRoiMap = pipeline.createXLinkOut()
-depthRoiMap.setStreamName("depthRoiMap")
+depthRoiMap.setStreamName("boundingBoxDepthMapping")
 
 xoutDepth = pipeline.createXLinkOut()
 xoutDepth.setStreamName("depth")
@@ -64,7 +64,7 @@ xoutDepth.setStreamName("depth")
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("detections")
 spatialDetectionNetwork.out.link(xout_nn.input)
-spatialDetectionNetwork.passthroughRoi.link(depthRoiMap.input)
+spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
@@ -83,7 +83,7 @@ monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
-stereo.depth.link(xoutDepth.input)
+spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -93,7 +93,7 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    depthRoiMap = device.getOutputQueue(name="depthRoiMap", maxSize=4, blocking=False)
+    depthRoiMap = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     rectifiedRight = None
@@ -125,8 +125,8 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
         detections = in_nn.detections
         if len(detections) != 0:
-            passthroughRoi = depthRoiMap.get()
-            roiDatas = passthroughRoi.getConfigData()
+            boundingBoxMapping = depthRoiMap.get()
+            roiDatas = boundingBoxMapping.getConfigData()
 
             for roiData in roiDatas:
                 roi = roiData.roi
