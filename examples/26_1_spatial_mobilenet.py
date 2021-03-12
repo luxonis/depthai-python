@@ -8,10 +8,8 @@ import numpy as np
 import time
 
 '''
-Mobilenet SSD device side decoding demo
-  The "mobilenet-ssd" model is a Single-Shot multibox Detection (SSD) network intended
-  to perform object detection. This model is implemented using the Caffe* framework.
-  For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
+Spatial detection network demo.
+    Performs inference on RGB camera and retrieves spatial location coordinates: x,y,z relative to the center of depth map.
 '''
 
 # MobilenetSSD label texts
@@ -21,9 +19,9 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 syncNN = True
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnBlobPath = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    nnBlobPath = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -60,7 +58,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
 
-spatialDetectionNetwork.setBlobPath(mobilenet_path)
+spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
