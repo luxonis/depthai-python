@@ -104,7 +104,7 @@ jobs:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
-          path: ~/.hunter/
+          path: C:/.hunter/
           key: hunter-msvc
       - uses: actions/checkout@v2
         with:
@@ -237,7 +237,7 @@ jobs:
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
     needs: build-docstrings
-    runs-on: [self-hosted, Linux, ARM64]
+    runs-on: [self-hosted, linux, ARM64]
     container:
       image: quay.io/pypa/manylinux2014_aarch64
       env:
