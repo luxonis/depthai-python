@@ -17,6 +17,7 @@
 #include "depthai/depthai.hpp"
 #include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
+#include "pipeline/CommonBindings.hpp"
 #include "pipeline/NodeBindings.hpp"
 #include "XLinkConnectionBindings.hpp"
 #include "DeviceBindings.hpp"
@@ -30,14 +31,8 @@
 PYBIND11_MODULE(depthai,m)
 {
 
-    // Version consists of: (depthai-core).(bindings revision)[+bindings hash]
-    std::string version = std::string(dai::build::VERSION) + "." + std::string(DEPTHAI_PYTHON_BINDINGS_REVISION);
-
-    #ifdef DEPTHAI_PYTHON_COMMIT_HASH
-        version += "+" + std::string(DEPTHAI_PYTHON_COMMIT_HASH);
-    #endif
-
-    m.attr("__version__") = version;
+    // Depthai python version consists of: (depthai-core).(bindings revision)[+bindings hash]
+    m.attr("__version__") = DEPTHAI_PYTHON_VERSION;
 
     // Add bindings 
     OpenVINOBindings::bind(m);
@@ -47,6 +42,7 @@ PYBIND11_MODULE(depthai,m)
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
+    CommonBindings::bind(m);
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
     LogBindings::bind(m);
