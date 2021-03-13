@@ -297,6 +297,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setFovOverrideDegrees",   &StereoDepth::setFovOverrideDegrees, py::arg("fov"), DOC(dai, node, StereoDepth, setFovOverrideDegrees))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
         .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
+        .def("setDepthAlign",           &StereoDepth::setDepthAlign, py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
         .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold, py::arg("confThr"), DOC(dai, node, StereoDepth, setConfidenceThreshold))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
@@ -443,6 +444,7 @@ void NodeBindings::bind(pybind11::module& m){
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("median",                  &StereoDepthProperties::median)
+        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
         .def_readwrite("confidenceThreshold",     &StereoDepthProperties::confidenceThreshold)
         .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
         .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
@@ -461,6 +463,15 @@ void NodeBindings::bind(pybind11::module& m){
         .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
         .value("KERNEL_7x7", StereoDepthProperties::MedianFilter::KERNEL_7x7)
         ;
+
+    py::enum_<StereoDepthProperties::DepthAlign>(stereoDepthProperties, "DepthAlign")
+        .value("AUTO",   StereoDepthProperties::DepthAlign::AUTO)
+        .value("RIGHT",  StereoDepthProperties::DepthAlign::RIGHT)
+        .value("LEFT",   StereoDepthProperties::DepthAlign::LEFT)
+        .value("RGB",    StereoDepthProperties::DepthAlign::RGB)
+        .value("CENTER", StereoDepthProperties::DepthAlign::CENTER)
+        ;
+
     // ALIAS
     m.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
    
