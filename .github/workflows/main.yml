@@ -34,7 +34,7 @@ jobs:
           path: ~/.hunter
           key: hunter-macos-latest
       - name: List .hunter cache directory
-        run: ls -a -l ~/.hunter/_Base/
+        run: ls -a -l ~/.hunter/_Base/ || true
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
@@ -152,8 +152,8 @@ jobs:
           path: ~/.hunter
           key: hunter-macos-latest
       - name: List .hunter cache directory
-        run: ls -a -l ~/.hunter/_Base/
-        
+        run: ls -a -l ~/.hunter/_Base/ || true
+
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
