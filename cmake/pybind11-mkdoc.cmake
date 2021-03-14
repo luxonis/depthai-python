@@ -51,9 +51,9 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             -w 80
             -o "${output_path}"
             # List of include directories
-            "-I$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,;-I>"
+            "-I$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
             # List of compiler definitions
-            "-D$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>,;-D>"
+            "-D$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_COMPILE_DEFINITIONS>,;-D>"
             # List of headers for which to generate docstrings
             "${mkdoc_headers}"
             # Redirect stderr to not spam output
