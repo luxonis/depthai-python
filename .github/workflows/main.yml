@@ -226,7 +226,7 @@ jobs:
         run: |
           cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
           cmake --build build_core --parallel --target install
-          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/lib/cmake/depthai" >> $GITHUB_ENV
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
         if: startsWith(github.ref, 'refs/tags/v') != true
@@ -281,7 +281,7 @@ jobs:
         run: |
           cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
           cmake --build build_core --parallel --target install
-          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/lib/cmake/depthai" >> $GITHUB_ENV
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
         if: startsWith(github.ref, 'refs/tags/v') != true
