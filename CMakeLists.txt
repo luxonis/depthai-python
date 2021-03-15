@@ -94,13 +94,10 @@ configure_file(cmake/docstring.hpp.in ${DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH})
 # Add target to generate docstrings
 if (DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
     include(pybind11-mkdoc)
-    # Check if pybind11_mkdoc available and create target (use non aliased target)
-    if(DEPTHAI_PYTHON_USE_FIND_PACKAGE)
-        target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai::depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
-    else()
-        target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
-    endif()
-
+    
+    # Check if pybind11_mkdoc available and create target
+    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai::core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    
     if(NOT TARGET pybind11_mkdoc)
         # Generate default docstrings to OUTPUT path
         configure_file(cmake/default_docstring.hpp.in ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} COPYONLY)

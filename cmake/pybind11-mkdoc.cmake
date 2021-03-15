@@ -5,6 +5,12 @@ include(target-public-headers)
 # target_pybind11_mkdoc_setup([path/to/output/docstring.hpp] [Library for which to generate: target-name] [Enforce pybind11_mkdoc existing ON/OFF])
 function(target_pybind11_mkdoc_setup output_file target enforce)
 
+    # Get unaliased target if alias target passed in
+    get_target_property(original_target ${target} ALIASED_TARGET)
+    if(original_target)
+        set(target ${original_target})
+    endif()
+
     # gets target public headers
     get_target_public_headers(${target} header_files)
 
