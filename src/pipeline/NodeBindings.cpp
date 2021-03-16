@@ -376,6 +376,16 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork", DOC(dai, node, YoloSpatialDetectionNetwork))
         ;
 
+    // SpatialLocationCalculator node
+    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
+        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))       
+        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
+        .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
+        .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
+        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
+        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+        ;
+
     // SystemLogger node
     py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger", DOC(dai, node, SystemLogger))
         .def_readonly("out", &SystemLogger::out, DOC(dai, node, SystemLogger, out))
@@ -502,21 +512,46 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
         ;
 
-    
+    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties");
+    neuralNetworkProperties
+        .def_readwrite("blobSize", &NeuralNetworkProperties::blobSize)
+        .def_readwrite("blobUri", &NeuralNetworkProperties::blobUri)
+        .def_readwrite("numFrames", &NeuralNetworkProperties::numFrames)
+        .def_readwrite("numThreads", &NeuralNetworkProperties::numThreads)
+        .def_readwrite("numNCEPerThread", &NeuralNetworkProperties::numNCEPerThread)
+        ;
+    m.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
 
-    py::class_<SpatialLocationCalculatorProperties> SpatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties");
-    SpatialLocationCalculatorProperties
+
+    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties");
+    detectionNetworkProperties
+        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
+        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
+        .def_readwrite("classes", &DetectionNetworkProperties::classes)
+        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
+        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
+        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
+        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
+        ;
+    // ALIAS
+    m.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
+
+
+    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties");
+    spatialDetectionNetworkProperties
+        .def_readwrite("detectedBBScaleFactor", &SpatialDetectionNetworkProperties::detectedBBScaleFactor)
+        .def_readwrite("depthThresholds", &SpatialDetectionNetworkProperties::depthThresholds)
+        ;
+    // ALIAS
+    m.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
+
+
+    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties");
+    spatialLocationCalculatorProperties
         .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
+        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
         ;
+    m.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
 
-    // SpatialLocationCalculator node
-    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
-        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))       
-        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
-        .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
-        .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
-        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
-        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
 
-        ;
 }
