@@ -159,7 +159,7 @@ First, clone the `depthai-python <https://github.com/luxonis/depthai-python/tree
 .. code-block:: bash
 
   git clone https://github.com/luxonis/depthai-python.git
-  cd depthai-python
+  cd depthai-python/examples
 
 Next install the requirements for this repository.
 Note that we recommend installing the dependencies in a virtual environment, so that they don't interfere with other Python
@@ -178,7 +178,7 @@ Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` direc
 
 .. code-block:: bash
 
-  python3 examples/01_rgb_preview.py
+  python3 01_rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
