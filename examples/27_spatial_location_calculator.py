@@ -31,8 +31,8 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 outputDepth = True
 outputRectified = False
-lrcheck = True
-subpixel = True
+lrcheck = False
+subpixel = False
 
 # StereoDepth
 stereo.setOutputDepth(outputDepth)
