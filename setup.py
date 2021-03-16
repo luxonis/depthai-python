@@ -105,6 +105,11 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
             cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
 
+        # Pass installation directory
+        if 'DEPTHAI_INSTALLATION_DIR' in os.environ:
+            cmake_args += ['-DDEPTHAI_PYTHON_USE_FIND_PACKAGE=ON']
+            cmake_args += ['-DCMAKE_PREFIX_PATH='+os.environ['DEPTHAI_INSTALLATION_DIR']]
+
         # Set build type (debug vs release for library as well as dependencies)
         cfg = 'Debug' if self.debug else 'Release'
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]

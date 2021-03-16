@@ -5,6 +5,12 @@ include(target-public-headers)
 # target_pybind11_mkdoc_setup([path/to/output/docstring.hpp] [Library for which to generate: target-name] [Enforce pybind11_mkdoc existing ON/OFF])
 function(target_pybind11_mkdoc_setup output_file target enforce)
 
+    # Get unaliased target if alias target passed in
+    get_target_property(original_target ${target} ALIASED_TARGET)
+    if(original_target)
+        set(target ${original_target})
+    endif()
+
     # gets target public headers
     get_target_public_headers(${target} header_files)
 
@@ -51,9 +57,9 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             -w 80
             -o "${output_path}"
             # List of include directories
-            "-I$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,;-I>"
+            "-I$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
             # List of compiler definitions
-            "-D$<JOIN:$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>,;-D>"
+            "-D$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_COMPILE_DEFINITIONS>,;-D>"
             # List of headers for which to generate docstrings
             "${mkdoc_headers}"
             # Redirect stderr to not spam output

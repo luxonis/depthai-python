@@ -41,6 +41,7 @@ set(DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH ${DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR}/do
 set(DOCSTRINGS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/include/depthai_python_docstring.hpp)
 
 # First specify options
+option(DEPTHAI_PYTHON_USE_FIND_PACKAGE "Use find_package for depthai-core" OFF)
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
@@ -54,8 +55,13 @@ endif()
 # Add external dependencies
 add_subdirectory(external)
 
-# Add depthai-cpp dependency
-add_subdirectory(depthai-core)
+# Add depthai-core dependency
+if(DEPTHAI_PYTHON_USE_FIND_PACKAGE)
+    find_package(depthai CONFIG REQUIRED)
+else()
+    add_subdirectory(depthai-core)
+endif()
+
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
@@ -88,8 +94,10 @@ configure_file(cmake/docstring.hpp.in ${DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH})
 # Add target to generate docstrings
 if (DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
     include(pybind11-mkdoc)
+    
     # Check if pybind11_mkdoc available and create target
-    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai::core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    
     if(NOT TARGET pybind11_mkdoc)
         # Generate default docstrings to OUTPUT path
         configure_file(cmake/default_docstring.hpp.in ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} COPYONLY)
