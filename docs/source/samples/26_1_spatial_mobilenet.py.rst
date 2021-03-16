@@ -31,9 +31,9 @@ This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to wo
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/21_mobilenet_device_side_decoding.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/26_1_spatial_mobilenet.py>`__
 
-.. literalinclude:: ../../../examples/21_mobilenet_device_side_decoding.py
+.. literalinclude:: ../../../examples/26_1_spatial_mobilenet.py
    :language: python
    :linenos:
 
