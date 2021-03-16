@@ -2,7 +2,7 @@
 
 set -e
 
-./docs/update_docs.sh
+./docs/docker/update_docs.sh
 
 when-changed -r docs/source -c "bash /app/docs/update_docs.sh" &
 

@@ -10,4 +10,4 @@ WORKDIR /app
 ADD docs/requirements.txt docs/requirements.txt
 RUN python3 -m pip install -r docs/requirements.txt
 ADD . .
-CMD docs/docker_run.sh
+CMD docs/docker/docker_run.sh
