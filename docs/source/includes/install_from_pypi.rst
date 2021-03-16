@@ -8,4 +8,4 @@ Please run the following command to install the required dependencies
     python3 -m pip install -U --force-reinstall depthai
 
 
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+For additional information, please follow :ref:`Python API installation guide <Installation>`
