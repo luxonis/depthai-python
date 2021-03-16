@@ -93,10 +93,9 @@ while True:
 
         fontType = cv2.FONT_HERSHEY_TRIPLEX
         cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-        cv2.putText(depthFrameColor, f"Avg: {int(depthData.depthAverage)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
-        cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 65), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
+        cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
 
 
     cv2.imshow("depth", depthFrameColor)

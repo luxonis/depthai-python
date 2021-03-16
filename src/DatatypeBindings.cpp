@@ -747,6 +747,10 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
         .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
         .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
+        .def_readwrite("x", &Rect::x)
+        .def_readwrite("y", &Rect::y)
+        .def_readwrite("width", &Rect::width)
+        .def_readwrite("height", &Rect::height)
         ;
 
     py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds))
