@@ -573,12 +573,14 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
         .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("x", &Point2f::x)
         .def_readwrite("y", &Point2f::y)
         ;
 
     py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
         .def(py::init<>())
+        .def(py::init<float, float, float>())
         .def_readwrite("x", &Point3f::x)
         .def_readwrite("y", &Point3f::y)
         .def_readwrite("z", &Point3f::z)
@@ -586,6 +588,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<Size2f>(m, "Size2f")
         .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("width", &Size2f::width)
         .def_readwrite("height", &Size2f::height)
         ;
@@ -638,8 +641,8 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // setters
         .def("setCropRect", &ImageManipConfig::setCropRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
-        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setCropRotatedRect))
-        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio"), DOC(dai, ImageManipConfig, setCenterCrop))
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords") = true, DOC(dai, ImageManipConfig, setCropRotatedRect))
+        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio")=1.0f, DOC(dai, ImageManipConfig, setCenterCrop))
         .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints, py::arg("pt"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setWarpTransformFourPoints))
         .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3, py::arg("mat"), DOC(dai, ImageManipConfig, setWarpTransformMatrix3x3))
         .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels, DOC(dai, ImageManipConfig, setWarpBorderReplicatePixels))
@@ -647,7 +650,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees, py::arg("deg"), DOC(dai, ImageManipConfig, setRotationDegrees))
         .def("setRotationRadians", &ImageManipConfig::setRotationRadians, py::arg("rad"), DOC(dai, ImageManipConfig, setRotationRadians))
         .def("setResize", &ImageManipConfig::setResize, py::arg("w"), py::arg("h"), DOC(dai, ImageManipConfig, setResize))
-        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed"), py::arg("bgGreen"), py::arg("bgBlue"), DOC(dai, ImageManipConfig, setResizeThumbnail))
+        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail))
         .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
@@ -732,12 +735,18 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<Rect> (m, "Rect", DOC(dai, Rect))
         .def(py::init<>())
         .def(py::init<float, float, float, float>())
-        .def("setRect", &Rect::setRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("ymax"), DOC(dai, Rect, setRect))
-        .def("validRect", &Rect::validRect, DOC(dai, Rect, validRect))
-        .def_readwrite("xmin", &Rect::xmin)
-        .def_readwrite("ymin", &Rect::ymin)
-        .def_readwrite("xmax", &Rect::xmax)
-        .def_readwrite("ymax", &Rect::ymax)
+        .def(py::init<Point2f, Point2f>())
+        .def(py::init<Point2f, Size2f>())
+
+        .def("topLeft", &Rect::topLeft, DOC(dai, Rect, topLeft))
+        .def("bottomRight", &Rect::bottomRight, DOC(dai, Rect, bottomRight))
+        .def("size", &Rect::size, DOC(dai, Rect, size))
+        .def("area", &Rect::area, DOC(dai, Rect, area))
+        .def("empty", &Rect::empty, DOC(dai, Rect, empty))
+        .def("contains", &Rect::contains, DOC(dai, Rect, contains))
+        .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
+        .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
+        .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
         ;
 
     py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds))

@@ -126,10 +126,13 @@ with dai.Device(pipeline) as device:
 
             for roiData in roiDatas:
                 roi = roiData.roi
-                xmin = int(roi.xmin * depth.getWidth())
-                ymin = int(roi.ymin * depth.getHeight())
-                xmax = int(roi.xmax * depth.getWidth())
-                ymax = int(roi.ymax * depth.getHeight())
+                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+                topLeft = roi.topLeft()
+                bottomRight = roi.bottomRight()
+                xmin = int(topLeft.x)
+                ymin = int(topLeft.y)
+                xmax = int(bottomRight.x)
+                ymax = int(bottomRight.y)
 
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 

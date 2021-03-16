@@ -48,16 +48,14 @@ monoRight.out.link(stereo.right)
 spatialLocationCalculator.passthroughDepth.link(xoutDepth.input)
 stereo.depth.link(spatialLocationCalculator.inputDepth)
 
-bbXmin = 0.4
-bbXmax = 0.6
-bbYmin = 0.4
-bbYmax = 0.6
+topLeft = dai.Point2f(0.4, 0.4)
+bottomRight = dai.Point2f(0.6, 0.6)
 
 spatialLocationCalculator.setWaitForConfigInput(False)
 config = dai.SpatialLocationCalculatorConfigData()
 config.depthThresholds.lowerThreshold = 100
 config.depthThresholds.upperThreshold = 10000
-config.roi = dai.Rect(bbXmin, bbYmin, bbXmax, bbYmax)
+config.roi = dai.Rect(topLeft, bottomRight)
 spatialLocationCalculator.initialConfig.addROI(config)
 spatialLocationCalculator.out.link(xoutSpatialData.input)
 xinSpatialCalcConfig.out.link(spatialLocationCalculator.inputConfig)
@@ -87,10 +85,11 @@ while True:
     spatialData = inDepthAvg.getSpatialLocations()
     for depthData in spatialData:
         roi = depthData.config.roi
-        xmin = int(roi.xmin * inDepth.getWidth())
-        ymin = int(roi.ymin * inDepth.getHeight())
-        xmax = int(roi.xmax * inDepth.getWidth())
-        ymax = int(roi.ymax * inDepth.getHeight())
+        roi = roi.denormalize(width=depthFrameColor.shape[1], height=depthFrameColor.shape[0])
+        xmin = int(roi.topLeft().x)
+        ymin = int(roi.topLeft().y)
+        xmax = int(roi.bottomRight().x)
+        ymax = int(roi.bottomRight().y)
 
         fontType = cv2.FONT_HERSHEY_TRIPLEX
         cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
@@ -107,28 +106,28 @@ while True:
     if key == ord('q'):
         break
     elif key == ord('w'):
-        if bbYmin - stepSize >= 0:
-            bbYmin -= stepSize
-            bbYmax -= stepSize
+        if topLeft.y - stepSize >= 0:
+            topLeft.y -= stepSize
+            bottomRight.y -= stepSize
             newConfig = True
     elif key == ord('a'):
-        if bbXmin - stepSize >= 0:
-            bbXmin -= stepSize
-            bbXmax -= stepSize
+        if topLeft.x - stepSize >= 0:
+            topLeft.x -= stepSize
+            bottomRight.x -= stepSize
             newConfig = True
     elif key == ord('s'):
-        if bbYmax + stepSize <= 1:
-            bbYmin += stepSize
-            bbYmax += stepSize
+        if bottomRight.y + stepSize <= 1:
+            topLeft.y += stepSize
+            bottomRight.y += stepSize
             newConfig = True
     elif key == ord('d'):
-        if bbXmax + stepSize <= 1:
-            bbXmin += stepSize
-            bbXmax += stepSize
+        if bottomRight.x + stepSize <= 1:
+            topLeft.x += stepSize
+            bottomRight.x += stepSize
             newConfig = True
 
     if newConfig:
-        config.roi = dai.Rect(bbXmin, bbYmin, bbXmax, bbYmax)
+        config.roi = dai.Rect(topLeft, bottomRight)
         cfg = dai.SpatialLocationCalculatorConfig()
         cfg.addROI(config)
         spatialCalcConfigInQueue.send(cfg)
