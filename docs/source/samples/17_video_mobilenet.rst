@@ -19,15 +19,7 @@ Demo
 Setup
 #####
 
-Please run the following command to install the required dependencies
-
-.. code-block:: python
-   :substitutions:
-
-   python3 -m pip install -U depthai opencv-python
-
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+.. include::  /includes/install_from_pypi.rst
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) and prerecorded video
 (:code:`construction_vest.mp4` file) to work - you can download them
