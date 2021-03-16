@@ -94,6 +94,10 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/22_tiny_tolo_v3_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
    samples/24_opencv_support.rst
+   samples/25_system_information.rst
+   samples/26_1_spatial_mobilenet.py.rst
+   samples/26_2_spatial_mobilenet_mono.rst
+   samples/27_spatial_location_calculator.rst
 
 .. toctree::
    :maxdepth: 1
