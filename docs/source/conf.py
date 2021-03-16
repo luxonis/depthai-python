@@ -10,7 +10,7 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 env=os.environ.copy()
 
 # Temp dir - remove if exists, and create a new one
-tmpdir = '/home/docs/__temp_dir/'
+tmpdir = '/home/docs/__temp_dir'
 subprocess.check_call(['rm', '-rf', tmpdir])
 subprocess.check_call(['mkdir', '-p', tmpdir])
 
@@ -30,7 +30,7 @@ env['LIBCLANG_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/lib/libclang.so.1'
 env['LLVM_DIR_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/'
 
 # Build library and generate actual conf.py
-subprocess.run(["cmake -P ci.cmake"], cwd=cwd, shell=True, check=True, env=env)
+subprocess.run(["cmake -P ../ci.cmake"], cwd=cwd, shell=True, check=True, env=env)
 
 # Load generated conf.py which includes all needed information to build with sphinx
 with open("../../build/docs/conf.py") as infile:
