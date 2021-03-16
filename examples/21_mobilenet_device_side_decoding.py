@@ -68,7 +68,7 @@ with dai.Device(pipeline) as device:
     frame = None
     bboxes = []
 
-    start_time = time.time()
+    start_time = time.monotonic()
     counter = 0
     fps = 0
     while True:
@@ -88,7 +88,7 @@ with dai.Device(pipeline) as device:
         if in_nn is not None:
             bboxes = in_nn.detections
             counter+=1
-            current_time = time.time()
+            current_time = time.monotonic()
             if (current_time - start_time) > 1 :
                 fps = counter / (current_time - start_time)
                 counter = 0

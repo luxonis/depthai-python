@@ -95,6 +95,14 @@ hunter_private_data(
     LOCATION tiny_yolo_v4_blob
 )
 
+# NeuralNetwork node, mobilenet example, 8 shaves
+hunter_private_data(
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_8shave.blob"
+    SHA1 "3329bb8f3a9c881ef9756d232055f9d6f38aa07b"
+    FILE "mobilenet-ssd_openvino_2021.2_8shave.blob"
+    LOCATION mobilenet_8shaves_blob
+)
+
 
 # Add examples
 add_python_example(01_rgb_preview 01_rgb_preview.py)
@@ -113,7 +121,7 @@ add_python_example(13_encoding_max_limit 13_encoding_max_limit.py)
 add_python_example(14_color_camera_control 14_color_camera_control.py)
 add_python_example(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_5shave_blob}")
 add_python_example(16_device_queue_event 16_device_queue_event.py)
-add_python_example(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_blob}" "${construction_vest}")
+add_python_example(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_8shaves_blob}" "${construction_vest}")
 add_python_example(18_rgb_encoding_mobilenet 18_rgb_encoding_mobilenet.py "${mobilenet_blob}")
 add_python_example(19_mono_camera_control 19_mono_camera_control.py)
 add_python_example(20_color_rotate_warp 20_color_rotate_warp.py)
@@ -123,3 +131,6 @@ add_python_example(22_2_tiny_yolo_v4_device_side_decoding 22_2_tiny_yolo_v4_devi
 add_python_example(23_autoexposure_roi 23_autoexposure_roi.py "${mobilenet_blob}")
 add_python_example(24_opencv_support 24_opencv_support.py)
 add_python_example(25_system_information 25_system_information.py)
+add_python_example(26_1_spatial_mobilenet 26_1_spatial_mobilenet.py "${mobilenet_blob}")
+add_python_example(26_2_spatial_mobilenet_mono 26_2_spatial_mobilenet_mono.py "${mobilenet_blob}")
+add_python_example(27_spatial_location_calculator 27_spatial_location_calculator.py)

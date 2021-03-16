@@ -9,18 +9,25 @@
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
 #include "depthai/pipeline/datatype/ImgDetections.hpp"
+#include "depthai/pipeline/datatype/SpatialImgDetections.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
 #include "depthai-shared/datatype/RawImgDetections.hpp"
+#include "depthai-shared/datatype/RawSpatialImgDetections.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawSpatialLocations.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 
 
 //pybind
@@ -167,9 +174,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymin", &ImgDetection::ymin)
         .def_readwrite("xmax", &ImgDetection::xmax)
         .def_readwrite("ymax", &ImgDetection::ymax)
-        .def_readwrite("xdepth", &ImgDetection::xdepth)
-        .def_readwrite("ydepth", &ImgDetection::ydepth)
-        .def_readwrite("zdepth", &ImgDetection::zdepth)
+        ;
+
+    py::class_<SpatialImgDetection, ImgDetection>(m, "SpatialImgDetection", DOC(dai, SpatialImgDetection))
+        .def(py::init<>())
+        .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
         ;
 
     py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections");
@@ -178,6 +187,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("detections", &RawImgDetections::detections)
         ;
 
+    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> RawSpatialImgDetections(m, "RawSpatialImgDetections");
+    RawSpatialImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawSpatialImgDetections::detections)
+        ;
     
     // Bind RawImageManipConfig
     py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
@@ -557,14 +571,24 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
-    py::class_<Point2f>(m, "Point2f")
+    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
         .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("x", &Point2f::x)
         .def_readwrite("y", &Point2f::y)
         ;
 
+    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
+        .def(py::init<>())
+        .def(py::init<float, float, float>())
+        .def_readwrite("x", &Point3f::x)
+        .def_readwrite("y", &Point3f::y)
+        .def_readwrite("z", &Point3f::z)
+        ;
+
     py::class_<Size2f>(m, "Size2f")
         .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("width", &Size2f::width)
         .def_readwrite("height", &Size2f::height)
         ;
@@ -606,13 +630,19 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
         ;
 
+    // Bind SpatialImgDetections
+    py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>>(m, "SpatialImgDetections", DOC(dai, SpatialImgDetections))
+        .def(py::init<>())
+        .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
+        ;
+
      // Bind ImageManipConfig
     py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig", DOC(dai, ImageManipConfig))
         .def(py::init<>())
         // setters
         .def("setCropRect", &ImageManipConfig::setCropRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
-        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setCropRotatedRect))
-        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio"), DOC(dai, ImageManipConfig, setCenterCrop))
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords") = true, DOC(dai, ImageManipConfig, setCropRotatedRect))
+        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio")=1.0f, DOC(dai, ImageManipConfig, setCenterCrop))
         .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints, py::arg("pt"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setWarpTransformFourPoints))
         .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3, py::arg("mat"), DOC(dai, ImageManipConfig, setWarpTransformMatrix3x3))
         .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels, DOC(dai, ImageManipConfig, setWarpBorderReplicatePixels))
@@ -620,7 +650,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees, py::arg("deg"), DOC(dai, ImageManipConfig, setRotationDegrees))
         .def("setRotationRadians", &ImageManipConfig::setRotationRadians, py::arg("rad"), DOC(dai, ImageManipConfig, setRotationRadians))
         .def("setResize", &ImageManipConfig::setResize, py::arg("w"), py::arg("h"), DOC(dai, ImageManipConfig, setResize))
-        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed"), py::arg("bgGreen"), py::arg("bgBlue"), DOC(dai, ImageManipConfig, setResizeThumbnail))
+        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail))
         .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
@@ -685,4 +715,59 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
         ;
 
+    //  // Bind ImageManipConfig
+    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
+        .def(py::init<>())
+        // setters
+        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
+        .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
+        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
+        ;
+
+    py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
+        .def(py::init<>())
+        .def_readwrite("config", &SpatialLocations::config)
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
+        ;
+    
+
+    py::class_<Rect> (m, "Rect", DOC(dai, Rect))
+        .def(py::init<>())
+        .def(py::init<float, float, float, float>())
+        .def(py::init<Point2f, Point2f>())
+        .def(py::init<Point2f, Size2f>())
+
+        .def("topLeft", &Rect::topLeft, DOC(dai, Rect, topLeft))
+        .def("bottomRight", &Rect::bottomRight, DOC(dai, Rect, bottomRight))
+        .def("size", &Rect::size, DOC(dai, Rect, size))
+        .def("area", &Rect::area, DOC(dai, Rect, area))
+        .def("empty", &Rect::empty, DOC(dai, Rect, empty))
+        .def("contains", &Rect::contains, DOC(dai, Rect, contains))
+        .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
+        .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
+        .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
+        .def_readwrite("x", &Rect::x)
+        .def_readwrite("y", &Rect::y)
+        .def_readwrite("width", &Rect::width)
+        .def_readwrite("height", &Rect::height)
+        ;
+
+    py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds))
+        .def(py::init<>())
+        .def_readwrite("lowerThreshold", &SpatialLocationCalculatorConfigThresholds::lowerThreshold)
+        .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
+        ;
+
+    py::class_<SpatialLocationCalculatorConfigData> (m, "SpatialLocationCalculatorConfigData", DOC(dai, SpatialLocationCalculatorConfigData))
+        .def(py::init<>())
+        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
+        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
+        ;
+
+    // Bind SpatialLocationCalculatorData
+    py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData))
+        .def(py::init<>())
+        .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
+        ;
 }
