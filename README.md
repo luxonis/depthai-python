@@ -31,6 +31,8 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
      Then run the following commands to build the docs website
   
      ```
+     python3 -m pip install -U pip
+     python3 -m pip install -r docs/requirements.txt
      cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
      cmake --build build --parallel --target sphinx
      python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
@@ -38,8 +40,14 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
   
      Then open [http://localhost:8000](http://localhost:8000).
 
-     This will build documentation based on current sources, so if some new changes will be made, these commnads will
-     have to be run again to build updated website
+     This will build documentation based on current sources, so if some new changes will be made, run this command
+     in a new terminal window to update the website source
+  
+     ```
+     cmake --build build --parallel --target sphinx
+     ```
+  
+     Then refresh your page - it should load the updated website that was just built
   
 
 ## Installation
