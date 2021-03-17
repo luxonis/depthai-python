@@ -66,7 +66,9 @@ Raspberry Pi OS
 Ubuntu
 ******
 
-Note that these Ubuntu instructions also work for the **Jetson** and **Xavier** series.
+These Ubuntu instructions also work for the **Jetson** and **Xavier** series.
+
+Note! For **Jetson** it is recommended to assign at least 7GB of memory during installation.
 
 .. code-block:: bash
 
