@@ -31,7 +31,7 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
      Then run the following commands to build the docs website
   
      ```
-     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON -D ENABLE_PRECOMPILED_HEADERS=OFF
+     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
      cmake --build build --parallel --target sphinx
      python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
      ```
