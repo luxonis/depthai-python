@@ -10,6 +10,38 @@ Python bindings for C++ depthai-core library
 
 Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.com/projects/api/en/latest/)
 
+### Building documentation
+
+- **Using [Docker](https://docs.docker.com/) (with [Docker Compose](https://docs.docker.com/compose/install/))**
+
+     ```
+     cd docs
+     docker-compose build
+     docker-compose up
+     ```
+  
+     Then open [http://localhost:8000](http://localhost:8000).
+     
+     This docker container will watch changes in the `docs/source` directory and rebuild the docs automatically
+
+- **Linux**
+     
+     First, please install the required [dependencies](#Dependencies)
+  
+     Then run the following commands to build the docs website
+  
+     ```
+     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON -D ENABLE_PRECOMPILED_HEADERS=OFF
+     cmake --build build --parallel --target sphinx
+     python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
+     ```
+  
+     Then open [http://localhost:8000](http://localhost:8000).
+
+     This will build documentation based on current sources, so if some new changes will be made, these commnads will
+     have to be run again to build updated website
+  
+
 ## Installation
 
 Prebuilt wheels are available in [Luxonis repository](https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/)
