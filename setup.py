@@ -116,7 +116,7 @@ class CMakeBuild(build_ext):
         freeMemory = 4000
         if platform.system() == "Linux":
             try:
-                freeMemory = int(os.popen("free -m").readlines()[1].split()[3])
+                freeMemory = int(os.popen("free -m").readlines()[1].split()[6])
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
@@ -153,8 +153,7 @@ class CMakeBuild(build_ext):
             if num_threads <= 0:
                 num_threads = 1            
             build_args += ['--', '-j' + str(num_threads)]
-            if num_threads <= 2:
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
+            cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
