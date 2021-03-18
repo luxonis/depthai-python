@@ -158,7 +158,7 @@ with dai.Device(pipeline) as device:
         height = frame.shape[0]
         width  = frame.shape[1]
         for detection in detections:
-            #denormalize bounging box
+            # denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

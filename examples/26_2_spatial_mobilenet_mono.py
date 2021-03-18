@@ -150,7 +150,7 @@ with dai.Device(pipeline) as device:
                 swap = detection.xmin
                 detection.xmin = 1 - detection.xmax
                 detection.xmax = 1 - swap
-            #denormalize bounging box
+            # denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)
