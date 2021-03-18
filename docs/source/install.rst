@@ -171,14 +171,15 @@ tools/environments on your system.
 Using a virtual environment (or system-wide, if you prefer), run the following to install the requirements for this example repository:
 
 .. code-block:: bash
-
+  
+  cd examples
   python3 -m pip install -r requirements.txt
 
 Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
 
 .. code-block:: bash
 
-  python3 examples/01_rgb_preview.py
+  python3 01_rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
