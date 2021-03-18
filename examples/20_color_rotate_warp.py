@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-'''
+"""
 This example shows usage of ImageWarp to crop a rotated rectangle area on a frame,
 or perform various image transforms: rotate, mirror, flip, perspective transform.
-'''
+"""
 
 import depthai as dai
 import cv2
@@ -14,6 +14,7 @@ key_rotate_incr = 'x'
 key_resize_inc = 'v'
 key_warp_test_cycle = 'c'
 
+
 def print_controls():
     print("=== Controls:")
     print(key_rotate_decr, "-rotated rectangle crop, decrease rate")
@@ -21,6 +22,7 @@ def print_controls():
     print(key_warp_test_cycle, "-warp 4-point transform, cycle through modes")
     print(key_resize_inc, "-resize cropped region, or disable resize")
     print("h -print controls (help)")
+
 
 rotate_rate_max = 5.0
 rotate_rate_inc = 0.1
@@ -42,17 +44,17 @@ P2 = [1, 1]  # bottom-right
 P3 = [0, 1]  # bottom-left
 warp_test_list = [
     # points order, normalized cordinates, description
-    #[[[0,0],[1,0],[1,1],[0,1]], True, "passthrough"],
-    #[[[0,0],[639,0],[639,479],[0,479]], False, "passthrough (pixels)"],
+    # [[[0, 0], [1, 0], [1, 1], [0, 1]], True, "passthrough"],
+    # [[[0, 0], [639, 0], [639, 479], [0, 479]], False, "passthrough (pixels)"],
     [[P0, P1, P2, P3], True, "1.passthrough"],
     [[P3, P0, P1, P2], True, "2.rotate 90"],
     [[P2, P3, P0, P1], True, "3.rotate 180"],
     [[P1, P2, P3, P0], True, "4.rotate 270"],
     [[P1, P0, P3, P2], True, "5.horizontal mirror"],
     [[P3, P2, P1, P0], True, "6.vertical flip"],
-    [[[-0.1,-0.1],[1.1,-0.1],[1.1,1.1],[-0.1,1.1]], True, "7.add black borders"],
-    [[[-0.3, 0],[1, 0],[1.3, 1],[0, 1]], True, "8.parallelogram transform"],
-    [[[-0.2, 0],[1.8, 0],[1, 1],[0, 1]], True, "9.trapezoid transform"],
+    [[[-0.1, -0.1], [1.1, -0.1], [1.1, 1.1], [-0.1, 1.1]], True, "7.add black borders"],
+    [[[-0.3, 0], [1, 0], [1.3, 1], [0, 1]], True, "8.parallelogram transform"],
+    [[[-0.2, 0], [1.8, 0], [1, 1], [0, 1]], True, "9.trapezoid transform"],
 ]
 
 pipeline = dai.Pipeline()
@@ -97,12 +99,13 @@ with dai.Device(pipeline) as device:
         if key > 0:
             if key == ord(key_rotate_decr) or key == ord(key_rotate_incr):
                 if key == ord(key_rotate_decr):
-                    if rotate_rate > -rotate_rate_max: rotate_rate -= rotate_rate_inc
+                    if rotate_rate > -rotate_rate_max:
+                        rotate_rate -= rotate_rate_inc
                 if key == ord(key_rotate_incr):
-                    if rotate_rate <  rotate_rate_max: rotate_rate += rotate_rate_inc
+                    if rotate_rate < rotate_rate_max:
+                        rotate_rate += rotate_rate_inc
                 test_four_pt = False
-                print("Crop rotated rectangle, rate per frame: {:.1f} degrees."
-                      .format(rotate_rate))
+                print("Crop rotated rectangle, rate per frame: {:.1f} degrees.".format(rotate_rate))
             elif key == ord(key_resize_inc):
                 resize_factor += 1
                 if resize_factor > resize_factor_max:
@@ -139,22 +142,21 @@ with dai.Device(pipeline) as device:
                 angle_deg += rotate_rate
                 rotated_rect = ((320, 240), (400, 400), angle_deg)
                 rr = dai.RotatedRect()
-                rr.center.x,   rr.center.y    = rotated_rect[0]
+                rr.center.x, rr.center.y = rotated_rect[0]
                 rr.size.width, rr.size.height = rotated_rect[1]
-                rr.angle                      = rotated_rect[2]
+                rr.angle = rotated_rect[2]
                 cfg.setCropRotatedRect(rr, False)
             if resize_factor > 0:
                 cfg.setResize(resize_x, resize_y)
-            #cfg.setWarpBorderFillColor(0, 0, 255)
-            #cfg.setWarpBorderReplicatePixels()
+            # cfg.setWarpBorderFillColor(0, 0, 255)
+            # cfg.setWarpBorderReplicatePixels()
             q_manip_cfg.send(cfg)
 
         for q in [q_preview, q_manip]:
             pkt = q.get()
             name = q.getName()
             shape = (3, pkt.getHeight(), pkt.getWidth())
-            frame = pkt.getData().reshape(shape).transpose(1, 2, 0)
-            frame = np.ascontiguousarray(frame)
+            frame = pkt.getCvFrame()
             if name == "preview" and not test_four_pt:
                 # Draw RotatedRect cropped area on input frame
                 points = np.int0(cv2.boxPoints(rotated_rect))

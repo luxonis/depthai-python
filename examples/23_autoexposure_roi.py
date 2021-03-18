@@ -29,8 +29,11 @@ xin_cam_control.setStreamName('cam_control')
 xin_cam_control.out.link(cam_rgb.inputControl)
 
 # Define a neural network that will make predictions based on the source frames
-detection_nn = pipeline.createNeuralNetwork()
+detection_nn = pipeline.createMobileNetDetectionNetwork()
+detection_nn.setConfidenceThreshold(0.5)
 detection_nn.setBlobPath(mobilenet_path)
+detection_nn.setNumInferenceThreads(2)
+detection_nn.input.setBlocking(False)
 cam_rgb.preview.link(detection_nn.input)
 
 # Create outputs
@@ -43,8 +46,8 @@ xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
 # MobilenetSSD label texts
-texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+nn_labels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
 def clamp(num, v0, v1):
@@ -107,9 +110,7 @@ with dai.Device(pipeline) as device:
     q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
     frame = None
-    bboxes = []
-    confidences = []
-    labels = []
+    detections = []
 
     nn_region = True
     region = AutoExposureRegion()
@@ -120,42 +121,33 @@ with dai.Device(pipeline) as device:
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        if not nn_region:
+            cv2.rectangle(frame, region.position, region.end_position(), (0, 255, 0), 2)
+        cv2.imshow(name, frame)
+
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
         in_rgb = q_rgb.tryGet()
         in_nn = q_nn.tryGet()
 
         if in_rgb is not None:
-            # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-            frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+            frame = in_rgb.getCvFrame()
 
         if in_nn is not None:
-            # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
-            bboxes = np.array(in_nn.getFirstLayerFp16())
-            # transform the 1D array into Nx7 matrix
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            confidences = bboxes[:, 2]
-            bboxes = bboxes[:, 3:7]
+            detections = in_nn.detections
 
-            if nn_region and len(bboxes) > 0:
-                q_control.send(as_control(AutoExposureRegion.bbox_to_roi(bboxes[0])))
+            if nn_region and len(detections) > 0:
+                bbox = (detections[0].xmin, detections[0].ymin, detections[0].xmax, detections[0].ymax)
+                q_control.send(as_control(AutoExposureRegion.bbox_to_roi(bbox)))
 
         if frame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
-                bbox = frame_norm(frame, raw_bbox)
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            if not nn_region:
-                cv2.rectangle(frame, region.position, region.end_position(), (0, 255, 0), 2)
-            cv2.imshow("rgb", frame)
+            display_frame("rgb", frame)
 
         key = cv2.waitKey(1)
         if key == ord('n'):

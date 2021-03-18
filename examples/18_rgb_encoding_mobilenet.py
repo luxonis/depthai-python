@@ -24,8 +24,11 @@ videoEncoder = pipeline.createVideoEncoder()
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 cam.video.link(videoEncoder.input)
 
-detection_nn = pipeline.createNeuralNetwork()
+detection_nn = pipeline.createMobileNetDetectionNetwork()
+detection_nn.setConfidenceThreshold(0.5)
 detection_nn.setBlobPath(mobilenet_path)
+detection_nn.setNumInferenceThreads(2)
+detection_nn.input.setBlocking(False)
 cam.preview.link(detection_nn.input)
 
 videoOut = pipeline.createXLinkOut()
@@ -41,8 +44,8 @@ xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
 # MobilenetSSD label texts
-texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+nn_labels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
     device.startPipeline()
@@ -53,15 +56,21 @@ with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
     q_rgb_enc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
     frame = None
-    bboxes = []
-    labels = []
-    confidences = []
+    detections = []
 
 
     def frame_norm(frame, bbox):
         norm_vals = np.full(len(bbox), frame.shape[0])
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
+
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
 
 
     while True:
@@ -72,27 +81,13 @@ with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
             q_rgb_enc.get().getData().tofile(videoFile)
 
         if in_rgb is not None:
-            # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-            frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+            frame = in_rgb.getCvFrame()
 
         if in_nn is not None:
-            bboxes = np.array(in_nn.getFirstLayerFp16())
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            confidences = bboxes[:, 2]
-            bboxes = bboxes[:, 3:7]
+            detections = in_nn.detections
 
         if frame is not None:
-            for raw_bbox, label, conf in zip(bboxes, labels, confidences):
-                bbox = frame_norm(frame, raw_bbox)
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("rgb", frame)
+            display_frame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

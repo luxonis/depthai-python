@@ -45,11 +45,7 @@ with dai.Device(pipeline) as device:
         in_rgb = q_rgb.tryGet()  # non-blocking call, will return a new data that has arrived or None otherwise
 
         if in_rgb is not None:
-            # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-            shape = (in_rgb.getHeight() * 3 // 2, in_rgb.getWidth())
-            frame_rgb = cv2.cvtColor(in_rgb.getData().reshape(shape), cv2.COLOR_YUV2BGR_NV12)
-            # frame is transformed and ready to be shown
-            cv2.imshow("rgb", frame_rgb)
+            cv2.imshow("rgb", in_rgb.getCvFrame())
 
         for enc_frame in q_jpeg.tryGetAll():
             with open(f"06_data/{int(time.time() * 10000)}.jpeg", "wb") as f:

@@ -43,8 +43,8 @@ xout_nn.setStreamName("nn")
 detection_nn.out.link(xout_nn.input)
 
 # MobilenetSSD label texts
-texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+nn_labels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
 # Pipeline defined, now the device is connected to
@@ -66,6 +66,14 @@ with dai.Device(pipeline) as device:
         norm_vals = np.full(len(bbox), frame.shape[0])
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
+
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
 
 
     while True:
@@ -89,15 +97,7 @@ with dai.Device(pipeline) as device:
 
         # if the frame is available, draw bounding boxes on it and show the frame
         if frame is not None:
-            for detection in detections:
-                bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[detection.label], (bbox[0] + 10, bbox[1] + 20),
-                            cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(detection.confidence*100)}%", (bbox[0] + 10, bbox[1] + 40),
-                            cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-
-            cv2.imshow("rgb", frame)
+            display_frame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

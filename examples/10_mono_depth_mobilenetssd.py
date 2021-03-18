@@ -42,9 +42,12 @@ manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 stereo.rectifiedRight.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
-detectionNN = pipeline.createNeuralNetwork()
-detectionNN.setBlobPath(mobilenet_path)
-manip.out.link(detectionNN.input)
+detection_nn = pipeline.createMobileNetDetectionNetwork()
+detection_nn.setConfidenceThreshold(0.5)
+detection_nn.setBlobPath(mobilenet_path)
+detection_nn.setNumInferenceThreads(2)
+detection_nn.input.setBlocking(False)
+manip.out.link(detection_nn.input)
 
 # Create outputs
 xout_depth = pipeline.createXLinkOut()
@@ -58,11 +61,11 @@ manip.out.link(xout_right.input)
 
 xout_nn = pipeline.createXLinkOut()
 xout_nn.setStreamName("nn")
-detectionNN.out.link(xout_nn.input)
+detection_nn.out.link(xout_nn.input)
 
 # MobilenetSSD label nnLabels
-nnLabels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+nn_labels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -70,16 +73,13 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
-    qRight = device.getOutputQueue("rectifiedRight", maxSize=4, blocking=False)
-    qDepth = device.getOutputQueue("depth", maxSize=4, blocking=False)
-    qNN = device.getOutputQueue("nn", maxSize=4, blocking=False)
+    q_right = device.getOutputQueue("rectifiedRight", maxSize=4, blocking=False)
+    q_depth = device.getOutputQueue("depth", maxSize=4, blocking=False)
+    q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
-    rightFrame = None
-    depthFrameColor = None
-    bboxes = []
-    labels = []
-    confidences = []
-
+    right_frame = None
+    depth_frame = None
+    detections = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frame_norm(frame, bbox):
@@ -87,56 +87,38 @@ with dai.Device(pipeline) as device:
         norm_vals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
 
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
+
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-        inRight = qRight.tryGet()
-        inNN = qNN.tryGet()
-        inDepth = qDepth.tryGet()
+        in_right = q_right.tryGet()
+        in_nn = q_nn.tryGet()
+        in_depth = q_depth.tryGet()
 
-        if inRight is not None:
-            # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
-            rightFrame = inRight.getCvFrame()
+        if in_right is not None:
+            right_frame = in_right.getCvFrame()
 
-        if inNN is not None:
-            # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
-            bboxes = np.array(inNN.getFirstLayerFp16())
-            # take only the results before -1 digit
-            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
-            # transform the 1D array into Nx7 matrix
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            confidences = bboxes[:, 2]
-            bboxes = bboxes[:, 3:7]
+        if in_nn is not None:
+            detections = in_nn.detections
 
-        if inDepth is not None:
-            # data is originally represented as a flat 1D array, it needs to be converted into HxW form
+        if in_depth is not None:
+            depth_frame = in_depth.getFrame()
+            depth_frame = cv2.normalize(depth_frame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+            depth_frame = cv2.equalizeHist(depth_frame)
+            depth_frame = cv2.applyColorMap(depth_frame, cv2.COLORMAP_HOT)
 
-            depthFrame = inDepth.getFrame()
+        if right_frame is not None:
+            display_frame("rectified right", right_frame)
 
-            depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-            depthFrameColor = cv2.equalizeHist(depthFrameColor)
-            depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-
-        if rightFrame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            for rawBbox, label, conf in zip(bboxes, labels, confidences):
-                bbox = frame_norm(rightFrame, rawBbox)
-                cv2.rectangle(rightFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(rightFrame, nnLabels[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(depthFrameColor, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("rectified right", rightFrame)
-
-        if depthFrameColor is not None:
-            for rawBbox, label, conf in zip(bboxes, labels, confidences):
-                bbox = frame_norm(depthFrameColor, rawBbox)
-                cv2.rectangle(depthFrameColor, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
-                cv2.putText(depthFrameColor, nnLabels[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
-                cv2.putText(depthFrameColor, f"{int(conf * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
-            cv2.imshow("depth", depthFrameColor)
+        if depth_frame is not None:
+            display_frame("depth", depth_frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Mono camera control demo:
   Control:      key[dec/inc]  min..max
   exposure time:     I   O      1..33000 [us]
   sensitivity iso:   K   L    100..1600
 Back to autoexposure: 'E'
-'''
+"""
 
 import cv2
 import depthai as dai
-import numpy as np
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -38,7 +37,9 @@ control_in.setStreamName('control')
 control_in.out.link(cam_left.inputControl)
 control_in.out.link(cam_right.inputControl)
 
+
 def clamp(num, v0, v1): return max(v0, min(num, v1))
+
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -72,14 +73,10 @@ with dai.Device(pipeline) as device:
         in_right = q_right.tryGet()
 
         if in_left is not None:
-            # if the data from the left camera is available, transform the 1D data into a frame
-            frame_left = in_left.getData().reshape((in_left.getHeight(), in_left.getWidth())).astype(np.uint8)
-            frame_left = np.ascontiguousarray(frame_left)
+            frame_left = in_left.getCvFrame()
 
         if in_right is not None:
-            # if the data from the right camera is available, transform the 1D data into a frame
-            frame_right = in_right.getData().reshape((in_right.getHeight(), in_right.getWidth())).astype(np.uint8)
-            frame_right = np.ascontiguousarray(frame_right)
+            frame_right = in_right.getCvFrame()
 
         # show the frames if available
         if frame_left is not None:
@@ -91,10 +88,14 @@ with dai.Device(pipeline) as device:
         if key == ord('q'):
             break
         elif key in [ord('i'), ord('o'), ord('k'), ord('l')]:
-            if key == ord('i'): exp_time -= EXP_STEP
-            if key == ord('o'): exp_time += EXP_STEP
-            if key == ord('k'): sens_iso -= ISO_STEP
-            if key == ord('l'): sens_iso += ISO_STEP
+            if key == ord('i'):
+                exp_time -= EXP_STEP
+            if key == ord('o'):
+                exp_time += EXP_STEP
+            if key == ord('k'):
+                sens_iso -= ISO_STEP
+            if key == ord('l'):
+                sens_iso += ISO_STEP
             exp_time = clamp(exp_time, exp_min, exp_max)
             sens_iso = clamp(sens_iso, sens_min, sens_max)
             print("Setting manual exposure, time:", exp_time, "iso:", sens_iso)

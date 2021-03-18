@@ -5,7 +5,6 @@ from pathlib import Path
 
 import cv2
 import depthai as dai
-import numpy as np
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -34,9 +33,7 @@ with dai.Device(pipeline) as device:
     while True:
         in_right = q_right.get()  # blocking call, will wait until a new data has arrived
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        shape = (in_right.getHeight(), in_right.getWidth())
-        frame_right = in_right.getData().reshape(shape).astype(np.uint8)
-        frame_right = np.ascontiguousarray(frame_right)
+        frame_right = in_right.getCvFrame()
         # frame is transformed and ready to be shown
         cv2.imshow("right", frame_right)
         # after showing the frame, it's being stored inside a target directory as a PNG image

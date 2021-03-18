@@ -2,7 +2,6 @@
 
 import cv2
 import depthai as dai
-import numpy as np
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -20,6 +19,7 @@ cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 xout_left = pipeline.createXLinkOut()
 xout_left.setStreamName('left')
 cam_left.out.link(xout_left.input)
+
 xout_right = pipeline.createXLinkOut()
 xout_right.setStreamName('right')
 cam_right.out.link(xout_right.input)
@@ -42,14 +42,10 @@ with dai.Device(pipeline) as device:
         in_right = q_right.tryGet()
 
         if in_left is not None:
-            # if the data from the left camera is available, transform the 1D data into a frame
-            frame_left = in_left.getData().reshape((in_left.getHeight(), in_left.getWidth())).astype(np.uint8)
-            frame_left = np.ascontiguousarray(frame_left)
+            frame_left = in_left.getCvFrame()
 
         if in_right is not None:
-            # if the data from the right camera is available, transform the 1D data into a frame
-            frame_right = in_right.getData().reshape((in_right.getHeight(), in_right.getWidth())).astype(np.uint8)
-            frame_right = np.ascontiguousarray(frame_right)
+            frame_right = in_right.getCvFrame()
 
         # show the frames if available
         if frame_left is not None:

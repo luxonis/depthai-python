@@ -20,7 +20,7 @@ right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-median = dai.StereoDepthProperties.MedianFilter.KERNEL_5x5 # For depth filtering
+median = dai.StereoDepthProperties.MedianFilter.KERNEL_5x5  # For depth filtering
 depth.setMedianFilter(median)
 
 left.out.link(depth.left)

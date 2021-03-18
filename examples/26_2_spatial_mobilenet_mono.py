@@ -15,7 +15,7 @@ Mobilenet SSD device side decoding demo
 '''
 
 # MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+nn_labels = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
              "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 syncNN = True
@@ -50,7 +50,7 @@ manip.out.link(spatialDetectionNetwork.input)
 # Create outputs
 xoutManip = pipeline.createXLinkOut()
 xoutManip.setStreamName("right")
-if(syncNN):
+if syncNN:
     spatialDetectionNetwork.passthrough.link(xoutManip.input)
 else:
     manip.out.link(xoutManip.input)
@@ -98,32 +98,47 @@ with dai.Device(pipeline) as device:
 
     rectifiedRight = None
     detections = []
-
     start_time = time.monotonic()
     counter = 0
-    fps = 0
     color = (255, 255, 255)
+
+    def frame_norm(frame, bbox):
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
+
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (bbox[0] + 10, bbox[1] + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (bbox[0] + 10, bbox[1] + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (bbox[0] + 10, bbox[1] + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+        cv2.imshow(name, frame)
 
     while True:
         inRectified = previewQueue.get()
         in_nn = detectionNNQueue.get()
         depth = depthQueue.get()
 
-        counter+=1
-        current_time = time.monotonic()
-        if (current_time - start_time) > 1 :
-            fps = counter / (current_time - start_time)
-            counter = 0
-            start_time = current_time
+        counter += 1
         
         rectifiedRight = inRectified.getCvFrame()
+        if flipRectified:
+            rectifiedRight = cv2.flip(rectifiedRight, 1)
 
         depthFrame = depth.getFrame()
+        detections = in_nn.detections
+
+        cv2.putText(rectifiedRight, "NN fps: {:.2f}".format(counter / (time.monotonic() - start_time)),
+                    (2, rectifiedRight.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        detections = in_nn.detections
+
         if len(detections) != 0:
             boundingBoxMapping = depthRoiMap.get()
             roiDatas = boundingBoxMapping.getConfigData()
@@ -137,41 +152,12 @@ with dai.Device(pipeline) as device:
                 ymin = int(topLeft.y)
                 xmax = int(bottomRight.x)
                 ymax = int(bottomRight.y)
+
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
-        if flipRectified:
-            rectifiedRight = cv2.flip(rectifiedRight, 1)
-
-        # if the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
-        height = rectifiedRight.shape[0]
-        width  = rectifiedRight.shape[1]
-        for detection in detections:
-            if flipRectified:
-                swap = detection.xmin
-                detection.xmin = 1 - detection.xmax
-                detection.xmax = 1 - swap
-            #denormalize bounging box
-            x1 = int(detection.xmin * width)
-            x2 = int(detection.xmax * width)
-            y1 = int(detection.ymin * height)
-            y2 = int(detection.ymax * height)
-
-            try:
-                label = labelMap[detection.label]
-            except:
-                label = detection.label
-            
-            cv2.putText(rectifiedRight, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(rectifiedRight, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(rectifiedRight, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(rectifiedRight, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(rectifiedRight, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-
-            cv2.rectangle(rectifiedRight, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-
-        cv2.putText(rectifiedRight, "NN fps: {:.2f}".format(fps), (2, rectifiedRight.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
         cv2.imshow("depth", depthFrameColor)
-        cv2.imshow("rectified right", rectifiedRight)
+
+        display_frame("rectified right", rectifiedRight)
 
         if cv2.waitKey(1) == ord('q'):
             break

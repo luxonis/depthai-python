@@ -14,7 +14,6 @@ To go back to auto controls:
 
 import depthai as dai
 import cv2
-import numpy as np
 
 # Step size ('W','A','S','D' controls)
 STEP_SIZE = 8

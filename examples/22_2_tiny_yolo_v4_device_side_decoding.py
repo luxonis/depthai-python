@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Tiny-yolo-v4 device side decoding demo
+The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
+The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
+"""
+
 from pathlib import Path
 import sys
 import cv2
@@ -7,14 +13,8 @@ import depthai as dai
 import numpy as np
 import time
 
-'''
-Tiny-yolo-v4 device side decoding demo
-  The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
-  The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
-'''
-
 # tiny yolo v4 label texts
-label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+nn_labels = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
              "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
              "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
              "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
@@ -31,7 +31,7 @@ label_map = ["person",         "bicycle",    "car",           "motorbike",     "
 syncNN = True
 
 # Get argument first
-tiny_yolo_v4_path = str((Path(__file__).parent / Path('models/tiny_yolo_v4_6shaves.blob')).resolve().absolute())
+tiny_yolo_v4_path = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     tiny_yolo_v4_path = sys.argv[1]
 
@@ -44,13 +44,13 @@ cam_rgb.setPreviewSize(416, 416)
 cam_rgb.setInterleaved(False)
 cam_rgb.setFps(40)
 
-#network specific settings
+# network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
 detectionNetwork.setCoordinateSize(4)
 detectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
-detectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+detectionNetwork.setAnchorMasks({"side26": np.array([1, 2, 3]), "side13": np.array([3, 4, 5])})
 detectionNetwork.setIouThreshold(0.5)
 
 detectionNetwork.setBlobPath(tiny_yolo_v4_path)
@@ -62,7 +62,7 @@ cam_rgb.preview.link(detectionNetwork.input)
 # Create outputs
 xout_rgb = pipeline.createXLinkOut()
 xout_rgb.setStreamName("rgb")
-if(syncNN):
+if syncNN:
     detectionNetwork.passthrough.link(xout_rgb.input)
 else:
     cam_rgb.preview.link(xout_rgb.input)
@@ -82,13 +82,27 @@ with dai.Device(pipeline) as device:
     q_nn = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
     frame = None
-    bboxes = []
+    detections = []
+
+    # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
+    def frame_norm(frame, bbox):
+        norm_vals = np.full(len(bbox), frame.shape[0])
+        norm_vals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * norm_vals).astype(int)
+
+    def display_frame(name, frame):
+        for detection in detections:
+            bbox = frame_norm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, nn_labels[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
 
     start_time = time.monotonic()
     counter = 0
-    fps = 0
+
     while True:
-        if(syncNN):
+        if syncNN:
             in_rgb = q_rgb.get()
             in_nn = q_nn.get()
         else:
@@ -96,42 +110,16 @@ with dai.Device(pipeline) as device:
             in_nn = q_nn.tryGet()
 
         if in_rgb is not None:
-            # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-            frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+            frame = in_rgb.getCvFrame()
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - start_time)),
+                        (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color=(255, 255, 255))
 
         if in_nn is not None:
-            bboxes = in_nn.detections
-            counter+=1
-            current_time = time.monotonic()
-            if (current_time - start_time) > 1 :
-                fps = counter / (current_time - start_time)
-                counter = 0
-                start_time = current_time
-
-        color = (255, 255, 255)
+            detections = in_nn.detections
+            counter += 1
 
         if frame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            height = frame.shape[0]
-            width  = frame.shape[1]
-            for bbox in bboxes:
-                # denormalize bounding box
-                x1 = int(bbox.xmin * width)
-                x2 = int(bbox.xmax * width)
-                y1 = int(bbox.ymin * height)
-                y2 = int(bbox.ymax * height)
-                try:
-                    label = label_map[bbox.label]
-                except:
-                    label = bbox.label
-                cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-                cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-
-            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
-            cv2.imshow("rgb", frame)
+            display_frame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
