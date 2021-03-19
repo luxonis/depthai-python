@@ -33,11 +33,11 @@ Otherwise, depth output is U16 (mm) and median is functional.
 But like on Gen1, either depth or disparity has valid data. TODO enable both.
 '''
 # Better handling for occlusions:
-stereo.setLeftRightCheck(False)
+depth.setLeftRightCheck(False)
 # Closer-in minimum depth, disparity range is doubled:
-stereo.setExtendedDisparity(False)
+depth.setExtendedDisparity(False)
 # Better accuracy for longer distance, fractional disparity 32-levels:
-stereo.setSubpixel(False)
+depth.setSubpixel(False)
 
 left.out.link(depth.left)
 right.out.link(depth.right)
