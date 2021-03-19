@@ -2,8 +2,10 @@ import sys
 import os
 import re
 
-version_depthai_core_path = "depthai-core/CMakeLists.txt"
-version_depthai_python_path = "CMakeLists.txt"
+
+project_root = os.path.dirname(__file__)
+version_depthai_core_path = project_root + "/" + "depthai-core/CMakeLists.txt"
+version_depthai_python_path = project_root + "/" + "CMakeLists.txt"
 
 cmake_lists_txt_version_pattern = r'project[\s]*\([^Vv]*version[\s]+((\"(?P<ver1>\S*)\"|(?P<ver2>\S*)\s))'
 
@@ -27,3 +29,7 @@ def get_package_version():
     package_version = version_core + '.' + version_revision
 
     return package_version
+
+
+def get_package_dev_version(commit_hash):
+    return get_package_version() + ".dev+" + commit_hash
