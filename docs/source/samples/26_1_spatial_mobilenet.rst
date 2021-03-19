@@ -15,15 +15,8 @@ Demo
 Setup
 #####
 
-Please run the following command to install the required dependencies
+.. include::  /includes/install_from_pypi.rst
 
-.. code-block:: bash
-  :substitutions:
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release| numpy==1.19.5 opencv-python==4.5.1.48
-
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__

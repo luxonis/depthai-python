@@ -117,7 +117,7 @@ with dai.Device(pipeline) as device:
             height = frame.shape[0]
             width  = frame.shape[1]
             for bbox in bboxes:
-                # denormalize bounding box
+                #  denormalize bounding box
                 x1 = int(bbox.xmin * width)
                 x2 = int(bbox.xmax * width)
                 y1 = int(bbox.ymin * height)

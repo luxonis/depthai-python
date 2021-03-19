@@ -8,13 +8,24 @@ import numpy as np
 import time
 
 '''
-Spatial detection network demo.
-    Performs inference on RGB camera and retrieves spatial location coordinates: x,y,z relative to the center of depth map.
+Spatial Tiny-yolo example
+  Performs inference on RGB camera and retrieves spatial location coordinates: x,y,z relative to the center of depth map.
+  Can be used for tiny-yolo-v3 or tiny-yolo-v4 networks
 '''
 
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+# tiny yolo v3/4 label texts
+labelMap = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+             "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+             "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+             "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+             "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+             "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+             "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+             "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+             "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+             "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+             "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+             "teddy bear",     "hair drier", "toothbrush"]  
 
 syncNN = True
 
@@ -28,7 +39,7 @@ pipeline = dai.Pipeline()
 
 # Define a source - color camera
 colorCam = pipeline.createColorCamera()
-spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
+spatialDetectionNetwork = pipeline.createYoloSpatialDetectionNetwork()
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
 stereo = pipeline.createStereoDepth()
@@ -44,7 +55,7 @@ xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
 
-colorCam.setPreviewSize(300, 300)
+colorCam.setPreviewSize(416, 416)
 colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 colorCam.setInterleaved(False)
 colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
@@ -64,6 +75,12 @@ spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
+# yolo specific parameters
+spatialDetectionNetwork.setNumClasses(80)
+spatialDetectionNetwork.setCoordinateSize(4)
+spatialDetectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
+spatialDetectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Create outputs
 
