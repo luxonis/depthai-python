@@ -136,3 +136,4 @@ add_python_example(26_2_spatial_mobilenet_mono 26_2_spatial_mobilenet_mono.py "$
 add_python_example(26_3_spatial_tiny_yolo_v3 26_3_spatial_tiny_yolo.py "${tiny_yolo_v3_blob}")
 add_python_example(26_3_spatial_tiny_yolo_v4 26_3_spatial_tiny_yolo.py "${tiny_yolo_v4_blob}")
 add_python_example(27_spatial_location_calculator 27_spatial_location_calculator.py)
+add_python_example(28_camera_video_example 28_camera_video_example.py)
