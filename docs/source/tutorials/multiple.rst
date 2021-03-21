@@ -48,13 +48,14 @@ For example, if the first device is desirable from above use the following code:
 .. code-block:: python
 
   found, device_info = depthai.Device.getDeviceByMxId("14442C10D13EABCE00")
+  if not found:
+    raise RuntimeError("Device not found!")
 
 You can then use the `device_info` to specify on which device you want to run your pipeline:
 
 .. code-block:: python
 
-  if found:
-    with depthai.Device(pipeline, device_info) as device:
+  with depthai.Device(pipeline, device_info) as device:
 
 And you can use this code as a basis for your own use cases, such that you can run differing neural models
 on different DepthAI/uAI models.
