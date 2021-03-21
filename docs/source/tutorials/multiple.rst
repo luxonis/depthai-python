@@ -48,8 +48,9 @@ For example, if the first device is desirable from above use the following code:
 .. code-block:: python
 
   found, device_info = depthai.Device.getDeviceByMxId("14442C10D13EABCE00")
+  
   if not found:
-    raise RuntimeError("Device not found!")
+      raise RuntimeError("Device not found!")
 
 You can then use the `device_info` to specify on which device you want to run your pipeline:
 
