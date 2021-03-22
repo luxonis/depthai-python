@@ -77,14 +77,14 @@ void DeviceBindings::bind(pybind11::module& m){
 
 
     // Bind Device, using DeviceWrapper to be able to destruct the object by calling close()
-    py::class_<Device>(m, "Device")
+    py::class_<Device>(m, "Device", DOC(dai, Device))
         // Python only methods
         .def("__enter__", [](py::object obj){ return obj; })
         .def("__exit__", [](Device& d, py::object type, py::object value, py::object traceback) { d.close(); })
         .def("close", &Device::close, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
 
         //dai::Device methods
-        //static (no need for the wrapper)
+        //static
         .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, Device, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return Device::getAnyAvailableDevice(); }, DOC(dai, Device, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &Device::getFirstAvailableDevice, DOC(dai, Device, getFirstAvailableDevice))

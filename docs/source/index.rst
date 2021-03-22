@@ -91,9 +91,15 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/17_video_mobilenet.rst
    samples/18_rgb_encoding_mobilenet.rst
    samples/21_mobilenet_decoding_on_device.rst
-   samples/22_tiny_tolo_v3_decoding_on_device.rst
+   samples/22_1_tiny_tolo_v3_decoding_on_device.rst
+   samples/22_2_tiny_tolo_v4_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
    samples/24_opencv_support.rst
+   samples/25_system_information.rst
+   samples/26_1_spatial_mobilenet.rst
+   samples/26_2_spatial_mobilenet_mono.rst
+   samples/26_3_spatial_tiny_yolo.rst
+   samples/27_spatial_location_calculator.rst
 
 .. toctree::
    :maxdepth: 1

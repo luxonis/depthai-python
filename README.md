@@ -83,6 +83,16 @@ To build a wheel, execute the following
 python3 -m pip wheel . -w wheelhouse
 ```
 
+## Running tests
+
+To run the tests build the library with the following options
+```
+mkdir build_tests && cd build_tests
+cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake --build . --parallel
+ctest
+```
+
 
 ## Tested platforms
 

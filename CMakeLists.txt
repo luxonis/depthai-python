@@ -29,7 +29,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Add module paths
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
@@ -41,6 +41,7 @@ set(DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH ${DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR}/do
 set(DOCSTRINGS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/include/depthai_python_docstring.hpp)
 
 # First specify options
+option(DEPTHAI_PYTHON_USE_FIND_PACKAGE "Use find_package for depthai-core" OFF)
 option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
@@ -54,8 +55,13 @@ endif()
 # Add external dependencies
 add_subdirectory(external)
 
-# Add depthai-cpp dependency
-add_subdirectory(depthai-core)
+# Add depthai-core dependency
+if(DEPTHAI_PYTHON_USE_FIND_PACKAGE)
+    find_package(depthai CONFIG REQUIRED)
+else()
+    add_subdirectory(depthai-core)
+endif()
+
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
@@ -88,8 +94,10 @@ configure_file(cmake/docstring.hpp.in ${DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH})
 # Add target to generate docstrings
 if (DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
     include(pybind11-mkdoc)
+    
     # Check if pybind11_mkdoc available and create target
-    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai-core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai::core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    
     if(NOT TARGET pybind11_mkdoc)
         # Generate default docstrings to OUTPUT path
         configure_file(cmake/default_docstring.hpp.in ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} COPYONLY)
@@ -111,24 +119,24 @@ target_link_libraries(${TARGET_NAME}
         hedley
 )
 
-# Version consists of: (depthai-core).(bindings revision)[+bindings hash]
-set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_VERSION}.${PROJECT_VERSION}")
-
 # Add default commit hash ('dev') if not build by CI
 if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)   
-    set(DEPTHAI_PYTHON_COMMIT_HASH dev)
+    set(DEPTHAI_PYTHON_COMMIT_HASH "dev")
 endif()
 
-# Append build info to version
+# Get version to use
+set(version_command "import find_version as v; print(v.get_package_version())")
 if(DEPTHAI_PYTHON_COMMIT_HASH)
-    set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_PYTHON_VERSION}+${DEPTHAI_PYTHON_COMMIT_HASH}")    
+    set(version_command "import find_version as v; print(v.get_package_dev_version('${DEPTHAI_PYTHON_COMMIT_HASH}'))")
 endif()
+execute_process(COMMAND ${PYTHON_EXECUTABLE} "-c" "${version_command}"
+    OUTPUT_VARIABLE DEPTHAI_PYTHON_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
 
 # Add version definition
 target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_VERSION="${DEPTHAI_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 
 # Set compiler features (c++14), and disables extensions
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)

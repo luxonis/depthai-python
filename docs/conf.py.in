@@ -23,6 +23,7 @@ copyright = u"@build_year@, Luxonis"
 author = "Luxonis"
 version = u"@DEPTHAI_PYTHON_VERSION@"
 release = version
+pypi_release = "2.0.0.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -86,5 +87,6 @@ html_css_files = [
 html_js_files = [
     'https://docs.luxonis.com/en/gen2/_static/js/navbar.js',
 ]
+html_title = 'DepthAI documentation | Luxonis'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}

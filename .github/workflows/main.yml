@@ -31,8 +31,10 @@ jobs:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
-          path: ~/.hunter/
-          key: hunter-clang
+          path: ~/.hunter
+          key: hunter-macos-latest
+      - name: List .hunter cache directory
+        run: ls -a -l ~/.hunter/_Base/ || true
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
@@ -83,7 +85,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheel
-        run: python3 -m pip wheel . -w ./wheelhouse/
+        run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheel
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
@@ -91,6 +93,14 @@ jobs:
         with:
           name: audited-wheels
           path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
 
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
@@ -104,7 +114,7 @@ jobs:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
-          path: ~/.hunter/
+          path: C:/.hunter
           key: hunter-msvc
       - uses: actions/checkout@v2
         with:
@@ -129,12 +139,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
       - name: Building wheels
-        run: python -m pip wheel . -w ./wheelhouse/
+        run: python -m pip wheel . -w ./wheelhouse/audited/ --verbose
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
           name: audited-wheels
-          path: wheelhouse/
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
   # This job builds wheels for macOS x86_64 arch
   build-macos-x86_64:
@@ -147,8 +164,11 @@ jobs:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
-          path: ~/.hunter/
-          key: hunter-clang
+          path: ~/.hunter
+          key: hunter-macos-latest
+      - name: List .hunter cache directory
+        run: ls -a -l ~/.hunter/_Base/ || true
+
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
@@ -175,7 +195,7 @@ jobs:
       - name: Set macos deployment target
         run: echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
       - name: Building wheels
-        run: python -m pip wheel . -w ./wheelhouse/
+        run: python -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels
         run: ci/repair-whl-macos.sh `pwd`/wheelhouse/* `pwd`/wheelhouse/audited      
       - name: Archive wheel artifacts
@@ -183,6 +203,13 @@ jobs:
         with:
           name: audited-wheels
           path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
@@ -196,7 +223,7 @@ jobs:
       - name: Cache .hunter folder
         uses: actions/cache@v2
         with:
-          path: ~/.hunter/
+          path: ~/.hunter
           key: hunter-x86_64
       - uses: actions/checkout@v2
         with:
@@ -217,15 +244,79 @@ jobs:
       - name: Specify docstring to use while building the wheel
         run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
 
+      - name: Build and install depthai-core
+        run: |
+          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          cmake --build build_core --parallel --target install
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
+
       - name: Append build hash if not a tagged commit
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
-      - name: Building a source distribution
+
+      - name: Building source distribution
         run: |
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar
           mv dist/* wheelhouse/audited/
+      - name: Build wheels
+        run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+      - name: Audit wheels
+        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: audited-wheels
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
+  # This job builds wheels for ARM64 arch
+  build-linux-arm64:
+    needs: build-docstrings
+    runs-on: [self-hosted, linux, ARM64]
+    container:
+      image: quay.io/pypa/manylinux2014_aarch64
+      env:
+        PLAT: manylinux2014_aarch64
+      # Mount local hunter cache directory, instead of transfering to Github and back
+      volumes:
+        - /.hunter:/github/home/.hunter
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Build and install depthai-core
+        run: |
+          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          cmake --build build_core --parallel --target install
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
+
+      - name: Append build hash if not a tagged commit
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheels
-        run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/; done
+        run: for PYBIN in /opt/python/cp3*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Auditing wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
@@ -233,53 +324,17 @@ jobs:
         with:
           name: audited-wheels
           path: wheelhouse/audited/
-
-
-  # # Run tests
-  # tests:
-  #   runs-on: luxonis-arm-tests
-  #   needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         submodules: 'recursive'
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: audited-wheels
-  #         path: wheels/depthai/
-  #     - name: List files
-  #       run: ls -lah
-  #     - name: install DepthAI
-  #       run: python3.7 -m pip install depthai --no-index --find-links file://`pwd`/wheels/depthai/
-  #     - name: Run tests
-  #       run: python3.7 tests/test.py
-
-  # Deploy to artifactory
-  deploy-artifacts:
-    if: startsWith(github.ref, 'refs/tags/v') != true
-    runs-on: ubuntu-latest
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - uses: actions/download-artifact@v2
-        with:
-          name: audited-wheels
-          path: wheelhouse/audited/
-      - name: List files
-        run: ls -lah wheelhouse/audited/
-      - name: Run deploy to artifacts
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
         run: bash ./ci/upload-artifactory.sh
         env:
           ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
-
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64]
+    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
     
     steps:
@@ -301,7 +356,7 @@ jobs:
     # Create GitHub release
     - uses: actions/create-release@master
       id: createRelease
-      name: Create ${{ steps.releaseNote.outputs.version }} depthai-core release
+      name: Create ${{ steps.tag.outputs.version-without-v }} depthai-core release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -337,5 +392,3 @@ jobs:
           PYPI_SERVER: ${{ secrets.PYPI_SERVER }}
           PYPI_USER: ${{ secrets.PYPI_USER }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-
-
