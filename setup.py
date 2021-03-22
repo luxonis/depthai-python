@@ -19,13 +19,13 @@ os.makedirs(os.path.join(here, "generated"), exist_ok=True)
 if os.environ.get('CI') != None : 
     ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
     final_version = find_version.get_package_version()
-    if os.environ.get('BUILD_COMMIT_HASH') != None  :
-        final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
+    if os.environ.get('BUILD_COMMIT_HASH') != None:
+        final_version = find_version.get_package_dev_version(os.environ['BUILD_COMMIT_HASH'])
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 elif os.path.exists(".git"):
     ### else if .git folder exists, create depthai with commit hash retrieved from git rev-parse HEAD
-    commit_hash = ''
+    commit_hash = 'dev'
     try:
         commit_hash = (
             subprocess.check_output(
@@ -36,8 +36,8 @@ elif os.path.exists(".git"):
         )
     except subprocess.CalledProcessError as e:
         # cannot get commit hash, leave empty
-        commit_hash = ''
-    final_version = find_version.get_package_version() + '+' + commit_hash
+        commit_hash = 'dev'
+    final_version = find_version.get_package_dev_version(commit_hash)
 
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
@@ -46,7 +46,7 @@ elif os.path.exists(".git"):
 # If not generated, generate from find_version
 if os.path.isfile(version_file) == False :
     # generate from find_version
-    final_version = find_version.get_package_version()
+    final_version = find_version.get_package_dev_version('dev')
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 

@@ -119,24 +119,24 @@ target_link_libraries(${TARGET_NAME}
         hedley
 )
 
-# Version consists of: (depthai-core).(bindings revision)[+bindings hash]
-set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_VERSION}.${PROJECT_VERSION}")
-
 # Add default commit hash ('dev') if not build by CI
 if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)   
-    set(DEPTHAI_PYTHON_COMMIT_HASH dev)
+    set(DEPTHAI_PYTHON_COMMIT_HASH "dev")
 endif()
 
-# Append build info to version
+# Get version to use
+set(version_command "import find_version as v; print(v.get_package_version())")
 if(DEPTHAI_PYTHON_COMMIT_HASH)
-    set(DEPTHAI_PYTHON_VERSION "${DEPTHAI_PYTHON_VERSION}+${DEPTHAI_PYTHON_COMMIT_HASH}")    
+    set(version_command "import find_version as v; print(v.get_package_dev_version('${DEPTHAI_PYTHON_COMMIT_HASH}'))")
 endif()
+execute_process(COMMAND ${PYTHON_EXECUTABLE} "-c" "${version_command}"
+    OUTPUT_VARIABLE DEPTHAI_PYTHON_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
 
 # Add version definition
 target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_BINDINGS_REVISION="${PROJECT_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_VERSION="${DEPTHAI_VERSION}")
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}")
 
 # Set compiler features (c++14), and disables extensions
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)
