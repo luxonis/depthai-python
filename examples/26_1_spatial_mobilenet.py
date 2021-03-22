@@ -14,7 +14,7 @@ Spatial detection network demo.
 
 # MobilenetSSD label texts
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 syncNN = True
 
@@ -96,7 +96,7 @@ with dai.Device(pipeline) as device:
     frame = None
     detections = []
 
-    start_time = time.monotonic()
+    startTime = time.monotonic()
     counter = 0
     fps = 0
     color = (255, 255, 255)
@@ -108,11 +108,11 @@ with dai.Device(pipeline) as device:
 
         counter+=1
         current_time = time.monotonic()
-        if (current_time - start_time) > 1 :
-            fps = counter / (current_time - start_time)
+        if (current_time - startTime) > 1 :
+            fps = counter / (current_time - startTime)
             counter = 0
-            start_time = current_time
-        
+            startTime = current_time
+
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame()
 

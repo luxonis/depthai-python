@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Tiny-yolo-v4 device side decoding demo
+The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
+The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
+"""
+
 from pathlib import Path
 import sys
 import cv2
@@ -7,69 +13,65 @@ import depthai as dai
 import numpy as np
 import time
 
-'''
-Tiny-yolo-v4 device side decoding demo
-  The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
-  The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
-'''
-
 # tiny yolo v4 label texts
-label_map = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
-             "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
-             "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
-             "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
-             "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
-             "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
-             "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
-             "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
-             "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
-             "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
-             "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
-             "teddy bear",     "hair drier", "toothbrush"]  
+labelMap = [
+    "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+    "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+    "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+    "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+    "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+    "teddy bear",     "hair drier", "toothbrush"
+]
 
 
 syncNN = True
 
 # Get argument first
-tiny_yolo_v4_path = str((Path(__file__).parent / Path('models/tiny_yolo_v4_6shaves.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    tiny_yolo_v4_path = sys.argv[1]
+    nnPath = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
-cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(416, 416)
-cam_rgb.setInterleaved(False)
-cam_rgb.setFps(40)
+camRgb = pipeline.createColorCamera()
+camRgb.setPreviewSize(416, 416)
+camRgb.setInterleaved(False)
+camRgb.setFps(40)
 
-#network specific settings
+# network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
 detectionNetwork.setCoordinateSize(4)
 detectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
-detectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+detectionNetwork.setAnchorMasks({"side26": np.array([1, 2, 3]), "side13": np.array([3, 4, 5])})
 detectionNetwork.setIouThreshold(0.5)
 
-detectionNetwork.setBlobPath(tiny_yolo_v4_path)
+detectionNetwork.setBlobPath(nnPath)
 detectionNetwork.setNumInferenceThreads(2)
 detectionNetwork.input.setBlocking(False)
 
-cam_rgb.preview.link(detectionNetwork.input)
+camRgb.preview.link(detectionNetwork.input)
 
 # Create outputs
-xout_rgb = pipeline.createXLinkOut()
-xout_rgb.setStreamName("rgb")
-if(syncNN):
-    detectionNetwork.passthrough.link(xout_rgb.input)
+xoutRgb = pipeline.createXLinkOut()
+xoutRgb.setStreamName("rgb")
+if syncNN:
+    detectionNetwork.passthrough.link(xoutRgb.input)
 else:
-    cam_rgb.preview.link(xout_rgb.input)
+    camRgb.preview.link(xoutRgb.input)
 
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("detections")
-detectionNetwork.out.link(xout_nn.input)
+nnOut = pipeline.createXLinkOut()
+nnOut.setStreamName("detections")
+detectionNetwork.out.link(nnOut.input)
 
 
 # Pipeline defined, now the device is connected to
@@ -78,60 +80,48 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-    q_nn = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+    qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    qDet = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 
     frame = None
-    bboxes = []
+    detections = []
 
-    start_time = time.monotonic()
+    # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
+    def frameNorm(frame, bbox):
+        normVals = np.full(len(bbox), frame.shape[0])
+        normVals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
+
+    def displayFrame(name, frame):
+        for detection in detections:
+            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
+
+    startTime = time.monotonic()
     counter = 0
-    fps = 0
+
     while True:
-        if(syncNN):
-            in_rgb = q_rgb.get()
-            in_nn = q_nn.get()
+        if syncNN:
+            inRgb = qRgb.get()
+            inDet = qDet.get()
         else:
-            in_rgb = q_rgb.tryGet()
-            in_nn = q_nn.tryGet()
+            inRgb = qRgb.tryGet()
+            inDet = qDet.tryGet()
 
-        if in_rgb is not None:
-            # if the data from the rgb camera is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_rgb.getHeight(), in_rgb.getWidth())
-            frame = in_rgb.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+        if inRgb is not None:
+            frame = inRgb.getCvFrame()
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - startTime)),
+                        (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color=(255, 255, 255))
 
-        if in_nn is not None:
-            bboxes = in_nn.detections
-            counter+=1
-            current_time = time.monotonic()
-            if (current_time - start_time) > 1 :
-                fps = counter / (current_time - start_time)
-                counter = 0
-                start_time = current_time
-
-        color = (255, 255, 255)
+        if inDet is not None:
+            detections = inDet.detections
+            counter += 1
 
         if frame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            height = frame.shape[0]
-            width  = frame.shape[1]
-            for bbox in bboxes:
-                #  denormalize bounding box
-                x1 = int(bbox.xmin * width)
-                x2 = int(bbox.xmax * width)
-                y1 = int(bbox.ymin * height)
-                y2 = int(bbox.ymax * height)
-                try:
-                    label = label_map[bbox.label]
-                except:
-                    label = bbox.label
-                cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-                cv2.putText(frame, "{:.2f}".format(bbox.confidence*100), (x1 + 10, y1 + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-
-            cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
-            cv2.imshow("rgb", frame)
+            displayFrame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

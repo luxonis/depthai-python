@@ -16,15 +16,15 @@ Mobilenet SSD device side decoding demo
 
 # MobilenetSSD label texts
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 syncNN = True
 flipRectified = True
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    nnPath = sys.argv[1]
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -39,7 +39,7 @@ manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 # Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
-spatialDetectionNetwork.setBlobPath(mobilenet_path)
+spatialDetectionNetwork.setBlobPath(nnPath)
 spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
@@ -61,9 +61,9 @@ depthRoiMap.setStreamName("boundingBoxDepthMapping")
 xoutDepth = pipeline.createXLinkOut()
 xoutDepth.setStreamName("depth")
 
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("detections")
-spatialDetectionNetwork.out.link(xout_nn.input)
+nnOut = pipeline.createXLinkOut()
+nnOut.setStreamName("detections")
+spatialDetectionNetwork.out.link(nnOut.input)
 spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
 monoLeft = pipeline.createMonoCamera()
@@ -99,23 +99,23 @@ with dai.Device(pipeline) as device:
     rectifiedRight = None
     detections = []
 
-    start_time = time.monotonic()
+    startTime = time.monotonic()
     counter = 0
     fps = 0
     color = (255, 255, 255)
 
     while True:
         inRectified = previewQueue.get()
-        in_nn = detectionNNQueue.get()
+        det = detectionNNQueue.get()
         depth = depthQueue.get()
 
-        counter+=1
-        current_time = time.monotonic()
-        if (current_time - start_time) > 1 :
-            fps = counter / (current_time - start_time)
+        counter += 1
+        currentTime = time.monotonic()
+        if (currentTime - startTime) > 1:
+            fps = counter / (currentTime - startTime)
             counter = 0
-            start_time = current_time
-        
+            startTime = currentTime
+
         rectifiedRight = inRectified.getCvFrame()
 
         depthFrame = depth.getFrame()
@@ -123,7 +123,7 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        detections = in_nn.detections
+        detections = det.detections
         if len(detections) != 0:
             boundingBoxMapping = depthRoiMap.get()
             roiDatas = boundingBoxMapping.getConfigData()
@@ -144,7 +144,7 @@ with dai.Device(pipeline) as device:
 
         # if the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
-        width  = rectifiedRight.shape[1]
+        width = rectifiedRight.shape[1]
         for detection in detections:
             if flipRectified:
                 swap = detection.xmin
@@ -160,7 +160,7 @@ with dai.Device(pipeline) as device:
                 label = labelMap[detection.label]
             except:
                 label = detection.label
-            
+
             cv2.putText(rectifiedRight, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(rectifiedRight, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(rectifiedRight, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)

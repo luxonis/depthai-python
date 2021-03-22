@@ -29,7 +29,7 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
 
     # The .h265 file is a raw stream file (not playable yet)
-    with open('video.h265','wb') as videoFile:
+    with open('video.h265', 'wb') as videoFile:
         print("Press Ctrl+C to stop encoding...")
         try:
             while True:

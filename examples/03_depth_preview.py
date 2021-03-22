@@ -20,7 +20,7 @@ right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(200)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-median = dai.StereoDepthProperties.MedianFilter.KERNEL_5x5 # For depth filtering
+median = dai.StereoDepthProperties.MedianFilter.KERNEL_5x5  # For depth filtering
 depth.setMedianFilter(median)
 
 left.out.link(depth.left)
@@ -40,9 +40,9 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
     while True:
-        in_depth = q.get()  # blocking call, will wait until a new data has arrived
+        inDepth = q.get()  # blocking call, will wait until a new data has arrived
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
+        frame = inDepth.getData().reshape((inDepth.getHeight(), inDepth.getWidth())).astype(np.uint8)
         frame = np.ascontiguousarray(frame)
         # frame is transformed, the color map will be applied to highlight the depth info
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
