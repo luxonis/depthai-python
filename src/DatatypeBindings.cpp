@@ -41,7 +41,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     using namespace dai;
 
     // Bind Raw datatypes
-    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
+    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer", DOC(dai, RawBuffer))
         .def(py::init<>())
         .def_property("data", [](py::object &obj){
             dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
@@ -54,7 +54,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind RawImgFrame
-    py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame");
+    py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     rawImgFrame
         .def(py::init<>())
         .def_readwrite("fb", &RawImgFrame::fb)
@@ -109,7 +109,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("NONE", RawImgFrame::Type::NONE)
         ;
 
-    py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs")
+    py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs))
         .def_readwrite("type", &RawImgFrame::Specs::type)
         .def_readwrite("width", &RawImgFrame::Specs::width)
         .def_readwrite("height", &RawImgFrame::Specs::height)
@@ -122,14 +122,14 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // NNData
-    py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData");
+    py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
     rawNnData
         .def(py::init<>())
         .def_readwrite("tensors", &RawNNData::tensors)
         .def_readwrite("batchSize", &RawNNData::batchSize)
         ;
 
-    py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
+    py::class_<TensorInfo> tensorInfo(m, "TensorInfo", DOC(dai, TensorInfo));
     tensorInfo
         .def(py::init<>())
         .def_readwrite("order", &TensorInfo::order)
@@ -166,7 +166,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("W", TensorInfo::StorageOrder::W)
         ;
 
-    py::class_<ImgDetection>(m, "ImgDetection")
+    py::class_<ImgDetection>(m, "ImgDetection", DOC(dai, ImgDetection))
         .def(py::init<>())
         .def_readwrite("label", &ImgDetection::label)
         .def_readwrite("confidence", &ImgDetection::confidence)
@@ -181,20 +181,20 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
         ;
 
-    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections");
+    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections", DOC(dai, RawImgDetections));
     RawImgDetections
         .def(py::init<>())
         .def_readwrite("detections", &RawImgDetections::detections)
         ;
 
-    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> RawSpatialImgDetections(m, "RawSpatialImgDetections");
+    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> RawSpatialImgDetections(m, "RawSpatialImgDetections", DOC(dai, RawSpatialImgDetections));
     RawSpatialImgDetections
         .def(py::init<>())
         .def_readwrite("detections", &RawSpatialImgDetections::detections)
         ;
     
     // Bind RawImageManipConfig
-    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
+    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig", DOC(dai, RawImageManipConfig));
     rawImageManipConfig
         .def(py::init<>())
         .def_readwrite("enableFormat", &RawImageManipConfig::enableFormat)
@@ -205,7 +205,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
         ;
 
-    py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect")
+    py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect", DOC(dai, RawImageManipConfig, CropRect))
         .def(py::init<>())
         .def_readwrite("xmin", &RawImageManipConfig::CropRect::xmin)
         .def_readwrite("ymin", &RawImageManipConfig::CropRect::ymin)
@@ -213,7 +213,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
         ;
 
-    py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
+    py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig", DOC(dai, RawImageManipConfig, CropConfig))
         .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
         .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
@@ -224,7 +224,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
         ;
 
-    py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
+    py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig", DOC(dai, RawImageManipConfig, ResizeConfig))
         .def(py::init<>())
         .def_readwrite("width", &RawImageManipConfig::ResizeConfig::width)
         .def_readwrite("height", &RawImageManipConfig::ResizeConfig::height)
@@ -243,7 +243,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
-    py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
+    py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig", DOC(dai, RawImageManipConfig, FormatConfig))
         .def(py::init<>())
         .def_readwrite("type", &RawImageManipConfig::FormatConfig::type)
         .def_readwrite("flipHorizontal", &RawImageManipConfig::FormatConfig::flipHorizontal)
@@ -251,7 +251,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind RawCameraControl
-    py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
+    py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl", DOC(dai, RawCameraControl));
     rawCameraControl
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
@@ -263,7 +263,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // The enum fields will also be exposed in 'CameraControl', store them for later
     std::vector<const char *> camCtrlAttr;
     camCtrlAttr.push_back("AutoFocusMode");
-    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode")
+    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode", DOC(dai, RawCameraControl, AutoFocusMode))
         .value("OFF", RawCameraControl::AutoFocusMode::OFF)
         .value("AUTO", RawCameraControl::AutoFocusMode::AUTO)
         .value("MACRO", RawCameraControl::AutoFocusMode::MACRO)
@@ -273,7 +273,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("AutoWhiteBalanceMode");
-    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode")
+    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode", DOC(dai, RawCameraControl, AutoWhiteBalanceMode))
         .value("OFF", RawCameraControl::AutoWhiteBalanceMode::OFF)
         .value("AUTO", RawCameraControl::AutoWhiteBalanceMode::AUTO)
         .value("INCANDESCENT", RawCameraControl::AutoWhiteBalanceMode::INCANDESCENT)
@@ -286,7 +286,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("SceneMode");
-    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode")
+    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode", DOC(dai, RawCameraControl, SceneMode))
         .value("UNSUPPORTED", RawCameraControl::SceneMode::UNSUPPORTED)
         .value("FACE_PRIORITY", RawCameraControl::SceneMode::FACE_PRIORITY)
         .value("ACTION", RawCameraControl::SceneMode::ACTION)
@@ -307,7 +307,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("AntiBandingMode");
-    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode")
+    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode", DOC(dai, RawCameraControl, AntiBandingMode))
         .value("OFF", RawCameraControl::AntiBandingMode::OFF)
         .value("MAINS_50_HZ", RawCameraControl::AntiBandingMode::MAINS_50_HZ)
         .value("MAINS_60_HZ", RawCameraControl::AntiBandingMode::MAINS_60_HZ)
@@ -315,7 +315,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("EffectMode");
-    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode")
+    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode", DOC(dai, RawCameraControl, EffectMode))
         .value("OFF", RawCameraControl::EffectMode::OFF)
         .value("MONO", RawCameraControl::EffectMode::MONO)
         .value("NEGATIVE", RawCameraControl::EffectMode::NEGATIVE)
@@ -328,7 +328,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     // Bind RawSystemInformation
-    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation");
+    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation", DOC(dai, RawSystemInformation));
     rawSystemInformation
         .def(py::init<>())
         .def_readwrite("ddrMemoryUsage", &RawSystemInformation::ddrMemoryUsage)
@@ -565,7 +565,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
 
-    py::class_<Timestamp>(m, "Timestamp")
+    py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
         .def(py::init<>())
         .def_readwrite("sec", &Timestamp::sec)
         .def_readwrite("nsec", &Timestamp::nsec)
@@ -586,14 +586,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("z", &Point3f::z)
         ;
 
-    py::class_<Size2f>(m, "Size2f")
+    py::class_<Size2f>(m, "Size2f", DOC(dai, Size2f))
         .def(py::init<>())
         .def(py::init<float, float>())
         .def_readwrite("width", &Size2f::width)
         .def_readwrite("height", &Size2f::height)
         ;
 
-    py::class_<RotatedRect>(m, "RotatedRect")
+    py::class_<RotatedRect>(m, "RotatedRect", DOC(dai, RotatedRect))
         .def(py::init<>())
         .def_readwrite("center", &RotatedRect::center)
         .def_readwrite("size", &RotatedRect::size)
@@ -715,15 +715,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
         ;
 
-    //  // Bind ImageManipConfig
-    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
-        .def(py::init<>())
-        // setters
-        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
-        .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
-        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
-        ;
-
     py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
         .def(py::init<>())
         .def_readwrite("config", &SpatialLocations::config)
@@ -770,4 +761,15 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
         ;
+
+
+    // SpatialLocationCalculatorConfig (after ConfigData)
+    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
+        .def(py::init<>())
+        // setters
+        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
+        .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
+        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
+        ;
+
 }

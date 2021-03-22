@@ -12,7 +12,7 @@ void CommonBindings::bind(pybind11::module& m){
     using namespace dai;
     
     // CameraBoardSocket enum bindings
-    py::enum_<CameraBoardSocket>(m, "CameraBoardSocket")
+    py::enum_<CameraBoardSocket>(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket))
         .value("AUTO", CameraBoardSocket::AUTO)
         .value("RGB", CameraBoardSocket::RGB)
         .value("LEFT", CameraBoardSocket::LEFT)
@@ -20,7 +20,7 @@ void CommonBindings::bind(pybind11::module& m){
     ;
     
     // CameraImageOrientation enum bindings
-    py::enum_<CameraImageOrientation>(m, "CameraImageOrientation")
+    py::enum_<CameraImageOrientation>(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation))
         .value("AUTO", CameraImageOrientation::AUTO)
         .value("NORMAL", CameraImageOrientation::NORMAL)
         .value("HORIZONTAL_MIRROR", CameraImageOrientation::HORIZONTAL_MIRROR)
@@ -29,7 +29,7 @@ void CommonBindings::bind(pybind11::module& m){
     ;
 
     // MemoryInfo
-    py::class_<MemoryInfo>(m, "MemoryInfo")
+    py::class_<MemoryInfo>(m, "MemoryInfo", DOC(dai, MemoryInfo))
         .def(py::init<>())
         .def_readwrite("remaining", &MemoryInfo::remaining)
         .def_readwrite("used", &MemoryInfo::used)
@@ -37,7 +37,7 @@ void CommonBindings::bind(pybind11::module& m){
     ;
      
     // ChipTemperature
-    py::class_<ChipTemperature>(m, "ChipTemperature")
+    py::class_<ChipTemperature>(m, "ChipTemperature", DOC(dai, ChipTemperature))
         .def(py::init<>())
         .def_readwrite("css", &ChipTemperature::css)
         .def_readwrite("mss", &ChipTemperature::mss)
@@ -47,7 +47,7 @@ void CommonBindings::bind(pybind11::module& m){
     ;
     
     // CpuUsage
-    py::class_<CpuUsage>(m, "CpuUsage")
+    py::class_<CpuUsage>(m, "CpuUsage", DOC(dai, CpuUsage))
         .def(py::init<>())
         .def_readwrite("average", &CpuUsage::average)
         .def_readwrite("msTime", &CpuUsage::msTime)
