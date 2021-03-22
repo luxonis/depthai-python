@@ -35,14 +35,14 @@ void NodeBindings::bind(pybind11::module& m){
     ;
 
     // Node::Input bindings
-    py::class_<Node::Input>(pyNode, "Input")
+    py::class_<Node::Input>(pyNode, "Input", DOC(dai, Node, Input))
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
     ;
     // Node::Output bindings
-    py::class_<Node::Output>(pyNode, "Output")
+    py::class_<Node::Output>(pyNode, "Output", DOC(dai, Node, Output))
         .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
@@ -401,7 +401,7 @@ void NodeBindings::bind(pybind11::module& m){
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
-    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
+    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
@@ -419,13 +419,13 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
     ;
 
-    py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution")
+    py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution))
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
         ;
 
-    py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder")
+    py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder))
         .value("BGR", ColorCameraProperties::ColorOrder::BGR)
         .value("RGB", ColorCameraProperties::ColorOrder::RGB)
         ;
@@ -435,7 +435,7 @@ void NodeBindings::bind(pybind11::module& m){
         
 
     // MonoCamera props
-    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
+    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     monoCameraProperties
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
@@ -443,7 +443,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("fps",  &MonoCameraProperties::fps)
     ;
 
-    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution")
+    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution))
         .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
         .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
@@ -453,7 +453,7 @@ void NodeBindings::bind(pybind11::module& m){
    
 
     // StereoDepth props
-    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties");
+    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("median",                  &StereoDepthProperties::median)
@@ -469,7 +469,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("height",                  &StereoDepthProperties::height)
         ;
 
-    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter")
+    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
         .value("MEDIAN_OFF", StereoDepthProperties::MedianFilter::MEDIAN_OFF)
         .value("KERNEL_3x3", StereoDepthProperties::MedianFilter::KERNEL_3x3)
         .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
@@ -481,7 +481,7 @@ void NodeBindings::bind(pybind11::module& m){
 
 
     // VideoEncoder props
-    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
+    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     videoEncoderProperties
         .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
         .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
@@ -495,7 +495,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("height", &VideoEncoderProperties::height)
         ;
 
-    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile")
+    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile))
         .value("H264_BASELINE", VideoEncoderProperties::Profile::H264_BASELINE)
         .value("H264_HIGH", VideoEncoderProperties::Profile::H264_HIGH)
         .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
@@ -503,7 +503,7 @@ void NodeBindings::bind(pybind11::module& m){
         .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
         ;
 
-    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode")
+    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode))
         .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
@@ -513,11 +513,11 @@ void NodeBindings::bind(pybind11::module& m){
 
 
 
-    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties")
+    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties", DOC(dai, SystemLoggerProperties))
         .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
         ;
 
-    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties");
+    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties", DOC(dai, NeuralNetworkProperties));
     neuralNetworkProperties
         .def_readwrite("blobSize", &NeuralNetworkProperties::blobSize)
         .def_readwrite("blobUri", &NeuralNetworkProperties::blobUri)
@@ -528,7 +528,7 @@ void NodeBindings::bind(pybind11::module& m){
     m.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
 
 
-    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties");
+    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
     detectionNetworkProperties
         .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
         .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
@@ -542,7 +542,7 @@ void NodeBindings::bind(pybind11::module& m){
     m.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
 
 
-    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties");
+    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
     spatialDetectionNetworkProperties
         .def_readwrite("detectedBBScaleFactor", &SpatialDetectionNetworkProperties::detectedBBScaleFactor)
         .def_readwrite("depthThresholds", &SpatialDetectionNetworkProperties::depthThresholds)
@@ -551,7 +551,7 @@ void NodeBindings::bind(pybind11::module& m){
     m.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
 
 
-    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties");
+    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
     spatialLocationCalculatorProperties
         .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
         .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)

@@ -11,9 +11,9 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
     using namespace dai;
 
     // Bind DeviceBootloader
-    py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader");
+    py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
 
-    py::class_<DeviceBootloader::Version>(deviceBootloader, "Version")
+    py::class_<DeviceBootloader::Version>(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version))
         .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
         .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
         .def("__str__", &DeviceBootloader::Version::toString)
