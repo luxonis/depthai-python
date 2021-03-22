@@ -4,7 +4,7 @@ In this directory there are usage examples of depthai-python repository.
 
 ## Setup
 
-- Configure and build python module with DEPTHAI_PYTHON_TEST_EXAMPLES option enabled
+Navigate to root of repository and build Python module with DEPTHAI_PYTHON_TEST_EXAMPLES option enabled
 
 ```
 mkdir -p build && cd build
