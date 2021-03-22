@@ -8,8 +8,14 @@ In this directory there are usage examples of depthai-python repository.
 
 ```
 mkdir -p build && cd build
-cmake .. -DDEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake .. -DDEPTHAI_PYTHON_ENABLE_EXAMPLES=ON
 cmake --build . --parallel
+```
+
+If you'd like to use a different Python interpreter, set `PYTHON_EXECUTABLE` to your interpreter location
+
+```
+cmake .. -DDEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D PYTHON_EXECUTABLE=/path/to/python
 ```
 
 ## Usage
