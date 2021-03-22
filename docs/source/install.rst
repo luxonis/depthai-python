@@ -68,11 +68,18 @@ Ubuntu
 
 These Ubuntu instructions also work for the **Jetson** and **Xavier** series.
 
-Note! For **Jetson** it is recommended to assign at least 7GB of memory during installation.
-
 .. code-block:: bash
 
   sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+
+
+Note! If opencv fails with illegal instruction after installing from PyPi, add:
+
+.. code-block:: bash
+
+  echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
+  source ~/.bashrc
+
 
 openSUSE
 ********
