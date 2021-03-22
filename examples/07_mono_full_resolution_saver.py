@@ -10,14 +10,14 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
-cam_right = pipeline.createMonoCamera()
-cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+camRight = pipeline.createMonoCamera()
+camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Create output
-xout_right = pipeline.createXLinkOut()
-xout_right.setStreamName("right")
-cam_right.out.link(xout_right.input)
+xoutRight = pipeline.createXLinkOut()
+xoutRight.setStreamName("right")
+camRight.out.link(xoutRight.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -25,19 +25,19 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
         
     # Output queue will be used to get the grayscale frames from the output defined above
-    q_right = device.getOutputQueue(name="right", maxSize=4, blocking=False)
+    qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
     # Make sure the destination path is present before starting to store the examples
     Path('07_data').mkdir(parents=True, exist_ok=True)
 
     while True:
-        in_right = q_right.get()  # blocking call, will wait until a new data has arrived
+        inRight = qRight.get()  # blocking call, will wait until a new data has arrived
         # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame_right = in_right.getCvFrame()
+        frameRight = inRight.getCvFrame()
         # frame is transformed and ready to be shown
-        cv2.imshow("right", frame_right)
+        cv2.imshow("right", frameRight)
         # after showing the frame, it's being stored inside a target directory as a PNG image
-        cv2.imwrite(f"07_data/{int(time.time() * 10000)}.png", frame_right)
+        cv2.imwrite(f"07_data/{int(time.time() * 10000)}.png", frameRight)
 
         if cv2.waitKey(1) == ord('q'):
             break

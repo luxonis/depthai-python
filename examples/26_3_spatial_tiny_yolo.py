@@ -14,18 +14,20 @@ Spatial Tiny-yolo example
 '''
 
 # tiny yolo v3/4 label texts
-labelMap = ["person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
-             "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
-             "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
-             "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
-             "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
-             "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
-             "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
-             "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
-             "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
-             "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
-             "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
-             "teddy bear",     "hair drier", "toothbrush"]  
+labelMap = [
+    "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+    "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+    "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+    "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+    "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+    "teddy bear",     "hair drier", "toothbrush"
+]
 
 syncNN = True
 
@@ -113,7 +115,7 @@ with dai.Device(pipeline) as device:
     frame = None
     detections = []
 
-    start_time = time.monotonic()
+    startTime = time.monotonic()
     counter = 0
     fps = 0
     color = (255, 255, 255)
@@ -125,10 +127,10 @@ with dai.Device(pipeline) as device:
 
         counter+=1
         current_time = time.monotonic()
-        if (current_time - start_time) > 1 :
-            fps = counter / (current_time - start_time)
+        if (current_time - startTime) > 1 :
+            fps = counter / (current_time - startTime)
             counter = 0
-            start_time = current_time
+            startTime = current_time
         
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame()

@@ -10,23 +10,23 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Create Color and Mono cameras
-cam_rgb = pipeline.createColorCamera()
-cam_mono = pipeline.createMonoCamera()
+camRgb = pipeline.createColorCamera()
+camMono = pipeline.createMonoCamera()
 # Create separate streams for them
-xout_rgb = pipeline.createXLinkOut()
-xout_mono = pipeline.createXLinkOut()
+xoutRgb = pipeline.createXLinkOut()
+xoutMono = pipeline.createXLinkOut()
 
 # Set properties
-xout_rgb.setStreamName("rgb")
-xout_mono.setStreamName("mono")
+xoutRgb.setStreamName("rgb")
+xoutMono.setStreamName("mono")
 # Cap color camera to 5 fps
-cam_rgb.setFps(5)
-cam_rgb.setInterleaved(True)
-cam_rgb.setPreviewSize(300, 300)
+camRgb.setFps(5)
+camRgb.setInterleaved(True)
+camRgb.setPreviewSize(300, 300)
 
 # Connect
-cam_rgb.preview.link(xout_rgb.input)
-cam_mono.out.link(xout_mono.input)
+camRgb.preview.link(xoutRgb.input)
+camMono.out.link(xoutMono.input)
 
 
 # Pipeline defined, now the device is connected to

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-''' This example shows usage of Camera Control message as well as ColorCamera configInput to change crop x and y
+"""
+This example shows usage of Camera Control message as well as ColorCamera configInput to change crop x and y
 Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to trigger autofocus, 'IOKL,.'
 for manual exposure/focus:
   Control:      key[dec/inc]  min..max
@@ -10,7 +11,7 @@ for manual exposure/focus:
 To go back to auto controls:
   'E' - autoexposure
   'F' - autofocus (continuous)
-'''
+"""
 
 import depthai as dai
 import cv2
@@ -56,7 +57,10 @@ configIn.out.link(colorCam.inputConfig)
 videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 
-def clamp(num, v0, v1): return max(v0, min(num, v1))
+
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as dev:
@@ -71,27 +75,27 @@ with dai.Device(pipeline) as dev:
     # Start pipeline
     dev.startPipeline()
 
-    # Max crop_x & crop_y
-    max_crop_x = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()
-    max_crop_y = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colorCam.getResolutionHeight()
+    # Max cropX & cropY
+    maxCropX = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()
+    maxCropY = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colorCam.getResolutionHeight()
 
     # Default crop
-    crop_x = 0
-    crop_y = 0
-    send_cam_config = True
+    cropX = 0
+    cropY = 0
+    sendCamConfig = True
 
     # Defaults and limits for manual focus/exposure controls
-    lens_pos = 150
-    lens_min = 0
-    lens_max = 255
+    lensPos = 150
+    lensMin = 0
+    lensMax = 255
 
-    exp_time = 20000
-    exp_min = 1
-    exp_max = 33000
+    expTime = 20000
+    expMin = 1
+    expMax = 33000
 
-    sens_iso = 800
-    sens_min = 100
-    sens_max = 1600
+    sensIso = 800
+    sensMin = 100
+    sensMax = 1600
 
     while True:
 
@@ -107,12 +111,12 @@ with dai.Device(pipeline) as dev:
             cv2.imshow('video', frame)
 
             # Send new cfg to camera
-            if send_cam_config:
+            if sendCamConfig:
                 cfg = dai.ImageManipConfig()
-                cfg.setCropRect(crop_x, crop_y, 0, 0)
+                cfg.setCropRect(cropX, cropY, 0, 0)
                 configQueue.send(cfg)
-                print('Sending new crop - x: ', crop_x, ' y: ', crop_y)
-                send_cam_config = False
+                print('Sending new crop - x: ', cropX, ' y: ', cropY)
+                sendCamConfig = False
 
         stillFrames = stillQueue.tryGetAll()
         for stillFrame in stillFrames:
@@ -147,35 +151,35 @@ with dai.Device(pipeline) as dev:
             ctrl.setAutoExposureEnable()
             controlQueue.send(ctrl)
         elif key in [ord(','), ord('.')]:
-            if key == ord(','): lens_pos -= LENS_STEP
-            if key == ord('.'): lens_pos += LENS_STEP
-            lens_pos = clamp(lens_pos, lens_min, lens_max)
-            print("Setting manual focus, lens position:", lens_pos)
+            if key == ord(','): lensPos -= LENS_STEP
+            if key == ord('.'): lensPos += LENS_STEP
+            lensPos = clamp(lensPos, lensMin, lensMax)
+            print("Setting manual focus, lens position:", lensPos)
             ctrl = dai.CameraControl()
-            ctrl.setManualFocus(lens_pos)
+            ctrl.setManualFocus(lensPos)
             controlQueue.send(ctrl)
         elif key in [ord('i'), ord('o'), ord('k'), ord('l')]:
-            if key == ord('i'): exp_time -= EXP_STEP
-            if key == ord('o'): exp_time += EXP_STEP
-            if key == ord('k'): sens_iso -= ISO_STEP
-            if key == ord('l'): sens_iso += ISO_STEP
-            exp_time = clamp(exp_time, exp_min, exp_max)
-            sens_iso = clamp(sens_iso, sens_min, sens_max)
-            print("Setting manual exposure, time:", exp_time, "iso:", sens_iso)
+            if key == ord('i'): expTime -= EXP_STEP
+            if key == ord('o'): expTime += EXP_STEP
+            if key == ord('k'): sensIso -= ISO_STEP
+            if key == ord('l'): sensIso += ISO_STEP
+            expTime = clamp(expTime, expMin, expMax)
+            sensIso = clamp(sensIso, sensMin, sensMax)
+            print("Setting manual exposure, time:", expTime, "iso:", sensIso)
             ctrl = dai.CameraControl()
-            ctrl.setManualExposure(exp_time, sens_iso)
+            ctrl.setManualExposure(expTime, sensIso)
             controlQueue.send(ctrl)
         elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
             if key == ord('a'):
-                crop_x = crop_x - (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-                if crop_x < 0: crop_x = max_crop_x
+                cropX = cropX - (maxCropX / colorCam.getResolutionWidth()) * STEP_SIZE
+                if cropX < 0: cropX = maxCropX
             elif key == ord('d'):
-                crop_x = crop_x + (max_crop_x / colorCam.getResolutionWidth()) * STEP_SIZE
-                if crop_x > max_crop_x: crop_x = 0
+                cropX = cropX + (maxCropX / colorCam.getResolutionWidth()) * STEP_SIZE
+                if cropX > maxCropX: cropX = 0
             elif key == ord('w'):
-                crop_y = crop_y - (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-                if crop_y < 0: crop_y = max_crop_y
+                cropY = cropY - (maxCropY / colorCam.getResolutionHeight()) * STEP_SIZE
+                if cropY < 0: cropY = maxCropY
             elif key == ord('s'):
-                crop_y = crop_y + (max_crop_y / colorCam.getResolutionHeight()) * STEP_SIZE
-                if crop_y > max_crop_y: crop_y = 0
-            send_cam_config = True
+                cropY = cropY + (maxCropY / colorCam.getResolutionHeight()) * STEP_SIZE
+                if cropY > maxCropY: cropY = 0
+            sendCamConfig = True

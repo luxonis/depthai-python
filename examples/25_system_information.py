@@ -23,9 +23,9 @@ sys_logger = pipeline.createSystemLogger()
 sys_logger.setRate(1)  # 1 Hz
 
 # Create output
-link_out = pipeline.createXLinkOut()
-link_out.setStreamName("sysinfo")
-sys_logger.out.link(link_out.input)
+linkOut = pipeline.createXLinkOut()
+linkOut.setStreamName("sysinfo")
+sys_logger.out.link(linkOut.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:

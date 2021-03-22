@@ -7,22 +7,22 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) cameras
-cam_left = pipeline.createMonoCamera()
-cam_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-cam_left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+camLeft = pipeline.createMonoCamera()
+camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
-cam_right = pipeline.createMonoCamera()
-cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+camRight = pipeline.createMonoCamera()
+camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Create outputs
-xout_left = pipeline.createXLinkOut()
-xout_left.setStreamName('left')
-cam_left.out.link(xout_left.input)
+xoutLeft = pipeline.createXLinkOut()
+xoutLeft.setStreamName('left')
+camLeft.out.link(xoutLeft.input)
 
-xout_right = pipeline.createXLinkOut()
-xout_right.setStreamName('right')
-cam_right.out.link(xout_right.input)
+xoutRight = pipeline.createXLinkOut()
+xoutRight.setStreamName('right')
+camRight.out.link(xoutRight.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -30,28 +30,28 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queues will be used to get the grayscale frames from the outputs defined above
-    q_left = device.getOutputQueue(name="left", maxSize=4, blocking=False)
-    q_right = device.getOutputQueue(name="right", maxSize=4, blocking=False)
+    qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
+    qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
-    frame_left = None
-    frame_right = None
+    frameLeft = None
+    frameRight = None
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-        in_left = q_left.tryGet()
-        in_right = q_right.tryGet()
+        inLeft = qLeft.tryGet()
+        inRight = qRight.tryGet()
 
-        if in_left is not None:
-            frame_left = in_left.getCvFrame()
+        if inLeft is not None:
+            frameLeft = inLeft.getCvFrame()
 
-        if in_right is not None:
-            frame_right = in_right.getCvFrame()
+        if inRight is not None:
+            frameRight = inRight.getCvFrame()
 
         # show the frames if available
-        if frame_left is not None:
-            cv2.imshow("left", frame_left)
-        if frame_right is not None:
-            cv2.imshow("right", frame_right)
+        if frameLeft is not None:
+            cv2.imshow("left", frameLeft)
+        if frameRight is not None:
+            cv2.imshow("right", frameRight)
 
         if cv2.waitKey(1) == ord('q'):
             break
