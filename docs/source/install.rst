@@ -66,11 +66,20 @@ Raspberry Pi OS
 Ubuntu
 ******
 
-Note that these Ubuntu instructions also work for the **Jetson** and **Xavier** series.
+These Ubuntu instructions also work for the **Jetson** and **Xavier** series.
 
 .. code-block:: bash
 
   sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+
+
+Note! If opencv fails with illegal instruction after installing from PyPi, add:
+
+.. code-block:: bash
+
+  echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
+  source ~/.bashrc
+
 
 openSUSE
 ********
