@@ -91,8 +91,8 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/17_video_mobilenet.rst
    samples/18_rgb_encoding_mobilenet.rst
    samples/21_mobilenet_decoding_on_device.rst
-   samples/22_1_tiny_tolo_v3_decoding_on_device.rst
-   samples/22_2_tiny_tolo_v4_decoding_on_device.rst
+   samples/22_1_tiny_yolo_v3_decoding_on_device.rst
+   samples/22_2_tiny_yolo_v4_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
    samples/24_opencv_support.rst
    samples/25_system_information.rst

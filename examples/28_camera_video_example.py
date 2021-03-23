@@ -10,8 +10,8 @@ pipeline = dai.Pipeline()
 # Define a source - color camera
 colorCam = pipeline.createColorCamera()
 colorCam.setBoardSocket(dai.CameraBoardSocket.RGB)
-colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-colorCam.setVideoSize(2000, 1000)
+colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+colorCam.setVideoSize(1920, 1080)
 
 # Create output
 xoutVideo = pipeline.createXLinkOut()
