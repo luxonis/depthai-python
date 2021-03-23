@@ -8,13 +8,7 @@ Both are displayed using functions `getFrame` and `getCvFrame`.
 Setup
 #####
 
-Please run the following command to install the required dependencies
-
-.. code-block:: bash
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+c9a19df719cb668e438d6eafd193cdf60a0d9354 numpy==1.19.5 opencv-python==4.5.1.48
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+.. include::  /includes/install_from_pypi.rst
 
 This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
@@ -22,7 +16,7 @@ This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to wo
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/24_opencv_support.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/24_opencv_support.py>`__
 
 .. literalinclude:: ../../../examples/24_opencv_support.py
    :language: python

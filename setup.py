@@ -5,6 +5,7 @@ import sys
 import platform
 import subprocess
 import find_version
+import multiprocessing
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -18,13 +19,13 @@ os.makedirs(os.path.join(here, "generated"), exist_ok=True)
 if os.environ.get('CI') != None : 
     ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
     final_version = find_version.get_package_version()
-    if os.environ.get('BUILD_COMMIT_HASH') != None  :
-        final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
+    if os.environ.get('BUILD_COMMIT_HASH') != None:
+        final_version = find_version.get_package_dev_version(os.environ['BUILD_COMMIT_HASH'])
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 elif os.path.exists(".git"):
     ### else if .git folder exists, create depthai with commit hash retrieved from git rev-parse HEAD
-    commit_hash = ''
+    commit_hash = 'dev'
     try:
         commit_hash = (
             subprocess.check_output(
@@ -35,8 +36,8 @@ elif os.path.exists(".git"):
         )
     except subprocess.CalledProcessError as e:
         # cannot get commit hash, leave empty
-        commit_hash = ''
-    final_version = find_version.get_package_version() + '+' + commit_hash
+        commit_hash = 'dev'
+    final_version = find_version.get_package_dev_version(commit_hash)
 
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
@@ -45,7 +46,7 @@ elif os.path.exists(".git"):
 # If not generated, generate from find_version
 if os.path.isfile(version_file) == False :
     # generate from find_version
-    final_version = find_version.get_package_version()
+    final_version = find_version.get_package_dev_version('dev')
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 
@@ -89,25 +90,47 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+        # initialize cmake_args and build_args
+        cmake_args = []
+        build_args = []
 
+        # Specify output directory and python executable
+        cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
+
+        # Pass a commit hash
         if buildCommitHash != None :
             cmake_args += ['-DDEPTHAI_PYTHON_COMMIT_HASH=' + buildCommitHash]
 
+        # Pass a docstring option
+        if 'DEPTHAI_PYTHON_DOCSTRINGS_INPUT' in os.environ:
+            cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
+            cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
+
+        # Pass installation directory
+        if 'DEPTHAI_INSTALLATION_DIR' in os.environ:
+            cmake_args += ['-DDEPTHAI_PYTHON_USE_FIND_PACKAGE=ON']
+            cmake_args += ['-DCMAKE_PREFIX_PATH='+os.environ['DEPTHAI_INSTALLATION_DIR']]
+
+        # Set build type (debug vs release for library as well as dependencies)
         cfg = 'Debug' if self.debug else 'Release'
-        build_args = ['--config', cfg]
+        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+        cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=' + cfg]
+        build_args += ['--config', cfg]
 
         # Memcheck (guard if it fails)
-        totalMemory = 4000
+        freeMemory = 4000
         if platform.system() == "Linux":
             try:
-                totalMemory = int(os.popen("free -m").readlines()[1].split()[1])
+                freeMemory = int(os.popen("free -m").readlines()[1].split()[6])
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
-                totalMemory = 4000
+                freeMemory = 4000
+        # Memcheck (guard if it fails)
 
+
+        # Configure and build
+        # Windows
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             cmake_args += ['-DCMAKE_TOOLCHAIN_FILE={}'.format(os.path.dirname(os.path.abspath(__file__)) + '/cmake/toolchain/msvc.cmake')]
@@ -120,32 +143,27 @@ class CMakeBuild(build_ext):
             
             # Add flag to build with maximum available threads
             build_args += ['--', '/m']
+        # Unix
         else:
-            # if macos
+            # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
                 os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
-            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-           
-            #Memcheck
-            parallel_args = ['--', '-j']
-            if totalMemory < 1000:
-                parallel_args = ['--', '-j1']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif totalMemory < 2000:
-                parallel_args = ['--', '-j2']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
-            build_args += parallel_args
-
-        # Hunter configuration to release only
-        cmake_args += ['-DHUNTER_CONFIGURATION_TYPES=Release']
+            # Specify how many threads to use when building, depending on available memory
+            max_threads = multiprocessing.cpu_count()
+            num_threads = (freeMemory // 1000)
+            num_threads = min(num_threads, max_threads)
+            if num_threads <= 0:
+                num_threads = 1            
+            build_args += ['--', '-j' + str(num_threads)]
+            cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
-        # Add additional cmake args
+        # Add additional cmake args from environment
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [os.environ['CMAKE_ARGS']]
 
@@ -172,7 +190,7 @@ setup(
     },
     zip_safe=False,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",
@@ -187,6 +205,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",

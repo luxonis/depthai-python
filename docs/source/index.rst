@@ -6,7 +6,10 @@
 Welcome to DepthAI Gen2 API Documentation
 =========================================
 
-On this page you can find the details regarding DepthAI API that will allow you to interact with the DepthAI device.
+.. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
+   :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
+
+On this page you can find the details regarding the Gen2 DepthAI API that will allow you to interact with the DepthAI device.
 We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ API Reference>`
 
 What is Gen2?
@@ -40,8 +43,9 @@ with some insightful tutorials.
 Before running the example, install the DepthAI Python library using the command below
 
 .. code-block:: python
+   :substitutions:
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+c9a19df719cb668e438d6eafd193cdf60a0d9354
+   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release|
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -87,9 +91,15 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/17_video_mobilenet.rst
    samples/18_rgb_encoding_mobilenet.rst
    samples/21_mobilenet_decoding_on_device.rst
-   samples/22_tiny_tolo_v3_decoding_on_device.rst
+   samples/22_1_tiny_tolo_v3_decoding_on_device.rst
+   samples/22_2_tiny_tolo_v4_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
    samples/24_opencv_support.rst
+   samples/25_system_information.rst
+   samples/26_1_spatial_mobilenet.rst
+   samples/26_2_spatial_mobilenet_mono.rst
+   samples/26_3_spatial_tiny_yolo.rst
+   samples/27_spatial_location_calculator.rst
 
 .. toctree::
    :maxdepth: 1
