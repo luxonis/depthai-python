@@ -1,4 +1,4 @@
-21 - RGB & TinyYoloV3 decoding on device
+22.1 - RGB & TinyYoloV3 decoding on device
 ==========================================
 
 This example shows how to run TinyYoloV3 on the RGB input frame, and how to display both the RGB
