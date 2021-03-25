@@ -57,7 +57,7 @@ TEST_TIMEOUT=0 ctest -R "01_rgb_preview" --verbose
 ![example_7](https://user-images.githubusercontent.com/5244214/104040905-86209480-51d8-11eb-9e15-5fe94aba7b69.gif)
 
 ### 08_rgb_mobilenet.py
-![example_8](https://user-images.githubusercontent.com/5244214/104040901-84ef6780-51d8-11eb-96e7-f54fa7853f1f.gif)
+![example_8](https://user-images.githubusercontent.com/5244214/112524084-b58a7a80-8d9f-11eb-9389-e17b0ea40338.gif)
 
 ### 09_mono_mobilenet.py
 ![example_9](https://user-images.githubusercontent.com/5244214/104040898-8456d100-51d8-11eb-9498-e316b71d41e6.gif)
