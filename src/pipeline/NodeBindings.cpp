@@ -14,6 +14,7 @@
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
+#include "depthai/pipeline/node/ObjectTracker.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -399,6 +400,19 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setRate", &SystemLogger::setRate, py::arg("hz"), DOC(dai, node, SystemLogger, setRate))
         ;
 
+    // NeuralNetwork node
+    py::class_<ObjectTracker, Node, std::shared_ptr<ObjectTracker>>(m, "ObjectTracker", DOC(dai, node, ObjectTracker))
+        .def_readonly("inputFrame", &ObjectTracker::inputFrame, DOC(dai, node, ObjectTracker, inputFrame))
+        .def_readonly("inputDetections", &ObjectTracker::inputDetections, DOC(dai, node, ObjectTracker, inputDetections))
+        .def_readonly("out", &ObjectTracker::out, DOC(dai, node, ObjectTracker, out))
+        .def_readonly("passthroughFrame", &ObjectTracker::passthroughFrame, DOC(dai, node, ObjectTracker, passthroughFrame))
+        .def_readonly("passthroughDetections", &ObjectTracker::passthroughDetections, DOC(dai, node, ObjectTracker, passthroughDetections))
+
+        .def("setTrackerThreshold", &ObjectTracker::setTrackerThreshold, py::arg("threshold"), DOC(dai, node, ObjectTracker, setTrackerThreshold))
+        .def("setMaxObjectsToTrack", &ObjectTracker::setMaxObjectsToTrack, py::arg("maxObjectsToTrack"), DOC(dai, node, ObjectTracker, setMaxObjectsToTrack))
+        .def("setDetectionLabelsToTrack", &ObjectTracker::setDetectionLabelsToTrack, py::arg("labels"), DOC(dai, node, ObjectTracker, setDetectionLabelsToTrack))
+        .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
+        ;
 
     ////////////////////////////////////
     // Node properties bindings
@@ -560,5 +574,19 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     m.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
 
+
+    py::enum_<TrackType>(m, "TrackType")
+        .value("ZERO_TERM_IMAGELESS", TrackType::ZERO_TERM_IMAGELESS)
+        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackType::ZERO_TERM_COLOR_HISTOGRAM)
+    ;
+
+    py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
+    objectTrackerProperties
+        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
+        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
+        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
+        .def_readwrite("trackType", &ObjectTrackerProperties::trackType)
+        ;
+    m.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
 }
