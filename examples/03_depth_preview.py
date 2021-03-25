@@ -41,10 +41,8 @@ with dai.Device(pipeline) as device:
 
     while True:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
-        # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frame = inDepth.getData().reshape((inDepth.getHeight(), inDepth.getWidth())).astype(np.uint8)
-        frame = np.ascontiguousarray(frame)
-        # frame is transformed, the color map will be applied to highlight the depth info
+        frame = inDepth.getFrame()
+        frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
 
         # Uncomment one of these and comment the one given above

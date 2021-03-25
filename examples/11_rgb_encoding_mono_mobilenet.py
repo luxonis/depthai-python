@@ -74,21 +74,16 @@ with dai.Device(pipeline) as device:
     frame = None
     frameManip = None
     detections = []
+    offset_x = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
 
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
-    def displayFrame(name, frame):
-        for detection in detections:
-            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-        cv2.imshow(name, frame)
-
     videoFile = open('video.h265', 'wb')
+    cv2.namedWindow("right", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
 
     while True:
         inRight = qRight.tryGet()
@@ -108,10 +103,22 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if frame is not None:
-            displayFrame("right", frame)
+            cropped_frame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
+            for detection in detections:
+                bbox = frameNorm(cropped_frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offset_x
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("right", frame)
 
         if frameManip is not None:
-            displayFrame("manip", frameManip)
+            for detection in detections:
+                bbox = frameNorm(frameManip, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("manip", frameManip)
 
         if cv2.waitKey(1) == ord('q'):
             break

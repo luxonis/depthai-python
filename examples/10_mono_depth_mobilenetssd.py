@@ -53,7 +53,7 @@ manip.out.link(nn.input)
 depthOut = pipeline.createXLinkOut()
 depthOut.setStreamName("depth")
 
-stereo.depth.link(depthOut.input)
+stereo.disparity.link(depthOut.input)
 
 xoutRight = pipeline.createXLinkOut()
 xoutRight.setStreamName("rectifiedRight")
@@ -109,10 +109,37 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if inDepth is not None:
-            depthFrame = inDepth.getFrame()
-            depthFrame = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-            depthFrame = cv2.equalizeHist(depthFrame)
-            depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HOT)
+            # depthFrame = inDepth.getFrame()
+            # data is originally represented as a flat 1D array, it needs to be converted into HxW form
+            depthFrame = inDepth.getData().reshape((inDepth.getHeight(), inDepth.getWidth())).astype(np.uint8)
+            depthFrame = np.ascontiguousarray(depthFrame)
+            # frame is transformed, the color map will be applied to highlight the depth info
+            depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_JET)
+
+            # Uncomment one of these and comment the one given above
+            # to see visualisation in different color frames
+
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_BONE)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_AUTUMN)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_WINTER)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_RAINBOW)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_OCEAN)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SUMMER)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SPRING)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_COOL)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HSV)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HOT)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PINK)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PARULA)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_MAGMA)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_INFERNO)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PLASMA)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_VIRIDIS)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_CIVIDIS)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT_SHIFTED)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TURBO)
+            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_DEEPGREEN)
 
         if rightFrame is not None:
             displayFrame("rectified right", rightFrame)
