@@ -4,12 +4,18 @@ In this directory there are usage examples of depthai-python repository.
 
 ## Setup
 
-- Configure and build python module with DEPTHAI_PYTHON_TEST_EXAMPLES option enabled
+Navigate to root of repository and build Python module with DEPTHAI_PYTHON_TEST_EXAMPLES option enabled
 
 ```
 mkdir -p build && cd build
-cmake .. -DDEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake .. -DDEPTHAI_PYTHON_ENABLE_EXAMPLES=ON
 cmake --build . --parallel
+```
+
+If you'd like to use a different Python interpreter, set `PYTHON_EXECUTABLE` to your interpreter location
+
+```
+cmake .. -DDEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D PYTHON_EXECUTABLE=/path/to/python
 ```
 
 ## Usage

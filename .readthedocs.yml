@@ -17,7 +17,7 @@ submodules:
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: dirhtml
-  configuration: docs/readthedocs/conf.py
+  configuration: docs/source/conf.py
 
 # Build documentation with MkDocs
 #mkdocs:

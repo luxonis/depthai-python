@@ -5,6 +5,7 @@ import sys
 import platform
 import subprocess
 import find_version
+import multiprocessing
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -18,13 +19,13 @@ os.makedirs(os.path.join(here, "generated"), exist_ok=True)
 if os.environ.get('CI') != None : 
     ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
     final_version = find_version.get_package_version()
-    if os.environ.get('BUILD_COMMIT_HASH') != None  :
-        final_version = final_version + '+' + os.environ['BUILD_COMMIT_HASH']
+    if os.environ.get('BUILD_COMMIT_HASH') != None:
+        final_version = find_version.get_package_dev_version(os.environ['BUILD_COMMIT_HASH'])
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 elif os.path.exists(".git"):
     ### else if .git folder exists, create depthai with commit hash retrieved from git rev-parse HEAD
-    commit_hash = ''
+    commit_hash = 'dev'
     try:
         commit_hash = (
             subprocess.check_output(
@@ -35,8 +36,8 @@ elif os.path.exists(".git"):
         )
     except subprocess.CalledProcessError as e:
         # cannot get commit hash, leave empty
-        commit_hash = ''
-    final_version = find_version.get_package_version() + '+' + commit_hash
+        commit_hash = 'dev'
+    final_version = find_version.get_package_dev_version(commit_hash)
 
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
@@ -45,7 +46,7 @@ elif os.path.exists(".git"):
 # If not generated, generate from find_version
 if os.path.isfile(version_file) == False :
     # generate from find_version
-    final_version = find_version.get_package_version()
+    final_version = find_version.get_package_dev_version('dev')
     with open(version_file, 'w') as vf :
         vf.write("__version__ = '" + final_version + "'")
 
@@ -105,6 +106,11 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
             cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
 
+        # Pass installation directory
+        if 'DEPTHAI_INSTALLATION_DIR' in os.environ:
+            cmake_args += ['-DDEPTHAI_PYTHON_USE_FIND_PACKAGE=ON']
+            cmake_args += ['-DCMAKE_PREFIX_PATH='+os.environ['DEPTHAI_INSTALLATION_DIR']]
+
         # Set build type (debug vs release for library as well as dependencies)
         cfg = 'Debug' if self.debug else 'Release'
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
@@ -112,14 +118,14 @@ class CMakeBuild(build_ext):
         build_args += ['--config', cfg]
 
         # Memcheck (guard if it fails)
-        totalMemory = 4000
+        freeMemory = 4000
         if platform.system() == "Linux":
             try:
-                totalMemory = int(os.popen("free -m").readlines()[1].split()[1])
+                freeMemory = int(os.popen("free -m").readlines()[1].split()[6])
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
-                totalMemory = 4000
+                freeMemory = 4000
         # Memcheck (guard if it fails)
 
 
@@ -146,15 +152,14 @@ class CMakeBuild(build_ext):
                 os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
-            if totalMemory < 1000:
-                build_args += ['--', '-j1']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=1']
-            elif totalMemory < 2000:
-                build_args += ['--', '-j2']
-                cmake_args += ['-DHUNTER_JOBS_NUMBER=2']
-            else:
-                # Build with maximum available threads
-                build_args += ['--', '-j']
+            max_threads = multiprocessing.cpu_count()
+            num_threads = (freeMemory // 1000)
+            num_threads = min(num_threads, max_threads)
+            if num_threads <= 0:
+                num_threads = 1            
+            build_args += ['--', '-j' + str(num_threads)]
+            cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
+
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
         
@@ -185,7 +190,7 @@ setup(
     },
     zip_safe=False,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",

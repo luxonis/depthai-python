@@ -12,6 +12,8 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
+#include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
+#include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -33,14 +35,14 @@ void NodeBindings::bind(pybind11::module& m){
     ;
 
     // Node::Input bindings
-    py::class_<Node::Input>(pyNode, "Input")
+    py::class_<Node::Input>(pyNode, "Input", DOC(dai, Node, Input))
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
     ;
     // Node::Output bindings
-    py::class_<Node::Output>(pyNode, "Output")
+    py::class_<Node::Output>(pyNode, "Output", DOC(dai, Node, Output))
         .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
@@ -333,6 +335,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setRateControlMode", &VideoEncoder::setRateControlMode, py::arg("mode"), DOC(dai, node, VideoEncoder, setRateControlMode))
         .def("setProfile", &VideoEncoder::setProfile, py::arg("width"), py::arg("height"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile))
         .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrate))
+        .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
         .def("setNumBFrames", &VideoEncoder::setNumBFrames, py::arg("numBFrames"), DOC(dai, node, VideoEncoder, setNumBFrames))
@@ -341,6 +344,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getRateControlMode", &VideoEncoder::getRateControlMode, DOC(dai, node, VideoEncoder, getRateControlMode))
         .def("getProfile", &VideoEncoder::getProfile, DOC(dai, node, VideoEncoder, getProfile))
         .def("getBitrate", &VideoEncoder::getBitrate, DOC(dai, node, VideoEncoder, getBitrate))
+        .def("getBitrateKbps", &VideoEncoder::getBitrate, DOC(dai, node, VideoEncoder, getBitrateKbps))
         .def("getKeyframeFrequency", &VideoEncoder::getKeyframeFrequency, DOC(dai, node, VideoEncoder, getKeyframeFrequency))
         //.def("getMaxBitrate", &VideoEncoder::getMaxBitrate)
         .def("getNumBFrames", &VideoEncoder::getNumBFrames, DOC(dai, node, VideoEncoder, getNumBFrames))
@@ -378,6 +382,41 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
         ;
 
+    py::class_<SpatialDetectionNetwork, DetectionNetwork, std::shared_ptr<SpatialDetectionNetwork>>(m, "SpatialDetectionNetwork", DOC(dai, node, SpatialDetectionNetwork))
+        .def_readonly("input", &SpatialDetectionNetwork::input, DOC(dai, node, SpatialDetectionNetwork, input))
+        .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth, DOC(dai, node, SpatialDetectionNetwork, inputDepth))
+        .def_readonly("out", &SpatialDetectionNetwork::out, DOC(dai, node, SpatialDetectionNetwork, out))
+        .def_readonly("boundingBoxMapping", &SpatialDetectionNetwork::boundingBoxMapping, DOC(dai, node, SpatialDetectionNetwork, boundingBoxMapping))
+        .def_readonly("passthrough", &SpatialDetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
+        .def_readonly("passthroughDepth", &SpatialDetectionNetwork::passthroughDepth, DOC(dai, node, SpatialDetectionNetwork, passthroughDepth))
+
+        .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
+        .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
+        .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold, py::arg("upperThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthUpperThreshold))
+        ;
+
+    py::class_<MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<MobileNetSpatialDetectionNetwork>>(m, "MobileNetSpatialDetectionNetwork", DOC(dai, node, MobileNetSpatialDetectionNetwork))
+        ;
+
+    // YoloSpatialDetectionNetwork node
+    py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork", DOC(dai, node, YoloSpatialDetectionNetwork))
+        .def("setNumClasses", &YoloSpatialDetectionNetwork::setNumClasses, py::arg("numClasses"), DOC(dai, node, YoloSpatialDetectionNetwork, setNumClasses))
+        .def("setCoordinateSize", &YoloSpatialDetectionNetwork::setCoordinateSize, py::arg("coordinates"), DOC(dai, node, YoloSpatialDetectionNetwork, setCoordinateSize))
+        .def("setAnchors", &YoloSpatialDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchors))
+        .def("setAnchorMasks", &YoloSpatialDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchorMasks))
+        .def("setIouThreshold", &YoloSpatialDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloSpatialDetectionNetwork, setIouThreshold))
+        ;
+
+    // SpatialLocationCalculator node
+    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
+        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))       
+        .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
+        .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
+        .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
+        .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
+        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+        ;
+
     // SystemLogger node
     py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger", DOC(dai, node, SystemLogger))
         .def_readonly("out", &SystemLogger::out, DOC(dai, node, SystemLogger, out))
@@ -388,7 +427,7 @@ void NodeBindings::bind(pybind11::module& m){
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
-    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties");
+    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
@@ -406,13 +445,13 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
     ;
 
-    py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution")
+    py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution))
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
         ;
 
-    py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder")
+    py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder))
         .value("BGR", ColorCameraProperties::ColorOrder::BGR)
         .value("RGB", ColorCameraProperties::ColorOrder::RGB)
         ;
@@ -422,7 +461,7 @@ void NodeBindings::bind(pybind11::module& m){
         
 
     // MonoCamera props
-    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties");
+    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     monoCameraProperties
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
@@ -430,7 +469,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("fps",  &MonoCameraProperties::fps)
     ;
 
-    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution")
+    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution))
         .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
         .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
@@ -440,7 +479,7 @@ void NodeBindings::bind(pybind11::module& m){
    
 
     // StereoDepth props
-    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties");
+    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("median",                  &StereoDepthProperties::median)
@@ -457,7 +496,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("fovOverrideDegrees",      &StereoDepthProperties::fovOverrideDegrees)
         ;
 
-    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter")
+    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
         .value("MEDIAN_OFF", StereoDepthProperties::MedianFilter::MEDIAN_OFF)
         .value("KERNEL_3x3", StereoDepthProperties::MedianFilter::KERNEL_3x3)
         .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
@@ -478,7 +517,7 @@ void NodeBindings::bind(pybind11::module& m){
 
 
     // VideoEncoder props
-    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties");
+    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     videoEncoderProperties
         .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
         .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
@@ -492,7 +531,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("height", &VideoEncoderProperties::height)
         ;
 
-    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile")
+    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile))
         .value("H264_BASELINE", VideoEncoderProperties::Profile::H264_BASELINE)
         .value("H264_HIGH", VideoEncoderProperties::Profile::H264_HIGH)
         .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
@@ -500,7 +539,7 @@ void NodeBindings::bind(pybind11::module& m){
         .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
         ;
 
-    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode")
+    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode))
         .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
         ;     
@@ -510,10 +549,50 @@ void NodeBindings::bind(pybind11::module& m){
 
 
 
-    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties")
+    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties", DOC(dai, SystemLoggerProperties))
         .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
         ;
 
-    
+    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties", DOC(dai, NeuralNetworkProperties));
+    neuralNetworkProperties
+        .def_readwrite("blobSize", &NeuralNetworkProperties::blobSize)
+        .def_readwrite("blobUri", &NeuralNetworkProperties::blobUri)
+        .def_readwrite("numFrames", &NeuralNetworkProperties::numFrames)
+        .def_readwrite("numThreads", &NeuralNetworkProperties::numThreads)
+        .def_readwrite("numNCEPerThread", &NeuralNetworkProperties::numNCEPerThread)
+        ;
+    m.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
+
+
+    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
+    detectionNetworkProperties
+        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
+        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
+        .def_readwrite("classes", &DetectionNetworkProperties::classes)
+        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
+        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
+        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
+        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
+        ;
+    // ALIAS
+    m.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
+
+
+    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
+    spatialDetectionNetworkProperties
+        .def_readwrite("detectedBBScaleFactor", &SpatialDetectionNetworkProperties::detectedBBScaleFactor)
+        .def_readwrite("depthThresholds", &SpatialDetectionNetworkProperties::depthThresholds)
+        ;
+    // ALIAS
+    m.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
+
+
+    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
+    spatialLocationCalculatorProperties
+        .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
+        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
+        ;
+    m.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
+
 
 }
