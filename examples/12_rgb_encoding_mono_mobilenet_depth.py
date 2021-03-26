@@ -34,7 +34,7 @@ camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 depth = pipeline.createStereoDepth()
-depth.setConfidenceThreshold(200)
+depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
 depth.setOutputRectified(True)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
@@ -121,7 +121,6 @@ with dai.Device(pipeline) as device:
 
         if inDepth is not None:
             frameDepth = cv2.flip(inDepth.getFrame(), 1)
-            frameDepth = cv2.normalize(frameDepth, None, 0, 255, cv2.NORM_MINMAX)
             frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_JET)
 
         if inDet is not None:
