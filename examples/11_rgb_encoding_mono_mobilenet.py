@@ -75,6 +75,7 @@ with dai.Device(pipeline) as device:
     frameManip = None
     detections = []
     offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -103,7 +104,6 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if frame is not None:
-            croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
