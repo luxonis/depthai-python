@@ -91,8 +91,8 @@ with dai.Device(pipeline) as device:
     frameManip = None
     frameDepth = None
     detections = []
-    offset_x = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
-    cropped_frame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
+    offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -129,8 +129,8 @@ with dai.Device(pipeline) as device:
 
         if frame is not None:
             for detection in detections:
-                bbox = frameNorm(cropped_frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                bbox[::2] += offset_x
+                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offsetX
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
@@ -138,8 +138,8 @@ with dai.Device(pipeline) as device:
 
         if frameDepth is not None:
             for detection in detections:
-                bbox = frameNorm(cropped_frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                bbox[::2] += offset_x
+                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offsetX
                 cv2.rectangle(frameDepth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frameDepth, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frameDepth, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)

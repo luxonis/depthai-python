@@ -26,8 +26,7 @@ right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 stereo = pipeline.createStereoDepth()
-stereo.setOutputRectified(True) # The rectified streams are horizontally mirrored by default
-stereo.setOutputDepth(True)
+stereo.setOutputRectified(True)  # The rectified streams are horizontally mirrored by default
 stereo.setConfidenceThreshold(255)
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout from rectification (black stripe on the edges)
 
@@ -80,21 +79,14 @@ with dai.Device(pipeline) as device:
     rightFrame = None
     depthFrame = None
     detections = []
+    offsetX = (right.getResolutionWidth() - right.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((right.getResolutionHeight(), right.getResolutionHeight()))
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
-
-    def displayFrame(name, frame):
-        for detection in detections:
-            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-        cv2.imshow(name, frame)
-
 
     while True:
         # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
@@ -109,10 +101,7 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if inDepth is not None:
-            # depthFrame = inDepth.getFrame()
-            # data is originally represented as a flat 1D array, it needs to be converted into HxW form
-            depthFrame = inDepth.getData().reshape((inDepth.getHeight(), inDepth.getWidth())).astype(np.uint8)
-            depthFrame = np.ascontiguousarray(depthFrame)
+            depthFrame = cv2.flip(inDepth.getFrame(), 1)
             # frame is transformed, the color map will be applied to highlight the depth info
             depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_JET)
 
@@ -142,10 +131,21 @@ with dai.Device(pipeline) as device:
             # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_DEEPGREEN)
 
         if rightFrame is not None:
-            displayFrame("rectified right", rightFrame)
+            for detection in detections:
+                bbox = frameNorm(rightFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                cv2.rectangle(rightFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(rightFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(rightFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("rectified right", rightFrame)
 
         if depthFrame is not None:
-            displayFrame("depth", depthFrame)
+            for detection in detections:
+                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offsetX
+                cv2.rectangle(depthFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(depthFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(depthFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("depth", depthFrame)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -52,9 +52,9 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
         
     # Output queues will be used to get the frames and nn data from the outputs defined above
-    qVideo = device.getOutputQueue(name="video", maxSize=1, blocking=False)
-    qPreview = device.getOutputQueue(name="preview", maxSize=1, blocking=False)
-    qDet = device.getOutputQueue(name="nn", maxSize=1, blocking=False)
+    qVideo = device.getOutputQueue(name="video", maxSize=4, blocking=False)
+    qPreview = device.getOutputQueue(name="preview", maxSize=4, blocking=False)
+    qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
     previewFrame = None
     videoFrame = None
@@ -66,8 +66,14 @@ with dai.Device(pipeline) as device:
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
-    offset_x = (camRgb.getResolutionWidth() - camRgb.getResolutionHeight()) // 2
-    cropped_frame = np.zeros((camRgb.getResolutionHeight(), camRgb.getResolutionHeight()))
+    def displayFrame(name, frame):
+        for detection in detections:
+            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
+
     cv2.namedWindow("video", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("video", 1280, 720)
     print("Resize video window with mouse drag!")
@@ -88,21 +94,10 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if videoFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(cropped_frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                bbox[::2] += offset_x
-                cv2.rectangle(videoFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(videoFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(videoFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("video", videoFrame)
+            displayFrame("video", videoFrame)
 
         if previewFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(previewFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(previewFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(previewFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(previewFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("preview", previewFrame)
+            displayFrame("preview", previewFrame)
 
         if cv2.waitKey(1) == ord('q'):
             break
