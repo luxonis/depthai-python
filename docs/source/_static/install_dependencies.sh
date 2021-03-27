@@ -103,8 +103,7 @@ elif [ -f /etc/os-release ]; then
     # shellcheck source=/etc/os-release
     source /etc/os-release
 
-    case "$ID" in
-    ubuntu|debian)
+    if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
             sudo apt-get install -y "${ubuntu_pkgs[@]}"
@@ -114,18 +113,15 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
         fi
-        ;;
-    fedora)
+    elif [[ "$ID" == fedora ]]; then
         sudo dnf update -y
         sudo dnf install -y "${fedora_pkgs[@]}"
         sudo dnf groupinstall -y "Development Tools" "Development Libraries"
         python3 -m pip install --upgrade pip
-        ;;
-    *)
+    else
         echo "ERROR: Distribution not supported"
         exit 99
-        ;;
-    esac
+    fi
 
     # Allow all users to read and write to Myriad X devices
     echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
