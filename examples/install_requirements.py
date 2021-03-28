@@ -30,7 +30,7 @@ git_branch = ""
 try:
     git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('UTF-8').strip()
     git_branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('UTF-8').strip()
-except (OSError, CalledProcessError) as e: 
+except (OSError, subprocess.CalledProcessError) as e: 
     git_context = False
 
 # Install depthai depending on context
@@ -38,6 +38,11 @@ if not git_context or git_branch == 'main':
     # Install latest pypi depthai release
     subprocess.check_call([*pip_install, '-U', '--force-reinstall', 'depthai'])
 elif git_context:
+    try:
+        subprocess.check_output(['git', 'submodule', 'update', '--init', '--recursive'])
+    except (OSError, subprocess.CalledProcessError) as e: 
+        print("git submodule update failed!")
+        raise
     # Get package version if in git context
     final_version = find_version.get_package_dev_version(git_commit)
     # Install latest built wheels from artifactory (0.0.0.0+[hash] or [version]+[hash])
@@ -47,7 +52,7 @@ elif git_context:
     for command in commands:
         try:
             success = subprocess.call(command) == 0
-        except (OSError, CalledProcessError) as e:
+        except (OSError, subprocess.CalledProcessError) as e:
             success = False    
         if success:
             break
