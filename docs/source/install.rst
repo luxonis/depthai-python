@@ -182,7 +182,7 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
 .. code-block:: bash
   
   cd examples
-  python3 -m pip install -r requirements.txt
+  python3 install_requirements.py
 
 Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
 
