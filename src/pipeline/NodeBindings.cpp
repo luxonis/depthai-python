@@ -295,11 +295,10 @@ void NodeBindings::bind(pybind11::module& m){
         .def("loadCalibrationFile",     &StereoDepth::loadCalibrationFile, py::arg("path"), DOC(dai, node, StereoDepth, loadCalibrationFile))
         .def("loadCalibrationData",     &StereoDepth::loadCalibrationData, py::arg("data"), DOC(dai, node, StereoDepth, loadCalibrationData))
         .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration, DOC(dai, node, StereoDepth, setEmptyCalibration))
-        .def("setBaselineOverrideCm",   &StereoDepth::setBaselineOverrideCm, py::arg("baseline"), DOC(dai, node, StereoDepth, setBaselineOverrideCm))
-        .def("setFovOverrideDegrees",   &StereoDepth::setFovOverrideDegrees, py::arg("fov"), DOC(dai, node, StereoDepth, setFovOverrideDegrees))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
         .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
-        .def("setDepthAlign",           &StereoDepth::setDepthAlign, py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
+        .def("setDepthAlign",           py::overload_cast<StereoDepthProperties::DepthAlign>(&StereoDepth::setDepthAlign), py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
+        .def("setDepthAlign",           py::overload_cast<CameraBoardSocket>(&StereoDepth::setDepthAlign), py::arg("camera"), DOC(dai, node, StereoDepth, setDepthAlign))
         .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold, py::arg("confThr"), DOC(dai, node, StereoDepth, setConfidenceThreshold))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
@@ -484,6 +483,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("median",                  &StereoDepthProperties::median)
         .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
+        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
         .def_readwrite("confidenceThreshold",     &StereoDepthProperties::confidenceThreshold)
         .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
         .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
@@ -492,8 +492,6 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
-        .def_readwrite("baselineOverrideCm",      &StereoDepthProperties::baselineOverrideCm)
-        .def_readwrite("fovOverrideDegrees",      &StereoDepthProperties::fovOverrideDegrees)
         ;
 
     py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
@@ -504,10 +502,8 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     py::enum_<StereoDepthProperties::DepthAlign>(stereoDepthProperties, "DepthAlign")
-        .value("AUTO",   StereoDepthProperties::DepthAlign::AUTO)
-        .value("RIGHT",  StereoDepthProperties::DepthAlign::RIGHT)
-        .value("LEFT",   StereoDepthProperties::DepthAlign::LEFT)
-        .value("RGB",    StereoDepthProperties::DepthAlign::RGB)
+        .value("RIGHT",  StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT)
+        .value("LEFT",   StereoDepthProperties::DepthAlign::RECTIFIED_LEFT)
         .value("CENTER", StereoDepthProperties::DepthAlign::CENTER)
         ;
 
