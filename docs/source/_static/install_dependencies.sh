@@ -113,7 +113,7 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
         fi
-    elif [[ "$ID" == fedora ]]; then
+    elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y
         sudo dnf install -y "${fedora_pkgs[@]}"
         sudo dnf groupinstall -y "Development Tools" "Development Libraries"
