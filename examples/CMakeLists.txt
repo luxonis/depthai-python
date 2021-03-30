@@ -138,4 +138,4 @@ add_python_example(26_3_spatial_tiny_yolo_v4 26_3_spatial_tiny_yolo.py "${tiny_y
 add_python_example(27_spatial_location_calculator 27_spatial_location_calculator.py)
 add_python_example(28_camera_video_example 28_camera_video_example.py)
 add_python_example(29_1_object_tracker 29_1_object_tracker.py "${mobilenet_blob}")
-add_python_example(29_2_object_tracker 29_2_object_tracker.py "${mobilenet_blob}")
+add_python_example(29_2_spatial_object_tracker 29_2_spatial_object_tracker.py "${mobilenet_blob}")
