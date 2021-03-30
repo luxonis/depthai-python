@@ -23,7 +23,7 @@ This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to wo
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/master/examples/27_spatial_location_calculator.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/27_spatial_location_calculator.py>`__
 
 .. literalinclude:: ../../../examples/27_spatial_location_calculator.py
    :language: python
