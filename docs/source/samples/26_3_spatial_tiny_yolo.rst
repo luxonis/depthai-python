@@ -33,7 +33,7 @@ YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) can be 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/master/examples/26_3_spatial_tiny_yolo.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/26_3_spatial_tiny_yolo.py>`__
 
 .. literalinclude:: ../../../examples/26_3_spatial_tiny_yolo.py
    :language: python
