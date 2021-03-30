@@ -16,7 +16,7 @@ args = parser.parse_args()
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-syncNN = True
+syncTracklets = True
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -43,7 +43,7 @@ detectionNetwork.setConfidenceThreshold(0.5)
 
 # Link plugins CAM . NN . XLINK
 colorCam.preview.link(detectionNetwork.input)
-if(syncNN):
+if syncTracklets:
     objectTracker.passthroughFrame.link(xlinkOut.input)
 else:
     colorCam.preview.link(xlinkOut.input)
@@ -68,7 +68,7 @@ with dai.Device(pipeline) as device:
 
     startTime = time.monotonic()
     counter = 0
-    detections = []
+    fps = 0
     frame = None
 
     while(True):
@@ -102,7 +102,8 @@ with dai.Device(pipeline) as device:
             cv2.putText(frame, f"ID: {[t.id]}", (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, statusMap[t.status], (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-        
+
+        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", frame)
 

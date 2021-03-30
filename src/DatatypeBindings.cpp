@@ -800,8 +800,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Tracklets (after ConfigData)
     py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>>(m, "Tracklets", DOC(dai, Tracklets))
         .def(py::init<>())
-        // setters
-        .def("getTracklets", &Tracklets::getTracklets, DOC(dai, Tracklets, getTracklets))
         .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
         ;
 

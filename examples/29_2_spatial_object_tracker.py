@@ -16,7 +16,7 @@ args = parser.parse_args()
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-syncNN = True
+syncTracklets = True
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -62,7 +62,7 @@ monoRight.out.link(stereo.right)
 
 # Link plugins CAM . NN . XLINK
 colorCam.preview.link(spatialDetectionNetwork.input)
-if(syncNN):
+if syncTracklets:
     objectTracker.passthroughFrame.link(xoutRgb.input)
 else:
     colorCam.preview.link(xoutRgb.input)
@@ -89,7 +89,7 @@ with dai.Device(pipeline) as device:
 
     startTime = time.monotonic()
     counter = 0
-    detections = []
+    fps = 0
     frame = None
 
     while(True):
@@ -126,6 +126,8 @@ with dai.Device(pipeline) as device:
             cv2.putText(frame, f"X: {int(t.spatialCoordinates.x)} mm", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, f"Y: {int(t.spatialCoordinates.y)} mm", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, f"Z: {int(t.spatialCoordinates.z)} mm", (x1 + 10, y1 + 95), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+        
+        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", frame)
 
