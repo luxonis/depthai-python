@@ -469,8 +469,10 @@ void NodeBindings::bind(pybind11::module& m){
     ADD_NODE(MicroPython)
         .def_readonly("inputs", &MicroPython::inputs)
         .def_readonly("outputs", &MicroPython::outputs)
+        .def("setName", &MicroPython::setName)
         .def("setScriptPath", &MicroPython::setScriptPath)
         .def("getScriptPath", &MicroPython::getScriptPath)
+        .def("addAsset", &MicroPython::addAsset)
         .def("setProcessor", &MicroPython::setProcessor)
         .def("getProcessor", &MicroPython::getProcessor)
         ;
