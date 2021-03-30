@@ -22,7 +22,7 @@ syncNN = True
 flipRectified = True
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
