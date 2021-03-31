@@ -69,7 +69,10 @@ else:
 
 
 objectTracker.setDetectionLabelsToTrack([15])  # track only person
-objectTracker.setTrackerType(dai.TrackType.ZERO_TERM_COLOR_HISTOGRAM)
+objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
+# take the smallest ID when new object is tracked
+objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
+
 objectTracker.out.link(trackerOut.input)
 
 spatialDetectionNetwork.passthrough.link(objectTracker.inputFrame)

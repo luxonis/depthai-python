@@ -27,7 +27,7 @@ void NodeBindings::bind(pybind11::module& m){
 
     // Base 'Node' class binding
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
-    pyNode 
+    pyNode
         .def_readonly("id", &Node::id, DOC(dai, Node, id))
         .def("getName", &Node::getName, DOC(dai, Node, getName))
         .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
@@ -59,7 +59,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
         .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
     ;
-    // MSVC errors out with: 
+    // MSVC errors out with:
     // Error C2326 'void NodeBindings::bind(pybind11::module &)': function cannot access 'dai::Node::Connection::outputId'
     // ...
     // py::class_<Node::Connection>(pyNode, "Connection")
@@ -76,10 +76,10 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &XLinkIn::out, DOC(dai, node, XLinkIn, out))
         .def("setStreamName", &XLinkIn::setStreamName, py::arg("streamName"), DOC(dai, node, XLinkIn, setStreamName))
         .def("setMaxDataSize", &XLinkIn::setMaxDataSize, py::arg("maxDataSize"), DOC(dai, node, XLinkIn, setMaxDataSize))
-        .def("setNumFrames",  &XLinkIn::setNumFrames, py::arg("numFrames"), DOC(dai, node, XLinkIn, setNumFrames)) 
+        .def("setNumFrames",  &XLinkIn::setNumFrames, py::arg("numFrames"), DOC(dai, node, XLinkIn, setNumFrames))
         .def("getStreamName", &XLinkIn::getStreamName, DOC(dai, node, XLinkIn, getStreamName))
         .def("getMaxDataSize", &XLinkIn::getMaxDataSize, DOC(dai, node, XLinkIn, getMaxDataSize))
-        .def("getNumFrames",  &XLinkIn::getNumFrames, DOC(dai, node, XLinkIn, getNumFrames))     
+        .def("getNumFrames",  &XLinkIn::getNumFrames, DOC(dai, node, XLinkIn, getNumFrames))
         ;
 
     // XLinkOut node
@@ -114,7 +114,7 @@ void NodeBindings::bind(pybind11::module& m){
             PyErr_WarnEx(PyExc_DeprecationWarning, "getCamId() is deprecated, use getBoardSocket() instead.", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            return c.getCamId();            
+            return c.getCamId();
             HEDLEY_DIAGNOSTIC_POP
         })
         .def("setBoardSocket", &ColorCamera::setBoardSocket, py::arg("boardSocket"), DOC(dai, node, ColorCamera, setBoardSocket))
@@ -156,7 +156,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, ColorCamera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio, DOC(dai, node, ColorCamera, getPreviewKeepAspectRatio))
         ;
-    
+
 
 
     // NeuralNetwork node
@@ -179,7 +179,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("out", &ImageManip::out, DOC(dai, node, ImageManip, out))
         .def_readonly("initialConfig", &ImageManip::initialConfig, DOC(dai, node, ImageManip, initialConfig))
         // setters
-        
+
         .def("setCropRect", [](ImageManip& im, float xmin, float ymin, float xmax, float ymax) {
             // Issue a deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCropRect() is deprecated, use initialConfig.setCropRect() instead.", 1);
@@ -232,7 +232,7 @@ void NodeBindings::bind(pybind11::module& m){
             im.setHorizontalFlip(flip);
             HEDLEY_DIAGNOSTIC_POP
         })
-        
+
         .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio, DOC(dai, node, ImageManip, setKeepAspectRatio))
 
         .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput, DOC(dai, node, ImageManip, setWaitForConfigInput))
@@ -273,7 +273,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getResolutionWidth", &MonoCamera::getResolutionWidth, DOC(dai, node, MonoCamera, getResolutionWidth))
         .def("getResolutionHeight", &MonoCamera::getResolutionHeight, DOC(dai, node, MonoCamera, getResolutionHeight))
         ;
-        
+
 
 
     // StereoDepth node
@@ -304,7 +304,7 @@ void NodeBindings::bind(pybind11::module& m){
     // VideoEncoder node
     py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder", DOC(dai, node, VideoEncoder))
         .def_readonly("input", &VideoEncoder::input, DOC(dai, node, VideoEncoder, input), DOC(dai, node, VideoEncoder, input))
-        .def_readonly("bitstream", &VideoEncoder::bitstream, DOC(dai, node, VideoEncoder, bitstream), DOC(dai, node, VideoEncoder, bitstream))        
+        .def_readonly("bitstream", &VideoEncoder::bitstream, DOC(dai, node, VideoEncoder, bitstream), DOC(dai, node, VideoEncoder, bitstream))
         .def("setDefaultProfilePreset", (void(VideoEncoder::*)(int, int, float, VideoEncoderProperties::Profile))&VideoEncoder::setDefaultProfilePreset, py::arg("width"), py::arg("height"), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset))
         .def("setDefaultProfilePreset", (void(VideoEncoder::*)(std::tuple<int,int>, float, VideoEncoderProperties::Profile))&VideoEncoder::setDefaultProfilePreset, py::arg("size"), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset, 2))
         .def("setNumFramesPool", &VideoEncoder::setNumFramesPool, py::arg("frames"), DOC(dai, node, VideoEncoder, setNumFramesPool))
@@ -386,7 +386,7 @@ void NodeBindings::bind(pybind11::module& m){
 
     // SpatialLocationCalculator node
     py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
-        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))       
+        .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))
         .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
         .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
         .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
@@ -412,6 +412,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setMaxObjectsToTrack", &ObjectTracker::setMaxObjectsToTrack, py::arg("maxObjectsToTrack"), DOC(dai, node, ObjectTracker, setMaxObjectsToTrack))
         .def("setDetectionLabelsToTrack", &ObjectTracker::setDetectionLabelsToTrack, py::arg("labels"), DOC(dai, node, ObjectTracker, setDetectionLabelsToTrack))
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
+        .def("setTrackerIdAssigmentPolicy", &ObjectTracker::setTrackerIdAssigmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssigmentPolicy))
         ;
 
     ////////////////////////////////////
@@ -448,7 +449,7 @@ void NodeBindings::bind(pybind11::module& m){
     // ALIAS
     m.attr("ColorCamera").attr("Properties") = colorCameraProperties;
 
-        
+
 
     // MonoCamera props
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
@@ -466,7 +467,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     // ALIAS
     m.attr("MonoCamera").attr("Properties") = monoCameraProperties;
-   
+
 
     // StereoDepth props
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
@@ -493,7 +494,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     // ALIAS
     m.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
-   
+
 
 
     // VideoEncoder props
@@ -522,7 +523,7 @@ void NodeBindings::bind(pybind11::module& m){
     py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode))
         .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
         .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
-        ;     
+        ;
     // ALIAS
     m.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
 
@@ -575,17 +576,24 @@ void NodeBindings::bind(pybind11::module& m){
     m.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
 
 
-    py::enum_<TrackType>(m, "TrackType")
-        .value("ZERO_TERM_IMAGELESS", TrackType::ZERO_TERM_IMAGELESS)
-        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackType::ZERO_TERM_COLOR_HISTOGRAM)
+    py::enum_<TrackerType>(m, "TrackerType")
+        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS)
+        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM)
     ;
+
+    py::enum_<TrackerIdAssigmentPolicy>(m, "TrackerIdAssigmentPolicy")
+        .value("UNIQUE_ID", TrackerIdAssigmentPolicy::UNIQUE_ID)
+        .value("SMALLEST_ID", TrackerIdAssigmentPolicy::SMALLEST_ID)
+    ;
+
 
     py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
     objectTrackerProperties
         .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
         .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
         .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
-        .def_readwrite("trackType", &ObjectTrackerProperties::trackType)
+        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
+        .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
         ;
     m.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
