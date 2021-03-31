@@ -13,7 +13,7 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
-#include "depthai/pipeline/node/MicroPython.hpp"
+#include "depthai/pipeline/node/LxScript.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -465,16 +465,16 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setRate", &SystemLogger::setRate)
         ;
 
-    // MicroPython node
-    ADD_NODE(MicroPython)
-        .def_readonly("inputs", &MicroPython::inputs)
-        .def_readonly("outputs", &MicroPython::outputs)
-        .def("setName", &MicroPython::setName)
-        .def("setScriptPath", &MicroPython::setScriptPath)
-        .def("getScriptPath", &MicroPython::getScriptPath)
-        .def("addAsset", &MicroPython::addAsset)
-        .def("setProcessor", &MicroPython::setProcessor)
-        .def("getProcessor", &MicroPython::getProcessor)
+    // LxScript node
+    ADD_NODE(LxScript)
+        .def_readonly("inputs", &LxScript::inputs)
+        .def_readonly("outputs", &LxScript::outputs)
+        .def("setName", &LxScript::setName)
+        .def("setScriptPath", &LxScript::setScriptPath)
+        .def("getScriptPath", &LxScript::getScriptPath)
+        .def("addAsset", &LxScript::addAsset)
+        .def("setProcessor", &LxScript::setProcessor)
+        .def("getProcessor", &LxScript::getProcessor)
         ;
 
 

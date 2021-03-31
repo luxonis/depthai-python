@@ -16,7 +16,7 @@
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
-#include "depthai/pipeline/node/MicroPython.hpp"
+#include "depthai/pipeline/node/LxScript.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -85,7 +85,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
         .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
         .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
-        .def("createMicroPython", &Pipeline::create<node::MicroPython>)
+        .def("createLxScript", &Pipeline::create<node::LxScript>)
         
         .def("create", [](dai::Pipeline& p, py::object class_) {
             auto node = createNode(p, class_);
