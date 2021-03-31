@@ -19,7 +19,7 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 syncNN = True
 
 # Get argument first
-nnBlobPath = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnBlobPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
 
