@@ -526,7 +526,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                     break;
 
                 case ImgFrame::Type::YUV420p:
-                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV420p2BGR"));
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_IYUV"));
                     break;
 
                 case ImgFrame::Type::NV12:
