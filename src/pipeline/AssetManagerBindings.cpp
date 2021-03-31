@@ -30,7 +30,10 @@ void AssetManagerBindings::bind(pybind11::module& m){
         .def("add", static_cast<void (AssetManager::*)(Asset)>(&AssetManager::add), py::arg("asset"))
         .def("add", static_cast<void (AssetManager::*)(const std::string&, Asset)>(&AssetManager::add), py::arg("key"), py::arg("asset"))
         .def("addExisting", &AssetManager::addExisting)
-        .def("set", &AssetManager::set)        
+        .def("set", &AssetManager::set)
+        .def("load", [](AssetManager& am, const std::string& key, const std::string& path){
+            am.load(key, path);
+            })
         .def("get", static_cast<std::shared_ptr<const Asset> (AssetManager::*)(const std::string&) const>(&AssetManager::get))
         .def("get", static_cast<std::shared_ptr<Asset> (AssetManager::*)(const std::string&)>(&AssetManager::get))
         .def("getAll", static_cast<std::vector<std::shared_ptr<const Asset>> (AssetManager::*)() const>(&AssetManager::getAll))
