@@ -12,7 +12,7 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/develop/examples/28_camera_video_example.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/28_camera_video_example.py>`__
 
 .. literalinclude:: ../../../examples/28_camera_video_example.py
    :language: python
