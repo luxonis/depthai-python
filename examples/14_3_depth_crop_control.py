@@ -83,7 +83,7 @@ with dai.Device(pipeline) as device:
             if topLeft.y - stepSize >= 0:
                 topLeft.y -= stepSize
                 bottomRight.y -= stepSize
-                sendCamConfig = True        
+                sendCamConfig = True
         elif key == ord('a'):
             if topLeft.x - stepSize >= 0:
                 topLeft.x -= stepSize
@@ -93,11 +93,11 @@ with dai.Device(pipeline) as device:
             if bottomRight.y + stepSize <= 1:
                 topLeft.y += stepSize
                 bottomRight.y += stepSize
-                sendCamConfig = True  
+                sendCamConfig = True
         elif key == ord('d'):
             if bottomRight.x + stepSize <= 1:
                 topLeft.x += stepSize
-                bottomRight.x += stepSize            
+                bottomRight.x += stepSize
                 sendCamConfig = True
 
 
@@ -105,4 +105,4 @@ with dai.Device(pipeline) as device:
             cfg = dai.ImageManipConfig()
             cfg.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
             controlQueue.send(cfg)
-            sendCamConfig = False   
+            sendCamConfig = False
