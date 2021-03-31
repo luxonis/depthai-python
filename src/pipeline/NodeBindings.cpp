@@ -507,9 +507,9 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     py::enum_<StereoDepthProperties::DepthAlign>(stereoDepthProperties, "DepthAlign")
-        .value("RIGHT",  StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT)
-        .value("LEFT",   StereoDepthProperties::DepthAlign::RECTIFIED_LEFT)
-        .value("CENTER", StereoDepthProperties::DepthAlign::CENTER)
+        .value("RECTIFIED_RIGHT", StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT)
+        .value("RECTIFIED_LEFT",  StereoDepthProperties::DepthAlign::RECTIFIED_LEFT)
+        .value("CENTER",          StereoDepthProperties::DepthAlign::CENTER)
         ;
 
     // ALIAS
