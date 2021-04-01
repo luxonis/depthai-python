@@ -14,7 +14,7 @@ For additional information, please follow :ref:`Python API installation guide <I
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/develop/examples/25_system_information.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/25_system_information.py>`__
 
 .. literalinclude:: ../../../examples/25_system_information.py
    :language: python

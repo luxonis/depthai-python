@@ -24,7 +24,7 @@ This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to wo
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/26_2_spatial_mobilenet_mono.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/26_2_spatial_mobilenet_mono.py>`__
 
 .. literalinclude:: ../../../examples/26_2_spatial_mobilenet_mono.py
    :language: python
