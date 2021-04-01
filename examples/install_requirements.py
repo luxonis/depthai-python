@@ -6,7 +6,7 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python']
+DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
@@ -56,3 +56,6 @@ elif git_context:
     if not success:
         print("Couldn't install dependencies as wheels and trying to compile from sources failed")
         print("Check https://github.com/luxonis/depthai-python#dependencies on retrieving dependencies for compiling from sources")
+
+# current dir was changed to root of depthai-python
+subprocess.check_call([sys.executable, "examples/downloader/downloader.py", "--all", "--cache_dir", "examples/downloader/", "-o", "examples/models"])
