@@ -8,12 +8,9 @@ TWo output is a displayed mono cropped frame, that can be manipulated using the 
 #. `d` will move the crop right
 #. `w` will move the crop up
 #. `s` will move the crop down
-#. `t` will trigger autofocus
-#. `f` will trigger autofocus continuously
 #. `e` will trigger autoexposure
 #. `i` and `o` will decrease/increase the exposure time
 #. `k` and `l` will decrease/increase the sensitivity iso
-#. `,` and `.` will decrease/increase the focus range
 
 
 Demo
