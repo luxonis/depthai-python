@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import sys, os, subprocess
+examples_dir = os.path.dirname(os.path.abspath(__file__))
+
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(parent_dir)
 sys.path.insert(1, parent_dir)
@@ -57,5 +59,4 @@ elif git_context:
         print("Couldn't install dependencies as wheels and trying to compile from sources failed")
         print("Check https://github.com/luxonis/depthai-python#dependencies on retrieving dependencies for compiling from sources")
 
-# current dir was changed to root of depthai-python
-subprocess.check_call([sys.executable, "examples/downloader/downloader.py", "--all", "--cache_dir", "examples/downloader/", "-o", "examples/models"])
+subprocess.check_call([sys.executable, f"{examples_dir}/downloader/downloader.py", "--all", "--cache_dir", f"{examples_dir}/downloader/", "--num_attempts", "5", "-o", f"{examples_dir}/models"])
