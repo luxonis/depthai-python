@@ -51,7 +51,7 @@ macro(add_python_example example_name python_script_path)
         # Sets a regex catching any logged warnings, errors or critical (coming either from device or host)
         set_tests_properties (${example_name} PROPERTIES FAIL_REGULAR_EXPRESSION "\\[warning\\];\\[error\\];\\[critical\\]")
 
-    endif()tespace
+    endif()
 
 endmacro()
 
