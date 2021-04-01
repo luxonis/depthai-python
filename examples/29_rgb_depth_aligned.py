@@ -48,22 +48,29 @@ with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    qColor = device.getOutputQueue(name="rgb",   maxSize=4, blocking=False)
-    qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+    device.getOutputQueue(name="rgb",   maxSize=4, blocking=False)
+    device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     frameRgb = None
     frameDepth = None
 
     while True:
-        queueName = device.getQueueEvent(("rgb", "depth"))
+        latestPacket = {}
+        latestPacket["rgb"] = None
+        latestPacket["depth"] = None
 
-        packet = device.getOutputQueue(queueName).get()
+        queueEvents = device.getQueueEvents(("rgb", "depth"))
+        for queueName in queueEvents:
+            packets = device.getOutputQueue(queueName).getAll()
+            if len(packets) > 0:
+                latestPacket[queueName] = packets[-1]
 
-        if queueName == "rgb":
-            frameRgb = packet.getCvFrame()
+        if latestPacket["rgb"] is not None:
+            frameRgb = latestPacket["rgb"].getCvFrame()
             cv2.imshow("rgb", frameRgb)
-        elif queueName == "depth":
-            frameDepth = packet.getFrame()
+
+        if latestPacket["depth"] is not None:
+            frameDepth = latestPacket["depth"].getFrame()
             # Optional, extend range 0..95 -> 0..255, for a better visualisation
             if 1: frameDepth = (frameDepth * 255. / 95).astype(np.uint8)
             # Optional, apply false colorization
@@ -83,4 +90,4 @@ with dai.Device(pipeline) as device:
             frameDepth = None
 
         if cv2.waitKey(1) == ord('q'):
-            break
+            exit()
