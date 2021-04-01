@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/depthai-core/cmake")
 # Constants
 set(DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/include)
 set(DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH ${DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR}/docstring.hpp)
-set(DOCSTRINGS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/include/depthai_python_docstring.hpp)
+set(DEFAULT_DOCSTRINGS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated/depthai_python_docstring.hpp)
 
 # First specify options
 option(DEPTHAI_PYTHON_USE_FIND_PACKAGE "Use find_package for depthai-core" OFF)
@@ -46,11 +46,6 @@ option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCSTRINGS "Generate docstrings from header files if module 'pybind11_mkdoc' available" ON)
-set(DEPTHAI_PYTHON_DOCSTRINGS_INPUT ${DOCSTRINGS_OUTPUT} CACHE FILEPATH "Path to docstring for bindings") 
-set(DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT ${DOCSTRINGS_OUTPUT} CACHE FILEPATH "Path where docstring file will be generated") 
-if(DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
-    option(DEPTHAI_PYTHON_FORCE_DOCSTRINGS "Force that docstrings are generated, module 'pybind11_mkdoc' required" OFF)
-endif()
 
 # Add external dependencies
 add_subdirectory(external)
@@ -89,6 +84,35 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
+
+# Docstring options
+if(DEPTHAI_PYTHON_DOCSTRINGS_INPUT AND DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT)
+    message(FATAL_ERROR "DEPTHAI_PYTHON_DOCSTRINGS_INPUT and DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT are mutually exclusive")
+endif()
+
+if(DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT)
+    # If output is specified set both input and output to same the path
+    set(docstring_input_path ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT}) 
+    set(docstring_output_path ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT}) 
+else()
+    # If input docstrings explicitly specified, use those and disable building
+    if(DEPTHAI_PYTHON_DOCSTRINGS_INPUT)
+        set(docstring_input_path ${DEPTHAI_PYTHON_DOCSTRINGS_INPUT})
+        message(STATUS "Disabled building of docstrings - using docstrings specified by DEPTHAI_PYTHON_DOCSTRINGS_INPUT (${DEPTHAI_PYTHON_DOCSTRINGS_INPUT})")
+        set(DEPTHAI_PYTHON_BUILD_DOCSTRINGS OFF CACHE BOOL "Generate docstrings from header files if module 'pybind11_mkdoc' available" FORCE)
+    else()
+        # Otherwise set default location as input
+        set(docstring_input_path ${DEFAULT_DOCSTRINGS_OUTPUT}) 
+    endif()
+
+    # Set default output location
+    set(docstring_output_path ${DEFAULT_DOCSTRINGS_OUTPUT}) 
+endif()
+
+if(DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
+    option(DEPTHAI_PYTHON_FORCE_DOCSTRINGS "Force that docstrings are generated, module 'pybind11_mkdoc' required" OFF)
+endif()
+
 # Configure include placeholder with INPUT path
 configure_file(cmake/docstring.hpp.in ${DOCSTRINGS_INCLUDE_PLACEHOLDER_PATH})
 # Add target to generate docstrings
@@ -96,15 +120,15 @@ if (DEPTHAI_PYTHON_BUILD_DOCSTRINGS)
     include(pybind11-mkdoc)
     
     # Check if pybind11_mkdoc available and create target
-    target_pybind11_mkdoc_setup(${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} depthai::core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
+    target_pybind11_mkdoc_setup(${docstring_output_path} depthai::core ${DEPTHAI_PYTHON_FORCE_DOCSTRINGS})
     
     if(NOT TARGET pybind11_mkdoc)
         # Generate default docstrings to OUTPUT path
-        configure_file(cmake/default_docstring.hpp.in ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} COPYONLY)
+        configure_file(cmake/default_docstring.hpp.in ${docstring_output_path} COPYONLY)
     endif()
 else()
     # Generate default docstrings to OUTPUT path
-    configure_file(cmake/default_docstring.hpp.in ${DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT} COPYONLY)
+    configure_file(cmake/default_docstring.hpp.in ${docstring_output_path} COPYONLY)
 endif()
 
 # Add include directory
