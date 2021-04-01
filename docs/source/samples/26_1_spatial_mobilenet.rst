@@ -2,7 +2,7 @@
 ===========================================
 
 This example shows how to run MobileNetv2SSD on the RGB input frame, and how to display both the RGB
-preview, detections, depth map and spatial information (X,Y,Z). It's similar to example 
+preview, detections, depth map and spatial information (X,Y,Z). It's similar to example
 '21_mobilenet_decoding_on_device' except it has spatial data.
 X,Y,Z coordinates are relative to the center of depth map.
 
