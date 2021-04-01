@@ -608,9 +608,9 @@ void DatatypeBindings::bind(pybind11::module& m){
             std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
             obj.setLayer(name, std::move(vec));
         }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
-        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, const std::vector<int>&)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<float>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<double>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
         .def("getLayer", &NNData::getLayer, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
         .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
         .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
