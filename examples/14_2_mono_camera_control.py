@@ -6,10 +6,8 @@ Uses 'WASD' controls to move the crop window, 'T' to trigger autofocus, 'IOKL,.'
   Control:      key[dec/inc]  min..max
   exposure time:     I   O      1..33000 [us]
   sensitivity iso:   K   L    100..1600
-  focus:             ,   .      0..255 [far..near]
 To go back to auto controls:
   'E' - autoexposure
-  'F' - autofocus (continuous)
 """
 
 
@@ -21,7 +19,6 @@ stepSize = 0.02
 # Manual exposure/focus set step
 expStep = 500  # us
 isoStep = 50
-lensStep = 3
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -89,10 +86,6 @@ with dai.Device(pipeline) as device:
     sendCamConfig = False
 
     # Defaults and limits for manual focus/exposure controls
-    lensPos = 100
-    lensMin = 0
-    lensMax = 255
-
     expTime = 20000
     expMin = 1
     expMax = 33000
@@ -117,29 +110,10 @@ with dai.Device(pipeline) as device:
             ctrl = dai.CameraControl()
             ctrl.setCaptureStill(True)
             controlQueue.send(ctrl)
-        elif key == ord('t'):
-            print("Autofocus trigger (and disable continuous)")
-            ctrl = dai.CameraControl()
-            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.AUTO)
-            ctrl.setAutoFocusTrigger()
-            controlQueue.send(ctrl)
-        elif key == ord('f'):
-            print("Autofocus enable, continuous")
-            ctrl = dai.CameraControl()
-            ctrl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.CONTINUOUS_VIDEO)
-            controlQueue.send(ctrl)
         elif key == ord('e'):
             print("Autoexposure enable")
             ctrl = dai.CameraControl()
             ctrl.setAutoExposureEnable()
-            controlQueue.send(ctrl)
-        elif key in [ord(','), ord('.')]:
-            if key == ord(','): lensPos -= lensStep
-            if key == ord('.'): lensPos += lensStep
-            lensPos = clamp(lensPos, lensMin, lensMax)
-            print("Setting manual focus, lens position:", lensPos)
-            ctrl = dai.CameraControl()
-            ctrl.setManualFocus(lensPos)
             controlQueue.send(ctrl)
         elif key in [ord('i'), ord('o'), ord('k'), ord('l')]:
             if key == ord('i'): expTime -= expStep
