@@ -48,7 +48,7 @@ jobs:
           brew install libusb
           python -m pip install git+git://github.com/luxonis/pybind11_mkdoc.git@master
       - name: Configure project
-        run: cmake -S . -B build -DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=ON -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
+        run: cmake -S . -B build -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
         run: cmake --build build --parallel --target pybind11_mkdoc
       - name: Upload docstring artifacts

@@ -104,7 +104,6 @@ class CMakeBuild(build_ext):
         # Pass a docstring option
         if 'DEPTHAI_PYTHON_DOCSTRINGS_INPUT' in os.environ:
             cmake_args += ['-DDEPTHAI_PYTHON_DOCSTRINGS_INPUT='+os.environ['DEPTHAI_PYTHON_DOCSTRINGS_INPUT']]
-            cmake_args += ['-DDEPTHAI_PYTHON_BUILD_DOCSTRINGS=OFF']
 
         # Pass installation directory
         if 'DEPTHAI_INSTALLATION_DIR' in os.environ:
