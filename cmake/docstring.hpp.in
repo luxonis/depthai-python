@@ -1,1 +1,1 @@
-#include "@DEPTHAI_PYTHON_DOCSTRINGS_INPUT@"
+#include "@docstring_input_path@"
