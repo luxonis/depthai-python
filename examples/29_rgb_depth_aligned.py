@@ -61,7 +61,7 @@ with dai.Device(pipeline) as device:
 
         queueEvents = device.getQueueEvents(("rgb", "depth"))
         for queueName in queueEvents:
-            packets = device.getOutputQueue(queueName).getAll()
+            packets = device.getOutputQueue(queueName).tryGetAll()
             if len(packets) > 0:
                 latestPacket[queueName] = packets[-1]
 
