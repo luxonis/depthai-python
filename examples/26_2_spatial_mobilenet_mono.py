@@ -85,7 +85,7 @@ monoRight.out.link(stereo.right)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -142,7 +142,7 @@ with dai.Device(pipeline) as device:
         if flipRectified:
             rectifiedRight = cv2.flip(rectifiedRight, 1)
 
-        # if the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
+        # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
         width = rectifiedRight.shape[1]
         for detection in detections:
@@ -150,7 +150,7 @@ with dai.Device(pipeline) as device:
                 swap = detection.xmin
                 detection.xmin = 1 - detection.xmax
                 detection.xmax = 1 - swap
-            # denormalize bounding box
+            # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

@@ -10,9 +10,6 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
-
 Source code
 ###########
 

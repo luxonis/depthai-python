@@ -100,7 +100,7 @@ class AutoExposureRegion:
         return roi
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -114,7 +114,7 @@ with dai.Device(pipeline) as device:
 
     nnRegion = True
     region = AutoExposureRegion()
-    
+
     # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])

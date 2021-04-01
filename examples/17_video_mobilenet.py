@@ -39,14 +39,14 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    # Output queue will be used to get nn data from the video frames.
     # Input queue will be used to send video frames to the device.
     qIn = device.getInputQueue(name="inFrame")
+    # Output queue will be used to get nn data from the video frames.
     qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
     frame = None

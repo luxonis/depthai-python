@@ -9,8 +9,6 @@ Setup
 .. include::  /includes/install_from_pypi.rst
 
 
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
-
 Source code
 ###########
 

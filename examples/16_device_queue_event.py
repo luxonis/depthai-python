@@ -48,7 +48,7 @@ with dai.Device(pipeline) as device:
         # because queues can be set to non-blocking (overwriting) behavior
         message = device.getOutputQueue(queueName).get()
 
-        # display arrived frames
+        # Display arrived frames
         if type(message) == dai.ImgFrame:
             cv2.imshow(queueName, message.getCvFrame())
 
