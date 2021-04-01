@@ -17,10 +17,9 @@ if len(sys.argv) > 2:
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-
-# Create neural network input
-xinDet = pipeline.createXLinkIn()
-xinDet.setStreamName("inDet")
+# Create xLink input to which host will send frames from the video file
+xinFrame = pipeline.createXLinkIn()
+xinFrame.setStreamName("inFrame")
 
 # Define a neural network that will make predictions based on the source frames
 nn = pipeline.createMobileNetDetectionNetwork()
@@ -28,7 +27,7 @@ nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
-xinDet.out.link(nn.input)
+xinFrame.out.link(nn.input)
 
 # Create output
 nnOut = pipeline.createXLinkOut()
@@ -44,9 +43,10 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
-        
-    # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    qIn = device.getInputQueue(name="inDet")
+
+    # Output queue will be used to get nn data from the video frames.
+    # Input queue will be used to send video frames to the device.
+    qIn = device.getInputQueue(name="inFrame")
     qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
     frame = None

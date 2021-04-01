@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-# This example demonstrates use of queue events to block a thread until a message
-# arrives to any (of the specified) queue
+"""
+ This example demonstrates use of queue events to block a thread until a message
+ arrives to any (of the specified) queue
+"""
 
 import cv2
 import depthai as dai
@@ -29,11 +31,11 @@ camRgb.preview.link(xoutRgb.input)
 camMono.out.link(xoutMono.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
-        
+
     # Clear queue events
     device.getQueueEvents()
 

@@ -3,13 +3,13 @@
 
 This example shows how to configure the depthai video encoder in h.265 format to encode the RGB camera
 input at Full-HD resolution at 30FPS, and transfers the encoded video over XLINK to the host,
-saving it to disk as a video file. In the same time, a MobileNetv2SSD network is ran on the
+saving it to disk as a video file. At the same time, a MobileNetv2SSD network is ran on the
 frames from right grayscale camera
 
 Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
 playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
 
-Be careful, this example saves encoded video to your host storage. So if you leave them running,
+Be careful, this example saves encoded video to your host storage. So if you leave it running,
 you could fill up your storage on your host.
 
 Demo
@@ -26,7 +26,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
+This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 
 Source code

@@ -47,7 +47,7 @@ xout = pipeline.createXLinkOut()
 xout.setStreamName("disparity")
 depth.disparity.link(xout.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -59,32 +59,9 @@ with dai.Device(pipeline) as device:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
         frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
+
+        # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
-
-        # Uncomment one of these and comment the one given above
-        # to see visualisation in different color frames
-
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_BONE)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_AUTUMN)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_WINTER)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_RAINBOW)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_OCEAN)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_SUMMER)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_SPRING)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_COOL)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_HSV)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_PINK)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_PARULA)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_MAGMA)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_INFERNO)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_PLASMA)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_VIRIDIS)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_CIVIDIS)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_TWILIGHT)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_TWILIGHT_SHIFTED)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_TURBO)
-        #frame = cv2.applyColorMap(frame, cv2.COLORMAP_DEEPGREEN)
 
         # frame is ready to be shown
         cv2.imshow("disparity", frame)
