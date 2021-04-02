@@ -8,6 +8,8 @@ import depthai as dai
 # Otherwise (False), the aligned depth is automatically upscaled to 1080p
 downscaleColor = True
 
+subpixel = False
+
 pipeline = dai.Pipeline()
 
 cam = pipeline.createColorCamera()
@@ -34,6 +36,7 @@ stereo = pipeline.createStereoDepth()
 stereo.setConfidenceThreshold(200)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
+stereo.setSubpixel(subpixel)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
@@ -71,8 +74,10 @@ with dai.Device(pipeline) as device:
 
         if latestPacket["depth"] is not None:
             frameDepth = latestPacket["depth"].getFrame()
+            maxDisparity = 95
+            if subpixel: maxDisparity *= 32
             # Optional, extend range 0..95 -> 0..255, for a better visualisation
-            if 1: frameDepth = (frameDepth * 255. / 95).astype(np.uint8)
+            if 1: frameDepth = (frameDepth * 255. / maxDisparity).astype(np.uint8)
             # Optional, apply false colorization
             if 1: frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_HOT)
             frameDepth = np.ascontiguousarray(frameDepth)
