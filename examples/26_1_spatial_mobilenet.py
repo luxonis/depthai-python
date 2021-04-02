@@ -54,7 +54,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-# setting node configs
+# Setting node configs
 stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
 
@@ -82,7 +82,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -137,11 +137,11 @@ with dai.Device(pipeline) as device:
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
 
-        # if the frame is available, draw bounding boxes on it and show the frame
+        # If the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]
         width  = frame.shape[1]
         for detection in detections:
-            # denormalize bounding box
+            # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

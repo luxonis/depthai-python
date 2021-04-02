@@ -1,5 +1,5 @@
 25 - System information
-=========================
+=======================
 
 This example shows how to get system information (memory usage, cpu usage and temperature) from the board.
 
@@ -8,8 +8,6 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
 
 Source code
 ###########
