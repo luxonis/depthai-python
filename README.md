@@ -73,6 +73,7 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 To build a shared library from source perform the following:
 ```
+git submodule update --init --recursive
 mkdir build && cd build
 cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
 cmake --build . --parallel
@@ -94,6 +95,7 @@ python3 -m pip install .
 
 To run the tests build the library with the following options
 ```
+git submodule update --init --recursive
 mkdir build_tests && cd build_tests
 cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
 cmake --build . --parallel

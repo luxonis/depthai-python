@@ -1,5 +1,5 @@
 24 - OpenCV support
-=========================
+===================
 
 This example shows API which exposes both numpy and OpenCV compatible image types for eaiser usage.
 It uses ColorCamera node to retrieve both BGR interleaved 'preview' and NV12 encoded 'video' frames.
