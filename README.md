@@ -16,8 +16,8 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
 
      ```
      cd docs
-     docker-compose build
-     docker-compose up
+     sudo docker-compose build
+     sudo docker-compose up
      ```
   
      Then open [http://localhost:8000](http://localhost:8000).
