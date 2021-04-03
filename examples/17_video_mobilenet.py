@@ -16,7 +16,8 @@ if len(sys.argv) > 2:
     videoPath = sys.argv[2]
 
 if not Path(nnPath).exists() or not Path(videoPath).exists():
-    raise FileNotFoundError("Required file/s not found, please run 'python3 install_requirements.py'")
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
