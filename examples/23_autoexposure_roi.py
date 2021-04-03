@@ -14,6 +14,10 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 previewSize = (300, 300)
 
 # Start defining a pipeline
