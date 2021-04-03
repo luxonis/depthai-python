@@ -1,5 +1,5 @@
 12 - RGB Encoding & Mono with MobilenetSSD & Depth
-================================================
+==================================================
 
 This example shows how to configure the depthai video encoder in h.265 format to encode the RGB camera
 input at Full-HD resolution at 30FPS, and transfers the encoded video over XLINK to the host,

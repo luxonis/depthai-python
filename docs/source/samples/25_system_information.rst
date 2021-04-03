@@ -1,5 +1,5 @@
 25 - System information
-=========================
+=======================
 
 This example shows how to get system information (memory usage, cpu usage and temperature) from the board.
 
