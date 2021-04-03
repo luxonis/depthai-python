@@ -8,5 +8,5 @@
 
 struct NodeBindings : public dai::Node {
     static void bind(pybind11::module& m);
-    static std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&)>>> getNodeCreateMap();
+    static std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&, py::object class_)>>> getNodeCreateMap();
 };

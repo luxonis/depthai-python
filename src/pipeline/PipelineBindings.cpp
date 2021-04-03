@@ -32,7 +32,7 @@ std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
         auto& node = kv.first;
         auto& create = kv.second;
         if(node.is(class_)){
-            return create(p);
+            return create(p, class_);
         }
     }
     return nullptr;
@@ -78,7 +78,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("create", [](dai::Pipeline& p, py::object class_) {
             auto node = createNode(p, class_);
             if(node == nullptr){
-                throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.Node");
+                throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.node");
             }
             return node;
         })

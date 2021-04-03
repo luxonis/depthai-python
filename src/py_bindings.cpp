@@ -35,17 +35,17 @@ PYBIND11_MODULE(depthai,m)
     m.attr("__version__") = DEPTHAI_PYTHON_VERSION;
 
     // Add bindings 
+    LogBindings::bind(m);
+    DataQueueBindings::bind(m);
+    DatatypeBindings::bind(m);
+    CommonBindings::bind(m);
     OpenVINOBindings::bind(m);
     AssetManagerBindings::bind(m);
-    NodeBindings::bind(m);
     PipelineBindings::bind(m);
+    NodeBindings::bind(m);
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
-    CommonBindings::bind(m);
-    DatatypeBindings::bind(m);
-    DataQueueBindings::bind(m);
-    LogBindings::bind(m);
 
     // Call dai::initialize on 'import depthai' to initialize asap
     dai::initialize();
