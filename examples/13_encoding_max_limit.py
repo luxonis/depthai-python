@@ -51,19 +51,19 @@ with dai.Device(pipeline) as dev:
     dev.startPipeline()
 
     # Processing loop
-    with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
+    with open('mono1.h264', 'wb') as fileMono1H264, open('color.h265', 'wb') as fileColorH265, open('mono2.h264', 'wb') as fileMono2H264:
         print("Press Ctrl+C to stop encoding...")
         while True:
             try:
                 # Empty each queue
                 while outQ1.has():
-                    outQ1.get().getData().tofile(file_mono1_h264)
+                    outQ1.get().getData().tofile(fileMono1H264)
 
                 while outQ2.has():
-                    outQ2.get().getData().tofile(file_color_h265)
+                    outQ2.get().getData().tofile(fileColorH265)
 
                 while outQ3.has():
-                    outQ3.get().getData().tofile(file_mono2_h264)
+                    outQ3.get().getData().tofile(fileMono2H264)
             except KeyboardInterrupt:
                 break
 

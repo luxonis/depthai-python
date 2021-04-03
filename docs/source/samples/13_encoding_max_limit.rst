@@ -1,9 +1,9 @@
 13 - Encoding Max Limit
-=====================
+=======================
 
 This example shows how to set up the encoder node to encode the RGB camera and both grayscale cameras
 (of DepthAI/OAK-D) at the same time, having all encoder parameters set to maximum quality and FPS.
-The RGB is set to 4K (3840x2160) and the grayscale are set to 1280x720 each, all at 30FPS.
+The RGB is set to 4K (3840x2160) and the grayscale are set to 1280x720 each, all at 25FPS.
 Each encoded video stream is transferred over XLINK and saved to a respective file.
 
 Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
@@ -24,18 +24,12 @@ Demo
 Setup
 #####
 
-Please run the following command to install the required dependencies
-
-.. code-block:: bash
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+d351f436f596a0e2ae9881f539b3e5a7fe714bfe numpy==1.19.5 opencv-python==4.5.1.48
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+.. include::  /includes/install_from_pypi.rst
 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/13_encoding_max_limit.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/13_encoding_max_limit.py>`__
 
 .. literalinclude:: ../../../examples/13_encoding_max_limit.py
    :language: python
