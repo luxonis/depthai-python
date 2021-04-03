@@ -15,7 +15,8 @@ if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
 if not Path(nnPath).exists():
-    raise FileNotFoundError("Required file/s not found, please run 'python3 install_requirements.py'")
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 previewSize = (300, 300)
 
