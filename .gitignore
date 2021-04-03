@@ -28,3 +28,6 @@ _builds/
 
 #ci
 wheelhouse/
+
+# Example blobs/files
+examples/models/

@@ -34,13 +34,20 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 To build a shared library from source perform the following:
 ```
 mkdir build && cd build
-cmake ..
+cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
 cmake --build . --parallel
 ```
+
+Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
 
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
+```
+
+To build and install using pip:
+```
+python3 -m pip install .
 ```
 
 ## Running tests

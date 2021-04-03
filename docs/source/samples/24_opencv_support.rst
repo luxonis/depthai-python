@@ -1,5 +1,5 @@
 24 - OpenCV support
-=========================
+===================
 
 This example shows API which exposes both numpy and OpenCV compatible image types for eaiser usage.
 It uses ColorCamera node to retrieve both BGR interleaved 'preview' and NV12 encoded 'video' frames.
@@ -9,9 +9,6 @@ Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
-
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet.blob>`__
 
 Source code
 ###########

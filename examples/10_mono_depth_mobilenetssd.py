@@ -66,7 +66,7 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -89,7 +89,7 @@ with dai.Device(pipeline) as device:
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
         inDet = qDet.tryGet()
         inDepth = qDepth.tryGet()
@@ -101,34 +101,10 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
 
         if inDepth is not None:
+            # Frame is transformed, the color map will be applied to highlight the depth info
             depthFrame = cv2.flip(inDepth.getFrame(), 1)
-            # frame is transformed, the color map will be applied to highlight the depth info
+            # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
             depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_JET)
-
-            # Uncomment one of these and comment the one given above
-            # to see visualisation in different color frames
-
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_BONE)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_AUTUMN)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_WINTER)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_RAINBOW)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_OCEAN)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SUMMER)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SPRING)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_COOL)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HSV)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HOT)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PINK)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PARULA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_MAGMA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_INFERNO)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PLASMA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_VIRIDIS)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_CIVIDIS)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT_SHIFTED)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TURBO)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_DEEPGREEN)
 
         if rightFrame is not None:
             for detection in detections:
