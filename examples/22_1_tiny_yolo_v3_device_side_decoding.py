@@ -38,6 +38,9 @@ nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v3_openvino_2021.2_
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    raise RuntimeError("Required file/s not found, please run 'python3 install_requirements.py'")
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 

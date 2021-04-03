@@ -11,6 +11,8 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    raise RuntimeError("Required file/s not found, please run 'python3 install_requirements.py'")
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()

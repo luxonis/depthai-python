@@ -13,6 +13,9 @@ parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection netwo
 parser.add_argument('-s', '--sync', action="store_true", help="Sync RGB output with NN output", default=False)
 args = parser.parse_args()
 
+if not Path(nnPathDefault).exists():
+    raise RuntimeError("Required file/s not found, please run 'python3 install_requirements.py'")
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
