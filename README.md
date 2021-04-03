@@ -72,7 +72,7 @@ ctest
      sudo docker-compose up
      ```
      
-     You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
+     > ℹ️ You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
 
      Then open [http://localhost:8000](http://localhost:8000).
      
