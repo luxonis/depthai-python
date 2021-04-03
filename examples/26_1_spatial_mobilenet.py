@@ -24,7 +24,7 @@ if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
 
 if not Path(nnBlobPath).exists():
-    raise RuntimeError("Required file/s not found, please run 'python3 install_requirements.py'")
+    raise FileNotFoundError("Required file/s not found, please run 'python3 install_requirements.py'")
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
