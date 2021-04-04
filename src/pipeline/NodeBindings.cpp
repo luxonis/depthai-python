@@ -303,7 +303,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getName", &Node::getName, DOC(dai, Node, getName))
         .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
         .def("getInputs", &Node::getInputs, DOC(dai, Node, getInputs))
-        .def("getAssets", &Node::getAssets, DOC(dai, Node, getAssets))
+        .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
+        .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
     ;
 
     // Node::Input bindings
@@ -697,6 +698,7 @@ void NodeBindings::bind(pybind11::module& m){
     // SystemLogger node
     ADD_NODE(SystemLogger)
         .def_readonly("out", &SystemLogger::out, DOC(dai, node, SystemLogger, out))
+        .def("setRate", &SystemLogger::setRate, DOC(dai, node, SystemLogger, setRate))
         ;
 
     // LxScript node
@@ -704,11 +706,11 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("inputs", &LxScript::inputs)
         .def_readonly("outputs", &LxScript::outputs)
         .def("setName", &LxScript::setName)
-        .def("setScriptPath", &LxScript::setScriptPath)
-        .def("getScriptPath", &LxScript::getScriptPath)
-        .def("addAsset", &LxScript::addAsset)
-        .def("setProcessor", &LxScript::setProcessor)
-        .def("getProcessor", &LxScript::getProcessor)
+        .def("setScriptPath", &LxScript::setScriptPath, DOC(dai, node, LxScript, setScriptPath))
+        .def("setScriptData", static_cast<void(LxScript::*)(const std::string&)>(&LxScript::setScriptData), py::arg("script"), DOC(dai, node, LxScript, setScriptData))
+        .def("setScriptData", static_cast<void(LxScript::*)(const std::vector<std::uint8_t>&)>(&LxScript::setScriptData), py::arg("data"), DOC(dai, node, LxScript, setScriptData, 2))
+        .def("setProcessor", &LxScript::setProcessor, DOC(dai, node, LxScript, setProcessor))
+        .def("getProcessor", &LxScript::getProcessor, DOC(dai, node, LxScript, getProcessor))
         ;
 
 }
