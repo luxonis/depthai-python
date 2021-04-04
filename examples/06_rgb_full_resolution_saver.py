@@ -10,21 +10,21 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
-camRgb = pipeline.createColorCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 
 # Create RGB output
-xoutRgb = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("rgb")
 camRgb.video.link(xoutRgb.input)
 
 # Create encoder to produce JPEG images
-videoEnc = pipeline.createVideoEncoder()
+videoEnc = pipeline.create(dai.node.VideoEncoder)
 videoEnc.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
 camRgb.video.link(videoEnc.input)
 
 # Create JPEG output
-xoutJpeg = pipeline.createXLinkOut()
+xoutJpeg = pipeline.create(dai.node.XLinkOut)
 xoutJpeg.setStreamName("jpeg")
 videoEnc.bitstream.link(xoutJpeg.input)
 

@@ -16,7 +16,7 @@
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
-#include "depthai/pipeline/node/LxScript.hpp"
+#include "depthai/pipeline/node/Script.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
@@ -82,24 +82,67 @@ void PipelineBindings::bind(pybind11::module& m){
             return node;
         })
 
-        // TODO(themarpe), deprecate in favor of 'create'
-         // templated create<NODE> function 
-        .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
-        .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
-        .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
-        .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
-        .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
-        .def("createSPIOut", &Pipeline::create<node::SPIOut>)
-        .def("createImageManip", &Pipeline::create<node::ImageManip>)
-        .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
-        .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
-        .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
-        .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
-        .def("createLxScript", &Pipeline::create<node::LxScript>)
-        .def("createSystemLogger", &Pipeline::create<node::SystemLogger>)
-        .def("createSpatialLocationCalculator", &Pipeline::create<node::SpatialLocationCalculator>)
-        .def("createMobileNetSpatialDetectionNetwork", &Pipeline::create<node::MobileNetSpatialDetectionNetwork>)
-        .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
+        // DEPRECATED, use pipeline.create([class name])
+        .def("createXLinkIn", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::XLinkIn>();
+        })
+        .def("createXLinkOut", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::XLinkOut>();
+        })
+        .def("createNeuralNetwork", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::NeuralNetwork>();
+        })
+        .def("createColorCamera", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::ColorCamera>();
+        })
+        .def("createVideoEncoder", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::VideoEncoder>();
+        })
+        .def("createSPIOut", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::SPIOut>();
+        })
+        .def("createImageManip", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::ImageManip>();
+        })
+        .def("createMonoCamera", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::MonoCamera>();
+        })
+        .def("createStereoDepth", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::StereoDepth>();
+        })
+        .def("createMobileNetDetectionNetwork", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::MobileNetDetectionNetwork>();
+        })
+        .def("createYoloDetectionNetwork", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::YoloDetectionNetwork>();
+        })
+        .def("createSystemLogger", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::SystemLogger>();
+        })
+        .def("createSpatialLocationCalculator", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::SpatialLocationCalculator>();
+        })
+        .def("createMobileNetSpatialDetectionNetwork", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::MobileNetSpatialDetectionNetwork>();
+        })
+        .def("createYoloSpatialDetectionNetwork", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::YoloSpatialDetectionNetwork>();
+        })
         ;
     
 }

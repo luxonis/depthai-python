@@ -16,19 +16,19 @@ if len(sys.argv) > 1:
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
+camRight = pipeline.create(dai.node.MonoCamera)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
@@ -36,11 +36,11 @@ camRight.out.link(manip.inputImage)
 manip.out.link(nn.input)
 
 # Create outputs
-manipOut = pipeline.createXLinkOut()
+manipOut = pipeline.create(dai.node.XLinkOut)
 manipOut.setStreamName("right")
 manip.out.link(manipOut.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

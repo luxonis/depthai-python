@@ -19,11 +19,11 @@ pipeline = dai.Pipeline()
 
 
 # Create neural network input
-xinDet = pipeline.createXLinkIn()
+xinDet = pipeline.create(dai.node.XLinkIn)
 xinDet.setStreamName("inDet")
 
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
@@ -31,7 +31,7 @@ nn.input.setBlocking(False)
 xinDet.out.link(nn.input)
 
 # Create output
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

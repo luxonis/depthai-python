@@ -14,26 +14,26 @@ if len(sys.argv) > 1:
 
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
+cam = pipeline.create(dai.node.ColorCamera)
 cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
-videoEncoder = pipeline.createVideoEncoder()
+videoEncoder = pipeline.create(dai.node.VideoEncoder)
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 cam.video.link(videoEncoder.input)
 
-videoOut = pipeline.createXLinkOut()
+videoOut = pipeline.create(dai.node.XLinkOut)
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
-camLeft = pipeline.createMonoCamera()
+camLeft = pipeline.create(dai.node.MonoCamera)
 camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-camRight = pipeline.createMonoCamera()
+camRight = pipeline.create(dai.node.MonoCamera)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
-depth = pipeline.createStereoDepth()
+depth = pipeline.create(dai.node.StereoDepth)
 depth.setConfidenceThreshold(200)
 # Note: the rectified streams are horizontally mirrored by default
 depth.setOutputRectified(True)
@@ -41,32 +41,32 @@ depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
 camRight.out.link(depth.right)
 
-depthOut = pipeline.createXLinkOut()
+depthOut = pipeline.create(dai.node.XLinkOut)
 depthOut.setStreamName("depth")
 depth.disparity.link(depthOut.input)
 
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(nn.input)
 
-xoutRight = pipeline.createXLinkOut()
+xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutRight.setStreamName("right")
 camRight.out.link(xoutRight.input)
 
-manipOut = pipeline.createXLinkOut()
+manipOut = pipeline.create(dai.node.XLinkOut)
 manipOut.setStreamName("manip")
 manip.out.link(manipOut.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

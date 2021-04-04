@@ -59,17 +59,17 @@ warpTestList = [
 
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
+cam = pipeline.create(dai.node.ColorCamera)
 cam.setPreviewSize(640, 480)
 cam.setInterleaved(False)
-camOut = pipeline.createXLinkOut()
+camOut = pipeline.create(dai.node.XLinkOut)
 camOut.setStreamName("preview")
 
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.setMaxOutputFrameSize(2000*1500*3)
-manipOut = pipeline.createXLinkOut()
+manipOut = pipeline.create(dai.node.XLinkOut)
 manipOut.setStreamName("manip")
-manipCfg = pipeline.createXLinkIn()
+manipCfg = pipeline.create(dai.node.XLinkIn)
 manipCfg.setStreamName("manipCfg")
 
 cam.preview.link(camOut.input)

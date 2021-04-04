@@ -13,7 +13,7 @@
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
-#include "depthai/pipeline/node/LxScript.hpp"
+#include "depthai/pipeline/node/Script.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 
@@ -701,16 +701,17 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setRate", &SystemLogger::setRate, DOC(dai, node, SystemLogger, setRate))
         ;
 
-    // LxScript node
-    ADD_NODE(LxScript)
-        .def_readonly("inputs", &LxScript::inputs)
-        .def_readonly("outputs", &LxScript::outputs)
-        .def("setName", &LxScript::setName)
-        .def("setScriptPath", &LxScript::setScriptPath, DOC(dai, node, LxScript, setScriptPath))
-        .def("setScriptData", static_cast<void(LxScript::*)(const std::string&)>(&LxScript::setScriptData), py::arg("script"), DOC(dai, node, LxScript, setScriptData))
-        .def("setScriptData", static_cast<void(LxScript::*)(const std::vector<std::uint8_t>&)>(&LxScript::setScriptData), py::arg("data"), DOC(dai, node, LxScript, setScriptData, 2))
-        .def("setProcessor", &LxScript::setProcessor, DOC(dai, node, LxScript, setProcessor))
-        .def("getProcessor", &LxScript::getProcessor, DOC(dai, node, LxScript, getProcessor))
+    // Script node
+    ADD_NODE(Script)
+        .def_readonly("inputs", &Script::inputs)
+        .def_readonly("outputs", &Script::outputs)
+        .def("setScriptPath", &Script::setScriptPath, DOC(dai, node, Script, setScriptPath))
+        .def("setScriptData", static_cast<void(Script::*)(const std::string&, const std::string&)>(&Script::setScriptData), py::arg("script"), py::arg("name") = "", DOC(dai, node, Script, setScriptData))
+        .def("setScriptData", static_cast<void(Script::*)(const std::vector<std::uint8_t>&, const std::string&)>(&Script::setScriptData), py::arg("data"), py::arg("name") = "", DOC(dai, node, Script, setScriptData, 2))
+        .def("getScriptPath", &Script::getScriptPath, DOC(dai, node, Script, getScriptPath))
+        .def("getScriptName", &Script::getScriptName, DOC(dai, node, Script, getScriptName))
+        .def("setProcessor", &Script::setProcessor, DOC(dai, node, Script, setProcessor))
+        .def("getProcessor", &Script::getProcessor, DOC(dai, node, Script, getProcessor))
         ;
 
 }

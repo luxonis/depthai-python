@@ -10,12 +10,12 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
+camRight = pipeline.create(dai.node.MonoCamera)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Create output
-xoutRight = pipeline.createXLinkOut()
+xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutRight.setStreamName("right")
 camRight.out.link(xoutRight.input)
 

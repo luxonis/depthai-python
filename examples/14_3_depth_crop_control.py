@@ -15,11 +15,11 @@ stepSize = 0.02
 pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) cameras
-left = pipeline.createMonoCamera()
+left = pipeline.create(dai.node.MonoCamera)
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-right = pipeline.createMonoCamera()
+right = pipeline.create(dai.node.MonoCamera)
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
@@ -27,13 +27,13 @@ right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 topLeft = dai.Point2f(0.4, 0.4)
 bottomRight = dai.Point2f(0.6, 0.6)
 
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manip.setMaxOutputFrameSize(right.getResolutionHeight()*right.getResolutionWidth()*3)
 
 
 # Create a node that will produce the depth map
-stereo = pipeline.createStereoDepth()
+stereo = pipeline.create(dai.node.StereoDepth)
 stereo.setConfidenceThreshold(200)
 stereo.setOutputDepth(True)
 
@@ -42,12 +42,12 @@ right.out.link(stereo.right)
 
 
 # Control movement
-controlIn = pipeline.createXLinkIn()
+controlIn = pipeline.create(dai.node.XLinkIn)
 controlIn.setStreamName('control')
 controlIn.out.link(manip.inputConfig)
 
 # Create outputs
-xout = pipeline.createXLinkOut()
+xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName("depth")
 stereo.depth.link(manip.inputImage)
 manip.out.link(xout.input)

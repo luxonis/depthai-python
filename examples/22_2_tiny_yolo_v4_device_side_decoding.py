@@ -41,13 +41,13 @@ if len(sys.argv) > 1:
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
-camRgb = pipeline.createColorCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setPreviewSize(416, 416)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 
 # network specific settings
-detectionNetwork = pipeline.createYoloDetectionNetwork()
+detectionNetwork = pipeline.create(dai.node.YoloDetectionNetwork)
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
 detectionNetwork.setCoordinateSize(4)
@@ -62,14 +62,14 @@ detectionNetwork.input.setBlocking(False)
 camRgb.preview.link(detectionNetwork.input)
 
 # Create outputs
-xoutRgb = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("rgb")
 if syncNN:
     detectionNetwork.passthrough.link(xoutRgb.input)
 else:
     camRgb.preview.link(xoutRgb.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 

@@ -30,14 +30,14 @@ if len(sys.argv) > 1:
 pipeline = dai.Pipeline()
 
 
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 # manip.setKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
-spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
+spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.setBlobPath(nnPath)
 spatialDetectionNetwork.input.setBlocking(False)
@@ -48,27 +48,27 @@ spatialDetectionNetwork.setDepthUpperThreshold(5000)
 manip.out.link(spatialDetectionNetwork.input)
 
 # Create outputs
-xoutManip = pipeline.createXLinkOut()
+xoutManip = pipeline.create(dai.node.XLinkOut)
 xoutManip.setStreamName("right")
 if(syncNN):
     spatialDetectionNetwork.passthrough.link(xoutManip.input)
 else:
     manip.out.link(xoutManip.input)
 
-depthRoiMap = pipeline.createXLinkOut()
+depthRoiMap = pipeline.create(dai.node.XLinkOut)
 depthRoiMap.setStreamName("boundingBoxDepthMapping")
 
-xoutDepth = pipeline.createXLinkOut()
+xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("depth")
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("detections")
 spatialDetectionNetwork.out.link(nnOut.input)
 spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)

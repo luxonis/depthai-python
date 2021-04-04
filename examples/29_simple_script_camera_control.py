@@ -11,7 +11,7 @@ pipeline = dai.Pipeline()
 cam = pipeline.create(dai.node.ColorCamera)
 
 # Script node
-script = pipeline.create(dai.node.LxScript)
+script = pipeline.create(dai.node.Script)
 script.setScriptData("""
 import time
 ctrl = CameraControl()

@@ -26,14 +26,14 @@ LENS_STEP = 3
 pipeline = dai.Pipeline()
 
 # Nodes
-colorCam = pipeline.createColorCamera()
-controlIn = pipeline.createXLinkIn()
-configIn = pipeline.createXLinkIn()
-videoEncoder = pipeline.createVideoEncoder()
-stillEncoder = pipeline.createVideoEncoder()
-videoMjpegOut = pipeline.createXLinkOut()
-stillMjpegOut = pipeline.createXLinkOut()
-previewOut = pipeline.createXLinkOut()
+colorCam = pipeline.create(dai.node.ColorCamera)
+controlIn = pipeline.create(dai.node.XLinkIn)
+configIn = pipeline.create(dai.node.XLinkIn)
+videoEncoder = pipeline.create(dai.node.VideoEncoder)
+stillEncoder = pipeline.create(dai.node.VideoEncoder)
+videoMjpegOut = pipeline.create(dai.node.XLinkOut)
+stillMjpegOut = pipeline.create(dai.node.XLinkOut)
+previewOut = pipeline.create(dai.node.XLinkOut)
 
 
 # Properties

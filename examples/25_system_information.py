@@ -19,11 +19,11 @@ def print_sys_info(info):
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-sys_logger = pipeline.createSystemLogger()
+sys_logger = pipeline.create(dai.node.SystemLogger)
 sys_logger.setRate(1)  # 1 Hz
 
 # Create output
-linkOut = pipeline.createXLinkOut()
+linkOut = pipeline.create(dai.node.XLinkOut)
 linkOut.setStreamName("sysinfo")
 sys_logger.out.link(linkOut.input)
 

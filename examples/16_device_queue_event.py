@@ -10,11 +10,11 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Create Color and Mono cameras
-camRgb = pipeline.createColorCamera()
-camMono = pipeline.createMonoCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
+camMono = pipeline.create(dai.node.MonoCamera)
 # Create separate streams for them
-xoutRgb = pipeline.createXLinkOut()
-xoutMono = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutMono = pipeline.create(dai.node.XLinkOut)
 
 # Set properties
 xoutRgb.setStreamName("rgb")

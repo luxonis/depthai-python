@@ -8,13 +8,13 @@ import numpy as np
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
-colorCam = pipeline.createColorCamera()
+colorCam = pipeline.create(dai.node.ColorCamera)
 colorCam.setBoardSocket(dai.CameraBoardSocket.RGB)
 colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 colorCam.setVideoSize(1920, 1080)
 
 # Create output
-xoutVideo = pipeline.createXLinkOut()
+xoutVideo = pipeline.create(dai.node.XLinkOut)
 xoutVideo.setStreamName("video")
 xoutVideo.input.setBlocking(False)
 xoutVideo.input.setQueueSize(1)

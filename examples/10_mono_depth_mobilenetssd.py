@@ -16,16 +16,16 @@ if len(sys.argv) > 1:
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) cameras
-left = pipeline.createMonoCamera()
+left = pipeline.create(dai.node.MonoCamera)
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-right = pipeline.createMonoCamera()
+right = pipeline.create(dai.node.MonoCamera)
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-stereo = pipeline.createStereoDepth()
+stereo = pipeline.create(dai.node.StereoDepth)
 stereo.setOutputRectified(True)  # The rectified streams are horizontally mirrored by default
 stereo.setConfidenceThreshold(255)
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout from rectification (black stripe on the edges)
@@ -34,14 +34,14 @@ left.out.link(stereo.left)
 right.out.link(stereo.right)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
-manip = pipeline.createImageManip()
+manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 stereo.rectifiedRight.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
@@ -49,16 +49,16 @@ nn.input.setBlocking(False)
 manip.out.link(nn.input)
 
 # Create outputs
-depthOut = pipeline.createXLinkOut()
+depthOut = pipeline.create(dai.node.XLinkOut)
 depthOut.setStreamName("depth")
 
 stereo.disparity.link(depthOut.input)
 
-xoutRight = pipeline.createXLinkOut()
+xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutRight.setStreamName("rectifiedRight")
 manip.out.link(xoutRight.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

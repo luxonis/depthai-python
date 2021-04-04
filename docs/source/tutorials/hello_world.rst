@@ -107,7 +107,7 @@ Now, first node we will add is a :class:`ColorCamera`. We will use the :code:`pr
 
 .. code-block:: python
 
-  cam_rgb = pipeline.createColorCamera()
+  cam_rgb = pipeline.create(dai.node.ColorCamera)
   cam_rgb.setPreviewSize(300, 300)
   cam_rgb.setInterleaved(False)
 
@@ -131,11 +131,11 @@ and in our case, since we want to receive data from device to host, we will use 
 
 .. code-block:: python
 
-  xout_rgb = pipeline.createXLinkOut()
+  xout_rgb = pipeline.create(dai.node.XLinkOut)
   xout_rgb.setStreamName("rgb")
   cam_rgb.preview.link(xout_rgb.input)
 
-  xout_nn = pipeline.createXLinkOut()
+  xout_nn = pipeline.create(dai.node.XLinkOut)
   xout_nn.setStreamName("nn")
   detection_nn.out.link(xout_nn.input)
 

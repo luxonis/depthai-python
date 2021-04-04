@@ -14,32 +14,32 @@ if len(sys.argv) > 1:
 
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
+cam = pipeline.create(dai.node.ColorCamera)
 cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 cam.setPreviewSize(300, 300)
 cam.setInterleaved(False)
 
-videoEncoder = pipeline.createVideoEncoder()
+videoEncoder = pipeline.create(dai.node.VideoEncoder)
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 cam.video.link(videoEncoder.input)
 
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 cam.preview.link(nn.input)
 
-videoOut = pipeline.createXLinkOut()
+videoOut = pipeline.create(dai.node.XLinkOut)
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
 
-xoutRgb = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("rgb")
 cam.preview.link(xoutRgb.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

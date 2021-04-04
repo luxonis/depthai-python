@@ -5,17 +5,17 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Nodes
-colorCam = pipeline.createColorCamera()
+colorCam = pipeline.create(dai.node.ColorCamera)
 colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-monoCam = pipeline.createMonoCamera()
-monoCam2 = pipeline.createMonoCamera()
-ve1 = pipeline.createVideoEncoder()
-ve2 = pipeline.createVideoEncoder()
-ve3 = pipeline.createVideoEncoder()
+monoCam = pipeline.create(dai.node.MonoCamera)
+monoCam2 = pipeline.create(dai.node.MonoCamera)
+ve1 = pipeline.create(dai.node.VideoEncoder)
+ve2 = pipeline.create(dai.node.VideoEncoder)
+ve3 = pipeline.create(dai.node.VideoEncoder)
 
-ve1Out = pipeline.createXLinkOut()
-ve2Out = pipeline.createXLinkOut()
-ve3Out = pipeline.createXLinkOut()
+ve1Out = pipeline.create(dai.node.XLinkOut)
+ve2Out = pipeline.create(dai.node.XLinkOut)
+ve3Out = pipeline.create(dai.node.XLinkOut)
 
 # Properties
 monoCam.setBoardSocket(dai.CameraBoardSocket.LEFT)

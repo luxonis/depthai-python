@@ -17,13 +17,13 @@ args = parser.parse_args()
 pipeline = dai.Pipeline()
 
 # Define a source - color camera
-camRgb = pipeline.createColorCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setPreviewSize(300, 300)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(args.nnPath)
 nn.setNumInferenceThreads(2)
@@ -31,14 +31,14 @@ nn.input.setBlocking(False)
 camRgb.preview.link(nn.input)
 
 # Create outputs
-xoutRgb = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("rgb")
 if args.sync:
     nn.passthrough.link(xoutRgb.input)
 else:
     camRgb.preview.link(xoutRgb.input)
 
-nnOut = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 

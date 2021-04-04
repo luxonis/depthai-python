@@ -24,10 +24,10 @@ isoStep = 50
 pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
+camRight = pipeline.create(dai.node.MonoCamera)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-camLeft = pipeline.createMonoCamera()
+camLeft = pipeline.create(dai.node.MonoCamera)
 camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
@@ -35,20 +35,20 @@ camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 topLeft = dai.Point2f(0.4, 0.4)
 bottomRight = dai.Point2f(0.6, 0.6)
 
-manipRight = pipeline.createImageManip()
+manipRight = pipeline.create(dai.node.ImageManip)
 manipRight.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-manipLeft = pipeline.createImageManip()
+manipLeft = pipeline.create(dai.node.ImageManip)
 manipLeft.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manipRight.setMaxOutputFrameSize(camRight.getResolutionHeight()*camRight.getResolutionWidth()*3)
 
 # Camera movement config (wasd)
-configIn = pipeline.createXLinkIn()
+configIn = pipeline.create(dai.node.XLinkIn)
 configIn.setStreamName('config')
 configIn.out.link(manipRight.inputConfig)
 configIn.out.link(manipLeft.inputConfig)
 
 # Camera control (exp, iso, focus)
-controlIn = pipeline.createXLinkIn()
+controlIn = pipeline.create(dai.node.XLinkIn)
 controlIn.setStreamName('control')
 controlIn.out.link(camRight.inputControl)
 controlIn.out.link(camLeft.inputControl)
@@ -58,11 +58,11 @@ camRight.out.link(manipRight.inputImage)
 camLeft.out.link(manipLeft.inputImage)
 
 # Create outputs
-manipOutRight = pipeline.createXLinkOut()
+manipOutRight = pipeline.create(dai.node.XLinkOut)
 manipOutRight.setStreamName("right")
 manipRight.out.link(manipOutRight.input)
 
-manipOutLeft = pipeline.createXLinkOut()
+manipOutLeft = pipeline.create(dai.node.XLinkOut)
 manipOutLeft.setStreamName("left")
 manipLeft.out.link(manipOutLeft.input)
 
