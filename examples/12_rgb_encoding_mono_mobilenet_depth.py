@@ -80,11 +80,11 @@ with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    queue_size = 8
-    qRight = device.getOutputQueue("right", queue_size)
-    qDepth = device.getOutputQueue("depth", queue_size)
-    qManip = device.getOutputQueue("manip", queue_size)
-    qDet = device.getOutputQueue("nn", queue_size)
+    queueSize = 8
+    qRight = device.getOutputQueue("right", queueSize)
+    qDepth = device.getOutputQueue("depth", queueSize)
+    qManip = device.getOutputQueue("manip", queueSize)
+    qDet = device.getOutputQueue("nn", queueSize)
     qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
     frame = None
