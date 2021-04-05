@@ -16,6 +16,8 @@ colorCam.setVideoSize(1920, 1080)
 # Create output
 xoutVideo = pipeline.createXLinkOut()
 xoutVideo.setStreamName("video")
+xoutVideo.input.setBlocking(False)
+xoutVideo.input.setQueueSize(1)
 
 colorCam.video.link(xoutVideo.input)
 

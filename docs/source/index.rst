@@ -85,7 +85,9 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/11_rgb_encoding_mono_mobilenet.rst
    samples/12_rgb_encoding_mono_mobilenet_depth.rst
    samples/13_encoding_max_limit.rst
-   samples/14_color_camera_control.rst
+   samples/14_1_color_camera_control.rst
+   samples/14_2_mono_camera_control.rst
+   samples/14_3_depth_crop_control.rst
    samples/15_rgb_mobilenet_4k.rst
    samples/16_device_queue_event.rst
    samples/17_video_mobilenet.rst
