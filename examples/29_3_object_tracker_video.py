@@ -36,8 +36,9 @@ trackerOut.setStreamName("tracklets")
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.initialConfig.setResize(544, 320)
-manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
+manip.initialConfig.setResizeThumbnail(544, 320)
+# manip.initialConfig.setResize(544, 320)
+# manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
 xiFrame.out.link(manip.inputImage)
