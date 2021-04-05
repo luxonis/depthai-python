@@ -20,13 +20,13 @@ macro(add_python_example example_name python_script_path)
     list(REMOVE_AT arguments 0 1)
 
     # Creates a target (python my_test [args])
-    add_custom_target(${example_name} 
-        ${CMAKE_COMMAND} -E env 
+    add_custom_target(${example_name}
+        ${CMAKE_COMMAND} -E env
         # Environment variables
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
-        "${ASAN_ENVIRONMENT_VARS}" 
+        "${ASAN_ENVIRONMENT_VARS}"
         # Example
         ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/${python_script_path} ${ARGN}
         DEPENDS ${TARGET_NAME}
@@ -35,25 +35,25 @@ macro(add_python_example example_name python_script_path)
     )
 
     if(DEPTHAI_PYTHON_TEST_EXAMPLES)
-        
+
         # Adds test with 5 seconds timeout and bumps all python warnings to errors
-        add_test(NAME ${example_name} COMMAND 
-            ${CMAKE_COMMAND} -E env 
+        add_test(NAME ${example_name} COMMAND
+            ${CMAKE_COMMAND} -E env
             # Python path (to find compiled module)
             "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
             # ASAN in case of sanitizers
             ${ASAN_ENVIRONMENT_VARS}
-            ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=5 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake 
+            ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=5 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
             # Actual script to run
             ${PYTHON_EXECUTABLE} -Werror "${CMAKE_CURRENT_LIST_DIR}/${python_script_path}" ${arguments}
         )
 
         # Sets a regex catching any logged warnings, errors or critical (coming either from device or host)
-        set_tests_properties (${example_name} PROPERTIES FAIL_REGULAR_EXPRESSION "\\[warning\\];\\[error\\];\\[critical\\]") 
+        set_tests_properties (${example_name} PROPERTIES FAIL_REGULAR_EXPRESSION "\\[warning\\];\\[error\\];\\[critical\\]")
 
     endif()
 
-endmacro() 
+endmacro()
 
 # Mobilenet resource
 hunter_private_data(
@@ -118,7 +118,9 @@ add_python_example(10_mono_depth_mobilenetssd 10_mono_depth_mobilenetssd.py "${m
 add_python_example(11_rgb_encoding_mono_mobilenet 11_rgb_encoding_mono_mobilenet.py "${mobilenet_blob}")
 add_python_example(12_rgb_encoding_mono_mobilenet_depth 12_rgb_encoding_mono_mobilenet_depth.py "${mobilenet_blob}")
 add_python_example(13_encoding_max_limit 13_encoding_max_limit.py)
-add_python_example(14_color_camera_control 14_color_camera_control.py)
+add_python_example(14_1_color_camera_control 14_1_color_camera_control.py)
+add_python_example(14_2_mono_camera_control 14_2_mono_camera_control.py)
+add_python_example(14_3_depth_crop_control 14_3_depth_crop_control.py)
 add_python_example(15_rgb_mobilenet_4k 15_rgb_mobilenet_4k.py "${mobilenet_5shave_blob}")
 add_python_example(16_device_queue_event 16_device_queue_event.py)
 add_python_example(17_video_mobilenet 17_video_mobilenet.py "${mobilenet_8shaves_blob}" "${construction_vest}")

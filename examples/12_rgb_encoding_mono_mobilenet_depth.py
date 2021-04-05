@@ -121,6 +121,7 @@ with dai.Device(pipeline) as device:
 
         if inDepth is not None:
             frameDepth = cv2.flip(inDepth.getFrame(), 1)
+            frameDepth = cv2.normalize(frameDepth, None, 0, 255, cv2.NORM_MINMAX)
             frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_JET)
 
         if inDet is not None:
