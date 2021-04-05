@@ -57,11 +57,33 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 
    Home <self>
    install.rst
+   tutorials/overview.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Components:
+
+   components/device.rst
+   components/bootloader.rst
+   components/pipeline.rst
+   components/nodes.rst
+   components/messages.rst
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Tutorials:
+
+   tutorials/hello_world.rst
+   tutorials/multiple.rst
+   tutorials/local_convert_openvino.rst
+   samples/code_samples.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Code:
 
    tutorials/hello_world.rst
    tutorials/multiple.rst
