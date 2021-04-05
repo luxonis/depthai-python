@@ -1,5 +1,5 @@
 19 - Mono Camera Control
-=========================
+========================
 
 This example shows how to control two mono cameras, set up a pipeline that outputs grayscale camera images, connects over XLink to transfer these 
 to the host real-time, and displays both using OpenCV.
