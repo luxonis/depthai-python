@@ -402,10 +402,12 @@ void NodeBindings::bind(pybind11::module& m){
 
     // NeuralNetwork node
     py::class_<ObjectTracker, Node, std::shared_ptr<ObjectTracker>>(m, "ObjectTracker", DOC(dai, node, ObjectTracker))
-        .def_readonly("inputFrame", &ObjectTracker::inputFrame, DOC(dai, node, ObjectTracker, inputFrame))
+        .def_readonly("inputTrackerFrame", &ObjectTracker::inputTrackerFrame, DOC(dai, node, ObjectTracker, inputTrackerFrame))
+        .def_readonly("inputDetectionFrame", &ObjectTracker::inputDetectionFrame, DOC(dai, node, ObjectTracker, inputDetectionFrame))
         .def_readonly("inputDetections", &ObjectTracker::inputDetections, DOC(dai, node, ObjectTracker, inputDetections))
         .def_readonly("out", &ObjectTracker::out, DOC(dai, node, ObjectTracker, out))
-        .def_readonly("passthroughFrame", &ObjectTracker::passthroughFrame, DOC(dai, node, ObjectTracker, passthroughFrame))
+        .def_readonly("passthroughTrackerFrame", &ObjectTracker::passthroughTrackerFrame, DOC(dai, node, ObjectTracker, passthroughTrackerFrame))
+        .def_readonly("passthroughDetectionFrame", &ObjectTracker::passthroughDetectionFrame, DOC(dai, node, ObjectTracker, passthroughDetectionFrame))
         .def_readonly("passthroughDetections", &ObjectTracker::passthroughDetections, DOC(dai, node, ObjectTracker, passthroughDetections))
 
         .def("setTrackerThreshold", &ObjectTracker::setTrackerThreshold, py::arg("threshold"), DOC(dai, node, ObjectTracker, setTrackerThreshold))

@@ -7,16 +7,18 @@ import numpy as np
 import time
 import argparse
 
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 nnPathDefault = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection network blob", default=nnPathDefault)
+parser.add_argument('-ff', '--full_frame', action="store_true", help="Perform tracking on full RGB frame", default=False)
+
 args = parser.parse_args()
 
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-syncTracklets = True
+fullFrameTracking = args.full_frame
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -40,21 +42,25 @@ colorCam.setFps(40)
 # setting node configs
 detectionNetwork.setBlobPath(args.nnPath)
 detectionNetwork.setConfidenceThreshold(0.5)
+detectionNetwork.input.setBlocking(False)
 
 # Link plugins CAM . NN . XLINK
 colorCam.preview.link(detectionNetwork.input)
-if syncTracklets:
-    objectTracker.passthroughFrame.link(xlinkOut.input)
-else:
-    colorCam.preview.link(xlinkOut.input)
+objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
 
 
 objectTracker.setDetectionLabelsToTrack([15])  # track only person
+# possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
-# take the smallest ID when new object is tracked
+# take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
 
-detectionNetwork.passthrough.link(objectTracker.inputFrame)
+if fullFrameTracking:
+    colorCam.video.link(objectTracker.inputTrackerFrame)
+else:
+    detectionNetwork.passthrough.link(objectTracker.inputTrackerFrame)
+
+detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 detectionNetwork.out.link(objectTracker.inputDetections)
 objectTracker.out.link(trackerOut.input)
 

@@ -103,6 +103,14 @@ hunter_private_data(
     LOCATION mobilenet_8shaves_blob
 )
 
+# Object tracker person detection
+hunter_private_data(
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection_openvino_2021.2_7shave.blob"
+    SHA1 "d671b81347d4a524baa90ba161cd76e2f20d5f88"
+    FILE "person-detection_openvino_2021.2_7shave.blob"
+    LOCATION person_detection_7shaves_blob
+)
+
 
 # Add examples
 add_python_example(01_rgb_preview 01_rgb_preview.py)
@@ -139,3 +147,4 @@ add_python_example(27_spatial_location_calculator 27_spatial_location_calculator
 add_python_example(28_camera_video_example 28_camera_video_example.py)
 add_python_example(29_1_object_tracker 29_1_object_tracker.py "${mobilenet_blob}")
 add_python_example(29_2_spatial_object_tracker 29_2_spatial_object_tracker.py "${mobilenet_blob}")
+add_python_example(29_3_object_tracker_video 29_3_object_tracker_video.py "-nnPath" "${person_detection_7shaves_blob}" "-v" "${construction_vest}")

@@ -7,16 +7,18 @@ import numpy as np
 import time
 import argparse
 
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 nnPathDefault = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection network blob", default=nnPathDefault)
+parser.add_argument('-ff', '--full_frame', action="store_true", help="Perform tracking on full RGB frame", default=False)
+
 args = parser.parse_args()
 
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-syncTracklets = True
+fullFrameTracking = args.full_frame
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -62,20 +64,26 @@ monoRight.out.link(stereo.right)
 
 # Link plugins CAM . NN . XLINK
 colorCam.preview.link(spatialDetectionNetwork.input)
-if syncTracklets:
-    objectTracker.passthroughFrame.link(xoutRgb.input)
-else:
-    colorCam.preview.link(xoutRgb.input)
+objectTracker.passthroughTrackerFrame.link(xoutRgb.input)
 
 
 objectTracker.setDetectionLabelsToTrack([15])  # track only person
+# possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
-# take the smallest ID when new object is tracked
+# take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
 
 objectTracker.out.link(trackerOut.input)
+if fullFrameTracking:
+    colorCam.setPreviewKeepAspectRatio(False)
+    colorCam.video.link(objectTracker.inputTrackerFrame)
+    objectTracker.inputTrackerFrame.setBlocking(False)
+    # do not block the pipeline if it's too slow on full frame
+    objectTracker.inputTrackerFrame.setQueueSize(2)
+else:
+    spatialDetectionNetwork.passthrough.link(objectTracker.inputTrackerFrame)
 
-spatialDetectionNetwork.passthrough.link(objectTracker.inputFrame)
+spatialDetectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 spatialDetectionNetwork.out.link(objectTracker.inputDetections)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
