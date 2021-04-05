@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This example shows usage of ImageWarp to crop a rotated rectangle area on a frame,
+This example shows usage of ImageManip to crop a rotated rectangle area on a frame,
 or perform various image transforms: rotate, mirror, flip, perspective transform.
 """
 
