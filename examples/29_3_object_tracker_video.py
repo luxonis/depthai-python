@@ -7,7 +7,7 @@ import numpy as np
 import time
 import argparse
 
-labelMap = ["no-person", "person"]
+labelMap = ["person", ""]
 
 nnPathDefault = str((Path(__file__).parent / Path('models/person-detection_openvino_2021.2_7shave.blob')).resolve().absolute())
 videoPathDefault = str((Path(__file__).parent / Path('models/construction_vest.mp4')).resolve().absolute())
@@ -21,9 +21,9 @@ args = parser.parse_args()
 pipeline = dai.Pipeline()
 
 # Create neural network input
-xiFrame = pipeline.createXLinkIn()
-xiFrame.setStreamName("inFrame")
-xiFrame.setMaxDataSize(1920*1080*3)
+xinFrame = pipeline.createXLinkIn()
+xinFrame.setStreamName("inFrame")
+xinFrame.setMaxDataSize(1920*1080*3)
 
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 objectTracker = pipeline.createObjectTracker()
@@ -36,12 +36,13 @@ trackerOut.setStreamName("tracklets")
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
-manip.initialConfig.setResizeThumbnail(544, 320)
-# manip.initialConfig.setResize(544, 320)
+manip.initialConfig.setResizeThumbnail(384, 384)
+# manip.initialConfig.setResize(384, 384)
 # manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-xiFrame.out.link(manip.inputImage)
+xinFrame.out.link(manip.inputImage)
+manip.inputImage.setBlocking(True)
 
 manipOut = pipeline.createXLinkOut()
 manipOut.setStreamName("manip")
@@ -57,20 +58,22 @@ detectionNetwork.setBlobPath(args.nnPath)
 detectionNetwork.setConfidenceThreshold(0.5)
 
 manip.out.link(detectionNetwork.input)
-
+detectionNetwork.input.setBlocking(True)
 objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
 
 
-objectTracker.setDetectionLabelsToTrack([1])  # track only person
+objectTracker.setDetectionLabelsToTrack([0])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
 
-xiFrame.out.link(objectTracker.inputTrackerFrame)
+xinFrame.out.link(objectTracker.inputTrackerFrame)
+objectTracker.inputTrackerFrame.setBlocking(True)
 detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
-
+objectTracker.inputDetectionFrame.setBlocking(True)
 detectionNetwork.out.link(objectTracker.inputDetections)
+objectTracker.inputDetections.setBlocking(True)
 objectTracker.out.link(trackerOut.input)
 
 
@@ -81,13 +84,14 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     qIn = device.getInputQueue(name="inFrame")
-    trackerFrameQ = device.getOutputQueue("trackerFrame", 4, False)
-    tracklets = device.getOutputQueue("tracklets", 4, False)
-    qManip = device.getOutputQueue("manip", maxSize=4, blocking=False)
-    qDet = device.getOutputQueue("nn", maxSize=4, blocking=False)
+    trackerFrameQ = device.getOutputQueue("trackerFrame", 4)
+    tracklets = device.getOutputQueue("tracklets", 4)
+    qManip = device.getOutputQueue("manip", maxSize=4)
+    qDet = device.getOutputQueue("nn", maxSize=4)
 
     startTime = time.monotonic()
     counter = 0
+    fps = 0
     detections = []
     frame = None
 
@@ -111,6 +115,8 @@ with dai.Device(pipeline) as device:
     cap = cv2.VideoCapture(args.videoPath)
     baseTs = time.monotonic()
     simulatedFps = 30
+    inputFrameShape = (1280, 720)
+
     while cap.isOpened():
         read_correctly, frame = cap.read()
         if not read_correctly:
@@ -118,20 +124,21 @@ with dai.Device(pipeline) as device:
 
         img = dai.ImgFrame()
         img.setType(dai.RawImgFrame.Type.BGR888p)
-        img.setData(to_planar(frame, (1280, 720)))
+        img.setData(to_planar(frame, inputFrameShape))
         img.setTimestamp(baseTs)
         baseTs += 1/simulatedFps
-        img.setWidth(1280)
-        img.setHeight(720)
+
+        img.setWidth(inputFrameShape[0])
+        img.setHeight(inputFrameShape[1])
         qIn.send(img)
 
-        imgFrame = trackerFrameQ.get()
+        trackFrame = trackerFrameQ.tryGet()
+        if trackFrame is None:
+            continue
+
         track = tracklets.get()
         manip = qManip.get()
         inDet = qDet.get()
-        detections = inDet.detections
-        manipFrame = manip.getCvFrame()
-        displayFrame("nn", manipFrame)
 
         counter+=1
         current_time = time.monotonic()
@@ -140,8 +147,12 @@ with dai.Device(pipeline) as device:
             counter = 0
             startTime = current_time
 
+        detections = inDet.detections
+        manipFrame = manip.getCvFrame()
+        displayFrame("nn", manipFrame)
+
         color = (255, 0, 0)
-        trackerFrame = imgFrame.getCvFrame()
+        trackerFrame = trackFrame.getCvFrame()
         trackletsData = track.tracklets
         for t in trackletsData:
             roi = t.roi.denormalize(trackerFrame.shape[1], trackerFrame.shape[0])
@@ -161,6 +172,7 @@ with dai.Device(pipeline) as device:
             cv2.putText(trackerFrame, statusMap[t.status], (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(trackerFrame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
+        cv2.putText(trackerFrame, "Fps: {:.2f}".format(fps), (2, trackerFrame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", trackerFrame)
 

@@ -105,9 +105,9 @@ hunter_private_data(
 
 # Object tracker person detection
 hunter_private_data(
-    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection_openvino_2021.2_7shave.blob"
-    SHA1 "d671b81347d4a524baa90ba161cd76e2f20d5f88"
-    FILE "person-detection_openvino_2021.2_7shave.blob"
+    URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection-0201_openvino_2021.3_7shave.blob"
+    SHA1 "a8d4b0067deb889ec66b2204573d9ee1e0039c8e"
+    FILE "person-detection-0201_openvino_2021.3_7shave.blob"
     LOCATION person_detection_7shaves_blob
 )
 
