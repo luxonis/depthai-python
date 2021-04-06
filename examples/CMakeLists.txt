@@ -12,7 +12,8 @@ if(UNIX)
     set(SYS_PATH_SEPARATOR ":")
 endif()
 
-add_custom_target(install_requirements
+# Add a target to install_requirements (added to ALL)
+add_custom_target(install_requirements ALL
     COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/install_requirements.py" "--skip_depthai"
     DEPENDS ${TARGET_NAME}
     VERBATIM
@@ -70,7 +71,7 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
         ${ASAN_ENVIRONMENT_VARS}
-        ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=300 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
+        ${CMAKE_COMMAND} -DFORCE_TIMEOUT_SECONDS=300 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
         # Actual script to run
         ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/install_requirements.py" "--skip_depthai"
     )
