@@ -102,6 +102,9 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/26_3_spatial_tiny_yolo.rst
    samples/27_spatial_location_calculator.rst
    samples/28_camera_video_example.rst
+   samples/29_1_object_tracker.rst
+   samples/29_2_spatial_object_tracker.rst
+   samples/29_3_object_tracker_video.rst
 
 .. toctree::
    :maxdepth: 1

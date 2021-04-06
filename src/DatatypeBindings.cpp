@@ -15,6 +15,7 @@
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
+#include "depthai/pipeline/datatype/Tracklets.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -28,6 +29,7 @@
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawTracklets.hpp"
 
 
 //pybind
@@ -257,6 +259,29 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
         // TODO add more raw types here, not directly used
+        ;
+
+    py::class_<Tracklet> tracklet(m, "Tracklet", DOC(dai, Tracklet));
+    tracklet
+        .def(py::init<>())
+        .def_readwrite("roi", &Tracklet::roi)
+        .def_readwrite("id", &Tracklet::id)
+        .def_readwrite("label", &Tracklet::label)
+        .def_readwrite("status", &Tracklet::status)
+        .def_readwrite("srcImgDetection", &Tracklet::srcImgDetection)
+        .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
+        ;
+
+    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus")
+        .value("NEW", Tracklet::TrackingStatus::NEW)
+        .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
+        .value("LOST", Tracklet::TrackingStatus::LOST)
+        ;
+    
+    // Bind RawTracklets
+    py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
+    rawTacklets
+        .def_readwrite("tracklets", &RawTracklets::tracklets)
         ;
 
     // RawCameraControl enum bindings
@@ -771,5 +796,12 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
         .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
         ;
+
+    // Tracklets (after ConfigData)
+    py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>>(m, "Tracklets", DOC(dai, Tracklets))
+        .def(py::init<>())
+        .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
+        ;
+
 
 }
