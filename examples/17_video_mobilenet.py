@@ -8,11 +8,16 @@ import numpy as np
 from time import monotonic
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_8shave.blob')).resolve().absolute())
-videoPath = str(Path("./construction_vest.mp4").resolve().absolute())
+parentDir = Path(__file__).parent
+nnPath = str((parentDir / Path('models/mobilenet-ssd_openvino_2021.2_8shave.blob')).resolve().absolute())
+videoPath = str((parentDir / Path('models/construction_vest.mp4')).resolve().absolute())
 if len(sys.argv) > 2:
     nnPath = sys.argv[1]
     videoPath = sys.argv[2]
+
+if not Path(nnPath).exists() or not Path(videoPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()

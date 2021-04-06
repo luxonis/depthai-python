@@ -36,6 +36,10 @@ nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_202
 if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
 
+if not Path(nnBlobPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
