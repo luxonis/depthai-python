@@ -13,9 +13,6 @@ if(UNIX)
 endif()
 
 add_custom_target(install_requirements
-    # Python path (to find compiled module)
-    "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
-    # Example
     COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/install_requirements.py" "--skip_depthai"
     DEPENDS ${TARGET_NAME}
     VERBATIM
