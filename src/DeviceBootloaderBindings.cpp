@@ -37,11 +37,11 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
         
         .def(py::init<const DeviceInfo&>(), py::arg("deviceDesc"), DOC(dai, DeviceBootloader, DeviceBootloader))
         .def(py::init<const DeviceInfo&, std::string>(), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBootloader, DeviceBootloader, 2))
-        .def("flash", &DeviceBootloader::flash, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
-        .def("flashDepthaiApplicationPackage", &DeviceBootloader::flashDepthaiApplicationPackage, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
-        .def("flashBootloader", &DeviceBootloader::flashBootloader, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
-        .def("getVersion", &DeviceBootloader::getVersion, DOC(dai, DeviceBootloader, getVersion))
-        .def("isEmbeddedVersion", &DeviceBootloader::isEmbeddedVersion, DOC(dai, DeviceBootloader, isEmbeddedVersion))
+        .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, Pipeline& pipeline) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline); }, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
+        .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
+        .def("flashBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::string path) { py::gil_scoped_release release; return db.flashBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
+        .def("getVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getVersion(); }, DOC(dai, DeviceBootloader, getVersion))
+        .def("isEmbeddedVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.isEmbeddedVersion(); }, DOC(dai, DeviceBootloader, isEmbeddedVersion))
         ;
 
 }
