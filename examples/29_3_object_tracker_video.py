@@ -9,7 +9,7 @@ import argparse
 
 labelMap = ["person", ""]
 
-nnPathDefault = str((Path(__file__).parent / Path('models/person-detection_openvino_2021.2_7shave.blob')).resolve().absolute())
+nnPathDefault = str((Path(__file__).parent / Path('models/person-detection-0201_openvino_2021.3_7shave.blob')).resolve().absolute())
 videoPathDefault = str((Path(__file__).parent / Path('models/construction_vest.mp4')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('-nnPath', help="Path to mobilenet detection network blob", default=nnPathDefault)
