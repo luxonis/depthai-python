@@ -22,7 +22,7 @@ syncNN = True
 flipRectified = True
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
@@ -73,9 +73,7 @@ monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
-stereo.setOutputRectified(True)
 
 stereo.rectifiedRight.link(manip.inputImage)
 
