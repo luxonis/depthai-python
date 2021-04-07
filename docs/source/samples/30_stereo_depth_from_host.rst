@@ -8,6 +8,10 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
+This example also requires dataset folder - you can download it from
+`here <https://drive.google.com/file/d/1mPyghc_0odGtSU2cROS1uLD-qwRU8aug>`__
+
+
 Source code
 ###########
 
