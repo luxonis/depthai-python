@@ -1,5 +1,5 @@
 13 - Encoding Max Limit
-=====================
+=======================
 
 This example shows how to set up the encoder node to encode the RGB camera and both grayscale cameras
 (of DepthAI/OAK-D) at the same time, having all encoder parameters set to maximum quality and FPS.

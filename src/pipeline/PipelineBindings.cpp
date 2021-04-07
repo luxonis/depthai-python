@@ -17,6 +17,7 @@
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
+#include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 
 // depthai-shared
@@ -75,6 +76,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createSpatialLocationCalculator", &Pipeline::create<node::SpatialLocationCalculator>)
         .def("createMobileNetSpatialDetectionNetwork", &Pipeline::create<node::MobileNetSpatialDetectionNetwork>)
         .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
+        .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
         .def("createUVC", &Pipeline::create<node::UVC>)
         ;
     

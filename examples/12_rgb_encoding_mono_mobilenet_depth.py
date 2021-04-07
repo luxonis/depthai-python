@@ -11,6 +11,9 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 pipeline = dai.Pipeline()
 
@@ -34,7 +37,7 @@ camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 depth = pipeline.createStereoDepth()
-depth.setConfidenceThreshold(200)
+depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
@@ -79,11 +82,11 @@ with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    queue_size = 8
-    qRight = device.getOutputQueue("right", queue_size)
-    qDepth = device.getOutputQueue("depth", queue_size)
-    qManip = device.getOutputQueue("manip", queue_size)
-    qDet = device.getOutputQueue("nn", queue_size)
+    queueSize = 8
+    qRight = device.getOutputQueue("right", queueSize)
+    qDepth = device.getOutputQueue("depth", queueSize)
+    qManip = device.getOutputQueue("manip", queueSize)
+    qDet = device.getOutputQueue("nn", queueSize)
     qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
     frame = None

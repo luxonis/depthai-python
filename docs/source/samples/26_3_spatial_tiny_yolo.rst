@@ -1,5 +1,5 @@
 26.3 - RGB & TinyYolo with spatial data
-===========================================
+=======================================
 
 This example shows how to run TinyYoloV3 and v4 on the RGB input frame, and how to display both the RGB
 preview, detections, depth map and spatial information (X,Y,Z). It's similar to example 
@@ -16,6 +16,12 @@ setConfidenceThreshold - confidence threshold above which objects are detected
 
 Demo
 ####
+
+.. raw:: html
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+        <iframe src="https://www.youtube.com/embed/93tG_qBweN8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+    </div>
 
 
 Setup
