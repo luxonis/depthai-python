@@ -23,7 +23,7 @@ camRight.out.link(xoutRight.input)
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
-        
+
     # Output queue will be used to get the grayscale frames from the output defined above
     qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 

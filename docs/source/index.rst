@@ -105,6 +105,7 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/29_1_object_tracker.rst
    samples/29_2_spatial_object_tracker.rst
    samples/29_3_object_tracker_video.rst
+   samples/30_stereo_depth_from_host.rst
 
 .. toctree::
    :maxdepth: 1
