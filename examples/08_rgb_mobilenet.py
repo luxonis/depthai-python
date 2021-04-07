@@ -74,9 +74,11 @@ with dai.Device(pipeline) as device:
     def displayFrame(name, frame):
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
+            cv2.rectangle(frame, (bbox[0], (bbox[1] - 28)), ((bbox[0] + 78), bbox[1]), (0, 0, 255), cv2.FILLED)
+            
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 5, bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", ((bbox[0] + 78), bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
         cv2.imshow(name, frame)
 
 
@@ -92,8 +94,9 @@ with dai.Device(pipeline) as device:
 
         if inRgb is not None:
             frame = inRgb.getCvFrame()
-            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - startTime)),
-                        (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color=(255, 255, 255))
+            cv2.rectangle(frame, (0,0), (75,20), (255,255,255), cv2.FILLED)
+            cv2.putText(frame, "{:.2f} fps".format(int(counter / (time.monotonic() - startTime))),
+                        (6, 14), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color=(0, 0, 0))
 
         if inDet is not None:
             detections = inDet.detections
