@@ -140,8 +140,8 @@ with dai.Device(pipeline) as device:
     print("Starting pipeline")
     device.startPipeline()
 
-    inStreams = []
-    inStreams.extend(['in_right', 'in_left'])
+    inStreams = ['in_right', 'in_left']
+    inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
     in_q_list = []
     for s in inStreams:
         q = device.getInputQueue(s)
@@ -161,7 +161,7 @@ with dai.Device(pipeline) as device:
         if in_q_list:
             dataset_size = 2  # Number of image pairs
             frame_interval_ms = 500
-            for q in in_q_list:
+            for i, q in enumerate(in_q_list):
                 path = args.dataset + '/' + str(index) + '/' + q.getName() + '.png'
                 data = cv2.imread(path, cv2.IMREAD_GRAYSCALE).reshape(720*1280)
                 tstamp = datetime.timedelta(seconds = timestamp_ms // 1000,
@@ -169,6 +169,7 @@ with dai.Device(pipeline) as device:
                 img = dai.ImgFrame()
                 img.setData(data)
                 img.setTimestamp(tstamp)
+                img.setInstanceNum(inStreamsCameraID[i])
                 img.setWidth(1280)
                 img.setHeight(720)
                 q.send(img)
@@ -177,6 +178,7 @@ with dai.Device(pipeline) as device:
                 print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
+            sleep(frame_interval_ms / 1000)
         # Handle output streams
         for q in q_list:
             if q.getName() in ['left', 'right', 'depth']: continue
