@@ -3,7 +3,7 @@ Nodes
 
 List of all nodes, ref links to the node documentation page where the node is further described in detail
 
-Every node in has an input queue whose default size (8) can be changed with `setQueueSize()`, and default behaviour (blocking) can be changed with 
+Every node in has an input queue whose default size (8) can be changed with `setQueueSize()`, and default behaviour (blocking) can be changed with
 `setBlocking()`. If queue size fills up, behavior depends on blocking attribute.
 
 Q:
@@ -15,9 +15,9 @@ This isn't an output queue per se, but the size of the pool of how many frames c
 somewhere in the pipeline. When all the frames (messages from pool) were sent out and none yet returned, that is when the node will block and
 wait until a frame is returned to the pool (not used by any node in the pipeline anymore)
 
-- On the host side, we have output data queues, and sometimes input data queues, whose size and behaviour are set at creation 
+Q: On the host side, we have output data queues, and sometimes input data queues, whose size and behaviour are set at creation
 (device.getOutputQueue and device.getInputQueue).
-Correct, the size and behavior can be modified by calling device.getOutputQueue again (or directly on the returned object 
+A: Correct, the size and behavior can be modified by calling device.getOutputQueue again (or directly on the returned object
 DataInputQueue / DataOutputQueue)
 
 

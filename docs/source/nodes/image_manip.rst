@@ -35,6 +35,9 @@ Inputs and Outputs
 Usage
 #####
 
+An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
+different streams with their different data formats (color cam, depth) would be great!
+
 .. tabs::
 
   .. code-tab:: py
