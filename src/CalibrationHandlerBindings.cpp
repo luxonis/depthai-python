@@ -10,6 +10,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def(py::init<>(), DOC(dai, CalibrationHandler, CalibrationHandler, 1))
         .def(py::init<std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
         .def(py::init<std::string, std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
+        .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
+
         .def("getCameraIntrinsics", &CalibrationHandler::getCameraIntrinsics, py::arg("cameraId"), py::arg("resizeHeight"), py::arg("resizewidth"), py::arg("topLeftPixelId"), py::arg("bottomRightPixelId"), DOC(dai, Device, getCameraIntrinsics))
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, Device, getDefaultIntrinsics))
 
@@ -18,7 +20,6 @@ void PipelineBindings::bind(pybind11::module& m){
 
         .def("getCameraToImuExtrinsics", &CalibrationHandler::getCameraToImuExtrinsics, py::arg("cameraId"), py::arg("useMeasuredTranslation") = false, DOC(dai, Device, getCameraToImuExtrinsics))
         .def("getImuToCameraExtrinsics", &CalibrationHandler::getImuToCameraExtrinsics, py::arg("cameraId"), py::arg("useMeasuredTranslation") = false, DOC(dai, Device, getImuToCameraExtrinsics))
-        // TODO(sachin): eepromToJsonFile function. should I add argument ?
         .def("eepromToJsonFile", &CalibrationHandler::eepromToJsonFile, py::arg("destPath"), DOC(dai, Device, eepromToJsonFile))
         
         .def("setBoardInfo", &CalibrationHandler::setBoardInfo, py::arg("version"), py::arg("swapLeftRightCam"), py::arg("boardName"), py::arg("boardRev"), DOC(dai, Device, setBoardInfo))
@@ -32,6 +33,6 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoRight))
 
 
-        // .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, Device, getEepromData));
+        .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, Device, getEepromData));
 
 }
