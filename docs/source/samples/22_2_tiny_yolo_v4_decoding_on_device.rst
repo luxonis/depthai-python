@@ -15,6 +15,12 @@ setConfidenceThreshold - confidence threshold above which objects are detected
 Demo
 ####
 
+.. raw:: html
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+        <iframe src="https://www.youtube.com/embed/l4jDLs9d8GI" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+    </div>
+
 
 Setup
 #####
@@ -28,7 +34,7 @@ This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/22_2_tiny_yolo_v4_device_side_decoding.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/22_2_tiny_yolo_v4_device_side_decoding.py>`__
 
 .. literalinclude:: ../../../examples/22_2_tiny_yolo_v4_device_side_decoding.py
    :language: python

@@ -34,7 +34,7 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
      python3 -m pip install -U pip
      python3 -m pip install -r docs/requirements.txt
      cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
-     cmake --build build --parallel --target sphinx
+     cmake --build build --target sphinx --parallel
      python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
      ```
   
@@ -44,7 +44,7 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
      in a new terminal window to update the website source
   
      ```
-     cmake --build build --parallel --target sphinx
+     cmake --build build --target sphinx --parallel
      ```
   
      Then refresh your page - it should load the updated website that was just built
@@ -73,20 +73,29 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 To build a shared library from source perform the following:
 ```
+git submodule update --init --recursive
 mkdir build && cd build
-cmake ..
+cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
 cmake --build . --parallel
 ```
+
+Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
 
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
 ```
 
+To build and install using pip:
+```
+python3 -m pip install .
+```
+
 ## Running tests
 
 To run the tests build the library with the following options
 ```
+git submodule update --init --recursive
 mkdir build_tests && cd build_tests
 cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
 cmake --build . --parallel

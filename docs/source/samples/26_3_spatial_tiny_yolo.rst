@@ -1,5 +1,5 @@
-26.1 - RGB & TinyYolo with spatial data
-===========================================
+26.3 - RGB & TinyYolo with spatial data
+=======================================
 
 This example shows how to run TinyYoloV3 and v4 on the RGB input frame, and how to display both the RGB
 preview, detections, depth map and spatial information (X,Y,Z). It's similar to example 
@@ -17,6 +17,12 @@ setConfidenceThreshold - confidence threshold above which objects are detected
 Demo
 ####
 
+.. raw:: html
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+        <iframe src="https://www.youtube.com/embed/93tG_qBweN8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+    </div>
+
 
 Setup
 #####
@@ -33,7 +39,7 @@ YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) can be 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/26_3_spatial_tiny_yolo.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/26_3_spatial_tiny_yolo.py>`__
 
 .. literalinclude:: ../../../examples/26_3_spatial_tiny_yolo.py
    :language: python

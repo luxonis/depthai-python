@@ -26,9 +26,10 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("setCameraIntrinsics", &CalibrationHandler::setCameraIntrinsics, py::arg("cameraId"), py::arg("intrinsics"), py::arg("width"), py::arg("height"), DOC(dai, Device, setCameraIntrinsics))
         .def("setdistortionCoefficients", &CalibrationHandler::setdistortionCoefficients, py::arg("cameraId"), py::arg("distortionCoefficients"), DOC(dai, Device, setdistortionCoefficients))
         .def("setFov", &CalibrationHandler::setFov, py::arg("cameraId"), py::arg("hfov"), DOC(dai, Device, setFov))
-        .def("setCameraExtrinsics", &CalibrationHandler::setCameraExtrinsics, py::arg("srcCameraId"), py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), DOC(dai, Device, setCameraExtrinsics))
+        
+        .def("setCameraExtrinsics", &CalibrationHandler::setCameraExtrinsics, py::arg("srcCameraId"), py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = {0, 0, 0}, DOC(dai, Device, setCameraExtrinsics))
+        .def("setImuExtrinsics", &CalibrationHandler::setImuExtrinsics, py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = {0, 0, 0}, DOC(dai, Device, setImuExtrinsics))
 
-        .def("setImuExtrinsics", &CalibrationHandler::setImuExtrinsics, py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), DOC(dai, Device, setImuExtrinsics))
         .def("setStereoLeft", &CalibrationHandler::setStereoLeft, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoLeft))
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoRight))
 
