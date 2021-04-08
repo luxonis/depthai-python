@@ -19,22 +19,22 @@ if not Path(datasetDefault).exists():
 
 
 # StereoDepth config options.
-out_depth     = False  # Disparity by default
+out_depth = False  # Disparity by default
 out_rectified = True   # Output and display rectified streams
-lrcheck       = True   # Better handling for occlusions
-extended      = False  # Closer-in minimum depth, disparity range is doubled
-subpixel      = True   # Better accuracy for longer distance, fractional disparity 32-levels
-median        = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
+lrcheck = True   # Better handling for occlusions
+extended = False  # Closer-in minimum depth, disparity range is doubled
+subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
 
 # Sanitize some incompatible options
 if lrcheck or extended or subpixel:
     median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF
 
-print("StereoDepth config options:")
-print("    Left-Right check:  ", lrcheck)
-print("    Extended disparity:", extended)
-print("    Subpixel:          ", subpixel)
-print("    Median filtering:  ", median)
+print("StereoDepth config options: ")
+print("Left-Right check: ", lrcheck)
+print("Extended disparity: ", extended)
+print("Subpixel: ", subpixel)
+print("Median filtering: ", median)
 
 right_intrinsic = [[860.0, 0.0, 640.0], [0.0, 860.0, 360.0], [0.0, 0.0, 1.0]]
 
@@ -45,17 +45,17 @@ def create_stereo_depth_pipeline():
     print("XLINK IN -> STEREO -> XLINK OUT")
     pipeline = dai.Pipeline()
 
-    camLeft         = pipeline.createXLinkIn()
-    camRight        = pipeline.createXLinkIn()
-    stereo          = pipeline.createStereoDepth()
-    xoutLeft        = pipeline.createXLinkOut()
-    xoutRight       = pipeline.createXLinkOut()
-    xoutDepth       = pipeline.createXLinkOut()
-    xoutDisparity   = pipeline.createXLinkOut()
-    xoutRectifLeft  = pipeline.createXLinkOut()
+    camLeft = pipeline.createXLinkIn()
+    camRight = pipeline.createXLinkIn()
+    stereo = pipeline.createStereoDepth()
+    xoutLeft = pipeline.createXLinkOut()
+    xoutRight = pipeline.createXLinkOut()
+    xoutDepth = pipeline.createXLinkOut()
+    xoutDisparity = pipeline.createXLinkOut()
+    xoutRectifLeft = pipeline.createXLinkOut()
     xoutRectifRight = pipeline.createXLinkOut()
 
-    camLeft .setStreamName('in_left')
+    camLeft.setStreamName('in_left')
     camRight.setStreamName('in_right')
 
     stereo.setOutputDepth(out_depth)
@@ -70,20 +70,20 @@ def create_stereo_depth_pipeline():
     stereo.setEmptyCalibration() # Set if the input frames are already rectified
     stereo.setInputResolution(1280, 720)
 
-    xoutLeft       .setStreamName('left')
-    xoutRight      .setStreamName('right')
-    xoutDepth      .setStreamName('depth')
-    xoutDisparity  .setStreamName('disparity')
-    xoutRectifLeft .setStreamName('rectified_left')
+    xoutLeft.setStreamName('left')
+    xoutRight.setStreamName('right')
+    xoutDepth.setStreamName('depth')
+    xoutDisparity.setStreamName('disparity')
+    xoutRectifLeft.setStreamName('rectified_left')
     xoutRectifRight.setStreamName('rectified_right')
 
-    camLeft.out          .link(stereo.left)
-    camRight.out         .link(stereo.right)
-    stereo.syncedLeft    .link(xoutLeft.input)
-    stereo.syncedRight   .link(xoutRight.input)
-    stereo.depth         .link(xoutDepth.input)
-    stereo.disparity     .link(xoutDisparity.input)
-    stereo.rectifiedLeft .link(xoutRectifLeft.input)
+    camLeft.out.link(stereo.left)
+    camRight.out.link(stereo.right)
+    stereo.syncedLeft.link(xoutLeft.input)
+    stereo.syncedRight.link(xoutRight.input)
+    stereo.depth.link(xoutDepth.input)
+    stereo.disparity.link(xoutDisparity.input)
+    stereo.rectifiedLeft.link(xoutRectifLeft.input)
     stereo.rectifiedRight.link(xoutRectifRight.input)
 
     streams = ['left', 'right']
