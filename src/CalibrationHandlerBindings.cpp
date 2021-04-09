@@ -1,7 +1,8 @@
 #include "CalibrationHandlerBindings.hpp"
 #include "depthai/device/CalibrationHandler.hpp"
+#include <vector>
 
-void PipelineBindings::bind(pybind11::module& m){
+void CalibrationHandlerBindings::bind(pybind11::module& m){
 
     using namespace dai;
 
@@ -27,8 +28,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("setdistortionCoefficients", &CalibrationHandler::setdistortionCoefficients, py::arg("cameraId"), py::arg("distortionCoefficients"), DOC(dai, Device, setdistortionCoefficients))
         .def("setFov", &CalibrationHandler::setFov, py::arg("cameraId"), py::arg("hfov"), DOC(dai, Device, setFov))
         
-        .def("setCameraExtrinsics", &CalibrationHandler::setCameraExtrinsics, py::arg("srcCameraId"), py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = {0, 0, 0}, DOC(dai, Device, setCameraExtrinsics))
-        .def("setImuExtrinsics", &CalibrationHandler::setImuExtrinsics, py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = {0, 0, 0}, DOC(dai, Device, setImuExtrinsics))
+        .def("setCameraExtrinsics", &CalibrationHandler::setCameraExtrinsics, py::arg("srcCameraId"), py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = std::vector<float>(3,0), DOC(dai, Device, setCameraExtrinsics))
+        .def("setImuExtrinsics", &CalibrationHandler::setImuExtrinsics, py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = std::vector<float>(3,0), DOC(dai, Device, setImuExtrinsics))
 
         .def("setStereoLeft", &CalibrationHandler::setStereoLeft, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoLeft))
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoRight))
