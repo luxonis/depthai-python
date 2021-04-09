@@ -1,5 +1,5 @@
-ImageManip node
-===============
+StereoDepth node
+================
 
 ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
@@ -24,13 +24,29 @@ Inputs and Outputs
 
 .. code-block::
 
-  InputImage  +-------------------+
-  +---------->+                   |
-              |                   |        out
-              |  ImageManip node  +---------->
-  InputConfig |                   |
-  +---------->+                   |
-              +-------------------+
+                 ┌───────────────────┐
+                 │                   │RectifiedLeft
+                 │                   ├─────────────►
+  Left           │                   │   SyncedLeft
+  ──────────────►│                   ├─────────────►
+                 │                   │        Depth
+                 │                   ├─────────────►
+                 │    StereoDepth    │    Disparity
+                 │                   ├─────────────►
+  Right          │                   │RectifiedRight
+  ──────────────►│                   ├─────────────►
+                 │                   │   SyncedRight
+                 │                   ├─────────────►
+                 └───────────────────┘
+
+Configuration
+#############
+-median
+-raw_depth
+-rectified
+-lr_check
+-ext_disparity
+-subpixel
 
 Usage
 #####
@@ -69,6 +85,6 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.ImageManip
+.. autoclass:: depthai.StereoDepth
   :members:
   :inherited-members:

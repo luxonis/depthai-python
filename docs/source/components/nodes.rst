@@ -1,6 +1,13 @@
 Nodes
 =====
 
+.. toctree::
+   :maxdepth: 0
+   :hidden:
+   :glob:
+
+   nodes/*
+
 List of all nodes, ref links to the node documentation page where the node is further described in detail
 
 Every node in has an input queue whose default size (8) can be changed with `setQueueSize()`, and default behaviour (blocking) can be changed with
@@ -19,14 +26,6 @@ Q: On the host side, we have output data queues, and sometimes input data queues
 (device.getOutputQueue and device.getInputQueue).
 A: Correct, the size and behavior can be modified by calling device.getOutputQueue again (or directly on the returned object
 DataInputQueue / DataOutputQueue)
-
-
-ImageManip
-##########
-
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
-
-For more details, click :ref:`here <ImageManip node>`
 
 
 Reference

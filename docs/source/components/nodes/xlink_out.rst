@@ -1,17 +1,7 @@
-NeuralNetwork node
-===============
+XLinkOut node
+=============
 
-Runs a neural inference on input data.
-
-Passthrough mechanism
-*********************
-
-The passthrough mechanism is very useful when a node specifies its input to be non-blocking, where messages can be overwritten.
-There we don't know on which message the node performed its operation (eg NN, was inference done on frame 25 or skipped 25 and performed
-inference on 26). At the same time means that if: xlink and host input queues are blocking, and we receive both say passthrough and
-output we can do a blocking get on both of those queues and be sure to always get matching frames. They might not arrive at the same time,
-but both of them will arrive, and be in queue in correct spot to be taken out together.
-
+ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
 How to place it
 ###############
@@ -34,13 +24,13 @@ Inputs and Outputs
 
 .. code-block::
 
-  InputImage  +-------------------+
-  +---------->+                   |
-              |                   |        out
-              |  ImageManip node  +---------->
-  InputConfig |                   |
-  +---------->+                   |
-              +-------------------+
+            ┌──────────────┐
+            │              │
+  Input     │              │   (to host)
+  ─────────►│   XLinkOut   ├------------►
+            │              │
+            │              │
+            └──────────────┘
 
 Usage
 #####
@@ -79,6 +69,6 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.ImageManip
+.. autoclass:: depthai.XLinkOut
   :members:
   :inherited-members:
