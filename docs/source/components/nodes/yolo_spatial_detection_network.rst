@@ -1,5 +1,5 @@
-XLink Out node
-==============
+Yolo Spatial Detection Network node
+===================================
 
 ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
@@ -24,13 +24,17 @@ Inputs and Outputs
 
 .. code-block::
 
-            ┌──────────────┐
-            │              │
-  Input     │              │   (to host)
-  ─────────►│   XLinkOut   ├------------►
-            │              │
-            │              │
-            └──────────────┘
+                 ┌───────────────────┐
+  Input          │                   │       Passthrough
+  ──────────────►│-------------------├─────────────────►
+                 │     Yolo          │               Out
+                 │     Spatial       ├─────────────────►
+                 │     Detection     │BoundingBoxMapping
+                 │     Network       ├─────────────────►
+  InputDepth     │                   │  PassthroughDepth
+  ──────────────►│-------------------├─────────────────►
+                 └───────────────────┘
+
 
 Usage
 #####
@@ -59,14 +63,11 @@ different streams with their different data formats (color cam, depth) would be 
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Encoding`
-
+- :ref:`26.3 - RGB & TinyYolo with spatial data`
 
 Reference
 #########
 
-.. autoclass:: depthai.XLinkOut
+.. autoclass:: depthai.YoloSpatialDetectionNetwork
   :members:
   :inherited-members:

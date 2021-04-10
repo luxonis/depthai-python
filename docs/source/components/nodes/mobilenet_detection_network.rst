@@ -1,17 +1,9 @@
-Neural Network node
-===================
+MobileNet Detection Network node
+================================
 
-Runs a neural inference on input data.
-
-Passthrough mechanism
-*********************
-
-The passthrough mechanism is very useful when a node specifies its input to be non-blocking, where messages can be overwritten.
-There we don't know on which message the node performed its operation (eg NN, was inference done on frame 25 or skipped 25 and performed
-inference on 26). At the same time means that if: xlink and host input queues are blocking, and we receive both say passthrough and
-output we can do a blocking get on both of those queues and be sure to always get matching frames. They might not arrive at the same time,
-but both of them will arrive, and be in queue in correct spot to be taken out together.
-
+MobileNet detection network node is very similar to :ref:`Neural Network node` (in fact it extends it). The only difference is that this node
+is specifically for the MobileNet NN and it decodes the result of the NN on device. This means that :code:`Out` of this node is not a byte array
+but a :ref:`ImgDetections message` that can easily be used in your code.
 
 How to place it
 ###############
@@ -21,12 +13,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    manip = pipeline.createMobileNetDetectionNetwork()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto imageManip = pipeline.create<dai::node::MobileNetDetectionNetwork>();
 
 
 Inputs and Outputs
@@ -37,16 +29,12 @@ Inputs and Outputs
               ┌───────────────────┐
               │                   │       Out
               │                   ├───────────►
-              │                   │
-              │   NeuralNetwork   │
-  Input       │                   │ Passthrough
+              │     MobileNet     │
+              │     Detection     │
+  Input       │     Network       │ Passthrough
   ───────────►│-------------------├───────────►
               │                   │
               └───────────────────┘
-
-Configuration
-#############
--blob
 
 Usage
 #####
@@ -75,16 +63,13 @@ different streams with their different data formats (color cam, depth) would be 
 Examples of functionality
 #########################
 
+- :ref:`08 - RGB & MobilenetSSD`
 - :ref:`09 - Mono & MobilenetSSD`
 - :ref:`10 - Mono & MobilenetSSD & Encoding`
-- :ref:`11 - RGB & Encoding & Mono & MobilenetSSD`
-- :ref:`12 - RGB Encoding & Mono with MobilenetSSD & Depth`
-- :ref:`14 - Color Camera Control`
-- :ref:`26.2 - MONO & MobilenetSSD with spatial data`
 
 Reference
 #########
 
-.. autoclass:: depthai.NeuralNetwork
+.. autoclass:: depthai.MobileNetDetectionNetwork
   :members:
   :inherited-members:

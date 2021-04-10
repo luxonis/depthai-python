@@ -7,6 +7,6 @@ Code samples
    :glob:
    :caption: Code samples:
 
-   samples/*
+   ../samples/*
 
 Code samples are used for automated testing.

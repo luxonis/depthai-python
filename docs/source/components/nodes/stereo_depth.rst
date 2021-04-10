@@ -1,5 +1,5 @@
-StereoDepth node
-================
+Stereo Depth node
+=================
 
 ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
@@ -75,12 +75,9 @@ different streams with their different data formats (color cam, depth) would be 
 Examples of functionality
 #########################
 
-- :ref:`09 - Mono & MobilenetSSD`
+- :ref:`03 - Depth Preview`
 - :ref:`10 - Mono & MobilenetSSD & Encoding`
-- :ref:`11 - RGB & Encoding & Mono & MobilenetSSD`
-- :ref:`12 - RGB Encoding & Mono with MobilenetSSD & Depth`
-- :ref:`14 - Color Camera Control`
-- :ref:`26.2 - MONO & MobilenetSSD with spatial data`
+- :ref:`26.1 - RGB & MobilenetSSD with spatial data`
 
 Reference
 #########

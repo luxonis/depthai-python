@@ -1,7 +1,7 @@
-XLinkIn node
-============
+XLink In node
+=============
 
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
+Used for sending a message from the host to the device via XLink.
 
 How to place it
 ###############
@@ -59,12 +59,9 @@ different streams with their different data formats (color cam, depth) would be 
 Examples of functionality
 #########################
 
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Encoding`
-- :ref:`11 - RGB & Encoding & Mono & MobilenetSSD`
-- :ref:`12 - RGB Encoding & Mono with MobilenetSSD & Depth`
 - :ref:`14 - Color Camera Control`
-- :ref:`26.2 - MONO & MobilenetSSD with spatial data`
+- :ref:`17 - Video & MobilenetSSD`
+- :ref:`20 - Color Rotate Warp`
 
 Reference
 #########
