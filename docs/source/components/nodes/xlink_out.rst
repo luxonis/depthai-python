@@ -1,7 +1,6 @@
-XLink Out node
-==============
+XLinkOut
+========
 
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
 How to place it
 ###############

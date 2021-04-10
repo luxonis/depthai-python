@@ -1,6 +1,5 @@
-Color Camera node
-=================
-
+ColorCamera
+===========
 
 
 How to place it
@@ -37,15 +36,6 @@ Inputs and Outputs
 Preview is RGB (or BGR planar/interleaved if configured) and is mostly suited for small size previews and to feed the image
 into :ref:`Neural Network node`. `Video` and `Still` are both NV12, so are suitable for bigger sizes. `Still` gets created when
 a capture event is sent to the ColorCamera, so it's like taking a photo.
-
-Configuration
-#############
-
-
--prev_height
--resolution
--interleaved
--fps
 
 Usage
 #####

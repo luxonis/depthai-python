@@ -1,7 +1,5 @@
-Stereo Depth node
-=================
-
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
+StereoDepth
+===========
 
 How to place it
 ###############
@@ -47,6 +45,18 @@ Configuration
 -lr_check
 -ext_disparity
 -subpixel
+
+
+Disparity
+#########
+
+When calculating the disparity, each pixel in the disparity map gets assigned a confidence value 0..255 by the stereo matching algorithm, as:
+- 0 - maximum confidence that it holds a valid value
+- 255 - minimum confidence, so there are chances the value is incorrect
+(this confidence score is kind-of inverted, if say comparing with NN)
+
+For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
+the threshold get invalidated, i.e. their disparity value is set to zero.
 
 Usage
 #####

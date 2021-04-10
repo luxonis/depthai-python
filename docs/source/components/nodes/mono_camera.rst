@@ -1,5 +1,5 @@
-Mono Camera node
-================
+MonoCamera
+==========
 
 
 How to place it

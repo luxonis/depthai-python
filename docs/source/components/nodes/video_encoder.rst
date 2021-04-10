@@ -1,7 +1,5 @@
-Video Encoder node
-==================
-
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
+VideoEncoder
+============
 
 How to place it
 ###############

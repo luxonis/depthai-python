@@ -1,5 +1,5 @@
-Buffer message
-==============
+Buffer
+======
 
 Just a buffer.
 

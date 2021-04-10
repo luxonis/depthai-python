@@ -26,11 +26,3 @@ Q: On the host side, we have output data queues, and sometimes input data queues
 (device.getOutputQueue and device.getInputQueue).
 A: Correct, the size and behavior can be modified by calling device.getOutputQueue again (or directly on the returned object
 DataInputQueue / DataOutputQueue)
-
-
-Reference
-*********
-
-.. autoclass:: depthai.Node
-  :members:
-  :inherited-members:

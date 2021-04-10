@@ -1,5 +1,5 @@
-Spatial Location Calculator Config message
-==========================================
+SpatialLocationCalculatorConfig
+===============================
 
 
 Reference

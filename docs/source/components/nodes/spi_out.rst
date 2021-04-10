@@ -1,7 +1,5 @@
-SPI Out node
-============
-
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
+SPIOut
+======
 
 How to place it
 ###############

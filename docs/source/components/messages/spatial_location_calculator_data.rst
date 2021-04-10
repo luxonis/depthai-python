@@ -1,5 +1,5 @@
-Spatial Location Calculator Data message
-==========================================
+SpatialLocationCalculatorData
+=============================
 
 
 Reference

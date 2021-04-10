@@ -1,5 +1,5 @@
-XLink In node
-=============
+XLinkIn
+=======
 
 Used for sending a message from the host to the device via XLink.
 

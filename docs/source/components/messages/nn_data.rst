@@ -1,5 +1,5 @@
-NN Data message
-===============
+NNData
+======
 
 Carries tensors and their metadata
 
