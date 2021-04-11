@@ -6,6 +6,9 @@ import cv2
 import depthai as dai
 import numpy as np
 
+
+flipRectified = True
+
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -91,6 +94,16 @@ with dai.Device(pipeline) as device:
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
+    # Add bounding boxes and text to the frame and show it to the user
+    def show(name, frame):
+        for detection in detections:
+            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        # Show the frame
+        cv2.imshow(name, frame)
+
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
@@ -99,32 +112,30 @@ with dai.Device(pipeline) as device:
 
         if inRight is not None:
             rightFrame = inRight.getCvFrame()
+            if flipRectified:
+                rightFrame = cv2.flip(rightFrame, 1)
+
 
         if inDet is not None:
             detections = inDet.detections
+            if flipRectified:
+                for detection in detections:
+                    swap = detection.xmin
+                    detection.xmin = 1 - detection.xmax
+                    detection.xmax = 1 - swap
 
         if inDepth is not None:
             # Frame is transformed, the color map will be applied to highlight the depth info
-            depthFrame = cv2.flip(inDepth.getFrame(), 1)
             # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
-            depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_JET)
-
-        if rightFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(rightFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(rightFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(rightFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(rightFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("rectified right", rightFrame)
+            depthFrame = cv2.applyColorMap(inDepth.getFrame(), cv2.COLORMAP_JET)
 
         if depthFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                bbox[::2] += offsetX
-                cv2.rectangle(depthFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(depthFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(depthFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("depth", depthFrame)
+            show("depth", depthFrame)
+
+        if rightFrame is not None:
+            show("rectified right", rightFrame)
+
+        detections = []
 
         if cv2.waitKey(1) == ord('q'):
             break
