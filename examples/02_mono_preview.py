@@ -24,7 +24,7 @@ xoutRight = pipeline.createXLinkOut()
 xoutRight.setStreamName('right')
 camRight.out.link(xoutRight.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -37,7 +37,7 @@ with dai.Device(pipeline) as device:
     frameRight = None
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inLeft = qLeft.tryGet()
         inRight = qRight.tryGet()
 

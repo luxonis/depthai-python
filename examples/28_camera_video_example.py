@@ -21,7 +21,7 @@ xoutVideo.input.setQueueSize(1)
 
 colorCam.video.link(xoutVideo.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()

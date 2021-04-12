@@ -24,7 +24,7 @@ ve1Out.setStreamName('ve1Out')
 ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
 
-#setting to 26fps will trigger error
+# Setting to 26fps will trigger error
 ve1.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
 ve2.setDefaultProfilePreset(3840, 2160, 25, dai.VideoEncoderProperties.Profile.H265_MAIN)
 ve3.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
@@ -39,7 +39,7 @@ ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as dev:
 
     # Prepare data queues

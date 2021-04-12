@@ -10,46 +10,6 @@ Python bindings for C++ depthai-core library
 
 Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.com/projects/api/en/latest/)
 
-### Building documentation
-
-- **Using [Docker](https://docs.docker.com/) (with [Docker Compose](https://docs.docker.com/compose/install/))**
-
-     ```
-     cd docs
-     docker-compose build
-     docker-compose up
-     ```
-  
-     Then open [http://localhost:8000](http://localhost:8000).
-     
-     This docker container will watch changes in the `docs/source` directory and rebuild the docs automatically
-
-- **Linux**
-     
-     First, please install the required [dependencies](#Dependencies)
-  
-     Then run the following commands to build the docs website
-  
-     ```
-     python3 -m pip install -U pip
-     python3 -m pip install -r docs/requirements.txt
-     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
-     cmake --build build --target sphinx --parallel
-     python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
-     ```
-  
-     Then open [http://localhost:8000](http://localhost:8000).
-
-     This will build documentation based on current sources, so if some new changes will be made, run this command
-     in a new terminal window to update the website source
-  
-     ```
-     cmake --build build --target sphinx --parallel
-     ```
-  
-     Then refresh your page - it should load the updated website that was just built
-  
-
 ## Installation
 
 Prebuilt wheels are available in [Luxonis repository](https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/)
@@ -110,6 +70,46 @@ ctest
 - Raspbian 10;
 - macOS 10.14.6, 10.15.4;
 
+### Building documentation
+
+- **Using [Docker](https://docs.docker.com/) (with [Docker Compose](https://docs.docker.com/compose/install/))**
+
+     ```
+     cd docs
+     sudo docker-compose build
+     sudo docker-compose up
+     ```
+
+     > ℹ️ You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
+     Then open [http://localhost:8000](http://localhost:8000).
+
+     This docker container will watch changes in the `docs/source` directory and rebuild the docs automatically
+
+- **Linux**
+
+     First, please install the required [dependencies](#Dependencies)
+
+     Then run the following commands to build the docs website
+
+     ```
+     python3 -m pip install -U pip
+     python3 -m pip install -r docs/requirements.txt
+     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
+     cmake --build build --parallel --target sphinx
+     python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
+     ```
+
+     Then open [http://localhost:8000](http://localhost:8000).
+
+     This will build documentation based on current sources, so if some new changes will be made, run this command
+     in a new terminal window to update the website source
+
+     ```
+     cmake --build build --parallel --target sphinx
+     ```
+
+     Then refresh your page - it should load the updated website that was just built
+
 ## Troubleshooting
 
 ### Relocation link error
@@ -121,7 +121,7 @@ Build failure on Ubuntu 18.04 ("relocation ..." link error) with gcc 7.4.0 (defa
          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 70
          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 70
 ### Hunter
-Hunter is a CMake-only dependency manager for C/C++ projects. 
+Hunter is a CMake-only dependency manager for C/C++ projects.
 
 If you are stuck with error message which mentions external libraries (subdirectory of `.hunter`) like the following:
 ```
@@ -145,7 +145,7 @@ del C:/[user]/.hunter
 
 ### LTO - link time optimization
 
-If following message appears: 
+If following message appears:
 ```
 lto1: internal compiler error: in add_symbol_to_partition_1, at lto/lto-partition.c:152
 Please submit a full bug report,
