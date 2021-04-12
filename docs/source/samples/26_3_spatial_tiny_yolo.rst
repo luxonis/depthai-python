@@ -2,7 +2,7 @@
 =======================================
 
 This example shows how to run TinyYoloV3 and v4 on the RGB input frame, and how to display both the RGB
-preview, detections, depth map and spatial information (X,Y,Z). It's similar to example 
+preview, detections, depth map and spatial information (X,Y,Z). It's similar to example
 '26_1_spatial_mobilenet' except it is running TinyYolo network.
 X,Y,Z coordinates are relative to the center of depth map.
 

@@ -27,7 +27,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
+This example also requires YoloV3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob>`__
 
 Source code

@@ -14,7 +14,7 @@ import depthai as dai
 import numpy as np
 import time
 
-# tiny yolo v3 label texts
+# Tiny yolo v3 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -79,7 +79,7 @@ nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()

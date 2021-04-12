@@ -104,7 +104,7 @@ class AutoExposureRegion:
         return roi
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -118,7 +118,7 @@ with dai.Device(pipeline) as device:
 
     nnRegion = True
     region = AutoExposureRegion()
-    
+
     # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -136,7 +136,7 @@ with dai.Device(pipeline) as device:
         cv2.imshow(name, frame)
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRgb = qRgb.tryGet()
         inDet = qDet.tryGet()
 

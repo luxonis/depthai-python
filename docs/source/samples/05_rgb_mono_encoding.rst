@@ -8,7 +8,7 @@ each, all at 30FPS. Each encoded video stream is transferred over XLINK and save
 Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
 playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
 
-Be careful, this example saves encoded video to your host storage. So if you leave them running,
+Be careful, this example saves encoded video to your host storage. So if you leave it running,
 you could fill up your storage on your host.
 
 Demo

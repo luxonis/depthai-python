@@ -41,7 +41,7 @@ control_in.out.link(camRight.inputControl)
 def clamp(num, v0, v1): return max(v0, min(num, v1))
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -68,7 +68,7 @@ with dai.Device(pipeline) as device:
     frameRight = None
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inLeft = qLeft.tryGet()
         inRight = qRight.tryGet()
 

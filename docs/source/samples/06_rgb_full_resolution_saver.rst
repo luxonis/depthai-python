@@ -8,7 +8,7 @@ uncompressed frames, processed by ISP, and raw - BayerRG (R_Gr_Gb_B), as read fr
 10-bit packed. See here for the pull request on this capability.
 
 Be careful, this example saves full resolution .png pictures to your host storage. So if you leave
-them running, you could fill up your storage on your host.
+it running, you could fill up your storage on your host.
 
 Demo
 ####

@@ -16,14 +16,14 @@ Supported Platforms
 
 We keep up-to-date, pre-compiled, libraries for the following platforms.  Note that a new change is that for Ubuntu now also work unchanged for the Jetson/Xavier series:
 
-======================== =========================================== ================================================= ================================================================================
-Platform                 Instructions                                Tutorial                                          Support
-======================== =========================================== ================================================= ================================================================================
-Windows 10               :ref:`Platform dependencies <Windows>`      `Video tutorial <https://youtu.be/ekopKJfcWiE>`__ `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-macOS                    :ref:`Platform dependencies <macOS>`        `Video tutorial <https://youtu.be/0RGmmjed3Hc>`__ `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
-Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`       `Video tutorial <https://youtu.be/QXeXMaxj4cM>`__ `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
-Raspberry Pi             :ref:`Platform dependencies <Raspberry Pi>` `Video tutorial <https://youtu.be/BpUMT-xqwqE>`__ `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-======================== =========================================== ================================================= ================================================================================
+======================== ============================================== ================================================================================
+Platform                 Instructions                                   Support
+======================== ============================================== ================================================================================
+Windows 10               :ref:`Platform dependencies <Windows>`         `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
+Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
+Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
+======================== ============================================== ================================================================================
 
 And the following platforms are also supported by a combination of the community and Luxonis.
 
@@ -34,6 +34,7 @@ Fedora                                                                       `Di
 Robot Operating System                                                       `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
 Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
+Kernel Virtual Machine :ref:`Run on KVM <KVM>`                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 ====================== ===================================================== ================================================================================
 
 macOS
@@ -146,6 +147,68 @@ Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux h
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on
 the host.
+
+KVM
+***
+
+To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__,  there is a need to attach and detach USB 
+devices on the fly when the host machine detects changes in the USB bus.
+
+OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively. 
+But when the camera is used in a virtual environment the situation is different. 
+
+On your host machine, use the following code:
+
+.. code-block:: bash
+
+  SUBSYSTEM=="usb", ACTION=="bind", ENV{ID_VENDOR_ID}=="03e7", MODE="0666", RUN+="/usr/local/bin/movidius_usb_hotplug.sh depthai-vm"
+  SUBSYSTEM=="usb", ACTION=="remove", ENV{PRODUCT}=="3e7/2485/1", ENV{DEVTYPE}=="usb_device", MODE="0666", RUN+="/usr/local/bin/movidius_usb_hotplug.sh depthai-vm"
+  SUBSYSTEM=="usb", ACTION=="remove", ENV{PRODUCT}=="3e7/f63b/100", ENV{DEVTYPE}=="usb_device", MODE="0666", RUN+="/usr/local/bin/movidius_usb_hotplug.sh depthai-vm"
+
+The script that the udev rule is calling (movidius_usb_hotplug.sh) should then attach/detach the USB device to the virtual machine. 
+In this case we need to call :code:`virsh` command. For example, the script could do the following:
+
+.. code-block:: bash
+
+  #!/bin/bash
+  # Abort script execution on errors
+  set -e
+  if [ "${ACTION}" == 'bind' ]; then
+    COMMAND='attach-device'
+  elif [ "${ACTION}" == 'remove' ]; then
+    COMMAND='detach-device'
+    if [ "${PRODUCT}" == '3e7/2485/1' ]; then
+      ID_VENDOR_ID=03e7
+      ID_MODEL_ID=2485
+    fi
+    if [ "${PRODUCT}" == '3e7/f63b/100' ]; then
+      ID_VENDOR_ID=03e7
+      ID_MODEL_ID=f63b
+    fi
+  else
+    echo "Invalid udev ACTION: ${ACTION}" >&2
+    exit 1
+  fi
+  echo "Running virsh ${COMMAND} ${DOMAIN} for ${ID_VENDOR}." >&2
+  virsh "${COMMAND}" "${DOMAIN}" /dev/stdin <<END
+  <hostdev mode='subsystem' type='usb'>
+    <source>
+      <vendor id='0x${ID_VENDOR_ID}'/>
+      <product id='0x${ID_MODEL_ID}'/>
+    </source>
+  </hostdev>
+  END
+  exit 0
+
+
+Note that when the device is disconnected from the USB bus, some udev environmental variables are not available (:code:`ID_VENDOR_ID` or :code:`ID_MODEL_ID`), 
+that is why you need to use :code:`PRODUCT` environmental variable to identify which device has been disconnected.
+
+The virtual machine where DepthAI API application is running should have defined a udev rules that identify the OAK-D camera. 
+The udev rule is decribed `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
+
+Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
+
 
 Install from PyPI
 #################
