@@ -121,7 +121,7 @@ Build failure on Ubuntu 18.04 ("relocation ..." link error) with gcc 7.4.0 (defa
          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 70
          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 70
 ### Hunter
-Hunter is a CMake-only dependency manager for C/C++ projects. 
+Hunter is a CMake-only dependency manager for C/C++ projects.
 
 If you are stuck with error message which mentions external libraries (subdirectory of `.hunter`) like the following:
 ```
@@ -145,7 +145,7 @@ del C:/[user]/.hunter
 
 ### LTO - link time optimization
 
-If following message appears: 
+If following message appears:
 ```
 lto1: internal compiler error: in add_symbol_to_partition_1, at lto/lto-partition.c:152
 Please submit a full bug report,
