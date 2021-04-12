@@ -37,7 +37,7 @@ camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 depth = pipeline.createStereoDepth()
-depth.setConfidenceThreshold(200)
+depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
 depth.setOutputRectified(True)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
@@ -83,11 +83,11 @@ with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    queue_size = 8
-    qRight = device.getOutputQueue("right", queue_size)
-    qDepth = device.getOutputQueue("depth", queue_size)
-    qManip = device.getOutputQueue("manip", queue_size)
-    qDet = device.getOutputQueue("nn", queue_size)
+    queueSize = 8
+    qRight = device.getOutputQueue("right", queueSize)
+    qDepth = device.getOutputQueue("depth", queueSize)
+    qManip = device.getOutputQueue("manip", queueSize)
+    qDet = device.getOutputQueue("nn", queueSize)
     qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
     frame = None
