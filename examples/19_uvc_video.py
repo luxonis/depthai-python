@@ -31,6 +31,9 @@ else:
 uvc = pipeline.createUVC()
 cam_rgb.video.link(uvc.input)
 
+# Create an UAC (USB Audio Class) node
+uac = pipeline.createUAC()
+
 if args.flash_bootloader or args.flash_app:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
     bootloader = dai.DeviceBootloader(bl)

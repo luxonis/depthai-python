@@ -16,6 +16,7 @@
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
+#include "depthai/pipeline/node/UAC.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -452,6 +453,10 @@ void NodeBindings::bind(pybind11::module& m){
     // UVC node
     py::class_<UVC, Node, std::shared_ptr<UVC>>(m, "UVC")
         .def_readonly("input", &UVC::input)
+        ;
+
+    // UAC node
+    py::class_<UAC, Node, std::shared_ptr<UAC>>(m, "UAC")
         ;
 
 

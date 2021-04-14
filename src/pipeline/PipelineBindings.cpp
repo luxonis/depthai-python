@@ -19,6 +19,7 @@
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
+#include "depthai/pipeline/node/UAC.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -78,6 +79,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
         .def("createUVC", &Pipeline::create<node::UVC>)
+        .def("createUAC", &Pipeline::create<node::UAC>)
         ;
     
 
