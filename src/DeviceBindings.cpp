@@ -82,6 +82,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("__enter__", [](py::object obj){ return obj; })
         .def("__exit__", [](Device& d, py::object type, py::object value, py::object traceback) { d.close(); })
         .def("close", &Device::close, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
+        .def("isClosed", &Device::isClosed, "Check if the device is still connected`")
 
         //dai::Device methods
         //static
@@ -131,6 +132,9 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getQueueEvents", [](Device& d, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
             return deviceGetQueueEventsHelper(d, d.getOutputQueueNames(), maxNumEvents, timeout);
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvents, 4))
+        
+        .def("getCalibration", &Device::getCalibration, DOC(dai, Device, getCalibration))
+        .def("flashCalibration", &Device::flashCalibration, py::arg("calibrationDataHandler"), DOC(dai, Device, flashCalibration))
 
         .def("getQueueEvent", [](Device& d, const std::vector<std::string>& queueNames, std::chrono::microseconds timeout) {
             auto events = deviceGetQueueEventsHelper(d, queueNames, std::numeric_limits<std::size_t>::max(), timeout);
@@ -153,6 +157,7 @@ void DeviceBindings::bind(pybind11::module& m){
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
         .def("setLogLevel", &Device::setLogLevel, py::arg("level"), DOC(dai, Device, setLogLevel))
         .def("getLogLevel", &Device::getLogLevel, DOC(dai, Device, getLogLevel))
+        .def("getCurrentDeviceInfo", &Device::getCurrentDeviceInfo, DOC(dai, Device, getCurrentDeviceInfo))
         .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate, DOC(dai, Device, getSystemInformationLoggingRate))
         .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage, DOC(dai, Device, getDdrMemoryUsage))
