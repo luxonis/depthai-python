@@ -1,5 +1,6 @@
 #include "CalibrationHandlerBindings.hpp"
 #include "depthai/device/CalibrationHandler.hpp"
+#include "depthai-shared/common/Point2f.hpp"
 #include <vector>
 
 void CalibrationHandlerBindings::bind(pybind11::module& m){
@@ -13,7 +14,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def(py::init<std::string, std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
         .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
 
-        .def("getCameraIntrinsics", &CalibrationHandler::getCameraIntrinsics, py::arg("cameraId"), py::arg("resizeHeight"), py::arg("resizewidth"), py::arg("topLeftPixelId"), py::arg("bottomRightPixelId"), DOC(dai, Device, getCameraIntrinsics))
+        .def("getCameraIntrinsics", &CalibrationHandler::getCameraIntrinsics, py::arg("cameraId"), py::arg("resizeHeight") = -1, py::arg("resizewidth") = -1, py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, Device, getCameraIntrinsics))
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, Device, getDefaultIntrinsics))
 
         .def("getDistortionCoefficients", &CalibrationHandler::getDistortionCoefficients, py::arg("cameraId"), DOC(dai, Device, getDistortionCoefficients))
@@ -33,7 +34,8 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
 
         .def("setStereoLeft", &CalibrationHandler::setStereoLeft, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoLeft))
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoRight))
-
+        .def("getStereoLeftRectificationRotation", &CalibrationHandler::getStereoLeftRectificationRotation, DOC(dai, Device, getStereoLeftRectificationRotation))
+        .def("getStereoRightRectificationRotation", &CalibrationHandler::getStereoRightRectificationRotation, DOC(dai, Device, getStereoRightRectificationRotation))
 
         .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, Device, getEepromData));
 

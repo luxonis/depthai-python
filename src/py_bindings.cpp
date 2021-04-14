@@ -42,9 +42,10 @@ PYBIND11_MODULE(depthai,m)
     PipelineBindings::bind(m);
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
+    CommonBindings::bind(m);
     CalibrationHandlerBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
-    CommonBindings::bind(m);
+    
     DatatypeBindings::bind(m);
     DataQueueBindings::bind(m);
     LogBindings::bind(m);
