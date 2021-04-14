@@ -14,7 +14,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def(py::init<std::string, std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
         .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
 
-        .def("getCameraIntrinsics", &CalibrationHandler::getCameraIntrinsics, py::arg("cameraId"), py::arg("resizeHeight") = -1, py::arg("resizewidth") = -1, py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, Device, getCameraIntrinsics))
+        .def("getCameraIntrinsics", &CalibrationHandler::getCameraIntrinsics, py::arg("cameraId"), py::arg("resizewidth") = -1, py::arg("resizeHeight") = -1, py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, Device, getCameraIntrinsics))
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, Device, getDefaultIntrinsics))
 
         .def("getDistortionCoefficients", &CalibrationHandler::getDistortionCoefficients, py::arg("cameraId"), DOC(dai, Device, getDistortionCoefficients))
@@ -24,7 +24,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def("getImuToCameraExtrinsics", &CalibrationHandler::getImuToCameraExtrinsics, py::arg("cameraId"), py::arg("useMeasuredTranslation") = false, DOC(dai, Device, getImuToCameraExtrinsics))
         .def("eepromToJsonFile", &CalibrationHandler::eepromToJsonFile, py::arg("destPath"), DOC(dai, Device, eepromToJsonFile))
         
-        .def("setBoardInfo", &CalibrationHandler::setBoardInfo, py::arg("version"), py::arg("swapLeftRightCam"), py::arg("boardName"), py::arg("boardRev"), DOC(dai, Device, setBoardInfo))
+        .def("setBoardInfo", &CalibrationHandler::setBoardInfo, py::arg("swapLeftRightCam"), py::arg("boardName"), py::arg("boardRev"), DOC(dai, Device, setBoardInfo))
         .def("setCameraIntrinsics", &CalibrationHandler::setCameraIntrinsics, py::arg("cameraId"), py::arg("intrinsics"), py::arg("width"), py::arg("height"), DOC(dai, Device, setCameraIntrinsics))
         .def("setdistortionCoefficients", &CalibrationHandler::setdistortionCoefficients, py::arg("cameraId"), py::arg("distortionCoefficients"), DOC(dai, Device, setdistortionCoefficients))
         .def("setFov", &CalibrationHandler::setFov, py::arg("cameraId"), py::arg("hfov"), DOC(dai, Device, setFov))
