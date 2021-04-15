@@ -1,0 +1,4 @@
+# Each line should contain the regular expression of a known Sphinx warning
+# that should be filtered out
+.*Duplicate C\+\+ declaration.*\n.*'\.\. cpp:class::.*dai::ADatatype'.*
+.*Duplicate C\+\+ declaration.*\n.*'\.\. cpp:class::.*dai::Buffer'.*
