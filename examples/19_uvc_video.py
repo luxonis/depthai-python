@@ -20,6 +20,9 @@ cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setInterleaved(False)
 cam_rgb.setPreviewSize(1920, 1080)
 cam_rgb.initialControl.setManualFocus(130)
+# Note: this file contains tuning info for all cameras, but for now setting it
+#       at pipeline level is not supported, so we set it for ColorCamera
+#cam_rgb.setCameraTuningBlobPath('/home/user/customTuning.bin')
 
 if enable_4k:
     cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)

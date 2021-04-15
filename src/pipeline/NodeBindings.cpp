@@ -168,6 +168,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getIspSize", &ColorCamera::getIspSize, DOC(dai, node, ColorCamera, getIspSize))
         .def("getIspWidth", &ColorCamera::getIspWidth, DOC(dai, node, ColorCamera, getIspWidth))
         .def("getIspHeight", &ColorCamera::getIspHeight, DOC(dai, node, ColorCamera, getIspHeight))
+        .def("setCameraTuningBlobPath", &ColorCamera::setCameraTuningBlobPath, py::arg("path"), DOC(dai, node, ColorCamera, setCameraTuningBlobPath))
         ;
 
 
