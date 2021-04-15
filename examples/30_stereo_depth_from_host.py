@@ -170,6 +170,7 @@ with dai.Device(pipeline) as device:
                 img.setData(data)
                 img.setTimestamp(tstamp)
                 img.setInstanceNum(inStreamsCameraID[i])
+                img.setType(dai.ImgFrame.Type.RAW8)
                 img.setWidth(1280)
                 img.setHeight(720)
                 q.send(img)

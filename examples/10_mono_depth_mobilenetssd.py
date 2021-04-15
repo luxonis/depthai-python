@@ -43,7 +43,7 @@ right.out.link(stereo.right)
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 stereo.rectifiedRight.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
