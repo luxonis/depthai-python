@@ -458,6 +458,7 @@ void NodeBindings::bind(pybind11::module& m){
 
     // UAC node
     py::class_<UAC, Node, std::shared_ptr<UAC>>(m, "UAC")
+        .def("setStreamBackMic", &UAC::setStreamBackMic, py::arg("enable"), DOC(dai, node, UAC, setStreamBackMic))
         ;
 
 
