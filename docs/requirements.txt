@@ -7,3 +7,4 @@ git+https://github.com/luxonis/pybind11_mkdoc.git@master
 Sphinx-Substitution-Extensions==2020.9.30.0
 sphinx-autopackagesummary==1.3
 autodocsumm==0.2.2
+pathlib==1.0.1

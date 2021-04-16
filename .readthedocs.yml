@@ -18,6 +18,7 @@ submodules:
 sphinx:
   builder: dirhtml
   configuration: docs/source/conf.py
+  fail_on_warning: true
 
 # Build documentation with MkDocs
 #mkdocs:
