@@ -1,6 +1,7 @@
 SystemLogger
 ============
 
+SystemLogger node is used to get :ref:`system information <SystemInformation>` of the device.
 
 How to place it
 ###############
@@ -10,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    logger = pipeline.createSystemLogger()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto logger = pipeline.create<dai::node::SystemLogger>();
 
 
 Inputs and Outputs
@@ -31,29 +32,32 @@ Inputs and Outputs
   │              │
   └──────────────┘
 
+Message types
+#############
+
+- :code:`Out` - :ref:`SystemInformation`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    logger = pipeline.createSystemLogger()
+    logger.setRate(1)  # 1 Hz
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Send system info to the host via XLink
+    sys_xout = pipeline.createXLinkOut()
+    sys_xout.setStreamName("sysinfo")
+    logger.out.link(sys_xout.input)
+
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto logger = pipeline.create<dai::node::SystemLogger>();
 
 Examples of functionality
 #########################

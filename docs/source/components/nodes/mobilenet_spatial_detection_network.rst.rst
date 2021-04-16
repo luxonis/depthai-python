@@ -1,6 +1,8 @@
 MobileNetSpatialDetectionNetwork
 ================================
 
+Spatial detection for the MobileNet NN. It is similar to a combination of the :ref:`MobileNetDetectionNetwork` and :ref:`SpatialLocationCalculator`.
+
 How to place it
 ###############
 
@@ -9,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    mobilenet_spatial = pipeline.createMobileNetSpatialDetectionNetwork()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto mobilenetSpatial = pipeline.create<dai::node::MobileNetSpatialDetectionNetwork>();
 
 
 Inputs and Outputs
@@ -33,29 +35,43 @@ Inputs and Outputs
   ──────────────►│-------------------├─────────────────►
                  └───────────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`ImgFrame`
+- :code:`InputDepth` - :ref:`ImgFrame`
+- :code:`Passthrough` - :ref:`ImgFrame`
+- :code:`Out` - :ref:`SpatialImgDetections`
+- :code:`BoundingBoxMapping` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`PassthroughDepth` - :ref:`ImgFrame`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    mobilenet_spatial = pipeline.createMobileNetSpatialDetectionNetwork()
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    mobilenet_spatial.setBlobPath(nnBlobPath)
+    # Will ingore all detections whose confidence is below 50%
+    mobilenet_spatial.setConfidenceThreshold(0.5)
+    mobilenet_spatial.input.setBlocking(False)
+    # How big the ROI will be (smaller value can provide a more stable reading)
+    mobilenet_spatial.setBoundingBoxScaleFactor(0.5)
+    # Min/Max threshold. Values out of range will be set to 0 (invalid)
+    mobilenet_spatial.setDepthLowerThreshold(100)
+    mobilenet_spatial.setDepthUpperThreshold(5000)
+
+    # Link depth from the StereoDepth node
+    stereo.depth.link(mobilenet_spatial.inputDepth)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto mobilenetSpatial = pipeline.create<dai::node::MobileNetSpatialDetectionNetwork>();
 
 Examples of functionality
 #########################

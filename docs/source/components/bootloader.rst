@@ -89,5 +89,5 @@ Following section will show an example of: Flashing bootloader (needed only once
 
 GPIO boot settings. Boot settings must be set as following: BOOT[4:0] : 01000 and GPIO58 (WAKEUP): 0
 
-.. image:: /_static/images/components/boot-depthai.png
-    :alt: face
+.. image:: /_static/images/components/boot-depthai.jpeg
+    :alt: boot-depthai

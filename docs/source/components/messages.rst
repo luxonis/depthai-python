@@ -8,4 +8,4 @@ Messages
 
    messages/*
 
-List of all messages, ref links to the message documentation page where the message is further described in detail
+Messages are sent between linked :ref:`Nodes`. Message is created in a node, sent out of the node's output to other node's input.

@@ -1,6 +1,8 @@
 MonoCamera
 ==========
 
+MonoCamera node is a source of :ref:`image frames <ImgFrame>`. You can control in at runtime with the :code:`InputControl`. Some DepthAI modules don't
+have mono camera(s). Two mono cameras are used to calculate stereo depth (with :ref:`StereoDepth` node).
 
 How to place it
 ###############
@@ -10,12 +12,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    mono = pipeline.createMonoCamera()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto mono = pipeline.create<dai::node::MonoCamera>();
 
 
 Inputs and Outputs
@@ -33,6 +35,13 @@ Inputs and Outputs
                  │                   │
                  └───────────────────┘
 
+Message types
+#############
+
+- :code:`InitialControl` - :ref:`CameraControl`
+- :code:`InputControl` - :ref:`CameraControl`
+- :code:`Out` - :ref:`ImgFrame`
+
 Usage
 #####
 
@@ -40,19 +49,15 @@ Usage
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
-
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    pipeline = dai.Pipeline()
+    mono = pipeline.createMonoCamera()
+    mono.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    mono.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto mono = pipeline.create<dai::node::MonoCamera>();
 
 Examples of functionality
 #########################

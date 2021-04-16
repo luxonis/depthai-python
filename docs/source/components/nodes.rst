@@ -8,21 +8,31 @@ Nodes
 
    nodes/*
 
-List of all nodes, ref links to the node documentation page where the node is further described in detail
+Nodes are the building blocks when populating the :ref:`Pipeline`. Each node provides a specific functionality on the DepthaI and a set of configurable
+properties. After you create a node on a pipeline, you can also configure it as desired.
 
-Every node in has an input queue whose default size (8) can be changed with `setQueueSize()`, and default behaviour (blocking) can be changed with
-`setBlocking()`. If queue size fills up, behavior depends on blocking attribute.
 
-Q:
-- In addition some type of nodes have an output queue. When full, the node stops and waits for the results to be consumed before
-producing new ones. The size of the output queue can be changed with setNumPoolFrames for NeuralNetwork nodes, with setNumFramesPool for
-ImageManip and VideoEncoder nodes. I don't know if the "same-same but different" function names is relevant or not
-A:
-This isn't an output queue per se, but the size of the pool of how many frames can be created and sent out while other frames are already
-somewhere in the pipeline. When all the frames (messages from pool) were sent out and none yet returned, that is when the node will block and
-wait until a frame is returned to the pool (not used by any node in the pipeline anymore)
+Outputs and inputs
+##################
 
-Q: On the host side, we have output data queues, and sometimes input data queues, whose size and behaviour are set at creation
-(device.getOutputQueue and device.getInputQueue).
-A: Correct, the size and behavior can be modified by calling device.getOutputQueue again (or directly on the returned object
-DataInputQueue / DataOutputQueue)
+Each node can have zero, one or multiple inputs and outputs. For example :ref:`SystemLogger` node has no inputs and 1 output and :ref:`StereoDepth` has
+2 inputs and 6 outputs.
+
+Node input
+##########
+
+Node input queue is a queue for the :ref:`Messages`. It can be linked with other node's output (that's how you link up nodes). Node inputs are
+configurable - with :code:`input.setBlocking(bool)` and :code:`input.setQueueSize(num)`. Default behaviour is blocking and a queue size of 8 messages.
+If the input queue fills up, behavior of the input depends on blocking attribute.
+If blocking is enabled, new messages will be discarded until user gets the old messages. If blocking is disabled, new messages will push out old messages.
+
+Node output
+###########
+
+Node outputs :ref:`Messages`. There is no output queue per se, but some nodes do have a configurable output message pool.
+Output message pool is a reserved memory region (to reduce memory fragmentation) that holds output messages.
+After the node creates an output message (for example :ref:`ImgFrame`), it will send it to other nodes as specified when linking the inputs/outputs of the node.
+Currently, some nodes (:ref:`VideoEncoder`, :ref:`NeuralNetwork`, :ref:`ImageManip`, :ref:`XLinkIn`) can have the pool size configured.
+The size of the pool specifies how many messages can be created and sent out while other messages are already
+somewhere in the pipeline. When all the messages from pool are sent out and none yet returned, that is when the node will block and
+wait until a message is returned to the pool (not used by any node in the pipeline anymore)

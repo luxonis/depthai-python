@@ -1,19 +1,28 @@
 Script
 ======
 
-enables users to write scripts that will run on the device.
+Scripting node enables users to write scripts that will run on the device.
 
-Logging: node.trace, node.debug, node.warn, node.error, node.critical
-//device.setLogLevel to view these logs
+How to place it
+###############
 
-You can only send messages as on host - if you want to send custom data do this:
-buf = Buffer([num bytes])
-buf.getData() <- serialize data into this memoryview
+.. tabs::
+
+  .. code-tab:: py
+
+    pipeline = dai.Pipeline()
+    script = pipeline.create(dai.node.Script)
+
+  .. code-tab:: c++
+
+    dai::Pipeline pipeline;
+    auto script = pipeline.create<dai::node::NeuralNetwork>();
 
 Demo
 ####
 
 .. code-block: python
+
     feed_manip_config_script = pipeline.create(dai.node.Script)
     feed_manip_config_script.setScriptData("""
     score, bb_cx, bb_cy, bb_w, rect_cx, rect_cy, rect_w, rotation = node.io['in'].get().getLayerFp16("result")
@@ -30,3 +39,16 @@ Demo
     """)
     pp_nn.out.link(feed_manip_config_script.inputs['in'])
     feed_manip_config_script.outputs['out'].link(pre_lm_manip.inputConfig)
+
+.. code-block: python
+
+    script = pipeline.create(dai.node.Script)
+    script.setScriptData("""
+    # Logging to the host can be enable with
+    # node.trace, node.debug, node.warn, node.error, node.critical
+    node.trace("Hello World")
+    """)
+
+    # After initializing the device, enable log levels
+    device.setLogLevel(dai.LogLevel.WARN)
+    device.setLogOutputLevel(dai.LogLevel.WARN)

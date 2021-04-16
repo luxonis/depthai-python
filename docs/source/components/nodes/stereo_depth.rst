@@ -1,6 +1,8 @@
 StereoDepth
 ===========
 
+Stereo depth node calculates the dispartiy/depth from two :ref:`mono cameras <MonoCamera>`.
+
 How to place it
 ###############
 
@@ -9,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    stereo = pipeline.createStereoDepth()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto stereo = pipeline.create<dai::node::StereoDepth>();
 
 
 Inputs and Outputs
@@ -37,15 +39,17 @@ Inputs and Outputs
                  │                   ├─────────────►
                  └───────────────────┘
 
-Configuration
+Message types
 #############
--median
--raw_depth
--rectified
--lr_check
--ext_disparity
--subpixel
 
+- :code:`Left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
+- :code:`Right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
+- :code:`RectifiedLeft` - :ref:`ImgFrame`
+- :code:`SyncedLeft` - :ref:`ImgFrame`
+- :code:`Depth` - :ref:`ImgFrame`
+- :code:`Disparity` - :ref:`ImgFrame`
+- :code:`RectifiedRight` - :ref:`ImgFrame`
+- :code:`SyncedRight` - :ref:`ImgFrame`
 
 Disparity
 #########
@@ -61,26 +65,46 @@ the threshold get invalidated, i.e. their disparity value is set to zero.
 Usage
 #####
 
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
+..
+  COnfigure different:
+  -median
+  -raw_depth
+  -rectified
+  -lr_check
+  -ext_disparity
+  -subpixel
 
 .. tabs::
 
   .. code-tab:: py
+    '''
+    If one or more of the additional depth modes (lrcheck, extended, subpixel)
+    are enabled, then:
+    - depth output is FP16. TODO enable U16.
+    - median filtering is disabled on device. TODO enable.
+    - with subpixel, either depth or disparity has valid data.
+    Otherwise, depth output is U16 (mm) and median is functional.
+    But like on Gen1, either depth or disparity has valid data. TODO enable both.
+    '''
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    stereo = pipeline.createStereoDepth()
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Better handling for occlusions:
+    stereo.setLeftRightCheck(False)
+    # Closer-in minimum depth, disparity range is doubled:
+    stereo.setExtendedDisparity(False)
+    # Better accuracy for longer distance, fractional disparity 32-levels:
+    stereo.setSubpixel(False)
+
+    # Define and configure MonoCamera nodes
+    left_mono.out.link(depth.left)
+    right_mono.out.link(depth.right)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto stereo = pipeline.create<dai::node::StereoDepth>();
 
 Examples of functionality
 #########################

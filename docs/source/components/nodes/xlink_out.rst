@@ -1,6 +1,7 @@
 XLinkOut
 ========
 
+XLinkOut node is used to send data from the device to the host via XLink.
 
 How to place it
 ###############
@@ -10,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    xlink_out = pipeline.createXLinkOut()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto xlinkOut = pipeline.create<dai::node::XLinkOut>();
 
 
 Inputs and Outputs
@@ -31,29 +32,29 @@ Inputs and Outputs
             │              │
             └──────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`Buffer`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    xlink_out = pipeline.createXLinkOut()
+    xlink_out.setStreamName("cam_out")
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Here we will send camera preview (ImgFrame) to the host via XLink. Host can then display the frame to the user
+    cam.preview.link(xlink_out.input)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto xlinkOut = pipeline.create<dai::node::XLinkOut>();
 
 Examples of functionality
 #########################

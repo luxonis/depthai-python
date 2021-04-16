@@ -1,6 +1,10 @@
 SPIOut
 ======
 
+SPIOut node is used to send data through to a MCU via SPI. `LUX-ESP32 <https://docs.luxonis.com/en/gen2/pages/products/bw1092/>`__ module has integrated an
+integrated ESP32 connected to the MyriadX via SPI. You can find demos `here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi>`__.
+
+
 How to place it
 ###############
 
@@ -9,12 +13,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    spi = pipeline.createSPIOut()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto spi = pipeline.create<dai::node::SPIOut>();
 
 
 Inputs and Outputs
@@ -30,11 +34,13 @@ Inputs and Outputs
             │              │
             └──────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`Buffer`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
@@ -48,16 +54,14 @@ different streams with their different data formats (color cam, depth) would be 
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto spi = pipeline.create<dai::node::SPIOut>();
 
 Examples of functionality
 #########################
 
-- :ref:``
+- `SPI demos (host side) <https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi>`__
+- `ESP32 code demos <https://github.com/luxonis/esp32-spi-message-demo>`__
 
 Reference
 #########

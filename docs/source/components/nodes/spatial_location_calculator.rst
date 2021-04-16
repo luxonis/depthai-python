@@ -9,12 +9,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    spatial_calc = pipeline.SpatialLocationCalculator()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto spatialCalc = pipeline.create<dai::node::SpatialLocationCalculator>();
 
 
 Inputs and Outputs
@@ -32,29 +32,40 @@ Inputs and Outputs
   ──────────────►│-------------------├───────────►
                  └───────────────────┘
 
+Message types
+#############
+
+- :code:`InitialConfig` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`InputConfig` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`InputDepth` - :ref:`ImgFrame`
+- :code:`Out` - :ref:`SpatialLocationCalculatorData`
+- :code:`PassthroughDepth` - :ref:`ImgFrame`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    spatial_calc = pipeline.SpatialLocationCalculator()
+    spatial_calc.setWaitForConfigInput(False)
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Set initial config
+    config = dai.SpatialLocationCalculatorConfigData()
+    config.depthThresholds.lowerThreshold = 100
+    config.depthThresholds.upperThreshold = 10000
+    config.roi = dai.Rect(topLeft, bottomRight)
+    spatial_calc.initialConfig.addROI(config)
+
+    # You can later send configs from the host (XLinkIn) /scripting node to the InputConfig
+
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto spatialCalc = pipeline.create<dai::node::SpatialLocationCalculator>();
 
 Examples of functionality
 #########################

@@ -1,7 +1,7 @@
 XLinkIn
 =======
 
-Used for sending a message from the host to the device via XLink.
+XLinkIn node is used to send data from the host to the device via XLink.
 
 How to place it
 ###############
@@ -11,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    xlink_in = pipeline.createXLinkIn()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto xlinkIn = pipeline.create<dai::node::XLinkIn>();
 
 
 Inputs and Outputs
@@ -32,29 +32,39 @@ Inputs and Outputs
               │              │
               └──────────────┘
 
+Message types
+#############
+
+- :code:`Out` - :ref:`Buffer`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    xlink_in = pipeline.createXLinkIn()
+    xlink_in.setStreamName("cam_control")
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Create ColorCamera beforehand
+    xlink_in.out.link(cam.inputControl)
+
+    with dai.Device(pipeline) as device:
+      q_cam_control = device.getInputQueue("cam_control")
+
+      # Send a message to the ColorCamera to capture a still image
+      ctrl = dai.CameraControl()
+      ctrl.setCaptureStill(True)
+      q_cam_control.send(ctrl)
+
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
+    dai::Pipeline pipeline;
+    auto xlinkIn = pipeline.create<dai::node::XLinkIn>();
 
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
 
 Examples of functionality
 #########################

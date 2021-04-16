@@ -13,12 +13,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createMobileNetDetectionNetwork()
+    mobilenet_det = pipeline.createMobileNetDetectionNetwork()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::MobileNetDetectionNetwork>();
+    auto mobilenetDet = pipeline.create<dai::node::MobileNetDetectionNetwork>();
 
 
 Inputs and Outputs
@@ -36,29 +36,31 @@ Inputs and Outputs
               │                   │
               └───────────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`ImgFrame`
+- :code:`Out` - :ref:`ImgDetections`
+- :code:`Passthrough` - :ref:`ImgFrame`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
-
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    pipeline = dai.Pipeline()
+    mobilenet_det = pipeline.createMobileNetDetectionNetwork()
+    mobilenet_det.setConfidenceThreshold(0.5)
+    mobilenet_det.setBlobPath(args.nnPath)
+    mobilenet_det.setNumInferenceThreads(2)
+    mobilenet_det.input.setBlocking(False)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto mobilenetDet = pipeline.create<dai::node::MobileNetDetectionNetwork>();
 
 Examples of functionality
 #########################

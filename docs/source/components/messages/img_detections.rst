@@ -1,5 +1,5 @@
-Image Detections message
-========================
+ImgDetections
+=============
 
 Both :ref:`Yolo Detection Network node
 

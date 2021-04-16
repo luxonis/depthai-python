@@ -1,6 +1,8 @@
 VideoEncoder
 ============
 
+VideoEncoder node is used to encode :ref:`image frames <ImfFrame>` into H264/H265/JPEG.
+
 How to place it
 ###############
 
@@ -9,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    encoder = pipeline.createVideoEncoder()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto encoder = pipeline.create<dai::node::VideoEncoder>();
 
 
 Inputs and Outputs
@@ -30,29 +32,36 @@ Inputs and Outputs
             │              │
             └──────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`ImgFrame`
+- :code:`Bitstream` - :ref:`ImgFrame`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    encoder_video = pipeline.createVideoEncoder()
+    # Set H265 encoding for 4k, 30FPS video
+    encoder_video.setDefaultProfilePreset(3840, 2160, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Or create MJPEG encoding for still images
+    encoder_still = pipeline.createVideoEncoder()
+    encoder_still.setDefaultProfilePreset(cam.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
+
+    # Create ColorCamera beforehand
+    cam.still.link(encoder_still.input)
+    cam.video.link(encoder_video.input)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto encoder = pipeline.create<dai::node::VideoEncoder>();
 
 Examples of functionality
 #########################

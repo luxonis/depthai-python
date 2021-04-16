@@ -13,12 +13,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    yolo_det = pipeline.createYoloDetectionNetwork()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto yoloDet = pipeline.create<dai::node::YoloDetectionNetwork>();
 
 
 Inputs and Outputs
@@ -36,29 +36,35 @@ Inputs and Outputs
               │                   │
               └───────────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`ImgFrame`
+- :code:`Out` - :ref:`ImgDetections`
+- :code:`Passthrough` - :ref:`ImgFrame`
+
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    yolo_det = pipeline.createYoloDetectionNetwork()
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Yolo specific parameters
+    yolo_det.setConfidenceThreshold(0.5)
+    yolo_det.setNumClasses(80)
+    yolo_det.setCoordinateSize(4)
+    yolo_det.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
+    yolo_det.setAnchorMasks({"side26": np.array([1, 2, 3]), "side13": np.array([3, 4, 5])})
+    yolo_det.setIouThreshold(0.5)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto yoloDet = pipeline.create<dai::node::YoloDetectionNetwork>();
 
 Examples of functionality
 #########################

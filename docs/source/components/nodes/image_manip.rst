@@ -34,11 +34,19 @@ Inputs and Outputs
                  │                   │
                  └───────────────────┘
 
+Message types
+#############
+
+- :code:`InputImage` - :ref:`ImgFrame`
+- :code:`InputConfig` - :ref:`ImageManipConfig`
+- :code:`Out` - :ref:`ImgFrame`
+
 Usage
 #####
 
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
+..
+  TODO Add example of how to perform various transformations with the manip and what needs to be kept in mind with regards to grabbing from
+  different streams with their different data formats (color cam, depth)
 
 .. tabs::
 

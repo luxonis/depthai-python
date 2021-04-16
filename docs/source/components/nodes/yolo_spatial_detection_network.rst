@@ -1,7 +1,7 @@
 YoloSpatialDetectionNetwork
 ===========================
 
-ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
+Spatial detection for the Yolo NN. It is similar to a combination of the :ref:`YoloDetectionNetwork` and :ref:`SpatialLocationCalculator`.
 
 How to place it
 ###############
@@ -11,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createImageManip()
+    yolo_spatial = pipeline.createYoloSpatialDetectionNetwork()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto yoloSpatial = pipeline.create<dai::node::YoloSpatialDetectionNetwork>();
 
 
 Inputs and Outputs
@@ -35,30 +35,45 @@ Inputs and Outputs
   ──────────────►│-------------------├─────────────────►
                  └───────────────────┘
 
+Message types
+#############
+
+- :code:`Input` - :ref:`ImgFrame`
+- :code:`InputDepth` - :ref:`ImgFrame`
+- :code:`Passthrough` - :ref:`ImgFrame`
+- :code:`Out` - :ref:`SpatialImgDetections`
+- :code:`BoundingBoxMapping` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`PassthroughDepth` - :ref:`ImgFrame`
 
 Usage
 #####
-
-An example for the various transformations one can do with the manip and what needs to be kept in mind with regards to grabbing from
-different streams with their different data formats (color cam, depth) would be great!
 
 .. tabs::
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    yolo_spatial = pipeline.createYoloSpatialDetectionNetwork()
+    yolo_spatial.setBlobPath(nnBlobPath)
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    # Spatial detection specific parameters
+    yolo_spatial.setConfidenceThreshold(0.5)
+    yolo_spatial.input.setBlocking(False)
+    yolo_spatial.setBoundingBoxScaleFactor(0.5)
+    yolo_spatial.setDepthLowerThreshold(100) # Min 10 centimeters
+    yolo_spatial.setDepthUpperThreshold(5000) # Max 5 meters
+
+    # Yolo specific parameters
+    yolo_spatial.setNumClasses(80)
+    yolo_spatial.setCoordinateSize(4)
+    yolo_spatial.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
+    yolo_spatial.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+    yolo_spatial.setIouThreshold(0.5)
 
   .. code-tab:: c++
 
-      dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
-
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+    dai::Pipeline pipeline;
+    auto yoloSpatial = pipeline.create<dai::node::YoloSpatialDetectionNetwork>();
 
 Examples of functionality
 #########################
