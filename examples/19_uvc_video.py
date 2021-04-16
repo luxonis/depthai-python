@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
 parser.add_argument('-b',  '--back-mic',         default=False, action="store_true")
+parser.add_argument('-g',  '--gain-db',          default=0, type=float)
 args = parser.parse_args()
 
 enable_4k = True
@@ -38,7 +39,11 @@ cam_rgb.video.link(uvc.input)
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
-print("UAC using:", "Back mic" if args.back_mic else "Front mics")
+uac.setMicGainDecibels(args.gain_db)
+print("UAC using:", "Back mic," if args.back_mic else "Front mics,",
+      "Gain {} dB".format(args.gain_db))
+
+#uac.setMicAutoGain(True) # Not yet implemented
 
 if args.flash_bootloader or args.flash_app:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()

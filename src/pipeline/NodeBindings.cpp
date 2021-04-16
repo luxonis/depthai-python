@@ -459,6 +459,9 @@ void NodeBindings::bind(pybind11::module& m){
     // UAC node
     py::class_<UAC, Node, std::shared_ptr<UAC>>(m, "UAC")
         .def("setStreamBackMic", &UAC::setStreamBackMic, py::arg("enable"), DOC(dai, node, UAC, setStreamBackMic))
+        .def("setMicGainDecibels", &UAC::setMicGainDecibels, py::arg("dB"), DOC(dai, node, UAC, setMicGainDecibels))
+        .def("setMicGainTimes", &UAC::setMicGainTimes, py::arg("times"), DOC(dai, node, UAC, setMicGainTimes))
+        .def("setMicAutoGain", &UAC::setMicAutoGain, py::arg("enable"), DOC(dai, node, UAC, setMicAutoGain))
         ;
 
 
