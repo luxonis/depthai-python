@@ -52,6 +52,9 @@ extensions = [
     "zephyr.warnings_filter",
 ]
 
+# See https://github.com/sphinx-doc/sphinx/issues/7728
+suppress_warnings = ['autosectionlabel.*']
+
 # substitutions
 rst_prolog = '.. |release| replace:: ' + release
 
