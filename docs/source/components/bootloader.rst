@@ -1,3 +1,4 @@
+.. _components_bootloader:
 Bootloader
 ==========
 
@@ -91,3 +92,5 @@ GPIO boot settings. Boot settings must be set as following: BOOT[4:0] : 01000 an
 
 .. image:: /_static/images/components/boot-depthai.jpeg
     :alt: boot-depthai
+
+.. include::  ../includes/footer-short.rst

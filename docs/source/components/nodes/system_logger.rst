@@ -70,3 +70,5 @@ Reference
 .. autoclass:: depthai.SystemLogger
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

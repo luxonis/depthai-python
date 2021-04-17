@@ -98,3 +98,5 @@ Reference
 .. autoclass:: depthai.NeuralNetwork
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

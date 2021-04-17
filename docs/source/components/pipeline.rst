@@ -1,3 +1,4 @@
+.. _components_pipeline:
 Pipeline
 ========
 
@@ -65,3 +66,4 @@ Reference
   :members:
   :inherited-members:
 
+.. include::  ../includes/footer-short.rst

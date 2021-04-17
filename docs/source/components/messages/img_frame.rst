@@ -10,3 +10,5 @@ Reference
 .. autoclass:: depthai.ImgFrame
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

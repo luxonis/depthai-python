@@ -76,3 +76,5 @@ Reference
 .. autoclass:: depthai.VideoEncoder
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

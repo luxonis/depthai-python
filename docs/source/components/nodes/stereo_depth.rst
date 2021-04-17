@@ -77,15 +77,14 @@ Usage
 .. tabs::
 
   .. code-tab:: py
-    '''
-    If one or more of the additional depth modes (lrcheck, extended, subpixel)
-    are enabled, then:
-    - depth output is FP16. TODO enable U16.
-    - median filtering is disabled on device. TODO enable.
-    - with subpixel, either depth or disparity has valid data.
-    Otherwise, depth output is U16 (mm) and median is functional.
-    But like on Gen1, either depth or disparity has valid data. TODO enable both.
-    '''
+
+    # If one or more of the additional depth modes (lrcheck, extended, subpixel)
+    # are enabled, then:
+    # - depth output is FP16. TODO enable U16.
+    # - median filtering is disabled on device. TODO enable.
+    # - with subpixel, either depth or disparity has valid data.
+    # Otherwise, depth output is U16 (mm) and median is functional.
+    # But like on Gen1, either depth or disparity has valid data. TODO enable both.
 
     pipeline = dai.Pipeline()
     stereo = pipeline.createStereoDepth()
@@ -119,3 +118,5 @@ Reference
 .. autoclass:: depthai.StereoDepth
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

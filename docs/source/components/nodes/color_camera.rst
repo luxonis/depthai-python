@@ -81,3 +81,5 @@ Reference
 .. autoclass:: depthai.ColorCamera
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

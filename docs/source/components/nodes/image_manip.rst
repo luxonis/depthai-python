@@ -79,3 +79,5 @@ Reference
 .. autoclass:: depthai.ImageManip
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

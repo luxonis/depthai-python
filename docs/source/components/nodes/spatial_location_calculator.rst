@@ -78,3 +78,5 @@ Reference
 .. autoclass:: depthai.SpatialLocationCalculator
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

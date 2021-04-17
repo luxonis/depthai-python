@@ -84,10 +84,8 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    :hidden:
    :caption: Code:
 
-   tutorials/hello_world.rst
-   tutorials/multiple.rst
-   tutorials/local_convert_openvino.rst
    tutorials/code_samples.rst
+   Experiments (Github) <https://github.com/luxonis/depthai-experiments>
 
 .. toctree::
    :maxdepth: 1

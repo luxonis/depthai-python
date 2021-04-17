@@ -52,3 +52,5 @@ Demo
     # After initializing the device, enable log levels
     device.setLogLevel(dai.LogLevel.WARN)
     device.setLogOutputLevel(dai.LogLevel.WARN)
+
+.. include::  ../../includes/footer-short.rst

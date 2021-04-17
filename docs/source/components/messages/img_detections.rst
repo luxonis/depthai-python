@@ -14,3 +14,5 @@ Reference
 .. autoclass:: depthai.ImgDetections
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

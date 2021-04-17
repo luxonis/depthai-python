@@ -1,3 +1,4 @@
+.. _components_nodes:
 Nodes
 =====
 
@@ -8,9 +9,8 @@ Nodes
 
    nodes/*
 
-Nodes are the building blocks when populating the :ref:`Pipeline`. Each node provides a specific functionality on the DepthaI and a set of configurable
-properties. After you create a node on a pipeline, you can also configure it as desired.
-
+Nodes are the building blocks when populating the :ref:`Pipeline`. Each node provides a specific functionality on the DepthaI, a set of configurable
+properties and inputs/outputs. After you create a node on a pipeline, you can also configure it as desired and link it to other nodes.
 
 Outputs and inputs
 ##################
@@ -36,3 +36,7 @@ Currently, some nodes (:ref:`VideoEncoder`, :ref:`NeuralNetwork`, :ref:`ImageMan
 The size of the pool specifies how many messages can be created and sent out while other messages are already
 somewhere in the pipeline. When all the messages from pool are sent out and none yet returned, that is when the node will block and
 wait until a message is returned to the pool (not used by any node in the pipeline anymore)
+
+On the table of contents (left side of the page) all nodes are listed under the :code:`Node` entry. You can click on them to find out more.
+
+.. include::  ../includes/footer-short.rst

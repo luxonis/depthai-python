@@ -69,3 +69,5 @@ Reference
 .. autoclass:: depthai.SPIOut
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

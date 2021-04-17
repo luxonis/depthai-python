@@ -75,3 +75,5 @@ Reference
 .. autoclass:: depthai.MobileNetDetectionNetwork
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

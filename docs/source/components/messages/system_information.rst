@@ -18,3 +18,5 @@ Reference
 .. autoclass:: depthai.SystemInformation
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

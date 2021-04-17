@@ -1,3 +1,4 @@
+.. _components_device:
 Device
 ======
 
@@ -66,3 +67,5 @@ Reference
 .. autoclass:: depthai.Device
   :members:
   :inherited-members:
+
+.. include::  ../includes/footer-short.rst

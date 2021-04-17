@@ -85,3 +85,5 @@ Reference
 .. autoclass:: depthai.MobileNetSpatialDetectionNetwork
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst

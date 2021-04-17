@@ -70,3 +70,5 @@ Reference
 .. autoclass:: depthai.XLinkOut
   :members:
   :inherited-members:
+
+.. include::  ../../includes/footer-short.rst
