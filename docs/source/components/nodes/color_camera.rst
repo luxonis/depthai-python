@@ -24,20 +24,19 @@ Inputs and Outputs
 
 .. code-block::
 
-  InitialControl ┌───────────────────┐   Still
-  ──────────────►│                   ├───────────►
-                 │                   │
-  InputConfig    │                   │   Preview
-  ──────────────►│    ColorCamera    ├───────────►
-                 │                   │
-  InputControl   │                   │   Video
-  ──────────────►│                   ├───────────►
+                 ┌───────────────────┐   Still
+                 │                   ├───────────►
+  InputConfig    │                   │
+  ──────────────►│                   │   Preview
+                 │    ColorCamera    ├───────────►
+  InputControl   │                   │
+  ──────────────►│                   │   Video
+                 │                   ├───────────►
                  └───────────────────┘
 
 Message types
 #############
 
-- :code:`InitialControl` - :ref:`CameraControl`
 - :code:`InputConfig` - :ref:`ImageManipConfig`
 - :code:`InputControl` - :ref:`CameraControl`
 - :code:`Still` - :ref:`ImgFrame`

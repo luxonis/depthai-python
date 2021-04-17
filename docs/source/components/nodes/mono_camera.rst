@@ -26,19 +26,18 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
-  InitialControl │                   │
-  ──────────────►│                   │
-                 │                   │       Out
-                 │    MonoCamera     ├───────────►
-  InputControl   │                   │
-  ──────────────►│                   │
+                 │                   │
+                 │                   │
+  InputControl   │                   │       Out
+  ──────────────►│    MonoCamera     ├───────────►
+                 │                   │
+                 │                   │
                  │                   │
                  └───────────────────┘
 
 Message types
 #############
 
-- :code:`InitialControl` - :ref:`CameraControl`
 - :code:`InputControl` - :ref:`CameraControl`
 - :code:`Out` - :ref:`ImgFrame`
 

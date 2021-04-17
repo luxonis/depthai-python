@@ -22,11 +22,11 @@ Inputs and Outputs
 
 .. code-block::
 
-  InitialConfig  ┌───────────────────┐
-  ──────────────►│                   │
-                 │                   │       Out
-  InputConfig    │     Spatial       ├───────────►
-  ──────────────►│     location      │
+                 ┌───────────────────┐
+                 │                   │
+  InputConfig    │                   │       Out
+  ──────────────►│     Spatial       ├───────────►
+                 │     location      │
                  │     calculator    │
   InputDepth     │                   │PassthroughDepth
   ──────────────►│-------------------├───────────►
@@ -35,7 +35,6 @@ Inputs and Outputs
 Message types
 #############
 
-- :code:`InitialConfig` - :ref:`SpatialLocationCalculatorConfig`
 - :code:`InputConfig` - :ref:`SpatialLocationCalculatorConfig`
 - :code:`InputDepth` - :ref:`ImgFrame`
 - :code:`Out` - :ref:`SpatialLocationCalculatorData`
