@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenet_spatial = pipeline.createMobileNetSpatialDetectionNetwork()
+    mobilenetSpatial = pipeline.createMobileNetSpatialDetectionNetwork()
 
   .. code-tab:: c++
 
@@ -25,25 +25,24 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
-  Input          │                   │       Passthrough
+  input          │                   │       oassthrough
   ──────────────►│-------------------├─────────────────►
-                 │     MobileNet     │               Out
+                 │     MobileNet     │               out
                  │     Spatial       ├─────────────────►
-                 │     Detection     │BoundingBoxMapping
+                 │     Detection     │boundingBoxMapping
                  │     Network       ├─────────────────►
-  InputDepth     │                   │  PassthroughDepth
+  inputDepth     │                   │  passthroughDepth
   ──────────────►│-------------------├─────────────────►
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`ImgFrame`
-- :code:`InputDepth` - :ref:`ImgFrame`
-- :code:`Passthrough` - :ref:`ImgFrame`
-- :code:`Out` - :ref:`SpatialImgDetections`
-- :code:`BoundingBoxMapping` - :ref:`SpatialLocationCalculatorConfig`
-- :code:`PassthroughDepth` - :ref:`ImgFrame`
+- :code:`input` - :ref:`ImgFrame`
+- :code:`inputDepth` - :ref:`ImgFrame`
+- :code:`passthrough` - :ref:`ImgFrame`
+- :code:`out` - :ref:`SpatialImgDetections`
+- :code:`boundingBoxMapping` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`passthroughDepth` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -53,25 +52,38 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenet_spatial = pipeline.createMobileNetSpatialDetectionNetwork()
+    mobilenetSpatial = pipeline.createMobileNetSpatialDetectionNetwork()
 
-    mobilenet_spatial.setBlobPath(nnBlobPath)
+    mobilenetSpatial.setBlobPath(nnBlobPath)
     # Will ingore all detections whose confidence is below 50%
-    mobilenet_spatial.setConfidenceThreshold(0.5)
-    mobilenet_spatial.input.setBlocking(False)
+    mobilenetSpatial.setConfidenceThreshold(0.5)
+    mobilenetSpatial.input.setBlocking(False)
     # How big the ROI will be (smaller value can provide a more stable reading)
-    mobilenet_spatial.setBoundingBoxScaleFactor(0.5)
+    mobilenetSpatial.setBoundingBoxScaleFactor(0.5)
     # Min/Max threshold. Values out of range will be set to 0 (invalid)
-    mobilenet_spatial.setDepthLowerThreshold(100)
-    mobilenet_spatial.setDepthUpperThreshold(5000)
+    mobilenetSpatial.setDepthLowerThreshold(100)
+    mobilenetSpatial.setDepthUpperThreshold(5000)
 
     # Link depth from the StereoDepth node
-    stereo.depth.link(mobilenet_spatial.inputDepth)
+    stereo.depth.link(mobilenetSpatial.inputDepth)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto mobilenetSpatial = pipeline.create<dai::node::MobileNetSpatialDetectionNetwork>();
+
+    mobilenetSpatial->setBlobPath(nnBlobPath);
+    // Will ingore all detections whose confidence is below 50%
+    mobilenetSpatial->setConfidenceThreshold(0.5f);
+    mobilenetSpatial->input.setBlocking(false);
+    // How big the ROI will be (smaller value can provide a more stable reading)
+    mobilenetSpatial->setBoundingBoxScaleFactor(0.5f);
+    // Min/Max threshold. Values out of range will be set to 0 (invalid)
+    mobilenetSpatial->setDepthLowerThreshold(100);
+    mobilenetSpatial->setDepthUpperThreshold(5000);
+
+    // Link depth from the StereoDepth node
+    stereo->depth.link(mobilenetSpatial->inputDepth);
 
 Examples of functionality
 #########################

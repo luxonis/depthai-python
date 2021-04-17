@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlink_out = pipeline.createXLinkOut()
+    xlinkOut = pipeline.createXLinkOut()
 
   .. code-tab:: c++
 
@@ -26,16 +26,15 @@ Inputs and Outputs
 
             ┌──────────────┐
             │              │
-  Input     │              │   (to host)
+  input     │              │   (to host)
   ─────────►│   XLinkOut   ├------------►
             │              │
             │              │
             └──────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`Buffer`
+- :code:`input` - :ref:`Buffer`
 
 Usage
 #####
@@ -45,16 +44,20 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlink_out = pipeline.createXLinkOut()
-    xlink_out.setStreamName("cam_out")
+    xOut = pipeline.createXLinkOut()
+    xOut.setStreamName("camOut")
 
     # Here we will send camera preview (ImgFrame) to the host via XLink. Host can then display the frame to the user
-    cam.preview.link(xlink_out.input)
+    cam.preview.link(xOut.input)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto xlinkOut = pipeline.create<dai::node::XLinkOut>();
+    auto xOut = pipeline.create<dai::node::XLinkOut>();
+    xOut->setStreamName("camOut");
+
+    # Here we will send camera preview (ImgFrame) to the host via XLink. Host can then display the frame to the user
+    cam->preview.link(xOut->input);
 
 Examples of functionality
 #########################

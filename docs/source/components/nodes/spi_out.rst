@@ -28,16 +28,15 @@ Inputs and Outputs
 
             ┌──────────────┐
             │              │
-  Input     │              │ SPI (to MCU)
+  input     │              │ SPI (to MCU)
   ─────────►│    SPIOut    ├------------►
             │              │
             │              │
             └──────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`Buffer`
+- :code:`input` - :ref:`Buffer`
 
 Usage
 #####
@@ -46,16 +45,19 @@ Usage
 
   .. code-tab:: py
 
-      pipeline = dai.Pipeline()
-      manip = pipeline.createImageManip()
+    pipeline = dai.Pipeline()
+    spi = pipeline.createSPIOut()
 
-      manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    spi.setStreamName("spimetaout")
+    spi.setBusId(0)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto spi = pipeline.create<dai::node::SPIOut>();
+
+    spi->setStreamName("spimetaout");
+    spi->setBusId(0);
 
 Examples of functionality
 #########################

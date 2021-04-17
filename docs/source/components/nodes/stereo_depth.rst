@@ -25,31 +25,30 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
-                 │                   │RectifiedLeft
+                 │                   │rectifiedLeft
                  │                   ├─────────────►
-  Left           │                   │   SyncedLeft
+  left           │                   │   syncedLeft
   ──────────────►│                   ├─────────────►
-                 │                   │        Depth
+                 │                   │        depth
                  │                   ├─────────────►
-                 │    StereoDepth    │    Disparity
+                 │    StereoDepth    │    disparity
                  │                   ├─────────────►
-  Right          │                   │RectifiedRight
+  right          │                   │rectifiedRight
   ──────────────►│                   ├─────────────►
-                 │                   │   SyncedRight
+                 │                   │   syncedRight
                  │                   ├─────────────►
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
-- :code:`Right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
-- :code:`RectifiedLeft` - :ref:`ImgFrame`
-- :code:`SyncedLeft` - :ref:`ImgFrame`
-- :code:`Depth` - :ref:`ImgFrame`
-- :code:`Disparity` - :ref:`ImgFrame`
-- :code:`RectifiedRight` - :ref:`ImgFrame`
-- :code:`SyncedRight` - :ref:`ImgFrame`
+- :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
+- :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
+- :code:`rectifiedLeft` - :ref:`ImgFrame`
+- :code:`syncedLeft` - :ref:`ImgFrame`
+- :code:`depth` - :ref:`ImgFrame`
+- :code:`disparity` - :ref:`ImgFrame`
+- :code:`rectifiedRight` - :ref:`ImgFrame`
+- :code:`syncedRight` - :ref:`ImgFrame`
 
 Disparity
 #########
@@ -96,14 +95,35 @@ Usage
     # Better accuracy for longer distance, fractional disparity 32-levels:
     stereo.setSubpixel(False)
 
-    # Define and configure MonoCamera nodes
-    left_mono.out.link(depth.left)
-    right_mono.out.link(depth.right)
+    # Define and configure MonoCamera nodes beforehand
+    left.out.link(stereo.left)
+    right.out.link(stereo.right)
 
   .. code-tab:: c++
 
+    /**
+    * If one or more of the additional depth modes (lrcheck, extended, subpixel)
+    * are enabled, then:
+    * - depth output is FP16. TODO enable U16.
+    * - median filtering is disabled on device. TODO enable.
+    * - with subpixel, either depth or disparity has valid data.
+    * Otherwise, depth output is U16 (mm) and median is functional.
+    * But like on Gen1, either depth or disparity has valid data. TODO enable both.
+    */
+
     dai::Pipeline pipeline;
     auto stereo = pipeline.create<dai::node::StereoDepth>();
+
+    // Better handling for occlusions:
+    stereo->setLeftRightCheck(false);
+    // Closer-in minimum depth, disparity range is doubled:
+    stereo->setExtendedDisparity(false);
+    // Better accuracy for longer distance, fractional disparity 32-levels:
+    stereo->setSubpixel(false);
+
+    // Define and configure MonoCamera nodes beforehand
+    left->out.link(stereo->left);
+    right->out.link(stereo->right);
 
 Examples of functionality
 #########################

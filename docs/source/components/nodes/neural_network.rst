@@ -27,21 +27,20 @@ Inputs and Outputs
 .. code-block::
 
               ┌───────────────────┐
-              │                   │       Out
+              │                   │       out
               │                   ├───────────►
               │                   │
               │   NeuralNetwork   │
-  Input       │                   │ Passthrough
+  input       │                   │ passthrough
   ───────────►│-------------------├───────────►
               │                   │
               └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`ImgFrame`
-- :code:`Out` - :ref:`NNData`
-- :code:`Passthrough` - :ref:`ImgFrame`
+- :code:`input` - :ref:`ImgFrame`
+- :code:`out` - :ref:`NNData`
+- :code:`passthrough` - :ref:`ImgFrame`
 
 Passthrough mechanism
 #####################
@@ -62,30 +61,52 @@ Usage
 
     pipeline = dai.Pipeline()
     nn = pipeline.createNeuralNetwork()
-    nn.setBlobPath(model_path_absolute)
+    nn.setBlobPath(bbBlobPath)
     cam.out.link(nn.input)
 
     # Send NN out to the host via XLink
-    nn_xout = pipeline.createXLinkOut()
-    nn_xout.setStreamName("nn")
-    nn.out.link(nn_xout.input)
+    nnXout = pipeline.createXLinkOut()
+    nnXout.setStreamName("nn")
+    nn.out.link(nnXout.input)
 
     with dai.Device(pipeline) as device:
-      q_nn = device.getOutputQueue("nn")
+      qNn = device.getOutputQueue("nn")
       # You have to decode the output of the NN
 
-      nn_data = q_nn.get() # Blocking
+      nnData = qNn.get() # Blocking
 
       # NN can output from multiple layers. Print all layer names:
-      print(nn_data.getAllLayerNames())
+      print(nnData.getAllLayerNames())
 
       # Get layer named "Layer1_FP16" as FP16
-      layer1_data = nn_data.getLayerFp16("Layer1_FP16")
+      layer1Data = nnData.getLayerFp16("Layer1_FP16")
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto nn = pipeline.create<dai::node::NeuralNetwork>();
+    nn->setBlobPath(bbBlobPath);
+    cam->out.link(nn->input);
+
+    // Send NN out to the host via XLink
+    auto nnXout = pipeline.create<dai::node::XLinkOut>();
+    nnXout->setStreamName("nn");
+    nn->out.link(nnXout->input);
+
+    dai::Device device(pipeline);
+    // Start the pipeline
+    device.startPipeline();
+
+    auto qNn = device.getOutputQueue("nn");
+    // You have to decode the output of the NN
+
+    auto nnData = qNn->get<dai::NNData>(); # Blocking
+
+    // NN can output from multiple layers. Print all layer names:
+    cout << nnData->getAllLayerNames();
+
+    // Get layer named "Layer1_FP16" as FP16
+    auto layer1Data = nnData->getLayerFp16("Layer1_FP16");
 
 Examples of functionality
 #########################

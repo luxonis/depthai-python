@@ -1,7 +1,7 @@
 VideoEncoder
 ============
 
-VideoEncoder node is used to encode :ref:`image frames <ImfFrame>` into H264/H265/JPEG.
+VideoEncoder node is used to encode :ref:`image frames <ImgFrame>` into H264/H265/JPEG.
 
 How to place it
 ###############
@@ -26,17 +26,16 @@ Inputs and Outputs
 
             ┌──────────────┐
             │              │
-   Input    │              │Bitstream
+   input    │              │bitstream
   ─────────►│ VideoEncoder ├────────►
             │              │
             │              │
             └──────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`ImgFrame`
-- :code:`Bitstream` - :ref:`ImgFrame`
+- :code:`input` - :ref:`ImgFrame`
+- :code:`bitstream` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -46,22 +45,35 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    encoder_video = pipeline.createVideoEncoder()
-    # Set H265 encoding for 4k, 30FPS video
-    encoder_video.setDefaultProfilePreset(3840, 2160, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-
-    # Or create MJPEG encoding for still images
-    encoder_still = pipeline.createVideoEncoder()
-    encoder_still.setDefaultProfilePreset(cam.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 
     # Create ColorCamera beforehand
-    cam.still.link(encoder_still.input)
-    cam.video.link(encoder_video.input)
+    # Set H265 encoding for the ColorCamera video output
+    videoEncoder = pipeline.createVideoEncoder()
+    videoEncoder.setDefaultProfilePreset(cam.getVideoSize(), cam.getFps(), dai.VideoEncoderProperties.Profile.H265_MAIN)
+
+    # Create MJPEG encoding for still images
+    stillEncoder = pipeline.createVideoEncoder()
+    stillEncoder.setDefaultProfilePreset(cam.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
+
+    cam.still.link(stillEncoder.input)
+    cam.video.link(videoEncoder.input)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto encoder = pipeline.create<dai::node::VideoEncoder>();
+
+    // Create ColorCamera beforehand
+    // Set H265 encoding for the ColorCamera video output
+    auto videoEncoder = pipeline.create<dai::node::VideoEncoder>();
+    videoEncoder->setDefaultProfilePreset(cam->getVideoSize(), cam->getFps(), dai::VideoEncoderProperties::Profile::H265_MAIN);
+
+    // Create MJPEG encoding for still images
+    stillEncoder = pipeline.createVideoEncoder();
+    stillEncoder->setDefaultProfilePreset(cam->getStillSize(), 1, dai::VideoEncoderProperties::Profile::MJPEG);
+
+    cam->still.link(stillEncoder->input);
+    cam->video.link(videoEncoder->input);
+
 
 Examples of functionality
 #########################

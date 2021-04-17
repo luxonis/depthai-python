@@ -16,7 +16,7 @@ How to place it
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ImageManip>();
+    auto manip = pipeline.create<dai::node::ImageManip>();
 
 
 Inputs and Outputs
@@ -25,21 +25,20 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
-  InputImage     │                   │
+  inputImage     │                   │
   ──────────────►│                   │
-                 │                   │        Out
+                 │                   │        out
                  │    ImageManip     ├───────────►
-  InputConfig    │                   │
+  inputConfig    │                   │
   ──────────────►│                   │
                  │                   │
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`InputImage` - :ref:`ImgFrame`
-- :code:`InputConfig` - :ref:`ImageManipConfig`
-- :code:`Out` - :ref:`ImgFrame`
+- :code:`inputImage` - :ref:`ImgFrame`
+- :code:`inputConfig` - :ref:`ImageManipConfig`
+- :code:`out` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -56,15 +55,15 @@ Usage
       manip = pipeline.createImageManip()
 
       manip.initialConfig.setResize(300, 300)
-      manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+      manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
   .. code-tab:: c++
 
       dai::Pipeline pipeline;
-      auto imageManip = pipeline.create<dai::node::ImageManip>();
+      auto manip = pipeline.create<dai::node::ImageManip>();
 
-      imageManip->initialConfig.setCenterCrop(0.7f);
-      imageManip->initialConfig.setResizeThumbnail(300, 400);
+      manip->initialConfig.setResize(300, 300);
+      manip->initialConfig.setFrameType(dai::ImgFrame::Type::BGR888p);
 
 Examples of functionality
 #########################

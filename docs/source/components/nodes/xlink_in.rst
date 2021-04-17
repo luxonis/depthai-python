@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlink_in = pipeline.createXLinkIn()
+    xlinkIn = pipeline.createXLinkIn()
 
   .. code-tab:: c++
 
@@ -26,16 +26,15 @@ Inputs and Outputs
 
               ┌──────────────┐
               │              │
-  (From host) │              │    Out
+  (From host) │              │    out
   ----------->│   XLinkIn    ├────────►
               │              │
               │              │
               └──────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Out` - :ref:`Buffer`
+- :code:`out` - :ref:`Buffer`
 
 Usage
 #####
@@ -45,25 +44,41 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlink_in = pipeline.createXLinkIn()
-    xlink_in.setStreamName("cam_control")
+    xIn = pipeline.createXLinkIn()
+    xIn.setStreamName("camControl")
 
     # Create ColorCamera beforehand
-    xlink_in.out.link(cam.inputControl)
+    xIn.out.link(cam.inputControl)
 
     with dai.Device(pipeline) as device:
-      q_cam_control = device.getInputQueue("cam_control")
+      device.startPipeline()
+      qCamControl = device.getInputQueue("camControl")
 
       # Send a message to the ColorCamera to capture a still image
       ctrl = dai.CameraControl()
       ctrl.setCaptureStill(True)
-      q_cam_control.send(ctrl)
+      qCamControl.send(ctrl)
 
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto xlinkIn = pipeline.create<dai::node::XLinkIn>();
+    auto xIn = pipeline.create<dai::node::XLinkIn>();
+    xIn->setStreamName("camControl");
+
+    // Create ColorCamera beforehand
+    xIn->out.link(cam->inputControl);
+
+    // Connect to the device
+    dai::Device device(pipeline);
+    device.startPipeline();
+
+    auto qCamControl = device.getInputQueue("camControl");
+
+    // Send a message to the ColorCamera to capture a still image
+    dai::CameraControl ctrl;
+    ctrl.setCaptureStill(true);
+    qCamControl->send(ctrl)
 
 
 Examples of functionality

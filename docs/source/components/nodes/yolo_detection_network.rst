@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yolo_det = pipeline.createYoloDetectionNetwork()
+    yoloDet = pipeline.createYoloDetectionNetwork()
 
   .. code-tab:: c++
 
@@ -27,21 +27,20 @@ Inputs and Outputs
 .. code-block::
 
               ┌───────────────────┐
-              │                   │       Out
+              │                   │       out
               │                   ├───────────►
               │     Yolo          │
               │     Detection     │
-  Input       │     Network       │ Passthrough
+  input       │     Network       │ passthrough
   ───────────►│-------------------├───────────►
               │                   │
               └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`ImgFrame`
-- :code:`Out` - :ref:`ImgDetections`
-- :code:`Passthrough` - :ref:`ImgFrame`
+- :code:`input` - :ref:`ImgFrame`
+- :code:`out` - :ref:`ImgDetections`
+- :code:`passthrough` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -51,20 +50,29 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yolo_det = pipeline.createYoloDetectionNetwork()
+    yoloDet = pipeline.createYoloDetectionNetwork()
+    yoloDet.setBlobPath(nnBlobPath)
 
     # Yolo specific parameters
-    yolo_det.setConfidenceThreshold(0.5)
-    yolo_det.setNumClasses(80)
-    yolo_det.setCoordinateSize(4)
-    yolo_det.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
-    yolo_det.setAnchorMasks({"side26": np.array([1, 2, 3]), "side13": np.array([3, 4, 5])})
-    yolo_det.setIouThreshold(0.5)
+    yoloDet.setConfidenceThreshold(0.5)
+    yoloDet.setNumClasses(80)
+    yoloDet.setCoordinateSize(4)
+    yoloDet.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
+    yoloDet.setAnchorMasks({"side26": np.array([1, 2, 3]), "side13": np.array([3, 4, 5])})
+    yoloDet.setIouThreshold(0.5)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto yoloDet = pipeline.create<dai::node::YoloDetectionNetwork>();
+    yoloDet->setBlobPath(nnBlobPath);
+
+    // yolo specific parameters
+    yoloDet->setNumClasses(80);
+    yoloDet->setCoordinateSize(4);
+    yoloDet->setAnchors({10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319});
+    yoloDet->setAnchorMasks({{"side13", {3, 4, 5}}, {"side26", {1, 2, 3}}});
+    yoloDet->setIouThreshold(0.5f);
 
 Examples of functionality
 #########################

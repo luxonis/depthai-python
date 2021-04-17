@@ -9,7 +9,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatial_calc = pipeline.SpatialLocationCalculator()
+    spatialCalc = pipeline.SpatialLocationCalculator()
 
   .. code-tab:: c++
 
@@ -24,21 +24,20 @@ Inputs and Outputs
 
                  ┌───────────────────┐
                  │                   │
-  InputConfig    │                   │       Out
+  inputConfig    │                   │       out
   ──────────────►│     Spatial       ├───────────►
                  │     location      │
                  │     calculator    │
-  InputDepth     │                   │PassthroughDepth
+  inputDepth     │                   │passthroughDepth
   ──────────────►│-------------------├───────────►
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`InputConfig` - :ref:`SpatialLocationCalculatorConfig`
-- :code:`InputDepth` - :ref:`ImgFrame`
-- :code:`Out` - :ref:`SpatialLocationCalculatorData`
-- :code:`PassthroughDepth` - :ref:`ImgFrame`
+- :code:`inputConfig` - :ref:`SpatialLocationCalculatorConfig`
+- :code:`inputDepth` - :ref:`ImgFrame`
+- :code:`out` - :ref:`SpatialLocationCalculatorData`
+- :code:`passthroughDepth` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -48,23 +47,36 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatial_calc = pipeline.SpatialLocationCalculator()
-    spatial_calc.setWaitForConfigInput(False)
+    spatialCalc = pipeline.SpatialLocationCalculator()
+    spatialCalc.setWaitForConfigInput(False)
 
     # Set initial config
     config = dai.SpatialLocationCalculatorConfigData()
     config.depthThresholds.lowerThreshold = 100
     config.depthThresholds.upperThreshold = 10000
-    config.roi = dai.Rect(topLeft, bottomRight)
+    config.roi = dai.Rect((0.4, 0.6), (0.4, 0.6))
     spatial_calc.initialConfig.addROI(config)
 
-    # You can later send configs from the host (XLinkIn) /scripting node to the InputConfig
+    # You can later send configs from the host (XLinkIn) / scripting node to the InputConfig
 
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto spatialCalc = pipeline.create<dai::node::SpatialLocationCalculator>();
+    spatialCalc->setWaitForConfigInput(false);
+
+    // Set initial config
+    dai::SpatialLocationCalculatorConfigData config;
+    config.depthThresholds.lowerThreshold = 100;
+    config.depthThresholds.upperThreshold = 10000;
+    config.roi = dai::Rect(topLeft, bottomRight);
+
+    dai::Point2f topLeft(0.4f, 0.4f);
+    dai::Point2f bottomRight(0.6f, 0.6f);
+    spatialCalc->initialConfig.addROI(config);
+
+    // You can later send configs from the host (XLinkIn) / scripting node to the InputConfig
 
 Examples of functionality
 #########################

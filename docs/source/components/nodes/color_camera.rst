@@ -11,12 +11,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    manip = pipeline.createColorCamera()
+    cam = pipeline.createColorCamera()
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imageManip = pipeline.create<dai::node::ColorCamera>();
+    auto cam = pipeline.create<dai::node::ColorCamera>();
 
 
 Inputs and Outputs
@@ -24,24 +24,23 @@ Inputs and Outputs
 
 .. code-block::
 
-                 ┌───────────────────┐   Still
+                 ┌───────────────────┐   still
                  │                   ├───────────►
-  InputConfig    │                   │
-  ──────────────►│                   │   Preview
+  inputConfig    │                   │
+  ──────────────►│                   │   preview
                  │    ColorCamera    ├───────────►
-  InputControl   │                   │
-  ──────────────►│                   │   Video
+  inputControl   │                   │
+  ──────────────►│                   │   video
                  │                   ├───────────►
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`InputConfig` - :ref:`ImageManipConfig`
-- :code:`InputControl` - :ref:`CameraControl`
-- :code:`Still` - :ref:`ImgFrame`
-- :code:`Preview` - :ref:`ImgFrame`
-- :code:`Video` - :ref:`ImgFrame`
+- :code:`inputConfig` - :ref:`ImageManipConfig`
+- :code:`inputControl` - :ref:`CameraControl`
+- :code:`dtill` - :ref:`ImgFrame`
+- :code:`preview` - :ref:`ImgFrame`
+- :code:`video` - :ref:`ImgFrame`
 
 :code:`Preview` is RGB (or BGR planar/interleaved if configured) and is mostly suited for small size previews and to feed the image
 into :ref:`NeuralNetwork`. :code:`Video` and :code:`Still` are both NV12, so are suitable for bigger sizes. :code:`Still` image gets created when
@@ -66,6 +65,11 @@ Usage
 
       dai::Pipeline pipeline;
       auto cam = pipeline.create<dai::node::createColorCamera>();
+      cam->setPreviewSize(300, 300);
+      cam->setBoardSocket(dai::CameraBoardSocket::RGB);
+      cam->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
+      cam->setInterleaved(false);
+      cam->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
 
 Examples of functionality
 #########################

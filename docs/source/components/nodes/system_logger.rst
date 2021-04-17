@@ -26,16 +26,15 @@ Inputs and Outputs
 
   ┌──────────────┐
   │              │
-  │              │    Out
+  │              │    out
   │ SystemLogger ├────────►
   │              │
   │              │
   └──────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Out` - :ref:`SystemInformation`
+- :code:`out` - :ref:`SystemInformation`
 
 Usage
 #####
@@ -49,15 +48,21 @@ Usage
     logger.setRate(1)  # 1 Hz
 
     # Send system info to the host via XLink
-    sys_xout = pipeline.createXLinkOut()
-    sys_xout.setStreamName("sysinfo")
-    logger.out.link(sys_xout.input)
+    xout = pipeline.createXLinkOut()
+    xout.setStreamName("sysinfo")
+    logger.out.link(xout.input)
 
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto logger = pipeline.create<dai::node::SystemLogger>();
+    auto logger = pipeline.create<dai::node::SystemLogger>();\
+    logger->setRate(1.0f);  // 1 Hz
+
+    // Send system info to the host via XLink
+    auto xout = pipeline.create<dai::node::XLinkOut>();
+    xout->setStreamName("sysinfo");
+    logger->out.link(xout->input);
 
 Examples of functionality
 #########################

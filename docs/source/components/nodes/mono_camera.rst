@@ -28,18 +28,17 @@ Inputs and Outputs
                  ┌───────────────────┐
                  │                   │
                  │                   │
-  InputControl   │                   │       Out
+  inputControl   │                   │       out
   ──────────────►│    MonoCamera     ├───────────►
                  │                   │
                  │                   │
                  │                   │
                  └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`InputControl` - :ref:`CameraControl`
-- :code:`Out` - :ref:`ImgFrame`
+- :code:`inputControl` - :ref:`CameraControl`
+- :code:`out` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -57,6 +56,8 @@ Usage
 
     dai::Pipeline pipeline;
     auto mono = pipeline.create<dai::node::MonoCamera>();
+    mono->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+    mono->setResolution(dai::MonoCameraProperties::SensorResolution::THE_720_P);
 
 Examples of functionality
 #########################

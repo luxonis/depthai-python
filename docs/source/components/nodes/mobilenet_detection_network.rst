@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenet_det = pipeline.createMobileNetDetectionNetwork()
+    mobilenetDet = pipeline.createMobileNetDetectionNetwork()
 
   .. code-tab:: c++
 
@@ -27,21 +27,20 @@ Inputs and Outputs
 .. code-block::
 
               ┌───────────────────┐
-              │                   │       Out
+              │                   │       out
               │                   ├───────────►
               │     MobileNet     │
               │     Detection     │
-  Input       │     Network       │ Passthrough
+  input       │     Network       │ passthrough
   ───────────►│-------------------├───────────►
               │                   │
               └───────────────────┘
 
-Message types
-#############
+**Message types**
 
-- :code:`Input` - :ref:`ImgFrame`
-- :code:`Out` - :ref:`ImgDetections`
-- :code:`Passthrough` - :ref:`ImgFrame`
+- :code:`input` - :ref:`ImgFrame`
+- :code:`out` - :ref:`ImgDetections`
+- :code:`passthrough` - :ref:`ImgFrame`
 
 Usage
 #####
@@ -51,16 +50,22 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenet_det = pipeline.createMobileNetDetectionNetwork()
-    mobilenet_det.setConfidenceThreshold(0.5)
-    mobilenet_det.setBlobPath(args.nnPath)
-    mobilenet_det.setNumInferenceThreads(2)
-    mobilenet_det.input.setBlocking(False)
+    mobilenetDet = pipeline.createMobileNetDetectionNetwork()
+
+    mobilenetDet.setConfidenceThreshold(0.5)
+    mobilenetDet.setBlobPath(nnBlobPath)
+    mobilenetDet.setNumInferenceThreads(2)
+    mobilenetDet.input.setBlocking(False)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto mobilenetDet = pipeline.create<dai::node::MobileNetDetectionNetwork>();
+
+    mobilenetDet->setConfidenceThreshold(0.5f);
+    mobilenetDet->setBlobPath(nnBlobPath);
+    mobilenetDet->setNumInferenceThreads(2);
+    mobilenetDet->input.setBlocking(false);
 
 Examples of functionality
 #########################
