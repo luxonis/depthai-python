@@ -1,7 +1,7 @@
 Buffer
 ======
 
-Just a buffer.
+Just a good old buffer. All other messages derive from the :code:`Buffer` class.
 
 Reference
 #########

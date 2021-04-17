@@ -1,7 +1,7 @@
 NNData
 ======
 
-Carries tensors and their metadata
+This message carries output(s) of the :ref:`NeuralNetwork` node. This includes one or more output tensors and their metadata.
 
 Reference
 #########
