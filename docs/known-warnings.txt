@@ -2,3 +2,5 @@
 # that should be filtered out
 .*Duplicate C\+\+ declaration.*\n.*'\.\. cpp:class::.*dai::ADatatype'.*
 .*Duplicate C\+\+ declaration.*\n.*'\.\. cpp:class::.*dai::Buffer'.*
+.*Duplicate C\+\+ declaration, also defined at components/nodes/.*
+.*Duplicate C\+\+ declaration, also defined at components/messages/.*
