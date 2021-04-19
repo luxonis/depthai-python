@@ -14,7 +14,7 @@ import depthai as dai
 import numpy as np
 import time
 
-# tiny yolo v3 label texts
+# Tiny yolo v3 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -37,6 +37,10 @@ syncNN = True
 nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v3_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
+
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -75,7 +79,7 @@ nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()

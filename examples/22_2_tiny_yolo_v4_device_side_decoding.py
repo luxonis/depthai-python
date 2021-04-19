@@ -37,6 +37,10 @@ nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -46,7 +50,7 @@ camRgb.setPreviewSize(416, 416)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 
-# network specific settings
+# Network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
@@ -74,7 +78,7 @@ nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()

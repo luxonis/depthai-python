@@ -11,6 +11,10 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -46,11 +50,11 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
-        
+
     # Output queues will be used to get the frames and nn data from the outputs defined above
     qVideo = device.getOutputQueue(name="video", maxSize=4, blocking=False)
     qPreview = device.getOutputQueue(name="preview", maxSize=4, blocking=False)
@@ -79,7 +83,7 @@ with dai.Device(pipeline) as device:
     print("Resize video window with mouse drag!")
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inVideo = qVideo.tryGet()
         inPreview = qPreview.tryGet()
         inDet = qDet.tryGet()

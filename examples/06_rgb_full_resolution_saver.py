@@ -29,7 +29,7 @@ xoutJpeg.setStreamName("jpeg")
 videoEnc.bitstream.link(xoutJpeg.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -42,7 +42,7 @@ with dai.Device(pipeline) as device:
     Path('06_data').mkdir(parents=True, exist_ok=True)
 
     while True:
-        inRgb = qRgb.tryGet()  # non-blocking call, will return a new data that has arrived or None otherwise
+        inRgb = qRgb.tryGet()  # Non-blocking call, will return a new data that has arrived or None otherwise
 
         if inRgb is not None:
             cv2.imshow("rgb", inRgb.getCvFrame())

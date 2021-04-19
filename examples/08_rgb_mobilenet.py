@@ -13,6 +13,10 @@ parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection netwo
 parser.add_argument('-s', '--sync', action="store_true", help="Sync RGB output with NN output", default=False)
 args = parser.parse_args()
 
+if not Path(nnPathDefault).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -47,7 +51,7 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -78,11 +82,11 @@ with dai.Device(pipeline) as device:
 
     while True:
         if args.sync:
-            # use blocking get() call to catch frame and inference result synced
+            # Use blocking get() call to catch frame and inference result synced
             inRgb = qRgb.get()
             inDet = qDet.get()
         else:
-            # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+            # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
             inRgb = qRgb.tryGet()
             inDet = qDet.tryGet()
 
@@ -95,7 +99,7 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
             counter += 1
 
-        # if the frame is available, draw bounding boxes on it and show the frame
+        # If the frame is available, draw bounding boxes on it and show the frame
         if frame is not None:
             displayFrame("rgb", frame)
 

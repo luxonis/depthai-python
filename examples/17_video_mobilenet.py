@@ -8,19 +8,23 @@ import numpy as np
 from time import monotonic
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_8shave.blob')).resolve().absolute())
-videoPath = str(Path("./construction_vest.mp4").resolve().absolute())
+parentDir = Path(__file__).parent
+nnPath = str((parentDir / Path('models/mobilenet-ssd_openvino_2021.2_8shave.blob')).resolve().absolute())
+videoPath = str((parentDir / Path('models/construction_vest.mp4')).resolve().absolute())
 if len(sys.argv) > 2:
     nnPath = sys.argv[1]
     videoPath = sys.argv[2]
 
+if not Path(nnPath).exists() or not Path(videoPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-
-# Create neural network input
-xinDet = pipeline.createXLinkIn()
-xinDet.setStreamName("inDet")
+# Create xLink input to which host will send frames from the video file
+xinFrame = pipeline.createXLinkIn()
+xinFrame.setStreamName("inFrame")
 
 # Define a neural network that will make predictions based on the source frames
 nn = pipeline.createMobileNetDetectionNetwork()
@@ -28,7 +32,7 @@ nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
-xinDet.out.link(nn.input)
+xinFrame.out.link(nn.input)
 
 # Create output
 nnOut = pipeline.createXLinkOut()
@@ -40,13 +44,14 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
-        
-    # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    qIn = device.getInputQueue(name="inDet")
+
+    # Input queue will be used to send video frames to the device.
+    qIn = device.getInputQueue(name="inFrame")
+    # Output queue will be used to get nn data from the video frames.
     qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
     frame = None

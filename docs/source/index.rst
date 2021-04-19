@@ -45,7 +45,7 @@ Before running the example, install the DepthAI Python library using the command
 .. code-block:: python
    :substitutions:
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release|
+   python3 -m pip install -U --force-reinstall depthai
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -85,12 +85,15 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/11_rgb_encoding_mono_mobilenet.rst
    samples/12_rgb_encoding_mono_mobilenet_depth.rst
    samples/13_encoding_max_limit.rst
-   samples/14_color_camera_control.rst
+   samples/14_1_color_camera_control.rst
+   samples/14_2_mono_camera_control.rst
+   samples/14_3_depth_crop_control.rst
    samples/15_rgb_mobilenet_4k.rst
    samples/16_device_queue_event.rst
    samples/17_video_mobilenet.rst
    samples/18_rgb_encoding_mobilenet.rst
-   samples/21_mobilenet_decoding_on_device.rst
+   samples/19_mono_camera_control.rst
+   samples/20_color_rotate_warp.rst
    samples/22_1_tiny_yolo_v3_decoding_on_device.rst
    samples/22_2_tiny_yolo_v4_decoding_on_device.rst
    samples/23_autoexposure_roi.rst
@@ -101,6 +104,10 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    samples/26_3_spatial_tiny_yolo.rst
    samples/27_spatial_location_calculator.rst
    samples/28_camera_video_example.rst
+   samples/29_1_object_tracker.rst
+   samples/29_2_spatial_object_tracker.rst
+   samples/29_3_object_tracker_video.rst
+   samples/30_stereo_depth_from_host.rst
 
 .. toctree::
    :maxdepth: 1

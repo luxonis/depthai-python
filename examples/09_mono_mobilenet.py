@@ -11,6 +11,9 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -31,7 +34,7 @@ nn.input.setBlocking(False)
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 camRight.out.link(manip.inputImage)
 manip.out.link(nn.input)
 
@@ -48,7 +51,7 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -76,7 +79,7 @@ with dai.Device(pipeline) as device:
 
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
         inDet = qDet.tryGet()
 

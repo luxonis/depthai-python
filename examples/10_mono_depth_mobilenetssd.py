@@ -6,11 +6,17 @@ import cv2
 import depthai as dai
 import numpy as np
 
+
+flipRectified = True
+
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -37,7 +43,7 @@ right.out.link(stereo.right)
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 stereo.rectifiedRight.link(manip.inputImage)
 
 # Define a neural network that will make predictions based on the source frames
@@ -49,10 +55,9 @@ nn.input.setBlocking(False)
 manip.out.link(nn.input)
 
 # Create outputs
-depthOut = pipeline.createXLinkOut()
-depthOut.setStreamName("depth")
-
-stereo.disparity.link(depthOut.input)
+disparityOut = pipeline.createXLinkOut()
+disparityOut.setStreamName("disparity")
+stereo.disparity.link(disparityOut.input)
 
 xoutRight = pipeline.createXLinkOut()
 xoutRight.setStreamName("rectifiedRight")
@@ -66,14 +71,14 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
     # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
     qRight = device.getOutputQueue("rectifiedRight", maxSize=4, blocking=False)
-    qDepth = device.getOutputQueue("depth", maxSize=4, blocking=False)
+    qDisparity = device.getOutputQueue("disparity", maxSize=4, blocking=False)
     qDet = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
     rightFrame = None
@@ -88,64 +93,49 @@ with dai.Device(pipeline) as device:
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
+    # Add bounding boxes and text to the frame and show it to the user
+    def show(name, frame):
+        for detection in detections:
+            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        # Show the frame
+        cv2.imshow(name, frame)
+
+    disparity_multiplier = 255 / 95 # Disparity range is 0..95
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
         inDet = qDet.tryGet()
-        inDepth = qDepth.tryGet()
+        inDisparity = qDisparity.tryGet()
 
         if inRight is not None:
             rightFrame = inRight.getCvFrame()
+            if flipRectified:
+                rightFrame = cv2.flip(rightFrame, 1)
+
 
         if inDet is not None:
             detections = inDet.detections
+            if flipRectified:
+                for detection in detections:
+                    swap = detection.xmin
+                    detection.xmin = 1 - detection.xmax
+                    detection.xmax = 1 - swap
 
-        if inDepth is not None:
-            depthFrame = cv2.flip(inDepth.getFrame(), 1)
-            # frame is transformed, the color map will be applied to highlight the depth info
-            depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_JET)
-
-            # Uncomment one of these and comment the one given above
-            # to see visualisation in different color frames
-
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_BONE)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_AUTUMN)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_WINTER)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_RAINBOW)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_OCEAN)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SUMMER)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_SPRING)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_COOL)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HSV)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_HOT)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PINK)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PARULA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_MAGMA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_INFERNO)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_PLASMA)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_VIRIDIS)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_CIVIDIS)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TWILIGHT_SHIFTED)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_TURBO)
-            # depthFrame = cv2.applyColorMap(depthFrame, cv2.COLORMAP_DEEPGREEN)
+        if inDisparity is not None:
+            # Frame is transformed, normalized, and color map will be applied to highlight the depth info
+            disparityFrame = inDisparity.getFrame()
+            disparityFrame = (disparityFrame*disparity_multiplier).astype(np.uint8)
+            # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
+            disparityFrame = cv2.applyColorMap(disparityFrame, cv2.COLORMAP_JET)
+            show("disparity", disparityFrame)
 
         if rightFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(rightFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(rightFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(rightFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(rightFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("rectified right", rightFrame)
+            show("rectified right", rightFrame)
 
-        if depthFrame is not None:
-            for detection in detections:
-                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                bbox[::2] += offsetX
-                cv2.rectangle(depthFrame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(depthFrame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(depthFrame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("depth", depthFrame)
+        detections = []
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -23,6 +23,10 @@ nnBlobPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_20
 if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
 
+if not Path(nnBlobPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -54,7 +58,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-# setting node configs
+# Setting node configs
 stereo.setConfidenceThreshold(255)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
@@ -70,7 +74,7 @@ monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 colorCam.preview.link(spatialDetectionNetwork.input)
-if(syncNN):
+if syncNN:
     spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 else:
     colorCam.preview.link(xoutRgb.input)
@@ -81,7 +85,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
@@ -136,11 +140,11 @@ with dai.Device(pipeline) as device:
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
 
-        # if the frame is available, draw bounding boxes on it and show the frame
+        # If the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]
         width  = frame.shape[1]
         for detection in detections:
-            # denormalize bounding box
+            # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

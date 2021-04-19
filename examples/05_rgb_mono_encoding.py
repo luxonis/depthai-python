@@ -39,7 +39,7 @@ ve3Out.setStreamName('ve3Out')
 ve3.bitstream.link(ve3Out.input)
 
 
-# Pipeline defined, now the device is connected to
+# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as dev:
     # Start pipeline
     dev.startPipeline()
