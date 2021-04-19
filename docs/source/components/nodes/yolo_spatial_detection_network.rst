@@ -92,22 +92,26 @@ Usage
 Examples of functionality
 #########################
 
-.. tabs::
-
-  .. tab:: Python
-
-    - :ref:`26.3 - RGB & TinyYolo with spatial data`
-
-  .. tab:: C++
-
-    - :ref:`26.3 - RGB & TinyYolo with spatial data`
-
+- :ref:`26.3 - RGB & TinyYolo with spatial data`
 
 Reference
 #########
 
-.. autoclass:: depthai.YoloSpatialDetectionNetwork
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.YoloSpatialDetectionNetwork
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::YoloSpatialDetectionNetwork
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

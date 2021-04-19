@@ -8,15 +8,28 @@ scenes, effects etc.
 Examples of functionality
 #########################
 
-- :ref:`14 - Color Camera Control`
+- :ref:`14.1 - Color Camera Control`
 - :ref:`19 - Mono Camera Control`
 - :ref:`23 - Auto Exposure on ROI`
 
 Reference
 #########
 
-.. autoclass:: depthai.CameraControl
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.CameraControl
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::CameraControl
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

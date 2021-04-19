@@ -86,8 +86,21 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.SpatialLocationCalculator
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.SpatialLocationCalculator
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::SpatialLocationCalculator
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

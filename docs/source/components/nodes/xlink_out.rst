@@ -64,14 +64,27 @@ Examples of functionality
 
 - :ref:`01 - RGB Preview`
 - :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Encoding`
+- :ref:`10 - Mono & MobilenetSSD & Depth`
 
 
 Reference
 #########
 
-.. autoclass:: depthai.XLinkOut
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.XLinkOut
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::XLinkOut
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

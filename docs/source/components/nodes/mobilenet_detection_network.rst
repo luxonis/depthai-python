@@ -72,13 +72,26 @@ Examples of functionality
 
 - :ref:`08 - RGB & MobilenetSSD`
 - :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Encoding`
+- :ref:`10 - Mono & MobilenetSSD & Depth`
 
 Reference
 #########
 
-.. autoclass:: depthai.MobileNetDetectionNetwork
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.MobileNetDetectionNetwork
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::MobileNetDetectionNetwork
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

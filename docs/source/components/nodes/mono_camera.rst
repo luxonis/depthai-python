@@ -69,6 +69,21 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.MonoCamera
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.MonoCamera
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::MonoCamera
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
+
+.. include::  ../../includes/footer-short.rst

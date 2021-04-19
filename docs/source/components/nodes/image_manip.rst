@@ -70,13 +70,26 @@ Examples of functionality
 
 - :ref:`09 - Mono & MobilenetSSD`
 - :ref:`11 - RGB & Encoding & Mono & MobilenetSSD`
-- :ref:`14 - Color Camera Control`
+- :ref:`14.1 - Color Camera Control`
 
 Reference
 #########
 
-.. autoclass:: depthai.ImageManip
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.ImageManip
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::ImageManip
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

@@ -94,8 +94,21 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.MobileNetSpatialDetectionNetwork
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.MobileNetSpatialDetectionNetwork
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::MobileNetSpatialDetectionNetwork
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

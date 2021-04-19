@@ -129,14 +129,27 @@ Examples of functionality
 #########################
 
 - :ref:`03 - Depth Preview`
-- :ref:`10 - Mono & MobilenetSSD & Encoding`
+- :ref:`10 - Mono & MobilenetSSD & Depth`
 - :ref:`26.1 - RGB & MobilenetSSD with spatial data`
 
 Reference
 #########
 
-.. autoclass:: depthai.StereoDepth
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.StereoDepth
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::StereoDepth
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

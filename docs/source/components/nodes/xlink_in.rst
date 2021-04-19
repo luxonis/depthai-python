@@ -84,15 +84,28 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`14 - Color Camera Control`
+- :ref:`14.1 - Color Camera Control`
 - :ref:`17 - Video & MobilenetSSD`
 - :ref:`20 - Color Rotate Warp`
 
 Reference
 #########
 
-.. autoclass:: depthai.XLinkIn
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.XLinkIn
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::XLinkIn
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

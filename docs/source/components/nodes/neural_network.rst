@@ -100,7 +100,7 @@ Usage
     auto qNn = device.getOutputQueue("nn");
     // You have to decode the output of the NN
 
-    auto nnData = qNn->get<dai::NNData>(); # Blocking
+    auto nnData = qNn->get<dai::NNData>(); // Blocking
 
     // NN can output from multiple layers. Print all layer names:
     cout << nnData->getAllLayerNames();
@@ -111,13 +111,28 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:``
+- `DepplabV3 experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-deeplabv3_person/deeplabv3_person_256.py>`__
+- `Age/gender experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-age-gender/main.py>`__
+- `License plate recognition experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-license-plate-recognition/main.py>`__
 
 Reference
 #########
 
-.. autoclass:: depthai.NeuralNetwork
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.NeuralNetwork
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::NeuralNetwork
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

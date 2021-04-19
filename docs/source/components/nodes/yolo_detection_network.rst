@@ -1,7 +1,7 @@
 YoloDetectionNetwork
 ====================
 
-Yolo detection network node is very similar to :ref:`Neural Network` (in fact it extends it). The only difference is that this node
+Yolo detection network node is very similar to :ref:`NeuralNetwork` (in fact it extends it). The only difference is that this node
 is specifically for the (tiny) Yolo (v3/v4) NN and it decodes the result of the NN on device. This means that :code:`Out` of this node is not a
 :ref:`NNData` (a byte array) but a :ref:`ImgDetections` that can easily be used in your code.
 
@@ -83,8 +83,21 @@ Examples of functionality
 Reference
 #########
 
-.. autoclass:: depthai.YoloDetectionNetwork
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.YoloDetectionNetwork
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::YoloDetectionNetwork
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

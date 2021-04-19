@@ -75,14 +75,27 @@ Examples of functionality
 #########################
 
 - :ref:`01 - RGB Preview`
-- :ref:`14 - Color Camera Control`
+- :ref:`14.1 - Color Camera Control`
 - :ref:`28 - Camera video high resolution`
 
 Reference
 #########
 
-.. autoclass:: depthai.ColorCamera
-  :members:
-  :inherited-members:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.ColorCamera
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::ColorCamera
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst

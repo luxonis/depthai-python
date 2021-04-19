@@ -1,4 +1,5 @@
 .. _components_device:
+
 Device
 ======
 
@@ -29,7 +30,6 @@ When you create the device in the code, firmware is uploaded together with the p
         # Send a message to the device
         cfg = depthai.ImageManipConfig()
         input_q.send(cfg)
-        # ...
 
 
 Multiple devices
@@ -67,5 +67,6 @@ Reference
 .. autoclass:: depthai.Device
   :members:
   :inherited-members:
+  :noindex:
 
 .. include::  ../includes/footer-short.rst

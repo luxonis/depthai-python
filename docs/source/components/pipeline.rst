@@ -1,4 +1,5 @@
 .. _components_pipeline:
+
 Pipeline
 ========
 
@@ -16,9 +17,7 @@ be loaded onto the :ref:`Device` and be started.
 
   pipeline = depthai.Pipeline()
 
-  # ...
   # Create nodes, configure them and link them together
-  # ...
 
   # Upload the pipeline to the device
   with depthai.Device(pipeline) as device:
@@ -65,5 +64,6 @@ Reference
 .. autoclass:: depthai.Pipeline
   :members:
   :inherited-members:
+  :noindex:
 
 .. include::  ../includes/footer-short.rst
