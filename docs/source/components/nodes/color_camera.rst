@@ -38,12 +38,12 @@ Inputs and Outputs
 
 - :code:`inputConfig` - :ref:`ImageManipConfig`
 - :code:`inputControl` - :ref:`CameraControl`
-- :code:`dtill` - :ref:`ImgFrame`
+- :code:`still` - :ref:`ImgFrame`
 - :code:`preview` - :ref:`ImgFrame`
 - :code:`video` - :ref:`ImgFrame`
 
 :code:`Preview` is RGB (or BGR planar/interleaved if configured) and is mostly suited for small size previews and to feed the image
-into :ref:`NeuralNetwork`. :code:`Video` and :code:`Still` are both NV12, so are suitable for bigger sizes. :code:`Still` image gets created when
+into :ref:`NeuralNetwork`. :code:`video` and :code:`still` are both NV12, so are suitable for bigger sizes. :code:`still` image gets created when
 a capture event is sent to the ColorCamera, so it's like taking a photo.
 
 Usage

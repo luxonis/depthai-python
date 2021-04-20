@@ -29,7 +29,7 @@ Inputs and Outputs
   ──────────────►│-------------------├─────────────────►
                  │     Yolo          │               out
                  │     Spatial       ├─────────────────►
-                 │     Detection     │noundingBoxMapping
+                 │     Detection     │boundingBoxMapping
                  │     Network       ├─────────────────►
   inputDepth     │                   │  passthroughDepth
   ──────────────►│-------------------├─────────────────►

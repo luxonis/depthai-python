@@ -71,7 +71,6 @@ Usage
 
     with dai.Device(pipeline) as device:
       qNn = device.getOutputQueue("nn")
-      # You have to decode the output of the NN
 
       nnData = qNn.get() # Blocking
 
@@ -80,6 +79,8 @@ Usage
 
       # Get layer named "Layer1_FP16" as FP16
       layer1Data = nnData.getLayerFp16("Layer1_FP16")
+
+      # You can now decode the output of your NN
 
   .. code-tab:: c++
 
@@ -98,7 +99,6 @@ Usage
     device.startPipeline();
 
     auto qNn = device.getOutputQueue("nn");
-    // You have to decode the output of the NN
 
     auto nnData = qNn->get<dai::NNData>(); // Blocking
 
@@ -107,6 +107,8 @@ Usage
 
     // Get layer named "Layer1_FP16" as FP16
     auto layer1Data = nnData->getLayerFp16("Layer1_FP16");
+
+    // You can now decode the output of your NN
 
 Examples of functionality
 #########################

@@ -2,7 +2,7 @@ MobileNetDetectionNetwork
 =========================
 
 MobileNet detection network node is very similar to :ref:`NeuralNetwork` (in fact it extends it). The only difference is that this node
-is specifically for the MobileNet NN and it decodes the result of the NN on device. This means that :code:`Out` of this node is not a byte array
+is specifically for the MobileNet NN and it decodes the result of the NN on device. This means that :code:`out` of this node is not a byte array
 but a :ref:`ImgDetections` that can easily be used in your code.
 
 How to place it

@@ -1,7 +1,7 @@
 MonoCamera
 ==========
 
-MonoCamera node is a source of :ref:`image frames <ImgFrame>`. You can control in at runtime with the :code:`InputControl`. Some DepthAI modules don't
+MonoCamera node is a source of :ref:`image frames <ImgFrame>`. You can control in at runtime with the :code:`inputControl`. Some DepthAI modules don't
 have mono camera(s). Two mono cameras are used to calculate stereo depth (with :ref:`StereoDepth` node).
 
 How to place it

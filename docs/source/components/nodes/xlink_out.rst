@@ -34,7 +34,7 @@ Inputs and Outputs
 
 **Message types**
 
-- :code:`input` - :ref:`Buffer`
+- :code:`input` - :code:`Any`
 
 Usage
 #####
@@ -47,7 +47,8 @@ Usage
     xOut = pipeline.createXLinkOut()
     xOut.setStreamName("camOut")
 
-    # Here we will send camera preview (ImgFrame) to the host via XLink. Host can then display the frame to the user
+    # Here we will send camera preview (ImgFrame) to the host via XLink.
+    # Host can then display the frame to the user
     cam.preview.link(xOut.input)
 
   .. code-tab:: c++
@@ -56,7 +57,8 @@ Usage
     auto xOut = pipeline.create<dai::node::XLinkOut>();
     xOut->setStreamName("camOut");
 
-    # Here we will send camera preview (ImgFrame) to the host via XLink. Host can then display the frame to the user
+    // Here we will send camera preview (ImgFrame) to the host via XLink.
+    // Host can then display the frame to the user
     cam->preview.link(xOut->input);
 
 Examples of functionality

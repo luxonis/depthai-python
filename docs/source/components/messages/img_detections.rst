@@ -1,8 +1,8 @@
 ImgDetections
 =============
 
-Both :ref:`YoloDetectionNetwork` and :ref:`MobileNetDetectionNetwork` output this message, since they both derive
-from the :code:`DetectionNetwork` class.
+Both :ref:`YoloDetectionNetwork` and :ref:`MobileNetDetectionNetwork` output this message. This message contains a list of :code:`detections`,
+which contains :code:`label`, :code:`confidence`, and the bounding box information (:code:`xmin`, :code:`ymin`, :code:`xmax`, :code:`ymax`).
 
 Examples of functionality
 #########################

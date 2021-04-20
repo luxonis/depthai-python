@@ -61,6 +61,19 @@ When calculating the disparity, each pixel in the disparity map gets assigned a 
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero.
 
+Current limitations
+###################
+
+If one or more of the additional depth modes (lrcheck, extended, subpixel) are enabled, then:
+
+- :code:`depth` output is FP16.
+- median filtering is disabled on device.
+- with subpixel, either depth or disparity has valid data.
+
+Otherwise, depth output is U16 (in milimeters) and median is functional.
+
+Like on Gen1, either :code:`depth` or :code:`disparity` has valid data.
+
 Usage
 #####
 
@@ -77,14 +90,6 @@ Usage
 
   .. code-tab:: py
 
-    # If one or more of the additional depth modes (lrcheck, extended, subpixel)
-    # are enabled, then:
-    # - depth output is FP16. TODO enable U16.
-    # - median filtering is disabled on device. TODO enable.
-    # - with subpixel, either depth or disparity has valid data.
-    # Otherwise, depth output is U16 (mm) and median is functional.
-    # But like on Gen1, either depth or disparity has valid data. TODO enable both.
-
     pipeline = dai.Pipeline()
     stereo = pipeline.createStereoDepth()
 
@@ -100,16 +105,6 @@ Usage
     right.out.link(stereo.right)
 
   .. code-tab:: c++
-
-    /**
-    * If one or more of the additional depth modes (lrcheck, extended, subpixel)
-    * are enabled, then:
-    * - depth output is FP16. TODO enable U16.
-    * - median filtering is disabled on device. TODO enable.
-    * - with subpixel, either depth or disparity has valid data.
-    * Otherwise, depth output is U16 (mm) and median is functional.
-    * But like on Gen1, either depth or disparity has valid data. TODO enable both.
-    */
 
     dai::Pipeline pipeline;
     auto stereo = pipeline.create<dai::node::StereoDepth>();

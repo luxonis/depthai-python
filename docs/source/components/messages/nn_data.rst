@@ -1,7 +1,8 @@
 NNData
 ======
 
-This message carries output(s) of the :ref:`NeuralNetwork` node. This includes one or more output tensors and their metadata.
+This message carries tensors and its data. You can recieve this message from the :ref:`NeuralNetwork` node or you could create this message
+on the host, populate the tensor with the data and send the message to the :code:`input` of the :ref:`NeuralNetwork` node.
 
 Reference
 #########

@@ -61,9 +61,21 @@ How to place it
 Reference
 #########
 
-.. autoclass:: depthai.Pipeline
-  :members:
-  :inherited-members:
-  :noindex:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.Pipeline
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::Pipeline
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../includes/footer-short.rst

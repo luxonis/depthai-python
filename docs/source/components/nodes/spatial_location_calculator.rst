@@ -1,6 +1,9 @@
 SpatialLocationCalculator
 =========================
 
+SpatialLocationCalculator will calculate the depth based on the :code:`depth` map from the :code:`inputDepth` and ROI (region-of-interest)
+provided from the :code:`inputConfig`. It will average the depth values in the ROI and remove the ones out of range.
+
 How to place it
 ###############
 
@@ -70,10 +73,11 @@ Usage
     dai::SpatialLocationCalculatorConfigData config;
     config.depthThresholds.lowerThreshold = 100;
     config.depthThresholds.upperThreshold = 10000;
-    config.roi = dai::Rect(topLeft, bottomRight);
 
     dai::Point2f topLeft(0.4f, 0.4f);
     dai::Point2f bottomRight(0.6f, 0.6f);
+    config.roi = dai::Rect(topLeft, bottomRight);
+
     spatialCalc->initialConfig.addROI(config);
 
     // You can later send configs from the host (XLinkIn) / scripting node to the InputConfig

@@ -25,7 +25,7 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
-  input          │                   │       oassthrough
+  input          │                   │       passthrough
   ──────────────►│-------------------├─────────────────►
                  │     MobileNet     │               out
                  │     Spatial       ├─────────────────►

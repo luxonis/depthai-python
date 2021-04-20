@@ -34,7 +34,7 @@ Inputs and Outputs
 
 **Message types**
 
-- :code:`out` - :ref:`Buffer`
+- :code:`out` - :code:`Any`
 
 Usage
 #####

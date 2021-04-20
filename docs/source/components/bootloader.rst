@@ -17,7 +17,7 @@ Once the device has the bootloader flashed, it will perform the same as before. 
 
 Suggested workflow is to perform as much of development as possible with the host connected as the iteration cycle is greatly improved.
 
-Once desired pipeline is created, use the following function to flash: DeviceBootloader::flash
+Once desired pipeline is created, use the following function to flash: :code:`DeviceBootloader::flash`
 
 API
 ###

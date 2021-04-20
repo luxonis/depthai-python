@@ -57,16 +57,28 @@ in this situation - instead of waiting, it will discard the oldest packet and ad
 loop (so it won't get blocked). maxSize determines the size of the queue and also
 helps to controll the memory usage - if the packet have 5MB of data, and the queue size is 30, this queue effectively stores
 150MB of data in memory (and the packets can be really big, like when reading 4K RGB frames).
-Also, decreasing the queue size to 1 will effectively mean "I want only the latest packet from the queue"
+Also, decreasing the queue size to 1 will effectively mean "I want only the latest packet from the queue".
 
-The size and behavior of the queue can be modified after the initialization by calling :code:`queue.setBlocking()` and :code:`queue.setMaxSize()`
+The size and behavior of the queue can be modified after the initialization by calling :code:`queue.setBlocking()` and :code:`queue.setMaxSize()`.
 
 Reference
 #########
 
-.. autoclass:: depthai.Device
-  :members:
-  :inherited-members:
-  :noindex:
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.Device
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::Device
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../includes/footer-short.rst
