@@ -16,6 +16,7 @@
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
 #include "depthai/pipeline/datatype/Tracklets.hpp"
+#include "depthai/pipeline/datatype/IMUData.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -30,6 +31,7 @@
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawTracklets.hpp"
+#include "depthai-shared/datatype/RawIMUData.hpp"
 
 
 //pybind
@@ -282,6 +284,21 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
     rawTacklets
         .def_readwrite("tracklets", &RawTracklets::tracklets)
+        ;
+
+    py::class_<IMUDatas> imuDatas(m, "IMUDatas", DOC(dai, IMUDatas));
+    imuDatas
+        .def(py::init<>())
+        .def_readwrite("ts", &IMUDatas::ts)
+        .def_readwrite("accelerometer", &IMUDatas::accelerometer)
+        .def_readwrite("gyro", &IMUDatas::gyro)
+        ;
+
+
+    // Bind RawIMUData
+    py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUDatas(m, "RawIMUData", DOC(dai, RawIMUData));
+    rawIMUDatas
+        .def_readwrite("imuDatas", &RawIMUData::imuDatas)
         ;
 
     // RawCameraControl enum bindings
@@ -594,6 +611,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("sec", &Timestamp::sec)
         .def_readwrite("nsec", &Timestamp::nsec)
+        .def("getTimestamp", &Timestamp::getTimestamp)
         ;
 
     py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
@@ -804,5 +822,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
         ;
 
+
+    // IMUData (after ConfigData)
+    py::class_<IMUData, Buffer, std::shared_ptr<IMUData>>(m, "IMUData", DOC(dai, IMUData))
+        .def(py::init<>())
+        .def_property("imuDatas", [](IMUData& imuDta) { return &imuDta.imuDatas; }, [](IMUData& imuDta, std::vector<IMUDatas> val) { imuDta.imuDatas = val; }, DOC(dai, IMUData, imuDatas))
+        ;
 
 }

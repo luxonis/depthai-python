@@ -15,6 +15,7 @@
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
+#include "depthai/pipeline/node/IMU.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -420,6 +421,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setTrackerIdAssigmentPolicy", &ObjectTracker::setTrackerIdAssigmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssigmentPolicy))
         ;
 
+    // IMU node
+    py::class_<IMU, Node, std::shared_ptr<IMU>>(m, "IMU", DOC(dai, node, IMU))
+        .def_readonly("out", &IMU::out, DOC(dai, node, IMU, out))
+        ;
+
+
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
@@ -601,5 +608,15 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
         ;
     m.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
+
+    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
+    imuProperties
+        .def_readwrite("accelerometerRate", &IMUProperties::accelerometerRate)
+        .def_readwrite("gyroRate", &IMUProperties::gyroRate)
+    ;
+
+    // ALIAS
+    m.attr("ColorCamera").attr("Properties") = imuProperties;
+
 
 }
