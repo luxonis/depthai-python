@@ -3,6 +3,7 @@
 import cv2
 import depthai as dai
 import time
+import math
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -32,11 +33,12 @@ with dai.Device(pipeline) as device:
         for imuData in imuDatas:
             dur = imuData.ts.getTimestamp()
             # TODO substract base time
+            ffs = "{: .06f}"
+            accelLength = math.sqrt(imuData.accelerometer.x**2 + imuData.accelerometer.y**2 + imuData.accelerometer.z**2)
+            
             print(f"Timestamp: {dur}")
-
-            print(f"Accelero: {imuData.accelerometer.x} {imuData.accelerometer.y} {imuData.accelerometer.z} ")
-            print(f"Gyro: {imuData.gyro.x} {imuData.gyro.y} {imuData.gyro.z} ")
-
+            print(f"Accel: {ffs.format(imuData.accelerometer.x)} {ffs.format(imuData.accelerometer.y)} {ffs.format(imuData.accelerometer.z)}, length {ffs.format(accelLength)}")
+            print(f"Gyro:  {ffs.format(imuData.gyro.x)} {ffs.format(imuData.gyro.y)} {ffs.format(imuData.gyro.z)} ")
 
         if cv2.waitKey(1) == ord('q'):
             break
