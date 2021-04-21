@@ -55,9 +55,9 @@ By default, the queue is blocking and its size is 30, so the device will put
 call (so, waits for the host to consume the packet before putting a new one). Making the queue non-blocking will change its behavior
 in this situation - instead of waiting, it will discard the oldest packet and add the new one, and then continue it's processing
 loop (so it won't get blocked). maxSize determines the size of the queue and also
-helps to controll the memory usage - if the packet have 5MB of data, and the queue size is 30, this queue effectively stores
-150MB of data in memory (and the packets can be really big, like when reading 4K RGB frames).
-Also, decreasing the queue size to 1 will effectively mean "I want only the latest packet from the queue".
+helps to control the memory usage - if the packet have 5MB of data, and the queue size is 30, this queue effectively stores
+150MB of data in memory (the packets can also get really big, for instance a single 4K NV12 encoded frame takes about ~12MB).
+Decreasing the queue size to 1 and setting non-blocking behavior will effectively mean "I only want the latest packet from the queue".
 
 The size and behavior of the queue can be modified after the initialization by calling :code:`queue.setBlocking()` and :code:`queue.setMaxSize()`.
 

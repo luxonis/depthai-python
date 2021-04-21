@@ -10,8 +10,8 @@ DepthAI device.
 Pipeline first steps
 ####################
 
-To get DpethAI up and running, one has to define pipeline, populate it with nodes, configure the nodes and link them together. After that, pipeline can
-be loaded onto the :ref:`Device` and be started.
+To get DepthAI up and running, one has to define a pipeline, populate it with nodes, configure the nodes and link them together. After that, the pipeline
+can be loaded onto the :ref:`Device` and be started.
 
 .. code-block:: python
 
