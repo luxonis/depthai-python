@@ -26,7 +26,7 @@ can be loaded onto the :ref:`Device` and be started.
 
     # Set input/output queues to configure device/host communication through the XLink...
 
-Using multiple deviecs
+Using multiple devices
 ######################
 
 If user has multiple DepthAI devices, each device can run a separate pipeline or the same pipeline
