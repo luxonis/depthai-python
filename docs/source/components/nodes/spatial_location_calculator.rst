@@ -57,7 +57,11 @@ Usage
     config = dai.SpatialLocationCalculatorConfigData()
     config.depthThresholds.lowerThreshold = 100
     config.depthThresholds.upperThreshold = 10000
-    config.roi = dai.Rect((0.4, 0.6), (0.4, 0.6))
+
+    topLeft = dai.Point2f(0.4, 0.4)
+    bottomRight = dai.Point2f(0.6, 0.6)
+    config.roi = dai.Rect(topLeft, bottomRight)
+
     spatial_calc.initialConfig.addROI(config)
 
     # You can later send configs from the host (XLinkIn) / scripting node to the InputConfig
