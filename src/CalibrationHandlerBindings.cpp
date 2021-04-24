@@ -27,7 +27,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def("eepromToJsonFile", &CalibrationHandler::eepromToJsonFile, py::arg("destPath"), DOC(dai, Device, eepromToJsonFile))
         
         .def("setBoardInfo", &CalibrationHandler::setBoardInfo, py::arg("swapLeftRightCam"), py::arg("boardName"), py::arg("boardRev"), DOC(dai, Device, setBoardInfo))
-        .def("setdistortionCoefficients", &CalibrationHandler::setdistortionCoefficients, py::arg("cameraId"), py::arg("distortionCoefficients"), DOC(dai, Device, setdistortionCoefficients))
+        .def("setDistortionCoefficients", &CalibrationHandler::setDistortionCoefficients, py::arg("cameraId"), py::arg("distortionCoefficients"), DOC(dai, Device, setdistortionCoefficients))
         .def("setFov", &CalibrationHandler::setFov, py::arg("cameraId"), py::arg("hfov"), DOC(dai, Device, setFov))
         
 
@@ -38,6 +38,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def("setImuExtrinsics", &CalibrationHandler::setImuExtrinsics, py::arg("destCameraId"), py::arg("rotationMatrix"), py::arg("translation"), py::arg("measuredTranslation") = std::vector<float>(3,0), DOC(dai, Device, setImuExtrinsics))
 
         .def("setStereoLeft", &CalibrationHandler::setStereoLeft, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoLeft))
+        .def("setLensPosition", &CalibrationHandler::setLensPosition, py::arg("cameraId"), py::arg("lensPosition"), DOC(dai, Device, setlensPosition))
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, Device, setStereoRight))
         .def("getStereoLeftRectificationRotation", &CalibrationHandler::getStereoLeftRectificationRotation, DOC(dai, Device, getStereoLeftRectificationRotation))
         .def("getStereoRightRectificationRotation", &CalibrationHandler::getStereoRightRectificationRotation, DOC(dai, Device, getStereoRightRectificationRotation))
