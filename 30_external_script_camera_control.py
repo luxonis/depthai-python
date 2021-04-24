@@ -19,15 +19,15 @@ cam = pipeline.create(dai.node.ColorCamera)
 script = pipeline.create(dai.node.Script)
 
 # no delay between captures
-embedableMethod = inspect.getsource(stillCapture)
+embeddableMethod = inspect.getsource(stillCapture)
 
 # 1 second delay between captures
-# embedableMethod = inspect.getsource(stillCaptureEverySecond)
+# embeddableMethod = inspect.getsource(stillCaptureEverySecond)
 
-embedableMethod = unindentMethod(embedableMethod)
-print(embedableMethod)
+embeddableMethod = unindentMethod(embeddableMethod)
+print(embeddableMethod)
 
-script.setScriptData(embedableMethod)
+script.setScriptData(embeddableMethod)
 
 # XLinkOut
 xout = pipeline.create(dai.node.XLinkOut)
