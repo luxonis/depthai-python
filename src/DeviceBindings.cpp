@@ -15,7 +15,7 @@ static std::unique_ptr<dai::Device> deviceConstructorHelper(const dai::Pipeline&
     bool found;
     dai::DeviceInfo deviceInfo = {};
     do {
-        {          
+        {
             // releases python GIL
             py::gil_scoped_release release;
             std::tie(found, deviceInfo) = dai::Device::getFirstAvailableDevice();
@@ -23,7 +23,7 @@ static std::unique_ptr<dai::Device> deviceConstructorHelper(const dai::Pipeline&
             if(found){
                 break;
             } else {
-                // block for 100ms                    
+                // block for 100ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
         }
@@ -45,7 +45,46 @@ static std::unique_ptr<dai::Device> deviceConstructorHelper(const dai::Pipeline&
         return std::unique_ptr<dai::Device>(new dai::Device(pipeline, deviceInfo, pathToCmd));
     }
     return nullptr;
-} 
+}
+
+// Searches for available devices (as Device constructor)
+// but pooling, to check for python interrupts, and releases GIL in between
+static std::unique_ptr<dai::Device> deviceConstructorHelper(dai::OpenVINO::Version version, const std::string& pathToCmd = "", bool usb2Mode = false){
+    auto startTime = std::chrono::steady_clock::now();
+    bool found;
+    dai::DeviceInfo deviceInfo = {};
+    do {
+        {
+            // releases python GIL
+            py::gil_scoped_release release;
+            std::tie(found, deviceInfo) = dai::Device::getFirstAvailableDevice();
+            // Check if found
+            if(found){
+                break;
+            } else {
+                // block for 100ms
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        }
+        // reacquires python GIL for PyErr_CheckSignals call
+        // check if interrupt triggered in between
+        if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+    } while(std::chrono::steady_clock::now() - startTime < dai::Device::DEFAULT_SEARCH_TIME);
+
+    // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
+    if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
+
+    // if no devices found, then throw
+    if(!found) throw std::runtime_error("No available devices");
+
+    // Check if pathToCmd supplied
+    if(pathToCmd.empty()){
+        return std::unique_ptr<dai::Device>(new dai::Device(version, deviceInfo, usb2Mode));
+    } else {
+        return std::unique_ptr<dai::Device>(new dai::Device(version, deviceInfo, pathToCmd));
+    }
+    return nullptr;
+}
 
 
 std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout){
@@ -55,7 +94,7 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
     bool unlimitedTimeout = timeout < microseconds(0);
     auto startTime = steady_clock::now();
     do {
-        {          
+        {
             // releases python GIL
             py::gil_scoped_release release;
             // block for 100ms
@@ -66,8 +105,8 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
     } while(unlimitedTimeout || steady_clock::now() - startTime < timeout);
-    
-    return std::vector<std::string>(); 
+
+    return std::vector<std::string>();
 }
 
 
@@ -91,16 +130,16 @@ void DeviceBindings::bind(pybind11::module& m){
         .def_static("getAllAvailableDevices", &Device::getAllAvailableDevices, DOC(dai, Device, getAllAvailableDevices))
         .def_static("getEmbeddedDeviceBinary", &Device::getEmbeddedDeviceBinary, py::arg("usb2Mode"), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Device, getEmbeddedDeviceBinary))
         .def_static("getDeviceByMxId", &Device::getDeviceByMxId, py::arg("mxId"), DOC(dai, Device, getDeviceByMxId))
-        
+
         // methods
         .def(py::init([](const Pipeline& pipeline){ return deviceConstructorHelper(pipeline); }), py::arg("pipeline"), DOC(dai, Device, Device))
-        .def(py::init([](const Pipeline& pipeline, bool usb2Mode){ 
+        .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
             // Blocking constructor
-            return deviceConstructorHelper(pipeline, std::string(""), usb2Mode); 
+            return deviceConstructorHelper(pipeline, std::string(""), usb2Mode);
         }), py::arg("pipeline"), py::arg("usb2Mode"), DOC(dai, Device, Device, 2))
         .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
             // Blocking constructor
-            return deviceConstructorHelper(pipeline, pathToCmd); 
+            return deviceConstructorHelper(pipeline, pathToCmd);
         }), py::arg("pipeline"), py::arg("pathToCmd"), DOC(dai, Device, Device, 3))
         .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
             // Non blocking constructor
@@ -111,8 +150,19 @@ void DeviceBindings::bind(pybind11::module& m){
             return std::unique_ptr<Device>(new Device(pipeline, deviceInfo, pathToCmd));
         }), py::arg("pipeline"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, Device, Device, 5))
 
+        .def(py::init([](OpenVINO::Version version){ return deviceConstructorHelper(version); }), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Device, Device, 6))
+        .def(py::init([](OpenVINO::Version version, bool usb2Mode){
+            // Blocking constructor
+            return deviceConstructorHelper(version, std::string(""), usb2Mode);
+        }), py::arg("version"), py::arg("usb2Mode"), DOC(dai, Device, Device, 7))
+        .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
+            // Blocking constructor
+            return deviceConstructorHelper(version, pathToCmd);
+        }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, Device, Device, 8))
+
         .def("isPipelineRunning", &Device::isPipelineRunning, DOC(dai, Device, isPipelineRunning))
-        .def("startPipeline", &Device::startPipeline, DOC(dai, Device, startPipeline))
+        .def("startPipeline", py::overload_cast<>(&Device::startPipeline), DOC(dai, Device, startPipeline))
+        .def("startPipeline", py::overload_cast<const Pipeline&>(&Device::startPipeline), DOC(dai, Device, startPipeline, 2))
 
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
@@ -137,13 +187,13 @@ void DeviceBindings::bind(pybind11::module& m){
             if(events.empty()) return std::string("");
             return events[0];
         }, py::arg("queueNames"), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent))
-        
+
         .def("getQueueEvent", [](Device& d, std::string queueName, std::chrono::microseconds timeout) {
             auto events = deviceGetQueueEventsHelper(d, std::vector<std::string>{queueName}, std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
             return events[0];
         }, py::arg("queueName"), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent, 3))
-        
+
         .def("getQueueEvent", [](Device& d, std::chrono::microseconds timeout) {
             auto events = deviceGetQueueEventsHelper(d, d.getOutputQueueNames(), std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
@@ -155,6 +205,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getLogLevel", &Device::getLogLevel, DOC(dai, Device, getLogLevel))
         .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate, DOC(dai, Device, getSystemInformationLoggingRate))
+        .def("getConnectedCameras", &Device::getConnectedCameras, DOC(dai, Device, getConnectedCameras))
         .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage, DOC(dai, Device, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", &Device::getCmxMemoryUsage, DOC(dai, Device, getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", &Device::getLeonCssHeapUsage, DOC(dai, Device, getLeonCssHeapUsage))
