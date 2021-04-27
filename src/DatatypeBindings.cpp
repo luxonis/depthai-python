@@ -276,6 +276,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("NEW", Tracklet::TrackingStatus::NEW)
         .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
         .value("LOST", Tracklet::TrackingStatus::LOST)
+        .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
         ;
 
     // Bind RawTracklets
