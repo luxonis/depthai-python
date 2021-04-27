@@ -286,12 +286,108 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("tracklets", &RawTracklets::tracklets)
         ;
 
+
+    py::class_<IMUReport, std::shared_ptr<IMUReport>> imureport(m, "IMUReport", DOC(dai, IMUReport));
+    imureport
+        .def(py::init<>())
+        .def_readwrite("sequence", &IMUReport::sequence)
+        .def_readwrite("accuracy", &IMUReport::accuracy)
+        .def_readwrite("timestamp", &IMUReport::timestamp)
+        .def_readwrite("delay", &IMUReport::delay)
+        ;
+
+    py::enum_<IMUReport::IMUReportAccuracy>(imureport, "IMUReportAccuracy")
+        .value("UNRELIABLE", IMUReport::IMUReportAccuracy::UNRELIABLE)
+        .value("LOW", IMUReport::IMUReportAccuracy::LOW)
+        .value("MEDIUM", IMUReport::IMUReportAccuracy::MEDIUM)
+        .value("HIGH", IMUReport::IMUReportAccuracy::HIGH)
+        ;
+
+    py::class_<IMUReportAccelerometer, IMUReport, std::shared_ptr<IMUReportAccelerometer>>(m, "IMUReportAccelerometer", DOC(dai, IMUReportAccelerometer))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportAccelerometer::x)
+        .def_readwrite("y", &IMUReportAccelerometer::y)
+        .def_readwrite("z", &IMUReportAccelerometer::z)
+        ;
+
+    py::class_<IMUReportGyroscope, IMUReport, std::shared_ptr<IMUReportGyroscope>>(m, "IMUReportGyroscope", DOC(dai, IMUReportGyroscope))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportGyroscope::x)
+        .def_readwrite("y", &IMUReportGyroscope::y)
+        .def_readwrite("z", &IMUReportGyroscope::z)
+        ;
+
+    py::class_<IMUReportGyroscopeUncalibrated, IMUReport, std::shared_ptr<IMUReportGyroscopeUncalibrated>>(m, "IMUReportGyroscopeUncalibrated", DOC(dai, IMUReportGyroscopeUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportGyroscopeUncalibrated::x)
+        .def_readwrite("y", &IMUReportGyroscopeUncalibrated::y)
+        .def_readwrite("z", &IMUReportGyroscopeUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportGyroscopeUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportGyroscopeUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportGyroscopeUncalibrated::biasZ)
+        ;
+
+    py::class_<IMUReportMagneticField, IMUReport, std::shared_ptr<IMUReportMagneticField>>(m, "IMUReportMagneticField", DOC(dai, IMUReportMagneticField))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportMagneticField::x)
+        .def_readwrite("y", &IMUReportMagneticField::y)
+        .def_readwrite("z", &IMUReportMagneticField::z)
+        ;
+
+    py::class_<IMUReportMagneticFieldUncalibrated, IMUReport, std::shared_ptr<IMUReportMagneticFieldUncalibrated>>(m, "IMUReportMagneticFieldUncalibrated", DOC(dai, IMUReportMagneticFieldUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportMagneticFieldUncalibrated::x)
+        .def_readwrite("y", &IMUReportMagneticFieldUncalibrated::y)
+        .def_readwrite("z", &IMUReportMagneticFieldUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportMagneticFieldUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportMagneticFieldUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportMagneticFieldUncalibrated::biasZ)
+        ;
+
+    py::class_<IMUReportRotationVectorWAcc, IMUReport, std::shared_ptr<IMUReportRotationVectorWAcc>>(m, "IMUReportRotationVectorWAcc", DOC(dai, IMUReportRotationVectorWAcc))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportRotationVectorWAcc::i)
+        .def_readwrite("j", &IMUReportRotationVectorWAcc::j)
+        .def_readwrite("k", &IMUReportRotationVectorWAcc::k)
+        .def_readwrite("real", &IMUReportRotationVectorWAcc::real)
+        .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
+        ;
+
+    py::class_<IMUReportRotationVector, IMUReport, std::shared_ptr<IMUReportRotationVector>>(m, "IMUReportRotationVector", DOC(dai, IMUReportRotationVector))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportRotationVector::i)
+        .def_readwrite("j", &IMUReportRotationVector::j)
+        .def_readwrite("k", &IMUReportRotationVector::k)
+        .def_readwrite("real", &IMUReportRotationVector::real)
+        ;
+
+    py::class_<IMUReportGyroIntegratedRV, IMUReport, std::shared_ptr<IMUReportGyroIntegratedRV>>(m, "IMUReportGyroIntegratedRV", DOC(dai, IMUReportGyroIntegratedRV))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportGyroIntegratedRV::i)
+        .def_readwrite("j", &IMUReportGyroIntegratedRV::j)
+        .def_readwrite("k", &IMUReportGyroIntegratedRV::k)
+        .def_readwrite("real", &IMUReportGyroIntegratedRV::real)
+        .def_readwrite("angVelX", &IMUReportGyroIntegratedRV::angVelX)
+        .def_readwrite("angVelY", &IMUReportGyroIntegratedRV::angVelY)
+        .def_readwrite("angVelZ", &IMUReportGyroIntegratedRV::angVelZ)
+        ;
+
     py::class_<IMUDatas> imuDatas(m, "IMUDatas", DOC(dai, IMUDatas));
     imuDatas
         .def(py::init<>())
-        .def_readwrite("ts", &IMUDatas::ts)
-        .def_readwrite("accelerometer", &IMUDatas::accelerometer)
-        .def_readwrite("gyro", &IMUDatas::gyro)
+        .def_readwrite("acceleroMeter", &IMUDatas::acceleroMeter)
+        .def_readwrite("linearAcceleroMeter", &IMUDatas::linearAcceleroMeter)
+        .def_readwrite("gravity", &IMUDatas::gravity)
+        .def_readwrite("gyroscope", &IMUDatas::gyroscope)
+        .def_readwrite("gyroscopeUncalibrated", &IMUDatas::gyroscopeUncalibrated)
+        .def_readwrite("magneticField", &IMUDatas::magneticField)
+        .def_readwrite("magneticFieldUncalibrated", &IMUDatas::magneticFieldUncalibrated)
+        .def_readwrite("rotationVector", &IMUDatas::rotationVector)
+        .def_readwrite("gameRotationVector", &IMUDatas::gameRotationVector)
+        .def_readwrite("geoMagRotationVector", &IMUDatas::geoMagRotationVector)
+        .def_readwrite("arvrStabilizedRotationVector", &IMUDatas::arvrStabilizedRotationVector)
+        .def_readwrite("arvrStabilizedGameRotationVector", &IMUDatas::arvrStabilizedGameRotationVector)
+        .def_readwrite("gyroIntegratedRotationVector", &IMUDatas::gyroIntegratedRotationVector)
         ;
 
 

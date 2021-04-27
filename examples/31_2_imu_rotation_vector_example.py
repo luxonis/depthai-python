@@ -15,9 +15,7 @@ xlinkOut.setStreamName("imu")
 
 sensorConfig = dai.IMUSensorConfig()
 sensorConfig.reportIntervalUs = 2500 # 400hz
-sensorConfig.sensorId = dai.IMUSensorId.IMU_ACCELEROMETER
-imu.enableIMUSensor(sensorConfig)
-sensorConfig.sensorId = dai.IMUSensorId.IMU_GYROSCOPE_CALIBRATED
+sensorConfig.sensorId = dai.IMUSensorId.IMU_ROTATION_VECTOR
 imu.enableIMUSensor(sensorConfig)
 # above this threshold packets will be sent in batch of X, if the host is not blocked
 imu.setBatchReportThreshold(5)
@@ -43,20 +41,15 @@ with dai.Device(pipeline) as device:
 
         imuDatas = imuPacket.imuDatas
         for imuData in imuDatas:
-            acceleroTs = imuData.acceleroMeter.timestamp.getTimestamp()
-            gyroTs = imuData.gyroscope.timestamp.getTimestamp()
+            gyroTs = imuData.rotationVector.timestamp.getTimestamp()
             if baseTs is None:
-                baseTs = acceleroTs if acceleroTs < gyroTs else gyroTs
-            acceleroTs = acceleroTs - baseTs
+                baseTs = gyroTs
             gyroTs = gyroTs - baseTs
 
-            ffs = "{: .06f}"
-            accelLength = math.sqrt(imuData.acceleroMeter.x**2 + imuData.acceleroMeter.y**2 + imuData.acceleroMeter.z**2)
-
-            print(f"Accelero timestamp: {acceleroTs} s")
-            print(f"Accelero: x: {ffs.format(imuData.acceleroMeter.x)} y: {ffs.format(imuData.acceleroMeter.y)} z: {ffs.format(imuData.acceleroMeter.z)}, length {ffs.format(accelLength)}")
             print(f"Gyro timestamp: {gyroTs} s")
-            print(f"Gyro: x: {ffs.format(imuData.gyroscope.x)} y: {ffs.format(imuData.gyroscope.y)} z: {ffs.format(imuData.gyroscope.z)} ")
+            print(f"Quaternion: i: {imuData.rotationVector.i} j: {imuData.rotationVector.j} k: {imuData.rotationVector.k} real: {imuData.rotationVector.real} ")
+            print(f"Accuracy (rad): {imuData.rotationVector.accuracy}")
+
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -424,8 +424,13 @@ void NodeBindings::bind(pybind11::module& m){
     // IMU node
     py::class_<IMU, Node, std::shared_ptr<IMU>>(m, "IMU", DOC(dai, node, IMU))
         .def_readonly("out", &IMU::out, DOC(dai, node, IMU, out))
+        .def("enableIMUSensor", &IMU::enableIMUSensor, py::arg("imuSensor"), DOC(dai, node, IMU, enableIMUSensor))
+        .def("enableIMUSensors", &IMU::enableIMUSensors, py::arg("imuSensors"), DOC(dai, node, IMU, enableIMUSensors))
+        .def("setBatchReportThreshold", &IMU::setBatchReportThreshold, py::arg("batchReportThreshold"), DOC(dai, node, IMU, setBatchReportThreshold))
+        .def("getBatchReportThreshold", &IMU::getBatchReportThreshold, DOC(dai, node, IMU, getBatchReportThreshold))
+        .def("setMaxBatchReports", &IMU::setMaxBatchReports, py::arg("maxBatchReports"), DOC(dai, node, IMU, setMaxBatchReports))
+        .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
         ;
-
 
     ////////////////////////////////////
     // Node properties bindings
@@ -609,14 +614,39 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     m.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
-    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
-    imuProperties
-        .def_readwrite("accelerometerRate", &IMUProperties::accelerometerRate)
-        .def_readwrite("gyroRate", &IMUProperties::gyroRate)
+    py::enum_<IMUSensorId>(m, "IMUSensorId")
+        .value("IMU_ACCELEROMETER", IMUSensorId::IMU_ACCELEROMETER)
+        .value("IMU_LINEAR_ACCELERATION", IMUSensorId::IMU_LINEAR_ACCELERATION)
+        .value("IMU_GRAVITY", IMUSensorId::IMU_GRAVITY)
+        .value("IMU_GYROSCOPE_CALIBRATED", IMUSensorId::IMU_GYROSCOPE_CALIBRATED)
+        .value("IMU_GYROSCOPE_UNCALIBRATED", IMUSensorId::IMU_GYROSCOPE_UNCALIBRATED)
+        .value("IMU_MAGNETIC_FIELD_CALIBRATED", IMUSensorId::IMU_MAGNETIC_FIELD_CALIBRATED)
+        .value("IMU_MAGNETIC_FIELD_UNCALIBRATED", IMUSensorId::IMU_MAGNETIC_FIELD_UNCALIBRATED)
+        .value("IMU_ROTATION_VECTOR", IMUSensorId::IMU_ROTATION_VECTOR)
+        .value("IMU_GAME_ROTATION_VECTOR", IMUSensorId::IMU_GAME_ROTATION_VECTOR)
+        .value("IMU_GEOMAGNETIC_ROTATION_VECTOR", IMUSensorId::IMU_GEOMAGNETIC_ROTATION_VECTOR)
+        .value("IMU_ARVR_STABILIZED_RV", IMUSensorId::IMU_ARVR_STABILIZED_RV)
+        .value("IMU_ARVR_STABILIZED_GRV", IMUSensorId::IMU_ARVR_STABILIZED_GRV)
+        .value("IMU_GYRO_INTEGRATED_RV", IMUSensorId::IMU_GYRO_INTEGRATED_RV)
     ;
 
-    // ALIAS
-    m.attr("ColorCamera").attr("Properties") = imuProperties;
+    py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>>(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig))
+        .def(py::init<>())
+        .def_readwrite("sensitivityEnabled", &IMUSensorConfig::sensitivityEnabled)
+        .def_readwrite("sensitivityRelative", &IMUSensorConfig::sensitivityRelative)
+        .def_readwrite("changeSensitivity", &IMUSensorConfig::changeSensitivity)
+        .def_readwrite("reportIntervalUs", &IMUSensorConfig::reportIntervalUs)
+        .def_readwrite("sensorId", &IMUSensorConfig::sensorId)
+        ;
+
+    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
+    imuProperties
+        .def_readwrite("imuSensors", &IMUProperties::imuSensors)
+        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold)
+        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports)
+    ;
+    m.attr("IMU").attr("Properties") = imuProperties;
+
 
 
 }
