@@ -157,7 +157,7 @@ void DeviceBindings::bind(pybind11::module& m){
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
         .def("setLogLevel", &Device::setLogLevel, py::arg("level"), DOC(dai, Device, setLogLevel))
         .def("getLogLevel", &Device::getLogLevel, DOC(dai, Device, getLogLevel))
-        .def("getCurrentDeviceInfo", &Device::getCurrentDeviceInfo, DOC(dai, Device, getCurrentDeviceInfo))
+        .def("getDeviceInfo", &Device::getDeviceInfo, DOC(dai, Device, getDeviceInfo))
         .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate, DOC(dai, Device, getSystemInformationLoggingRate))
         .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage, DOC(dai, Device, getDdrMemoryUsage))
