@@ -64,7 +64,7 @@ Usage
   .. code-tab:: c++
 
       dai::Pipeline pipeline;
-      auto cam = pipeline.create<dai::node::createColorCamera>();
+      auto cam = pipeline.create<dai::node::ColorCamera>();
       cam->setPreviewSize(300, 300);
       cam->setBoardSocket(dai::CameraBoardSocket::RGB);
       cam->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
