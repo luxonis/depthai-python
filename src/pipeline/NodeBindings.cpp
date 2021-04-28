@@ -10,6 +10,7 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/SPIIn.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
@@ -368,6 +369,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("input", &SPIOut::input, DOC(dai, node, SPIOut, input))
         .def("setStreamName", &SPIOut::setStreamName, py::arg("name"), DOC(dai, node, SPIOut, setStreamName))
         .def("setBusId", &SPIOut::setBusId, py::arg("id"), DOC(dai, node, SPIOut, setBusId))
+        ;
+    // SPIIn node
+    py::class_<SPIIn, Node, std::shared_ptr<SPIIn>>(m, "SPIIn", DOC(dai, node, SPIIn))
+        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, input))
+        .def("setStreamName", &SPIIn::setStreamName, py::arg("name"), DOC(dai, node, SPIIn, setStreamName))
+        .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
         ;
 
     py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork", DOC(dai, node, DetectionNetwork))
