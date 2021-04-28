@@ -43,9 +43,9 @@ else()
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
-        "${ASAN_ENVIRONMENT_VARS}" 
+        "${ASAN_ENVIRONMENT_VARS}"
         ############ SPHINX
-        ${PYTHON_EXECUTABLE} -m sphinx -c ${CMAKE_CURRENT_BINARY_DIR} -W -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
+        ${PYTHON_EXECUTABLE} -m sphinx -c ${CMAKE_CURRENT_BINARY_DIR} -W --keep-going -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating documentation with Sphinx"
         VERBATIM

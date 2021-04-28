@@ -7,6 +7,8 @@
 #include <pybind11/chrono.h>
 // py::detail
 #include <pybind11/detail/common.h>
+// hedley
+#include <hedley/hedley.h>
 
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
@@ -161,7 +163,14 @@ void DeviceBindings::bind(pybind11::module& m){
         }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, Device, Device, 8))
 
         .def("isPipelineRunning", &Device::isPipelineRunning, DOC(dai, Device, isPipelineRunning))
-        .def("startPipeline", py::overload_cast<>(&Device::startPipeline), DOC(dai, Device, startPipeline))
+        .def("startPipeline", [](Device& d){
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Device(pipeline) starts the pipeline automatically. See Device() and startPipeline(pipeline) otherwise", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            d.startPipeline();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, Device, startPipeline))
         .def("startPipeline", py::overload_cast<const Pipeline&>(&Device::startPipeline), DOC(dai, Device, startPipeline, 2))
 
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
