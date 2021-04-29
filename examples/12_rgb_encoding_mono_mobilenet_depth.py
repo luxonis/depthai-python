@@ -54,7 +54,6 @@ monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
 # Note: the rectified streams are horizontally mirrored by default
-depth.setOutputRectified(True)
 depth.setConfidenceThreshold(255)
 depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
@@ -65,7 +64,7 @@ nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 manip.initialConfig.setResize(300, 300)
 
 # Linking

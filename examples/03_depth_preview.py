@@ -30,7 +30,6 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 depth.setConfidenceThreshold(200)
-depth.setOutputDepth(False)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
 depth.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(lr_check)

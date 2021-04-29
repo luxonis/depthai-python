@@ -53,7 +53,7 @@ nn.input.setBlocking(False)
 
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setResize(300, 300)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
 # Linking
 camRgb.video.link(videoEncoder.input)
