@@ -33,6 +33,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonMssFrequencyHz)
         .def_readwrite("pipelineName", &GlobalProperties::pipelineName)
         .def_readwrite("pipelineVersion", &GlobalProperties::pipelineVersion)
+        .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize)
+        .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri)
         ;
 
 
@@ -57,7 +59,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion), DOC(dai, Pipeline, setOpenVINOVersion))
-
+        .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
 
          // templated create<NODE> function 
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
