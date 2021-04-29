@@ -39,16 +39,13 @@ ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
 
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as dev:
 
     # Prepare data queues
     outQ1 = dev.getOutputQueue('ve1Out', maxSize=30, blocking=True)
     outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
     outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)
-
-    # Start the pipeline
-    dev.startPipeline()
 
     # Processing loop
     with open('mono1.h264', 'wb') as fileMono1H264, open('color.h265', 'wb') as fileColorH265, open('mono2.h264', 'wb') as fileMono2H264:

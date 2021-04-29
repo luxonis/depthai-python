@@ -59,9 +59,9 @@ spatialLocationCalculator.initialConfig.addROI(config)
 spatialLocationCalculator.out.link(xoutSpatialData.input)
 xinSpatialCalcConfig.out.link(spatialLocationCalculator.inputConfig)
 
-# Pipeline is defined, now we can connect to the device
+
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    device.startPipeline()
 
     # Output queue will be used to get the depth frames from the outputs defined above
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)

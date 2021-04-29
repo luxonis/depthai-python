@@ -50,8 +50,8 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
+# Connect and start the pipeline
 with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
-    device.startPipeline()
 
     queue_size = 8
     qRgb = device.getOutputQueue("rgb", queue_size)

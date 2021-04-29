@@ -135,10 +135,9 @@ def convert_to_cv2_frame(name, image):
 
 pipeline, streams = create_stereo_depth_pipeline()
 
-print("Creating DepthAI device")
+print("Connecting and starting the pipeline")
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    print("Starting pipeline")
-    device.startPipeline()
 
     inStreams = ['in_right', 'in_left']
     inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]

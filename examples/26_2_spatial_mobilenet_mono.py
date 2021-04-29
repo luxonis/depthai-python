@@ -89,10 +89,8 @@ monoRight.out.link(stereo.right)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
