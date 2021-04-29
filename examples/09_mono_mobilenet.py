@@ -15,41 +15,41 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label texts
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-
-# Define a neural network that will make predictions based on the source frames
+# Define sources and outputs
+monoRight = pipeline.createMonoCamera()
 nn = pipeline.createMobileNetDetectionNetwork()
+manip = pipeline.createImageManip()
+manipOut = pipeline.createXLinkOut()
+nnOut = pipeline.createXLinkOut()
+
+manipOut.setStreamName("right")
+nnOut.setStreamName("nn")
+
+# Properties
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+# Define a neural network that will make predictions based on the source frames
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
-
-# Create a node to convert the grayscale frame into the nn-acceptable form
-manip = pipeline.createImageManip()
+# Convert the grayscale frame into the nn-acceptable form
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-camRight.out.link(manip.inputImage)
+
+# Linking
+monoRight.out.link(manip.inputImage)
 manip.out.link(nn.input)
-
-# Create outputs
-manipOut = pipeline.createXLinkOut()
-manipOut.setStreamName("right")
 manip.out.link(manipOut.input)
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
-
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -72,11 +72,11 @@ with dai.Device(pipeline) as device:
     def displayFrame(name, frame):
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+        # Show the frame
         cv2.imshow(name, frame)
-
 
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise

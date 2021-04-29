@@ -6,23 +6,24 @@ import depthai as dai
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - two mono (grayscale) cameras
-camLeft = pipeline.createMonoCamera()
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-
-# Create outputs
+# Define sources and outputs
+monoLeft = pipeline.createMonoCamera()
+monoRight = pipeline.createMonoCamera()
 xoutLeft = pipeline.createXLinkOut()
-xoutLeft.setStreamName('left')
-camLeft.out.link(xoutLeft.input)
-
 xoutRight = pipeline.createXLinkOut()
+
+xoutLeft.setStreamName('left')
 xoutRight.setStreamName('right')
-camRight.out.link(xoutRight.input)
+
+# Properties
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+
+# Linking
+monoRight.out.link(xoutRight.input)
+monoLeft.out.link(xoutLeft.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -33,25 +34,16 @@ with dai.Device(pipeline) as device:
     qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
     qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
-    frameLeft = None
-    frameRight = None
-
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inLeft = qLeft.tryGet()
         inRight = qRight.tryGet()
 
         if inLeft is not None:
-            frameLeft = inLeft.getCvFrame()
+            cv2.imshow("left", inLeft.getCvFrame())
 
         if inRight is not None:
-            frameRight = inRight.getCvFrame()
-
-        # show the frames if available
-        if frameLeft is not None:
-            cv2.imshow("left", frameLeft)
-        if frameRight is not None:
-            cv2.imshow("right", frameRight)
+            cv2.imshow("right", inRight.getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break

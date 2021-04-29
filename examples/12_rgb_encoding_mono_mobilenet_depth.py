@@ -17,71 +17,68 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label texts
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
-cam.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 videoEncoder = pipeline.createVideoEncoder()
-videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-cam.video.link(videoEncoder.input)
+monoRight = pipeline.createMonoCamera()
+monoLeft = pipeline.createMonoCamera()
+depth = pipeline.createStereoDepth()
+nn = pipeline.createMobileNetDetectionNetwork()
+manip = pipeline.createImageManip()
 
 videoOut = pipeline.createXLinkOut()
+xoutRight = pipeline.createXLinkOut()
+disparityOut = pipeline.createXLinkOut()
+manipOut = pipeline.createXLinkOut()
+nnOut = pipeline.createXLinkOut()
+
 videoOut.setStreamName('h265')
-videoEncoder.bitstream.link(videoOut.input)
-camLeft = pipeline.createMonoCamera()
-camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+xoutRight.setStreamName('right')
+disparityOut.setStreamName('disparity')
+manipOut.setStreamName('manip')
+nnOut.setStreamName('nn')
 
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+# Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-depth = pipeline.createStereoDepth()
-depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
 depth.setOutputRectified(True)
+depth.setConfidenceThreshold(255)
 depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
-camLeft.out.link(depth.left)
-camRight.out.link(depth.right)
-# Disparity range is 0..95, used for normalization
-disparity_multiplier = 255 / 95
 
-disparityOut = pipeline.createXLinkOut()
-disparityOut.setStreamName("disparity")
-depth.disparity.link(disparityOut.input)
-
-nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
-manip = pipeline.createImageManip()
-manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setResize(300, 300)
+
+# Linking
+camRgb.video.link(videoEncoder.input)
+videoEncoder.bitstream.link(videoOut.input)
+monoRight.out.link(xoutRight.input)
+monoRight.out.link(depth.right)
+monoLeft.out.link(depth.left)
+depth.disparity.link(disparityOut.input)
 depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(nn.input)
-
-xoutRight = pipeline.createXLinkOut()
-xoutRight.setStreamName("right")
-camRight.out.link(xoutRight.input)
-
-manipOut = pipeline.createXLinkOut()
-manipOut.setStreamName("manip")
 manip.out.link(manipOut.input)
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
-
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
-
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -99,8 +96,8 @@ with dai.Device(pipeline) as device:
     frameManip = None
     frameDisparity = None
     detections = []
-    offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
-    croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
+    offsetX = (monoRight.getResolutionWidth() - monoRight.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((monoRight.getResolutionHeight(), monoRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -110,7 +107,9 @@ with dai.Device(pipeline) as device:
     videoFile = open('video.h265', 'wb')
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
+
+    # Disparity range is 0..95, used for normalization
+    disparity_multiplier = 255 / 95
 
     while True:
         inRight = qRight.tryGet()
@@ -122,16 +121,14 @@ with dai.Device(pipeline) as device:
             qRgbEnc.get().getData().tofile(videoFile)
 
         if inRight is not None:
-            frame = cv2.flip(inRight.getCvFrame(), 1)
-            if flipRectified:
-                frame = cv2.flip(frame, 1)
+            frame = inRight.getCvFrame()
 
         if inManip is not None:
             frameManip = inManip.getCvFrame()
 
         if inDisparity is not None:
             # Flip disparity frame, normalize it and apply color map for better visualization
-            frameDisparity = inDisparity.getFrame()
+            frameDisparity = inDisparity.getCvFrame()
             if flipRectified:
                 frameDisparity = cv2.flip(frameDisparity, 1)
             frameDisparity = (frameDisparity*disparity_multiplier).astype(np.uint8)
@@ -168,8 +165,6 @@ with dai.Device(pipeline) as device:
 
         if cv2.waitKey(1) == ord('q'):
             break
-
-    videoFile.close()
 
     print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
     print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

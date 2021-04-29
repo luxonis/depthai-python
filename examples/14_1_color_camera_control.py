@@ -23,61 +23,59 @@ EXP_STEP = 500  # us
 ISO_STEP = 50
 LENS_STEP = 3
 
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
 pipeline = dai.Pipeline()
 
-# Nodes
-colorCam = pipeline.createColorCamera()
-controlIn = pipeline.createXLinkIn()
-configIn = pipeline.createXLinkIn()
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 videoEncoder = pipeline.createVideoEncoder()
 stillEncoder = pipeline.createVideoEncoder()
+
+controlIn = pipeline.createXLinkIn()
+configIn = pipeline.createXLinkIn()
 videoMjpegOut = pipeline.createXLinkOut()
 stillMjpegOut = pipeline.createXLinkOut()
 previewOut = pipeline.createXLinkOut()
 
-
-# Properties
-colorCam.setVideoSize(640, 360)
-colorCam.setPreviewSize(300, 300)
 controlIn.setStreamName('control')
 configIn.setStreamName('config')
-videoEncoder.setDefaultProfilePreset(colorCam.getVideoSize(), colorCam.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
-stillEncoder.setDefaultProfilePreset(colorCam.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 videoMjpegOut.setStreamName('video')
 stillMjpegOut.setStreamName('still')
 previewOut.setStreamName('preview')
 
+# Properties
+camRgb.setVideoSize(640, 360)
+camRgb.setPreviewSize(300, 300)
+videoEncoder.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+stillEncoder.setDefaultProfilePreset(camRgb.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 
-# Link nodes
-colorCam.video.link(videoEncoder.input)
-colorCam.still.link(stillEncoder.input)
-colorCam.preview.link(previewOut.input)
-controlIn.out.link(colorCam.inputControl)
-configIn.out.link(colorCam.inputConfig)
+# Linking
+camRgb.video.link(videoEncoder.input)
+camRgb.still.link(stillEncoder.input)
+camRgb.preview.link(previewOut.input)
+controlIn.out.link(camRgb.inputControl)
+configIn.out.link(camRgb.inputConfig)
 videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 
-
-def clamp(num, v0, v1):
-    return max(v0, min(num, v1))
-
-
 # Pipeline is defined, now we can connect to the device
-with dai.Device(pipeline) as dev:
+with dai.Device(pipeline) as device:
 
     # Get data queues
-    controlQueue = dev.getInputQueue('control')
-    configQueue = dev.getInputQueue('config')
-    previewQueue = dev.getOutputQueue('preview')
-    videoQueue = dev.getOutputQueue('video')
-    stillQueue = dev.getOutputQueue('still')
+    controlQueue = device.getInputQueue('control')
+    configQueue = device.getInputQueue('config')
+    previewQueue = device.getOutputQueue('preview')
+    videoQueue = device.getOutputQueue('video')
+    stillQueue = device.getOutputQueue('still')
 
     # Start pipeline
-    dev.startPipeline()
+    device.startPipeline()
 
     # Max cropX & cropY
-    maxCropX = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()
-    maxCropY = (colorCam.getResolutionHeight() - colorCam.getVideoHeight()) / colorCam.getResolutionHeight()
+    maxCropX = (camRgb.getResolutionWidth() - camRgb.getVideoWidth()) / camRgb.getResolutionWidth()
+    maxCropY = (camRgb.getResolutionHeight() - camRgb.getVideoHeight()) / camRgb.getResolutionHeight()
 
     # Default crop
     cropX = 0
@@ -98,7 +96,6 @@ with dai.Device(pipeline) as dev:
     sensMax = 1600
 
     while True:
-
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
             cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
@@ -125,8 +122,7 @@ with dai.Device(pipeline) as dev:
             # Display
             cv2.imshow('still', frame)
 
-
-        # Update screen
+        # Update screen (1ms pooling rate)
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
@@ -171,15 +167,15 @@ with dai.Device(pipeline) as dev:
             controlQueue.send(ctrl)
         elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
             if key == ord('a'):
-                cropX = cropX - (maxCropX / colorCam.getResolutionWidth()) * STEP_SIZE
+                cropX = cropX - (maxCropX / camRgb.getResolutionWidth()) * STEP_SIZE
                 if cropX < 0: cropX = maxCropX
             elif key == ord('d'):
-                cropX = cropX + (maxCropX / colorCam.getResolutionWidth()) * STEP_SIZE
+                cropX = cropX + (maxCropX / camRgb.getResolutionWidth()) * STEP_SIZE
                 if cropX > maxCropX: cropX = 0
             elif key == ord('w'):
-                cropY = cropY - (maxCropY / colorCam.getResolutionHeight()) * STEP_SIZE
+                cropY = cropY - (maxCropY / camRgb.getResolutionHeight()) * STEP_SIZE
                 if cropY < 0: cropY = maxCropY
             elif key == ord('s'):
-                cropY = cropY + (maxCropY / colorCam.getResolutionHeight()) * STEP_SIZE
+                cropY = cropY + (maxCropY / camRgb.getResolutionHeight()) * STEP_SIZE
                 if cropY > maxCropY: cropY = 0
             sendCamConfig = True

@@ -19,30 +19,31 @@ if not Path(nnPath).exists() or not Path(videoPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
-# Start defining a pipeline
-pipeline = dai.Pipeline()
-
-# Create xLink input to which host will send frames from the video file
-xinFrame = pipeline.createXLinkIn()
-xinFrame.setStreamName("inFrame")
-
-# Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
-nn.setConfidenceThreshold(0.5)
-nn.setBlobPath(nnPath)
-nn.setNumInferenceThreads(2)
-nn.input.setBlocking(False)
-xinFrame.out.link(nn.input)
-
-# Create output
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
-nn.out.link(nnOut.input)
-
 # MobilenetSSD label texts
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
+# Start defining a pipeline
+pipeline = dai.Pipeline()
+
+# Define sources and outputs
+nn = pipeline.createMobileNetDetectionNetwork()
+
+xinFrame = pipeline.createXLinkIn()
+nnOut = pipeline.createXLinkOut()
+
+xinFrame.setStreamName("inFrame")
+nnOut.setStreamName("nn")
+
+# Properties
+nn.setConfidenceThreshold(0.5)
+nn.setBlobPath(nnPath)
+nn.setNumInferenceThreads(2)
+nn.input.setBlocking(False)
+
+# Linking
+xinFrame.out.link(nn.input)
+nn.out.link(nnOut.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -63,16 +64,16 @@ with dai.Device(pipeline) as device:
         normVals[::2] = frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
-
     def to_planar(arr: np.ndarray, shape: tuple) -> np.ndarray:
         return cv2.resize(arr, shape).transpose(2, 0, 1).flatten()
 
     def displayFrame(name, frame):
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+        # Show the frame
         cv2.imshow(name, frame)
 
     cap = cv2.VideoCapture(videoPath)

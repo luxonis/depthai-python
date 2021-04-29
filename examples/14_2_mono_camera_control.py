@@ -10,7 +10,6 @@ To go back to auto controls:
   'E' - autoexposure
 """
 
-
 import cv2
 import depthai as dai
 
@@ -20,54 +19,50 @@ stepSize = 0.02
 expStep = 500  # us
 isoStep = 50
 
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - two mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-camLeft = pipeline.createMonoCamera()
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+# Define sources and outputs
+monoRight = pipeline.createMonoCamera()
+monoLeft = pipeline.createMonoCamera()
+manipRight = pipeline.createImageManip()
+manipLeft = pipeline.createImageManip()
+
+controlIn = pipeline.createXLinkIn()
+configIn = pipeline.createXLinkIn()
+manipOutRight = pipeline.createXLinkOut()
+manipOutLeft = pipeline.createXLinkOut()
+
+controlIn.setStreamName('control')
+configIn.setStreamName('config')
+manipOutRight.setStreamName("right")
+manipOutLeft.setStreamName("left")
 
 # Crop range
-topLeft = dai.Point2f(0.4, 0.4)
-bottomRight = dai.Point2f(0.6, 0.6)
+topLeft = dai.Point2f(0.2, 0.2)
+bottomRight = dai.Point2f(0.8, 0.8)
 
-manipRight = pipeline.createImageManip()
+# Properties
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 manipRight.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-manipLeft = pipeline.createImageManip()
 manipLeft.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-manipRight.setMaxOutputFrameSize(camRight.getResolutionHeight()*camRight.getResolutionWidth()*3)
+manipRight.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
 
-# Camera movement config (wasd)
-configIn = pipeline.createXLinkIn()
-configIn.setStreamName('config')
+# Linking
+monoRight.out.link(manipRight.inputImage)
+monoLeft.out.link(manipLeft.inputImage)
+controlIn.out.link(monoRight.inputControl)
+controlIn.out.link(monoLeft.inputControl)
 configIn.out.link(manipRight.inputConfig)
 configIn.out.link(manipLeft.inputConfig)
-
-# Camera control (exp, iso, focus)
-controlIn = pipeline.createXLinkIn()
-controlIn.setStreamName('control')
-controlIn.out.link(camRight.inputControl)
-controlIn.out.link(camLeft.inputControl)
-
-# Linking with USB
-camRight.out.link(manipRight.inputImage)
-camLeft.out.link(manipLeft.inputImage)
-
-# Create outputs
-manipOutRight = pipeline.createXLinkOut()
-manipOutRight.setStreamName("right")
 manipRight.out.link(manipOutRight.input)
-
-manipOutLeft = pipeline.createXLinkOut()
-manipOutLeft.setStreamName("left")
 manipLeft.out.link(manipOutLeft.input)
-
-def clamp(num, v0, v1):
-    return max(v0, min(num, v1))
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -97,19 +92,13 @@ with dai.Device(pipeline) as device:
     while True:
         inRight = qRight.get()
         inLeft = qLeft.get()
-        frameRight = inRight.getCvFrame()
-        frameLeft = inLeft.getCvFrame()
-        displayFrame("right", frameRight)
-        displayFrame("left", frameLeft)
+        displayFrame("right", inRight.getCvFrame())
+        displayFrame("left", inLeft.getCvFrame())
 
-        # Update screen
+        # Update screen (1ms pooling rate)
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
-        elif key == ord('c'):
-            ctrl = dai.CameraControl()
-            ctrl.setCaptureStill(True)
-            controlQueue.send(ctrl)
         elif key == ord('e'):
             print("Autoexposure enable")
             ctrl = dai.CameraControl()
@@ -146,7 +135,6 @@ with dai.Device(pipeline) as device:
                 topLeft.x += stepSize
                 bottomRight.x += stepSize
                 sendCamConfig = True
-
 
         if sendCamConfig:
             cfg = dai.ImageManipConfig()

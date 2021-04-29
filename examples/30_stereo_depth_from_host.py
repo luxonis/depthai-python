@@ -45,8 +45,8 @@ def create_stereo_depth_pipeline():
     print("XLINK IN -> STEREO -> XLINK OUT")
     pipeline = dai.Pipeline()
 
-    camLeft = pipeline.createXLinkIn()
-    camRight = pipeline.createXLinkIn()
+    monoLeft = pipeline.createXLinkIn()
+    monoRight = pipeline.createXLinkIn()
     stereo = pipeline.createStereoDepth()
     xoutLeft = pipeline.createXLinkOut()
     xoutRight = pipeline.createXLinkOut()
@@ -55,8 +55,8 @@ def create_stereo_depth_pipeline():
     xoutRectifLeft = pipeline.createXLinkOut()
     xoutRectifRight = pipeline.createXLinkOut()
 
-    camLeft.setStreamName('in_left')
-    camRight.setStreamName('in_right')
+    monoLeft.setStreamName('in_left')
+    monoRight.setStreamName('in_right')
 
     stereo.setOutputDepth(out_depth)
     stereo.setOutputRectified(out_rectified)
@@ -77,8 +77,8 @@ def create_stereo_depth_pipeline():
     xoutRectifLeft.setStreamName('rectified_left')
     xoutRectifRight.setStreamName('rectified_right')
 
-    camLeft.out.link(stereo.left)
-    camRight.out.link(stereo.right)
+    monoLeft.out.link(stereo.left)
+    monoRight.out.link(stereo.right)
     stereo.syncedLeft.link(xoutLeft.input)
     stereo.syncedRight.link(xoutRight.input)
     stereo.depth.link(xoutDepth.input)

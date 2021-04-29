@@ -2,32 +2,30 @@
 
 import time
 from pathlib import Path
-
 import cv2
 import depthai as dai
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
+# Define source and outputs
 camRgb = pipeline.createColorCamera()
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-
-# Create RGB output
-xoutRgb = pipeline.createXLinkOut()
-xoutRgb.setStreamName("rgb")
-camRgb.video.link(xoutRgb.input)
-
-# Create encoder to produce JPEG images
-videoEnc = pipeline.createVideoEncoder()
-videoEnc.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
-camRgb.video.link(videoEnc.input)
-
-# Create JPEG output
 xoutJpeg = pipeline.createXLinkOut()
-xoutJpeg.setStreamName("jpeg")
-videoEnc.bitstream.link(xoutJpeg.input)
+xoutRgb = pipeline.createXLinkOut()
+videoEnc = pipeline.createVideoEncoder()
 
+xoutJpeg.setStreamName("jpeg")
+xoutRgb.setStreamName("rgb")
+
+# Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+videoEnc.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+
+# Linking
+camRgb.video.link(xoutRgb.input)
+camRgb.video.link(videoEnc.input)
+videoEnc.bitstream.link(xoutJpeg.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -48,7 +46,7 @@ with dai.Device(pipeline) as device:
             cv2.imshow("rgb", inRgb.getCvFrame())
 
         for encFrame in qJpeg.tryGetAll():
-            with open(f"06_data/{int(time.time() * 10000)}.jpeg", "wb") as f:
+            with open(f"06_data/{int(time.time() * 1000)}.jpeg", "wb") as f:
                 f.write(bytearray(encFrame.getData()))
 
         if cv2.waitKey(1) == ord('q'):

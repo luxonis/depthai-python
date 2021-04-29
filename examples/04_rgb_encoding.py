@@ -5,20 +5,21 @@ import depthai as dai
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
-cam = pipeline.createColorCamera()
-cam.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+# Define sources and output
+camRgb = pipeline.createColorCamera()
+videoEnc = pipeline.createVideoEncoder()
+xout = pipeline.createXLinkOut()
 
-# Create an encoder, consuming the frames and encoding them using H.265 encoding
-videoEncoder = pipeline.createVideoEncoder()
-videoEncoder.setDefaultProfilePreset(3840, 2160, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-cam.video.link(videoEncoder.input)
+xout.setStreamName('h265')
 
-# Create output
-videoOut = pipeline.createXLinkOut()
-videoOut.setStreamName('h265')
-videoEncoder.bitstream.link(videoOut.input)
+# Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+videoEnc.setDefaultProfilePreset(3840, 2160, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
+
+# Create outputs
+camRgb.video.link(videoEnc.input)
+videoEnc.bitstream.link(xout.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -33,8 +34,8 @@ with dai.Device(pipeline) as device:
         print("Press Ctrl+C to stop encoding...")
         try:
             while True:
-                h264Packet = q.get()  # Blocking call, will wait until a new data has arrived
-                h264Packet.getData().tofile(videoFile)  # Appends the packet data to the opened file
+                h265Packet = q.get()  # Blocking call, will wait until a new data has arrived
+                h265Packet.getData().tofile(videoFile)  # Appends the packet data to the opened file
         except KeyboardInterrupt:
             # Keyboard interrupt (Ctrl + C) detected
             pass

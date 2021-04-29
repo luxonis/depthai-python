@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 
-import time
 from pathlib import Path
-
 import cv2
 import depthai as dai
+import time
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - mono (grayscale) camera
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-
-# Create output
+# Define sources and outputs
+monoRight = pipeline.createMonoCamera()
 xoutRight = pipeline.createXLinkOut()
+
 xoutRight.setStreamName("right")
-camRight.out.link(xoutRight.input)
+
+# Properties
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+
+# Linking
+monoRight.out.link(xoutRight.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -33,11 +35,11 @@ with dai.Device(pipeline) as device:
     while True:
         inRight = qRight.get()  # Blocking call, will wait until a new data has arrived
         # Data is originally represented as a flat 1D array, it needs to be converted into HxW form
-        frameRight = inRight.getCvFrame()
         # Frame is transformed and ready to be shown
-        cv2.imshow("right", frameRight)
+        cv2.imshow("right", inRight.getCvFrame())
+
         # After showing the frame, it's being stored inside a target directory as a PNG image
-        cv2.imwrite(f"07_data/{int(time.time() * 10000)}.png", frameRight)
+        cv2.imwrite(f"07_data/{int(time.time() * 1000)}.png", frameRight)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -9,74 +9,70 @@ import cv2
 import depthai as dai
 import numpy as np
 
+# Step size ('W','A','S','D' controls)
 stepSize = 0.02
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - two mono (grayscale) cameras
-left = pipeline.createMonoCamera()
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+# Define sources and outputs
+monoRight = pipeline.createMonoCamera()
+monoLeft = pipeline.createMonoCamera()
+manip = pipeline.createImageManip()
+stereo = pipeline.createStereoDepth()
 
-right = pipeline.createMonoCamera()
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+configIn = pipeline.createXLinkIn()
+xout = pipeline.createXLinkOut()
+
+configIn.setStreamName('config')
+xout.setStreamName("depth")
 
 # Crop range
-topLeft = dai.Point2f(0.4, 0.4)
-bottomRight = dai.Point2f(0.6, 0.6)
+topLeft = dai.Point2f(0.2, 0.2)
+bottomRight = dai.Point2f(0.8, 0.8)
 
-manip = pipeline.createImageManip()
+# Properties
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+
 manip.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-manip.setMaxOutputFrameSize(right.getResolutionHeight()*right.getResolutionWidth()*3)
-
-
-# Create a node that will produce the depth map
-stereo = pipeline.createStereoDepth()
+manip.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
 stereo.setConfidenceThreshold(200)
 stereo.setOutputDepth(True)
 
-left.out.link(stereo.left)
-right.out.link(stereo.right)
-
-
-# Control movement
-controlIn = pipeline.createXLinkIn()
-controlIn.setStreamName('control')
-controlIn.out.link(manip.inputConfig)
-
-# Create outputs
-xout = pipeline.createXLinkOut()
-xout.setStreamName("depth")
+# Linking
+configIn.out.link(manip.inputConfig)
 stereo.depth.link(manip.inputImage)
 manip.out.link(xout.input)
+monoRight.out.link(stereo.right)
+monoLeft.out.link(stereo.left)
 
-# Pipeline defined, now the device is connected to
+# Connect to device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
-    # Output queue will be used to get the depth frames from the outputs defined above
+    # Queues
     q = device.getOutputQueue(xout.getStreamName(), maxSize=4, blocking=False)
+    configQueue = device.getInputQueue(configIn.getStreamName())
 
     sendCamConfig = False
 
     while True:
-        inDepth = q.get()  # blocking call, will wait until a new data has arrived
-        # data is originally represented as a flat 1D array, it needs to be converted into HxW form
+        inDepth = q.get()
         depthFrame = inDepth.getFrame()
-        # frame is transformed, the color map will be applied to highlight the depth info
+        # Frame is transformed, the color map will be applied to highlight the depth info
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        controlQueue = device.getInputQueue(controlIn.getStreamName())
 
-        # frame is ready to be shown
+        # Frame is ready to be shown
         cv2.imshow("depth", depthFrameColor)
 
         # Update screen
-        key = cv2.waitKey(1)
+        key = cv2.waitKey(10)
         if key == ord('q'):
             break
         elif key == ord('w'):
@@ -100,9 +96,9 @@ with dai.Device(pipeline) as device:
                 bottomRight.x += stepSize
                 sendCamConfig = True
 
-
+        # Send new config to camera
         if sendCamConfig:
             cfg = dai.ImageManipConfig()
             cfg.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-            controlQueue.send(cfg)
+            configQueue.send(cfg)
             sendCamConfig = False

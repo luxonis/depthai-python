@@ -6,7 +6,6 @@ import cv2
 import depthai as dai
 import numpy as np
 
-
 flipRectified = True
 
 # Get argument first
@@ -18,58 +17,55 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label nnLabels
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - mono (grayscale) cameras
-left = pipeline.createMonoCamera()
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-
-right = pipeline.createMonoCamera()
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-
-# Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
+# Define sources and outputs
+monoRight = pipeline.createMonoCamera()
+monoLeft = pipeline.createMonoCamera()
 stereo = pipeline.createStereoDepth()
+manip = pipeline.createImageManip()
+nn = pipeline.createMobileNetDetectionNetwork()
+
+nnOut = pipeline.createXLinkOut()
+disparityOut = pipeline.createXLinkOut()
+xoutRight = pipeline.createXLinkOut()
+
+disparityOut.setStreamName("disparity")
+xoutRight.setStreamName("rectifiedRight")
+nnOut.setStreamName("nn")
+
+# Properties
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+# Produce the depth map (using disparity output as it's easier to visualize depth this way)
 stereo.setOutputRectified(True)  # The rectified streams are horizontally mirrored by default
 stereo.setConfidenceThreshold(255)
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout from rectification (black stripe on the edges)
-
-left.out.link(stereo.left)
-right.out.link(stereo.right)
-
-# Create a node to convert the grayscale frame into the nn-acceptable form
-manip = pipeline.createImageManip()
+# Convert the grayscale frame into the nn-acceptable form
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-stereo.rectifiedRight.link(manip.inputImage)
-
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
-manip.out.link(nn.input)
 
-# Create outputs
-disparityOut = pipeline.createXLinkOut()
-disparityOut.setStreamName("disparity")
+# Linking
+monoRight.out.link(stereo.right)
+monoLeft.out.link(stereo.left)
+stereo.rectifiedRight.link(manip.inputImage)
 stereo.disparity.link(disparityOut.input)
-
-xoutRight = pipeline.createXLinkOut()
-xoutRight.setStreamName("rectifiedRight")
+manip.out.link(nn.input)
 manip.out.link(xoutRight.input)
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
-
-# MobilenetSSD label nnLabels
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -82,10 +78,7 @@ with dai.Device(pipeline) as device:
     qDet = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
     rightFrame = None
-    depthFrame = None
     detections = []
-    offsetX = (right.getResolutionWidth() - right.getResolutionHeight()) // 2
-    croppedFrame = np.zeros((right.getResolutionHeight(), right.getResolutionHeight()))
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
@@ -95,11 +88,12 @@ with dai.Device(pipeline) as device:
 
     # Add bounding boxes and text to the frame and show it to the user
     def show(name, frame):
+        color = (255, 0, 0)
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
         # Show the frame
         cv2.imshow(name, frame)
 
@@ -114,7 +108,6 @@ with dai.Device(pipeline) as device:
             rightFrame = inRight.getCvFrame()
             if flipRectified:
                 rightFrame = cv2.flip(rightFrame, 1)
-
 
         if inDet is not None:
             detections = inDet.detections
@@ -134,8 +127,6 @@ with dai.Device(pipeline) as device:
 
         if rightFrame is not None:
             show("rectified right", rightFrame)
-
-        detections = []
 
         if cv2.waitKey(1) == ord('q'):
             break

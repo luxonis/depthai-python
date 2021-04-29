@@ -11,22 +11,20 @@ import depthai as dai
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Create Color and Mono cameras
+# Define sources and outputs
 camRgb = pipeline.createColorCamera()
 camMono = pipeline.createMonoCamera()
-# Create separate streams for them
 xoutRgb = pipeline.createXLinkOut()
 xoutMono = pipeline.createXLinkOut()
 
-# Set properties
 xoutRgb.setStreamName("rgb")
 xoutMono.setStreamName("mono")
-# Cap color camera to 5 fps
-camRgb.setFps(5)
+
+# Properties
 camRgb.setInterleaved(True)
 camRgb.setPreviewSize(300, 300)
 
-# Connect
+# Linking
 camRgb.preview.link(xoutRgb.input)
 camMono.out.link(xoutMono.input)
 

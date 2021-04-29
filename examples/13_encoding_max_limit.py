@@ -5,10 +5,9 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Nodes
-colorCam = pipeline.createColorCamera()
-colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-monoCam = pipeline.createMonoCamera()
-monoCam2 = pipeline.createMonoCamera()
+camRgb = pipeline.createColorCamera()
+monoLeft = pipeline.createMonoCamera()
+monoRight = pipeline.createMonoCamera()
 ve1 = pipeline.createVideoEncoder()
 ve2 = pipeline.createVideoEncoder()
 ve3 = pipeline.createVideoEncoder()
@@ -17,27 +16,29 @@ ve1Out = pipeline.createXLinkOut()
 ve2Out = pipeline.createXLinkOut()
 ve3Out = pipeline.createXLinkOut()
 
-# Properties
-monoCam.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoCam2.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 ve1Out.setStreamName('ve1Out')
 ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
+
+# Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Setting to 26fps will trigger error
 ve1.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
 ve2.setDefaultProfilePreset(3840, 2160, 25, dai.VideoEncoderProperties.Profile.H265_MAIN)
 ve3.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
 
-# Link nodes
-monoCam.out.link(ve1.input)
-colorCam.video.link(ve2.input)
-monoCam2.out.link(ve3.input)
+# Linking
+monoLeft.out.link(ve1.input)
+camRgb.video.link(ve2.input)
+monoRight.out.link(ve3.input)
 
 ve1.bitstream.link(ve1Out.input)
 ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
-
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as dev:

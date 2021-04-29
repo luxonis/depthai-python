@@ -15,27 +15,27 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) cameras
-camLeft = pipeline.createMonoCamera()
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoLeft = pipeline.createMonoCamera()
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight = pipeline.createMonoCamera()
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Create outputs
 xoutLeft = pipeline.createXLinkOut()
 xoutLeft.setStreamName('left')
-camLeft.out.link(xoutLeft.input)
+monoLeft.out.link(xoutLeft.input)
 xoutRight = pipeline.createXLinkOut()
 xoutRight.setStreamName('right')
-camRight.out.link(xoutRight.input)
+monoRight.out.link(xoutRight.input)
 
 # Create and link control input
 control_in = pipeline.createXLinkIn()
 control_in.setStreamName('control')
-control_in.out.link(camLeft.inputControl)
-control_in.out.link(camRight.inputControl)
+control_in.out.link(monoLeft.inputControl)
+control_in.out.link(monoRight.inputControl)
 
 
 def clamp(num, v0, v1): return max(v0, min(num, v1))

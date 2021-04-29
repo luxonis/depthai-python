@@ -42,44 +42,53 @@ P0 = [0, 0]  # top-left
 P1 = [1, 0]  # top-right
 P2 = [1, 1]  # bottom-right
 P3 = [0, 1]  # bottom-left
-warpTestList = [
+
+warpList = [
     # points order, normalized cordinates, description
     # [[[0, 0], [1, 0], [1, 1], [0, 1]], True, "passthrough"],
     # [[[0, 0], [639, 0], [639, 479], [0, 479]], False, "passthrough (pixels)"],
-    [[P0, P1, P2, P3], True, "1.passthrough"],
-    [[P3, P0, P1, P2], True, "2.rotate 90"],
-    [[P2, P3, P0, P1], True, "3.rotate 180"],
-    [[P1, P2, P3, P0], True, "4.rotate 270"],
-    [[P1, P0, P3, P2], True, "5.horizontal mirror"],
-    [[P3, P2, P1, P0], True, "6.vertical flip"],
-    [[[-0.1, -0.1], [1.1, -0.1], [1.1, 1.1], [-0.1, 1.1]], True, "7.add black borders"],
-    [[[-0.3, 0], [1, 0], [1.3, 1], [0, 1]], True, "8.parallelogram transform"],
-    [[[-0.2, 0], [1.8, 0], [1, 1], [0, 1]], True, "9.trapezoid transform"],
+    [[P0, P1, P2, P3], True, "1. passthrough"],
+    [[P3, P0, P1, P2], True, "2. rotate 90"],
+    [[P2, P3, P0, P1], True, "3. rotate 180"],
+    [[P1, P2, P3, P0], True, "4. rotate 270"],
+    [[P1, P0, P3, P2], True, "5. horizontal mirror"],
+    [[P3, P2, P1, P0], True, "6. vertical flip"],
+    [[[-0.1, -0.1], [1.1, -0.1], [1.1, 1.1], [-0.1, 1.1]], True, "7. add black borders"],
+    [[[-0.3, 0], [1, 0], [1.3, 1], [0, 1]], True, "8. parallelogram transform"],
+    [[[-0.2, 0], [1.8, 0], [1, 1], [0, 1]], True, "9. trapezoid transform"],
 ]
 
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
-cam.setPreviewSize(640, 480)
-cam.setInterleaved(False)
-camOut = pipeline.createXLinkOut()
-camOut.setStreamName("preview")
-
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 manip = pipeline.createImageManip()
-manip.setMaxOutputFrameSize(2000*1500*3)
+
+camOut = pipeline.createXLinkOut()
 manipOut = pipeline.createXLinkOut()
-manipOut.setStreamName("manip")
 manipCfg = pipeline.createXLinkIn()
+
+camOut.setStreamName("preview")
+manipOut.setStreamName("manip")
 manipCfg.setStreamName("manipCfg")
 
-cam.preview.link(camOut.input)
-cam.preview.link(manip.inputImage)
+# Properties
+camRgb.setPreviewSize(640, 480)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+manip.setMaxOutputFrameSize(2000 * 1500 * 3)
+
+# Linking
+camRgb.preview.link(camOut.input)
+camRgb.preview.link(manip.inputImage)
 manip.out.link(manipOut.input)
 manipCfg.out.link(manip.inputConfig)
 
 with dai.Device(pipeline) as device:
     device.startPipeline()
 
+    # Create input & output queues
     qPreview = device.getOutputQueue(name="preview", maxSize=4)
     qManip = device.getOutputQueue(name="manip", maxSize=4)
     qManipCfg = device.getInputQueue(name="manipCfg")
@@ -97,6 +106,7 @@ with dai.Device(pipeline) as device:
 
     while key != ord('q'):
         if key > 0:
+            print("Pressed: ", key)
             if key == ord(keyRotateDecr) or key == ord(keyRotateIncr):
                 if key == ord(keyRotateDecr):
                     if rotateRate > -rotateRateMax:
@@ -105,7 +115,7 @@ with dai.Device(pipeline) as device:
                     if rotateRate < rotateRateMax:
                         rotateRate += rotateRateInc
                 testFourPt = False
-                print("Crop rotated rectangle, rate per frame: {:.1f} degrees.".format(rotateRate))
+                print("Crop rotated rectangle, rate per frame: {:.1f} degrees".format(rotateRate))
             elif key == ord(keyResizeInc):
                 resizeFactor += 1
                 if resizeFactor > resizeFactorMax:
@@ -114,14 +124,14 @@ with dai.Device(pipeline) as device:
                 else:
                     resizeX = resizeMaxW // resizeFactor
                     resizeY = resizeMaxH // resizeFactor
-                    print("Crop region resized to", resizeX, 'x', resizeY)
+                    print("Crop region resized to: ", resizeX, 'x', resizeY)
             elif key == ord(keyWarpTestCycle):
                 # Disable resizing initially
                 resizeFactor = 0
-                warpIdx = (warpIdx + 1) % len(warpTestList)
+                warpIdx = (warpIdx + 1) % len(warpList)
                 testFourPt = True
-                testDescription = warpTestList[warpIdx][2]
-                print("Warp 4-point transform:", testDescription)
+                testDescription = warpList[warpIdx][2]
+                print("Warp 4-point transform: ", testDescription)
             elif key == ord('h'):
                 printControls()
 
@@ -129,9 +139,8 @@ with dai.Device(pipeline) as device:
         if key >= 0 or (not testFourPt and abs(rotateRate) > 0.0001):
             cfg = dai.ImageManipConfig()
             if testFourPt:
-                test = warpTestList[warpIdx]
+                test = warpList[warpIdx]
                 points, normalized = test[0], test[1]
-                # TODO: improve this, should avoid this conversion
                 point2fList = []
                 for p in points:
                     pt = dai.Point2f()
@@ -148,7 +157,7 @@ with dai.Device(pipeline) as device:
                 cfg.setCropRotatedRect(rr, False)
             if resizeFactor > 0:
                 cfg.setResize(resizeX, resizeY)
-            # cfg.setWarpBorderFillColor(0, 0, 255)
+            # cfg.setWarpBorderFillColor(255, 0, 0)
             # cfg.setWarpBorderReplicatePixels()
             qManipCfg.send(cfg)
 

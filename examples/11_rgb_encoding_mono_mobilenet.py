@@ -15,59 +15,61 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label texts
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
+# Start defining a pipeline
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
-cam.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
+monoRight = pipeline.createMonoCamera()
 videoEncoder = pipeline.createVideoEncoder()
-videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-cam.video.link(videoEncoder.input)
+nn = pipeline.createMobileNetDetectionNetwork()
+manip = pipeline.createImageManip()
 
 videoOut = pipeline.createXLinkOut()
+xoutRight = pipeline.createXLinkOut()
+manipOut = pipeline.createXLinkOut()
+nnOut = pipeline.createXLinkOut()
+
 videoOut.setStreamName('h265')
-videoEncoder.bitstream.link(videoOut.input)
+xoutRight.setStreamName("right")
+manipOut.setStreamName("manip")
+nnOut.setStreamName("nn")
 
-camRight = pipeline.createMonoCamera()
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+# Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
-manip = pipeline.createImageManip()
-manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
+manip.initialConfig.setResize(300, 300)
 manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-camRight.out.link(manip.inputImage)
+
+# Linking
+camRgb.video.link(videoEncoder.input)
+videoEncoder.bitstream.link(videoOut.input)
+monoRight.out.link(manip.inputImage)
 manip.out.link(nn.input)
-
-xoutRight = pipeline.createXLinkOut()
-xoutRight.setStreamName("right")
-camRight.out.link(xoutRight.input)
-
-manipOut = pipeline.createXLinkOut()
-manipOut.setStreamName("manip")
+monoRight.out.link(xoutRight.input)
 manip.out.link(manipOut.input)
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
-
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
-
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     device.startPipeline()
 
+    # Queues
     queue_size = 8
     qRight = device.getOutputQueue("right", queue_size)
     qManip = device.getOutputQueue("manip", queue_size)
@@ -77,8 +79,8 @@ with dai.Device(pipeline) as device:
     frame = None
     frameManip = None
     detections = []
-    offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
-    croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
+    offsetX = (monoRight.getResolutionWidth() - monoRight.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((monoRight.getResolutionHeight(), monoRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -110,23 +112,21 @@ with dai.Device(pipeline) as device:
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.imshow("right", frame)
 
         if frameManip is not None:
             for detection in detections:
                 bbox = frameNorm(frameManip, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
                 cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                 cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.imshow("manip", frameManip)
 
         if cv2.waitKey(1) == ord('q'):
             break
-
-    videoFile.close()
 
     print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4) using a command below:")
     print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

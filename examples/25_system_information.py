@@ -3,8 +3,7 @@
 import cv2
 import depthai as dai
 
-
-def print_sys_info(info):
+def printSystemInformation(info):
     m = 1024 * 1024 # MiB
     print(f"Drr used / total - {info.ddrMemoryUsage.used / m:.2f} / {info.ddrMemoryUsage.total / m:.2f} MiB")
     print(f"Cmx used / total - {info.cmxMemoryUsage.used / m:.2f} / {info.cmxMemoryUsage.total / m:.2f} MiB")
@@ -19,13 +18,16 @@ def print_sys_info(info):
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-sys_logger = pipeline.createSystemLogger()
-sys_logger.setRate(1)  # 1 Hz
-
-# Create output
+sysLog = pipeline.createSystemLogger()
 linkOut = pipeline.createXLinkOut()
+
 linkOut.setStreamName("sysinfo")
-sys_logger.out.link(linkOut.input)
+
+# Properties
+sysLog.setRate(1)  # 1 Hz
+
+# Linking
+sysLog.out.link(linkOut.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -33,12 +35,10 @@ with dai.Device(pipeline) as device:
     device.startPipeline()
 
     # Output queue will be used to get the system info
-    q_sysinfo = device.getOutputQueue(name="sysinfo", maxSize=4, blocking=False)
+    qSysInfo = device.getOutputQueue(name="sysinfo", maxSize=4, blocking=False)
 
     while True:
-        info = q_sysinfo.get()  # Blocking call, will wait until a new data has arrived
-        print_sys_info(info)
+        sysInfo = qSysInfo.get()  # Blocking call, will wait until a new data has arrived
+        printSystemInformation(sysInfo)
 
-        if cv2.waitKey(1) == ord('q'):
-            break
 

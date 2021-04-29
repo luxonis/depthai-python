@@ -7,7 +7,7 @@ import depthai as dai
 import numpy as np
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_5shave.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
@@ -15,40 +15,41 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label texts
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
+# Define sources and outputs
 camRgb = pipeline.createColorCamera()
+nn = pipeline.createMobileNetDetectionNetwork()
+
+xoutVideo = pipeline.createXLinkOut()
+xoutPreview = pipeline.createXLinkOut()
+nnOut = pipeline.createXLinkOut()
+
+xoutVideo.setStreamName("video")
+xoutPreview.setStreamName("preview")
+nnOut.setStreamName("nn")
+
+# Properties
 camRgb.setPreviewSize(300, 300)    # NN input
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 camRgb.setInterleaved(False)
 camRgb.setPreviewKeepAspectRatio(False)
-
 # Define a neural network that will make predictions based on the source frames
-nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
-camRgb.preview.link(nn.input)
 
-# Create outputs
-xoutVideo = pipeline.createXLinkOut()
-xoutVideo.setStreamName("video")
+# Linking
 camRgb.video.link(xoutVideo.input)
-
-xoutPreview = pipeline.createXLinkOut()
-xoutPreview.setStreamName("preview")
 camRgb.preview.link(xoutPreview.input)
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
+camRgb.preview.link(nn.input)
 nn.out.link(nnOut.input)
-
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -73,9 +74,10 @@ with dai.Device(pipeline) as device:
     def displayFrame(name, frame):
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+        # Show the frame
         cv2.imshow(name, frame)
 
     cv2.namedWindow("video", cv2.WINDOW_NORMAL)
