@@ -35,6 +35,7 @@ Robot Operating System                                                       `Di
 Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
 Kernel Virtual Machine :ref:`Run on KVM <KVM>`                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 ====================== ===================================================== ================================================================================
 
 macOS
@@ -206,6 +207,26 @@ The udev rule is decribed `here <https://docs.luxonis.com/en/latest/pages/faq/#d
 
 Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
 
+VMware
+******
+
+Using the OAK-D device in a VMware requires some extra one-time settings that need to be set up for it to work. Depending on what state the device is, 
+there could be two devices showing up, and both need to be routed to the VM. Those could be visible at :code:`Player -> Removable Devices`:
+
+* Intel Movidius MyriadX
+* Intel VSC Loopback Device or Intel Luxonis Device 
+
+In Ubuntu, run these commands to give USB permissions for the regular user:
+
+.. code-block:: bash
+
+  echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+  sudo udevadm control --reload-rules && sudo udevadm trigger
+
+If Virtual Machine doesn't detect the device, try the following: find and select option like *Forget connection rule* (for both devices), then try running
+the :code:`main.py` script again inside the VM. Choose to route to VM and select to *not ask again* (this is important, as there is a timeout, and the device 
+watchdog could get triggered if the host doesn't start communication in few seconds). You may need to repeat running the script a few times, until all gets 
+set properly for VMware.
 
 Install from PyPI
 #################
