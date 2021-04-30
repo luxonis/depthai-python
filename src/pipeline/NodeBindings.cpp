@@ -445,6 +445,8 @@ void NodeBindings::bind(pybind11::module& m){
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
+        .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
+        .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         ;
 
     py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder))
@@ -469,6 +471,7 @@ void NodeBindings::bind(pybind11::module& m){
         .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
         .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
+        .value("THE_480_P", MonoCameraProperties::SensorResolution::THE_480_P)
         ;
     // ALIAS
     m.attr("MonoCamera").attr("Properties") = monoCameraProperties;
