@@ -134,6 +134,8 @@ void DeviceBindings::bind(pybind11::module& m){
         .def_static("getDeviceByMxId", &Device::getDeviceByMxId, py::arg("mxId"), DOC(dai, Device, getDeviceByMxId))
 
         // methods
+
+        // Device constructor - Pipeline
         .def(py::init([](const Pipeline& pipeline){ return deviceConstructorHelper(pipeline); }), py::arg("pipeline"), DOC(dai, Device, Device))
         .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
             // Blocking constructor
@@ -152,6 +154,8 @@ void DeviceBindings::bind(pybind11::module& m){
             return std::unique_ptr<Device>(new Device(pipeline, deviceInfo, pathToCmd));
         }), py::arg("pipeline"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, Device, Device, 5))
 
+
+        // Device constructor - OpenVINO version
         .def(py::init([](OpenVINO::Version version){ return deviceConstructorHelper(version); }), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Device, Device, 6))
         .def(py::init([](OpenVINO::Version version, bool usb2Mode){
             // Blocking constructor
@@ -161,6 +165,14 @@ void DeviceBindings::bind(pybind11::module& m){
             // Blocking constructor
             return deviceConstructorHelper(version, pathToCmd);
         }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, Device, Device, 8))
+        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
+            // Non blocking constructor
+            return std::unique_ptr<Device>(new Device(version, deviceInfo, usb2Mode));
+        }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, Device, Device, 9))
+        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
+            // Non blocking constructor
+            return std::unique_ptr<Device>(new Device(version, deviceInfo, pathToCmd));
+        }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, Device, Device, 10))
 
         .def("isPipelineRunning", &Device::isPipelineRunning, DOC(dai, Device, isPipelineRunning))
         .def("startPipeline", [](Device& d){
