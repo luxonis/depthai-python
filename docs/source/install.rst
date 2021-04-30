@@ -216,7 +216,7 @@ there could be two devices showing up, and both need to be routed to the VM. Tho
 * Intel Movidius MyriadX
 * Intel VSC Loopback Device or Intel Luxonis Device 
 
-In Ubuntu, run these commands to give USB permissions for the regular user:
+In Linux OS, run these commands to give USB permissions for the regular user:
 
 .. code-block:: bash
 
@@ -224,7 +224,7 @@ In Ubuntu, run these commands to give USB permissions for the regular user:
   sudo udevadm control --reload-rules && sudo udevadm trigger
 
 If Virtual Machine doesn't detect the device, try the following: find and select option like *Forget connection rule* (for both devices), then try running
-the :code:`main.py` script again inside the VM. Choose to route to VM and select to *not ask again* (this is important, as there is a timeout, and the device 
+the DepthAI example again inside the VM. Choose to route to VM and select to *not ask again* (this is important, as there is a timeout, and the device 
 watchdog could get triggered if the host doesn't start communication in few seconds). You may need to repeat running the script a few times, until all gets 
 set properly for VMware.
 
