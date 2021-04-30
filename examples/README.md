@@ -11,6 +11,7 @@ mkdir -p build && cd build
 cmake .. -DDEPTHAI_PYTHON_ENABLE_EXAMPLES=ON
 cmake --build . --parallel
 ```
+ℹ️ For the `--parallel` argument above, specify a value `[num CPU cores]` or less, to reduce memory consumption during build. E.g.: `--parallel 8`
 
 If you'd like to use a different Python interpreter, set `PYTHON_EXECUTABLE` to your interpreter location
 
