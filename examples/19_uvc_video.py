@@ -3,14 +3,18 @@
 import depthai as dai
 import argparse
 import time
+import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
+parser.add_argument('-r',  '--rotate-cam',       default=False, action="store_true")
 parser.add_argument('-b',  '--back-mic',         default=False, action="store_true")
 parser.add_argument('-xm', '--xlink-mic',        default=False, action="store_true")
-parser.add_argument('-g',  '--gain-db',          default=0, type=float)
+parser.add_argument('-xc', '--xlink-cam',        default=False, action="store_true")
+parser.add_argument('-g',  '--mic-gain-db',      default=0, type=float)
 args = parser.parse_args()
+args.back_mic = False  # TODO again for UAC. Available with XLink
 
 enable_4k = True
 
@@ -33,6 +37,9 @@ if enable_4k:
 else:
     cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
+if args.rotate_cam:
+    cam_rgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+
 # Create an UVC (USB Video Class) output node
 uvc = pipeline.createUVC()
 cam_rgb.video.link(uvc.input)
@@ -40,9 +47,12 @@ cam_rgb.video.link(uvc.input)
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
-uac.setMicGainDecibels(args.gain_db)
+uac.setMicGainDecibels(args.mic_gain_db)
 print("UAC using:", "Back mic," if args.back_mic else "Front mics,",
-      "Gain {} dB".format(args.gain_db))
+      "Gain {} dB".format(args.mic_gain_db))
+
+uac.setXlinkApplyMicGain(True)
+uac.setXlinkSampleSizeBytes(3)
 
 #uac.setMicAutoGain(True) # Not yet implemented
 
@@ -52,6 +62,11 @@ if args.xlink_mic:
     xout.setStreamName("mic")
     uac.out.link(xout.input)
     print("Writing XLink audio data to:", filename)
+
+if args.xlink_cam:
+    xout = pipeline.createXLinkOut()
+    xout.setStreamName("cam")
+    cam_rgb.video.link(xout.input)
 
 if args.flash_bootloader or args.flash_app:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
@@ -78,17 +93,32 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
     print("\nTo close: Ctrl+C")
 
     if args.xlink_mic:
-        q = device.getOutputQueue(name="mic", maxSize=16, blocking=True)
+        qmic = device.getOutputQueue(name="mic", maxSize=16, blocking=True)
+    if args.xlink_cam:
+        qcam = device.getOutputQueue(name="cam", maxSize=4, blocking=False)
 
     while True:
-        if args.xlink_mic:
-            pkt = q.get()
-            print('MIC seq:', pkt.getSequenceNum(),
-                      'timestamp:', pkt.getTimestamp(),
-                      'samples:', pkt.getHeight(),
-                      'mics:', pkt.getWidth())
-            data = pkt.getData()
-            data.tofile(f)
+        if args.xlink_mic or args.xlink_cam:
+            if args.xlink_mic:
+                pkt = qmic.tryGet()
+                if pkt is not None:
+                    print('MIC seq:', pkt.getSequenceNum(),
+                              'timestamp:', pkt.getTimestamp(),
+                              'samples:', pkt.getHeight(),
+                              'mics:', pkt.getWidth())
+                    data = pkt.getData()
+                    data.tofile(f)
+            if args.xlink_cam:
+                pkt = qcam.tryGet()
+                if pkt is not None:
+                    print('CAM seq:', pkt.getSequenceNum(),
+                              'timestamp:', pkt.getTimestamp(),
+                              'height:', pkt.getHeight(),
+                              'width:', pkt.getWidth())
+                    frame = pkt.getCvFrame()
+                    cv2.imshow('cam', frame)
+                    if cv2.waitKey(1) == ord('q'):
+                        break
             continue
 
         try:
