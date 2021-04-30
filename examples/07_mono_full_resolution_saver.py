@@ -36,10 +36,10 @@ with dai.Device(pipeline) as device:
         inRight = qRight.get()  # Blocking call, will wait until a new data has arrived
         # Data is originally represented as a flat 1D array, it needs to be converted into HxW form
         # Frame is transformed and ready to be shown
-        cv2.imshow("right", inRight.getCvFrame())
+        cv2.imshow("right", inRight.getFrame())
 
         # After showing the frame, it's being stored inside a target directory as a PNG image
-        cv2.imwrite(f"07_data/{int(time.time() * 1000)}.png", frameRight)
+        cv2.imwrite(f"07_data/{int(time.time() * 1000)}.png", inRight.getFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
