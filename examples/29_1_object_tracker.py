@@ -64,12 +64,8 @@ detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 detectionNetwork.out.link(objectTracker.inputDetections)
 objectTracker.out.link(trackerOut.input)
 
-
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-
-    # Start the pipeline
-    device.startPipeline()
 
     preview = device.getOutputQueue("preview", 4, False)
     tracklets = device.getOutputQueue("tracklets", 4, False)
