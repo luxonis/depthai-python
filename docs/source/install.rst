@@ -210,8 +210,13 @@ Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
 VMware
 ******
 
-Using the OAK-D device in a VMware requires some extra one-time settings that need to be set up for it to work. Depending on what state the device is, 
-there could be two devices showing up, and both need to be routed to the VM. Those could be visible at :code:`Player -> Removable Devices`:
+Using the OAK-D device in a VMware requires some extra one-time settings that need to be set up for it to work. 
+
+First of all, make sure  the USB controller is switched from USB2 to USB3. Go to :code:`Virtual Machine Settings -> USB Controller -> USB compatibility` and change 
+to USB 3.1 (or USB 3.0 for older VMware versions, as available).
+
+Depending on what state the device is, there could be two devices showing up, and both need to be routed to the VM. 
+Those could be visible at :code:`Player -> Removable Devices`:
 
 * Intel Movidius MyriadX
 * Intel VSC Loopback Device or Intel Luxonis Device 
