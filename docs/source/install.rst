@@ -57,13 +57,6 @@ following:
 
 See the `Video preview window fails to appear on macOS <https://discuss.luxonis.com/d/95-video-preview-window-fails-to-appear-on-macos>`_ thread on our forum for more information.
 
-Raspberry Pi OS
-***************
-
-.. code-block:: bash
-
-  sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
-
 Ubuntu
 ******
 
@@ -82,13 +75,21 @@ Note! If opencv fails with illegal instruction after installing from PyPi, add:
   source ~/.bashrc
 
 
+Raspberry Pi OS
+***************
+  
+  .. code-block:: bash
+  
+    sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
+
+
 openSUSE
 ********
 
 For openSUSE, available `in this official article <https://en.opensuse.org/SDB:Install_OAK_AI_Kit>`__ how to install the OAK device on the openSUSE platform.
 
-Windows
-*******
+Windows 10
+**********
 
 We recommend using the Chocolatey package manager to install DepthAI's
 dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
@@ -111,7 +112,7 @@ use it to install DepthAI's dependencies do the following:
   choco install cmake git python pycharm-community -y
 
 Windows 7
----------
+*********
 
 Although we do not officially support Windows 7, members of the community `have
 had success <https://discuss.luxonis.com/d/105-run-on-win7-sp1-x64-manual-instal-usb-driver>`__ manually installing WinUSB using `Zadig
@@ -142,13 +143,12 @@ Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux h
        luxonis/depthai-library:latest \
        python3 /depthai-python/examples/01_rgb_preview.py
 
-To allow the container to update X11 you may need to run :code:`xhost local:root` on
-the host.
+To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
-KVM
-***
+Kernel Virtual Machine
+**********************
 
-To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__,  there is a need to attach and detach USB 
+To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__, there is a need to attach and detach USB 
 devices on the fly when the host machine detects changes in the USB bus.
 
 OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively. 
