@@ -158,9 +158,27 @@ target_link_libraries(${TARGET_NAME}
         hedley
 )
 
-# Add default commit hash ('dev') if not build by CI
+# Add local commit hash (or 'dev' if unable to retrieve) if not build by CI
 if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)
-    set(DEPTHAI_PYTHON_COMMIT_HASH "dev")
+    set(BUILD_COMMIT "dev")
+    find_package(Git)
+    if(GIT_FOUND)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            OUTPUT_VARIABLE BUILD_COMMIT
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} show -s --format=%ci ${BUILD_COMMIT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE BUILD_COMMIT_DATETIME
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(DEPTHAI_PYTHON_COMMIT_HASH ${BUILD_COMMIT})
 endif()
 
 # Get version to use
@@ -174,8 +192,15 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} "-c" "${version_command}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add version definition
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}")
+# Add build information
+string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d %H:%M:%S +0000" UTC)
+target_compile_definitions(${TARGET_NAME}
+    PRIVATE
+        DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}"
+        DEPTHAI_PYTHON_COMMIT_HASH="${DEPTHAI_PYTHON_COMMIT_HASH}"
+        DEPTHAI_PYTHON_COMMIT_DATETIME="${BUILD_COMMIT_DATETIME}"
+        DEPTHAI_PYTHON_BUILD_DATETIME="${BUILD_DATETIME}"
+)
 
 # Set compiler features (c++14), and disables extensions
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)
