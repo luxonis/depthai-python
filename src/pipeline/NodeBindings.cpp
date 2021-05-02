@@ -451,7 +451,7 @@ void NodeBindings::bind(pybind11::module& m){
 
     // UVC node
     py::class_<UVC, Node, std::shared_ptr<UVC>>(m, "UVC")
-        .def_readonly("input", &UVC::input)
+        .def_readonly("input", &UVC::input, DOC(dai, node, UVC, input))
         ;
 
     ////////////////////////////////////

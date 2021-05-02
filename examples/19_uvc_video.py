@@ -20,9 +20,9 @@ if enable_4k:
 else:
     cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
-# Create an UVC (USB Video Class) output node
+# Create an UVC (USB Video Class) output node. It needs 1920x1080, NV12 input
 uvc = pipeline.createUVC()
-cam_rgb.isp.link(uvc.input)
+cam_rgb.video.link(uvc.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
