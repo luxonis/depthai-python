@@ -19,7 +19,7 @@ We keep up-to-date, pre-compiled, libraries for the following platforms.  Note t
 ======================== ============================================== ================================================================================
 Platform                 Instructions                                   Support
 ======================== ============================================== ================================================================================
-Windows 10               :ref:`Platform dependencies <Windows>`         `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
 Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
 Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
@@ -34,7 +34,7 @@ Fedora                                                                       `Di
 Robot Operating System                                                       `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
 Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
-Kernel Virtual Machine :ref:`Run on KVM <KVM>`                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`            `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 ====================== ===================================================== ================================================================================
 
