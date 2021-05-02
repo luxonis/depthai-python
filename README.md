@@ -1,10 +1,14 @@
 # DepthAI Python Library
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![](https://img.shields.io/pypi/v/depthai.svg)](https://pypi.org/project/depthai/)
+[![Python Wheel CI](https://github.com/luxonis/depthai-python/actions/workflows/main.yml/badge.svg?branch=gen2_develop)](https://github.com/luxonis/depthai-python/actions/workflows/main.yml)
+
 Python bindings for C++ depthai-core library
 
 ## Documentation
 
-Documentation is available over at [Luxonis DepthAI Python API](https://docs.luxonis.com/api/)
+Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.com/projects/api/en/latest/)
 
 ## Installation
 
@@ -17,8 +21,8 @@ python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifacto
 ## Building from source
 
 ### Dependencies
- - cmake >= 3.2
- - C/C++11 compiler (clang, gcc, msvc, ...)
+ - cmake >= 3.4
+ - C++14 compiler (clang, gcc, msvc, ...)
  - Python
 
 Along these, dependencies of depthai-core are also required
@@ -29,14 +33,34 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 To build a shared library from source perform the following:
 ```
+git submodule update --init --recursive
 mkdir build && cd build
-cmake ..
+cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
 cmake --build . --parallel
 ```
+Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
+
+ℹ️ For the `--parallel` argument, specify a value `[num CPU cores]` or less, to reduce memory consumption during build. E.g.: `--parallel 8`
 
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
+```
+
+To build and install using pip:
+```
+python3 -m pip install .
+```
+
+## Running tests
+
+To run the tests build the library with the following options
+```
+git submodule update --init --recursive
+mkdir build_tests && cd build_tests
+cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake --build . --parallel
+ctest
 ```
 
 
@@ -46,6 +70,46 @@ python3 -m pip wheel . -w wheelhouse
 - Ubuntu 16.04, 18.04;
 - Raspbian 10;
 - macOS 10.14.6, 10.15.4;
+
+### Building documentation
+
+- **Using [Docker](https://docs.docker.com/) (with [Docker Compose](https://docs.docker.com/compose/install/))**
+
+     ```
+     cd docs
+     sudo docker-compose build
+     sudo docker-compose up
+     ```
+
+     > ℹ️ You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
+     Then open [http://localhost:8000](http://localhost:8000).
+
+     This docker container will watch changes in the `docs/source` directory and rebuild the docs automatically
+
+- **Linux**
+
+     First, please install the required [dependencies](#Dependencies)
+
+     Then run the following commands to build the docs website
+
+     ```
+     python3 -m pip install -U pip
+     python3 -m pip install -r docs/requirements.txt
+     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
+     cmake --build build --parallel --target sphinx
+     python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
+     ```
+
+     Then open [http://localhost:8000](http://localhost:8000).
+
+     This will build documentation based on current sources, so if some new changes will be made, run this command
+     in a new terminal window to update the website source
+
+     ```
+     cmake --build build --parallel --target sphinx
+     ```
+
+     Then refresh your page - it should load the updated website that was just built
 
 ## Troubleshooting
 
@@ -58,7 +122,7 @@ Build failure on Ubuntu 18.04 ("relocation ..." link error) with gcc 7.4.0 (defa
          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 70
          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 70
 ### Hunter
-Hunter is a CMake-only dependency manager for C/C++ projects. 
+Hunter is a CMake-only dependency manager for C/C++ projects.
 
 If you are stuck with error message which mentions external libraries (subdirectory of `.hunter`) like the following:
 ```
@@ -82,7 +146,7 @@ del C:/[user]/.hunter
 
 ### LTO - link time optimization
 
-If following message appears: 
+If following message appears:
 ```
 lto1: internal compiler error: in add_symbol_to_partition_1, at lto/lto-partition.c:152
 Please submit a full bug report,

@@ -21,7 +21,7 @@ Dependencies
 Let's get your development environment setup first. This tutorial uses:
 
 - Python 3.6 (Ubuntu) or Python 3.7 (Raspbian).
-- The DepthAI :ref:`Python API`
+- The DepthAI :ref:`Python API <Installation>`
 - The :code:`cv2` and :code:`numpy` Python modules.
 
 
@@ -30,7 +30,7 @@ Code Overview
 
 The :code:`depthai` Python module provides access to your board's 4K 60 Hz color camera.
 We'll display a video stream from this camera to your desktop.
-You can find the `complete source code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/tree/gen2/1-hello-world>`__.
+You can find the `complete source code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/tree/master/1-hello-world>`__.
 
 File Setup
 ##########
@@ -295,6 +295,11 @@ we display the frame using :code:`cv2.imshow`
 Finally, we add a way to terminate our program (as it's running inside an infinite loop). We will use :code:`cv2.waitKey`
 method, that waits for a key to be pressed by user - in our case, we want to break out of the loop when user presses :code:`q` key
 
+.. code-block:: python
+    
+    if cv2.waitKey(1) == ord('q'):
+        break
+
 Running the example
 ###################
 
@@ -303,7 +308,7 @@ Putting it all together, only thing left to do is to run the file we've prepared
 .. code-block:: bash
 
   python3 hello_world.py
-
-You're on your way! You can find the `complete code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/blob/gen2/1-hello-world/hello_world.py>`__.
+  
+You're on your way! You can find the `complete code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/blob/master/1-hello-world/hello_world.py>`__.
 
 .. include::  /includes/footer-short.rst

@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
 
-# TODO (themarpe) - cross platform timeout
-
 # Parse out arguments
 foreach(_arg RANGE ${CMAKE_ARGC})
     if(append)
@@ -18,17 +16,25 @@ list(REMOVE_AT arguments 0)
 message(STATUS "arguments: ${arguments}")
 
 # Check if ENV variable TEST_TIMEOUT is set and use that rather than TIMEOUT_SECONDS
-if(DEFINED ENV{TEST_TIMEOUT})
+if(DEFINED ENV{TEST_TIMEOUT} AND NOT DEFINED FORCE_TIMEOUT_SECONDS)
     message(STATUS "Overriding timeout: ${TIMEOUT_SECONDS} with $ENV{TEST_TIMEOUT}")
     set(TIMEOUT_SECONDS $ENV{TEST_TIMEOUT})
 endif()
 
-# Execute the example
-execute_process(COMMAND timeout -s SIGINT -k 5 ${TIMEOUT_SECONDS} ${arguments} RESULT_VARIABLE error_variable)
-message(STATUS "After timeout, ${PATH_TO_TEST_EXECUTABLE} produced the following exit code: ${error_variable}")
+# Check if FORCE_TIMEOUT_SECONDS is set, in that case respect that option
+if(FORCE_TIMEOUT_SECONDS)
+    message(STATUS "Forcing timeout of ${FORCE_TIMEOUT_SECONDS} seconds")
+    set(TIMEOUT_SECONDS ${FORCE_TIMEOUT_SECONDS})
+endif()
 
-# After that, wait for ~3 seconds
-#execute_process(COMMAND sleep 3)
+# Execute the example (SIGTERM for now, could be improved with SIGINT -> SIGKILL)
+if(TIMEOUT_SECONDS GREATER 0)
+    execute_process(COMMAND ${arguments} TIMEOUT ${TIMEOUT_SECONDS} RESULT_VARIABLE error_variable)
+else()
+    execute_process(COMMAND ${arguments} RESULT_VARIABLE error_variable)
+endif()
+
+message(STATUS "After process executed, ${PATH_TO_TEST_EXECUTABLE} produced the following exit code: ${error_variable}")
 
 if(error_variable MATCHES "timeout" OR error_variable EQUAL 128 OR error_variable EQUAL 124)
     # Okay

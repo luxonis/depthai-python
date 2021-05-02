@@ -8,7 +8,7 @@ each, all at 30FPS. Each encoded video stream is transferred over XLINK and save
 Pressing Ctrl+C will stop the recording and then convert it using ffmpeg into an mp4 to make it
 playable. Note that ffmpeg will need to be installed and runnable for the conversion to mp4 to succeed.
 
-Be careful, this example saves encoded video to your host storage. So if you leave them running,
+Be careful, this example saves encoded video to your host storage. So if you leave it running,
 you could fill up your storage on your host.
 
 Demo
@@ -23,18 +23,12 @@ Demo
 Setup
 #####
 
-Please run the following command to install the required dependencies
-
-.. code-block:: bash
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c numpy==1.19.5 opencv-python==4.5.1.48
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+.. include::  /includes/install_from_pypi.rst
 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/05_rgb_mono_encoding.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/05_rgb_mono_encoding.py>`__
 
 .. literalinclude:: ../../../examples/05_rgb_mono_encoding.py
    :language: python

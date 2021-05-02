@@ -1,69 +1,37 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# readthedocs CI build limitation circumvent
+import subprocess
+import os
+import sys
 
-# -- Path setup --------------------------------------------------------------
+# Get current working directory
+cwd = os.path.dirname(os.path.realpath(__file__))
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+# Prepare dependencies for library
+env=os.environ.copy()
 
+# Temp dir - remove if exists, and create a new one
+tmpdir = '/home/docs/__temp_dir'
+subprocess.check_call(['rm', '-rf', tmpdir])
+subprocess.check_call(['mkdir', '-p', tmpdir])
 
-# -- Project information -----------------------------------------------------
+# Libusb
+subprocess.check_call(['wget', 'https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2'], cwd=tmpdir)
+subprocess.check_call(['tar', 'xf', 'libusb-1.0.24.tar.bz2'], cwd=tmpdir)
+subprocess.check_call(['./configure', '--disable-udev', '--prefix', tmpdir+'/libusb'], cwd=tmpdir+'/libusb-1.0.24')
+subprocess.check_call(['make', '-j'], cwd=tmpdir+'/libusb-1.0.24')
+subprocess.check_call(['make', 'install'], cwd=tmpdir+'/libusb-1.0.24')
+env['PATH'] = tmpdir+'/libusb/include:'+tmpdir+'/libusb/lib'+':'+env['PATH']
 
-project = 'DepthAI API Docs'
-copyright = '2020, Luxonis'
-author = 'Luxonis'
+# libclang
+subprocess.check_call(['wget', 'https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/libclang-11_manylinux2014_x86_64.tar.xz'], cwd=tmpdir)
+subprocess.check_call(['mkdir', '-p', 'libclang'], cwd=tmpdir)
+subprocess.check_call(['tar', 'xf', 'libclang-11_manylinux2014_x86_64.tar.xz', '-C', tmpdir+'/libclang/'], cwd=tmpdir)
+env['LIBCLANG_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/lib/libclang.so.1'
+env['LLVM_DIR_PATH'] = tmpdir+'/libclang/usr/lib/llvm-11/'
 
-# The full version, including alpha/beta/rc tags
-release = '1.0.2'
+# Build library and generate actual conf.py
+subprocess.run(["cmake -P ../ci.cmake"], cwd=cwd, shell=True, check=True, env=env)
 
-
-# -- General configuration ---------------------------------------------------
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
-extensions = [
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.autosectionlabel",  # https://github.com/sphinx-doc/sphinx/issues/7697 wait for this and implement
-    "sphinx_rtd_theme",
-]
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
-
-
-# -- Options for HTML output -------------------------------------------------
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'sphinx_rtd_theme'
-
-html_theme_options = {
-    "collapse_navigation" : False
-}
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-# html_logo = "_static/images/logo.png"
-html_favicon = '_static/images/favicon.png'
-html_css_files = [
-    'css/index.css',
-]
-
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+# Load generated conf.py which includes all needed information to build with sphinx
+with open("../../build/docs/conf.py") as infile:
+    exec(infile.read())

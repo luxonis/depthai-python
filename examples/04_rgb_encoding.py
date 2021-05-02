@@ -20,21 +20,19 @@ videoOut = pipeline.createXLinkOut()
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the encoded data from the output defined above
     q = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
 
     # The .h265 file is a raw stream file (not playable yet)
-    with open('video.h265','wb') as videoFile:
+    with open('video.h265', 'wb') as videoFile:
         print("Press Ctrl+C to stop encoding...")
         try:
             while True:
-                h264Packet = q.get()  # blocking call, will wait until a new data has arrived
-                h264Packet.getData().tofile(videoFile)  # appends the packet data to the opened file
+                h264Packet = q.get()  # Blocking call, will wait until a new data has arrived
+                h264Packet.getData().tofile(videoFile)  # Appends the packet data to the opened file
         except KeyboardInterrupt:
             # Keyboard interrupt (Ctrl + C) detected
             pass

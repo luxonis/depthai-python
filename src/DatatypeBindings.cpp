@@ -8,21 +8,33 @@
 #include "depthai/pipeline/datatype/Buffer.hpp"
 #include "depthai/pipeline/datatype/ImgFrame.hpp"
 #include "depthai/pipeline/datatype/NNData.hpp"
+#include "depthai/pipeline/datatype/ImgDetections.hpp"
+#include "depthai/pipeline/datatype/SpatialImgDetections.hpp"
 #include "depthai/pipeline/datatype/ImageManipConfig.hpp"
 #include "depthai/pipeline/datatype/CameraControl.hpp"
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
+#include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
+#include "depthai/pipeline/datatype/Tracklets.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
 #include "depthai-shared/datatype/RawImgFrame.hpp"
 #include "depthai-shared/datatype/RawNNData.hpp"
+#include "depthai-shared/datatype/RawImgDetections.hpp"
+#include "depthai-shared/datatype/RawSpatialImgDetections.hpp"
 #include "depthai-shared/datatype/RawImageManipConfig.hpp"
 #include "depthai-shared/datatype/RawCameraControl.hpp"
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawSpatialLocations.hpp"
+#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawTracklets.hpp"
 
 
 //pybind
 #include <pybind11/chrono.h>
+#include <pybind11/numpy.h>
 
 
 void DatatypeBindings::bind(pybind11::module& m){
@@ -31,7 +43,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     using namespace dai;
 
     // Bind Raw datatypes
-    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer")
+    py::class_<RawBuffer, std::shared_ptr<RawBuffer>>(m, "RawBuffer", DOC(dai, RawBuffer))
         .def(py::init<>())
         .def_property("data", [](py::object &obj){
             dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
@@ -44,7 +56,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind RawImgFrame
-    py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame");
+    py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     rawImgFrame
         .def(py::init<>())
         .def_readwrite("fb", &RawImgFrame::fb)
@@ -52,14 +64,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("instanceNum", &RawImgFrame::instanceNum)
         .def_readwrite("sequenceNum", &RawImgFrame::sequenceNum)
         .def_property("ts",
-            [](const RawImgFrame& o){ 
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0; 
-                return ts; 
+            [](const RawImgFrame& o){
+                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+                return ts;
             },
-            [](RawImgFrame& o, double ts){ 
-                o.ts.sec = ts; 
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;   
-            }  
+            [](RawImgFrame& o, double ts){
+                o.ts.sec = ts;
+                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+            }
         )
         ;
 
@@ -99,7 +111,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("NONE", RawImgFrame::Type::NONE)
         ;
 
-    py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs")
+    py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs))
         .def_readwrite("type", &RawImgFrame::Specs::type)
         .def_readwrite("width", &RawImgFrame::Specs::width)
         .def_readwrite("height", &RawImgFrame::Specs::height)
@@ -112,14 +124,14 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // NNData
-    py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData");
+    py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
     rawNnData
         .def(py::init<>())
         .def_readwrite("tensors", &RawNNData::tensors)
         .def_readwrite("batchSize", &RawNNData::batchSize)
         ;
 
-    py::class_<TensorInfo> tensorInfo(m, "TensorInfo");
+    py::class_<TensorInfo> tensorInfo(m, "TensorInfo", DOC(dai, TensorInfo));
     tensorInfo
         .def(py::init<>())
         .def_readwrite("order", &TensorInfo::order)
@@ -138,7 +150,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("FP32", TensorInfo::DataType::FP32)
         .value("I8", TensorInfo::DataType::I8)
         ;
-        
+
     py::enum_<TensorInfo::StorageOrder>(tensorInfo, "StorageOrder")
         .value("NHWC", TensorInfo::StorageOrder::NHWC)
         .value("NHCW", TensorInfo::StorageOrder::NHCW)
@@ -156,10 +168,35 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("W", TensorInfo::StorageOrder::W)
         ;
 
+    py::class_<ImgDetection>(m, "ImgDetection", DOC(dai, ImgDetection))
+        .def(py::init<>())
+        .def_readwrite("label", &ImgDetection::label)
+        .def_readwrite("confidence", &ImgDetection::confidence)
+        .def_readwrite("xmin", &ImgDetection::xmin)
+        .def_readwrite("ymin", &ImgDetection::ymin)
+        .def_readwrite("xmax", &ImgDetection::xmax)
+        .def_readwrite("ymax", &ImgDetection::ymax)
+        ;
 
-    
+    py::class_<SpatialImgDetection, ImgDetection>(m, "SpatialImgDetection", DOC(dai, SpatialImgDetection))
+        .def(py::init<>())
+        .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
+        ;
+
+    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> RawImgDetections(m, "RawImgDetections", DOC(dai, RawImgDetections));
+    RawImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawImgDetections::detections)
+        ;
+
+    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> RawSpatialImgDetections(m, "RawSpatialImgDetections", DOC(dai, RawSpatialImgDetections));
+    RawSpatialImgDetections
+        .def(py::init<>())
+        .def_readwrite("detections", &RawSpatialImgDetections::detections)
+        ;
+
     // Bind RawImageManipConfig
-    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig");
+    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig", DOC(dai, RawImageManipConfig));
     rawImageManipConfig
         .def(py::init<>())
         .def_readwrite("enableFormat", &RawImageManipConfig::enableFormat)
@@ -170,7 +207,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
         ;
 
-    py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect")
+    py::class_<RawImageManipConfig::CropRect>(rawImageManipConfig, "CropRect", DOC(dai, RawImageManipConfig, CropRect))
         .def(py::init<>())
         .def_readwrite("xmin", &RawImageManipConfig::CropRect::xmin)
         .def_readwrite("ymin", &RawImageManipConfig::CropRect::ymin)
@@ -178,7 +215,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
         ;
 
-    py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig")
+    py::class_<RawImageManipConfig::CropConfig>(rawImageManipConfig, "CropConfig", DOC(dai, RawImageManipConfig, CropConfig))
         .def(py::init<>())
         .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
         .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
@@ -189,7 +226,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
         ;
 
-    py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig")
+    py::class_<RawImageManipConfig::ResizeConfig>(rawImageManipConfig, "ResizeConfig", DOC(dai, RawImageManipConfig, ResizeConfig))
         .def(py::init<>())
         .def_readwrite("width", &RawImageManipConfig::ResizeConfig::width)
         .def_readwrite("height", &RawImageManipConfig::ResizeConfig::height)
@@ -205,9 +242,10 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
         .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
         .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
+        .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
-    py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig")
+    py::class_<RawImageManipConfig::FormatConfig>(rawImageManipConfig, "FormatConfig", DOC(dai, RawImageManipConfig, FormatConfig))
         .def(py::init<>())
         .def_readwrite("type", &RawImageManipConfig::FormatConfig::type)
         .def_readwrite("flipHorizontal", &RawImageManipConfig::FormatConfig::flipHorizontal)
@@ -215,7 +253,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind RawCameraControl
-    py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl");
+    py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl", DOC(dai, RawCameraControl));
     rawCameraControl
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
@@ -223,11 +261,34 @@ void DatatypeBindings::bind(pybind11::module& m){
         // TODO add more raw types here, not directly used
         ;
 
+    py::class_<Tracklet> tracklet(m, "Tracklet", DOC(dai, Tracklet));
+    tracklet
+        .def(py::init<>())
+        .def_readwrite("roi", &Tracklet::roi)
+        .def_readwrite("id", &Tracklet::id)
+        .def_readwrite("label", &Tracklet::label)
+        .def_readwrite("status", &Tracklet::status)
+        .def_readwrite("srcImgDetection", &Tracklet::srcImgDetection)
+        .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
+        ;
+
+    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus")
+        .value("NEW", Tracklet::TrackingStatus::NEW)
+        .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
+        .value("LOST", Tracklet::TrackingStatus::LOST)
+        ;
+
+    // Bind RawTracklets
+    py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
+    rawTacklets
+        .def_readwrite("tracklets", &RawTracklets::tracklets)
+        ;
+
     // RawCameraControl enum bindings
     // The enum fields will also be exposed in 'CameraControl', store them for later
     std::vector<const char *> camCtrlAttr;
     camCtrlAttr.push_back("AutoFocusMode");
-    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode")
+    py::enum_<RawCameraControl::AutoFocusMode>(rawCameraControl, "AutoFocusMode", DOC(dai, RawCameraControl, AutoFocusMode))
         .value("OFF", RawCameraControl::AutoFocusMode::OFF)
         .value("AUTO", RawCameraControl::AutoFocusMode::AUTO)
         .value("MACRO", RawCameraControl::AutoFocusMode::MACRO)
@@ -237,7 +298,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("AutoWhiteBalanceMode");
-    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode")
+    py::enum_<RawCameraControl::AutoWhiteBalanceMode>(rawCameraControl, "AutoWhiteBalanceMode", DOC(dai, RawCameraControl, AutoWhiteBalanceMode))
         .value("OFF", RawCameraControl::AutoWhiteBalanceMode::OFF)
         .value("AUTO", RawCameraControl::AutoWhiteBalanceMode::AUTO)
         .value("INCANDESCENT", RawCameraControl::AutoWhiteBalanceMode::INCANDESCENT)
@@ -250,7 +311,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("SceneMode");
-    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode")
+    py::enum_<RawCameraControl::SceneMode>(rawCameraControl, "SceneMode", DOC(dai, RawCameraControl, SceneMode))
         .value("UNSUPPORTED", RawCameraControl::SceneMode::UNSUPPORTED)
         .value("FACE_PRIORITY", RawCameraControl::SceneMode::FACE_PRIORITY)
         .value("ACTION", RawCameraControl::SceneMode::ACTION)
@@ -271,7 +332,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("AntiBandingMode");
-    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode")
+    py::enum_<RawCameraControl::AntiBandingMode>(rawCameraControl, "AntiBandingMode", DOC(dai, RawCameraControl, AntiBandingMode))
         .value("OFF", RawCameraControl::AntiBandingMode::OFF)
         .value("MAINS_50_HZ", RawCameraControl::AntiBandingMode::MAINS_50_HZ)
         .value("MAINS_60_HZ", RawCameraControl::AntiBandingMode::MAINS_60_HZ)
@@ -279,7 +340,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     camCtrlAttr.push_back("EffectMode");
-    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode")
+    py::enum_<RawCameraControl::EffectMode>(rawCameraControl, "EffectMode", DOC(dai, RawCameraControl, EffectMode))
         .value("OFF", RawCameraControl::EffectMode::OFF)
         .value("MONO", RawCameraControl::EffectMode::MONO)
         .value("NEGATIVE", RawCameraControl::EffectMode::NEGATIVE)
@@ -292,10 +353,11 @@ void DatatypeBindings::bind(pybind11::module& m){
     ;
 
     // Bind RawSystemInformation
-    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation");
+    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation", DOC(dai, RawSystemInformation));
     rawSystemInformation
         .def(py::init<>())
         .def_readwrite("ddrMemoryUsage", &RawSystemInformation::ddrMemoryUsage)
+        .def_readwrite("cmxMemoryUsage", &RawSystemInformation::cmxMemoryUsage)
         .def_readwrite("leonCssMemoryUsage", &RawSystemInformation::leonCssMemoryUsage)
         .def_readwrite("leonMssMemoryUsage", &RawSystemInformation::leonMssMemoryUsage)
         .def_readwrite("leonCssCpuUsage", &RawSystemInformation::leonCssCpuUsage)
@@ -305,87 +367,258 @@ void DatatypeBindings::bind(pybind11::module& m){
 
 
     // Bind non-raw 'helper' datatypes
-    py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype")
+    py::class_<ADatatype, std::shared_ptr<ADatatype>>(m, "ADatatype", DOC(dai, ADatatype))
         .def("getRaw", &ADatatype::getRaw);
 
-    py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>>(m, "Buffer")
-        .def(py::init<>())
+    py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>>(m, "Buffer", DOC(dai, Buffer))
+        .def(py::init<>(), DOC(dai, Buffer, Buffer))
 
         // obj is "Python" object, which we used then to bind the numpy arrays lifespan to
         .def("getData", [](py::object &obj){
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
             dai::Buffer &a = obj.cast<dai::Buffer&>();
             return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
-        })
-        .def("setData", &Buffer::setData)
+        }, DOC(dai, Buffer, getData))
+        .def("setData", &Buffer::setData, DOC(dai, Buffer, setData))
+        .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
+            buffer.getData().clear();
+            buffer.getData().insert(buffer.getData().begin(), array.data(), array.data() + array.nbytes());
+        }, DOC(dai, Buffer, setData))
         ;
 
     // Bind ImgFrame
-    py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>>(m, "ImgFrame")
+    py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>>(m, "ImgFrame", DOC(dai, ImgFrame))
         .def(py::init<>())
         // getters
-        .def("getTimestamp", &ImgFrame::getTimestamp)
-        .def("getInstanceNum", &ImgFrame::getInstanceNum)
-        .def("getCategory", &ImgFrame::getCategory)
-        .def("getSequenceNum", &ImgFrame::getSequenceNum)
-        .def("getWidth", &ImgFrame::getWidth)
-        .def("getHeight", &ImgFrame::getHeight)
-        .def("getType", &ImgFrame::getType)
+        .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
+        .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
+        .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
+        .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
+        .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
+        .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
+        .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
 
-        /* TODO(themarpe) - Convinience function which constructs array with correct datatype, shape, ...
-        .def("getFrame", [](py::object &obj){
+        // OpenCV Support section
+        .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
+             // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'setFrame' requires 'numpy' module");
+            }
+
+            py::array contiguous = numpy.attr("ascontiguousarray")(arr);
+            frm.getData().resize(contiguous.nbytes());
+            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());
+
+        }, py::arg("array"), "Copies array bytes to ImgFrame buffer")
+        .def("getFrame", [](py::object &obj, bool copy){
+
+            // Try importing 'numpy' module
+            py::module numpy;
+            try {
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'getFrame' requires 'numpy' module");
+            }
+
             // obj is "Python" object, which we used then to bind the numpy view lifespan to
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
-            dai::ImgFrame &a = obj.cast<dai::ImgFrame&>();
-            
+            auto& img = obj.cast<dai::ImgFrame&>();
+
             // shape
-            std::vector<std::size_t> shape = {a.getData().size()};
+            bool valid = img.getWidth() > 0 && img.getHeight() > 0;
+            std::vector<std::size_t> shape = {img.getData().size()};
+            py::dtype dtype = py::dtype::of<uint8_t>();
 
-            // TODO
-            switch(a.getType()){
-                case dai::RawImgFrame::Type::BITSTREAM :
-                    //shape = {return py::array_t<uint8_t>(a.getData().size(), a.getData().data(), obj);
+            switch(img.getType()){
+
+                case ImgFrame::Type::RGB888i :
+                case ImgFrame::Type::BGR888i :
+                    // HWC
+                    shape = {img.getHeight(), img.getWidth(), 3};
+                    dtype = py::dtype::of<uint8_t>();
                 break;
 
-                case dai::RawImgFrame::Type::RGB888 :
-                    shape = {a.getWidth(), a.getHeight(), 3};
-                    //return py::array_t<uint8_t>(py::array::ShapeContainer(a.getWidth(), a.getHeight(), 3), a.getData().data(), obj);
+                case ImgFrame::Type::RGB888p :
+                case ImgFrame::Type::BGR888p :
+                    // CHW
+                    shape = {3, img.getHeight(), img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
                 break;
 
+                case ImgFrame::Type::YUV420p:
+                case ImgFrame::Type::NV12:
+                case ImgFrame::Type::NV21:
+                    // Height 1.5x actual size
+                    shape = {img.getHeight() * 3 / 2, img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
+                break;
+
+                case ImgFrame::Type::RAW8:
+                case ImgFrame::Type::GRAY8:
+                    shape = {img.getHeight(), img.getWidth()};
+                    dtype = py::dtype::of<uint8_t>();
+                break;
+
+                case ImgFrame::Type::GRAYF16:
+                    shape = {img.getHeight(), img.getWidth()};
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::RAW16:
+                    shape = {img.getHeight(), img.getWidth()};
+                    dtype = py::dtype::of<uint16_t>();
+                break;
+
+                case ImgFrame::Type::RGBF16F16F16i:
+                case ImgFrame::Type::BGRF16F16F16i:
+                    shape = {img.getHeight(), img.getWidth(), 3};
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::RGBF16F16F16p:
+                case ImgFrame::Type::BGRF16F16F16p:
+                    shape = {3, img.getHeight(), img.getWidth()};
+                    dtype = py::dtype("half");
+                break;
+
+                case ImgFrame::Type::BITSTREAM :
+                default:
+                    shape = {img.getData().size()};
+                    dtype = py::dtype::of<uint8_t>();
+                    break;
             }
-            
 
-            return py::array_t<uint8_t>(shape, a.getData().data(), obj);
-        })
-        */
+            // Check if enough data
+            long requiredSize = dtype.itemsize();
+            for(const auto& dim : shape) requiredSize *= dim;
+            if(img.getData().size() < requiredSize){
+                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
+            }
+            if(img.getWidth() <= 0 || img.getHeight() <= 0){
+                throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
+            }
+
+            if(copy){
+                py::array a(dtype, shape);
+                std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
+                return a;
+            } else {
+                return py::array(dtype, shape, img.getData().data(), obj);
+            }
+
+        }, py::arg("copy") = false, "Returns numpy array with shape as specified by width, height and type")
+
+        .def("getCvFrame", [](py::object &obj){
+            using namespace pybind11::literals;
+
+            // Try importing 'cv2' module
+            py::module cv2;
+            py::module numpy;
+            try {
+                cv2 = py::module::import("cv2");
+                numpy = py::module::import("numpy");
+            } catch (const py::error_already_set& err){
+                throw std::runtime_error("Function 'getCvFrame' requires 'cv2' module (opencv-python package)");
+            }
+
+            // ImgFrame
+            auto& img = obj.cast<dai::ImgFrame&>();
+
+            // Get numpy frame (python object) by calling getFrame
+            auto frame = obj.attr("getFrame")();
+
+            // Convert numpy array to bgr frame using cv2 module
+            switch(img.getType()) {
+
+                case ImgFrame::Type::BGR888p:
+                    return numpy.attr("ascontiguousarray")(frame.attr("transpose")(1, 2, 0));
+                    break;
+
+                case ImgFrame::Type::BGR888i:
+                    return frame.attr("copy")();
+                    break;
+
+                case ImgFrame::Type::RGB888p:
+                    // Transpose to RGB888i then convert to BGR
+                    return cv2.attr("cvtColor")(frame.attr("transpose")(1, 2, 0), cv2.attr("COLOR_RGB2BGR"));
+                    break;
+
+                case ImgFrame::Type::RGB888i:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_RGB2BGR"));
+                    break;
+
+                case ImgFrame::Type::YUV420p:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_IYUV"));
+                    break;
+
+                case ImgFrame::Type::NV12:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV12"));
+                    break;
+
+                case ImgFrame::Type::NV21:
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV21"));
+                    break;
+
+                case ImgFrame::Type::RAW8:
+                case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::GRAY8:
+                case ImgFrame::Type::GRAYF16:
+                default:
+                    return frame.attr("copy")();
+                    break;
+            }
+
+            // Default case
+            return frame.attr("copy")();
+
+        }, "Returns BGR or grayscale frame compatible with use in other opencv functions")
 
         // setters
-        .def("setTimestamp", &ImgFrame::setTimestamp)
-        .def("setInstanceNum", &ImgFrame::setInstanceNum)
-        .def("setCategory", &ImgFrame::setCategory)
-        .def("setSequenceNum", &ImgFrame::setSequenceNum)
-        .def("setWidth", &ImgFrame::setWidth)
-        .def("setHeight", &ImgFrame::setHeight)
-        .def("setType", &ImgFrame::setType)
+        .def("setTimestamp", &ImgFrame::setTimestamp, py::arg("timestamp"), DOC(dai, ImgFrame, setTimestamp))
+        .def("setInstanceNum", &ImgFrame::setInstanceNum, py::arg("instance"), DOC(dai, ImgFrame, setInstanceNum))
+        .def("setCategory", &ImgFrame::setCategory, py::arg("category"), DOC(dai, ImgFrame, setCategory))
+        .def("setSequenceNum", &ImgFrame::setSequenceNum, py::arg("seq"), DOC(dai, ImgFrame, setSequenceNum))
+        .def("setWidth", &ImgFrame::setWidth, py::arg("width"), DOC(dai, ImgFrame, setWidth))
+        .def("setHeight", &ImgFrame::setHeight, py::arg("height"), DOC(dai, ImgFrame, setHeight))
+        .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
         ;
+    // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
+    m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
+    m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
-    py::class_<Timestamp>(m, "Timestamp")
+
+    py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
         .def(py::init<>())
         .def_readwrite("sec", &Timestamp::sec)
         .def_readwrite("nsec", &Timestamp::nsec)
         ;
 
-    py::class_<Point2f>(m, "Point2f")
+    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
+        .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("x", &Point2f::x)
         .def_readwrite("y", &Point2f::y)
         ;
 
-    py::class_<Size2f>(m, "Size2f")
+    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
+        .def(py::init<>())
+        .def(py::init<float, float, float>())
+        .def_readwrite("x", &Point3f::x)
+        .def_readwrite("y", &Point3f::y)
+        .def_readwrite("z", &Point3f::z)
+        ;
+
+    py::class_<Size2f>(m, "Size2f", DOC(dai, Size2f))
+        .def(py::init<>())
+        .def(py::init<float, float>())
         .def_readwrite("width", &Size2f::width)
         .def_readwrite("height", &Size2f::height)
         ;
 
-    py::class_<RotatedRect>(m, "RotatedRect")
+    py::class_<RotatedRect>(m, "RotatedRect", DOC(dai, RotatedRect))
         .def(py::init<>())
         .def_readwrite("center", &RotatedRect::center)
         .def_readwrite("size", &RotatedRect::size)
@@ -393,86 +626,101 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     // Bind NNData
-    py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData")
-        .def(py::init<>())
+    py::class_<NNData, Buffer, std::shared_ptr<NNData>>(m, "NNData", DOC(dai, NNData))
+        .def(py::init<>(), DOC(dai, NNData, NNData))
         // setters
-        .def("setLayer", [](NNData& obj, const std::string& key, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
-            std::vector<std::uint8_t> vec(array.data(), array.data() + array.size());
-            obj.setLayer(key, std::move(vec));
-        })
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<std::uint8_t>))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer)
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer)
-        .def("getLayer", &NNData::getLayer)
-        .def("hasLayer", &NNData::hasLayer)
-        .def("getAllLayerNames", &NNData::getAllLayerNames)
-        .def("getAllLayers", &NNData::getAllLayers)
-        .def("getLayerDatatype", &NNData::getLayerDatatype)
-        .def("getLayerUInt8", &NNData::getLayerUInt8)
-        .def("getLayerFp16", &NNData::getLayerFp16)
-        .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8)
-        .def("getFirstLayerFp16", &NNData::getFirstLayerFp16)
+        .def("setLayer", [](NNData& obj, const std::string& name, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> data){
+            std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
+            obj.setLayer(name, std::move(vec));
+        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, const std::vector<int>&)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<float>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<double>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        .def("getLayer", &NNData::getLayer, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
+        .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
+        .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
+        .def("getAllLayers", &NNData::getAllLayers, DOC(dai, NNData, getAllLayers))
+        .def("getLayerDatatype", &NNData::getLayerDatatype, py::arg("name"), py::arg("datatype"), DOC(dai, NNData, getLayerDatatype))
+        .def("getLayerUInt8", &NNData::getLayerUInt8, py::arg("name"), DOC(dai, NNData, getLayerUInt8))
+        .def("getLayerFp16", &NNData::getLayerFp16, py::arg("name"), DOC(dai, NNData, getLayerFp16))
+        .def("getLayerInt32", &NNData::getLayerInt32, py::arg("name"), DOC(dai, NNData, getLayerInt32))
+        .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8, DOC(dai, NNData, getFirstLayerUInt8))
+        .def("getFirstLayerFp16", &NNData::getFirstLayerFp16, DOC(dai, NNData, getFirstLayerFp16))
+        .def("getFirstLayerInt32", &NNData::getFirstLayerInt32, DOC(dai, NNData, getFirstLayerInt32))
+        ;
+
+    // Bind ImgDetections
+    py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>>(m, "ImgDetections", DOC(dai, ImgDetections))
+        .def(py::init<>(), DOC(dai, ImgDetections, ImgDetections))
+        .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
+        ;
+
+    // Bind SpatialImgDetections
+    py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>>(m, "SpatialImgDetections", DOC(dai, SpatialImgDetections))
+        .def(py::init<>())
+        .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
         ;
 
      // Bind ImageManipConfig
-    py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig")
+    py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>>(m, "ImageManipConfig", DOC(dai, ImageManipConfig))
         .def(py::init<>())
         // setters
-        .def("setCropRect", &ImageManipConfig::setCropRect)
-        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect)
-        .def("setCenterCrop", &ImageManipConfig::setCenterCrop)
-        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints)
-        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3)
-        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees)
-        .def("setRotationRadians", &ImageManipConfig::setRotationRadians)
-        .def("setResize", &ImageManipConfig::setResize)
-        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail)
-        .def("setFrameType", &ImageManipConfig::setFrameType)
-        .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip)
-        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage)
-        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage)
+        .def("setCropRect", &ImageManipConfig::setCropRect, py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
+        .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords") = true, DOC(dai, ImageManipConfig, setCropRotatedRect))
+        .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio")=1.0f, DOC(dai, ImageManipConfig, setCenterCrop))
+        .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints, py::arg("pt"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setWarpTransformFourPoints))
+        .def("setWarpTransformMatrix3x3", &ImageManipConfig::setWarpTransformMatrix3x3, py::arg("mat"), DOC(dai, ImageManipConfig, setWarpTransformMatrix3x3))
+        .def("setWarpBorderReplicatePixels", &ImageManipConfig::setWarpBorderReplicatePixels, DOC(dai, ImageManipConfig, setWarpBorderReplicatePixels))
+        .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor, py::arg("red"), py::arg("green"), py::arg("blue"), DOC(dai, ImageManipConfig, setWarpBorderFillColor))
+        .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees, py::arg("deg"), DOC(dai, ImageManipConfig, setRotationDegrees))
+        .def("setRotationRadians", &ImageManipConfig::setRotationRadians, py::arg("rad"), DOC(dai, ImageManipConfig, setRotationRadians))
+        .def("setResize", &ImageManipConfig::setResize, py::arg("w"), py::arg("h"), DOC(dai, ImageManipConfig, setResize))
+        .def("setResizeThumbnail", &ImageManipConfig::setResizeThumbnail, py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail))
+        .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
+        .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
+        .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
+        .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
+        .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
 
         // getters
-        .def("getCropXMin", &ImageManipConfig::getCropXMin)
-        .def("getCropYMin", &ImageManipConfig::getCropYMin)
-        .def("getCropXMax", &ImageManipConfig::getCropXMax)
-        .def("getCropYMax", &ImageManipConfig::getCropYMax)
-        .def("getResizeWidth", &ImageManipConfig::getResizeWidth)
-        .def("getResizeHeight", &ImageManipConfig::getResizeHeight)
-        .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail)
+        .def("getCropXMin", &ImageManipConfig::getCropXMin, DOC(dai, ImageManipConfig, getCropXMin))
+        .def("getCropYMin", &ImageManipConfig::getCropYMin, DOC(dai, ImageManipConfig, getCropYMin))
+        .def("getCropXMax", &ImageManipConfig::getCropXMax, DOC(dai, ImageManipConfig, getCropXMax))
+        .def("getCropYMax", &ImageManipConfig::getCropYMax, DOC(dai, ImageManipConfig, getCropYMax))
+        .def("getResizeWidth", &ImageManipConfig::getResizeWidth, DOC(dai, ImageManipConfig, getResizeWidth))
+        .def("getResizeHeight", &ImageManipConfig::getResizeHeight, DOC(dai, ImageManipConfig, getResizeHeight))
+        .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         ;
 
     // Bind CameraControl
-    py::class_<CameraControl, Buffer, std::shared_ptr<CameraControl>>(m, "CameraControl")
-        .def(py::init<>())
+    py::class_<CameraControl, Buffer, std::shared_ptr<CameraControl>>(m, "CameraControl", DOC(dai, CameraControl))
+        .def(py::init<>(), DOC(dai, CameraControl, CameraControl))
         // setters
-        .def("setCaptureStill", &CameraControl::setCaptureStill)
-        .def("setStartStreaming", &CameraControl::setStartStreaming)
-        .def("setStopStreaming", &CameraControl::setStopStreaming)
-        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode)
-        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger)
-        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion)
-        .def("setManualFocus", &CameraControl::setManualFocus)
-        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable)
-        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock)
-        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion)
-        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation)
-        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode)
-        .def("setManualExposure", &CameraControl::setManualExposure)
-        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode)
-        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock)
-        .def("setBrightness", &CameraControl::setBrightness)
-        .def("setContrast", &CameraControl::setContrast)
-        .def("setSaturation", &CameraControl::setSaturation)
-        .def("setSharpness", &CameraControl::setSharpness)
-        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength)
-        .def("setLumaDenoise", &CameraControl::setLumaDenoise)
-        .def("setChromaDenoise", &CameraControl::setChromaDenoise)
-        .def("setSceneMode", &CameraControl::setSceneMode)
-        .def("setEffectMode", &CameraControl::setEffectMode)
+        .def("setCaptureStill", &CameraControl::setCaptureStill, py::arg("capture"), DOC(dai, CameraControl, setCaptureStill))
+        .def("setStartStreaming", &CameraControl::setStartStreaming, DOC(dai, CameraControl, setStartStreaming))
+        .def("setStopStreaming", &CameraControl::setStopStreaming, DOC(dai, CameraControl, setStopStreaming))
+        .def("setAutoFocusMode", &CameraControl::setAutoFocusMode, py::arg("mode"), DOC(dai, CameraControl, setAutoFocusMode))
+        .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger, DOC(dai, CameraControl, setAutoFocusTrigger))
+        .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoFocusRegion))
+        .def("setManualFocus", &CameraControl::setManualFocus, py::arg("lensPosition"), DOC(dai, CameraControl, setManualFocus))
+        .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable, DOC(dai, CameraControl, setAutoExposureEnable))
+        .def("setAutoExposureLock", &CameraControl::setAutoExposureLock, py::arg("lock"), DOC(dai, CameraControl, setAutoExposureLock))
+        .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoExposureRegion))
+        .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation, py::arg("compensation"), DOC(dai, CameraControl, setAutoExposureCompensation))
+        .def("setAntiBandingMode", &CameraControl::setAntiBandingMode, py::arg("mode"), DOC(dai, CameraControl, setAntiBandingMode))
+        .def("setManualExposure", &CameraControl::setManualExposure, py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
+        .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode, py::arg("mode"), DOC(dai, CameraControl, setAutoWhiteBalanceMode))
+        .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock, py::arg("lock"), DOC(dai, CameraControl, setAutoWhiteBalanceLock))
+        .def("setBrightness", &CameraControl::setBrightness, py::arg("value"), DOC(dai, CameraControl, setBrightness))
+        .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
+        .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
+        .def("setSharpness", &CameraControl::setSharpness, py::arg("value"), DOC(dai, CameraControl, setSharpness))
+        .def("setLumaDenoise", &CameraControl::setLumaDenoise, py::arg("value"), DOC(dai, CameraControl, setLumaDenoise))
+        .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
+        .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
+        .def("setEffectMode", &CameraControl::setEffectMode, py::arg("mode"), DOC(dai, CameraControl, setEffectMode))
         // getters
-        .def("getCaptureStill", &CameraControl::getCaptureStill)
+        .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
         ;
     // Add also enum attributes from RawCameraControl
     for (const auto& a : camCtrlAttr) {
@@ -480,14 +728,80 @@ void DatatypeBindings::bind(pybind11::module& m){
     }
 
     // Bind SystemInformation
-    py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation")
+    py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>>(m, "SystemInformation", DOC(dai, SystemInformation))
         .def(py::init<>())
         .def_property("ddrMemoryUsage", [](SystemInformation& i) { return &i.ddrMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.ddrMemoryUsage = val; } )
+        .def_property("cmxMemoryUsage", [](SystemInformation& i) { return &i.cmxMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.cmxMemoryUsage = val; } )
         .def_property("leonCssMemoryUsage", [](SystemInformation& i) { return &i.leonCssMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.leonCssMemoryUsage = val; } )
         .def_property("leonMssMemoryUsage", [](SystemInformation& i) { return &i.leonMssMemoryUsage; }, [](SystemInformation& i, MemoryInfo val) { i.leonMssMemoryUsage = val; } )
         .def_property("leonCssCpuUsage", [](SystemInformation& i) { return &i.leonCssCpuUsage; }, [](SystemInformation& i, CpuUsage val) { i.leonCssCpuUsage = val; } )
         .def_property("leonMssCpuUsage", [](SystemInformation& i) { return &i.leonMssCpuUsage; }, [](SystemInformation& i, CpuUsage val) { i.leonMssCpuUsage = val; } )
         .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
         ;
+
+    py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
+        .def(py::init<>())
+        .def_readwrite("config", &SpatialLocations::config)
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
+        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount)
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
+        ;
+
+
+    py::class_<Rect> (m, "Rect", DOC(dai, Rect))
+        .def(py::init<>())
+        .def(py::init<float, float, float, float>())
+        .def(py::init<Point2f, Point2f>())
+        .def(py::init<Point2f, Size2f>())
+
+        .def("topLeft", &Rect::topLeft, DOC(dai, Rect, topLeft))
+        .def("bottomRight", &Rect::bottomRight, DOC(dai, Rect, bottomRight))
+        .def("size", &Rect::size, DOC(dai, Rect, size))
+        .def("area", &Rect::area, DOC(dai, Rect, area))
+        .def("empty", &Rect::empty, DOC(dai, Rect, empty))
+        .def("contains", &Rect::contains, DOC(dai, Rect, contains))
+        .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
+        .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
+        .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
+        .def_readwrite("x", &Rect::x)
+        .def_readwrite("y", &Rect::y)
+        .def_readwrite("width", &Rect::width)
+        .def_readwrite("height", &Rect::height)
+        ;
+
+    py::class_<SpatialLocationCalculatorConfigThresholds> (m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds))
+        .def(py::init<>())
+        .def_readwrite("lowerThreshold", &SpatialLocationCalculatorConfigThresholds::lowerThreshold)
+        .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
+        ;
+
+    py::class_<SpatialLocationCalculatorConfigData> (m, "SpatialLocationCalculatorConfigData", DOC(dai, SpatialLocationCalculatorConfigData))
+        .def(py::init<>())
+        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
+        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
+        ;
+
+    // Bind SpatialLocationCalculatorData
+    py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData))
+        .def(py::init<>())
+        .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
+        ;
+
+
+    // SpatialLocationCalculatorConfig (after ConfigData)
+    py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
+        .def(py::init<>())
+        // setters
+        .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
+        .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
+        .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
+        ;
+
+    // Tracklets (after ConfigData)
+    py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>>(m, "Tracklets", DOC(dai, Tracklets))
+        .def(py::init<>())
+        .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
+        ;
+
 
 }

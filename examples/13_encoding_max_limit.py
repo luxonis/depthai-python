@@ -24,7 +24,7 @@ ve1Out.setStreamName('ve1Out')
 ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
 
-#setting to 26fps will trigger error
+# Setting to 26fps will trigger error
 ve1.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
 ve2.setDefaultProfilePreset(3840, 2160, 25, dai.VideoEncoderProperties.Profile.H265_MAIN)
 ve3.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
@@ -39,7 +39,7 @@ ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as dev:
 
     # Prepare data queues
@@ -47,23 +47,20 @@ with dai.Device(pipeline) as dev:
     outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
     outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)
 
-    # Start the pipeline
-    dev.startPipeline()
-
     # Processing loop
-    with open('mono1.h264', 'wb') as file_mono1_h264, open('color.h265', 'wb') as file_color_h265, open('mono2.h264', 'wb') as file_mono2_h264:
+    with open('mono1.h264', 'wb') as fileMono1H264, open('color.h265', 'wb') as fileColorH265, open('mono2.h264', 'wb') as fileMono2H264:
         print("Press Ctrl+C to stop encoding...")
         while True:
             try:
                 # Empty each queue
                 while outQ1.has():
-                    outQ1.get().getData().tofile(file_mono1_h264)
+                    outQ1.get().getData().tofile(fileMono1H264)
 
                 while outQ2.has():
-                    outQ2.get().getData().tofile(file_color_h265)
+                    outQ2.get().getData().tofile(fileColorH265)
 
                 while outQ3.has():
-                    outQ3.get().getData().tofile(file_mono2_h264)
+                    outQ3.get().getData().tofile(fileMono2H264)
             except KeyboardInterrupt:
                 break
 

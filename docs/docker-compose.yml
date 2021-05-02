@@ -1,0 +1,10 @@
+version: "3"
+services:
+  docs:
+    build:
+      dockerfile: docs/docker/dev.dockerfile
+      context: ..
+    volumes:
+      - ./:/app/docs
+    ports:
+      - 8000:8000

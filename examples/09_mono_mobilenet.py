@@ -7,93 +7,88 @@ import depthai as dai
 import numpy as np
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
 # Define a source - mono (grayscale) camera
-cam_right = pipeline.createMonoCamera()
-cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-cam_right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+camRight = pipeline.createMonoCamera()
+camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Define a neural network that will make predictions based on the source frames
-detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(mobilenet_path)
+nn = pipeline.createMobileNetDetectionNetwork()
+nn.setConfidenceThreshold(0.5)
+nn.setBlobPath(nnPath)
+nn.setNumInferenceThreads(2)
+nn.input.setBlocking(False)
 
 # Create a node to convert the grayscale frame into the nn-acceptable form
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-cam_right.out.link(manip.inputImage)
-manip.out.link(detection_nn.input)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
+camRight.out.link(manip.inputImage)
+manip.out.link(nn.input)
 
 # Create outputs
-xout_manip = pipeline.createXLinkOut()
-xout_manip.setStreamName("right")
-manip.out.link(xout_manip.input)
+manipOut = pipeline.createXLinkOut()
+manipOut.setStreamName("right")
+manip.out.link(manipOut.input)
 
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("nn")
-detection_nn.out.link(xout_nn.input)
+nnOut = pipeline.createXLinkOut()
+nnOut.setStreamName("nn")
+nn.out.link(nnOut.input)
 
 # MobilenetSSD label texts
-texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
-    q_right = device.getOutputQueue("right", maxSize=4, blocking=False)
-    q_nn = device.getOutputQueue("nn", maxSize=4, blocking=False)
+    qRight = device.getOutputQueue("right", maxSize=4, blocking=False)
+    qDet = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
     frame = None
-    bboxes = []
-    labels = []
+    detections = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
-    def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
+    def frameNorm(frame, bbox):
+        normVals = np.full(len(bbox), frame.shape[0])
+        normVals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
+
+    def displayFrame(name, frame):
+        for detection in detections:
+            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+            cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+        cv2.imshow(name, frame)
 
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
-        in_right = q_right.tryGet()
-        in_nn = q_nn.tryGet()
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
+        inRight = qRight.tryGet()
+        inDet = qDet.tryGet()
 
-        if in_right is not None:
-            # if the grayscale frame data is available, transform the 1D data into a HxWxC frame
-            shape = (3, in_right.getHeight(), in_right.getWidth())
-            frame = in_right.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame = np.ascontiguousarray(frame)
+        if inRight is not None:
+            frame = inRight.getCvFrame()
 
-        if in_nn is not None:
-            # one detection has 7 numbers, and the last detection is followed by -1 digit, which later is filled with 0
-            bboxes = np.array(in_nn.getFirstLayerFp16())
-            # take only the results before -1 digit
-            bboxes = bboxes[:np.where(bboxes == -1)[0][0]]
-            # transform the 1D array into Nx7 matrix
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            # filter out the results which confidence less than a defined threshold
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            bboxes = bboxes[:, 3:7]
+        if inDet is not None:
+            detections = inDet.detections
 
         if frame is not None:
-            # if the frame is available, draw bounding boxes on it and show the frame
-            for raw_bbox, label in zip(bboxes, labels):
-                bbox = frame_norm(frame, raw_bbox)
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("right", frame)
+            displayFrame("right", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -1,14 +1,14 @@
 06 - RGB Full Resolution Saver
 ==============================
 
-This example does its best to save full-resolution 3840x2160 .png files as fast at it can from the
+This example does its best to save full-resolution 3840x2160 .jpeg files as fast at it can from the
 RGB sensor. It serves as an example of recording high resolution to disk for the purposes of
 high-resolution ground-truth data. We also recently added the options to save isp - YUV420p
 uncompressed frames, processed by ISP, and raw - BayerRG (R_Gr_Gb_B), as read from sensor,
 10-bit packed. See here for the pull request on this capability.
 
-Be careful, this example saves full resolution .png pictures to your host storage. So if you leave
-them running, you could fill up your storage on your host.
+Be careful, this example saves full resolution .jpeg pictures to your host storage. So if you leave
+it running, you could fill up your storage on your host.
 
 Demo
 ####
@@ -22,18 +22,12 @@ Demo
 Setup
 #####
 
-Please run the following command to install the required dependencies
-
-.. code-block:: bash
-
-  python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c numpy==1.19.5 opencv-python==4.5.1.48
-
-For additional information, please follow :ref:`Python API installation guide <Installation - Python>`
+.. include::  /includes/install_from_pypi.rst
 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/gen2_develop/examples/06_rgb_full_resolution_saver.py>`__
+Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/06_rgb_full_resolution_saver.py>`__
 
 .. literalinclude:: ../../../examples/06_rgb_full_resolution_saver.py
    :language: python

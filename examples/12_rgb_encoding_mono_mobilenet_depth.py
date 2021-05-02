@@ -6,11 +6,16 @@ import cv2
 import depthai as dai
 import numpy as np
 
+flipRectified = True
 
 # Get argument first
-mobilenet_path = str((Path(__file__).parent / Path('models/mobilenet.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
-    mobilenet_path = sys.argv[1]
+    nnPath = sys.argv[1]
+
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 pipeline = dai.Pipeline()
 
@@ -25,129 +30,138 @@ cam.video.link(videoEncoder.input)
 videoOut = pipeline.createXLinkOut()
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
+camLeft = pipeline.createMonoCamera()
+camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-left = pipeline.createMonoCamera()
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-
-right = pipeline.createMonoCamera()
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRight = pipeline.createMonoCamera()
+camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 depth = pipeline.createStereoDepth()
-depth.setConfidenceThreshold(200)
+depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
-depth.setOutputRectified(True)
+depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
-left.out.link(depth.left)
-right.out.link(depth.right)
+camLeft.out.link(depth.left)
+camRight.out.link(depth.right)
+# Disparity range is 0..95, used for normalization
+disparity_multiplier = 255 / 95
 
-detection_nn = pipeline.createNeuralNetwork()
-detection_nn.setBlobPath(mobilenet_path)
+disparityOut = pipeline.createXLinkOut()
+disparityOut.setStreamName("disparity")
+depth.disparity.link(disparityOut.input)
 
-xout_depth = pipeline.createXLinkOut()
-xout_depth.setStreamName("depth")
-depth.disparity.link(xout_depth.input)
-
-xout_right = pipeline.createXLinkOut()
-xout_right.setStreamName("rect_right")
-depth.rectifiedRight.link(xout_right.input)
+nn = pipeline.createMobileNetDetectionNetwork()
+nn.setConfidenceThreshold(0.5)
+nn.setBlobPath(nnPath)
+nn.setNumInferenceThreads(2)
+nn.input.setBlocking(False)
 
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 depth.rectifiedRight.link(manip.inputImage)
-manip.out.link(detection_nn.input)
+manip.out.link(nn.input)
 
-xout_manip = pipeline.createXLinkOut()
-xout_manip.setStreamName("manip")
-manip.out.link(xout_manip.input)
+xoutRight = pipeline.createXLinkOut()
+xoutRight.setStreamName("right")
+camRight.out.link(xoutRight.input)
 
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("nn")
-detection_nn.out.link(xout_nn.input)
+manipOut = pipeline.createXLinkOut()
+manipOut.setStreamName("manip")
+manip.out.link(manipOut.input)
+
+nnOut = pipeline.createXLinkOut()
+nnOut.setStreamName("nn")
+nn.out.link(nnOut.input)
 
 # MobilenetSSD label texts
-texts = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-         "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
-    q_right = device.getOutputQueue(name="rect_right", maxSize=8, blocking=False)
-    q_manip = device.getOutputQueue(name="manip", maxSize=8, blocking=False)
-    q_depth = device.getOutputQueue(name="depth", maxSize=8, blocking=False)
-    q_nn = device.getOutputQueue(name="nn", maxSize=8, blocking=False)
-    q_rgb_enc = device.getOutputQueue(name="h265", maxSize=30, blocking=True)
+    queueSize = 8
+    qRight = device.getOutputQueue("right", queueSize)
+    qDisparity = device.getOutputQueue("disparity", queueSize)
+    qManip = device.getOutputQueue("manip", queueSize)
+    qDet = device.getOutputQueue("nn", queueSize)
+    qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
-    frame_right = None
-    frame_manip = None
-    frame_depth = None
-    bboxes = []
-    labels = []
+    frame = None
+    frameManip = None
+    frameDisparity = None
+    detections = []
+    offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
+    croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
 
+    def frameNorm(frame, bbox):
+        normVals = np.full(len(bbox), frame.shape[0])
+        normVals[::2] = frame.shape[1]
+        return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
-    def frame_norm(frame, bbox):
-        return (np.array(bbox) * np.array([*frame.shape[:2], *frame.shape[:2]])[::-1]).astype(int)
-
-    videoFile = open('video.h265','wb')
+    videoFile = open('video.h265', 'wb')
+    cv2.namedWindow("right", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("disparity", cv2.WINDOW_NORMAL)
 
     while True:
-        in_right = q_right.tryGet()
-        in_manip = q_manip.tryGet()
-        in_nn = q_nn.tryGet()
-        in_depth = q_depth.tryGet()
+        inRight = qRight.tryGet()
+        inManip = qManip.tryGet()
+        inDet = qDet.tryGet()
+        inDisparity = qDisparity.tryGet()
 
-        while q_rgb_enc.has():
-            q_rgb_enc.get().getData().tofile(videoFile)
+        while qRgbEnc.has():
+            qRgbEnc.get().getData().tofile(videoFile)
 
-        if in_right is not None:
-            shape = (in_right.getHeight(), in_right.getWidth())
-            frame_right = in_right.getData().reshape(shape).astype(np.uint8)
-            frame_right = np.ascontiguousarray(frame_right)
+        if inRight is not None:
+            frame = cv2.flip(inRight.getCvFrame(), 1)
+            if flipRectified:
+                frame = cv2.flip(frame, 1)
 
-        if in_manip is not None:
-            shape = (3, in_manip.getHeight(), in_manip.getWidth())
-            frame_manip = in_manip.getData().reshape(shape).transpose(1, 2, 0).astype(np.uint8)
-            frame_manip = np.ascontiguousarray(frame_manip)
+        if inManip is not None:
+            frameManip = inManip.getCvFrame()
 
-        if in_nn is not None:
-            bboxes = np.array(in_nn.getFirstLayerFp16())
-            bboxes = bboxes.reshape((bboxes.size // 7, 7))
-            bboxes = bboxes[bboxes[:, 2] > 0.5]
-            # Cut bboxes and labels
-            labels = bboxes[:, 1].astype(int)
-            bboxes = bboxes[:, 3:7]
+        if inDisparity is not None:
+            # Flip disparity frame, normalize it and apply color map for better visualization
+            frameDisparity = inDisparity.getFrame()
+            if flipRectified:
+                frameDisparity = cv2.flip(frameDisparity, 1)
+            frameDisparity = (frameDisparity*disparity_multiplier).astype(np.uint8)
+            frameDisparity = cv2.applyColorMap(frameDisparity, cv2.COLORMAP_JET)
 
-        if in_depth is not None:
-            frame_depth = in_depth.getData().reshape((in_depth.getHeight(), in_depth.getWidth())).astype(np.uint8)
-            frame_depth = np.ascontiguousarray(frame_depth)
-            frame_depth = cv2.applyColorMap(frame_depth, cv2.COLORMAP_JET)
+        if inDet is not None:
+            detections = inDet.detections
 
-        if frame_right is not None:
-            for raw_bbox, label in zip(bboxes, labels):
-                bbox = frame_norm(frame_right, raw_bbox)
-                cv2.rectangle(frame_right, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame_right, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("rectif_right", frame_right)
+        if frame is not None:
+            for detection in detections:
+                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offsetX
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("right", frame)
 
-        if frame_manip is not None:
-            for raw_bbox, label in zip(bboxes, labels):
-                bbox = frame_norm(frame_manip, raw_bbox)
-                cv2.rectangle(frame_manip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame_manip, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("manip", frame_manip)
+        if frameDisparity is not None:
+            for detection in detections:
+                bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                bbox[::2] += offsetX
+                cv2.rectangle(frameDisparity, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frameDisparity, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frameDisparity, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("disparity", frameDisparity)
 
-        if frame_depth is not None:
-            for raw_bbox, label in zip(bboxes, labels):
-                bbox = frame_norm(frame_depth, raw_bbox)
-                cv2.rectangle(frame_depth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 0, 255), 2)
-                cv2.putText(frame_depth, texts[label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 255))
-            cv2.imshow("depth", frame_depth)
+        if frameManip is not None:
+            for detection in detections:
+                bbox = frameNorm(frameManip, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("manip", frameManip)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -6,7 +6,10 @@
 Welcome to DepthAI Gen2 API Documentation
 =========================================
 
-On this page you can find the details regarding DepthAI API that will allow you to interact with the DepthAI device.
+.. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
+   :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
+
+On this page you can find the details regarding the Gen2 DepthAI API that will allow you to interact with the DepthAI device.
 We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ API Reference>`
 
 What is Gen2?
@@ -40,8 +43,9 @@ with some insightful tutorials.
 Before running the example, install the DepthAI Python library using the command below
 
 .. code-block:: python
+   :substitutions:
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==0.0.2.1+8fd7384f6658c57dd1a439e4801bfe2718e5a25c
+   python3 -m pip install -U --force-reinstall depthai
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -53,6 +57,18 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 
    Home <self>
    install.rst
+   tutorials/overview.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Components:
+
+   components/device.rst
+   components/bootloader.rst
+   components/pipeline.rst
+   components/nodes.rst
+   components/messages.rst
 
 .. toctree::
    :maxdepth: 1
@@ -66,27 +82,10 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Code samples:
+   :caption: Code:
 
-   samples/01_rgb_preview.rst
-   samples/02_mono_preview.rst
-   samples/03_depth_preview.rst
-   samples/04_rgb_encoding.rst
-   samples/05_rgb_mono_encoding.rst
-   samples/06_rgb_full_resolution_saver.rst
-   samples/07_mono_full_resolution_saver.rst
-   samples/08_rgb_mobilenet.rst
-   samples/09_mono_mobilenet.rst
-   samples/10_mono_depth_mobilenetssd.rst
-   samples/11_rgb_encoding_mono_mobilenet.rst
-   samples/12_rgb_encoding_mono_mobilenet_depth.rst
-   samples/13_encoding_max_limit.rst
-   samples/14_color_camera_control.rst
-   samples/15_rgb_mobilenet_4k.rst
-   samples/16_device_queue_event.rst
-   samples/17_video_mobilenet.rst
-   samples/18_rgb_encoding_mobilenet.rst
-
+   tutorials/code_samples.rst
+   Experiments (Github) <https://github.com/luxonis/depthai-experiments>
 
 .. toctree::
    :maxdepth: 1
