@@ -272,21 +272,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
         ;
 
-    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus")
+    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus", DOC(dai, Tracklet, TrackingStatus))
         .value("NEW", Tracklet::TrackingStatus::NEW)
         .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
         .value("LOST", Tracklet::TrackingStatus::LOST)
         .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
-        .def("__str__", [](const Tracklet::TrackingStatus& v) {
-            std::stringstream stream;
-            stream << v;
-            return stream.str();
-        }, py::prepend{})
-        // .def("__repr__", [](const Tracklet::TrackingStatus& v) {
-        //     std::stringstream stream;
-        //     stream << v;
-        //     return stream.str();
-        // }, py::prepend{})
         ;
 
     // Bind RawTracklets

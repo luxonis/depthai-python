@@ -177,7 +177,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("isPipelineRunning", &Device::isPipelineRunning, DOC(dai, Device, isPipelineRunning))
         .def("startPipeline", [](Device& d){
             // Issue an deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Device(pipeline) starts the pipeline automatically. See Device() and startPipeline(pipeline) otherwise", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Device(pipeline) starts the pipeline automatically. Use Device() and startPipeline(pipeline) otherwise", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             d.startPipeline();
