@@ -277,6 +277,16 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
         .value("LOST", Tracklet::TrackingStatus::LOST)
         .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
+        .def("__str__", [](const Tracklet::TrackingStatus& v) {
+            std::stringstream stream;
+            stream << v;
+            return stream.str();
+        }, py::prepend{})
+        // .def("__repr__", [](const Tracklet::TrackingStatus& v) {
+        //     std::stringstream stream;
+        //     stream << v;
+        //     return stream.str();
+        // }, py::prepend{})
         ;
 
     // Bind RawTracklets
