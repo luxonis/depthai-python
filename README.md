@@ -38,8 +38,9 @@ mkdir build && cd build
 cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
 cmake --build . --parallel
 ```
-
 Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
+
+ℹ️ For the `--parallel` argument, specify a value `[num CPU cores]` or less, to reduce memory consumption during build. E.g.: `--parallel 8`
 
 To build a wheel, execute the following
 ```

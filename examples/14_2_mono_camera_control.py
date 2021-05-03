@@ -69,10 +69,8 @@ manipLeft.out.link(manipOutLeft.input)
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames
     qRight = device.getOutputQueue(manipOutRight.getStreamName(), maxSize=4, blocking=False)

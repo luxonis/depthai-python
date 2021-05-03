@@ -92,9 +92,6 @@ Windows
 
 We recommend using the Chocolatey package manager to install DepthAI's
 dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
-Alternatively, it is also possible to :ref:`install DepthAI and its
-dependencies manually <Manually install DepthAI on Windows>`, although it can
-be more time consuming and error prone.
 
 To `install Chocolatey <https://docs.chocolatey.org/en-us/choco/setup>`__ and
 use it to install DepthAI's dependencies do the following:
@@ -168,7 +165,7 @@ On your host machine, use the following code:
 The script that the udev rule is calling (movidius_usb_hotplug.sh) should then attach/detach the USB device to the virtual machine. 
 In this case we need to call :code:`virsh` command. For example, the script could do the following:
 
-.. code-block:: bash
+.. code-block::
 
   #!/bin/bash
   # Abort script execution on errors

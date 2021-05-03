@@ -31,10 +31,8 @@ camRgb.preview.link(xoutRgb.input)
 camMono.out.link(xoutMono.input)
 
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Clear queue events
     device.getQueueEvents()

@@ -77,11 +77,8 @@ objectTracker.inputDetections.setBlocking(True)
 objectTracker.out.link(trackerOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-
-    # Start the pipeline
-    device.startPipeline()
 
     qIn = device.getInputQueue(name="inFrame")
     trackerFrameQ = device.getOutputQueue("trackerFrame", 4)
