@@ -68,7 +68,6 @@ spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
-
 # Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
@@ -138,7 +137,6 @@ with dai.Device(pipeline) as device:
                 ymax = int(bottomRight.y)
 
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-
 
         # If the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]

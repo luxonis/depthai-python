@@ -17,13 +17,13 @@ parser.add_argument('-ff', '--full_frame', action="store_true", help="Perform tr
 
 args = parser.parse_args()
 
-
 fullFrameTracking = args.full_frame
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-colorCam = pipeline.createColorCamera()
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
@@ -36,10 +36,11 @@ trackerOut = pipeline.createXLinkOut()
 xoutRgb.setStreamName("preview")
 trackerOut.setStreamName("tracklets")
 
-colorCam.setPreviewSize(300, 300)
-colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-colorCam.setInterleaved(False)
-colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+# Properties
+camRgb.setPreviewSize(300, 300)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
@@ -56,26 +57,24 @@ spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
-# Create outputs
-
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
-
-# Link plugins CAM . NN . XLINK
-colorCam.preview.link(spatialDetectionNetwork.input)
-objectTracker.passthroughTrackerFrame.link(xoutRgb.input)
-
-
 objectTracker.setDetectionLabelsToTrack([15])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
 
+# Linking
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+
+# Link plugins CAM . NN . XLINK
+camRgb.preview.link(spatialDetectionNetwork.input)
+objectTracker.passthroughTrackerFrame.link(xoutRgb.input)
 objectTracker.out.link(trackerOut.input)
+
 if fullFrameTracking:
-    colorCam.setPreviewKeepAspectRatio(False)
-    colorCam.video.link(objectTracker.inputTrackerFrame)
+    camRgb.setPreviewKeepAspectRatio(False)
+    camRgb.video.link(objectTracker.inputTrackerFrame)
     objectTracker.inputTrackerFrame.setBlocking(False)
     # do not block the pipeline if it's too slow on full frame
     objectTracker.inputTrackerFrame.setQueueSize(2)
@@ -86,7 +85,6 @@ spatialDetectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 spatialDetectionNetwork.out.link(objectTracker.inputDetections)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
-
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
@@ -132,11 +130,11 @@ with dai.Device(pipeline) as device:
             cv2.putText(frame, f"ID: {[t.id]}", (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, statusMap[t.status], (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-        
+
             cv2.putText(frame, f"X: {int(t.spatialCoordinates.x)} mm", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, f"Y: {int(t.spatialCoordinates.y)} mm", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, f"Z: {int(t.spatialCoordinates.z)} mm", (x1 + 10, y1 + 95), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-        
+
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", frame)

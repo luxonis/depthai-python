@@ -8,7 +8,7 @@ stepSize = 0.05
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - two mono (grayscale) cameras
+# Define sources and outputs
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
 stereo = pipeline.createStereoDepth()
@@ -22,7 +22,7 @@ xoutDepth.setStreamName("depth")
 xoutSpatialData.setStreamName("spatialData")
 xinSpatialCalcConfig.setStreamName("spatialCalcConfig")
 
-# MonoCamera
+# Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
@@ -31,27 +31,29 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 lrcheck = False
 subpixel = False
 
-# StereoDepth
 stereo.setConfidenceThreshold(255)
-
 stereo.setLeftRightCheck(lrcheck)
 stereo.setSubpixel(subpixel)
 
+# Config
+topLeft = dai.Point2f(0.4, 0.4)
+bottomRight = dai.Point2f(0.6, 0.6)
+
+config = dai.SpatialLocationCalculatorConfigData()
+config.depthThresholds.lowerThreshold = 100
+config.depthThresholds.upperThreshold = 10000
+config.roi = dai.Rect(topLeft, bottomRight)
+
+spatialLocationCalculator.setWaitForConfigInput(False)
+spatialLocationCalculator.initialConfig.addROI(config)
+
+# Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 spatialLocationCalculator.passthroughDepth.link(xoutDepth.input)
 stereo.depth.link(spatialLocationCalculator.inputDepth)
 
-topLeft = dai.Point2f(0.4, 0.4)
-bottomRight = dai.Point2f(0.6, 0.6)
-
-spatialLocationCalculator.setWaitForConfigInput(False)
-config = dai.SpatialLocationCalculatorConfigData()
-config.depthThresholds.lowerThreshold = 100
-config.depthThresholds.upperThreshold = 10000
-config.roi = dai.Rect(topLeft, bottomRight)
-spatialLocationCalculator.initialConfig.addROI(config)
 spatialLocationCalculator.out.link(xoutSpatialData.input)
 xinSpatialCalcConfig.out.link(spatialLocationCalculator.inputConfig)
 
@@ -70,14 +72,13 @@ with dai.Device(pipeline) as device:
 
     while True:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
-        inDepthAvg = spatialCalcQueue.get() # Blocking call, will wait until a new data has arrived
 
         depthFrame = inDepth.getFrame()
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-        spatialData = inDepthAvg.getSpatialLocations()
+        spatialData = spatialCalcQueue.get().getSpatialLocations()
         for depthData in spatialData:
             roi = depthData.config.roi
             roi = roi.denormalize(width=depthFrameColor.shape[1], height=depthFrameColor.shape[0])
@@ -91,7 +92,6 @@ with dai.Device(pipeline) as device:
             cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
             cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
             cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
-
 
         cv2.imshow("depth", depthFrameColor)
 

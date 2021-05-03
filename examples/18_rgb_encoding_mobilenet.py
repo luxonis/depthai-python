@@ -66,7 +66,6 @@ with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
     frame = None
     detections = []
 
-
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]

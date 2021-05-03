@@ -14,7 +14,6 @@ keyRotateIncr = 'x'
 keyResizeInc = 'v'
 keyWarpTestCycle = 'c'
 
-
 def printControls():
     print("=== Controls:")
     print(keyRotateDecr, "-rotated rectangle crop, decrease rate")
@@ -22,7 +21,6 @@ def printControls():
     print(keyWarpTestCycle, "-warp 4-point transform, cycle through modes")
     print(keyResizeInc, "-resize cropped region, or disable resize")
     print("h -print controls (help)")
-
 
 rotateRateMax = 5.0
 rotateRateInc = 0.1

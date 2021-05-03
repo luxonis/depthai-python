@@ -20,62 +20,55 @@ args = parser.parse_args()
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Create neural network input
-xinFrame = pipeline.createXLinkIn()
-xinFrame.setStreamName("inFrame")
-xinFrame.setMaxDataSize(1920*1080*3)
-
+# Define sources and outputs
+manip = pipeline.createImageManip()
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 objectTracker = pipeline.createObjectTracker()
-trackerOut = pipeline.createXLinkOut()
-
-xlinkOut = pipeline.createXLinkOut()
-
-xlinkOut.setStreamName("trackerFrame")
-trackerOut.setStreamName("tracklets")
-
-# Create a node to convert the grayscale frame into the nn-acceptable form
-manip = pipeline.createImageManip()
-manip.initialConfig.setResizeThumbnail(384, 384)
-# manip.initialConfig.setResize(384, 384)
-# manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
-# The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
-xinFrame.out.link(manip.inputImage)
-manip.inputImage.setBlocking(True)
 
 manipOut = pipeline.createXLinkOut()
-manipOut.setStreamName("manip")
-manip.out.link(manipOut.input)
-
+xinFrame = pipeline.createXLinkIn()
+xlinkOut = pipeline.createXLinkOut()
+trackerOut = pipeline.createXLinkOut()
 nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("nn")
-detectionNetwork.out.link(nnOut.input)
 
+manipOut.setStreamName("manip")
+xinFrame.setStreamName("inFrame")
+xlinkOut.setStreamName("trackerFrame")
+trackerOut.setStreamName("tracklets")
+nnOut.setStreamName("nn")
+
+# Properties
+xinFrame.setMaxDataSize(1920*1080*3)
+
+manip.initialConfig.setResizeThumbnail(384, 384)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
+manip.inputImage.setBlocking(True)
 
 # setting node configs
 detectionNetwork.setBlobPath(args.nnPath)
 detectionNetwork.setConfidenceThreshold(0.5)
-
-manip.out.link(detectionNetwork.input)
 detectionNetwork.input.setBlocking(True)
-objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
-
 
 objectTracker.setDetectionLabelsToTrack([0])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
-
-xinFrame.out.link(objectTracker.inputTrackerFrame)
 objectTracker.inputTrackerFrame.setBlocking(True)
-detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 objectTracker.inputDetectionFrame.setBlocking(True)
-detectionNetwork.out.link(objectTracker.inputDetections)
 objectTracker.inputDetections.setBlocking(True)
-objectTracker.out.link(trackerOut.input)
 
+
+# Linking
+manip.out.link(manipOut.input)
+manip.out.link(detectionNetwork.input)
+xinFrame.out.link(manip.inputImage)
+xinFrame.out.link(objectTracker.inputTrackerFrame)
+objectTracker.out.link(trackerOut.input)
+objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
+detectionNetwork.out.link(nnOut.input)
+detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
+detectionNetwork.out.link(objectTracker.inputDetections)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:

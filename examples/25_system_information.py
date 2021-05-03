@@ -14,7 +14,6 @@ def printSystemInformation(info):
     print(f"Cpu usage - Leon OS: {info.leonCssCpuUsage.average * 100:.2f}%, Leon RT: {info.leonMssCpuUsage.average * 100:.2f} %")
     print("----------------------------------------")
 
-
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -40,5 +39,3 @@ with dai.Device(pipeline) as device:
     while True:
         sysInfo = qSysInfo.get()  # Blocking call, will wait until a new data has arrived
         printSystemInformation(sysInfo)
-
-

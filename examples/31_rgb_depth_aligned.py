@@ -12,38 +12,40 @@ subpixel = False
 
 pipeline = dai.Pipeline()
 
-cam = pipeline.createColorCamera()
-cam.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-if downscaleColor: cam.setIspScale(2, 3)
-# For now, RGB needs fixed focus to properly align with depth.
-# This value was used during calibration
-cam.initialControl.setManualFocus(130)
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
+left = pipeline.createMonoCamera()
+right = pipeline.createMonoCamera()
+stereo = pipeline.createStereoDepth()
 
 rgbOut = pipeline.createXLinkOut()
-rgbOut.setStreamName("rgb")
-cam.isp.link(rgbOut.input)
+depthOut = pipeline.createXLinkOut()
 
-left = pipeline.createMonoCamera()
+rgbOut.setStreamName("rgb")
+depthOut.setStreamName("depth")
+
+#Properties
+camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+if downscaleColor: camRgb.setIspScale(2, 3)
+# For now, RGB needs fixed focus to properly align with depth.
+# This value was used during calibration
+camRgb.initialControl.setManualFocus(130)
+
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-
-right = pipeline.createMonoCamera()
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-stereo = pipeline.createStereoDepth()
 stereo.setConfidenceThreshold(200)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
-stereo.setSubpixel(subpixel)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+
+# Linking
+camRgb.isp.link(rgbOut.input)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
-
-depthOut = pipeline.createXLinkOut()
-depthOut.setStreamName("depth")
-# Currently we use the 'disparity' output. TODO 'depth'
 stereo.disparity.link(depthOut.input)
 
 # Pipeline defined, now the device is connected to

@@ -13,6 +13,15 @@ Spatial Tiny-yolo example
   Can be used for tiny-yolo-v3 or tiny-yolo-v4 networks
 '''
 
+# Get argument first
+nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
+if len(sys.argv) > 1:
+    nnBlobPath = sys.argv[1]
+
+if not Path(nnBlobPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Tiny yolo v3/4 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
@@ -31,20 +40,11 @@ labelMap = [
 
 syncNN = True
 
-# Get argument first
-nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
-if len(sys.argv) > 1:
-    nnBlobPath = sys.argv[1]
-
-if not Path(nnBlobPath).exists():
-    import sys
-    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
-
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
-colorCam = pipeline.createColorCamera()
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 spatialDetectionNetwork = pipeline.createYoloSpatialDetectionNetwork()
 monoLeft = pipeline.createMonoCamera()
 monoRight = pipeline.createMonoCamera()
@@ -60,11 +60,11 @@ xoutNN.setStreamName("detections")
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
-
-colorCam.setPreviewSize(416, 416)
-colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-colorCam.setInterleaved(False)
-colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+# Properties
+camRgb.setPreviewSize(416, 416)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
@@ -80,6 +80,7 @@ spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
+
 # Yolo specific parameters
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
@@ -87,16 +88,15 @@ spatialDetectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169
 spatialDetectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
-# Create outputs
-
+# Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-colorCam.preview.link(spatialDetectionNetwork.input)
+camRgb.preview.link(spatialDetectionNetwork.input)
 if syncNN:
     spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 else:
-    colorCam.preview.link(xoutRgb.input)
+    camRgb.preview.link(xoutRgb.input)
 
 spatialDetectionNetwork.out.link(xoutNN.input)
 spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
@@ -112,7 +112,7 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    xoutBoundingBoxDepthMapping = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
+    xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     frame = None
@@ -125,8 +125,14 @@ with dai.Device(pipeline) as device:
 
     while True:
         inPreview = previewQueue.get()
-        inNN = detectionNNQueue.get()
+        inDet = detectionNNQueue.get()
         depth = depthQueue.get()
+
+        frame = inPreview.getCvFrame()
+        depthFrame = depth.getFrame()
+        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         counter+=1
         current_time = time.monotonic()
@@ -135,15 +141,9 @@ with dai.Device(pipeline) as device:
             counter = 0
             startTime = current_time
 
-        frame = inPreview.getCvFrame()
-        depthFrame = depth.getFrame()
-
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        detections = inNN.detections
+        detections = inDet.detections
         if len(detections) != 0:
-            boundingBoxMapping = xoutBoundingBoxDepthMapping.get()
+            boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
             roiDatas = boundingBoxMapping.getConfigData()
 
             for roiData in roiDatas:

@@ -14,13 +14,6 @@ Mobilenet SSD device side decoding demo
   For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
 '''
 
-# MobilenetSSD label texts
-labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
-
-syncNN = True
-flipRectified = True
-
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -30,18 +23,47 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+# MobilenetSSD label texts
+labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+            "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+
+syncNN = True
+flipRectified = True
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
+# Define sources and outputs
+monoLeft = pipeline.createMonoCamera()
+monoRight = pipeline.createMonoCamera()
+stereo = pipeline.createStereoDepth()
+spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
+imageManip = pipeline.createImageManip()
 
-manip = pipeline.createImageManip()
-manip.initialConfig.setResize(300, 300)
+xoutManip = pipeline.createXLinkOut()
+nnOut = pipeline.createXLinkOut()
+depthRoiMap = pipeline.createXLinkOut()
+xoutDepth = pipeline.createXLinkOut()
+
+xoutManip.setStreamName("right")
+nnOut.setStreamName("detections")
+depthRoiMap.setStreamName("boundingBoxDepthMapping")
+xoutDepth.setStreamName("depth")
+
+# Properties
+imageManip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
-# manip.setKeepAspectRatio(False)
+imageManip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
+
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
+# StereoDepth
+stereo.setConfidenceThreshold(255)
 
 # Define a neural network that will make predictions based on the source frames
-spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.setBlobPath(nnPath)
 spatialDetectionNetwork.input.setBlocking(False)
@@ -49,41 +71,20 @@ spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
-manip.out.link(spatialDetectionNetwork.input)
-
-# Create outputs
-xoutManip = pipeline.createXLinkOut()
-xoutManip.setStreamName("right")
-if syncNN:
-    spatialDetectionNetwork.passthrough.link(xoutManip.input)
-else:
-    manip.out.link(xoutManip.input)
-
-depthRoiMap = pipeline.createXLinkOut()
-depthRoiMap.setStreamName("boundingBoxDepthMapping")
-
-xoutDepth = pipeline.createXLinkOut()
-xoutDepth.setStreamName("depth")
-
-nnOut = pipeline.createXLinkOut()
-nnOut.setStreamName("detections")
-spatialDetectionNetwork.out.link(nnOut.input)
-spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
-
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-stereo.setConfidenceThreshold(255)
-
-stereo.rectifiedRight.link(manip.inputImage)
-
+# Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
+imageManip.out.link(spatialDetectionNetwork.input)
+if syncNN:
+    spatialDetectionNetwork.passthrough.link(xoutManip.input)
+else:
+    imageManip.out.link(xoutManip.input)
+
+spatialDetectionNetwork.out.link(nnOut.input)
+spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
+
+stereo.rectifiedRight.link(imageManip.inputImage)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
@@ -95,7 +96,7 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    depthRoiMap = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
+    depthRoiMapQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     rectifiedRight = None
@@ -108,8 +109,8 @@ with dai.Device(pipeline) as device:
 
     while True:
         inRectified = previewQueue.get()
-        det = detectionNNQueue.get()
-        depth = depthQueue.get()
+        inDet = detectionNNQueue.get()
+        inDepth = depthQueue.get()
 
         counter += 1
         currentTime = time.monotonic()
@@ -119,15 +120,17 @@ with dai.Device(pipeline) as device:
             startTime = currentTime
 
         rectifiedRight = inRectified.getCvFrame()
+        if flipRectified:
+            rectifiedRight = cv2.flip(rectifiedRight, 1)
 
-        depthFrame = depth.getFrame()
-
+        depthFrame = inDepth.getFrame()
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        detections = det.detections
+
+        detections = inDet.detections
         if len(detections) != 0:
-            boundingBoxMapping = depthRoiMap.get()
+            boundingBoxMapping = depthRoiMapQueue.get()
             roiDatas = boundingBoxMapping.getConfigData()
 
             for roiData in roiDatas:
@@ -140,9 +143,6 @@ with dai.Device(pipeline) as device:
                 xmax = int(bottomRight.x)
                 ymax = int(bottomRight.y)
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-
-        if flipRectified:
-            rectifiedRight = cv2.flip(rectifiedRight, 1)
 
         # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]

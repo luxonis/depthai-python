@@ -53,16 +53,13 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
-
 
 def asControl(roi):
     camControl = dai.CameraControl()
     camControl.setAutoExposureRegion(*roi)
     return camControl
-
 
 class AutoExposureRegion:
     step = 10
@@ -102,7 +99,6 @@ class AutoExposureRegion:
         width, height = bbox[2] - startX, bbox[3] - startY
         roi = frameNorm(np.empty(camRgb.getResolutionSize()), (startX, startY, width, height))
         return roi
-
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:

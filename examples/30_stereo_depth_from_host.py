@@ -38,7 +38,6 @@ print("Median filtering: ", median)
 
 right_intrinsic = [[860.0, 0.0, 640.0], [0.0, 860.0, 360.0], [0.0, 0.0, 1.0]]
 
-
 def create_stereo_depth_pipeline():
     print("Creating Stereo Depth pipeline: ", end='')
 
@@ -93,7 +92,6 @@ def create_stereo_depth_pipeline():
 
     return pipeline, streams
 
-
 def convert_to_cv2_frame(name, image):
     baseline = 75 #mm
     focal = right_intrinsic[0][0]
@@ -131,7 +129,6 @@ def convert_to_cv2_frame(name, image):
         if name == 'rectified_right':
             last_rectif_right = frame
     return frame
-
 
 pipeline, streams = create_stereo_depth_pipeline()
 

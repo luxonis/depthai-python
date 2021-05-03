@@ -17,37 +17,33 @@ parser.add_argument('-ff', '--full_frame', action="store_true", help="Perform tr
 
 args = parser.parse_args()
 
-
 fullFrameTracking = args.full_frame
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-colorCam = pipeline.createColorCamera()
+# Define sources and outputs
+camRgb = pipeline.createColorCamera()
 detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 objectTracker = pipeline.createObjectTracker()
-trackerOut = pipeline.createXLinkOut()
 
 xlinkOut = pipeline.createXLinkOut()
+trackerOut = pipeline.createXLinkOut()
 
 xlinkOut.setStreamName("preview")
 trackerOut.setStreamName("tracklets")
 
-colorCam.setPreviewSize(300, 300)
-colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-colorCam.setInterleaved(False)
-colorCam.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-colorCam.setFps(40)
+# Properties
+camRgb.setPreviewSize(300, 300)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+camRgb.setFps(40)
 
-# setting node configs
+# testing MobileNet DetectionNetwork
 detectionNetwork.setBlobPath(args.nnPath)
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.input.setBlocking(False)
-
-# Link plugins CAM . NN . XLINK
-colorCam.preview.link(detectionNetwork.input)
-objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
-
 
 objectTracker.setDetectionLabelsToTrack([15])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
@@ -55,15 +51,18 @@ objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
 
+# Linking
+camRgb.preview.link(detectionNetwork.input)
+objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
+
 if fullFrameTracking:
-    colorCam.video.link(objectTracker.inputTrackerFrame)
+    camRgb.video.link(objectTracker.inputTrackerFrame)
 else:
     detectionNetwork.passthrough.link(objectTracker.inputTrackerFrame)
 
 detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 detectionNetwork.out.link(objectTracker.inputDetections)
 objectTracker.out.link(trackerOut.input)
-
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
