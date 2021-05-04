@@ -28,10 +28,8 @@ sysLog.setRate(1)  # 1 Hz
 # Linking
 sysLog.out.link(linkOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the system info
     qSysInfo = device.getOutputQueue(name="sysinfo", maxSize=4, blocking=False)

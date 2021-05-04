@@ -23,7 +23,7 @@ python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifacto
 ### Dependencies
  - cmake >= 3.4
  - C++14 compiler (clang, gcc, msvc, ...)
- - Python
+ - Python3
 
 Along these, dependencies of depthai-core are also required
 See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#dependencies)
@@ -31,38 +31,51 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 ### Building
 
-To build a shared library from source perform the following:
+To build and install using pip:
 ```
-git submodule update --init --recursive
-mkdir build && cd build
-cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
-cmake --build . --parallel
+python3 -m pip install .
 ```
-Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
+Add parameter `-v` to see the output of the building process.
 
-ℹ️ For the `--parallel` argument, specify a value `[num CPU cores]` or less, to reduce memory consumption during build. E.g.: `--parallel 8`
 
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
 ```
 
-To build and install using pip:
+To build a shared library from source perform the following:
+
+> ℹ️ To speed up build times, use `cmake --build build --parallel [num CPU cores]` (CMake >= 3.12).
+For older versions use: Linux/macOS: `cmake --build build -- -j[num CPU cores]`, MSVC: `cmake --build build -- /MP[num CPU cores]`
+
 ```
-python3 -m pip install .
+git submodule update --init --recursive
+cmake -H. -Bbuild
+cmake --build build
 ```
+To specify custom Python executable to build for, use `cmake -H. -Bbuild -D PYTHON_EXECUTABLE=/full/path/to/python`.
+
 
 ## Running tests
 
 To run the tests build the library with the following options
 ```
 git submodule update --init --recursive
-mkdir build_tests && cd build_tests
-cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
-cmake --build . --parallel
+cmake -H. -Bbuild -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake --build build
+```
+
+Then navigate to `build` folder and run `ctest`
+```
+cd build
 ctest
 ```
 
+To test a specific example/test with a custom timeout (in seconds) use following:
+```
+TEST_TIMEOUT=0 ctest -R "01_rgb_preview" --verbose
+```
+If `TEST_TIMEOUT=0`, the test will run until stopped or it ends.
 
 ## Tested platforms
 
@@ -95,8 +108,8 @@ ctest
      ```
      python3 -m pip install -U pip
      python3 -m pip install -r docs/requirements.txt
-     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
-     cmake --build build --parallel --target sphinx
+     cmake -H. -Bbuild -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
+     cmake --build build --target sphinx
      python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
      ```
 
@@ -106,7 +119,7 @@ ctest
      in a new terminal window to update the website source
 
      ```
-     cmake --build build --parallel --target sphinx
+     cmake --build build --target sphinx
      ```
 
      Then refresh your page - it should load the updated website that was just built

@@ -38,10 +38,8 @@ ve1.bitstream.link(ve1Out.input)
 ve2.bitstream.link(ve2Out.input)
 ve3.bitstream.link(ve3Out.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as dev:
-    # Start pipeline
-    dev.startPipeline()
 
     # Output queues will be used to get the encoded data from the outputs defined above
     outQ1 = dev.getOutputQueue(name='ve1Out', maxSize=30, blocking=True)

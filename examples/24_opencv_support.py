@@ -25,10 +25,8 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 camRgb.video.link(xoutVideo.input)
 camRgb.preview.link(xoutPreview.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     video = device.getOutputQueue('video')
     preview = device.getOutputQueue('preview')

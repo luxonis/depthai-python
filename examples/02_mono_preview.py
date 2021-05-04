@@ -25,10 +25,8 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoRight.out.link(xoutRight.input)
 monoLeft.out.link(xoutLeft.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames from the outputs defined above
     qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)

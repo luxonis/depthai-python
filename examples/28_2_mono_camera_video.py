@@ -7,7 +7,7 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define source and output
-monoLeft = pipeline.createColorCamera()
+monoLeft = pipeline.createMonoCamera()
 xoutVideo = pipeline.createXLinkOut()
 
 xoutVideo.setStreamName("video")
@@ -19,12 +19,10 @@ xoutVideo.input.setBlocking(False)
 xoutVideo.input.setQueueSize(1)
 
 # Linking
-monoLeft.video.link(xoutVideo.input)
+monoLeft.out.link(xoutVideo.input)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 

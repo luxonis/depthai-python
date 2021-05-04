@@ -51,10 +51,8 @@ camRgb.preview.link(xoutPreview.input)
 camRgb.preview.link(nn.input)
 nn.out.link(nnOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the frames and nn data from the outputs defined above
     qVideo = device.getOutputQueue(name="video", maxSize=4, blocking=False)

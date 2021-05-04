@@ -23,10 +23,9 @@ xoutVideo.input.setQueueSize(1)
 # Linking
 camRgb.video.link(xoutVideo.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
+
 
     video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 

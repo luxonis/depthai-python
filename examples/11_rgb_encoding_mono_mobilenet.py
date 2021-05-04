@@ -64,10 +64,8 @@ monoRight.out.link(xoutRight.input)
 manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Queues
     queue_size = 8

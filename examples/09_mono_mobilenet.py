@@ -51,10 +51,8 @@ manip.out.link(nn.input)
 manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
     qRight = device.getOutputQueue("right", maxSize=4, blocking=False)

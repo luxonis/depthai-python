@@ -45,10 +45,7 @@ nn.input.setBlocking(False)
 xinFrame.out.link(nn.input)
 nn.out.link(nnOut.input)
 
-# Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Input queue will be used to send video frames to the device.
     qIn = device.getInputQueue(name="inFrame")

@@ -54,8 +54,8 @@ camRgb.preview.link(nn.input)
 videoEncoder.bitstream.link(videoOut.input)
 nn.out.link(nnOut.input)
 
+# Connect and start the pipeline
 with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
-    device.startPipeline()
 
     # Queues
     queue_size = 8

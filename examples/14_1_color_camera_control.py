@@ -60,7 +60,7 @@ configIn.out.link(camRgb.inputConfig)
 videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
 
     # Get data queues
@@ -69,10 +69,7 @@ with dai.Device(pipeline) as device:
     previewQueue = device.getOutputQueue('preview')
     videoQueue = device.getOutputQueue('video')
     stillQueue = device.getOutputQueue('still')
-
-    # Start pipeline
-    device.startPipeline()
-
+	
     # Max cropX & cropY
     maxCropX = (camRgb.getResolutionWidth() - camRgb.getVideoWidth()) / camRgb.getResolutionWidth()
     maxCropY = (camRgb.getResolutionHeight() - camRgb.getVideoHeight()) / camRgb.getResolutionHeight()

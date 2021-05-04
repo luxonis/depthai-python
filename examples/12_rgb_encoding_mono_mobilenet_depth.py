@@ -79,10 +79,8 @@ manip.out.link(nn.input)
 manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     queueSize = 8
     qRight = device.getOutputQueue("right", queueSize)
@@ -106,7 +104,7 @@ with dai.Device(pipeline) as device:
     videoFile = open('video.h265', 'wb')
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
-
+    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
     # Disparity range is 0..95, used for normalization
     disparity_multiplier = 255 / 95
 

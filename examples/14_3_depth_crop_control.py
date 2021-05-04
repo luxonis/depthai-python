@@ -48,10 +48,8 @@ manip.out.link(xout.input)
 monoRight.out.link(stereo.right)
 monoLeft.out.link(stereo.left)
 
-# Connect to device
+# Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Queues
     q = device.getOutputQueue(xout.getStreamName(), maxSize=4, blocking=False)

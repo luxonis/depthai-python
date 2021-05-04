@@ -27,10 +27,8 @@ camRgb.video.link(xoutRgb.input)
 camRgb.video.link(videoEnc.input)
 videoEnc.bitstream.link(xoutJpeg.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=30, blocking=False)
