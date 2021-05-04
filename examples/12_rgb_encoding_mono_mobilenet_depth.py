@@ -41,7 +41,6 @@ camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
-depth.setOutputRectified(True)
 depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
@@ -83,10 +82,8 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     queueSize = 8
     qRight = device.getOutputQueue("right", queueSize)

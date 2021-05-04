@@ -56,10 +56,10 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("getAllAssets", &Pipeline::getAllAssets, DOC(dai, Pipeline, getAllAssets))
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
-        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion), DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("getOpenVINOVersion", &Pipeline::getOpenVINOVersion, DOC(dai, Pipeline, getOpenVINOVersion))
 
-
-         // templated create<NODE> function 
+         // templated create<NODE> function
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
@@ -78,6 +78,6 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
 
         ;
-    
+
 
 }
