@@ -293,7 +293,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("sequence", &IMUReport::sequence)
         .def_readwrite("accuracy", &IMUReport::accuracy)
         .def_readwrite("timestamp", &IMUReport::timestamp)
-        .def_readwrite("delay", &IMUReport::delay)
         ;
 
     py::enum_<IMUReport::IMUReportAccuracy>(imureport, "IMUReportAccuracy")
@@ -375,11 +374,14 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<IMUDatas> imuDatas(m, "IMUDatas", DOC(dai, IMUDatas));
     imuDatas
         .def(py::init<>())
+        .def_readwrite("rawAcceleroMeter", &IMUDatas::rawAcceleroMeter)
         .def_readwrite("acceleroMeter", &IMUDatas::acceleroMeter)
         .def_readwrite("linearAcceleroMeter", &IMUDatas::linearAcceleroMeter)
         .def_readwrite("gravity", &IMUDatas::gravity)
+        .def_readwrite("rawGyroscope", &IMUDatas::rawGyroscope)
         .def_readwrite("gyroscope", &IMUDatas::gyroscope)
         .def_readwrite("gyroscopeUncalibrated", &IMUDatas::gyroscopeUncalibrated)
+        .def_readwrite("rawMagneticField", &IMUDatas::rawMagneticField)
         .def_readwrite("magneticField", &IMUDatas::magneticField)
         .def_readwrite("magneticFieldUncalibrated", &IMUDatas::magneticFieldUncalibrated)
         .def_readwrite("rotationVector", &IMUDatas::rotationVector)

@@ -15,7 +15,7 @@ xlinkOut.setStreamName("imu")
 
 sensorConfig = dai.IMUSensorConfig()
 sensorConfig.reportIntervalUs = 2500 # 400hz
-sensorConfig.sensorId = dai.IMUSensorId.IMU_ROTATION_VECTOR
+sensorConfig.sensorId = dai.IMUSensorId.ROTATION_VECTOR
 imu.enableIMUSensor(sensorConfig)
 # above this threshold packets will be sent in batch of X, if the host is not blocked
 imu.setBatchReportThreshold(5)

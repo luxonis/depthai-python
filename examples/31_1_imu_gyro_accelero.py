@@ -15,9 +15,9 @@ xlinkOut.setStreamName("imu")
 
 sensorConfig = dai.IMUSensorConfig()
 sensorConfig.reportIntervalUs = 2500
-sensorConfig.sensorId = dai.IMUSensorId.IMU_ACCELEROMETER
+sensorConfig.sensorId = dai.IMUSensorId.RAW_ACCELEROMETER
 imu.enableIMUSensor(sensorConfig)
-sensorConfig.sensorId = dai.IMUSensorId.IMU_GYROSCOPE_CALIBRATED
+sensorConfig.sensorId = dai.IMUSensorId.RAW_GYROSCOPE
 imu.enableIMUSensor(sensorConfig)
 # above this threshold packets will be sent in batch of X, if the host is not blocked
 imu.setBatchReportThreshold(1)
@@ -46,8 +46,8 @@ with dai.Device(pipeline) as device:
 
         imuDatas = imuPacket.imuDatas
         for imuData in imuDatas:
-            acceleroTs = imuData.acceleroMeter.timestamp.getTimestamp()
-            gyroTs = imuData.gyroscope.timestamp.getTimestamp()
+            acceleroTs = imuData.rawAcceleroMeter.timestamp.getTimestamp()
+            gyroTs = imuData.rawGyroscope.timestamp.getTimestamp()
             if baseTs is None:
                 baseTs = acceleroTs if acceleroTs < gyroTs else gyroTs
             acceleroTs = timeDeltaToMilliS(acceleroTs - baseTs)
@@ -55,12 +55,12 @@ with dai.Device(pipeline) as device:
 
             imup = "{: .06f}"
             tsp = "{: .03f}"
-            accelLength = math.sqrt(imuData.acceleroMeter.x**2 + imuData.acceleroMeter.y**2 + imuData.acceleroMeter.z**2)
+            accelLength = math.sqrt(imuData.rawAcceleroMeter.x**2 + imuData.rawAcceleroMeter.y**2 + imuData.rawAcceleroMeter.z**2)
 
-            print(f"Accelero timestamp: {tsp.format(acceleroTs)} ms")
-            print(f"Accelero: x: {imup.format(imuData.acceleroMeter.x)} y: {imup.format(imuData.acceleroMeter.y)} z: {imup.format(imuData.acceleroMeter.z)}, length {imup.format(accelLength)}")
-            print(f"Gyro timestamp: {tsp.format(gyroTs)} ms")
-            print(f"Gyro: x: {imup.format(imuData.gyroscope.x)} y: {imup.format(imuData.gyroscope.y)} z: {imup.format(imuData.gyroscope.z)} ")
+            print(f"Accelerometer timestamp: {tsp.format(acceleroTs)} ms")
+            print(f"Accelerometer [m/s^2]: x: {imup.format(imuData.rawAcceleroMeter.x)} y: {imup.format(imuData.rawAcceleroMeter.y)} z: {imup.format(imuData.rawAcceleroMeter.z)}, length {imup.format(accelLength)}")
+            print(f"Gyroscope timestamp: {tsp.format(gyroTs)} ms")
+            print(f"Gyroscope [rad/s]: x: {imup.format(imuData.rawGyroscope.x)} y: {imup.format(imuData.rawGyroscope.y)} z: {imup.format(imuData.rawGyroscope.z)} ")
 
         if cv2.waitKey(1) == ord('q'):
             break
