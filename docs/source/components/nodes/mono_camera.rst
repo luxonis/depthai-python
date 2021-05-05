@@ -62,8 +62,8 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`02 - Mono Preview`
-- :ref:`09 - Mono & MobilenetSSD`
+- :ref:`Mono Preview`
+- :ref:`Mono & MobilenetSSD`
 - :ref:`19 - Mono Camera Control`
 
 Reference
