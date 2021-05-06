@@ -41,10 +41,8 @@ control_in.out.link(camRight.inputControl)
 def clamp(num, v0, v1): return max(v0, min(num, v1))
 
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames from the outputs defined above
     qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
