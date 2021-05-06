@@ -35,7 +35,6 @@ manip.setMaxOutputFrameSize(right.getResolutionHeight()*right.getResolutionWidth
 # Create a node that will produce the depth map
 stereo = pipeline.createStereoDepth()
 stereo.setConfidenceThreshold(200)
-stereo.setOutputDepth(True)
 
 left.out.link(stereo.left)
 right.out.link(stereo.right)
@@ -52,10 +51,8 @@ xout.setStreamName("depth")
 stereo.depth.link(manip.inputImage)
 manip.out.link(xout.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the depth frames from the outputs defined above
     q = device.getOutputQueue(xout.getStreamName(), maxSize=4, blocking=False)
