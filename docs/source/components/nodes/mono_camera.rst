@@ -64,7 +64,7 @@ Examples of functionality
 
 - :ref:`Mono Preview`
 - :ref:`Mono & MobilenetSSD`
-- :ref:`19 - Mono Camera Control`
+- :ref:`Mono Camera Control`
 
 Reference
 #########
