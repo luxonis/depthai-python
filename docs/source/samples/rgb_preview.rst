@@ -1,9 +1,15 @@
 RGB Preview
 ===========
 
-This example shows how to set up a pipeline that outpus a small preview of the RGB camera,
+This example shows how to set up a pipeline that outputs a small preview of the RGB camera,
 connects over XLink to transfer these to the host real-time, and displays the RGB frames
 on the host with OpenCV.
+
+Note that preview frames are not suited for larger resolution (eg. 1920x1080).
+Preview is more suitable for either NN or visualization purposes.
+Please check out :ref:`ColorCamera` node to get a better view.
+
+If you want to get higher resolution RGB frames sample please visit :ref:`RGB video`.
 
 Demo
 ####

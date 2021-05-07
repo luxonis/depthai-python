@@ -1,8 +1,11 @@
 Mono Full Resolution Saver
 ==========================
 
-This example shows how to save 1280x720p .png of the right grayscale camera to disk. Left is defined
-as from the boards perspective.
+This example does its best to save  1280x720 .png files as fast at it can from the
+Mono sensor. It serves as an example of recording mono pictures to disk.
+
+Be careful, this example saves pictures to your host storage. So if you leave
+it running, you could fill up your storage on your host.
 
 Demo
 ####

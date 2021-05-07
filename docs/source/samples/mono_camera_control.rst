@@ -12,7 +12,6 @@ TWo output is a displayed mono cropped frame, that can be manipulated using the 
 #. `i` and `o` will decrease/increase the exposure time
 #. `k` and `l` will decrease/increase the sensitivity iso
 
-
 Demo
 ####
 

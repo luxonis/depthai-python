@@ -3,6 +3,8 @@ Spatial object tracker on RGB
 
 This example shows how to run MobileNetv2SSD on the RGB input frame, and perform spatial object tracking on persons.
 
+setConfidenceThreshold - confidence threshold above which objects are detected
+
 Demo
 ####
 

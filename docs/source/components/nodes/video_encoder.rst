@@ -80,7 +80,7 @@ Examples of functionality
 
 - :ref:`RGB Encoding`
 - :ref:`Encoding Max Limit`
-- :ref:`RGB Encoding with MobilenetSSD`
+- :ref:`RGB Encoding & MobilenetSSD`
 
 Reference
 #########

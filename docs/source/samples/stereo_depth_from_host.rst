@@ -1,7 +1,9 @@
 Stereo Depth from host
 ======================
 
-This example shows depth map from host using stereo images. There are 3 depth modes which you can select inside the code: left-right check, extended (for closer distance), subpixel (for longer distance). Otherwise a median with kernel_7x7 is activated.
+This example shows depth map from host using stereo images. There are 3 depth modes which you can select
+inside the code: left-right check, extended (for closer distance), subpixel (for longer distance).
+Otherwise a median with kernel_7x7 is activated.
 
 Setup
 #####

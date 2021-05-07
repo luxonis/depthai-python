@@ -5,9 +5,9 @@ This example does its best to save full-resolution 3840x2160 .jpeg files as fast
 RGB sensor. It serves as an example of recording high resolution to disk for the purposes of
 high-resolution ground-truth data. We also recently added the options to save isp - YUV420p
 uncompressed frames, processed by ISP, and raw - BayerRG (R_Gr_Gb_B), as read from sensor,
-10-bit packed. See here for the pull request on this capability.
+10-bit packed.
 
-Be careful, this example saves full resolution .jpeg pictures to your host storage. So if you leave
+Be careful, this example saves pictures to your host storage. So if you leave
 it running, you could fill up your storage on your host.
 
 Demo

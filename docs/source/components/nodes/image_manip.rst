@@ -69,7 +69,7 @@ Examples of functionality
 #########################
 
 - :ref:`Mono & MobilenetSSD`
-- :ref:`RGB & Encoding & Mono & MobilenetSSD`
+- :ref:`RGB Encoding & Mono & MobilenetSSD`
 - :ref:`RGB Camera Control`
 
 Reference

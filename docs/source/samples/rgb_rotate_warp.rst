@@ -1,8 +1,8 @@
 RGB Rotate Warp
 ===============
 
-This example shows usage of ImageManip to crop a rotated rectangle area on a frame, or perform various image transforms: rotate, mirror, flip,
-perspective transform.
+This example shows usage of :ref:`ImageManip` to crop a rotated rectangle area on a frame,
+or perform various image transforms: rotate, mirror, flip, perspective transform.
 
 Setup
 #####

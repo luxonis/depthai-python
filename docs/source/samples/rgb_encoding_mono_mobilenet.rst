@@ -1,4 +1,4 @@
-RGB & Encoding & Mono & MobilenetSSD
+RGB Encoding & Mono & MobilenetSSD
 ====================================
 
 This example shows how to configure the depthai video encoder in h.265 format to encode the RGB camera
