@@ -36,10 +36,14 @@ You can do so by pressing one of the following buttons:
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/autoexposure_roi.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/autoexposure_roi.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+
+        .. literalinclude:: ../../../examples/autoexposure_roi.py
+           :language: python
+           :linenos:
 
 .. include::  /includes/footer-short.rst

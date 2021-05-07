@@ -24,10 +24,22 @@ This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_mobilenet.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/rgb_mobilenet.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+
+        .. literalinclude:: ../../../examples/rgb_mobilenet.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_mobilenet.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/rgb_mobilenet.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

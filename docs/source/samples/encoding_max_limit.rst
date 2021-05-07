@@ -29,10 +29,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/encoding_max_limit.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/encoding_max_limit.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/encoding_max_limit.py>`__
+
+        .. literalinclude:: ../../../examples/encoding_max_limit.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/encoding_max_limit.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/encoding_max_limit.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

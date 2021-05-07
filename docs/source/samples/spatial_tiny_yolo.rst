@@ -23,12 +23,10 @@ Demo
         <iframe src="https://www.youtube.com/embed/93tG_qBweN8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
-
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
-
 
 This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob>`__
@@ -39,10 +37,22 @@ YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) can be 
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_tiny_yolo.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/spatial_tiny_yolo.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_tiny_yolo.py>`__
+
+        .. literalinclude:: ../../../examples/spatial_tiny_yolo.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_tiny_yolo.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/spatial_tiny_yolo.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

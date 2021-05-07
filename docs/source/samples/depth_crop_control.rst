@@ -22,10 +22,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/depth_crop_control.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/depth_crop_control.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/depth_crop_control.py>`__
+
+        .. literalinclude:: ../../../examples/depth_crop_control.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/depth_crop_control.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/depth_crop_control.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

@@ -21,12 +21,10 @@ Demo
         <iframe src="https://www.youtube.com/embed/l4jDLs9d8GI" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
-
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
-
 
 This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob>`__
@@ -34,10 +32,22 @@ This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/tiny_yolo_v4_device_side_decoding.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/tiny_yolo_v4_device_side_decoding.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/tiny_yolo_v4_device_side_decoding.py>`__
+
+        .. literalinclude:: ../../../examples/tiny_yolo_v4_device_side_decoding.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/tiny_yolo_v4_device_side_decoding.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/tiny_yolo_v4_device_side_decoding.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

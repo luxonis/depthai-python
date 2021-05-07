@@ -25,10 +25,22 @@ This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_depth_mobilenetssd.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/mono_depth_mobilenetssd.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_depth_mobilenetssd.py>`__
+
+        .. literalinclude:: ../../../examples/mono_depth_mobilenetssd.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mono_depth_mobilenetssd.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/mono_depth_mobilenetssd.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

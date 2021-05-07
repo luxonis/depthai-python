@@ -22,10 +22,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/device_queue_event.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/device_queue_event.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/device_queue_event.py>`__
+
+        .. literalinclude:: ../../../examples/device_queue_event.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/device_queue_event.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/device_queue_event.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

@@ -15,7 +15,6 @@ Demo
         <iframe src="https://www.youtube.com/embed/4DVzHw1f8p8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
-
 Setup
 #####
 
@@ -29,10 +28,22 @@ and `construction_vest.mp4 <https://artifacts.luxonis.com/artifactory/luxonis-de
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/video_mobilenet.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/video_mobilenet.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+
+        .. literalinclude:: ../../../examples/video_mobilenet.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/video_mobilenet.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/video_mobilenet.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

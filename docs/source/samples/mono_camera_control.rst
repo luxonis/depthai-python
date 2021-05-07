@@ -25,10 +25,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_camera_control.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/mono_camera_control.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_camera_control.py>`__
+
+        .. literalinclude:: ../../../examples/mono_camera_control.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mono_camera_control.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/mono_camera_control.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

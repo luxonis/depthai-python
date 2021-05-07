@@ -11,14 +11,17 @@ Setup
 This example also requires dataset folder - you can download it from
 `here <https://drive.google.com/file/d/1mPyghc_0odGtSU2cROS1uLD-qwRU8aug>`__
 
-
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/stereo_depth_from_host.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/stereo_depth_from_host.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/stereo_depth_from_host.py>`__
+
+        .. literalinclude:: ../../../examples/stereo_depth_from_host.py
+           :language: python
+           :linenos:
 
 .. include::  /includes/footer-short.rst

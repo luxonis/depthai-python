@@ -9,14 +9,17 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_rotate_warp.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/rgb_rotate_warp.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_rotate_warp.py>`__
+
+        .. literalinclude:: ../../../examples/rgb_rotate_warp.py
+           :language: python
+           :linenos:
 
 .. include::  /includes/footer-short.rst

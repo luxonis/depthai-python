@@ -32,10 +32,22 @@ This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_encoding_mono_mobilenet.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/rgb_encoding_mono_mobilenet.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_encoding_mono_mobilenet.py>`__
+
+        .. literalinclude:: ../../../examples/rgb_encoding_mono_mobilenet.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_encoding_mono_mobilenet.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/rgb_encoding_mono_mobilenet.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

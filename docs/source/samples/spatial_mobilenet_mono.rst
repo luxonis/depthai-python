@@ -17,12 +17,10 @@ Demo
         <iframe src="https://www.youtube.com/embed/SZz7NwM86uw" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
-
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
-
 
 This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
@@ -30,10 +28,22 @@ This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_mobilenet_mono.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/spatial_mobilenet_mono.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_mobilenet_mono.py>`__
+
+        .. literalinclude:: ../../../examples/spatial_mobilenet_mono.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_mobilenet_mono.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/spatial_mobilenet_mono.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

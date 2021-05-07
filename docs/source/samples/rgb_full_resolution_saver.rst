@@ -27,10 +27,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_full_resolution_saver.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/rgb_full_resolution_saver.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_full_resolution_saver.py>`__
+
+        .. literalinclude:: ../../../examples/rgb_full_resolution_saver.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_full_resolution_saver.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/rgb_full_resolution_saver.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

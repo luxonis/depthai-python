@@ -22,10 +22,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/opencv_support.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/opencv_support.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/opencv_support.py>`__
+
+        .. literalinclude:: ../../../examples/opencv_support.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/opencv_support.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/opencv_support.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

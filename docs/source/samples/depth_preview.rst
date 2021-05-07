@@ -31,10 +31,22 @@ Setup
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/depth_preview.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/depth_preview.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/depth_preview.py>`__
+
+        .. literalinclude:: ../../../examples/depth_preview.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/depth_preview.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/depth_preview.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst

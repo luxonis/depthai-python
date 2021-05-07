@@ -16,20 +16,30 @@ Demo
 Setup
 #####
 
-
 .. include::  /includes/install_from_pypi.rst
 
 This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_6shave.blob` file) to work - you can download it from
 `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 
-
 Source code
 ###########
 
-Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_mobilenet.py>`__
+.. tabs::
 
-.. literalinclude:: ../../../examples/mono_mobilenet.py
-   :language: python
-   :linenos:
+    .. tab:: Python
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_mobilenet.py>`__
+
+        .. literalinclude:: ../../../examples/mono_mobilenet.py
+           :language: python
+           :linenos:
+
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mono_mobilenet.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/mono_mobilenet.cpp
+           :language: cpp
+           :linenos:
 
 .. include::  /includes/footer-short.rst
