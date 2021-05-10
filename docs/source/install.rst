@@ -36,6 +36,7 @@ Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Di
 Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
 Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`            `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 ====================== ===================================================== ================================================================================
 
 macOS
@@ -232,6 +233,12 @@ If Virtual Machine doesn't detect the device, try the following: find and select
 the DepthAI example again inside the VM. Choose to route to VM and select to *not ask again* (this is important, as there is a timeout, and the device 
 watchdog could get triggered if the host doesn't start communication in few seconds). You may need to repeat running the script a few times, until all gets 
 set properly for VMware.
+
+Virtual Box
+***********
+
+Detailed step-by-step tutorial available `here <https://docs.luxonis.com/en/latest/pages/faq/#how-to-use-depthai-under-virtualbox>`__
+
 
 Install from PyPI
 #################
