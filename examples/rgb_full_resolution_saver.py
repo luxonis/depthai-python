@@ -35,7 +35,8 @@ with dai.Device(pipeline) as device:
     qJpeg = device.getOutputQueue(name="jpeg", maxSize=30, blocking=True)
 
     # Make sure the destination path is present before starting to store the examples
-    Path('06_data').mkdir(parents=True, exist_ok=True)
+    dirName = "rgb_data"
+    Path(dirName).mkdir(parents=True, exist_ok=True)
 
     while True:
         inRgb = qRgb.tryGet()  # Non-blocking call, will return a new data that has arrived or None otherwise
@@ -44,7 +45,7 @@ with dai.Device(pipeline) as device:
             cv2.imshow("rgb", inRgb.getCvFrame())
 
         for encFrame in qJpeg.tryGetAll():
-            with open(f"06_data/{int(time.time() * 1000)}.jpeg", "wb") as f:
+            with open(f"{dirName}/{int(time.time() * 1000)}.jpeg", "wb") as f:
                 f.write(bytearray(encFrame.getData()))
 
         if cv2.waitKey(1) == ord('q'):

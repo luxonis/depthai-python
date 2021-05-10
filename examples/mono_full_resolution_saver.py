@@ -28,7 +28,8 @@ with dai.Device(pipeline) as device:
     qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
     # Make sure the destination path is present before starting to store the examples
-    Path('07_data').mkdir(parents=True, exist_ok=True)
+    dirName = "mono_data"
+    Path(dirName).mkdir(parents=True, exist_ok=True)
 
     while True:
         inRight = qRight.get()  # Blocking call, will wait until a new data has arrived
@@ -37,7 +38,7 @@ with dai.Device(pipeline) as device:
         cv2.imshow("right", inRight.getFrame())
 
         # After showing the frame, it's being stored inside a target directory as a PNG image
-        cv2.imwrite(f"07_data/{int(time.time() * 1000)}.png", inRight.getFrame())
+        cv2.imwrite(f"{dirName}/{int(time.time() * 1000)}.png", inRight.getFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
