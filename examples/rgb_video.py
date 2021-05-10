@@ -29,7 +29,6 @@ with dai.Device(pipeline) as device:
     video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
     while True:
-        # Get preview and video frames
         videoIn = video.get()
 
         # Get BGR frame from NV12 encoded video frame to show with opencv
