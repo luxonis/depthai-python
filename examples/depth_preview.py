@@ -11,7 +11,7 @@ subpixel = False
 # Better handling for occlusions:
 lr_check = False
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

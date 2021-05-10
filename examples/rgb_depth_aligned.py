@@ -10,7 +10,7 @@ downscaleColor = True
 
 subpixel = False
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

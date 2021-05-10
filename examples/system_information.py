@@ -14,9 +14,10 @@ def printSystemInformation(info):
     print(f"Cpu usage - Leon OS: {info.leonCssCpuUsage.average * 100:.2f}%, Leon RT: {info.leonMssCpuUsage.average * 100:.2f} %")
     print("----------------------------------------")
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
+# Define source and output
 sysLog = pipeline.createSystemLogger()
 linkOut = pipeline.createXLinkOut()
 

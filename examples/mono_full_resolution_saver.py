@@ -5,10 +5,10 @@ import cv2
 import depthai as dai
 import time
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
-# Define sources and outputs
+# Define source and output
 monoRight = pipeline.createMonoCamera()
 xoutRight = pipeline.createXLinkOut()
 

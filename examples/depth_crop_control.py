@@ -12,7 +12,7 @@ import numpy as np
 # Step size ('W','A','S','D' controls)
 stepSize = 0.02
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

@@ -20,10 +20,10 @@ if not Path(nnPath).exists():
 
 previewSize = (300, 300)
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
+# Define source and outputs
 camRgb = pipeline.createColorCamera()
 camRgb.setPreviewSize(*previewSize)
 camRgb.setInterleaved(False)
@@ -40,7 +40,7 @@ nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 camRgb.preview.link(nn.input)
 
-# Create outputs
+# Linking
 xoutRgb = pipeline.createXLinkOut()
 xoutRgb.setStreamName("rgb")
 camRgb.preview.link(xoutRgb.input)

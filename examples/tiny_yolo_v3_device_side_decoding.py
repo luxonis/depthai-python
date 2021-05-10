@@ -41,7 +41,7 @@ labelMap = [
 
 syncNN = True
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

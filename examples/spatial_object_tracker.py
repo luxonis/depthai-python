@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 fullFrameTracking = args.full_frame
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
@@ -67,7 +67,6 @@ objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-# Link plugins CAM . NN . XLINK
 camRgb.preview.link(spatialDetectionNetwork.input)
 objectTracker.passthroughTrackerFrame.link(xoutRgb.input)
 objectTracker.out.link(trackerOut.input)

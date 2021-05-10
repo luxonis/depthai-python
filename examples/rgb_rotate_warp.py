@@ -56,7 +56,7 @@ warpList = [
     [[[-0.2, 0], [1.8, 0], [1, 1], [0, 1]], True, "9. trapezoid transform"],
 ]
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

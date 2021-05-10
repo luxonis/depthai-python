@@ -5,7 +5,7 @@ import depthai as dai
 
 stepSize = 0.05
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

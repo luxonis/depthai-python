@@ -17,7 +17,7 @@ parser.add_argument('-v', '--videoPath', help="Path to video frame", default=vid
 
 args = parser.parse_args()
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

@@ -26,7 +26,7 @@ LENS_STEP = 3
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs

@@ -5,14 +5,14 @@ from pathlib import Path
 import cv2
 import depthai as dai
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
-# Define source and outputs
+# Define sources and outputs
 camRgb = pipeline.createColorCamera()
+videoEnc = pipeline.createVideoEncoder()
 xoutJpeg = pipeline.createXLinkOut()
 xoutRgb = pipeline.createXLinkOut()
-videoEnc = pipeline.createVideoEncoder()
 
 xoutJpeg.setStreamName("jpeg")
 xoutRgb.setStreamName("rgb")

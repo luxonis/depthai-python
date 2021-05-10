@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 fullFrameTracking = args.full_frame
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
