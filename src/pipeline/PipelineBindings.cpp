@@ -33,8 +33,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonMssFrequencyHz)
         .def_readwrite("pipelineName", &GlobalProperties::pipelineName)
         .def_readwrite("pipelineVersion", &GlobalProperties::pipelineVersion)
-        .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize)
-        .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri)
+        .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize, DOC(dai, GlobalProperties, cameraTuningBlobSize))
+        .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri, DOC(dai, GlobalProperties, cameraTuningBlobUri))
         ;
 
 
