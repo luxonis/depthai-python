@@ -23,6 +23,7 @@ Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord
 macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
 Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
 Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
+Jestson Nano             :ref:`Installation guide <Jetson Nano>`        `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
 ======================== ============================================== ================================================================================
 
 And the following platforms are also supported by a combination of the community and Luxonis.
@@ -82,6 +83,106 @@ Raspberry Pi OS
   .. code-block:: bash
   
     sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
+
+
+Jetson Nano
+***********
+
+Perform the following steps, after completing a fresh install and setup. On the first log in, **DO NOT** immediately run updates.
+
+Go to the *Software* (App Store) and delete the apps or software that you probably will not use. Then open a terminal window and run the following commands:
+  
+  .. code-block:: bash
+
+    sudo apt update && sudo apt upgrade
+    sudo reboot now
+
+* Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson Nano <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from nvidia:
+
+  .. code-block:: bash
+
+    # Disable ZRAM:
+    sudo systemctl disable nvzramconfig
+    # Create 4GB swap file
+    sudo fallocate -l 4G /mnt/4GB.swap
+    sudo chmod 600 /mnt/4GB.swap
+    sudo mkswap /mnt/4GB.swap
+
+If you have an issue with the final command, you can try the following:
+
+  * Run :code:`vi` or :code:`nano`
+
+    .. code-block:: bash
+
+      sudo vi /etc/fstab
+    
+  * Add the following at the bottom of that file:
+  
+    .. code-block:: bash
+
+      /mnt/4GB.swap swap swap defaults 0 0
+
+  * Reboot
+
+    .. code-block:: bash
+
+      sudo reboot now
+
+The next step is to install :code:`pip` and :code:`python3`:
+
+  .. code-block:: bash
+  
+    sudo -H apt install -y python3-pip
+
+After that, install and set up virtual environment:
+
+  .. code-block:: bash
+
+    sudo -H pip3 install virtualenv virtualenvwrapper
+
+All following lines to the bash script:
+
+  .. code-block:: bash
+
+    sudo vi ~/.bashrc
+
+    # Virtual Env Wrapper Configuration
+    export WORKON_HOME=$HOME/.virtualenvs
+    export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+    source /usr/local/bin/virtualenvwrapper.sh
+
+Save and reload the script by running the command :code:`source ~/.bashrc`.
+
+* Create a virtual environment (in this example it's called :code:`depthAI`
+  
+  .. code-block:: bash
+
+    mkvirtualenv depthAI -p python3
+
+If you are not automatically inside the virtual environment, type: :code:`workon depthAI`
+
+* Install :code:`depthAI` dependencies
+  
+  **MAKE SURE YOU ARE IN THE VIRTUAL ENVIRONMENT TO RUN THIS STEP!**
+
+  .. code-block:: bash
+
+    sudo apt install curl
+
+    #Download and install the dependency package
+    sudowget-qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+
+    #Clone github repository
+    git clone https://github.com/luxonis/depthai-python.git
+    cd depthai-python
+
+Last step is to edit :code:`.bashrc` with the line:
+
+  .. code-block:: bash
+
+    echo “export OPENBLAS_CORETYPE=AMRV8” >> ~/.bashrc
+
+Navigate to the folder with :code:`depthai` examples and run it.
 
 
 openSUSE
