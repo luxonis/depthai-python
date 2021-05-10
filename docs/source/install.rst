@@ -97,7 +97,7 @@ Go to the *Software* (App Store) and delete the apps or software that you probab
     sudo apt update && sudo apt upgrade
     sudo reboot now
 
-* Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson Nano <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from nvidia:
+Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson Nano <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from nvidia:
 
   .. code-block:: bash
 
@@ -110,22 +110,14 @@ Go to the *Software* (App Store) and delete the apps or software that you probab
 
 If you have an issue with the final command, you can try the following:
 
-  * Run :code:`vi` or :code:`nano`
-
     .. code-block:: bash
 
       sudo vi /etc/fstab
-    
-  * Add the following at the bottom of that file:
-  
-    .. code-block:: bash
 
+      # Add this line at the bottom of the file
       /mnt/4GB.swap swap swap defaults 0 0
 
-  * Reboot
-
-    .. code-block:: bash
-
+      # Reboot 
       sudo reboot now
 
 The next step is to install :code:`pip` and :code:`python3`:
@@ -140,7 +132,7 @@ After that, install and set up virtual environment:
 
     sudo -H pip3 install virtualenv virtualenvwrapper
 
-All following lines to the bash script:
+Add following lines to the bash script:
 
   .. code-block:: bash
 
@@ -151,19 +143,14 @@ All following lines to the bash script:
     export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
     source /usr/local/bin/virtualenvwrapper.sh
 
-Save and reload the script by running the command :code:`source ~/.bashrc`.
-
-* Create a virtual environment (in this example it's called :code:`depthAI`
+Save and reload the script by running the command :code:`source ~/.bashrc`. Then create a virtual environment (in this example it's called :code:`depthAI`).
   
   .. code-block:: bash
 
     mkvirtualenv depthAI -p python3
 
-If you are not automatically inside the virtual environment, type: :code:`workon depthAI`
 
-* Install :code:`depthAI` dependencies
-  
-  **MAKE SURE YOU ARE IN THE VIRTUAL ENVIRONMENT TO RUN THIS STEP!**
+**Note!** Before installing :code:`depthai`, make sure you're in the virtual environment.
 
   .. code-block:: bash
 
@@ -184,6 +171,8 @@ Last step is to edit :code:`.bashrc` with the line:
 
 Navigate to the folder with :code:`depthai` examples and run it.
 
+
+Solution provided by **iacisme** via our `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__ channel.
 
 openSUSE
 ********
