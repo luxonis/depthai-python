@@ -23,7 +23,7 @@ Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord
 macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
 Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
 Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-Jestson Nano             :ref:`Installation guide <Jetson Nano>`        `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
+Jestson Nano             :ref:`Platform dependencies <Jetson Nano>`     `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
 ======================== ============================================== ================================================================================
 
 And the following platforms are also supported by a combination of the community and Luxonis.
@@ -88,7 +88,8 @@ Raspberry Pi OS
 Jetson Nano
 ***********
 
-Perform the following steps, after completing a fresh install and setup. On the first log in, **DO NOT** immediately run updates.
+To install DepthAI on Jetson Nano, perform the following steps, after completing a fresh install and setup. On the first log in, 
+**do not** immediately run updates.
 
 Go to the *Software* (App Store) and delete the apps or software that you probably will not use. Then open a terminal window and run the following commands:
   
