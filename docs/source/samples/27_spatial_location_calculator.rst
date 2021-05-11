@@ -1,7 +1,7 @@
 27 - Spatial location calculator
 ================================
 
-This example shows how to retrieve spatial location data (X,Y,Z) on a runtime configurable ROI.
+This example shows how to retrieve spatial location data (X,Y,Z) on a runtime configurable ROI. You can move the ROI using WASD keys.
 X,Y,Z coordinates are relative to the center of depth map.
 
 
@@ -15,10 +15,6 @@ Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
-
-
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
 
 Source code
 ###########

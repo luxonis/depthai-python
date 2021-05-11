@@ -21,7 +21,7 @@ Dependencies
 Let's get your development environment setup first. This tutorial uses:
 
 - Python 3.6 (Ubuntu) or Python 3.7 (Raspbian).
-- The DepthAI :ref:`Python API`
+- The DepthAI :ref:`Python API <Installation>`
 - The :code:`cv2` and :code:`numpy` Python modules.
 
 
@@ -116,7 +116,7 @@ The blob file for this example can be found `here <https://github.com/luxonis/de
 
 .. code-block:: python
 
-  detection_nn = pipeline.createNeuralNetwork()
+  detection_nn = pipeline.create(dai.node.NeuralNetwork)
   detection_nn.setBlobPath("/path/to/mobilenet-ssd.blob")
 
 And now, let's connect a color camera :code:`preview` output to neural network input
@@ -296,7 +296,7 @@ Finally, we add a way to terminate our program (as it's running inside an infini
 method, that waits for a key to be pressed by user - in our case, we want to break out of the loop when user presses :code:`q` key
 
 .. code-block:: python
-    
+
     if cv2.waitKey(1) == ord('q'):
         break
 
@@ -308,7 +308,7 @@ Putting it all together, only thing left to do is to run the file we've prepared
 .. code-block:: bash
 
   python3 hello_world.py
-  
+
 You're on your way! You can find the `complete code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/blob/master/1-hello-world/hello_world.py>`__.
 
 .. include::  /includes/footer-short.rst

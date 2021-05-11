@@ -37,6 +37,10 @@ nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -73,11 +77,8 @@ nnOut = pipeline.create(dai.node.XLinkOut)
 nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
-
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

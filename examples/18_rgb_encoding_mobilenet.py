@@ -11,6 +11,9 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 pipeline = dai.Pipeline()
 
@@ -47,8 +50,8 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
+# Connect and start the pipeline
 with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
-    device.startPipeline()
 
     queue_size = 8
     qRgb = device.getOutputQueue("rgb", queue_size)

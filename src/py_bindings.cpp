@@ -33,8 +33,11 @@ PYBIND11_MODULE(depthai,m)
 
     // Depthai python version consists of: (depthai-core).(bindings revision)[+bindings hash]
     m.attr("__version__") = DEPTHAI_PYTHON_VERSION;
+    m.attr("__commit__") = DEPTHAI_PYTHON_COMMIT_HASH;
+    m.attr("__commit_datetime__") = DEPTHAI_PYTHON_COMMIT_DATETIME;
+    m.attr("__build_datetime__") = DEPTHAI_PYTHON_BUILD_DATETIME;
 
-    // Add bindings 
+    // Add bindings
     LogBindings::bind(m);
     DataQueueBindings::bind(m);
     DatatypeBindings::bind(m);
@@ -47,8 +50,8 @@ PYBIND11_MODULE(depthai,m)
     DeviceBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
 
-    // Call dai::initialize on 'import depthai' to initialize asap
-    dai::initialize();
+    // Call dai::initialize on 'import depthai' to initialize asap with additional information to print
+    dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME);
 
 }
 

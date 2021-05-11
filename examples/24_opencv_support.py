@@ -23,10 +23,8 @@ xoutPreview.setStreamName("preview")
 camRgb.preview.link(xoutPreview.input)
 camRgb.video.link(xoutVideo.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     while True:
         # Get preview and video frames

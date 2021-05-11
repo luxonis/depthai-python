@@ -26,6 +26,10 @@ nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -33,7 +37,7 @@ pipeline = dai.Pipeline()
 manip = pipeline.create(dai.node.ImageManip)
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 # manip.setKeepAspectRatio(False)
 
 # Define a neural network that will make predictions based on the source frames
@@ -50,7 +54,7 @@ manip.out.link(spatialDetectionNetwork.input)
 # Create outputs
 xoutManip = pipeline.create(dai.node.XLinkOut)
 xoutManip.setStreamName("right")
-if(syncNN):
+if syncNN:
     spatialDetectionNetwork.passthrough.link(xoutManip.input)
 else:
     manip.out.link(xoutManip.input)
@@ -73,9 +77,7 @@ monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
-stereo.setOutputRectified(True)
 
 stereo.rectifiedRight.link(manip.inputImage)
 
@@ -85,10 +87,8 @@ monoRight.out.link(stereo.right)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
@@ -142,7 +142,7 @@ with dai.Device(pipeline) as device:
         if flipRectified:
             rectifiedRight = cv2.flip(rectifiedRight, 1)
 
-        # if the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
+        # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
         width = rectifiedRight.shape[1]
         for detection in detections:
@@ -150,7 +150,7 @@ with dai.Device(pipeline) as device:
                 swap = detection.xmin
                 detection.xmin = 1 - detection.xmax
                 detection.xmax = 1 - swap
-            # denormalize bounding box
+            # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

@@ -13,7 +13,7 @@ Spatial Tiny-yolo example
   Can be used for tiny-yolo-v3 or tiny-yolo-v4 networks
 '''
 
-# tiny yolo v3/4 label texts
+# Tiny yolo v3/4 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -32,9 +32,13 @@ labelMap = [
 syncNN = True
 
 # Get argument first
-nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v3_openvino_2021.2_6shave.blob')).resolve().absolute())
+nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
+
+if not Path(nnBlobPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -68,7 +72,6 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
-stereo.setOutputDepth(True)
 stereo.setConfidenceThreshold(255)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
@@ -77,7 +80,7 @@ spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
-# yolo specific parameters
+# Yolo specific parameters
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
@@ -90,7 +93,7 @@ monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 colorCam.preview.link(spatialDetectionNetwork.input)
-if(syncNN):
+if syncNN:
     spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 else:
     colorCam.preview.link(xoutRgb.input)
@@ -101,10 +104,8 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -131,7 +132,7 @@ with dai.Device(pipeline) as device:
             fps = counter / (current_time - startTime)
             counter = 0
             startTime = current_time
-        
+
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame()
 
@@ -156,11 +157,11 @@ with dai.Device(pipeline) as device:
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
 
-        # if the frame is available, draw bounding boxes on it and show the frame
+        # If the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]
         width  = frame.shape[1]
         for detection in detections:
-            # denormalize bounding box
+            # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)

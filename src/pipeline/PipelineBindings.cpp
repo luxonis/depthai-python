@@ -20,6 +20,7 @@
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
+#include "depthai/pipeline/node/ObjectTracker.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -71,7 +72,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("unlink", &Pipeline::unlink, DOC(dai, Pipeline, unlink), DOC(dai, Pipeline, unlink))
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
-        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion), DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("getOpenVINOVersion", &Pipeline::getOpenVINOVersion, DOC(dai, Pipeline, getOpenVINOVersion))
 
         // 'Template' create function
         .def("create", [](dai::Pipeline& p, py::object class_) {
@@ -143,6 +145,10 @@ void PipelineBindings::bind(pybind11::module& m){
             PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
             return p.create<node::YoloSpatialDetectionNetwork>();
         })
+        .def("createObjectTracker", [](Pipeline& p){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "create[Node]() is deprecated, use create([Node]) instead.", 1);
+            return p.create<node::ObjectTracker>();
+        })
         ;
-    
+
 }

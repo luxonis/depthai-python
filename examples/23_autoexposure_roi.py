@@ -10,9 +10,13 @@ import numpy as np
 # Press N to go back to the region controlled by the NN detections.
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_5shave.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
+
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 previewSize = (300, 300)
 
@@ -100,10 +104,8 @@ class AutoExposureRegion:
         return roi
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qControl = device.getInputQueue(name="camControl")
@@ -114,7 +116,7 @@ with dai.Device(pipeline) as device:
 
     nnRegion = True
     region = AutoExposureRegion()
-    
+
     # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
@@ -132,7 +134,7 @@ with dai.Device(pipeline) as device:
         cv2.imshow(name, frame)
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRgb = qRgb.tryGet()
         inDet = qDet.tryGet()
 
