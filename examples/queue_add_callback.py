@@ -27,26 +27,26 @@ camRgb.preview.link(xout.input)
 left.out.link(xout.input)
 right.out.link(xout.input)
 
+q = queue.Queue()
+
+
+def newFrame(inFrame):
+    global q
+    # Get "stream name" from the instance number
+    num = inFrame.getInstanceNum()
+    name = "color" if num == 0 else "left" if num == 1 else "right"
+    frame = inFrame.getCvFrame()
+    # This is a different thread and you could use it to
+    # run image processing algorithms here
+    q.put({"name": name, "frame": frame})
+
+
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     device.startPipeline()
 
-    # Output queue will be used to get the frames
-    qFrames = device.getOutputQueue(name="frames", maxSize=4, blocking=False)
-
-    q = queue.Queue()
-    def newFrame(inFrame):
-        global q
-        # Get "stream name" from the instance number
-        num = inFrame.getInstanceNum()
-        name = "color" if num == 0 else "left" if num == 1 else "right"
-        frame = inFrame.getCvFrame()
-        # This is a different thread and you could use it to
-        # run image processing algorithms here
-        q.put({"name": name, "frame": frame})
-
-    # Add callback for all newly arrived frames (color, left, right)
-    qFrames.addCallback(newFrame)
+    # Output queue will be used to get the frames, callback for all newly arrived frames (color, left, right)
+    device.getOutputQueue(name="frames", maxSize=4, blocking=False).addCallback(newFrame)
 
     while True:
         # You could also get the data as non-blocking (block=False)
