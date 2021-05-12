@@ -64,10 +64,8 @@ xout = pipeline.createXLinkOut()
 xout.setStreamName("disparity")
 depth.disparity.link(xout.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the disparity frames from the outputs defined above
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)

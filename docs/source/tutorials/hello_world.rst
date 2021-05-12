@@ -21,7 +21,7 @@ Dependencies
 Let's get your development environment setup first. This tutorial uses:
 
 - Python 3.6 (Ubuntu) or Python 3.7 (Raspbian).
-- The DepthAI :ref:`Python API`
+- The DepthAI :ref:`Python API <Installation>`
 - The :code:`cv2` and :code:`numpy` Python modules.
 
 
