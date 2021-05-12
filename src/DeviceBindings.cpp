@@ -133,7 +133,7 @@ void DeviceBindings::bind(pybind11::module& m){
             return deviceGetQueueEventsHelper(d, d.getOutputQueueNames(), maxNumEvents, timeout);
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvents, 4))
         
-        .def("getCalibration", &Device::getCalibration, DOC(dai, Device, getCalibration))
+        .def("readCalibration", &Device::readCalibration, DOC(dai, Device, readCalibration))
         .def("flashCalibration", &Device::flashCalibration, py::arg("calibrationDataHandler"), DOC(dai, Device, flashCalibration))
 
         .def("getQueueEvent", [](Device& d, const std::vector<std::string>& queueNames, std::chrono::microseconds timeout) {
