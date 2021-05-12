@@ -10,6 +10,10 @@ endif()
 get_target_property(DOXYGEN_OUTPUT_DIR doxygen DOXYGEN_OUTPUT_DIR)
 message(STATUS "Retrieved doxygen output dir from doxygen target: ${DOXYGEN_OUTPUT_DIR}")
 
+# Add input and output information for conf.py
+set(SPHINX_SOURCE ${CMAKE_CURRENT_LIST_DIR}/source)
+set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+
 # Add year information
 string(TIMESTAMP build_year "%Y")
 # Configure sphinx for the build
@@ -31,20 +35,17 @@ if(error)
 else()
     message(STATUS "Checking for sphinx - found, target 'sphinx' available")
 
-    # Set input and output
-    set(SPHINX_SOURCE ${CMAKE_CURRENT_LIST_DIR}/source)
-    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
-
+    file(COPY ${SPHINX_SOURCE}/_static DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     # Ready up sphinx - needed values configured in conf.py
     add_custom_target(sphinx ALL
-        ${CMAKE_COMMAND} -E env 
+        ${CMAKE_COMMAND} -E env
         # Environment variables
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
-        "${ASAN_ENVIRONMENT_VARS}" 
+        "${ASAN_ENVIRONMENT_VARS}"
         ############ SPHINX
-        ${PYTHON_EXECUTABLE} -m sphinx -c ${CMAKE_CURRENT_BINARY_DIR} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
+        ${PYTHON_EXECUTABLE} -m sphinx -c ${CMAKE_CURRENT_BINARY_DIR} -W --keep-going -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating documentation with Sphinx"
         VERBATIM
@@ -53,5 +54,10 @@ else()
 
     # Add dependency to library
     add_dependencies(sphinx ${TARGET_NAME})
+
+    # Add dependency to doxygen (C++) if exists
+    if(TARGET doxygen)
+        add_dependencies(sphinx doxygen)
+    endif()
 
 endif()

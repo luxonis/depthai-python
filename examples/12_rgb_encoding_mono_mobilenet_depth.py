@@ -6,6 +6,8 @@ import cv2
 import depthai as dai
 import numpy as np
 
+flipRectified = True
+
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -39,14 +41,16 @@ camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 depth = pipeline.createStereoDepth()
 depth.setConfidenceThreshold(255)
 # Note: the rectified streams are horizontally mirrored by default
-depth.setOutputRectified(True)
+depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
 camRight.out.link(depth.right)
+# Disparity range is 0..95, used for normalization
+disparity_multiplier = 255 / 95
 
-depthOut = pipeline.createXLinkOut()
-depthOut.setStreamName("depth")
-depth.disparity.link(depthOut.input)
+disparityOut = pipeline.createXLinkOut()
+disparityOut.setStreamName("disparity")
+depth.disparity.link(disparityOut.input)
 
 nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
@@ -57,7 +61,7 @@ nn.input.setBlocking(False)
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 depth.rectifiedRight.link(manip.inputImage)
 manip.out.link(nn.input)
 
@@ -78,21 +82,19 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     queueSize = 8
     qRight = device.getOutputQueue("right", queueSize)
-    qDepth = device.getOutputQueue("depth", queueSize)
+    qDisparity = device.getOutputQueue("disparity", queueSize)
     qManip = device.getOutputQueue("manip", queueSize)
     qDet = device.getOutputQueue("nn", queueSize)
     qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
 
     frame = None
     frameManip = None
-    frameDepth = None
+    frameDisparity = None
     detections = []
     offsetX = (camRight.getResolutionWidth() - camRight.getResolutionHeight()) // 2
     croppedFrame = np.zeros((camRight.getResolutionHeight(), camRight.getResolutionHeight()))
@@ -105,27 +107,32 @@ with dai.Device(pipeline) as device:
     videoFile = open('video.h265', 'wb')
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("disparity", cv2.WINDOW_NORMAL)
 
     while True:
         inRight = qRight.tryGet()
         inManip = qManip.tryGet()
         inDet = qDet.tryGet()
-        inDepth = qDepth.tryGet()
+        inDisparity = qDisparity.tryGet()
 
         while qRgbEnc.has():
             qRgbEnc.get().getData().tofile(videoFile)
 
         if inRight is not None:
             frame = cv2.flip(inRight.getCvFrame(), 1)
+            if flipRectified:
+                frame = cv2.flip(frame, 1)
 
         if inManip is not None:
             frameManip = inManip.getCvFrame()
 
-        if inDepth is not None:
-            frameDepth = cv2.flip(inDepth.getFrame(), 1)
-            frameDepth = cv2.normalize(frameDepth, None, 0, 255, cv2.NORM_MINMAX)
-            frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_JET)
+        if inDisparity is not None:
+            # Flip disparity frame, normalize it and apply color map for better visualization
+            frameDisparity = inDisparity.getFrame()
+            if flipRectified:
+                frameDisparity = cv2.flip(frameDisparity, 1)
+            frameDisparity = (frameDisparity*disparity_multiplier).astype(np.uint8)
+            frameDisparity = cv2.applyColorMap(frameDisparity, cv2.COLORMAP_JET)
 
         if inDet is not None:
             detections = inDet.detections
@@ -139,14 +146,14 @@ with dai.Device(pipeline) as device:
                 cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.imshow("right", frame)
 
-        if frameDepth is not None:
+        if frameDisparity is not None:
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
-                cv2.rectangle(frameDepth, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frameDepth, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frameDepth, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.imshow("depth", frameDepth)
+                cv2.rectangle(frameDisparity, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frameDisparity, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frameDisparity, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.imshow("disparity", frameDisparity)
 
         if frameManip is not None:
             for detection in detections:

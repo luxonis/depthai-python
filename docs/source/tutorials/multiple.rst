@@ -11,6 +11,11 @@ a `Raspberry Pi Compute Module Edition (BW1097) <https://shop.luxonis.com/produc
 
 So in this case, everything is running on the (single) Raspberry Pi 3B+ which is in the back of the BW1097.
 
+Demo code
+#########
+
+You can find demo code `here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-multiple-devices>`__. The demo will find all devices connected to the host and display an RGB preview from each of them.
+
 Dependencies
 ############
 
@@ -48,7 +53,7 @@ For example, if the first device is desirable from above use the following code:
 .. code-block:: python
 
   found, device_info = depthai.Device.getDeviceByMxId("14442C10D13EABCE00")
-  
+
   if not found:
       raise RuntimeError("Device not found!")
 

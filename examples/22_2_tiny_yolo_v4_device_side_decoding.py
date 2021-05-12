@@ -50,7 +50,7 @@ camRgb.setPreviewSize(416, 416)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 
-# network specific settings
+# Network specific settings
 detectionNetwork = pipeline.createYoloDetectionNetwork()
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.setNumClasses(80)
@@ -77,11 +77,8 @@ nnOut = pipeline.createXLinkOut()
 nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
-
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

@@ -62,7 +62,7 @@ def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as dev:
 
     # Get data queues
@@ -71,9 +71,6 @@ with dai.Device(pipeline) as dev:
     previewQueue = dev.getOutputQueue('preview')
     videoQueue = dev.getOutputQueue('video')
     stillQueue = dev.getOutputQueue('still')
-
-    # Start pipeline
-    dev.startPipeline()
 
     # Max cropX & cropY
     maxCropX = (colorCam.getResolutionWidth() - colorCam.getVideoWidth()) / colorCam.getResolutionWidth()

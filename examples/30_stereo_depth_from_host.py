@@ -58,8 +58,6 @@ def create_stereo_depth_pipeline():
     camLeft.setStreamName('in_left')
     camRight.setStreamName('in_right')
 
-    stereo.setOutputDepth(out_depth)
-    stereo.setOutputRectified(out_rectified)
     stereo.setConfidenceThreshold(200)
     stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
     stereo.setMedianFilter(median) # KERNEL_7x7 default
@@ -81,10 +79,12 @@ def create_stereo_depth_pipeline():
     camRight.out.link(stereo.right)
     stereo.syncedLeft.link(xoutLeft.input)
     stereo.syncedRight.link(xoutRight.input)
-    stereo.depth.link(xoutDepth.input)
+    if out_depth:
+        stereo.depth.link(xoutDepth.input)
     stereo.disparity.link(xoutDisparity.input)
-    stereo.rectifiedLeft.link(xoutRectifLeft.input)
-    stereo.rectifiedRight.link(xoutRectifRight.input)
+    if out_rectified:
+        stereo.rectifiedLeft.link(xoutRectifLeft.input)
+        stereo.rectifiedRight.link(xoutRectifRight.input)
 
     streams = ['left', 'right']
     if out_rectified:
@@ -135,10 +135,9 @@ def convert_to_cv2_frame(name, image):
 
 pipeline, streams = create_stereo_depth_pipeline()
 
-print("Creating DepthAI device")
+print("Connecting and starting the pipeline")
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    print("Starting pipeline")
-    device.startPipeline()
 
     inStreams = ['in_right', 'in_left']
     inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
@@ -170,6 +169,7 @@ with dai.Device(pipeline) as device:
                 img.setData(data)
                 img.setTimestamp(tstamp)
                 img.setInstanceNum(inStreamsCameraID[i])
+                img.setType(dai.ImgFrame.Type.RAW8)
                 img.setWidth(1280)
                 img.setHeight(720)
                 q.send(img)

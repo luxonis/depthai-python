@@ -45,7 +45,7 @@ Before running the example, install the DepthAI Python library using the command
 .. code-block:: python
    :substitutions:
 
-   python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ depthai==|release|
+   python3 -m pip install -U --force-reinstall depthai
 
 
 Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
@@ -57,6 +57,18 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 
    Home <self>
    install.rst
+   tutorials/overview.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Components:
+
+   components/device.rst
+   components/bootloader.rst
+   components/pipeline.rst
+   components/nodes.rst
+   components/messages.rst
 
 .. toctree::
    :maxdepth: 1
@@ -70,42 +82,10 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Code samples:
+   :caption: Code:
 
-   samples/01_rgb_preview.rst
-   samples/02_mono_preview.rst
-   samples/03_depth_preview.rst
-   samples/04_rgb_encoding.rst
-   samples/05_rgb_mono_encoding.rst
-   samples/06_rgb_full_resolution_saver.rst
-   samples/07_mono_full_resolution_saver.rst
-   samples/08_rgb_mobilenet.rst
-   samples/09_mono_mobilenet.rst
-   samples/10_mono_depth_mobilenetssd.rst
-   samples/11_rgb_encoding_mono_mobilenet.rst
-   samples/12_rgb_encoding_mono_mobilenet_depth.rst
-   samples/13_encoding_max_limit.rst
-   samples/14_1_color_camera_control.rst
-   samples/14_2_mono_camera_control.rst
-   samples/14_3_depth_crop_control.rst
-   samples/15_rgb_mobilenet_4k.rst
-   samples/16_device_queue_event.rst
-   samples/17_video_mobilenet.rst
-   samples/18_rgb_encoding_mobilenet.rst
-   samples/22_1_tiny_yolo_v3_decoding_on_device.rst
-   samples/22_2_tiny_yolo_v4_decoding_on_device.rst
-   samples/23_autoexposure_roi.rst
-   samples/24_opencv_support.rst
-   samples/25_system_information.rst
-   samples/26_1_spatial_mobilenet.rst
-   samples/26_2_spatial_mobilenet_mono.rst
-   samples/26_3_spatial_tiny_yolo.rst
-   samples/27_spatial_location_calculator.rst
-   samples/28_camera_video_example.rst
-   samples/29_1_object_tracker.rst
-   samples/29_2_spatial_object_tracker.rst
-   samples/29_3_object_tracker_video.rst
-   samples/30_stereo_depth_from_host.rst
+   tutorials/code_samples.rst
+   Experiments (Github) <https://github.com/luxonis/depthai-experiments>
 
 .. toctree::
    :maxdepth: 1

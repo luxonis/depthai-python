@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This example shows usage of ImageWarp to crop a rotated rectangle area on a frame,
+This example shows usage of ImageManip to crop a rotated rectangle area on a frame,
 or perform various image transforms: rotate, mirror, flip, perspective transform.
 """
 
@@ -77,8 +77,8 @@ cam.preview.link(manip.inputImage)
 manip.out.link(manipOut.input)
 manipCfg.out.link(manip.inputConfig)
 
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    device.startPipeline()
 
     qPreview = device.getOutputQueue(name="preview", maxSize=4)
     qManip = device.getOutputQueue(name="manip", maxSize=4)

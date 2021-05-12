@@ -40,7 +40,7 @@ manip.initialConfig.setResizeThumbnail(384, 384)
 # manip.initialConfig.setResize(384, 384)
 # manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 xinFrame.out.link(manip.inputImage)
 manip.inputImage.setBlocking(True)
 
@@ -77,11 +77,8 @@ objectTracker.inputDetections.setBlocking(True)
 objectTracker.out.link(trackerOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-
-    # Start the pipeline
-    device.startPipeline()
 
     qIn = device.getInputQueue(name="inFrame")
     trackerFrameQ = device.getOutputQueue("trackerFrame", 4)
@@ -123,7 +120,7 @@ with dai.Device(pipeline) as device:
             break
 
         img = dai.ImgFrame()
-        img.setType(dai.RawImgFrame.Type.BGR888p)
+        img.setType(dai.ImgFrame.Type.BGR888p)
         img.setData(to_planar(frame, inputFrameShape))
         img.setTimestamp(baseTs)
         baseTs += 1/simulatedFps
@@ -166,10 +163,9 @@ with dai.Device(pipeline) as device:
             except:
                 label = t.label
 
-            statusMap = {dai.Tracklet.TrackingStatus.NEW : "NEW", dai.Tracklet.TrackingStatus.TRACKED : "TRACKED", dai.Tracklet.TrackingStatus.LOST : "LOST"}
             cv2.putText(trackerFrame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(trackerFrame, f"ID: {[t.id]}", (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(trackerFrame, statusMap[t.status], (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(trackerFrame, t.status.name, (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(trackerFrame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(trackerFrame, "Fps: {:.2f}".format(fps), (2, trackerFrame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)

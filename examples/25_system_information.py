@@ -27,16 +27,14 @@ linkOut = pipeline.createXLinkOut()
 linkOut.setStreamName("sysinfo")
 sys_logger.out.link(linkOut.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the system info
     q_sysinfo = device.getOutputQueue(name="sysinfo", maxSize=4, blocking=False)
 
     while True:
-        info = q_sysinfo.get()  # blocking call, will wait until a new data has arrived
+        info = q_sysinfo.get()  # Blocking call, will wait until a new data has arrived
         print_sys_info(info)
 
         if cv2.waitKey(1) == ord('q'):

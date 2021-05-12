@@ -51,10 +51,8 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -82,11 +80,11 @@ with dai.Device(pipeline) as device:
 
     while True:
         if args.sync:
-            # use blocking get() call to catch frame and inference result synced
+            # Use blocking get() call to catch frame and inference result synced
             inRgb = qRgb.get()
             inDet = qDet.get()
         else:
-            # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+            # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
             inRgb = qRgb.tryGet()
             inDet = qDet.tryGet()
 
@@ -99,7 +97,7 @@ with dai.Device(pipeline) as device:
             detections = inDet.detections
             counter += 1
 
-        # if the frame is available, draw bounding boxes on it and show the frame
+        # If the frame is available, draw bounding boxes on it and show the frame
         if frame is not None:
             displayFrame("rgb", frame)
 

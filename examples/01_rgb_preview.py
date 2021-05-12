@@ -9,8 +9,6 @@ pipeline = dai.Pipeline()
 # Define a source - color camera
 camRgb = pipeline.createColorCamera()
 camRgb.setPreviewSize(300, 300)
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
 
@@ -19,10 +17,12 @@ xoutRgb = pipeline.createXLinkOut()
 xoutRgb.setStreamName("rgb")
 camRgb.preview.link(xoutRgb.input)
 
-# Pipeline defined, now the device is connected to
-with dai.Device(pipeline) as device:
+# Connect to the device
+with dai.Device() as device:
+    # Print out available cameras
+    print('Connected cameras: ', device.getConnectedCameras())
     # Start pipeline
-    device.startPipeline()
+    device.startPipeline(pipeline)
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

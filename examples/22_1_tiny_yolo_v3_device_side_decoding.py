@@ -14,7 +14,7 @@ import depthai as dai
 import numpy as np
 import time
 
-# tiny yolo v3 label texts
+# Tiny yolo v3 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -79,10 +79,8 @@ nnOut.setStreamName("detections")
 detectionNetwork.out.link(nnOut.input)
 
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

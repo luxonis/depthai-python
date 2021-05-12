@@ -24,10 +24,8 @@ xoutRight = pipeline.createXLinkOut()
 xoutRight.setStreamName('right')
 camRight.out.link(xoutRight.input)
 
-# Pipeline defined, now the device is connected to
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale frames from the outputs defined above
     qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
@@ -37,7 +35,7 @@ with dai.Device(pipeline) as device:
     frameRight = None
 
     while True:
-        # instead of get (blocking) used tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inLeft = qLeft.tryGet()
         inRight = qRight.tryGet()
 

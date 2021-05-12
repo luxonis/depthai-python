@@ -1,7 +1,7 @@
 14.1 - Color Camera Control
 ===========================
 
-This example shows how to controll the device-side crop and camera triggers.
+This example shows how to control the device-side crop and camera triggers.
 An output is a displayed RGB cropped frame, that can be manipulated using the following keys:
 
 #. `a` will move the crop left
