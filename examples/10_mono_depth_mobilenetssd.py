@@ -101,7 +101,7 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    disparity_multiplier = 255 / 95 # Disparity range is 0..95
+    disparity_multiplier = 255 / stereo.getMaxDisparity()
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
