@@ -329,14 +329,14 @@ void NodeBindings::bind(pybind11::module& m){
             PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationFile() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.setOutputDepth(enable);
+            s.loadCalibrationFile(path);
             HEDLEY_DIAGNOSTIC_POP
         })
         .def("loadCalibrationData", [](StereoDepth& s, std::vector<std::uint8_t> data){
             PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationData() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.setOutputDepth(enable);
+            s.loadCalibrationData(data);
             HEDLEY_DIAGNOSTIC_POP
         })
         ;
