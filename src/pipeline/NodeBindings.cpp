@@ -327,6 +327,7 @@ void NodeBindings::bind(pybind11::module& m){
             s.setOutputDepth(enable);
             HEDLEY_DIAGNOSTIC_POP
         })
+        .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
 
     // VideoEncoder node

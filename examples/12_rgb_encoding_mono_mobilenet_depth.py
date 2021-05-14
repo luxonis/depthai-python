@@ -45,8 +45,8 @@ depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
 camRight.out.link(depth.right)
-# Disparity range is 0..95, used for normalization
-disparity_multiplier = 255 / 95
+# Used for normalization
+disparity_multiplier = 255 / depth.getMaxDisparity()
 
 disparityOut = pipeline.createXLinkOut()
 disparityOut.setStreamName("disparity")

@@ -4,7 +4,6 @@ import cv2
 import depthai as dai
 import numpy as np
 
-
 '''
 If one or more of the additional depth modes (lrcheck, extended, subpixel)
 are enabled, then:
@@ -42,19 +41,8 @@ median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7 # For depth filtering
 depth.setMedianFilter(median)
 
 depth.setLeftRightCheck(lr_check)
-
-# Normal disparity values range from 0..95, will be used for normalization
-max_disparity = 95
-
-if extended_disparity: max_disparity *= 2 # Double the range
 depth.setExtendedDisparity(extended_disparity)
-
-if subpixel: max_disparity *= 32 # 5 fractional bits, x32
 depth.setSubpixel(subpixel)
-
-# When we get disparity to the host, we will multiply all values with the multiplier
-# for better visualization
-multiplier = 255 / max_disparity
 
 left.out.link(depth.left)
 right.out.link(depth.right)
@@ -72,7 +60,8 @@ with dai.Device(pipeline) as device:
     while True:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
-        frame = (frame*multiplier).astype(np.uint8)
+        # Normalization for better visualization
+        frame = (frame * 255 / depth.getMaxDisparity()).astype(np.uint8)
         # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
 
