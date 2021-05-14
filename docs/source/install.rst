@@ -37,6 +37,7 @@ Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Di
 Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
 Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`            `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 ====================== ===================================================== ================================================================================
 
 macOS
@@ -324,6 +325,42 @@ If Virtual Machine doesn't detect the device, try the following: find and select
 the DepthAI example again inside the VM. Choose to route to VM and select to *not ask again* (this is important, as there is a timeout, and the device 
 watchdog could get triggered if the host doesn't start communication in few seconds). You may need to repeat running the script a few times, until all gets 
 set properly for VMware.
+
+Virtual Box
+***********
+
+If you want to use VirtualBox to run the DepthAI source code, please make sure that you allow the VM to access the USB devices. Also, be aware that 
+by default, it supports only USB 1.1 devices, and DepthAI operates in two stages:
+
+#. For showing up when plugged in. We use this endpoint to load the firmware onto the device, which is a usb-boot technique.  This device is USB2.
+#. For running the actual code. This shows up after USB booting and is USB3.
+
+In order to support the DepthAI modes, you need to download and install `Oracle VM VirtualBox Extension Pack <https://www.virtualbox.org/wiki/Downloads>`__.  Once this is installed, enable USB3 (xHCI) Controller in the USB settings.
+
+Once this is done, you'll need to route the Myriad as USB device from Host to the VBox.  This is the filter for depthai before it has booted, which is 
+at that point a USB2 device:
+
+.. image:: https://user-images.githubusercontent.com/32992551/105070455-8d4d6b00-5a40-11eb-9bc6-19b164a55b4c.png
+  :alt: Routing the not-yet-booted depthai to the VirtualBox.
+
+The last step is to add the USB Intel Loopback device. The depthai device boots its firmware over USB, and after it has booted, it shows up as a new device.
+
+This device shows just up when the depthai/OAK is trying to reconnect (during runntime, so right after running a pipeline on depthai, such as `:bash: python3 depthai_demo.py`).
+
+It might take a few tries to get this loopback device shown up and added, as you need to do this while depthai is trying to connect after a pipeline has been built (and so it has at that point now booted its internal firmware over USB2).
+
+For enabling it only once, you can see the loopback device here (after the pipeline has been started):
+
+.. image:: https://user-images.githubusercontent.com/32992551/105112208-c527d300-5a7f-11eb-96b4-d14bcf974313.png
+  :alt: Find the loopback device right after you tell depthai to start the pipeline, and select it.
+
+And then for permanently enabling this pass-through to virtual box, enable this in setting below:
+
+.. image:: https://user-images.githubusercontent.com/32992551/105070474-93dbe280-5a40-11eb-94b3-6557cd83fe1f.png
+  :alt: Making the USB Loopback Device for depthai/OAK, to allow the booted device to communicate in virtualbox
+
+And then for each additional depthai/OAK device you would like to pass through, repeat just this last loopback settings step for each unit (as each unit will have its own unique ID).
+
 
 Install from PyPI
 #################
