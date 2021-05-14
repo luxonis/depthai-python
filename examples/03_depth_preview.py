@@ -61,7 +61,7 @@ with dai.Device(pipeline) as device:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
         # Normalization for better visualization
-        frame = (frame * 255 / depth.getMaxDisparity()).astype(np.uint8)
+        frame = (frame * (255 / depth.getMaxDisparity())).astype(np.uint8)
         # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
 
