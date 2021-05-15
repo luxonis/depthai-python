@@ -18,7 +18,7 @@ xoutRgb.setStreamName("rgb")
 camRgb.preview.link(xoutRgb.input)
 
 # Connect to the device
-with dai.Device() as device:
+with dai.Device(dai.OpenVINO.VERSION_2021_2, usb2Mode=True) as device:
     # Print out available cameras
     print('Connected cameras: ', device.getConnectedCameras())
     # Start pipeline
