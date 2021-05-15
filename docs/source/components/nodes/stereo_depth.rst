@@ -53,26 +53,26 @@ Inputs and Outputs
 Disparity
 #########
 
-When calculating the disparity, each pixel in the disparity map gets assigned a confidence value 0..255 by the stereo matching algorithm, as:
-- 0 - maximum confidence that it holds a valid value
-- 255 - minimum confidence, so there are chances the value is incorrect
+When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
+as:
+
+- :code:`0` - maximum confidence that it holds a valid value
+- :code:`255` - minimum confidence, so there is more chance that the value is incorrect
+
 (this confidence score is kind-of inverted, if say comparing with NN)
 
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
-the threshold get invalidated, i.e. their disparity value is set to zero.
+the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.setConfidenceThreshold()`.
 
 Current limitations
 ###################
 
-If one or more of the additional depth modes (lrcheck, extended, subpixel) are enabled, then:
+If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`, :code:`subpixel`) are enabled, then:
 
-- :code:`depth` output is FP16.
-- median filtering is disabled on device.
-- with subpixel, either depth or disparity has valid data.
+- median filtering is disabled on device
+- with subpixel, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output
 
-Otherwise, depth output is U16 (in milimeters) and median is functional.
-
-Like on Gen1, either :code:`depth` or :code:`disparity` has valid data.
+Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
 
 Usage
 #####
