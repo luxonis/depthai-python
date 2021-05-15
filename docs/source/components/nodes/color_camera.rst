@@ -24,20 +24,30 @@ Inputs and Outputs
 
 .. code-block::
 
-                 ┌───────────────────┐   still
-                 │                   ├───────────►
-  inputConfig    │                   │
-  ──────────────►│                   │   preview
-                 │    ColorCamera    ├───────────►
-  inputControl   │                   │
-  ──────────────►│                   │   video
-                 │                   ├───────────►
-                 └───────────────────┘
+                         ColorCamera node
+                 ┌──────────────────────────────┐
+                 │  ┌──────────────┐            │
+                 │  │    sensor    │            │     raw
+                 │  │   (IMX378)   │------------├────────►
+                 │  └─────┬───▲────┘            │
+                 │        │   │                 │
+                 │      ┌─▼───┴─┐               │     isp
+  inputControl   │      │       │------┬--------├────────►
+  ──────────────►│------│  ISP  │ ┌────▼────┐   │   video
+                 │      │       │ |         |---├────────►
+                 │      └───────┘ │         │   │   still
+  inputConfig    │                │ Encoder │---├────────►
+  ──────────────►│----------------|         │   │ preview
+                 │                │         │---├────────►
+                 │                └─────────┘   │
+                 └──────────────────────────────┘
 
 **Message types**
 
 - :code:`inputConfig` - :ref:`ImageManipConfig`
 - :code:`inputControl` - :ref:`CameraControl`
+- :code:`raw` - :ref:`ImgFrame`
+- :code:`isp` - :ref:`ImgFrame`
 - :code:`still` - :ref:`ImgFrame`
 - :code:`preview` - :ref:`ImgFrame`
 - :code:`video` - :ref:`ImgFrame`
@@ -45,6 +55,11 @@ Inputs and Outputs
 :code:`Preview` is RGB (or BGR planar/interleaved if configured) and is mostly suited for small size previews and to feed the image
 into :ref:`NeuralNetwork`. :code:`video` and :code:`still` are both NV12, so are suitable for bigger sizes. :code:`still` image gets created when
 a capture event is sent to the ColorCamera, so it's like taking a photo.
+
+**ISP** (image signal processor) is used for bayer transformation, demosaicing, noise reduction etc. Click
+`here <https://en.wikipedia.org/wiki/Image_processor>`__ for more information.
+
+**Encoder** converts YUV420 planar frames from **ISP** into :code:`video`/:code:`preview`/:code:`still` frames.
 
 Usage
 #####
