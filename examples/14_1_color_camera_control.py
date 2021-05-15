@@ -37,7 +37,9 @@ previewOut = pipeline.createXLinkOut()
 
 
 # Properties
-colorCam.setVideoSize(640, 360)
+colorCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+colorCam.setStillSize(1280, 800)  # TODO: default in FW
+#colorCam.setVideoSize(640, 360)
 colorCam.setPreviewSize(300, 300)
 controlIn.setStreamName('control')
 configIn.setStreamName('config')
