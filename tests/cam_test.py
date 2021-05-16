@@ -68,6 +68,12 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
+if 0:
+    print("=== Using custom camera tuning, and limiting RGB FPS to 10")
+    pipeline.setCameraTuningBlobPath("/home/user/Downloads/tuning_color_low_light.bin")
+    # TODO: change sensor driver to make FPS automatic (based on requested exposure time)
+    cam['rgb'].setFps(10)
+
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     q = {}
