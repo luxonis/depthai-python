@@ -4,6 +4,14 @@ Mono & MobilenetSSD & Depth
 This example shows how to run MobileNetv2SSD on the left grayscale camera in parallel with running
 the disparity depth results, displaying both the depth map and the right grayscale stream, with the
 bounding box from the neural network overlaid.
+It's a combination of :ref:`Depth Preview` and :ref:`Mono & MobilenetSSD`.
+
+.. rubric:: Similiar samples:
+
+- :ref:`RGB & MobilenetSSD`
+- :ref:`RGB & MobileNetSSD @ 4K`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`Video & MobilenetSSD`
 
 Demo
 ####

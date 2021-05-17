@@ -5,6 +5,13 @@ This example shows how to run MobileNetv2SSD on the RGB input frame, and perform
 
 setConfidenceThreshold - confidence threshold above which objects are detected
 
+.. rubric:: Similiar samples:
+
+- :ref:`Spatial location calculator`
+- :ref:`RGB & MobilenetSSD with spatial data`
+- :ref:`Mono & MobilenetSSD with spatial data`
+- :ref:`RGB & TinyYolo with spatial data`
+
 Demo
 ####
 

@@ -4,6 +4,13 @@ Mono & MobilenetSSD
 This example shows how to run MobileNetv2SSD on the right grayscale camera and how to display the
 neural network results on a preview of the right camera stream.
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB & MobilenetSSD`
+- :ref:`RGB & MobileNetSSD @ 4K`
+- :ref:`Video & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD & Depth`
+
 Demo
 ####
 

@@ -5,6 +5,15 @@ This example shows how to run MobileNetv2SSD on the RGB input frame, and how to 
 preview and the metadata results from the MobileNetv2SSD on the preview.
 The preview size is set to 4K resolution.
 
+It's a variation of :ref:`RGB & MobilenetSSD`.
+
+.. rubric:: Similiar samples:
+
+- :ref:`RGB & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`Video & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD & Depth`
+
 Demo
 ####
 

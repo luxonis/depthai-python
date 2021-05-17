@@ -65,7 +65,7 @@ with dai.Device(pipeline) as device:
     spatialCalcQueue = device.getOutputQueue(name="spatialData", maxSize=4, blocking=False)
     spatialCalcConfigInQueue = device.getInputQueue("spatialCalcConfig")
 
-    color = (255, 255, 255)
+    color = (0, 255, 0)
 
     print("Use WASD keys to move ROI!")
 

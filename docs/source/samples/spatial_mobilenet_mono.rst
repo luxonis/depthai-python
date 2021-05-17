@@ -8,6 +8,13 @@ X,Y,Z coordinates are relative to the center of depth map.
 
 setConfidenceThreshold - confidence threshold above which objects are detected
 
+.. rubric:: Similiar samples:
+
+- :ref:`Spatial location calculator`
+- :ref:`Spatial object tracker on RGB`
+- :ref:`RGB & MobilenetSSD with spatial data`
+- :ref:`RGB & TinyYolo with spatial data`
+
 Demo
 ####
 

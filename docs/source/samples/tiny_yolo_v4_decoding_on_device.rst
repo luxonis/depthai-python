@@ -12,6 +12,10 @@ setAnchorMasks - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for 
 setIouThreshold - intersection over union threshold
 setConfidenceThreshold - confidence threshold above which objects are detected
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB & TinyYoloV3 decoding on device`
+
 Demo
 ####
 

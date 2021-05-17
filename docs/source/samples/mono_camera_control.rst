@@ -4,16 +4,27 @@ Mono Camera Control
 This example shows how to control the device-side crop and camera triggers.
 TWo output is a displayed mono cropped frame, that can be manipulated using the following keys:
 
-#. `a` will move the crop left
-#. `d` will move the crop right
 #. `w` will move the crop up
+#. `a` will move the crop left
 #. `s` will move the crop down
+#. `d` will move the crop right
 #. `e` will trigger autoexposure
 #. `i` and `o` will decrease/increase the exposure time
 #. `k` and `l` will decrease/increase the sensitivity iso
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB Camera Control`
+- :ref:`Depth Crop Control`
+
 Demo
 ####
+
+.. raw:: html
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+        <iframe src="https://www.youtube.com/watch?v=MiyvByYbUVU" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+    </div>
 
 
 Setup

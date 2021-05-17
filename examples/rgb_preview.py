@@ -32,7 +32,7 @@ with dai.Device(pipeline) as device:
         inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
 
         # Retrieve 'bgr' (opencv format) frame
-        cv2.imshow("bgr", inRgb.getCvFrame())
+        cv2.imshow("rgb", inRgb.getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break

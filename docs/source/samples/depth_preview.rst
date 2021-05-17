@@ -6,13 +6,18 @@ over XLink to transfer the results to the host real-time, and displays the depth
 Note that disparity is used in this case, as it colorizes in a more intuitive way.
 Below is also a preview of using different median filters side-by-side on a depth image.
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB Preview`
+- :ref:`Mono Preview`
+
 Demo
 ####
 
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/7oDjG-s-88Y" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/watch?v=4iiyxAj4TRk" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
 **Filtering depth using median filter**

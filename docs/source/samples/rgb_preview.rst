@@ -11,13 +11,19 @@ Please check out :ref:`ColorCamera` node to get a better view.
 
 If you want to get higher resolution RGB frames sample please visit :ref:`RGB video`.
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB Video` (higher resolution)
+- :ref:`Mono Preview`
+- :ref:`Depth Preview`
+
 Demo
 ####
 
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/WP-Vo-awT9A" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/watch?v=qPoejs07qpY" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
 Setup

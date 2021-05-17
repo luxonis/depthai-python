@@ -4,6 +4,10 @@ RGB video
 This example shows how to use high resolution video at low latency. Compared to :ref:`RGB Preview`, this demo outputs NV12 frames whereas
 preview frames are BGR and are not suited for larger resoulution (eg. 1920x1080). Preview is more suitable for either NN or visualization purposes.
 
+.. rubric:: Similiar samples:
+
+- :ref:`RGB Preview` (lower resolution)
+
 Demo
 ####
 

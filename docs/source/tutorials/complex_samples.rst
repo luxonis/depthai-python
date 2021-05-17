@@ -1,35 +1,36 @@
-Code samples
-============
+Complex samples
+===============
 
 .. toctree::
    :maxdepth: 0
    :hidden:
    :glob:
 
-   simple_samples.rst
-   complex_samples.rst
-   mixed_samples.rst
-
-Code samples are used for automated testing. They are also a great starting point for the gen2 API.
-
-.. rubric:: List of simple samples
-
-- :ref:`RGB Preview` - Displays a small preview of the RGB camera
-- :ref:`RGB video` - Displays high resolution frames of the RGB camera
-- :ref:`Mono Preview` - Displays right/left mono cameras
-- :ref:`Depth Preview` - Displays colorized stereo disparity
-- :ref:`Device Queue Event` - Demonstrates how to use device queue events
-- :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
-- :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
-- :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
-- :ref:`RGB Full Resolution Saver` - Saves full resolution RGB images (4k) on the host (:code:`.jpeg`)
-- :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
-- :ref:`RGB & MobilenetSSD` - Runs MobileNetSSD on RGB frames and displays detections on the frame
-- :ref:`RGB & MobileNetSSD @ 4K` - Runs MobileNetSSD on RGB frames and displays detections on both preview and 4k frames
-- :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
-- :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
+   ../samples/rgb_camera_control.rst
+   ../samples/mono_camera_control.rst
+   ../samples/depth_crop_control.rst
+   ../samples/stereo_depth_from_host.rst
+   ../samples/rgb_rotate_warp.rst
+   ../samples/rgb_depth_aligned.rst
+   ../samples/autoexposure_roi.rst
+   ../samples/mono_depth_mobilenetssd.rst
+   ../samples/rgb_encoding_mobilenet.rst
+   ../samples/rgb_encoding_mono_mobilenet.rst
+   ../samples/rgb_encoding_mono_mobilenet_depth.rst
+   ../samples/tiny_yolo_v3_decoding_on_device.rst
+   ../samples/tiny_yolo_v4_decoding_on_device.rst
+   ../samples/object_tracker.rst
+   ../samples/object_tracker_video.rst
+   ../samples/spatial_location_calculator.rst
+   ../samples/spatial_object_tracker.rst
+   ../samples/spatial_mobilenet.rst
+   ../samples/spatial_mobilenet_mono.rst
+   ../samples/spatial_tiny_yolo.rst
 
 .. rubric:: List of complex samples
+
+These samples are great starting point for the gen2 API.
+If you want to see more interesting examples you should check out our `Experiments on GitHub <https://github.com/luxonis/depthai-experiments>`_.
 
 - :ref:`RGB Camera Control` - Demonstrates how to control the RGB camera (crop, focus, exposure, sensitivity) from the host
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
@@ -51,8 +52,3 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`RGB & MobilenetSSD with spatial data` - Displays RGB frames with MobileNet detections and spatial coordinates on them
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
 - :ref:`RGB & TinyYolo with spatial data`- Displays RGB frames with Yolo detections and spatial coordinates on them
-
-.. rubric:: List of mixed samples
-
-- :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
-- :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame

@@ -4,10 +4,10 @@ RGB Camera Control
 This example shows how to control the device-side crop and camera triggers.
 An output is a displayed RGB cropped frame, that can be manipulated using the following keys:
 
-#. `a` will move the crop left
-#. `d` will move the crop right
 #. `w` will move the crop up
+#. `a` will move the crop left
 #. `s` will move the crop down
+#. `d` will move the crop right
 #. `c` will trigger a `still` event, causing the current frame to be captured and sent over `still` output from camera node
 #. `t` will trigger autofocus
 #. `f` will trigger autofocus continuously
@@ -16,13 +16,18 @@ An output is a displayed RGB cropped frame, that can be manipulated using the fo
 #. `k` and `l` will decrease/increase the sensitivity iso
 #. `,` and `.` will decrease/increase the focus range
 
+.. rubric:: Similiar samples:
+
+- :ref:`Mono Camera Control`
+- :ref:`Depth Crop Control`
+
 Demo
 ####
 
 .. raw:: html
 
     <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/httOxe2LAkI" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+        <iframe src="https://www.youtube.com/watch?v=HLt9Y5np0hk" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
 Setup

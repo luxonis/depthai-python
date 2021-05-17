@@ -12,6 +12,16 @@ playable. Note that ffmpeg will need to be installed and runnable for the conver
 Be careful, this example saves encoded video to your host storage. So if you leave it running,
 you could fill up your storage on your host.
 
+It's a variation of :ref:`RGB Encoding` and :ref:`RGB & Mono Encoding`.
+
+.. rubric:: Similiar samples:
+
+- :ref:`RGB Encoding`
+- :ref:`RGB & Mono Encoding`
+- :ref:`RGB Encoding & MobilenetSSD`
+- :ref:`RGB Encoding & Mono & MobilenetSSD`
+- :ref:`RGB Encoding & Mono with MobilenetSSD & Depth`
+
 Demo
 ####
 

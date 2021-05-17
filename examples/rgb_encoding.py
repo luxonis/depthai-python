@@ -17,7 +17,7 @@ camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 videoEnc.setDefaultProfilePreset(3840, 2160, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-# Create outputs
+# Linking
 camRgb.video.link(videoEnc.input)
 videoEnc.bitstream.link(xout.input)
 

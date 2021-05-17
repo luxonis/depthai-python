@@ -22,13 +22,13 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 manip = pipeline.createImageManip()
-detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 objectTracker = pipeline.createObjectTracker()
+detectionNetwork = pipeline.createMobileNetDetectionNetwork()
 
 manipOut = pipeline.createXLinkOut()
 xinFrame = pipeline.createXLinkIn()
-xlinkOut = pipeline.createXLinkOut()
 trackerOut = pipeline.createXLinkOut()
+xlinkOut = pipeline.createXLinkOut()
 nnOut = pipeline.createXLinkOut()
 
 manipOut.setStreamName("manip")
@@ -41,6 +41,9 @@ nnOut.setStreamName("nn")
 xinFrame.setMaxDataSize(1920*1080*3)
 
 manip.initialConfig.setResizeThumbnail(384, 384)
+# manip.initialConfig.setResize(384, 384)
+# manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
+# The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 manip.inputImage.setBlocking(True)
 
@@ -49,27 +52,27 @@ detectionNetwork.setBlobPath(args.nnPath)
 detectionNetwork.setConfidenceThreshold(0.5)
 detectionNetwork.input.setBlocking(True)
 
+objectTracker.inputTrackerFrame.setBlocking(True)
+objectTracker.inputDetectionFrame.setBlocking(True)
+objectTracker.inputDetections.setBlocking(True)
 objectTracker.setDetectionLabelsToTrack([0])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
 objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
-objectTracker.inputTrackerFrame.setBlocking(True)
-objectTracker.inputDetectionFrame.setBlocking(True)
-objectTracker.inputDetections.setBlocking(True)
 
 # Linking
 manip.out.link(manipOut.input)
 manip.out.link(detectionNetwork.input)
 xinFrame.out.link(manip.inputImage)
 xinFrame.out.link(objectTracker.inputTrackerFrame)
+detectionNetwork.out.link(nnOut.input)
+detectionNetwork.out.link(objectTracker.inputDetections)
+detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 objectTracker.out.link(trackerOut.input)
 objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
-detectionNetwork.out.link(nnOut.input)
-detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
-detectionNetwork.out.link(objectTracker.inputDetections)
 
-# Connect to device and start pipeline
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
 
     qIn = device.getInputQueue(name="inFrame")
@@ -155,10 +158,9 @@ with dai.Device(pipeline) as device:
             except:
                 label = t.label
 
-            statusMap = {dai.Tracklet.TrackingStatus.NEW : "NEW", dai.Tracklet.TrackingStatus.TRACKED : "TRACKED", dai.Tracklet.TrackingStatus.LOST : "LOST"}
             cv2.putText(trackerFrame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(trackerFrame, f"ID: {[t.id]}", (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-            cv2.putText(trackerFrame, statusMap[t.status], (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            cv2.putText(trackerFrame, t.status.name, (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(trackerFrame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(trackerFrame, "Fps: {:.2f}".format(fps), (2, trackerFrame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
