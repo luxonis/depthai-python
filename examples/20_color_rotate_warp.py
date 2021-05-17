@@ -77,8 +77,8 @@ cam.preview.link(manip.inputImage)
 manip.out.link(manipOut.input)
 manipCfg.out.link(manip.inputConfig)
 
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    device.startPipeline()
 
     qPreview = device.getOutputQueue(name="preview", maxSize=4)
     qManip = device.getOutputQueue(name="manip", maxSize=4)

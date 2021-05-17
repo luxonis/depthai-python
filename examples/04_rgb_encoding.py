@@ -20,10 +20,8 @@ videoOut = pipeline.createXLinkOut()
 videoOut.setStreamName('h265')
 videoEncoder.bitstream.link(videoOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the encoded data from the output defined above
     q = device.getOutputQueue(name="h265", maxSize=30, blocking=True)

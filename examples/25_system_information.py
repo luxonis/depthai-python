@@ -27,10 +27,8 @@ linkOut = pipeline.createXLinkOut()
 linkOut.setStreamName("sysinfo")
 sys_logger.out.link(linkOut.input)
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queue will be used to get the system info
     q_sysinfo = device.getOutputQueue(name="sysinfo", maxSize=4, blocking=False)

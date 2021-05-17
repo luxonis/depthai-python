@@ -122,7 +122,7 @@ void NodeBindings::bind(pybind11::module& m){
         })
         .def("setBoardSocket", &ColorCamera::setBoardSocket, py::arg("boardSocket"), DOC(dai, node, ColorCamera, setBoardSocket))
         .def("getBoardSocket", &ColorCamera::getBoardSocket, DOC(dai, node, ColorCamera, getBoardSocket))
-        .def("setImageOrientation", &ColorCamera::setImageOrientation, py::arg("boardSocket"), DOC(dai, node, ColorCamera, setImageOrientation))
+        .def("setImageOrientation", &ColorCamera::setImageOrientation, py::arg("imageOrientation"), DOC(dai, node, ColorCamera, setImageOrientation))
         .def("getImageOrientation", &ColorCamera::getImageOrientation, DOC(dai, node, ColorCamera, getImageOrientation))
         .def("setColorOrder", &ColorCamera::setColorOrder, py::arg("colorOrder"), DOC(dai, node, ColorCamera, setColorOrder))
         .def("getColorOrder", &ColorCamera::getColorOrder, DOC(dai, node, ColorCamera, getColorOrder))
@@ -328,6 +328,7 @@ void NodeBindings::bind(pybind11::module& m){
             s.setOutputDepth(enable);
             HEDLEY_DIAGNOSTIC_POP
         })
+        .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
 
     // VideoEncoder node

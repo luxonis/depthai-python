@@ -45,8 +45,8 @@ depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 camLeft.out.link(depth.left)
 camRight.out.link(depth.right)
-# Disparity range is 0..95, used for normalization
-disparity_multiplier = 255 / 95
+# Used for normalization
+disparity_multiplier = 255 / depth.getMaxDisparity()
 
 disparityOut = pipeline.createXLinkOut()
 disparityOut.setStreamName("disparity")
@@ -82,10 +82,8 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     queueSize = 8
     qRight = device.getOutputQueue("right", queueSize)
@@ -109,7 +107,7 @@ with dai.Device(pipeline) as device:
     videoFile = open('video.h265', 'wb')
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("disparity", cv2.WINDOW_NORMAL)
 
     while True:
         inRight = qRight.tryGet()

@@ -71,10 +71,8 @@ nn.out.link(nnOut.input)
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-# Pipeline is defined, now we can connect to the device
+# Connect and start the pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
 
     # Output queues will be used to get the grayscale / depth frames and nn data from the outputs defined above
     qRight = device.getOutputQueue("rectifiedRight", maxSize=4, blocking=False)
@@ -103,7 +101,7 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    disparity_multiplier = 255 / 95 # Disparity range is 0..95
+    disparity_multiplier = 255 / stereo.getMaxDisparity()
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
