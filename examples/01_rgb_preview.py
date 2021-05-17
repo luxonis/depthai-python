@@ -21,6 +21,8 @@ camRgb.preview.link(xoutRgb.input)
 with dai.Device() as device:
     # Print out available cameras
     print('Connected cameras: ', device.getConnectedCameras())
+    # Print out usb speed
+    print('Usb speed: ', device.getUsbSpeed().name)
     # Start pipeline
     device.startPipeline(pipeline)
 
