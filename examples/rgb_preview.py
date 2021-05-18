@@ -24,6 +24,8 @@ camRgb.preview.link(xoutRgb.input)
 with dai.Device(pipeline) as device:
 
     print('Connected cameras: ', device.getConnectedCameras())
+    # Print out usb speed
+    print('Usb speed: ', device.getUsbSpeed().name)
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

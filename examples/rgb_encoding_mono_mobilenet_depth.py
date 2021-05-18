@@ -80,6 +80,9 @@ manip.out.link(nn.input)
 manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
+# Disparity range is used for normalization
+disparityMultiplier = 255 / depth.getMaxDisparity()
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
@@ -106,8 +109,6 @@ with dai.Device(pipeline) as device:
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
     cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
-    # Disparity range is 0..95, used for normalization
-    disparity_multiplier = 255 / 95
 
     while True:
         inRight = qRight.tryGet()
@@ -129,7 +130,7 @@ with dai.Device(pipeline) as device:
             frameDisparity = inDisparity.getCvFrame()
             if flipRectified:
                 frameDisparity = cv2.flip(frameDisparity, 1)
-            frameDisparity = (frameDisparity*disparity_multiplier).astype(np.uint8)
+            frameDisparity = (frameDisparity*disparityMultiplier).astype(np.uint8)
             frameDisparity = cv2.applyColorMap(frameDisparity, cv2.COLORMAP_JET)
 
         if inDet is not None:

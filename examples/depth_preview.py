@@ -33,19 +33,8 @@ depth.setConfidenceThreshold(200)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
 depth.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(lr_check)
-
-# Normal disparity values range from 0..95, will be used for normalization
-max_disparity = 95
-
-if extended_disparity: max_disparity *= 2 # Double the range
 depth.setExtendedDisparity(extended_disparity)
-
-if subpixel: max_disparity *= 32 # 5 fractional bits, x32
 depth.setSubpixel(subpixel)
-
-# When we get disparity to the host, we will multiply all values with the multiplier
-# for better visualization
-multiplier = 255 / max_disparity
 
 # Linking
 monoLeft.out.link(depth.left)
@@ -60,7 +49,8 @@ with dai.Device(pipeline) as device:
     while True:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
-        frame = (frame*multiplier).astype(np.uint8)
+        # Normalization for better visualization
+        frame = (frame * (255 / depth.getMaxDisparity())).astype(np.uint8)
 
         cv2.imshow("disparity", frame)
 

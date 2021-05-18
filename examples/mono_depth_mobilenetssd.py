@@ -96,7 +96,8 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    disparity_multiplier = 255 / 95 # Disparity range is 0..95
+    disparityMultiplier = 255 / stereo.getMaxDisparity()
+
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
@@ -119,7 +120,7 @@ with dai.Device(pipeline) as device:
         if inDisparity is not None:
             # Frame is transformed, normalized, and color map will be applied to highlight the depth info
             disparityFrame = inDisparity.getFrame()
-            disparityFrame = (disparityFrame*disparity_multiplier).astype(np.uint8)
+            disparityFrame = (disparityFrame*disparityMultiplier).astype(np.uint8)
             # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
             disparityFrame = cv2.applyColorMap(disparityFrame, cv2.COLORMAP_JET)
             show("disparity", disparityFrame)
