@@ -373,7 +373,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     // SPIIn node
     py::class_<SPIIn, Node, std::shared_ptr<SPIIn>>(m, "SPIIn", DOC(dai, node, SPIIn))
-        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, input))
+        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, out))
         .def("setStreamName", &SPIIn::setStreamName, py::arg("name"), DOC(dai, node, SPIIn, setStreamName))
         .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
         ;
