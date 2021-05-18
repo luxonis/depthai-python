@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.4) # For Hunter
 
-set(PYTHON_EXECUTABLE "/usr/bin/python3.6")
-set(PYTHON_INCLUDE_DIR "/usr/include/python3.6")
-set(PYTHON_LIBRARY "/usr/lib/x86_64-linux-gnu/libpython3.6.so")
-
-
 # Set defaults
 # PIC toolchain as we are building a shared library
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" CACHE STRING "")
