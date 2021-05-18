@@ -1,5 +1,5 @@
-Simple samples
-==============
+Simple
+======
 
 .. toctree::
    :maxdepth: 0
@@ -20,8 +20,6 @@ Simple samples
    ../samples/rgb_mobilenet_4k.rst
    ../samples/mono_mobilenet.rst
    ../samples/video_mobilenet.rst
-
-.. rubric:: List of simple samples
 
 These samples are great starting point for the gen2 API.
 

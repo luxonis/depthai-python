@@ -1,5 +1,5 @@
-Complex samples
-===============
+Complex
+=======
 
 .. toctree::
    :maxdepth: 0
@@ -26,8 +26,6 @@ Complex samples
    ../samples/spatial_mobilenet.rst
    ../samples/spatial_mobilenet_mono.rst
    ../samples/spatial_tiny_yolo.rst
-
-.. rubric:: List of complex samples
 
 These samples are great starting point for the gen2 API.
 If you want to see more interesting examples you should check out our `Experiments on GitHub <https://github.com/luxonis/depthai-experiments>`_.

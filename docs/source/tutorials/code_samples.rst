@@ -1,4 +1,4 @@
-Code samples
+Code Samples
 ============
 
 .. toctree::
@@ -12,7 +12,7 @@ Code samples
 
 Code samples are used for automated testing. They are also a great starting point for the gen2 API.
 
-.. rubric:: List of simple samples
+.. rubric:: Simple
 
 - :ref:`RGB Preview` - Displays a small preview of the RGB camera
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
@@ -29,7 +29,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
 
-.. rubric:: List of complex samples
+.. rubric:: Complex
 
 - :ref:`RGB Camera Control` - Demonstrates how to control the RGB camera (crop, focus, exposure, sensitivity) from the host
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
@@ -52,7 +52,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
 - :ref:`RGB & TinyYolo with spatial data`- Displays RGB frames with Yolo detections and spatial coordinates on them
 
-.. rubric:: List of mixed samples
+.. rubric:: Mixed
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
