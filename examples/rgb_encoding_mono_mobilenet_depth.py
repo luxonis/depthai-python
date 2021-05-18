@@ -6,8 +6,6 @@ import cv2
 import depthai as dai
 import numpy as np
 
-flipRectified = True
-
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -21,6 +19,8 @@ if not Path(nnPath).exists():
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
+flipRectified = True
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -30,8 +30,8 @@ videoEncoder = pipeline.createVideoEncoder()
 monoRight = pipeline.createMonoCamera()
 monoLeft = pipeline.createMonoCamera()
 depth = pipeline.createStereoDepth()
-nn = pipeline.createMobileNetDetectionNetwork()
 manip = pipeline.createImageManip()
+nn = pipeline.createMobileNetDetectionNetwork()
 
 videoOut = pipeline.createXLinkOut()
 xoutRight = pipeline.createXLinkOut()
@@ -98,6 +98,7 @@ with dai.Device(pipeline) as device:
     frameDisparity = None
     detections = []
     offsetX = (monoRight.getResolutionWidth() - monoRight.getResolutionHeight()) // 2
+    color = (255, 0, 0)
     croppedFrame = np.zeros((monoRight.getResolutionHeight(), monoRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
@@ -108,7 +109,6 @@ with dai.Device(pipeline) as device:
     videoFile = open('video.h265', 'wb')
     cv2.namedWindow("right", cv2.WINDOW_NORMAL)
     cv2.namedWindow("manip", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
 
     while True:
         inRight = qRight.tryGet()
@@ -140,26 +140,29 @@ with dai.Device(pipeline) as device:
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+            # Show the right cam frame
             cv2.imshow("right", frame)
 
         if frameDisparity is not None:
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
-                cv2.rectangle(frameDisparity, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frameDisparity, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frameDisparity, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.rectangle(frameDisparity, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+                cv2.putText(frameDisparity, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frameDisparity, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            # Show the disparity frame
             cv2.imshow("disparity", frameDisparity)
 
         if frameManip is not None:
             for detection in detections:
                 bbox = frameNorm(frameManip, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+            # Show the manip frame
             cv2.imshow("manip", frameManip)
 
         if cv2.waitKey(1) == ord('q'):

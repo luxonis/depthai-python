@@ -44,7 +44,7 @@ ve3.bitstream.link(ve3Out.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as dev:
 
-    # Prepare data queues
+    # Output queues will be used to get the encoded data from the output defined above
     outQ1 = dev.getOutputQueue('ve1Out', maxSize=30, blocking=True)
     outQ2 = dev.getOutputQueue('ve2Out', maxSize=30, blocking=True)
     outQ3 = dev.getOutputQueue('ve3Out', maxSize=30, blocking=True)

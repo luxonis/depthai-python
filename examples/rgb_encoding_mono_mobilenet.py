@@ -52,8 +52,8 @@ nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
-manip.initialConfig.setResize(300, 300)
 manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
+manip.initialConfig.setResize(300, 300)
 
 # Linking
 camRgb.video.link(videoEncoder.input)
@@ -78,6 +78,7 @@ with dai.Device(pipeline) as device:
     frameManip = None
     detections = []
     offsetX = (monoRight.getResolutionWidth() - monoRight.getResolutionHeight()) // 2
+    color = (255, 0, 0)
     croppedFrame = np.zeros((monoRight.getResolutionHeight(), monoRight.getResolutionHeight()))
 
     def frameNorm(frame, bbox):
@@ -110,17 +111,19 @@ with dai.Device(pipeline) as device:
             for detection in detections:
                 bbox = frameNorm(croppedFrame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 bbox[::2] += offsetX
-                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+            # Show the frame
             cv2.imshow("right", frame)
 
         if frameManip is not None:
             for detection in detections:
                 bbox = frameNorm(frameManip, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                cv2.putText(frameManip, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.putText(frameManip, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
+                cv2.rectangle(frameManip, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+            # Show the frame
             cv2.imshow("manip", frameManip)
 
         if cv2.waitKey(1) == ord('q'):

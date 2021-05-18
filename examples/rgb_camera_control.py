@@ -148,7 +148,7 @@ with dai.Device(pipeline) as device:
             if key == ord(','): lensPos -= LENS_STEP
             if key == ord('.'): lensPos += LENS_STEP
             lensPos = clamp(lensPos, lensMin, lensMax)
-            print("Setting manual focus, lens position:", lensPos)
+            print("Setting manual focus, lens position: ", lensPos)
             ctrl = dai.CameraControl()
             ctrl.setManualFocus(lensPos)
             controlQueue.send(ctrl)
@@ -159,7 +159,7 @@ with dai.Device(pipeline) as device:
             if key == ord('l'): sensIso += ISO_STEP
             expTime = clamp(expTime, expMin, expMax)
             sensIso = clamp(sensIso, sensMin, sensMax)
-            print("Setting manual exposure, time:", expTime, "iso:", sensIso)
+            print("Setting manual exposure, time: ", expTime, "iso: ", sensIso)
             ctrl = dai.CameraControl()
             ctrl.setManualExposure(expTime, sensIso)
             controlQueue.send(ctrl)

@@ -8,10 +8,9 @@ import depthai as dai
 # Otherwise (False), the aligned depth is automatically upscaled to 1080p
 downscaleColor = True
 
-subpixel = False
-
 # Create pipeline
 pipeline = dai.Pipeline()
+queueNames = None
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
@@ -23,7 +22,9 @@ rgbOut = pipeline.createXLinkOut()
 depthOut = pipeline.createXLinkOut()
 
 rgbOut.setStreamName("rgb")
+queueNames.append("rgb")
 depthOut.setStreamName("depth")
+queueNames.append("depth")
 
 #Properties
 camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
@@ -95,4 +96,4 @@ with dai.Device(pipeline) as device:
             frameDepth = None
 
         if cv2.waitKey(1) == ord('q'):
-            exit()
+            break

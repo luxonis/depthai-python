@@ -5,6 +5,8 @@ import depthai as dai
 
 stepSize = 0.05
 
+newConfig = False
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -65,7 +67,7 @@ with dai.Device(pipeline) as device:
     spatialCalcQueue = device.getOutputQueue(name="spatialData", maxSize=4, blocking=False)
     spatialCalcConfigInQueue = device.getInputQueue("spatialCalcConfig")
 
-    color = (0, 255, 0)
+    color = (255, 255, 255)
 
     print("Use WASD keys to move ROI!")
 
@@ -88,13 +90,12 @@ with dai.Device(pipeline) as device:
 
             fontType = cv2.FONT_HERSHEY_TRIPLEX
             cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-            cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, color)
-            cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, color)
-            cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, color)
-
+            cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, 255)
+            cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, 255)
+            cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, 255)
+        # Show the frame
         cv2.imshow("depth", depthFrameColor)
 
-        newConfig = False
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
@@ -124,3 +125,4 @@ with dai.Device(pipeline) as device:
             cfg = dai.SpatialLocationCalculatorConfig()
             cfg.addROI(config)
             spatialCalcConfigInQueue.send(cfg)
+            newConfig = false

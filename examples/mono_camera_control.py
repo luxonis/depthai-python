@@ -22,6 +22,8 @@ isoStep = 50
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
+sendCamConfig = False
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -73,11 +75,6 @@ with dai.Device(pipeline) as device:
     configQueue = device.getInputQueue(configIn.getStreamName())
     controlQueue = device.getInputQueue(controlIn.getStreamName())
 
-    def displayFrame(name, frame):
-        cv2.imshow(name, frame)
-
-    sendCamConfig = False
-
     # Defaults and limits for manual focus/exposure controls
     expTime = 20000
     expMin = 1
@@ -90,8 +87,8 @@ with dai.Device(pipeline) as device:
     while True:
         inRight = qRight.get()
         inLeft = qLeft.get()
-        displayFrame("right", inRight.getCvFrame())
-        displayFrame("left", inLeft.getCvFrame())
+        cv2.imshow("right", inRight.getCvFrame())
+        cv2.imshow("left", inLeft.getCvFrame())
 
         # Update screen (1ms pooling rate)
         key = cv2.waitKey(1)
@@ -134,6 +131,7 @@ with dai.Device(pipeline) as device:
                 bottomRight.x += stepSize
                 sendCamConfig = True
 
+        # Send new config to camera
         if sendCamConfig:
             cfg = dai.ImageManipConfig()
             cfg.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)

@@ -27,7 +27,6 @@ with dai.Device(pipeline) as device:
     # Output queue will be used to get the grayscale frames from the output defined above
     qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
-    # Make sure the destination path is present before starting to store the examples
     dirName = "mono_data"
     Path(dirName).mkdir(parents=True, exist_ok=True)
 
@@ -35,7 +34,7 @@ with dai.Device(pipeline) as device:
         inRight = qRight.get()  # Blocking call, will wait until a new data has arrived
         # Data is originally represented as a flat 1D array, it needs to be converted into HxW form
         # Frame is transformed and ready to be shown
-        cv2.imshow("right", inRight.getFrame())
+        cv2.imshow("right", inRight.getCvFrame())
 
         # After showing the frame, it's being stored inside a target directory as a PNG image
         cv2.imwrite(f"{dirName}/{int(time.time() * 1000)}.png", inRight.getFrame())
