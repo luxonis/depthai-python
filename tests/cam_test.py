@@ -17,7 +17,7 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
 args = parser.parse_args()
 
 # TODO as args
-cam_list = ['rgb', 'left', 'right']
+cam_list = ['left', 'right']
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -56,7 +56,7 @@ xout = {}
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
-    if c == 'rgb':
+    if 1:  # c == 'rgb':
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].isp.link(xout[c].input)
