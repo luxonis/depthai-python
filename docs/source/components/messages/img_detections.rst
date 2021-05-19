@@ -7,9 +7,9 @@ which contains :code:`label`, :code:`confidence`, and the bounding box informati
 Examples of functionality
 #########################
 
-- :ref:`08 - RGB & MobilenetSSD`
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`22.2 - RGB & TinyYoloV4 decoding on device`
+- :ref:`RGB & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`RGB & TinyYoloV4 decoding on device`
 
 Reference
 #########
