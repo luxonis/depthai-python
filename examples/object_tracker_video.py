@@ -19,6 +19,7 @@ args = parser.parse_args()
 
 # Create pipeline
 pipeline = dai.Pipeline()
+pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_3)
 
 # Define sources and outputs
 manip = pipeline.createImageManip()
