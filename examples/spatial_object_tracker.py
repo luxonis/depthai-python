@@ -21,6 +21,7 @@ fullFrameTracking = args.full_frame
 
 # Create pipeline
 pipeline = dai.Pipeline()
+pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_2)
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
