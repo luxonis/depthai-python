@@ -10,12 +10,6 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
     // Bind DeviceBootloader
     py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
 
-    // DeviceBootloader::Config
-    py::class_<DeviceBootloader::Config>(deviceBootloader, "Config", DOC(dai, DeviceBootloader, Config))
-        .def(py::init<>())
-        .def_readwrite("timeout", &DeviceBootloader::Config::timeout)
-    ;
-
     py::class_<DeviceBootloader::Version>(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version))
         .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
         .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
@@ -33,16 +27,16 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
 
         .def_static("getFirstAvailableDevice", &DeviceBootloader::getFirstAvailableDevice, DOC(dai, DeviceBootloader, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBootloader::getAllAvailableDevices, DOC(dai, DeviceBootloader, getAllAvailableDevices))
-        .def_static("saveDepthaiApplicationPackage", &DeviceBootloader::saveDepthaiApplicationPackage, py::arg("path"), py::arg("pipeline"), py::arg("maxUsbSpeed") = Device::DEFAULT_USB_SPEED, DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage))
-        .def_static("createDepthaiApplicationPackage", &DeviceBootloader::createDepthaiApplicationPackage, py::arg("pipeline"), py::arg("maxUsbSpeed") = Device::DEFAULT_USB_SPEED, DOC(dai, DeviceBootloader, createDepthaiApplicationPackage))
+        .def_static("saveDepthaiApplicationPackage", &DeviceBootloader::saveDepthaiApplicationPackage, py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "", DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage))
+        .def_static("createDepthaiApplicationPackage", &DeviceBootloader::createDepthaiApplicationPackage, py::arg("pipeline"), py::arg("pathToCmd") = "", DOC(dai, DeviceBootloader, createDepthaiApplicationPackage))
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion, DOC(dai, DeviceBootloader, getEmbeddedBootloaderVersion))
-        .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary, py::arg("config"), DOC(dai, DeviceBootloader, getEmbeddedBootloaderBinary))
+        .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary, DOC(dai, DeviceBootloader, getEmbeddedBootloaderBinary))
 
         .def(py::init<const DeviceInfo&>(), py::arg("deviceDesc"), DOC(dai, DeviceBootloader, DeviceBootloader))
         .def(py::init<const DeviceInfo&, std::string>(), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBootloader, DeviceBootloader, 2))
         .def("flash", &DeviceBootloader::flash, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
         .def("flashDepthaiApplicationPackage", &DeviceBootloader::flashDepthaiApplicationPackage, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
-        .def("flashBootloader", &DeviceBootloader::flashBootloader, py::arg("progressCallback"), py::arg("config") = DeviceBootloader::Config{}, DOC(dai, DeviceBootloader, flashBootloader))
+        .def("flashBootloader", &DeviceBootloader::flashBootloader, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
         .def("getVersion", &DeviceBootloader::getVersion, DOC(dai, DeviceBootloader, getVersion))
         .def("isEmbeddedVersion", &DeviceBootloader::isEmbeddedVersion, DOC(dai, DeviceBootloader, isEmbeddedVersion))
         ;
