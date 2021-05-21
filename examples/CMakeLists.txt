@@ -20,8 +20,11 @@ add_custom_target(install_requirements ALL
     COMMAND_EXPAND_LISTS
 )
 
-# Macro for adding new python test
-macro(add_python_example example_name python_script_path)
+# Function for adding new python test
+function(add_python_example example_name python_script_path)
+    # Modify example name to signify that its Python based
+    set(example_name "py_${example_name}")
+
     # parse the rest of the arguments
     set(arguments ${ARGV})
     list(REMOVE_AT arguments 0 1)
@@ -60,7 +63,7 @@ macro(add_python_example example_name python_script_path)
 
     endif()
 
-endmacro()
+endfunction()
 
 if(DEPTHAI_PYTHON_TEST_EXAMPLES)
 
