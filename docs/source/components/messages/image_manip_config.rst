@@ -10,8 +10,8 @@ It is sent either from the host to :ref:`ColorCamera` or :ref:`ImageManip`.
 Examples of functionality
 #########################
 
-- :ref:`14.1 - Color Camera Control`
-- :ref:`20 - Color Rotate Warp`
+- :ref:`RGB Camera Control`
+- :ref:`RGB Rotate Warp`
 
 Reference
 #########

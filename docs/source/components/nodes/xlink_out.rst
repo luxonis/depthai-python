@@ -64,9 +64,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Depth`
+- :ref:`RGB Preview`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD & Depth`
 
 
 Reference

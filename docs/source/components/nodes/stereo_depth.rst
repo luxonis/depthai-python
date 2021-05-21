@@ -123,9 +123,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`03 - Depth Preview`
-- :ref:`10 - Mono & MobilenetSSD & Depth`
-- :ref:`26.1 - RGB & MobilenetSSD with spatial data`
+- :ref:`Depth Preview`
+- :ref:`Mono & MobilenetSSD & Depth`
+- :ref:`RGB & MobilenetSSD with spatial data`
 
 Reference
 #########
