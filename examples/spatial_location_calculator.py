@@ -125,4 +125,4 @@ with dai.Device(pipeline) as device:
             cfg = dai.SpatialLocationCalculatorConfig()
             cfg.addROI(config)
             spatialCalcConfigInQueue.send(cfg)
-            newConfig = false
+            newConfig = False
