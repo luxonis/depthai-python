@@ -36,7 +36,7 @@
 #include <pybind11/chrono.h>
 #include <pybind11/numpy.h>
 
-#include "spdlog/spdlog.h"
+// #include "spdlog/spdlog.h"
 
 void DatatypeBindings::bind(pybind11::module& m){
 
@@ -501,7 +501,8 @@ void DatatypeBindings::bind(pybind11::module& m){
                 throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame, required " + std::to_string(requiredSize)
                         + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
             } else if(actualSize > requiredSize) {
-                spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
+                // FIXME check build on Windows
+                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
