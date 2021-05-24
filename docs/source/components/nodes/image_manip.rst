@@ -68,9 +68,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`11 - RGB & Encoding & Mono & MobilenetSSD`
-- :ref:`14.1 - Color Camera Control`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`RGB Encoding & Mono & MobilenetSSD`
+- :ref:`RGB Camera Control`
 
 Reference
 #########

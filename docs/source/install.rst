@@ -149,11 +149,11 @@ the host.
 KVM
 ***
 
-To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__,  there is a need to attach and detach USB 
+To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__,  there is a need to attach and detach USB
 devices on the fly when the host machine detects changes in the USB bus.
 
-OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively. 
-But when the camera is used in a virtual environment the situation is different. 
+OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively.
+But when the camera is used in a virtual environment the situation is different.
 
 On your host machine, use the following code:
 
@@ -163,7 +163,7 @@ On your host machine, use the following code:
   SUBSYSTEM=="usb", ACTION=="remove", ENV{PRODUCT}=="3e7/2485/1", ENV{DEVTYPE}=="usb_device", MODE="0666", RUN+="/usr/local/bin/movidius_usb_hotplug.sh depthai-vm"
   SUBSYSTEM=="usb", ACTION=="remove", ENV{PRODUCT}=="3e7/f63b/100", ENV{DEVTYPE}=="usb_device", MODE="0666", RUN+="/usr/local/bin/movidius_usb_hotplug.sh depthai-vm"
 
-The script that the udev rule is calling (movidius_usb_hotplug.sh) should then attach/detach the USB device to the virtual machine. 
+The script that the udev rule is calling (movidius_usb_hotplug.sh) should then attach/detach the USB device to the virtual machine.
 In this case we need to call :code:`virsh` command. For example, the script could do the following:
 
 .. code-block::
@@ -199,10 +199,10 @@ In this case we need to call :code:`virsh` command. For example, the script coul
   exit 0
 
 
-Note that when the device is disconnected from the USB bus, some udev environmental variables are not available (:code:`ID_VENDOR_ID` or :code:`ID_MODEL_ID`), 
+Note that when the device is disconnected from the USB bus, some udev environmental variables are not available (:code:`ID_VENDOR_ID` or :code:`ID_MODEL_ID`),
 that is why you need to use :code:`PRODUCT` environmental variable to identify which device has been disconnected.
 
-The virtual machine where DepthAI API application is running should have defined a udev rules that identify the OAK-D camera. 
+The virtual machine where DepthAI API application is running should have defined a udev rules that identify the OAK-D camera.
 The udev rule is decribed `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
 
 Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
@@ -266,7 +266,7 @@ tools/environments on your system.
 Using a virtual environment (or system-wide, if you prefer), run the following to install the requirements for this example repository:
 
 .. code-block:: bash
-  
+
   cd examples
   python3 install_requirements.py
 
