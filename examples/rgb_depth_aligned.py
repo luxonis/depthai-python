@@ -10,7 +10,7 @@ downscaleColor = True
 
 # Create pipeline
 pipeline = dai.Pipeline()
-queueNames = None
+queueNames = []
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
