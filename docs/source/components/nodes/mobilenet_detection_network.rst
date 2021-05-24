@@ -70,9 +70,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`08 - RGB & MobilenetSSD`
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Depth`
+- :ref:`RGB & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD & Depth`
 
 Reference
 #########

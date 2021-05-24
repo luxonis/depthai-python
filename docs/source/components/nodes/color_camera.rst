@@ -87,9 +87,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`14.1 - Color Camera Control`
-- :ref:`28 - Camera video high resolution`
+- :ref:`RGB Preview`
+- :ref:`RGB Camera Control`
+- :ref:`RGB video`
 
 Reference
 #########
