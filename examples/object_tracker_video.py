@@ -76,7 +76,7 @@ objectTracker.passthroughTrackerFrame.link(xlinkOut.input)
 # Connect and start the pipeline
 with dai.Device(pipeline) as device:
 
-    qIn = device.getInputQueue(name="inFrame",)
+    qIn = device.getInputQueue(name="inFrame")
     trackerFrameQ = device.getOutputQueue(name="trackerFrame", maxSize=4)
     tracklets = device.getOutputQueue(name="tracklets", maxSize=4)
     qManip = device.getOutputQueue(name="manip", maxSize=4)
