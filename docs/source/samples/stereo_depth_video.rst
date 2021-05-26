@@ -4,11 +4,12 @@ Stereo Depth Video
 This example is an upgraded :ref:`Depth Preview`. It has higher resolution (720p), each frame can be shown
 (mono left-right, rectified left-right, disparity and depth). There are 6 modes which you can select
 inside the code:
-#. withDepth: if you turn it off it will became :ref:`Mono Preview`, so it will show only the 2 mono cameras
-#. outputDepth: if you turn it on it will show the depth
-#. lrcheck: computes disparity with sub-pixel interpolation (5 fractional bits), suitable for long range
-#. extended: mirror rectified frames: true to have disparity/depth normal (non-mirrored)
-#. subpixel: suitable for short range objects
+
+#. `withDepth`: if you turn it off it will became :ref:`Mono Preview`, so it will show only the 2 mono cameras
+#. `outputDepth`: if you turn it on it will show the depth
+#. `lrcheck`: used for better occlusion handling. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#left-right-check-depth-mode>`__
+#. `extended`: suitable for short range objects. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity-depth-mode>`__
+#. `subpixel`: suitable for long range. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#subpixel-disparity-depth-mode>`__
 
 .. rubric:: Similiar samples:
 

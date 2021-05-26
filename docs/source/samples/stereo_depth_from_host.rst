@@ -2,9 +2,11 @@ Stereo Depth from host
 ======================
 
 This example shows depth map from host using stereo images. There are 3 depth modes which you can select inside the code:
-#. lr_check: computes disparity with sub-pixel interpolation (5 fractional bits), suitable for long range
-#. extended_disparity: mirror rectified frames: true to have disparity/depth normal (non-mirrored)
-#. subpixel: suitable for short range objects
+
+#. `lr_check`: used for better occlusion handling. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#left-right-check-depth-mode>`__
+#. `extended_disparity`: suitable for short range objects. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity-depth-mode>`__
+#. `subpixel`: suitable for long range. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#subpixel-disparity-depth-mode>`__
+
 Otherwise a median with kernel_7x7 is activated.
 
 .. rubric:: Similiar samples:
