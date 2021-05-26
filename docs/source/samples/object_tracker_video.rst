@@ -33,4 +33,12 @@ Source code
            :language: python
            :linenos:
 
+    .. tab:: C++
+
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/object_tracker_video.cpp>`__
+
+        .. literalinclude:: ../../../depthai-core/examples/src/object_tracker_video.cpp
+           :language: cpp
+           :linenos:
+
 .. include::  /includes/footer-short.rst
