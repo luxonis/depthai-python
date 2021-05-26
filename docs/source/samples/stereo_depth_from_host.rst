@@ -1,9 +1,15 @@
 Stereo Depth from host
 ======================
 
-This example shows depth map from host using stereo images. There are 3 depth modes which you can select
-inside the code: left-right check, extended (for closer distance), subpixel (for longer distance).
+This example shows depth map from host using stereo images. There are 3 depth modes which you can select inside the code:
+#. lr_check: computes disparity with sub-pixel interpolation (5 fractional bits), suitable for long range
+#. extended_disparity: mirror rectified frames: true to have disparity/depth normal (non-mirrored)
+#. subpixel: suitable for short range objects
 Otherwise a median with kernel_7x7 is activated.
+
+.. rubric:: Similiar samples:
+
+- :ref:`Stereo Depth Video`
 
 Setup
 #####
