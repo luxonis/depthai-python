@@ -127,7 +127,6 @@ void CommonBindings::bind(pybind11::module& m){
     py::class_<EepromData> (m, "EepromData", DOC(dai, EepromData))
         .def(py::init<>())
         .def_readwrite("version", &EepromData::version)
-        .def_readwrite("swapLeftRightCam", &EepromData::swapLeftRightCam)
         .def_readwrite("boardName", &EepromData::boardName)
         .def_readwrite("boardRev", &EepromData::boardRev)
         .def_readwrite("cameraData", &EepromData::cameraData)
