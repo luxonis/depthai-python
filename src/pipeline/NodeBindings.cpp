@@ -303,6 +303,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("loadCalibrationData",     &StereoDepth::loadCalibrationData, py::arg("data"), DOC(dai, node, StereoDepth, loadCalibrationData))
         .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration, DOC(dai, node, StereoDepth, setEmptyCalibration))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
+        .def("setOutputResolution",     &StereoDepth::setOutputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setOutputResolution))
         .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(StereoDepthProperties::DepthAlign)>(&StereoDepth::setDepthAlign), py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(CameraBoardSocket)>(&StereoDepth::setDepthAlign), py::arg("camera"), DOC(dai, node, StereoDepth, setDepthAlign, 2))
@@ -519,6 +520,8 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
+        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth)
+        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight)
         ;
 
     py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
