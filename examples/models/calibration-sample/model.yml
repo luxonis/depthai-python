@@ -19,15 +19,15 @@ files:
   - name: depthai_calib.json
     size: 8019
     sha256: f27dc05a57d2d964189e459599b1633556dc647e67a3b7e3eb7fe1b00740f157
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/depthai_calib.json
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/depthai_calib.json
   - name: depthai_v5.calib
     size: 444
     sha256: c258902222d7b9ec55eee56b1b39255f9a3bb55c02eb8c5228f5a251c70740ee
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/depthai_v5.calib
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/depthai_v5.calib
   - name: BW1098OBC.json
     size: 286
     sha256: fed667afd54e97b4918f1118788ae14acd6461ac6364850e32686ce111fa4528
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/BW1098OBC.json
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/BW1098OBC.json
 
 
 framework: dldt
