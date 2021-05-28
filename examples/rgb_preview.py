@@ -21,7 +21,7 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
 camRgb.preview.link(xoutRgb.input)
 
 # Connect to the device
-with dai.Device(dai.OpenVINO.VERSION_2021_3, dai.UsbSpeed.SUPER) as device:
+with dai.Device(pipeline, dai.UsbSpeed.SUPER) as device:
     # Print out available cameras
     print('Connected cameras: ', device.getConnectedCameras())
     # Print out usb speed
@@ -31,7 +31,7 @@ with dai.Device(dai.OpenVINO.VERSION_2021_3, dai.UsbSpeed.SUPER) as device:
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 
     while True:
-        inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
+        inRgb = qRgb.get() # blocking call, will wait until a new data has arrived
 
         # Retrieve 'bgr' (opencv format) frame
         cv2.imshow("rgb", inRgb.getCvFrame())
