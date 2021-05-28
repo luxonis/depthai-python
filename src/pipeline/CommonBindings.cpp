@@ -11,6 +11,7 @@
 #include "depthai-shared/common/Point2f.hpp"
 #include "depthai-shared/common/Point3f.hpp"
 #include "depthai-shared/common/Size2f.hpp"
+#include "depthai-shared/common/UsbSpeed.hpp"
 
 void CommonBindings::bind(pybind11::module& m){
 
@@ -51,7 +52,7 @@ void CommonBindings::bind(pybind11::module& m){
         .value("LEFT", CameraBoardSocket::LEFT)
         .value("RIGHT", CameraBoardSocket::RIGHT)
     ;
-    
+
     // CameraImageOrientation enum bindings
     py::enum_<CameraImageOrientation>(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation))
         .value("AUTO", CameraImageOrientation::AUTO)
@@ -68,7 +69,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("used", &MemoryInfo::used)
         .def_readwrite("total", &MemoryInfo::total)
     ;
-     
+
     // ChipTemperature
     py::class_<ChipTemperature>(m, "ChipTemperature", DOC(dai, ChipTemperature))
         .def(py::init<>())
@@ -78,7 +79,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("dss", &ChipTemperature::dss)
         .def_readwrite("average", &ChipTemperature::average)
     ;
-    
+
     // CpuUsage
     py::class_<CpuUsage>(m, "CpuUsage", DOC(dai, CpuUsage))
         .def(py::init<>())
@@ -133,4 +134,14 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
         ;
+    // UsbSpeed
+    py::enum_<UsbSpeed>(m, "UsbSpeed", DOC(dai, UsbSpeed))
+        .value("UNKNOWN", UsbSpeed::UNKNOWN)
+        .value("LOW", UsbSpeed::LOW)
+        .value("FULL", UsbSpeed::FULL)
+        .value("HIGH", UsbSpeed::HIGH)
+        .value("SUPER", UsbSpeed::SUPER)
+        .value("SUPER_PLUS", UsbSpeed::SUPER_PLUS)
+    ;
+
 }

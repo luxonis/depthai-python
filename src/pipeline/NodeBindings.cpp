@@ -256,6 +256,7 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera", DOC(dai, node, MonoCamera))
         .def_readonly("inputControl", &MonoCamera::inputControl, DOC(dai, node, MonoCamera, inputControl))
         .def_readonly("out",  &MonoCamera::out, DOC(dai, node, MonoCamera, out))
+        .def_readonly("raw",  &MonoCamera::raw, DOC(dai, node, MonoCamera, raw))
         .def_readonly("initialControl",  &MonoCamera::initialControl, DOC(dai, node, MonoCamera, initialControl))
         .def("setCamId", [](MonoCamera& c, int64_t id) {
             // Issue an deprecation warning
@@ -339,6 +340,7 @@ void NodeBindings::bind(pybind11::module& m){
             s.loadCalibrationData(data);
             HEDLEY_DIAGNOSTIC_POP
         })
+        .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
 
     // VideoEncoder node
