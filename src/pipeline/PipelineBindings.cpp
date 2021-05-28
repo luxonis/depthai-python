@@ -77,7 +77,8 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createMobileNetSpatialDetectionNetwork", &Pipeline::create<node::MobileNetSpatialDetectionNetwork>)
         .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
-
+        .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
+        .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
         ;
 
 
