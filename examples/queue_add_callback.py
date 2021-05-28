@@ -45,7 +45,7 @@ def newFrame(inFrame):
 with dai.Device(pipeline) as device:
     device.startPipeline()
 
-    # Output queue will be used to get the frames, callback for all newly arrived frames (color, left, right)
+    # Add callback to the output queue "frames" for all newly arrived frames (color, left, right)
     device.getOutputQueue(name="frames", maxSize=4, blocking=False).addCallback(newFrame)
 
     while True:
