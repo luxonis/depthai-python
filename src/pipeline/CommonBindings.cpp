@@ -108,7 +108,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("rotationMatrix", &Extrinsics::rotationMatrix)
         .def_readwrite("translation", &Extrinsics::translation)
-        .def_readwrite("measuredTranslation", &Extrinsics::specTranslation)
+        .def_readwrite("specTranslation", &Extrinsics::specTranslation)
         .def_readwrite("toCameraSocket", &Extrinsics::toCameraSocket)
         ;
 
@@ -121,7 +121,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("distortionCoeff", &CameraInfo::distortionCoeff)
         .def_readwrite("extrinsics", &CameraInfo::extrinsics)
         .def_readwrite("cameraType", &CameraInfo::cameraType)
-        .def_readwrite("measuredFovDeg", &CameraInfo::specHfovDeg)
+        .def_readwrite("specHfovDeg", &CameraInfo::specHfovDeg)
         ;
 
     // EepromData 

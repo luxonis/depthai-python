@@ -22,6 +22,6 @@ with dai.Device() as device:
     calibData = dai.CalibrationHandler(args.calibBinaryFile, args.boardConfigFile);
     status = device.flashCalibration(calibData)
     if status:
-        print('Calibration write succesfull')
+        print('Calibration write succesful')
     else:
         print('Calibration Flash Failed!!')
