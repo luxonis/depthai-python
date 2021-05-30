@@ -8,15 +8,17 @@ import argparse
 
 # Connect Device
 calibJsonFile = str((Path(__file__).parent / Path('models/depthai_calib.json')).resolve().absolute())
+calibBackupfile = str((Path(__file__).parent / Path('depthai_calib_backup.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('calibJsonFile', nargs='?', help="Path to V6 calibration file in json", default=calibJsonFile)
 args = parser.parse_args()
 
-print("The following code is going to replace the calibration data stored on your device. Proceed with Caution.")
-input("Press Enter to continue... or Press ctrl + c to abort")
-
 with dai.Device() as device:
+    deviceCalib = device.readCalibration()
+    deviceCalib.eepromToJsonFile(calibBackupfile)
+    print("Calibration Data on the device is backed up at:")
+    print(calibBackupfile)
     calibData = dai.CalibrationHandler(args.calibJsonFile);
     status = device.flashCalibration(calibData)
     if status:
