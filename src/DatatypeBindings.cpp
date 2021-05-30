@@ -1,5 +1,6 @@
 #include "DatatypeBindings.hpp"
 
+#include "pipeline/CommonBindings.hpp"
 #include <unordered_map>
 #include <memory>
 
@@ -596,35 +597,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
-
-    py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
-        .def(py::init<>())
-        .def_readwrite("sec", &Timestamp::sec)
-        .def_readwrite("nsec", &Timestamp::nsec)
-        ;
-
-    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("x", &Point2f::x)
-        .def_readwrite("y", &Point2f::y)
-        ;
-
-    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
-        .def(py::init<>())
-        .def(py::init<float, float, float>())
-        .def_readwrite("x", &Point3f::x)
-        .def_readwrite("y", &Point3f::y)
-        .def_readwrite("z", &Point3f::z)
-        ;
-
-    py::class_<Size2f>(m, "Size2f", DOC(dai, Size2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("width", &Size2f::width)
-        .def_readwrite("height", &Size2f::height)
-        ;
-
     py::class_<RotatedRect>(m, "RotatedRect", DOC(dai, RotatedRect))
         .def(py::init<>())
         .def_readwrite("center", &RotatedRect::center)
@@ -793,7 +765,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
         ;
-
 
     // SpatialLocationCalculatorConfig (after ConfigData)
     py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
