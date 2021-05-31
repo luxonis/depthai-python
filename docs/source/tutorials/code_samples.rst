@@ -35,6 +35,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
+- :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Rotate Warp` - Demonstrates how to rotate, mirror, flip or perform perspective transform on a frame
 - :ref:`RGB Depth` - Displays RGB depth frames
 - :ref:`Auto Exposure on ROI` - Demonstrates how to use auto exposure based on the selected ROI
