@@ -18,7 +18,6 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Depth Preview` - Displays colorized stereo disparity
-- :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
@@ -57,3 +56,5 @@ Code samples are used for automated testing. They are also a great starting poin
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
+- :ref:`Device Queue Event` - Demonstrates how to use device queue events
+- :ref:`Queue add callback` - Demonstrates how to use queue callbacks

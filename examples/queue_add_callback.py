@@ -3,24 +3,24 @@ import cv2
 import depthai as dai
 import queue
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
 # Add all three cameras
 camRgb = pipeline.createColorCamera()
-camRgb.setPreviewSize(300, 300)
-
 left = pipeline.createMonoCamera()
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-
 right = pipeline.createMonoCamera()
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 # Create XLink output
 xout = pipeline.createXLinkOut()
 xout.setStreamName("frames")
+
+# Properties
+camRgb.setPreviewSize(300, 300)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 # Stream all the camera streams through the same XLink node
 camRgb.preview.link(xout.input)
@@ -28,7 +28,6 @@ left.out.link(xout.input)
 right.out.link(xout.input)
 
 q = queue.Queue()
-
 
 def newFrame(inFrame):
     global q
@@ -40,10 +39,8 @@ def newFrame(inFrame):
     # run image processing algorithms here
     q.put({"name": name, "frame": frame})
 
-
-# Pipeline is defined, now we can connect to the device
+# Connect to device and start pipeline
 with dai.Device(pipeline) as device:
-    device.startPipeline()
 
     # Add callback to the output queue "frames" for all newly arrived frames (color, left, right)
     device.getOutputQueue(name="frames", maxSize=4, blocking=False).addCallback(newFrame)
