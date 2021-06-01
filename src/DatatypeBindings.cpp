@@ -720,12 +720,12 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
         .def(py::init<>())
-        .def_readwrite("config", &SpatialLocations::config)
-        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
-        .def_readwrite("depthMin", &SpatialLocations::depthMin)
-        .def_readwrite("depthMax", &SpatialLocations::depthMax)
-        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount)
-        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
+        .def_readwrite("config", &SpatialLocations::config, DOC(dai, SpatialLocations, config))
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage, DOC(dai, SpatialLocations, depthAverage))
+        .def_readwrite("depthMin", &SpatialLocations::depthMin, DOC(dai, SpatialLocations, depthMin))
+        .def_readwrite("depthMax", &SpatialLocations::depthMax, DOC(dai, SpatialLocations, depthMax))
+        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount, DOC(dai, SpatialLocations, depthAveragePixelCount))
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates, DOC(dai, SpatialLocations, spatialCoordinates))
         ;
 
 
