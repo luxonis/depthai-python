@@ -34,9 +34,9 @@ void PipelineBindings::bind(pybind11::module& m){
         .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonMssFrequencyHz)
         .def_readwrite("pipelineName", &GlobalProperties::pipelineName)
         .def_readwrite("pipelineVersion", &GlobalProperties::pipelineVersion)
+        .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize, DOC(dai, GlobalProperties, cameraTuningBlobSize))
+        .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri, DOC(dai, GlobalProperties, cameraTuningBlobUri))
         ;
-
-
 
     // bind pipeline
     py::class_<Pipeline>(m, "Pipeline", DOC(dai, Pipeline, 2))
@@ -57,9 +57,11 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("getAllAssets", &Pipeline::getAllAssets, DOC(dai, Pipeline, getAllAssets))
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
-        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion), DOC(dai, Pipeline, setOpenVINOVersion))
-
-
+        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("getOpenVINOVersion", &Pipeline::getOpenVINOVersion, DOC(dai, Pipeline, getOpenVINOVersion))
+        .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
+        .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
+        .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
          // templated create<NODE> function
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)

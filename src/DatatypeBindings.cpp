@@ -1,5 +1,6 @@
 #include "DatatypeBindings.hpp"
 
+#include "pipeline/CommonBindings.hpp"
 #include <unordered_map>
 #include <memory>
 
@@ -38,6 +39,7 @@
 #include <pybind11/chrono.h>
 #include <pybind11/numpy.h>
 
+// #include "spdlog/spdlog.h"
 
 void DatatypeBindings::bind(pybind11::module& m){
 
@@ -274,10 +276,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
         ;
 
-    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus")
+    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus", DOC(dai, Tracklet, TrackingStatus))
         .value("NEW", Tracklet::TrackingStatus::NEW)
         .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
         .value("LOST", Tracklet::TrackingStatus::LOST)
+        .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
         ;
 
     // Bind RawTracklets
@@ -607,10 +610,15 @@ void DatatypeBindings::bind(pybind11::module& m){
             }
 
             // Check if enough data
+            long actualSize = img.getData().size();
             long requiredSize = dtype.itemsize();
             for(const auto& dim : shape) requiredSize *= dim;
-            if(img.getData().size() < requiredSize){
-                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
+            if(actualSize < requiredSize){
+                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame, required " + std::to_string(requiredSize)
+                        + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
+            } else if(actualSize > requiredSize) {
+                // FIXME check build on Windows
+                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
@@ -666,7 +674,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                     break;
 
                 case ImgFrame::Type::YUV420p:
-                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV420p2BGR"));
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_IYUV"));
                     break;
 
                 case ImgFrame::Type::NV12:
@@ -704,36 +712,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
-
-    py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
-        .def(py::init<>())
-        .def_readwrite("sec", &Timestamp::sec)
-        .def_readwrite("nsec", &Timestamp::nsec)
-        .def("getTimestamp", &Timestamp::getTimestamp)
-        ;
-
-    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("x", &Point2f::x)
-        .def_readwrite("y", &Point2f::y)
-        ;
-
-    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
-        .def(py::init<>())
-        .def(py::init<float, float, float>())
-        .def_readwrite("x", &Point3f::x)
-        .def_readwrite("y", &Point3f::y)
-        .def_readwrite("z", &Point3f::z)
-        ;
-
-    py::class_<Size2f>(m, "Size2f", DOC(dai, Size2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("width", &Size2f::width)
-        .def_readwrite("height", &Size2f::height)
-        ;
-
     py::class_<RotatedRect>(m, "RotatedRect", DOC(dai, RotatedRect))
         .def(py::init<>())
         .def_readwrite("center", &RotatedRect::center)
@@ -749,9 +727,9 @@ void DatatypeBindings::bind(pybind11::module& m){
             std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
             obj.setLayer(name, std::move(vec));
         }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
-        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, const std::vector<int>&)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<float>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<double>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
         .def("getLayer", &NNData::getLayer, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
         .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
         .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
@@ -831,7 +809,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
         .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
         .def("setSharpness", &CameraControl::setSharpness, py::arg("value"), DOC(dai, CameraControl, setSharpness))
-        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength, py::arg("value"), DOC(dai, CameraControl, setNoiseReductionStrength))
         .def("setLumaDenoise", &CameraControl::setLumaDenoise, py::arg("value"), DOC(dai, CameraControl, setLumaDenoise))
         .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
         .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
@@ -858,10 +835,12 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
         .def(py::init<>())
-        .def_readwrite("config", &SpatialLocations::config)
-        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
-        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount)
-        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
+        .def_readwrite("config", &SpatialLocations::config, DOC(dai, SpatialLocations, config))
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage, DOC(dai, SpatialLocations, depthAverage))
+        .def_readwrite("depthMin", &SpatialLocations::depthMin, DOC(dai, SpatialLocations, depthMin))
+        .def_readwrite("depthMax", &SpatialLocations::depthMax, DOC(dai, SpatialLocations, depthMax))
+        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount, DOC(dai, SpatialLocations, depthAveragePixelCount))
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates, DOC(dai, SpatialLocations, spatialCoordinates))
         ;
 
 
@@ -903,7 +882,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
         ;
-
 
     // SpatialLocationCalculatorConfig (after ConfigData)
     py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
