@@ -116,6 +116,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs))
+        .def(py::init<>())
         .def_readwrite("type", &RawImgFrame::Specs::type)
         .def_readwrite("width", &RawImgFrame::Specs::width)
         .def_readwrite("height", &RawImgFrame::Specs::height)
@@ -259,6 +260,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawCameraControl
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl", DOC(dai, RawCameraControl));
     rawCameraControl
+        .def(py::init<>())
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
@@ -286,6 +288,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawTracklets
     py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
     rawTacklets
+        .def(py::init<>())
         .def_readwrite("tracklets", &RawTracklets::tracklets)
         ;
 
@@ -399,6 +402,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawIMUData
     py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
     rawIMUPackets
+        .def(py::init<>())
         .def_readwrite("packets", &RawIMUData::packets)
         ;
 

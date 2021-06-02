@@ -694,9 +694,9 @@ void NodeBindings::bind(pybind11::module& m){
 
     py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
     imuProperties
-        .def_readwrite("imuSensors", &IMUProperties::imuSensors)
-        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold)
-        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports)
+        .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
+        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
+        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
     ;
     m.attr("IMU").attr("Properties") = imuProperties;
 
