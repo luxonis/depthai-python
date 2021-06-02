@@ -374,32 +374,32 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("angVelZ", &IMUReportGyroIntegratedRV::angVelZ)
         ;
 
-    py::class_<IMUDatas> imuDatas(m, "IMUDatas", DOC(dai, IMUDatas));
-    imuDatas
+    py::class_<IMUPacket> imuPackets(m, "IMUPacket", DOC(dai, IMUPacket));
+    imuPackets
         .def(py::init<>())
-        .def_readwrite("rawAcceleroMeter", &IMUDatas::rawAcceleroMeter)
-        .def_readwrite("acceleroMeter", &IMUDatas::acceleroMeter)
-        .def_readwrite("linearAcceleroMeter", &IMUDatas::linearAcceleroMeter)
-        .def_readwrite("gravity", &IMUDatas::gravity)
-        .def_readwrite("rawGyroscope", &IMUDatas::rawGyroscope)
-        .def_readwrite("gyroscope", &IMUDatas::gyroscope)
-        .def_readwrite("gyroscopeUncalibrated", &IMUDatas::gyroscopeUncalibrated)
-        .def_readwrite("rawMagneticField", &IMUDatas::rawMagneticField)
-        .def_readwrite("magneticField", &IMUDatas::magneticField)
-        .def_readwrite("magneticFieldUncalibrated", &IMUDatas::magneticFieldUncalibrated)
-        .def_readwrite("rotationVector", &IMUDatas::rotationVector)
-        .def_readwrite("gameRotationVector", &IMUDatas::gameRotationVector)
-        .def_readwrite("geoMagRotationVector", &IMUDatas::geoMagRotationVector)
-        .def_readwrite("arvrStabilizedRotationVector", &IMUDatas::arvrStabilizedRotationVector)
-        .def_readwrite("arvrStabilizedGameRotationVector", &IMUDatas::arvrStabilizedGameRotationVector)
-        .def_readwrite("gyroIntegratedRotationVector", &IMUDatas::gyroIntegratedRotationVector)
+        .def_readwrite("rawAcceleroMeter", &IMUPacket::rawAcceleroMeter)
+        .def_readwrite("acceleroMeter", &IMUPacket::acceleroMeter)
+        .def_readwrite("linearAcceleroMeter", &IMUPacket::linearAcceleroMeter)
+        .def_readwrite("gravity", &IMUPacket::gravity)
+        .def_readwrite("rawGyroscope", &IMUPacket::rawGyroscope)
+        .def_readwrite("gyroscope", &IMUPacket::gyroscope)
+        .def_readwrite("gyroscopeUncalibrated", &IMUPacket::gyroscopeUncalibrated)
+        .def_readwrite("rawMagneticField", &IMUPacket::rawMagneticField)
+        .def_readwrite("magneticField", &IMUPacket::magneticField)
+        .def_readwrite("magneticFieldUncalibrated", &IMUPacket::magneticFieldUncalibrated)
+        .def_readwrite("rotationVector", &IMUPacket::rotationVector)
+        .def_readwrite("gameRotationVector", &IMUPacket::gameRotationVector)
+        .def_readwrite("geoMagRotationVector", &IMUPacket::geoMagRotationVector)
+        .def_readwrite("arvrStabilizedRotationVector", &IMUPacket::arvrStabilizedRotationVector)
+        .def_readwrite("arvrStabilizedGameRotationVector", &IMUPacket::arvrStabilizedGameRotationVector)
+        .def_readwrite("gyroIntegratedRotationVector", &IMUPacket::gyroIntegratedRotationVector)
         ;
 
 
     // Bind RawIMUData
-    py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUDatas(m, "RawIMUData", DOC(dai, RawIMUData));
-    rawIMUDatas
-        .def_readwrite("imuDatas", &RawIMUData::imuDatas)
+    py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
+    rawIMUPackets
+        .def_readwrite("packets", &RawIMUData::packets)
         ;
 
     // RawCameraControl enum bindings
@@ -902,7 +902,7 @@ void DatatypeBindings::bind(pybind11::module& m){
     // IMUData (after ConfigData)
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>>(m, "IMUData", DOC(dai, IMUData))
         .def(py::init<>())
-        .def_property("imuDatas", [](IMUData& imuDta) { return &imuDta.imuDatas; }, [](IMUData& imuDta, std::vector<IMUDatas> val) { imuDta.imuDatas = val; }, DOC(dai, IMUData, imuDatas))
+        .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
         ;
 
 }

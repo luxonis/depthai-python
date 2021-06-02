@@ -5,50 +5,42 @@ import depthai as dai
 import time
 import math
 
-# Start defining a pipeline
+# Create pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
+# Define sources and outputs
 imu = pipeline.createIMU()
 xlinkOut = pipeline.createXLinkOut()
+
 xlinkOut.setStreamName("imu")
 
-sensorConfig = dai.IMUSensorConfig()
-sensorConfig.reportIntervalUs = 2500 # 400hz
-sensorConfig.sensorId = dai.IMUSensorId.ROTATION_VECTOR
-imu.enableIMUSensor(sensorConfig)
-# above this threshold packets will be sent in batch of X, if the host is not blocked
-imu.setBatchReportThreshold(5)
-# maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
-# if lower or equal to batchReportThreshold then the sending is always blocking on device
-imu.setMaxBatchReports(5)
+# enable ROTATION_VECTOR and RAW_GYROSCOPE at 400 hz rate
+imu.enableIMUSensor([dai.IMUSensor.ROTATION_VECTOR], 400)
 
-# Link plugins CAM -> XLINK
+# Link plugins IMU -> XLINK
 imu.out.link(xlinkOut.input)
-
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
     # Start pipeline
     baseTs = time.monotonic()
-    device.startPipeline()
 
     # Output queue for imu bulk packets
-    imuQueue = device.getOutputQueue(name="imu", maxSize=4, blocking=False)
+    imuQueue = device.getOutputQueue(name="imu", maxSize=50, blocking=False)
     baseTs = None
     while True:
-        imuPacket = imuQueue.get()  # blocking call, will wait until a new data has arrived
+        imuData = imuQueue.get()  # blocking call, will wait until a new data has arrived
 
-        imuDatas = imuPacket.imuDatas
-        for imuData in imuDatas:
-            gyroTs = imuData.rotationVector.timestamp.getTimestamp()
+        imuPackets = imuData.packets
+        for imuPacket in imuPackets:
+            gyroTs = imuPacket.rotationVector.timestamp.get()
             if baseTs is None:
                 baseTs = gyroTs
             gyroTs = gyroTs - baseTs
 
             print(f"Gyro timestamp: {gyroTs} s")
-            print(f"Quaternion: i: {imuData.rotationVector.i} j: {imuData.rotationVector.j} k: {imuData.rotationVector.k} real: {imuData.rotationVector.real} ")
-            print(f"Accuracy (rad): {imuData.rotationVector.accuracy}")
+            print(f"Quaternion: i: {imuPacket.rotationVector.i} j: {imuPacket.rotationVector.j} k: {imuPacket.rotationVector.k} real: {imuPacket.rotationVector.real} ")
+            print(f"Accuracy (rad): {imuPacket.rotationVector.accuracy}")
 
 
         if cv2.waitKey(1) == ord('q'):
