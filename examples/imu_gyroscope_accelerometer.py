@@ -14,8 +14,8 @@ xlinkOut = pipeline.createXLinkOut()
 
 xlinkOut.setStreamName("imu")
 
-# enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 500 hz rate
-imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)
+# enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 500 hz rate
+imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 500)
 # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
 imu.setBatchReportThreshold(1)
 # maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
