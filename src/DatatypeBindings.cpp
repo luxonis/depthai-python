@@ -29,7 +29,6 @@
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
-#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawTracklets.hpp"
 
 
