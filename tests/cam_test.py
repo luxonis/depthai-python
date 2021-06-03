@@ -8,16 +8,16 @@ import argparse
 import depthai as dai
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={400, 720, 800},
+parser.add_argument('-mres', '--mono-resolution', type=int, default=480, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='800', choices={'720', '800', '1080', '4k', '12mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '12mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 args = parser.parse_args()
 
 # TODO as args
-cam_list = ['rgb', 'left', 'right']
+cam_list = ['rgb', 'left', ]  # 'right'
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -36,6 +36,7 @@ rotate = {
 
 mono_res_opts = {
     400: dai.MonoCameraProperties.SensorResolution.THE_400_P,
+    480: dai.MonoCameraProperties.SensorResolution.THE_480_P,
     720: dai.MonoCameraProperties.SensorResolution.THE_720_P,
     800: dai.MonoCameraProperties.SensorResolution.THE_800_P,
 }
@@ -58,6 +59,7 @@ for c in cam_list:
     xout[c].setStreamName(c)
     if c == 'rgb':
         cam[c] = pipeline.createColorCamera()
+        cam[c].initialControl.setManualFocus(100)
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].isp.link(xout[c].input)
     else:
