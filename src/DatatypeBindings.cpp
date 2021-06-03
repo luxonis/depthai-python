@@ -322,31 +322,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("z", &IMUReportGyroscope::z)
         ;
 
-    py::class_<IMUReportGyroscopeUncalibrated, IMUReport, std::shared_ptr<IMUReportGyroscopeUncalibrated>>(m, "IMUReportGyroscopeUncalibrated", DOC(dai, IMUReportGyroscopeUncalibrated))
-        .def(py::init<>())
-        .def_readwrite("x", &IMUReportGyroscopeUncalibrated::x)
-        .def_readwrite("y", &IMUReportGyroscopeUncalibrated::y)
-        .def_readwrite("z", &IMUReportGyroscopeUncalibrated::z)
-        .def_readwrite("biasX", &IMUReportGyroscopeUncalibrated::biasX)
-        .def_readwrite("biasY", &IMUReportGyroscopeUncalibrated::biasY)
-        .def_readwrite("biasZ", &IMUReportGyroscopeUncalibrated::biasZ)
-        ;
-
     py::class_<IMUReportMagneticField, IMUReport, std::shared_ptr<IMUReportMagneticField>>(m, "IMUReportMagneticField", DOC(dai, IMUReportMagneticField))
         .def(py::init<>())
         .def_readwrite("x", &IMUReportMagneticField::x)
         .def_readwrite("y", &IMUReportMagneticField::y)
         .def_readwrite("z", &IMUReportMagneticField::z)
-        ;
-
-    py::class_<IMUReportMagneticFieldUncalibrated, IMUReport, std::shared_ptr<IMUReportMagneticFieldUncalibrated>>(m, "IMUReportMagneticFieldUncalibrated", DOC(dai, IMUReportMagneticFieldUncalibrated))
-        .def(py::init<>())
-        .def_readwrite("x", &IMUReportMagneticFieldUncalibrated::x)
-        .def_readwrite("y", &IMUReportMagneticFieldUncalibrated::y)
-        .def_readwrite("z", &IMUReportMagneticFieldUncalibrated::z)
-        .def_readwrite("biasX", &IMUReportMagneticFieldUncalibrated::biasX)
-        .def_readwrite("biasY", &IMUReportMagneticFieldUncalibrated::biasY)
-        .def_readwrite("biasZ", &IMUReportMagneticFieldUncalibrated::biasZ)
         ;
 
     py::class_<IMUReportRotationVectorWAcc, IMUReport, std::shared_ptr<IMUReportRotationVectorWAcc>>(m, "IMUReportRotationVectorWAcc", DOC(dai, IMUReportRotationVectorWAcc))
@@ -358,12 +338,33 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
         ;
 
+#if 0
     py::class_<IMUReportRotationVector, IMUReport, std::shared_ptr<IMUReportRotationVector>>(m, "IMUReportRotationVector", DOC(dai, IMUReportRotationVector))
         .def(py::init<>())
         .def_readwrite("i", &IMUReportRotationVector::i)
         .def_readwrite("j", &IMUReportRotationVector::j)
         .def_readwrite("k", &IMUReportRotationVector::k)
         .def_readwrite("real", &IMUReportRotationVector::real)
+        ;
+
+    py::class_<IMUReportGyroscopeUncalibrated, IMUReport, std::shared_ptr<IMUReportGyroscopeUncalibrated>>(m, "IMUReportGyroscopeUncalibrated", DOC(dai, IMUReportGyroscopeUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportGyroscopeUncalibrated::x)
+        .def_readwrite("y", &IMUReportGyroscopeUncalibrated::y)
+        .def_readwrite("z", &IMUReportGyroscopeUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportGyroscopeUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportGyroscopeUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportGyroscopeUncalibrated::biasZ)
+        ;
+
+    py::class_<IMUReportMagneticFieldUncalibrated, IMUReport, std::shared_ptr<IMUReportMagneticFieldUncalibrated>>(m, "IMUReportMagneticFieldUncalibrated", DOC(dai, IMUReportMagneticFieldUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportMagneticFieldUncalibrated::x)
+        .def_readwrite("y", &IMUReportMagneticFieldUncalibrated::y)
+        .def_readwrite("z", &IMUReportMagneticFieldUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportMagneticFieldUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportMagneticFieldUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportMagneticFieldUncalibrated::biasZ)
         ;
 
     py::class_<IMUReportGyroIntegratedRV, IMUReport, std::shared_ptr<IMUReportGyroIntegratedRV>>(m, "IMUReportGyroIntegratedRV", DOC(dai, IMUReportGyroIntegratedRV))
@@ -377,25 +378,29 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("angVelZ", &IMUReportGyroIntegratedRV::angVelZ)
         ;
 
+#endif
+
     py::class_<IMUPacket> imuPackets(m, "IMUPacket", DOC(dai, IMUPacket));
     imuPackets
         .def(py::init<>())
-        .def_readwrite("rawAcceleroMeter", &IMUPacket::rawAcceleroMeter)
         .def_readwrite("acceleroMeter", &IMUPacket::acceleroMeter)
+        .def_readwrite("gyroscope", &IMUPacket::gyroscope)
+        .def_readwrite("magneticField", &IMUPacket::magneticField)
+        .def_readwrite("rotationVector", &IMUPacket::rotationVector)
+#if 0
+        .def_readwrite("rawAcceleroMeter", &IMUPacket::rawAcceleroMeter)
         .def_readwrite("linearAcceleroMeter", &IMUPacket::linearAcceleroMeter)
         .def_readwrite("gravity", &IMUPacket::gravity)
         .def_readwrite("rawGyroscope", &IMUPacket::rawGyroscope)
-        .def_readwrite("gyroscope", &IMUPacket::gyroscope)
         .def_readwrite("gyroscopeUncalibrated", &IMUPacket::gyroscopeUncalibrated)
         .def_readwrite("rawMagneticField", &IMUPacket::rawMagneticField)
-        .def_readwrite("magneticField", &IMUPacket::magneticField)
         .def_readwrite("magneticFieldUncalibrated", &IMUPacket::magneticFieldUncalibrated)
-        .def_readwrite("rotationVector", &IMUPacket::rotationVector)
         .def_readwrite("gameRotationVector", &IMUPacket::gameRotationVector)
         .def_readwrite("geoMagRotationVector", &IMUPacket::geoMagRotationVector)
         .def_readwrite("arvrStabilizedRotationVector", &IMUPacket::arvrStabilizedRotationVector)
         .def_readwrite("arvrStabilizedGameRotationVector", &IMUPacket::arvrStabilizedGameRotationVector)
         .def_readwrite("gyroIntegratedRotationVector", &IMUPacket::gyroIntegratedRotationVector)
+#endif
         ;
 
 
