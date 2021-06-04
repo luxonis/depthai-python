@@ -21,6 +21,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("sec", &Timestamp::sec)
         .def_readwrite("nsec", &Timestamp::nsec)
+        .def("get", &Timestamp::get)
         ;
 
     py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
