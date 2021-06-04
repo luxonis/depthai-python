@@ -20,6 +20,9 @@ Simple
    ../samples/rgb_mobilenet_4k.rst
    ../samples/mono_mobilenet.rst
    ../samples/video_mobilenet.rst
+   ../samples/imu_accelerometer_gyroscope.rst
+   ../samples/imu_rotation_vector.rst
+
 
 These samples are great starting point for the gen2 API.
 
