@@ -85,6 +85,7 @@ pybind11_add_module(${TARGET_NAME}
     src/py_bindings.cpp
     src/XLinkConnectionBindings.cpp
     src/DeviceBindings.cpp
+    src/CalibrationHandlerBindings.cpp
     src/DeviceBootloaderBindings.cpp
     src/DatatypeBindings.cpp
     src/DataQueueBindings.cpp

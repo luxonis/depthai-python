@@ -50,6 +50,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",  # https://github.com/sphinx-doc/sphinx/issues/7697 wait for this and implement
     "sphinx_rtd_theme",
     "zephyr.warnings_filter",
+    'sphinx.ext.mathjax',
 ]
 
 # See https://github.com/sphinx-doc/sphinx/issues/7728

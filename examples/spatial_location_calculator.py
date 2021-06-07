@@ -88,6 +88,9 @@ with dai.Device(pipeline) as device:
             xmax = int(roi.bottomRight().x)
             ymax = int(roi.bottomRight().y)
 
+            depthMin = depthData.depthMin
+            depthMax = depthData.depthMax
+
             fontType = cv2.FONT_HERSHEY_TRIPLEX
             cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
             cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, 255)
