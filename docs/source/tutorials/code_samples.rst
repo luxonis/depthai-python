@@ -27,6 +27,8 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`RGB & MobileNetSSD @ 4K` - Runs MobileNetSSD on RGB frames and displays detections on both preview and 4k frames
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
+- :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
+- :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
 
 .. rubric:: Complex
 
