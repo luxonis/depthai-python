@@ -27,7 +27,7 @@ subpixel = True   # Better accuracy for longer distance, fractional disparity 32
 median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
 
 # Sanitize some incompatible options
-if lrcheck or extended or subpixel:
+if extended or subpixel:
     median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF
 
 print("StereoDepth config options: ")
@@ -64,7 +64,6 @@ def create_stereo_depth_pipeline():
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)
 
-    stereo.setEmptyCalibration() # Set if the input frames are already rectified
     stereo.setInputResolution(1280, 720)
 
     xoutLeft.setStreamName('left')
@@ -131,6 +130,9 @@ def convert_to_cv2_frame(name, image):
     return frame
 
 pipeline, streams = create_stereo_depth_pipeline()
+# set empty calibration
+calibData = dai.CalibrationHandler()
+pipeline.setCalibrationData(calibData)
 
 print("Connecting and starting the pipeline")
 # Connect to device and start pipeline
