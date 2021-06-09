@@ -1,7 +1,7 @@
 Calibration Flash
 =================
 
-This example shows how to write API over XLink. CalibrationHandler loads version 6 of EEPROM data.
+This example shows how to flash calibration data (version 6 of EEPROM data).
 
 .. rubric:: Similiar samples:
 

@@ -1,7 +1,7 @@
 Calibration Reader
 ==================
 
-This example shows how to read API over XLink.
+This example shows how to read calibration data.
 
 .. rubric:: Similiar samples:
 
