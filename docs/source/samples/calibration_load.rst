@@ -1,7 +1,7 @@
 Calibration Load
 ================
 
-This example shows how to load and use calibration data in a pipeline. CalibrationHandler loads version 6 of EEPROM data.
+This example shows how to load and use calibration data of version6 (gen2 calibration data) in a pipeline.
 
 .. rubric:: Similiar samples:
 

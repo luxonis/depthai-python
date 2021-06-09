@@ -1,7 +1,7 @@
 Calibration Reader
 ==================
 
-This example shows how to read calibration data.
+This example shows how to read calibration data stored on device over XLink.
 
 .. rubric:: Similiar samples:
 

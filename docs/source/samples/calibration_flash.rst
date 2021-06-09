@@ -1,7 +1,7 @@
 Calibration Flash
 =================
 
-This example shows how to flash calibration data (version 6 of EEPROM data).
+This example shows how to flash calibration data of version 6 (gen2 calibration data) to the device.
 
 .. rubric:: Similiar samples:
 
