@@ -35,6 +35,9 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 The first time you build, the repository submodules need be initialized:
 ```
 git submodule update --init --recursive
+
+# Tip: You can ask Git to do that automatically:
+git config submodule.recurse true
 ```
 
 Later submodules also need to be updated.
