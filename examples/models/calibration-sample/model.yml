@@ -1,0 +1,34 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Calibration Sample files to test writing to device
+task_type: object_attributes
+files:
+  - name: depthai_calib.json
+    size: 8019
+    sha256: f27dc05a57d2d964189e459599b1633556dc647e67a3b7e3eb7fe1b00740f157
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/depthai_calib.json
+  - name: depthai_v5.calib
+    size: 444
+    sha256: c258902222d7b9ec55eee56b1b39255f9a3bb55c02eb8c5228f5a251c70740ee
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/depthai_v5.calib
+  - name: BW1098OBC.json
+    size: 286
+    sha256: fed667afd54e97b4918f1118788ae14acd6461ac6364850e32686ce111fa4528
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/BW1098OBC.json
+
+
+framework: dldt
+license: https://vision.middlebury.edu/stereo/data/scenes2014/

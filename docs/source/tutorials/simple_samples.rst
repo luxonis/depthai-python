@@ -10,7 +10,6 @@ Simple
    ../samples/rgb_video.rst
    ../samples/mono_preview.rst
    ../samples/depth_preview.rst
-   ../samples/device_queue_event.rst
    ../samples/rgb_encoding.rst
    ../samples/rgb_mono_encoding.rst
    ../samples/encoding_max_limit.rst
@@ -20,6 +19,9 @@ Simple
    ../samples/rgb_mobilenet_4k.rst
    ../samples/mono_mobilenet.rst
    ../samples/video_mobilenet.rst
+   ../samples/imu_accelerometer_gyroscope.rst
+   ../samples/imu_rotation_vector.rst
+
 
 These samples are great starting point for the gen2 API.
 
@@ -27,7 +29,6 @@ These samples are great starting point for the gen2 API.
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Depth Preview` - Displays colorized stereo disparity
-- :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
