@@ -24,7 +24,6 @@ python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifacto
  - cmake >= 3.4
  - C++14 compiler (clang, gcc, msvc, ...)
  - Python3
- - Submodule dependencies with Git
 
 Along these, dependencies of depthai-core are also required
 See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#dependencies)
