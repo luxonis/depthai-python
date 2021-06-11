@@ -1,6 +1,7 @@
 #include "NodeBindings.hpp"
 
 #include "depthai/pipeline/Node.hpp"
+#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
@@ -34,6 +35,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
         .def("getInputs", &Node::getInputs, DOC(dai, Node, getInputs))
         .def("getAssets", &Node::getAssets, DOC(dai, Node, getAssets))
+        .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
     ;
 
     // Node::Input bindings
