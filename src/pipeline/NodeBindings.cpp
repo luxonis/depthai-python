@@ -292,6 +292,8 @@ void NodeBindings::bind(pybind11::module& m){
 
     // StereoDepth node
     py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth", DOC(dai, node, StereoDepth))
+        .def_readonly("initialConfig", &StereoDepth::initialConfig)
+        .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
         .def_readonly("left",           &StereoDepth::left, DOC(dai, node, StereoDepth, left))
         .def_readonly("right",          &StereoDepth::right, DOC(dai, node, StereoDepth, right))
         .def_readonly("depth",          &StereoDepth::depth, DOC(dai, node, StereoDepth, depth))
@@ -534,10 +536,10 @@ void NodeBindings::bind(pybind11::module& m){
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
-        .def_readwrite("median",                  &StereoDepthProperties::median)
+        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
+        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
         .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
         .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("confidenceThreshold",     &StereoDepthProperties::confidenceThreshold)
         .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
         .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
         .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)

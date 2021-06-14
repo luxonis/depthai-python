@@ -18,6 +18,7 @@
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
 #include "depthai/pipeline/datatype/Tracklets.hpp"
 #include "depthai/pipeline/datatype/IMUData.hpp"
+#include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -32,6 +33,7 @@
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
 #include "depthai-shared/datatype/RawTracklets.hpp"
 #include "depthai-shared/datatype/RawIMUData.hpp"
+#include "depthai-shared/datatype/RawStereoDepthConfig.hpp"
 
 
 //pybind
@@ -911,6 +913,41 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>>(m, "IMUData", DOC(dai, IMUData))
         .def(py::init<>())
         .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
+        ;
+
+
+
+
+    // Bind RawStereoDepthConfig
+    py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
+    rawStereoDepthConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawStereoDepthConfig::config)
+        ;
+
+
+    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
+    stereoDepthConfigData
+        .def(py::init<>())
+        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
+        ;
+
+    py::enum_<StereoDepthConfigData::MedianFilter>(stereoDepthConfigData, "MedianFilter", DOC(dai, StereoDepthConfigData, MedianFilter))
+        .value("MEDIAN_OFF", StereoDepthConfigData::MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", StereoDepthConfigData::MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", StereoDepthConfigData::MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", StereoDepthConfigData::MedianFilter::KERNEL_7x7)
+        ;
+
+
+    // StereoDepthConfig (after ConfigData)
+    py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>>(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig))
+        .def(py::init<>())
+        .def("setConfidenceThreshold", &StereoDepthConfig::setConfidenceThreshold, py::arg("confThr"), DOC(dai, StereoDepthConfig, setConfidenceThreshold))
+        .def("setMedianFilter", &StereoDepthConfig::setMedianFilter, py::arg("median"), DOC(dai, StereoDepthConfig, setMedianFilter))
+        .def("setBilateralFilterSigma", &StereoDepthConfig::setBilateralFilterSigma, py::arg("sigma"), DOC(dai, StereoDepthConfig, setBilateralFilterSigma))
         ;
 
 }
