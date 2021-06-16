@@ -69,6 +69,12 @@ By default, queues are **blocking** and their size is **30**, so when the device
 reached, any additional messages from the device will be blocked and the library will wait until it can add new messages to the queue.
 It will wait for the host to consume (eg. :code:`queue.get()`) a message before putting a new one into the queue.
 
+.. note::
+    After the host queue gets filled up, the XLinkOut.input queue on the device will start filling up. If that queue is
+    set to blocking, other nodes that are sending messages to it will have to wait as well. This is a usual cause for a
+    blocked pipeline, where one of the queues isn't emptied in timely manner and the rest of the pipeline waits for it
+    to be empty again.
+
 Non-Blocking behaviour
 **********************
 Making the queue non-blocking will change the behavior in the situation described above - instead of waiting, the library will discard
