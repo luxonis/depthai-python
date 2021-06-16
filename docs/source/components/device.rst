@@ -48,8 +48,8 @@ After initializing the device, one has to initialize the input/output queues as 
   inputQueue = device.getInputQueue("input_name")
 
 When you define an output queue, the device can push new messages to it at any point in time, and the host can read from it at any point in time.
-Usually when the host is reading very fast from the queue, the queue (regardless of its size) will stay empty most of
-the time. But as we add things on the host side (additional processing, analysis etc), it may happen that the device will be writing to
+Usually, when the host is reading very fast from the queue, the queue (regardless of its size) will stay empty most of
+the time. But as we add things on the host side (additional processing, analysis, etc), it may happen that the device will be writing to
 the queue faster than the host can read from it. And then the messages in the queue will start to add up - and both maxSize and blocking
 flags determine the behavior of the queue in this case. You can set these flags with:
 
@@ -73,18 +73,18 @@ Non-Blocking behaviour
 **********************
 Making the queue non-blocking will change the behavior in the situation described above - instead of waiting, the library will discard
 the oldest message and add the new one to the queue, and then continue its processing loop (so it won't get blocked).
-:code:`maxSize` determines the size of the queue and it also helps to control the memory usage.
+:code:`maxSize` determines the size of the queue and it also helps to control memory usage.
 
 For example, if a message has 5MB of data, and the queue size is 30, this queue can effectively store
-up to 150MB of data in the memory on the host (the messagages can also get really big, for instance a single 4K NV12 encoded frame takes about ~12MB).
+up to 150MB of data in the memory on the host (the messages can also get really big, for instance, a single 4K NV12 encoded frame takes about ~12MB).
 
 Some additional information
 ***************************
 
 - Decreasing the queue size to 1 and setting non-blocking behavior will effectively mean "I only want the latest packet from the queue".
-- Queues are thread safe - they can be accessed from any thread.
-- Queues are created such that each queue is its own thread which takes care of receiving, serializing/deserializing and sending the messages forward (same for input/output queues).
-- The :code:`Device` object isn't fully thread safe. Some RPC calls (eg. :code:`getLogLevel`, :code:`setLogLevel`, :code:`getDdrMemoryUsage`) will get thread safe once the mutex is set in place (right now there could be races).
+- Queues are thread-safe - they can be accessed from any thread.
+- Queues are created such that each queue is its own thread which takes care of receiving, serializing/deserializing, and sending the messages forward (same for input/output queues).
+- The :code:`Device` object isn't fully thread-safe. Some RPC calls (eg. :code:`getLogLevel`, :code:`setLogLevel`, :code:`getDdrMemoryUsage`) will get thread-safe once the mutex is set in place (right now there could be races).
 
 
 Reference
