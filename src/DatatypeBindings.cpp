@@ -925,23 +925,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("config", &RawStereoDepthConfig::config)
         ;
 
-
-    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
-    stereoDepthConfigData
-        .def(py::init<>())
-        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
-        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
-        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
-        ;
-
-    py::enum_<StereoDepthConfigData::MedianFilter>(stereoDepthConfigData, "MedianFilter", DOC(dai, StereoDepthConfigData, MedianFilter))
-        .value("MEDIAN_OFF", StereoDepthConfigData::MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", StereoDepthConfigData::MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", StereoDepthConfigData::MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", StereoDepthConfigData::MedianFilter::KERNEL_7x7)
-        ;
-
-
     // StereoDepthConfig (after ConfigData)
     py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>>(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig))
         .def(py::init<>())

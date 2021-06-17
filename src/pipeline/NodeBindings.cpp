@@ -549,11 +549,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("height",                  &StereoDepthProperties::height)
         ;
 
-    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
-        .value("MEDIAN_OFF", StereoDepthProperties::MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", StereoDepthProperties::MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", StereoDepthProperties::MedianFilter::KERNEL_7x7)
+    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    medianFilter
+        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
         ;
 
     py::enum_<StereoDepthProperties::DepthAlign>(stereoDepthProperties, "DepthAlign")
@@ -561,6 +562,17 @@ void NodeBindings::bind(pybind11::module& m){
         .value("RECTIFIED_LEFT",  StereoDepthProperties::DepthAlign::RECTIFIED_LEFT)
         .value("CENTER",          StereoDepthProperties::DepthAlign::CENTER)
         ;
+
+    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
+    stereoDepthConfigData
+        .def(py::init<>())
+        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
+        ;
+
+    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
 
     // ALIAS
     m.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
