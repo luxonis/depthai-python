@@ -301,7 +301,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("rectifiedLeft",  &StereoDepth::rectifiedLeft, DOC(dai, node, StereoDepth, rectifiedLeft))
         .def_readonly("rectifiedRight", &StereoDepth::rectifiedRight, DOC(dai, node, StereoDepth, rectifiedRight))
         .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration, DOC(dai, node, StereoDepth, setEmptyCalibration))
+        .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
+        .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
+        .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
+        .def("setOutputSize",           &StereoDepth::setOutputSize, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setOutputSize))
+        .def("setOutputKeepAspectRatio",&StereoDepth::setOutputKeepAspectRatio, py::arg("keep"), DOC(dai, node, StereoDepth, setOutputKeepAspectRatio))
         .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(StereoDepthProperties::DepthAlign)>(&StereoDepth::setDepthAlign), py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(CameraBoardSocket)>(&StereoDepth::setDepthAlign), py::arg("camera"), DOC(dai, node, StereoDepth, setDepthAlign, 2))
@@ -545,6 +550,10 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
+        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
         ;
 
     py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
