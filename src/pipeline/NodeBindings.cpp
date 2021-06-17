@@ -292,7 +292,7 @@ void NodeBindings::bind(pybind11::module& m){
 
     // StereoDepth node
     py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth", DOC(dai, node, StereoDepth))
-        .def_readonly("initialConfig", &StereoDepth::initialConfig)
+        .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
         .def_readonly("left",           &StereoDepth::left, DOC(dai, node, StereoDepth, left))
         .def_readonly("right",          &StereoDepth::right, DOC(dai, node, StereoDepth, right))
