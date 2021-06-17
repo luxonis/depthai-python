@@ -65,6 +65,7 @@ def create_stereo_depth_pipeline():
     stereo.setSubpixel(subpixel)
 
     stereo.setInputResolution(1280, 720)
+    stereo.setEmptyCalibration()
 
     xoutLeft.setStreamName('left')
     xoutRight.setStreamName('right')
@@ -130,9 +131,6 @@ def convert_to_cv2_frame(name, image):
     return frame
 
 pipeline, streams = create_stereo_depth_pipeline()
-# set empty calibration
-calibData = dai.CalibrationHandler()
-pipeline.setCalibrationData(calibData)
 
 print("Connecting and starting the pipeline")
 # Connect to device and start pipeline
