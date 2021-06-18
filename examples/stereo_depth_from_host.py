@@ -24,11 +24,11 @@ out_rectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled
 subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
-median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
+median = dai.MedianFilter.KERNEL_7x7
 
 # Sanitize some incompatible options
 if extended or subpixel:
-    median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF
+    median = dai.MedianFilter.MEDIAN_OFF
 
 print("StereoDepth config options: ")
 print("Left-Right check: ", lrcheck)

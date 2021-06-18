@@ -48,7 +48,7 @@ if withDepth:
     stereo.setConfidenceThreshold(230)
     stereo.setRectifyEdgeFillColor(0)  # black, to better see the cutout
     # stereo.setInputResolution(1280, 720)
-    stereo.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_5x5)
+    stereo.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
     stereo.setLeftRightCheck(lrcheck)
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)

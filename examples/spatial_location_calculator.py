@@ -3,6 +3,56 @@
 import cv2
 import depthai as dai
 
+class trackbar:
+    def __init__(self, trackbarName, windowName, minValue, maxValue, defaultValue, handler):
+        cv2.createTrackbar(trackbarName, windowName, minValue, maxValue, handler)
+        cv2.setTrackbarPos(trackbarName, windowName, defaultValue)
+
+class depthHandler:
+    depthStream = "depth"
+    _send_new_config = False
+    currentConfig = dai.StereoDepthConfig()
+
+    def update_config(self, config):
+        self.currentConfig = config
+        self._send_new_config = True
+
+    def on_trackbar_change_sigma(self, value):
+        self._sigma = value
+        self._send_new_config = True
+
+    def on_trackbar_change_confidence(self, value):
+        self._confidence = value
+        self._send_new_config = True
+
+    def handleKeypress(self, key, stereoDepthConfigInQueue):
+        if key == ord('m'):
+            self._send_new_config = True
+            medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5, dai.MedianFilter.KERNEL_7x7]
+            currentMedian = self.currentConfig.getMedianFilter()
+            # circle through median settins
+            nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
+            self.currentConfig.setMedianFilter(nextMedian)
+            print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
+        self.sendConfig(stereoDepthConfigInQueue)
+
+    def __init__(self, _confidence, _sigma):
+        self._confidence = _confidence
+        self._sigma = _sigma
+        cv2.namedWindow(self.depthStream)
+        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, _confidence, self.on_trackbar_change_confidence)
+        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, _sigma, self.on_trackbar_change_sigma)
+
+    def imshow(self, frame):
+        cv2.imshow(self.depthStream, frame)
+
+    def sendConfig(self, stereoDepthConfigInQueue):
+        if self._send_new_config:
+            self._send_new_config = False
+            self.currentConfig.setConfidenceThreshold(self._confidence)
+            self.currentConfig.setBilateralFilterSigma(self._sigma)
+            stereoDepthConfigInQueue.send(self.currentConfig)
+
 stepSize = 0.05
 
 newConfig = False
@@ -32,10 +82,10 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-lrcheck = False
+lrcheck = True
 subpixel = False
 
-stereo.setConfidenceThreshold(230)
+stereo.initialConfig.setConfidenceThreshold(230)
 stereo.setLeftRightCheck(lrcheck)
 stereo.setSubpixel(subpixel)
 
@@ -62,45 +112,11 @@ xinStereoDepthConfig.out.link(stereo.inputConfig)
 spatialLocationCalculator.out.link(xoutSpatialData.input)
 xinSpatialCalcConfig.out.link(spatialLocationCalculator.inputConfig)
 
-class trackbar:
-    def __init__(self, trackbarName, windowName, minValue, maxValue, defaultValue, handler):
-        cv2.createTrackbar(trackbarName, windowName, minValue, maxValue, handler)
-        cv2.setTrackbarPos(trackbarName, windowName, defaultValue)
+depthHandler = depthHandler(_confidence=stereo.initialConfig.getConfidenceThreshold(), _sigma=stereo.initialConfig.getBilateralFilterSigma())
 
-class depthDrawer:
-    depthStream = "depth"
-    _send_new_config = False
-
-    def on_trackbar_change_sigma(self, value):
-        self._sigma = value
-        self._send_new_config = True
-
-    def on_trackbar_change_confidence(self, value):
-        self._confidence = value
-        self._send_new_config = True
-
-
-    def __init__(self, _confidence, _sigma):
-        self._confidence = _confidence
-        self._sigma = _sigma
-        cv2.namedWindow(self.depthStream)
-        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, _confidence, self.on_trackbar_change_confidence)
-        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, _sigma, self.on_trackbar_change_sigma)
-
-    def imshow(self, frame):
-        cv2.imshow(self.depthStream, depthFrameColor)
-
-    def sendConfig(self, stereoDepthConfigInQueue):
-        if self._send_new_config:
-            self._send_new_config = False
-            stereoCfg = dai.StereoDepthConfig()
-            stereoCfg.setConfidenceThreshold(self._confidence)
-            stereoCfg.setBilateralFilterSigma(self._sigma)
-            stereoDepthConfigInQueue.send(stereoCfg)
-
-
-
-depthDrawer = depthDrawer(_confidence=230, _sigma=0)
+print("Control median filter using the 'm' key.")
+print("Use slider to adjust disparity confidence.")
+print("Use slider to adjust bilateral filter intensity.")
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -141,7 +157,7 @@ with dai.Device(pipeline) as device:
             cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, 255)
             cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, 255)
         # Show the frame
-        depthDrawer.imshow(depthFrameColor)
+        depthHandler.imshow(depthFrameColor)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
@@ -174,4 +190,4 @@ with dai.Device(pipeline) as device:
             spatialCalcConfigInQueue.send(cfg)
             newConfig = False
 
-        depthDrawer.sendConfig(stereoDepthConfigInQueue)
+        depthHandler.handleKeypress(key, stereoDepthConfigInQueue)
