@@ -65,7 +65,7 @@ def create_stereo_depth_pipeline():
     stereo.setSubpixel(subpixel)
 
     stereo.setInputResolution(1280, 720)
-    stereo.setEmptyCalibration()
+    stereo.setRectification(False)
 
     xoutLeft.setStreamName('left')
     xoutRight.setStreamName('right')
