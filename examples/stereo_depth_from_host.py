@@ -17,18 +17,77 @@ if not Path(datasetDefault).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
+class trackbar:
+    def __init__(self, trackbarName, windowName, minValue, maxValue, defaultValue, handler):
+        cv2.createTrackbar(trackbarName, windowName, minValue, maxValue, handler)
+        cv2.setTrackbarPos(trackbarName, windowName, defaultValue)
+
+class depthHandler:
+    depthStream = "depth"
+    _send_new_config = False
+    currentConfig = dai.StereoDepthConfig()
+
+    def on_trackbar_change_sigma(self, value):
+        self._sigma = value
+        self._send_new_config = True
+
+    def on_trackbar_change_confidence(self, value):
+        self._confidence = value
+        self._send_new_config = True
+
+    def on_trackbar_change_lr_threshold(self, value):
+        self._lrCheckThreshold = value
+        self._send_new_config = True
+
+    def handleKeypress(self, key, stereoDepthConfigInQueue):
+        if key == ord('m'):
+            self._send_new_config = True
+            medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5, dai.MedianFilter.KERNEL_7x7]
+            currentMedian = self.currentConfig.getMedianFilter()
+            # circle through median settins
+            nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
+            self.currentConfig.setMedianFilter(nextMedian)
+            print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
+        self.sendConfig(stereoDepthConfigInQueue)
+
+    def __init__(self, _confidence, _sigma, _lrCheckThreshold):
+        print("Control median filter using the 'm' key.")
+        print("Use slider to adjust disparity confidence.")
+        print("Use slider to adjust bilateral filter intensity.")
+        print("Use slider to adjust left-right check threshold.")
+
+        self._confidence = _confidence
+        self._sigma = _sigma
+        self._lrCheckThreshold = _lrCheckThreshold
+        cv2.namedWindow(self.depthStream)
+        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, _confidence, self.on_trackbar_change_confidence)
+        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, _sigma, self.on_trackbar_change_sigma)
+        self.lrcheckTrackbar  = trackbar('LR-check threshold',  self.depthStream, 0, 10, _lrCheckThreshold, self.on_trackbar_change_lr_threshold)
+
+    def imshow(self, frame):
+        cv2.imshow(self.depthStream, frame)
+
+    def sendConfig(self, stereoDepthConfigInQueue):
+        if self._send_new_config:
+            self._send_new_config = False
+            self.currentConfig.setConfidenceThreshold(self._confidence)
+            self.currentConfig.setBilateralFilterSigma(self._sigma)
+            self.currentConfig.setLeftRightCheckThreshold(self._lrCheckThreshold)
+            stereoDepthConfigInQueue.send(self.currentConfig)
 
 # StereoDepth config options.
-out_depth = False  # Disparity by default
+out_depth = True  # Disparity by default
 out_rectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled
-subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+subpixel = False   # Better accuracy for longer distance, fractional disparity 32-levels
 median = dai.MedianFilter.KERNEL_7x7
 
 # Sanitize some incompatible options
 if extended or subpixel:
     median = dai.MedianFilter.MEDIAN_OFF
+
+depth_handler = None
 
 print("StereoDepth config options: ")
 print("Left-Right check: ", lrcheck)
@@ -46,6 +105,8 @@ def create_stereo_depth_pipeline():
 
     monoLeft = pipeline.createXLinkIn()
     monoRight = pipeline.createXLinkIn()
+    xinStereoDepthConfig = pipeline.createXLinkIn()
+
     stereo = pipeline.createStereoDepth()
     xoutLeft = pipeline.createXLinkOut()
     xoutRight = pipeline.createXLinkOut()
@@ -54,15 +115,23 @@ def create_stereo_depth_pipeline():
     xoutRectifLeft = pipeline.createXLinkOut()
     xoutRectifRight = pipeline.createXLinkOut()
 
+    xinStereoDepthConfig.setStreamName("stereoDepthConfig")
     monoLeft.setStreamName('in_left')
     monoRight.setStreamName('in_right')
 
-    stereo.setConfidenceThreshold(200)
+    stereo.initialConfig.setConfidenceThreshold(200)
     stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
-    stereo.setMedianFilter(median) # KERNEL_7x7 default
+    stereo.initialConfig.setMedianFilter(median) # KERNEL_7x7 default
     stereo.setLeftRightCheck(lrcheck)
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)
+    xinStereoDepthConfig.out.link(stereo.inputConfig)
+    global depth_handler
+    _confidence=stereo.initialConfig.getConfidenceThreshold()
+    _sigma=stereo.initialConfig.getBilateralFilterSigma()
+    _lrCheckThreshold=stereo.initialConfig.getLeftRightCheckThreshold()
+    depth_handler = depthHandler(_confidence, _sigma, _lrCheckThreshold)
+
 
     stereo.setInputResolution(1280, 720)
     stereo.setRectification(False)
@@ -107,8 +176,11 @@ def convert_to_cv2_frame(name, image):
 
     data, w, h = image.getData(), image.getWidth(), image.getHeight()
     if name == 'depth':
-        # this contains FP16 with (lrcheck or extended or subpixel)
-        frame = np.array(data).astype(np.uint8).view(np.uint16).reshape((h, w))
+        depthFrame = image.getFrame()
+        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+        frame = depthFrameColor
     elif name == 'disparity':
         disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
 
@@ -136,6 +208,7 @@ print("Connecting and starting the pipeline")
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
+    stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
     inStreams = ['in_right', 'in_left']
     inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
     in_q_list = []
@@ -155,7 +228,7 @@ with dai.Device(pipeline) as device:
     while True:
         # Handle input streams, if any
         if in_q_list:
-            dataset_size = 2  # Number of image pairs
+            dataset_size = 1  # Number of image pairs
             frame_interval_ms = 500
             for i, q in enumerate(in_q_list):
                 path = args.dataset + '/' + str(index) + '/' + q.getName() + '.png'
@@ -178,8 +251,14 @@ with dai.Device(pipeline) as device:
             sleep(frame_interval_ms / 1000)
         # Handle output streams
         for q in q_list:
-            if q.getName() in ['left', 'right', 'depth']: continue
+            if q.getName() in ['left', 'right']: continue
             frame = convert_to_cv2_frame(q.getName(), q.get())
-            cv2.imshow(q.getName(), frame)
-        if cv2.waitKey(1) == ord('q'):
+            if q.getName() == 'depth':
+                depth_handler.imshow(frame)
+            else:
+                cv2.imshow(q.getName(), frame)
+
+        key = cv2.waitKey(1)
+        if key == ord('q'):
             break
+        depth_handler.handleKeypress(key, stereoDepthConfigInQueue)

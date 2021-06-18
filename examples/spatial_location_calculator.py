@@ -13,10 +13,6 @@ class depthHandler:
     _send_new_config = False
     currentConfig = dai.StereoDepthConfig()
 
-    def update_config(self, config):
-        self.currentConfig = config
-        self._send_new_config = True
-
     def on_trackbar_change_sigma(self, value):
         self._sigma = value
         self._send_new_config = True
@@ -37,6 +33,9 @@ class depthHandler:
         self.sendConfig(stereoDepthConfigInQueue)
 
     def __init__(self, _confidence, _sigma):
+        print("Control median filter using the 'm' key.")
+        print("Use slider to adjust disparity confidence.")
+        print("Use slider to adjust bilateral filter intensity.")
         self._confidence = _confidence
         self._sigma = _sigma
         cv2.namedWindow(self.depthStream)
@@ -114,9 +113,6 @@ xinSpatialCalcConfig.out.link(spatialLocationCalculator.inputConfig)
 
 depthHandler = depthHandler(_confidence=stereo.initialConfig.getConfidenceThreshold(), _sigma=stereo.initialConfig.getBilateralFilterSigma())
 
-print("Control median filter using the 'm' key.")
-print("Use slider to adjust disparity confidence.")
-print("Use slider to adjust bilateral filter intensity.")
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
