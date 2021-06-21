@@ -19,6 +19,11 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
         .def("__gt__", &DeviceBootloader::Version::operator>)
         ;
 
+    py::enum_<DeviceBootloader::Type>(deviceBootloader, "Type")
+        .value("USB", DeviceBootloader::Type::USB)
+        .value("ETHERNET", DeviceBootloader::Type::ETHERNET)
+        ;
+
     deviceBootloader
       // Python only methods
         .def("__enter__", [](py::object obj){ return obj; })
