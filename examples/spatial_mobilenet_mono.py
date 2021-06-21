@@ -62,7 +62,7 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # StereoDepth
-stereo.setConfidenceThreshold(255)
+stereo.initialConfig.setConfidenceThreshold(255)
 
 # Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork.setConfidenceThreshold(0.5)

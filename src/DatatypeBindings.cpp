@@ -18,6 +18,7 @@
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
 #include "depthai/pipeline/datatype/Tracklets.hpp"
 #include "depthai/pipeline/datatype/IMUData.hpp"
+#include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -32,6 +33,7 @@
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
 #include "depthai-shared/datatype/RawTracklets.hpp"
 #include "depthai-shared/datatype/RawIMUData.hpp"
+#include "depthai-shared/datatype/RawStereoDepthConfig.hpp"
 
 
 //pybind
@@ -911,6 +913,29 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>>(m, "IMUData", DOC(dai, IMUData))
         .def(py::init<>())
         .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
+        ;
+
+
+
+
+    // Bind RawStereoDepthConfig
+    py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
+    rawStereoDepthConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawStereoDepthConfig::config)
+        ;
+
+    // StereoDepthConfig (after ConfigData)
+    py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>>(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig))
+        .def(py::init<>())
+        .def("setConfidenceThreshold",  &StereoDepthConfig::setConfidenceThreshold, py::arg("confThr"), DOC(dai, StereoDepthConfig, setConfidenceThreshold))
+        .def("setMedianFilter",         &StereoDepthConfig::setMedianFilter, py::arg("median"), DOC(dai, StereoDepthConfig, setMedianFilter))
+        .def("setBilateralFilterSigma", &StereoDepthConfig::setBilateralFilterSigma, py::arg("sigma"), DOC(dai, StereoDepthConfig, setBilateralFilterSigma))
+        .def("setLeftRightCheckThreshold", &StereoDepthConfig::setLeftRightCheckThreshold, py::arg("sigma"), DOC(dai, StereoDepthConfig, setLeftRightCheckThreshold))
+        .def("getConfidenceThreshold",  &StereoDepthConfig::getConfidenceThreshold, DOC(dai, StereoDepthConfig, getConfidenceThreshold))
+        .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
+        .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
+        .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
         ;
 
 }
