@@ -30,10 +30,12 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-lrcheck = True
+lrcheck = False
+subpixel = False
 
 stereo.initialConfig.setConfidenceThreshold(255)
 stereo.setLeftRightCheck(lrcheck)
+stereo.setSubpixel(subpixel)
 
 # Config
 topLeft = dai.Point2f(0.4, 0.4)
