@@ -59,7 +59,7 @@ for c in cam_list:
     xout[c].setStreamName(c)
     if c == 'rgb':
         cam[c] = pipeline.createColorCamera()
-        cam[c].initialControl.setManualFocus(50) # TODO
+        cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].isp.link(xout[c].input)
     else:
@@ -82,7 +82,7 @@ with dai.Device(pipeline) as device:
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         cv2.namedWindow(c, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(c, (640, 360))
+        cv2.resizeWindow(c, (640, 480))
 
     while True:
         for c in cam_list:
