@@ -10,7 +10,7 @@ System information message is created by the :ref:`SystemLogger` node.
 Examples of functionality
 #########################
 
-- :ref:`25 - System information`
+- :ref:`System information`
 
 Reference
 #########

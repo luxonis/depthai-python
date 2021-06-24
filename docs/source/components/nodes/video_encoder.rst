@@ -78,9 +78,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`04 - RGB Encoding`
-- :ref:`13 - Encoding Max Limit`
-- :ref:`18 - RGB Encoding with MobilenetSSD`
+- :ref:`RGB Encoding`
+- :ref:`Encoding Max Limit`
+- :ref:`RGB Encoding & MobilenetSSD`
 
 Reference
 #########

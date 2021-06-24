@@ -88,8 +88,8 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`26.1 - RGB & MobilenetSSD with spatial data`
-- :ref:`26.2 - MONO & MobilenetSSD with spatial data`
+- :ref:`RGB & MobilenetSSD with spatial data`
+- :ref:`Mono & MobilenetSSD with spatial data`
 
 Reference
 #########

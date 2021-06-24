@@ -81,9 +81,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`29.1 - Object tracker on RGB camera`
-- :ref:`29.2 - Spatial object tracker on RGB camera`
-- :ref:`29.3 - Object tracker on video`
+- :ref:`Object tracker on RGB`
+- :ref:`Spatial object tracker on RGB`
+- :ref:`Object tracker on video`
 
 Reference
 #########

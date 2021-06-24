@@ -78,8 +78,8 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`22.1 - RGB & TinyYoloV3 decoding on device`
-- :ref:`22.2 - RGB & TinyYoloV4 decoding on device`
+- :ref:`RGB & TinyYoloV3 decoding on device`
+- :ref:`RGB & TinyYoloV4 decoding on device`
 
 Reference
 #########

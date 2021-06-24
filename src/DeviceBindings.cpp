@@ -126,6 +126,7 @@ void DeviceBindings::bind(pybind11::module& m){
             d.close();
         })
         .def("close", [](Device& d) { py::gil_scoped_release release; d.close(); }, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
+        .def("isClosed", &Device::isClosed, "Check if the device is still connected`")
 
         //dai::Device methods
         //static
@@ -206,6 +207,9 @@ void DeviceBindings::bind(pybind11::module& m){
             return deviceGetQueueEventsHelper(d, d.getOutputQueueNames(), maxNumEvents, timeout);
         }, py::arg("maxNumEvents") = std::numeric_limits<std::size_t>::max(), py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvents, 4))
 
+        .def("readCalibration", &Device::readCalibration, DOC(dai, Device, readCalibration))
+        .def("flashCalibration", &Device::flashCalibration, py::arg("calibrationDataHandler"), DOC(dai, Device, flashCalibration))
+
         .def("getQueueEvent", [](Device& d, const std::vector<std::string>& queueNames, std::chrono::microseconds timeout) {
             auto events = deviceGetQueueEventsHelper(d, queueNames, std::numeric_limits<std::size_t>::max(), timeout);
             if(events.empty()) return std::string("");
@@ -241,6 +245,8 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getLogOutputLevel", [](Device& d) { py::gil_scoped_release release; return d.getLogOutputLevel(); }, DOC(dai, Device, getLogOutputLevel))
         .def("addLogCallback", [](Device& d, std::function<void(LogMessage)> callback) { py::gil_scoped_release release; return d.addLogCallback(callback); }, py::arg("callback"), DOC(dai, Device, addLogCallback))
         .def("removeLogCallback", [](Device& d, int cbId) { py::gil_scoped_release release; return d.removeLogCallback(cbId); }, py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
-        ;
+        .def("getUsbSpeed", [](Device& d) { py::gil_scoped_release release; return d.getUsbSpeed(); }, DOC(dai, Device, getUsbSpeed))
+        .def("getDeviceInfo", [](Device& d) { py::gil_scoped_release release; return d.getDeviceInfo(); }, DOC(dai, Device, getDeviceInfo))
+    ;
 
 }

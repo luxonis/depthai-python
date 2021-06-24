@@ -17,6 +17,7 @@
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
+#include "depthai/pipeline/node/IMU.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -139,7 +140,6 @@ void NodeBindings::bind(pybind11::module& m){
     using namespace dai;
 
 
-
     ////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////
     // Node properties bindings first - so function params are resolved
@@ -198,17 +198,21 @@ void NodeBindings::bind(pybind11::module& m){
     // StereoDepth props
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
 
-    py::enum_<StereoDepthProperties::MedianFilter>(stereoDepthProperties, "MedianFilter", DOC(dai, StereoDepthProperties, MedianFilter))
-        .value("MEDIAN_OFF", StereoDepthProperties::MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", StereoDepthProperties::MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", StereoDepthProperties::MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", StereoDepthProperties::MedianFilter::KERNEL_7x7)
+    // MedianFilter
+    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    medianFilter
+        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
         ;
 
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
-        .def_readwrite("median",                  &StereoDepthProperties::median)
-        .def_readwrite("confidenceThreshold",     &StereoDepthProperties::confidenceThreshold)
+        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
+        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
+        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
+        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
         .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
         .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
         .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
@@ -216,7 +220,22 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
+        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
         ;
+    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+
+    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
+    stereoDepthConfigData
+        .def(py::init<>())
+        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
+        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfigData::leftRightCheckThreshold,  DOC(dai, StereoDepthConfigData, leftRightCheckThreshold))
+        ;
+    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
 
 
     // VideoEncoder props
@@ -307,6 +326,42 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
         .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
         ;
+
+    // IMU node properties
+    py::enum_<IMUSensor>(m, "IMUSensor", DOC(dai, IMUSensor))
+        .value("ACCELEROMETER_RAW", IMUSensor::ACCELEROMETER_RAW, DOC(dai, IMUSensor, ACCELEROMETER_RAW))
+        .value("ACCELEROMETER", IMUSensor::ACCELEROMETER, DOC(dai, IMUSensor, ACCELEROMETER))
+        .value("LINEAR_ACCELERATION", IMUSensor::LINEAR_ACCELERATION, DOC(dai, IMUSensor, LINEAR_ACCELERATION))
+        .value("GRAVITY", IMUSensor::GRAVITY, DOC(dai, IMUSensor, GRAVITY))
+        .value("GYROSCOPE_RAW", IMUSensor::GYROSCOPE_RAW, DOC(dai, IMUSensor, GYROSCOPE_RAW))
+        .value("GYROSCOPE_CALIBRATED", IMUSensor::GYROSCOPE_CALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_CALIBRATED))
+        .value("GYROSCOPE_UNCALIBRATED", IMUSensor::GYROSCOPE_UNCALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_UNCALIBRATED))
+        .value("MAGNETOMETER_RAW", IMUSensor::MAGNETOMETER_RAW, DOC(dai, IMUSensor, MAGNETOMETER_RAW))
+        .value("MAGNETOMETER_CALIBRATED", IMUSensor::MAGNETOMETER_CALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_CALIBRATED))
+        .value("MAGNETOMETER_UNCALIBRATED", IMUSensor::MAGNETOMETER_UNCALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_UNCALIBRATED))
+        .value("ROTATION_VECTOR", IMUSensor::ROTATION_VECTOR, DOC(dai, IMUSensor, ROTATION_VECTOR))
+        .value("GAME_ROTATION_VECTOR", IMUSensor::GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, GAME_ROTATION_VECTOR))
+        .value("GEOMAGNETIC_ROTATION_VECTOR", IMUSensor::GEOMAGNETIC_ROTATION_VECTOR, DOC(dai, IMUSensor, GEOMAGNETIC_ROTATION_VECTOR))
+        .value("ARVR_STABILIZED_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_ROTATION_VECTOR))
+        .value("ARVR_STABILIZED_GAME_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_GAME_ROTATION_VECTOR))
+        // .value("GYRO_INTEGRATED_ROTATION_VECTOR", IMUSensor::GYRO_INTEGRATED_ROTATION_VECTOR)
+    ;
+
+    py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>>(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig))
+        .def(py::init<>())
+        .def_readwrite("sensitivityEnabled", &IMUSensorConfig::sensitivityEnabled)
+        .def_readwrite("sensitivityRelative", &IMUSensorConfig::sensitivityRelative)
+        .def_readwrite("changeSensitivity", &IMUSensorConfig::changeSensitivity)
+        .def_readwrite("reportRate", &IMUSensorConfig::reportRate)
+        .def_readwrite("sensorId", &IMUSensorConfig::sensorId)
+        ;
+
+    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
+    imuProperties
+        .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
+        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
+        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
+    ;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -563,6 +618,7 @@ void NodeBindings::bind(pybind11::module& m){
     ADD_NODE(MonoCamera)
         .def_readonly("inputControl", &MonoCamera::inputControl, DOC(dai, node, MonoCamera, inputControl))
         .def_readonly("out",  &MonoCamera::out, DOC(dai, node, MonoCamera, out))
+        .def_readonly("raw",  &MonoCamera::raw, DOC(dai, node, MonoCamera, raw))
         .def_readonly("initialControl",  &MonoCamera::initialControl, DOC(dai, node, MonoCamera, initialControl))
         .def("setCamId", [](MonoCamera& c, int64_t id) {
             // Issue an deprecation warning
@@ -598,6 +654,8 @@ void NodeBindings::bind(pybind11::module& m){
 
     // StereoDepth node
     ADD_NODE(StereoDepth)
+        .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
+        .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
         .def_readonly("left",           &StereoDepth::left, DOC(dai, node, StereoDepth, left))
         .def_readonly("right",          &StereoDepth::right, DOC(dai, node, StereoDepth, right))
         .def_readonly("depth",          &StereoDepth::depth, DOC(dai, node, StereoDepth, depth))
@@ -606,19 +664,36 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("syncedRight",    &StereoDepth::syncedRight, DOC(dai, node, StereoDepth, syncedRight))
         .def_readonly("rectifiedLeft",  &StereoDepth::rectifiedLeft, DOC(dai, node, StereoDepth, rectifiedLeft))
         .def_readonly("rectifiedRight", &StereoDepth::rectifiedRight, DOC(dai, node, StereoDepth, rectifiedRight))
-        .def("loadCalibrationFile",     &StereoDepth::loadCalibrationFile, py::arg("path"), DOC(dai, node, StereoDepth, loadCalibrationFile))
-        .def("loadCalibrationData",     &StereoDepth::loadCalibrationData, py::arg("data"), DOC(dai, node, StereoDepth, loadCalibrationData))
-        .def("setEmptyCalibration",     &StereoDepth::setEmptyCalibration, DOC(dai, node, StereoDepth, setEmptyCalibration))
+        .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
+        .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
+        .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
         .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
-        .def("setMedianFilter",         &StereoDepth::setMedianFilter, py::arg("median"), DOC(dai, node, StereoDepth, setMedianFilter))
+        .def("setOutputSize",           &StereoDepth::setOutputSize, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setOutputSize))
+        .def("setOutputKeepAspectRatio",&StereoDepth::setOutputKeepAspectRatio, py::arg("keep"), DOC(dai, node, StereoDepth, setOutputKeepAspectRatio))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(StereoDepthProperties::DepthAlign)>(&StereoDepth::setDepthAlign), py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(CameraBoardSocket)>(&StereoDepth::setDepthAlign), py::arg("camera"), DOC(dai, node, StereoDepth, setDepthAlign, 2))
-        .def("setConfidenceThreshold",  &StereoDepth::setConfidenceThreshold, py::arg("confThr"), DOC(dai, node, StereoDepth, setConfidenceThreshold))
+        .def("setRectification",        &StereoDepth::setRectification, py::arg("enable"), DOC(dai, node, StereoDepth, setRectification))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
         .def("setRectifyMirrorFrame",   &StereoDepth::setRectifyMirrorFrame, py::arg("enable"), DOC(dai, node, StereoDepth, setRectifyMirrorFrame))
+        .def("setConfidenceThreshold", [](StereoDepth& s, int confThr) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setConfidenceThreshold() is deprecated, Use 'initialConfig.setConfidenceThreshold()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setConfidenceThreshold(confThr);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setConfidenceThreshold))
+        .def("setMedianFilter", [](StereoDepth& s, dai::MedianFilter median) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setMedianFilter() is deprecated, Use 'initialConfig.setMedianFilter()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setMedianFilter(median);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setMedianFilter))
         .def("setOutputRectified", [](StereoDepth& s, bool enable) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setOutputRectified() is deprecated, the output is auto-enabled if used.", 1);
@@ -635,6 +710,28 @@ void NodeBindings::bind(pybind11::module& m){
             s.setOutputDepth(enable);
             HEDLEY_DIAGNOSTIC_POP
         })
+        .def("loadCalibrationFile", [](StereoDepth& s, std::string path){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationFile() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.loadCalibrationFile(path);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("loadCalibrationData", [](StereoDepth& s, std::vector<std::uint8_t> data){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationData() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.loadCalibrationData(data);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setEmptyCalibration", [](StereoDepth& s){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setEmptyCalibration() is deprecated, Use 'setRectification(False)' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setEmptyCalibration();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setEmptyCalibration))
+        .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -769,8 +866,6 @@ void NodeBindings::bind(pybind11::module& m){
         ;
     daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
-
-
     // Script node
     ADD_NODE(Script)
         .def_readonly("inputs", &Script::inputs)
@@ -783,6 +878,22 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setProcessor", &Script::setProcessor, DOC(dai, node, Script, setProcessor))
         .def("getProcessor", &Script::getProcessor, DOC(dai, node, Script, getProcessor))
         ;
+
+
+    // IMU node
+    ADD_NODE(IMU)
+        .def_readonly("out", &IMU::out, DOC(dai, node, IMU, out))
+        .def("enableIMUSensor", static_cast<void(IMU::*)(IMUSensorConfig imuSensor)>(&IMU::enableIMUSensor), py::arg("sensorConfig"), DOC(dai, node, IMU, enableIMUSensor))
+        .def("enableIMUSensor", static_cast<void(IMU::*)(const std::vector<IMUSensorConfig>& imuSensors)>(&IMU::enableIMUSensor), py::arg("sensorConfigs"), DOC(dai, node, IMU, enableIMUSensor, 2))
+        .def("enableIMUSensor", static_cast<void(IMU::*)(IMUSensor sensor, uint32_t reportRate)>(&IMU::enableIMUSensor), py::arg("sensor"), py::arg("reportRate"), DOC(dai, node, IMU, enableIMUSensor, 3))
+        .def("enableIMUSensor", static_cast<void(IMU::*)(const std::vector<IMUSensor>& sensors, uint32_t reportRate)>(&IMU::enableIMUSensor), py::arg("sensors"), py::arg("reportRate"), DOC(dai, node, IMU, enableIMUSensor, 4))
+        .def("setBatchReportThreshold", &IMU::setBatchReportThreshold, py::arg("batchReportThreshold"), DOC(dai, node, IMU, setBatchReportThreshold))
+        .def("getBatchReportThreshold", &IMU::getBatchReportThreshold, DOC(dai, node, IMU, getBatchReportThreshold))
+        .def("setMaxBatchReports", &IMU::setMaxBatchReports, py::arg("maxBatchReports"), DOC(dai, node, IMU, setMaxBatchReports))
+        .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
+        ;
+    daiNodeModule.attr("IMU").attr("Properties") = imuProperties;
+
 
 }
 

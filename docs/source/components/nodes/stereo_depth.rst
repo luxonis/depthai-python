@@ -53,26 +53,62 @@ Inputs and Outputs
 Disparity
 #########
 
-When calculating the disparity, each pixel in the disparity map gets assigned a confidence value 0..255 by the stereo matching algorithm, as:
-- 0 - maximum confidence that it holds a valid value
-- 255 - minimum confidence, so there are chances the value is incorrect
+When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
+as:
+
+- :code:`0` - maximum confidence that it holds a valid value
+- :code:`255` - minimum confidence, so there is more chance that the value is incorrect
+
 (this confidence score is kind-of inverted, if say comparing with NN)
 
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
-the threshold get invalidated, i.e. their disparity value is set to zero.
+the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
 Current limitations
 ###################
 
-If one or more of the additional depth modes (lrcheck, extended, subpixel) are enabled, then:
+If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`, :code:`subpixel`) are enabled, then:
 
-- :code:`depth` output is FP16.
-- median filtering is disabled on device.
-- with subpixel, either depth or disparity has valid data.
+- median filtering is disabled on device
+- with subpixel, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output
 
-Otherwise, depth output is U16 (in milimeters) and median is functional.
+Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
 
-Like on Gen1, either :code:`depth` or :code:`disparity` has valid data.
+Depth Modes
+###########
+
+Left-Right Check
+****************
+
+Left-Right Check or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views
+are slightly different).
+
+#. Computes disparity by matching in R->L direction
+#. Computes disparity by matching in L->R direction
+#. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in the final disparity map is invalidated.
+
+Extended Disparity
+******************
+
+The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
+So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
+of :code:`focal_length * base_line_dist / 95`.
+
+#. Computes disparity on the original size images (e.g. 1280x720)
+#. Computes disparity on 2x downscaled images (e.g. 640x360)
+#. Combines the two level disparities on Shave, effectively covering a total disparity range of 191 pixels (in relation to the original resolution).
+
+Subpixel Disparity
+******************
+
+Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals
+
+Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
+then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granular depth
+steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
+is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel.
+
+For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
 Usage
 #####
@@ -123,9 +159,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`03 - Depth Preview`
-- :ref:`10 - Mono & MobilenetSSD & Depth`
-- :ref:`26.1 - RGB & MobilenetSSD with spatial data`
+- :ref:`Depth Preview`
+- :ref:`Mono & MobilenetSSD & Depth`
+- :ref:`RGB & MobilenetSSD with spatial data`
 
 Reference
 #########
