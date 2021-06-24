@@ -71,7 +71,16 @@ if args.xlink_cam:
 if args.flash_bootloader or args.flash_app:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
     bootloader = dai.DeviceBootloader(bl)
-    progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+
+    # Workaround for a bug with the timeout-enabled bootloader
+    progressCalled = False
+
+    def progress(p):
+        global progressCalled
+        progressCalled = True
+        print(f'Flashing progress: {p*100:.1f}%')
+
+    startTime = time.monotonic()
     if args.flash_bootloader:
         print("Flashing bootloader...")
         bootloader.flashBootloader(progress)
@@ -79,7 +88,10 @@ if args.flash_bootloader or args.flash_app:
     else:
         print("Flashing application pipeline...")
         bootloader.flash(progress, pipeline)
-    print("Done. Exiting.")
+    if not progressCalled:
+        raise RuntimeError('Flashing failed, please try again')
+    elapsedTime = round(time.monotonic() - startTime, 2)
+    print("Done in", elapsedTime, "seconds. Exiting.")
     quit()
 
 # Pipeline defined, now the device is connected to
