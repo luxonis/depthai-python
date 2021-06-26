@@ -16,6 +16,7 @@
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
+#include "depthai/pipeline/node/EdgeDetector.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -504,6 +505,17 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
         ;
 
+    // EdgeDetector node
+    py::class_<EdgeDetector, Node, std::shared_ptr<EdgeDetector>>(m, "EdgeDetector", DOC(dai, node, EdgeDetector))
+        .def_readonly("initialConfig", &EdgeDetector::initialConfig, DOC(dai, node, EdgeDetector, initialConfig))
+        .def_readonly("inputConfig", &EdgeDetector::inputConfig, DOC(dai, node, EdgeDetector, inputConfig))
+        .def_readonly("inputImage", &EdgeDetector::inputImage, DOC(dai, node, EdgeDetector, inputImage))
+        .def_readonly("outputImage", &EdgeDetector::outputImage, DOC(dai, node, EdgeDetector, outputImage))
+        .def("setWaitForConfigInput", &EdgeDetector::setWaitForConfigInput, DOC(dai, node, EdgeDetector, setWaitForConfigInput))
+        .def("setNumFramesPool", &EdgeDetector::setNumFramesPool, DOC(dai, node, EdgeDetector, setNumFramesPool))
+        .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
+        ;
+
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
@@ -745,6 +757,17 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
     ;
     m.attr("IMU").attr("Properties") = imuProperties;
+
+
+    py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
+    edgeDetectorProperties
+        .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
+        .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
+        .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
+
+    ;
+    m.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
 
 
 
