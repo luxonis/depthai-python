@@ -940,8 +940,8 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<EdgeDetectorConfigData> (m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData))
         .def(py::init<>())
-        .def_readwrite("sobelFilterHorizontalKernel", &EdgeDetectorConfigData::sobelFilterHorizontalKernel)
-        .def_readwrite("sobelFilterVerticalKernel", &EdgeDetectorConfigData::sobelFilterVerticalKernel)
+        .def_readwrite("sobelFilterHorizontalKernel", &EdgeDetectorConfigData::sobelFilterHorizontalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterHorizontalKernel))
+        .def_readwrite("sobelFilterVerticalKernel", &EdgeDetectorConfigData::sobelFilterVerticalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterVerticalKernel))
         ;
 
     // Bind RawEdgeDetectorConfig
