@@ -4,8 +4,6 @@ import cv2
 import depthai as dai
 import numpy as np
 
-
-
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -93,7 +91,6 @@ with dai.Device(pipeline) as device:
             sobelVerticalKernel = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
             cfg.setSobelFilterKernels(sobelHorizontalKernel, sobelVerticalKernel)
             edgeCfgQueue.send(cfg)
-
 
         if key == ord('2'):
             print("Switching sobel filter kernel.")

@@ -21,7 +21,7 @@ Simple
    ../samples/video_mobilenet.rst
    ../samples/imu_accelerometer_gyroscope.rst
    ../samples/imu_rotation_vector.rst
-
+   ../samples/edge_detector.rst
 
 These samples are great starting point for the gen2 API.
 
@@ -38,3 +38,4 @@ These samples are great starting point for the gen2 API.
 - :ref:`RGB & MobileNetSSD @ 4K` - Runs MobileNetSSD on RGB frames and displays detections on both preview and 4k frames
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
+- :ref:`Edge detector` - Edge detection on input frame
