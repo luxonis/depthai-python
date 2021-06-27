@@ -19,6 +19,8 @@
 #include "depthai/pipeline/datatype/Tracklets.hpp"
 #include "depthai/pipeline/datatype/IMUData.hpp"
 #include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
+#include "depthai/pipeline/datatype/AprilTagData.hpp"
+#include "depthai/pipeline/datatype/AprilTagConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -34,7 +36,8 @@
 #include "depthai-shared/datatype/RawTracklets.hpp"
 #include "depthai-shared/datatype/RawIMUData.hpp"
 #include "depthai-shared/datatype/RawStereoDepthConfig.hpp"
-
+#include "depthai-shared/datatype/RawAprilTagConfig.hpp"
+#include "depthai-shared/datatype/RawAprilTags.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -936,6 +939,55 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
         .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
+        ;
+
+
+    py::class_<AprilTagConfigData> aprilTagConfigData(m, "AprilTagConfigData", DOC(dai, AprilTagConfigData));
+    aprilTagConfigData
+        .def(py::init<>())
+        .def_readwrite("type", &AprilTagConfigData::type)
+        ;
+
+    py::enum_<AprilTagConfigData::AprilTagType>(aprilTagConfigData, "AprilTagType")
+        .value("TAG_36H11", AprilTagConfigData::AprilTagType::TAG_36H11)
+        .value("TAG_25H9", AprilTagConfigData::AprilTagType::TAG_25H9)
+        .value("TAG_16H5", AprilTagConfigData::AprilTagType::TAG_16H5)
+        .value("TAG_CIR21H7", AprilTagConfigData::AprilTagType::TAG_CIR21H7)
+        .value("TAG_CIR49H12", AprilTagConfigData::AprilTagType::TAG_CIR49H12)
+        .value("TAG_CUST48H12", AprilTagConfigData::AprilTagType::TAG_CUST48H12)
+        .value("TAG_STAND41H12", AprilTagConfigData::AprilTagType::TAG_STAND41H12)
+        .value("TAG_STAND52H13", AprilTagConfigData::AprilTagType::TAG_STAND52H13)
+        ;
+
+    // Bind RawAprilTagConfig
+    py::class_<RawAprilTagConfig, RawBuffer, std::shared_ptr<RawAprilTagConfig>> rawAprilTagConfig(m, "RawAprilTagConfig", DOC(dai, RawAprilTagConfig));
+    rawAprilTagConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawAprilTagConfig::config)
+        ;
+
+    // AprilTagConfig (after ConfigData)
+    py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>>(m, "AprilTagConfig", DOC(dai, AprilTagConfig))
+        .def(py::init<>())
+        .def("setType", &AprilTagConfig::setType, py::arg("type"), DOC(dai, AprilTagConfig, setType))
+        .def("getConfigData", &AprilTagConfig::getConfigData, DOC(dai, AprilTagConfig, getConfigData))
+        ;
+
+    py::class_<AprilTags> (m, "AprilTags", DOC(dai, AprilTags))
+        .def(py::init<>())
+        .def_readwrite("id", &AprilTags::id, DOC(dai, AprilTags, id))
+        .def_readwrite("hamming", &AprilTags::hamming, DOC(dai, AprilTags, hamming))
+        .def_readwrite("decision_margin", &AprilTags::decision_margin, DOC(dai, AprilTags, decision_margin))
+        .def_readwrite("c", &AprilTags::c, DOC(dai, AprilTags, c))
+        .def_readwrite("p", &AprilTags::p, DOC(dai, AprilTags, p))
+        .def_readwrite("config", &AprilTags::config, DOC(dai, AprilTags, config))
+        ;
+
+    // Bind AprilTagData
+    py::class_<AprilTagData, Buffer, std::shared_ptr<AprilTagData>>(m, "AprilTagData", DOC(dai, AprilTagData))
+        .def(py::init<>())
+        .def("getAprilTag", &AprilTagData::getAprilTag, DOC(dai, AprilTagData, getAprilTag))
+        .def_property("aprilTags", [](AprilTagData& det) { return &det.aprilTags; }, [](AprilTagData& det, std::vector<AprilTags> val) { det.aprilTags = val; })
         ;
 
 }

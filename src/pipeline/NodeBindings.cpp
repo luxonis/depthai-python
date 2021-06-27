@@ -16,6 +16,7 @@
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
+#include "depthai/pipeline/node/AprilTag.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -504,6 +505,16 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
         ;
 
+    // AprilTag node
+    py::class_<AprilTag, Node, std::shared_ptr<AprilTag>>(m, "AprilTag", DOC(dai, node, AprilTag))
+        .def_readonly("inputConfig", &AprilTag::inputConfig, DOC(dai, node, AprilTag, inputConfig))
+        .def_readonly("inputImage", &AprilTag::inputImage, DOC(dai, node, AprilTag, inputImage))
+        .def_readonly("out", &AprilTag::out, DOC(dai, node, AprilTag, out))
+        .def_readonly("passthroughInputImage", &AprilTag::passthroughInputImage, DOC(dai, node, AprilTag, passthroughInputImage))
+        .def_readonly("initialConfig", &AprilTag::initialConfig, DOC(dai, node, AprilTag, initialConfig))
+        .def("setWaitForConfigInput", &AprilTag::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, AprilTag, setWaitForConfigInput))
+        ;
+
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
@@ -746,6 +757,11 @@ void NodeBindings::bind(pybind11::module& m){
     ;
     m.attr("IMU").attr("Properties") = imuProperties;
 
-
+    py::class_<AprilTagProperties> aprilTagProperties(m, "AprilTagProperties", DOC(dai, AprilTagProperties));
+    aprilTagProperties
+        .def_readwrite("initialConfig", &AprilTagProperties::initialConfig)
+        .def_readwrite("inputConfigSync", &AprilTagProperties::inputConfigSync)
+        ;
+    m.attr("AprilTag").attr("Properties") = aprilTagProperties;
 
 }
