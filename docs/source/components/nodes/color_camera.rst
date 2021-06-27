@@ -24,27 +24,40 @@ Inputs and Outputs
 
 .. code-block::
 
-                 ┌───────────────────┐   still
-                 │                   ├───────────►
-  inputConfig    │                   │
-  ──────────────►│                   │   preview
-                 │    ColorCamera    ├───────────►
-  inputControl   │                   │
-  ──────────────►│                   │   video
-                 │                   ├───────────►
-                 └───────────────────┘
+                         ColorCamera node
+                 ┌──────────────────────────────┐
+                 │   ┌─────────────┐            │
+                 │   │    Image    │ raw        │     raw
+                 │   │    Sensor   │---┬--------├────────►
+                 │   └────▲────────┘   |        │
+                 │        │   ┌--------┘        │
+                 │      ┌─┴───▼─┐               │     isp
+  inputControl   │      │       │-------┬-------├────────►
+  ──────────────►│------│  ISP  │ ┌─────▼────┐  │   video
+                 │      │       │ |          |--├────────►
+                 │      └───────┘ │   Image  │  │   still
+  inputConfig    │                │   Post-  │--├────────►
+  ──────────────►│----------------|Processing│  │ preview
+                 │                │          │--├────────►
+                 │                └──────────┘  │
+                 └──────────────────────────────┘
 
 **Message types**
 
 - :code:`inputConfig` - :ref:`ImageManipConfig`
 - :code:`inputControl` - :ref:`CameraControl`
-- :code:`still` - :ref:`ImgFrame`
-- :code:`preview` - :ref:`ImgFrame`
-- :code:`video` - :ref:`ImgFrame`
+- :code:`raw` - :ref:`ImgFrame` - RAW10 bayer data. Demo code for unpacking `here <https://github.com/luxonis/depthai-experiments/blob/3f1b2b2/gen2-color-isp-raw/main.py#L13-L32>`__
+- :code:`isp` - :ref:`ImgFrame` - YUV420 planar (same as YU12/IYUV/I420)
+- :code:`still` - :ref:`ImgFrame` - NV12, suitable for bigger size frames. The image gets created when a capture event is sent to the ColorCamera, so it's like taking a photo
+- :code:`preview` - :ref:`ImgFrame` - RGB (or BGR planar/interleaved if configured), mostly suited for small size previews and to feed the image into :ref:`NeuralNetwork`
+- :code:`video` - :ref:`ImgFrame` - NV12, suitable for bigger size frames
 
-:code:`Preview` is RGB (or BGR planar/interleaved if configured) and is mostly suited for small size previews and to feed the image
-into :ref:`NeuralNetwork`. :code:`video` and :code:`still` are both NV12, so are suitable for bigger sizes. :code:`still` image gets created when
-a capture event is sent to the ColorCamera, so it's like taking a photo.
+**ISP** (image signal processor) is used for bayer transformation, demosaicing, noise reduction, and other image enhancements.
+It interacts with the 3A algorithms: **auto-focus**, **auto-exposure**, and **auto-white-balance**, which are handling image sensor
+adjustments such as exposure time, sensitivity (ISO), and lens position (if the camera module has a motorized lens) at runtime.
+Click `here <https://en.wikipedia.org/wiki/Image_processor>`__ for more information.
+
+**Image Post-Processing** converts YUV420 planar frames from the **ISP** into :code:`video`/:code:`preview`/:code:`still` frames.
 
 Usage
 #####
@@ -74,9 +87,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`14.1 - Color Camera Control`
-- :ref:`28 - Camera video high resolution`
+- :ref:`RGB Preview`
+- :ref:`RGB Camera Control`
+- :ref:`RGB video`
 
 Reference
 #########
