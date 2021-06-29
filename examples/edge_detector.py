@@ -58,7 +58,7 @@ xinEdgeCfg.out.link(edgeDetectorRgb.inputConfig)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    # Output queue will be used to get the depth frames from the outputs defined above
+    # Output/input queues
     edgeLeftQueue = device.getOutputQueue(edgeLeftStr, 8, False)
     edgeRightQueue = device.getOutputQueue(edgeRightStr, 8, False)
     edgeRgbQueue = device.getOutputQueue(edgeRgbStr, 8, False)
