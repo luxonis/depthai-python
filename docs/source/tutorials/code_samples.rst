@@ -29,6 +29,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
 - :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
 - :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
+- :ref:`Edge detector` - Edge detection on input frame
 
 .. rubric:: Complex
 
