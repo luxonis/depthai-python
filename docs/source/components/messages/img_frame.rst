@@ -7,9 +7,9 @@ These are all the images (regardless of their encoding/format), as well as the d
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`02 - Mono Preview`
-- :ref:`03 - Depth Preview`
+- :ref:`RGB Preview`
+- :ref:`Mono Preview`
+- :ref:`Depth Preview`
 
 Reference
 #########
