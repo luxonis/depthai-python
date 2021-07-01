@@ -117,6 +117,9 @@ if 0:
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
+    print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
+    print('USB speed:', device.getUsbSpeed().name)
+
     q = {}
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
