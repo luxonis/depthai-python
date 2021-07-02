@@ -17,6 +17,7 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
 args = parser.parse_args()
 
 # TODO as args
+#cam_list = ['rgb'] 
 cam_list = ['left', 'right']
 
 print("DepthAI version:", dai.__version__)
@@ -51,6 +52,9 @@ color_res_opts = {
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
+control = pipeline.createXLinkIn()
+control.setStreamName('control')
+
 cam = {}
 xout = {}
 for c in cam_list:
@@ -65,6 +69,12 @@ for c in cam_list:
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
         cam[c].out.link(xout[c].input)
     cam[c].setBoardSocket(cam_socket_opts[c])
+    # Num frames to capture on trigger
+    cam[c].initialControl.setExternalTrigger(2)
+    # There's a problem with this initial command, we're sending it at runtime instead
+    # Note: first few frames may need to be discarded
+    #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
+    control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
@@ -79,6 +89,12 @@ with dai.Device(pipeline) as device:
     q = {}
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
+    q['control'] = device.getInputQueue(control.getStreamName())
+
+    if 1:
+        ctrl = dai.CameraControl()
+        ctrl.setManualExposure(15000, 400) # exposure [us], iso
+        q['control'].send(ctrl)
 
     while True:
         for c in cam_list:
