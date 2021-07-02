@@ -92,7 +92,7 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`26.3 - RGB & TinyYolo with spatial data`
+- :ref:`RGB & TinyYolo with spatial data`
 
 Reference
 #########

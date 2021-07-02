@@ -7,7 +7,7 @@ Overview
 
 .. code-block::
 
-              DepthAI device (eg. LUX-D)                                  Host (eg. RaspberryPi)
+              DepthAI device (eg. OAK-D)                                  Host (eg. RaspberryPi)
   ┌───────────────────────────────────────────────┐                   ┌─────────────────────────┐
   │                                               │                   │                         │
   │       Node                            Node    │                   │ # Your python code that │

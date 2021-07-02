@@ -84,9 +84,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`14.1 - Color Camera Control`
-- :ref:`17 - Video & MobilenetSSD`
-- :ref:`20 - Color Rotate Warp`
+- :ref:`RGB Camera Control`
+- :ref:`Video & MobilenetSSD`
+- :ref:`RGB Rotate Warp`
 
 Reference
 #########
