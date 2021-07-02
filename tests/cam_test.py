@@ -123,8 +123,10 @@ with dai.Device(pipeline) as device:
     q = {}
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
-        cv2.namedWindow(c, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(c, (640, 480))
+        # The OpenCV window resize may produce some artifacts
+        if c == 'rgb':
+            cv2.namedWindow(c, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(c, (640, 480))
 
     controlQueue = device.getInputQueue('control')
 
