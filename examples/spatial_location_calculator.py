@@ -33,7 +33,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 lrcheck = False
 subpixel = False
 
-stereo.setConfidenceThreshold(255)
+stereo.initialConfig.setConfidenceThreshold(255)
 stereo.setLeftRightCheck(lrcheck)
 stereo.setSubpixel(subpixel)
 

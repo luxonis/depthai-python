@@ -45,10 +45,10 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 if withDepth:
     # StereoDepth
-    stereo.setConfidenceThreshold(200)
+    stereo.initialConfig.setConfidenceThreshold(230)
     stereo.setRectifyEdgeFillColor(0)  # black, to better see the cutout
     # stereo.setInputResolution(1280, 720)
-    stereo.setMedianFilter(dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF)
+    stereo.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
     stereo.setLeftRightCheck(lrcheck)
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)
