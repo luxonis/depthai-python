@@ -275,8 +275,8 @@ In particular, let's change the :code:`setBlobPath` invocation to load our model
 
 .. code-block:: diff
 
-  - detection_nn.setBlobPath("/path/to/mobilenet-ssd.blob")
-  - detection_nn.setBlobPath("/path/to/face-detection-retail-0004.blob")
+  - detection_nn.setBlobPath(str(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6)))
+  + detection_nn.setBlobPath("/path/to/face-detection-retail-0004.blob")
 
 And that's all!
 
