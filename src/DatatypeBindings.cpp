@@ -942,21 +942,21 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
 
-    py::class_<AprilTagConfigData> aprilTagConfigData(m, "AprilTagConfigData", DOC(dai, AprilTagConfigData));
-    aprilTagConfigData
+    py::class_<AprilTagType> aprilTagType(m, "AprilTagType", DOC(dai, AprilTagType));
+    aprilTagType
         .def(py::init<>())
-        .def_readwrite("type", &AprilTagConfigData::type)
+        .def_readwrite("type", &AprilTagType::t)
         ;
 
-    py::enum_<AprilTagConfigData::AprilTagType>(aprilTagConfigData, "AprilTagType")
-        .value("TAG_36H11", AprilTagConfigData::AprilTagType::TAG_36H11)
-        .value("TAG_25H9", AprilTagConfigData::AprilTagType::TAG_25H9)
-        .value("TAG_16H5", AprilTagConfigData::AprilTagType::TAG_16H5)
-        .value("TAG_CIR21H7", AprilTagConfigData::AprilTagType::TAG_CIR21H7)
-        .value("TAG_CIR49H12", AprilTagConfigData::AprilTagType::TAG_CIR49H12)
-        .value("TAG_CUST48H12", AprilTagConfigData::AprilTagType::TAG_CUST48H12)
-        .value("TAG_STAND41H12", AprilTagConfigData::AprilTagType::TAG_STAND41H12)
-        .value("TAG_STAND52H13", AprilTagConfigData::AprilTagType::TAG_STAND52H13)
+    py::enum_<AprilTagType::Type>(aprilTagType, "Type")
+        .value("TAG_36H11", AprilTagType::Type::TAG_36H11)
+        .value("TAG_25H9", AprilTagType::Type::TAG_25H9)
+        .value("TAG_16H5", AprilTagType::Type::TAG_16H5)
+        .value("TAG_CIR21H7", AprilTagType::Type::TAG_CIR21H7)
+        .value("TAG_CIR49H12", AprilTagType::Type::TAG_CIR49H12)
+        .value("TAG_CUST48H12", AprilTagType::Type::TAG_CUST48H12)
+        .value("TAG_STAND41H12", AprilTagType::Type::TAG_STAND41H12)
+        .value("TAG_STAND52H13", AprilTagType::Type::TAG_STAND52H13)
         ;
 
     // Bind RawAprilTagConfig
@@ -977,9 +977,9 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("id", &AprilTags::id, DOC(dai, AprilTags, id))
         .def_readwrite("hamming", &AprilTags::hamming, DOC(dai, AprilTags, hamming))
-        .def_readwrite("decision_margin", &AprilTags::decision_margin, DOC(dai, AprilTags, decision_margin))
-        .def_readwrite("c", &AprilTags::c, DOC(dai, AprilTags, c))
-        .def_readwrite("p", &AprilTags::p, DOC(dai, AprilTags, p))
+        .def_readwrite("decisionMargin", &AprilTags::decisionMargin, DOC(dai, AprilTags, decisionMargin))
+        .def_readwrite("center", &AprilTags::center, DOC(dai, AprilTags, center))
+        .def_readwrite("points", &AprilTags::points, DOC(dai, AprilTags, points))
         .def_readwrite("config", &AprilTags::config, DOC(dai, AprilTags, config))
         ;
 
