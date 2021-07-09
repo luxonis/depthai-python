@@ -17,6 +17,7 @@
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
+#include "depthai/pipeline/node/FeatureTracker.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -516,6 +517,16 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
 
+    // FeatureTracker node
+    py::class_<FeatureTracker, Node, std::shared_ptr<FeatureTracker>>(m, "FeatureTracker", DOC(dai, node, FeatureTracker))
+        .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))
+        .def_readonly("inputImage", &FeatureTracker::inputImage, DOC(dai, node, FeatureTracker, inputImage))
+        .def_readonly("outputFeatures", &FeatureTracker::outputFeatures, DOC(dai, node, FeatureTracker, outputFeatures))
+        .def_readonly("passthroughInputImage", &FeatureTracker::passthroughInputImage, DOC(dai, node, FeatureTracker, passthroughInputImage))
+        .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
+        .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+        ;
+
     ////////////////////////////////////
     // Node properties bindings
     ////////////////////////////////////
@@ -768,6 +779,14 @@ void NodeBindings::bind(pybind11::module& m){
 
     ;
     m.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
+
+
+    py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
+    featureTrackerProperties
+        .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
+        ;
+    m.attr("SpatialLocationCalculator").attr("Properties") = featureTrackerProperties;
 
 
 

@@ -20,6 +20,8 @@
 #include "depthai/pipeline/datatype/IMUData.hpp"
 #include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
 #include "depthai/pipeline/datatype/EdgeDetectorConfig.hpp"
+#include "depthai/pipeline/datatype/FeatureTrackerData.hpp"
+#include "depthai/pipeline/datatype/FeatureTrackerConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -36,7 +38,8 @@
 #include "depthai-shared/datatype/RawIMUData.hpp"
 #include "depthai-shared/datatype/RawStereoDepthConfig.hpp"
 #include "depthai-shared/datatype/RawEdgeDetectorConfig.hpp"
-
+#include "depthai-shared/datatype/RawFeatureTrackerConfig.hpp"
+#include "depthai-shared/datatype/RawTrackedFeatures.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -893,6 +896,8 @@ void DatatypeBindings::bind(pybind11::module& m){
     py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>>(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData))
         .def(py::init<>())
         .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
+        .def_property("spatialLocations", [](SpatialLocationCalculatorData& loc) { return &loc.spatialLocations; }, [](SpatialLocationCalculatorData& loc, std::vector<SpatialLocations> val) { loc.spatialLocations = val; }, DOC(dai, SpatialLocationCalculatorData, spatialLocations))
+
         ;
 
     // SpatialLocationCalculatorConfig (after ConfigData)
@@ -956,6 +961,47 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def("setSobelFilterKernels",  &EdgeDetectorConfig::setSobelFilterKernels, py::arg("horizontalKernel"), py::arg("verticalKernel"), DOC(dai, EdgeDetectorConfig, setSobelFilterKernels))
         .def("getConfigData",         &EdgeDetectorConfig::getConfigData, DOC(dai, EdgeDetectorConfig, getConfigData))
+        ;
+
+    // Bind RawTrackedFeatures
+    py::class_<RawTrackedFeatures, RawBuffer, std::shared_ptr<RawTrackedFeatures>> rawTrackedFeatures(m, "RawTrackedFeatures", DOC(dai, RawTrackedFeatures));
+    rawTrackedFeatures
+        .def(py::init<>())
+        .def_readwrite("trackedFeatures", &RawTrackedFeatures::trackedFeatures)
+        ;
+
+    py::class_<TrackedFeatures> (m, "TrackedFeatures", DOC(dai, TrackedFeatures))
+        .def(py::init<>())
+        .def_readwrite("position", &TrackedFeatures::position, DOC(dai, TrackedFeatures, position))
+        .def_readwrite("id", &TrackedFeatures::id, DOC(dai, TrackedFeatures, id))
+        .def_readwrite("age", &TrackedFeatures::age, DOC(dai, TrackedFeatures, age))
+        .def_readwrite("harrisScore", &TrackedFeatures::harrisScore, DOC(dai, TrackedFeatures, harrisScore))
+        .def_readwrite("trackingError", &TrackedFeatures::trackingError, DOC(dai, TrackedFeatures, trackingError))
+        ;
+
+
+    // Bind RawTrackedFeatures
+    py::class_<RawFeatureTrackerConfig, RawBuffer, std::shared_ptr<RawFeatureTrackerConfig>> rawFeatureTrackerConfig(m, "RawFeatureTrackerConfig", DOC(dai, RawFeatureTrackerConfig));
+    rawFeatureTrackerConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawFeatureTrackerConfig::config)
+        ;
+
+    py::class_<FeatureTrackerConfigData> (m, "FeatureTrackerConfigData", DOC(dai, FeatureTrackerConfigData))
+        .def(py::init<>())
+        .def_readwrite("dummy", &FeatureTrackerConfigData::dummy)
+        ;
+
+    // Bind FeatureTrackerData
+    py::class_<FeatureTrackerData, Buffer, std::shared_ptr<FeatureTrackerData>>(m, "FeatureTrackerData", DOC(dai, FeatureTrackerData))
+        .def(py::init<>())
+        .def_property("trackedFeatures", [](FeatureTrackerData& feat) { return &feat.trackedFeatures; }, [](FeatureTrackerData& feat, std::vector<TrackedFeatures> val) { feat.trackedFeatures = val; }, DOC(dai, FeatureTrackerData, trackedFeatures))
+        ;
+
+    // FeatureTrackerConfig (after ConfigData)
+    py::class_<FeatureTrackerConfig, Buffer, std::shared_ptr<FeatureTrackerConfig>>(m, "FeatureTrackerConfig", DOC(dai, FeatureTrackerConfig))
+        .def(py::init<>())
+        .def("getConfigData", &FeatureTrackerConfig::getConfigData, DOC(dai, FeatureTrackerConfig, getConfigData))
         ;
 
 }
