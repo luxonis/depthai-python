@@ -986,7 +986,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind AprilTagData
     py::class_<AprilTagData, Buffer, std::shared_ptr<AprilTagData>>(m, "AprilTagData", DOC(dai, AprilTagData))
         .def(py::init<>())
-        .def("getAprilTag", &AprilTagData::getAprilTag, DOC(dai, AprilTagData, getAprilTag))
         .def_property("aprilTags", [](AprilTagData& det) { return &det.aprilTags; }, [](AprilTagData& det, std::vector<AprilTags> val) { det.aprilTags = val; })
         ;
 
