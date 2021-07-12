@@ -231,6 +231,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getDeviceInfo", &Device::getDeviceInfo, DOC(dai, Device, getDeviceInfo))
         .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate, DOC(dai, Device, getSystemInformationLoggingRate))
+        .def("getMxId", &Device::getMxId, DOC(dai, Device, getMxId))
         .def("getConnectedCameras", &Device::getConnectedCameras, DOC(dai, Device, getConnectedCameras))
         .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage, DOC(dai, Device, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", &Device::getCmxMemoryUsage, DOC(dai, Device, getCmxMemoryUsage))

@@ -39,6 +39,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
         .value("X_LINK_USB_CDC", X_LINK_USB_CDC)
         .value("X_LINK_PCIE", X_LINK_PCIE)
+        .value("X_LINK_TCP_IP", X_LINK_TCP_IP)
         .value("X_LINK_IPC", X_LINK_IPC)
         .value("X_LINK_NMB_OF_PROTOCOLS", X_LINK_NMB_OF_PROTOCOLS)
         .value("X_LINK_ANY_PROTOCOL", X_LINK_ANY_PROTOCOL)
