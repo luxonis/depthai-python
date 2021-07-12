@@ -1,3 +1,25 @@
+# Simple test
+execute_process(
+    COMMAND "/usr/bin/git"  clone --no-checkout "https://github.com/Maratyszcza/psimd.git" "psimd-source"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    RESULT_VARIABLE error_code
+)
+
+execute_process(
+  COMMAND "/usr/bin/git"  checkout origin/master --
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/psimd-source
+  RESULT_VARIABLE error_code
+)
+
+execute_process(
+    COMMAND "/usr/bin/git"  submodule update --recursive --init
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/psimd-source
+    RESULT_VARIABLE error_code
+    )
+
+execute_process(COMMAND ls ${CMAKE_CURRENT_LIST_DIR}/psimd-source)
+
+
 # Builds library at 'build/' and prepares sphinx configuration at 'build/docs/conf.py'
 set(project_root "${CMAKE_CURRENT_LIST_DIR}/..")
 
