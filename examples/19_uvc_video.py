@@ -12,37 +12,55 @@ parser.add_argument('-r',  '--rotate-cam',       default=False, action="store_tr
 parser.add_argument('-b',  '--back-mic',         default=False, action="store_true")
 parser.add_argument('-xm', '--xlink-mic',        default=False, action="store_true")
 parser.add_argument('-xc', '--xlink-cam',        default=False, action="store_true")
+parser.add_argument('-nc', '--no-camera',        default=False, action="store_true")
 parser.add_argument('-g',  '--mic-gain-db',      default=0, type=float)
 args = parser.parse_args()
 args.back_mic = False  # TODO again for UAC. Available with XLink
 
 enable_4k = True
 
+def try_reset_booted_device():
+    try:
+        import usb.core
+    except ModuleNotFoundError:
+        print("WARN The device might be already booted up with UVC firmware")
+        print("==== Please install `pyusb` to allow auto-resetting it:")
+        print("     python3 -m pip install pyusb")
+        print()
+        return
+    dev = usb.core.find(idVendor=0x03e7, idProduct=0xf63b)
+    if dev is not None:
+        print("Attempting to reset already booted device")
+        dev.ctrl_transfer(0x00, 0xF5, 0x0DA1, 0x0000)
+
+try_reset_booted_device()
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-# Define a source - color camera
-cam_rgb = pipeline.createColorCamera()
-cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-cam_rgb.setInterleaved(False)
-cam_rgb.setPreviewSize(1920, 1080)
-cam_rgb.initialControl.setManualFocus(130)
-# Note: this file contains tuning info for all cameras, but for now setting it
-#       at pipeline level is not supported, so we set it for ColorCamera
-#cam_rgb.setCameraTuningBlobPath('/home/user/customTuning.bin')
+if not args.no_camera:
+    # Define a source - color camera
+    cam_rgb = pipeline.createColorCamera()
+    cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+    cam_rgb.setInterleaved(False)
+    cam_rgb.setPreviewSize(1920, 1080)
+    cam_rgb.initialControl.setManualFocus(130)
+    # Note: this file contains tuning info for all cameras, but for now setting it
+    #       at pipeline level is not supported, so we set it for ColorCamera
+    #cam_rgb.setCameraTuningBlobPath('/home/user/customTuning.bin')
 
-if enable_4k:
-    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-    cam_rgb.setIspScale(1, 2)
-else:
-    cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+    if enable_4k:
+        cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+        cam_rgb.setIspScale(1, 2)
+    else:
+        cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
-if args.rotate_cam:
-    cam_rgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+    if args.rotate_cam:
+        cam_rgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
-# Create an UVC (USB Video Class) output node
-uvc = pipeline.createUVC()
-cam_rgb.video.link(uvc.input)
+    # Create an UVC (USB Video Class) output node
+    uvc = pipeline.createUVC()
+    cam_rgb.video.link(uvc.input)
 
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
@@ -97,6 +115,7 @@ if args.flash_bootloader or args.flash_app:
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device, open(filename, "wb") as f:
     # Start pipeline
+    tstart = time.monotonic()
     device.startPipeline()
 
     print("\nDevice started, please keep this process running")
@@ -115,7 +134,8 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
                 pkt = qmic.tryGet()
                 if pkt is not None:
                     print('MIC seq:', pkt.getSequenceNum(),
-                              'timestamp:', pkt.getTimestamp(),
+                              'timestamp:{:.6f}'.format(
+                                  pkt.getTimestamp().total_seconds() - tstart),
                               'samples:', pkt.getHeight(),
                               'mics:', pkt.getWidth())
                     data = pkt.getData()
@@ -124,7 +144,8 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
                 pkt = qcam.tryGet()
                 if pkt is not None:
                     print('CAM seq:', pkt.getSequenceNum(),
-                              'timestamp:', pkt.getTimestamp(),
+                              'timestamp:{:.6f}'.format(
+                                  pkt.getTimestamp().total_seconds() - tstart),
                               'height:', pkt.getHeight(),
                               'width:', pkt.getWidth())
                     frame = pkt.getCvFrame()
