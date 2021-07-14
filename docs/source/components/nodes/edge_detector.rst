@@ -1,7 +1,7 @@
 EdgeDetector
 ============
 
-Edge detector uses `Sobel filter <https://en.wikipedia.org/wiki/Sobel_operator>`__ to create image that emphasises edges.
+Edge detector uses `Sobel filter <https://en.wikipedia.org/wiki/Sobel_operator>`__ to create an image that emphasises edges.
 
 How to place it
 ###############
