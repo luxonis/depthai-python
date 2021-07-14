@@ -38,8 +38,8 @@ void NodeBindings::bind(pybind11::module& m){
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
     pyInput
-        .def_readonly("name", &Node::Input::name)
-        .def_readonly("type", &Node::Input::type)
+        .def_property_readonly("name", [](const Node::Input& input){ return input.name; })
+        .def_property_readonly("type", [](const Node::Input& input){ return input.type; })
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
