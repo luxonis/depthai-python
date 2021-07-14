@@ -25,7 +25,7 @@ Letterboxing
 the size of the image and apply "black bars" above and below the image, so the aspect ratio is preserved. You can
 achieve this by using :ref:`ImageManip` with :code:`manip.setResizeThumbnail(x,y)` (for Mobilenet :code:`x=300,y=300`).
 The downside of using this method is that your actual image will be smaller, so some features might not be preserved,
-which can mean the NN accuracy can decrease.
+which can mean the NN accuracy could decrease.
 `Usage example here <https://github.com/luxonis/depthai-python/blob/main/examples/object_tracker_video.py#L44>`__.
 
 .. image:: /_static/images/tutorials/fov.jpeg
