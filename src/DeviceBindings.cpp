@@ -247,6 +247,7 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("removeLogCallback", [](Device& d, int cbId) { py::gil_scoped_release release; return d.removeLogCallback(cbId); }, py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
         .def("getUsbSpeed", [](Device& d) { py::gil_scoped_release release; return d.getUsbSpeed(); }, DOC(dai, Device, getUsbSpeed))
         .def("getDeviceInfo", [](Device& d) { py::gil_scoped_release release; return d.getDeviceInfo(); }, DOC(dai, Device, getDeviceInfo))
+        .def("getMxId", [](Device& d) { py::gil_scoped_release release; return d.getMxId(); }, DOC(dai, Device, getMxId));
     ;
 
 }

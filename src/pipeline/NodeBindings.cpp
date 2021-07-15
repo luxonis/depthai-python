@@ -2,6 +2,7 @@
 
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
+#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
@@ -382,17 +383,16 @@ void NodeBindings::bind(pybind11::module& m){
 
     // Base 'Node' class binding
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
-    pyNode
-        .def_readonly("id", &Node::id, DOC(dai, Node, id))
-        .def("getName", &Node::getName, DOC(dai, Node, getName))
-        .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
-        .def("getInputs", &Node::getInputs, DOC(dai, Node, getInputs))
-        .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-        .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-    ;
 
     // Node::Input bindings
-    py::class_<Node::Input>(pyNode, "Input", DOC(dai, Node, Input))
+    py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
+    py::enum_<Node::Input::Type>(pyInput, "Type")
+        .value("SReceiver", Node::Input::Type::SReceiver)
+        .value("MReceiver", Node::Input::Type::MReceiver)
+    ;
+    pyInput
+        .def_property_readonly("name", [](const Node::Input& input){ return input.name; })
+        .def_property_readonly("type", [](const Node::Input& input){ return input.type; })
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
@@ -400,7 +400,12 @@ void NodeBindings::bind(pybind11::module& m){
     ;
 
     // Node::Output bindings
-    py::class_<Node::Output>(pyNode, "Output", DOC(dai, Node, Output))
+    py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
+    py::enum_<Node::Output::Type>(pyOutput, "Type")
+        .value("MSender", Node::Output::Type::MSender)
+        .value("SSender", Node::Output::Type::SSender)
+    ;
+    pyOutput
         .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
@@ -416,6 +421,22 @@ void NodeBindings::bind(pybind11::module& m){
         .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
         .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
     ;
+
+    pyNode
+        .def_readonly("id", &Node::id, DOC(dai, Node, id))
+        .def("getName", &Node::getName, DOC(dai, Node, getName))
+        .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
+        .def("getInputs", &Node::getInputs, DOC(dai, Node, getInputs))
+        .def("getOutputRefs", static_cast<std::vector< Node::Output*> (Node::*)()>(&Node::getOutputRefs), DOC(dai, Node, getOutputRefs), py::return_value_policy::reference_internal)
+        .def("getInputRefs", static_cast<std::vector<Node::Input*> (Node::*)()>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
+        .def("getOutputRefs", static_cast<std::vector<const Node::Output*> (Node::*)() const>(&Node::getOutputRefs), DOC(dai, Node, getOutputRefs), py::return_value_policy::reference_internal)
+        .def("getInputRefs", static_cast<std::vector<const Node::Input*> (Node::*)() const>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
+        .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline), DOC(dai, Node, getParentPipeline))
+        .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
+        .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
+        .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
+    ;
+
     // MSVC errors out with:
     // Error C2326 'void NodeBindings::bind(pybind11::module &)': function cannot access 'dai::Node::Connection::outputId'
     // ...
