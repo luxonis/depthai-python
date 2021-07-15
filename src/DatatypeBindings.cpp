@@ -140,6 +140,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
         ;
 
+        // TODO add RawImgFrame::CameraSettings
 
     // NNData
     py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
@@ -538,6 +539,9 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
+        .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
+        .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
+        .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
