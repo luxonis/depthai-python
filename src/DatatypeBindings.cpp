@@ -338,7 +338,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("j", &IMUReportRotationVectorWAcc::j)
         .def_readwrite("k", &IMUReportRotationVectorWAcc::k)
         .def_readwrite("real", &IMUReportRotationVectorWAcc::real)
-        .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
+        .def_readwrite("rotationVectorAccuracy", &IMUReportRotationVectorWAcc::rotationVectorAccuracy)
         ;
 
 #if 0
