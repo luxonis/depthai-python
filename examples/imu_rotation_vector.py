@@ -53,7 +53,7 @@ with dai.Device(pipeline) as device:
             print(f"Rotation vector timestamp: {tsF.format(timeDeltaToMilliS(rvTs))} ms")
             print(f"Quaternion: i: {imuF.format(rVvalues.i)} j: {imuF.format(rVvalues.j)} "
                 f"k: {imuF.format(rVvalues.k)} real: {imuF.format(rVvalues.real)}")
-            print(f"Accuracy (rad): {imuF.format(rVvalues.accuracy)}")
+            print(f"Accuracy (rad): {imuF.format(rVvalues.rotationVectorAccuracy)}")
 
 
         if cv2.waitKey(1) == ord('q'):
