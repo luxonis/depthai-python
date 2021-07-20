@@ -32,6 +32,8 @@ def try_reset_booted_device():
     if dev is not None:
         print("Attempting to reset already booted device")
         dev.ctrl_transfer(0x00, 0xF5, 0x0DA1, 0x0000)
+        # Waiting a bit for device to boot (required when flashing)
+        time.sleep(1)
 
 try_reset_booted_device()
 
