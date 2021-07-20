@@ -454,6 +454,9 @@ void NodeBindings::bind(pybind11::module& m){
     // UVC node
     py::class_<UVC, Node, std::shared_ptr<UVC>>(m, "UVC")
         .def_readonly("input", &UVC::input)
+        .def("setGpiosOnInit", &UVC::setGpiosOnInit, py::arg("list"), DOC(dai, node, UVC, setGpiosOnInit))
+        .def("setGpiosOnStreamOn", &UVC::setGpiosOnStreamOn, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOn))
+        .def("setGpiosOnStreamOff", &UVC::setGpiosOnStreamOff, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOff))
         ;
 
     // UAC node
