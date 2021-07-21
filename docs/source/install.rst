@@ -159,7 +159,7 @@ Save and reload the script by running the command :code:`source ~/.bashrc`. Then
   .. code-block:: bash
 
     #Download and install the dependency package
-    sudo wget-qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
 
     #Clone github repository
     git clone https://github.com/luxonis/depthai-python.git
@@ -172,7 +172,7 @@ Last step is to edit :code:`.bashrc` with the line:
     echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc
 
 
-Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python 01_rgb_preview.py`.
+Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python rgb_preview.py`.
 
 Solution provided by `iacisme <https://github.com/iacisme>`__ via our `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__ channel.
 
