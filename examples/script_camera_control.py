@@ -10,13 +10,13 @@ cam = pipeline.create(dai.node.ColorCamera)
 
 # Script node
 script = pipeline.create(dai.node.Script)
-script.setScriptData("""
-import time
-ctrl = CameraControl()
-ctrl.setCaptureStill(True)
-while True:
-    time.sleep(1)
-    node.io['out'].send(ctrl)
+script.setScript("""
+    import time
+    ctrl = CameraControl()
+    ctrl.setCaptureStill(True)
+    while True:
+        time.sleep(1)
+        node.io['out'].send(ctrl)
 """)
 
 # XLinkOut
@@ -27,12 +27,10 @@ xout.setStreamName('still')
 script.outputs['out'].link(cam.inputControl)
 cam.still.link(xout.input)
 
-# Connect to device and start pipeline
+# Connect to device with pipeline
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
     while True:
         img = device.getOutputQueue("still").get()
         cv2.imshow('still', img.getCvFrame())
         if cv2.waitKey(1) == ord('q'):
-            exit(0)
+            break

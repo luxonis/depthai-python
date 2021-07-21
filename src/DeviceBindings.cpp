@@ -229,6 +229,12 @@ void DeviceBindings::bind(pybind11::module& m){
         }, py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent, 4))
 
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
+
+        // Doesn't require GIL release (eg, don't do RPC or long blocking things in background)
+        .def("setLogOutputLevel", &Device::setLogOutputLevel, py::arg("level"), DOC(dai, Device, setLogOutputLevel))
+        .def("getLogOutputLevel", &Device::getLogOutputLevel, DOC(dai, Device, getLogOutputLevel))
+
+        // Requires GIL release
         .def("setLogLevel", [](Device& d, LogLevel l) { py::gil_scoped_release release; d.setLogLevel(l); }, py::arg("level"), DOC(dai, Device, setLogLevel))
         .def("getLogLevel", [](Device& d) { py::gil_scoped_release release; return d.getLogLevel(); }, DOC(dai, Device, getLogLevel))
         .def("setSystemInformationLoggingRate", [](Device& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
@@ -241,8 +247,6 @@ void DeviceBindings::bind(pybind11::module& m){
         .def("getChipTemperature", [](Device& d) { py::gil_scoped_release release; return d.getChipTemperature(); }, DOC(dai, Device, getChipTemperature))
         .def("getLeonCssCpuUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonCssCpuUsage(); }, DOC(dai, Device, getLeonCssCpuUsage))
         .def("getLeonMssCpuUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonMssCpuUsage(); }, DOC(dai, Device, getLeonMssCpuUsage))
-        .def("setLogOutputLevel", [](Device& d, LogLevel l) { py::gil_scoped_release release; return d.setLogOutputLevel(l); }, py::arg("level"), DOC(dai, Device, setLogOutputLevel))
-        .def("getLogOutputLevel", [](Device& d) { py::gil_scoped_release release; return d.getLogOutputLevel(); }, DOC(dai, Device, getLogOutputLevel))
         .def("addLogCallback", [](Device& d, std::function<void(LogMessage)> callback) { py::gil_scoped_release release; return d.addLogCallback(callback); }, py::arg("callback"), DOC(dai, Device, addLogCallback))
         .def("removeLogCallback", [](Device& d, int cbId) { py::gil_scoped_release release; return d.removeLogCallback(cbId); }, py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
         .def("getUsbSpeed", [](Device& d) { py::gil_scoped_release release; return d.getUsbSpeed(); }, DOC(dai, Device, getUsbSpeed))
