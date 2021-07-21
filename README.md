@@ -31,29 +31,46 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 ### Building
 
+The first time you build, the repository submodules need be initialized:
+```
+git submodule update --init --recursive
+
+# Tip: You can ask Git to do that automatically:
+git config submodule.recurse true
+```
+
+Later submodules also need to be updated.
+
+#### Local build with pip
 To build and install using pip:
 ```
 python3 -m pip install .
 ```
 Add parameter `-v` to see the output of the building process.
 
-
+#### Wheel with pip
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
 ```
 
+#### Shared library
 To build a shared library from source perform the following:
 
 > ℹ️ To speed up build times, use `cmake --build build --parallel [num CPU cores]` (CMake >= 3.12).
 For older versions use: Linux/macOS: `cmake --build build -- -j[num CPU cores]`, MSVC: `cmake --build build -- /MP[num CPU cores]`
 
 ```
-git submodule update --init --recursive
 cmake -H. -Bbuild
 cmake --build build
 ```
 To specify custom Python executable to build for, use `cmake -H. -Bbuild -D PYTHON_EXECUTABLE=/full/path/to/python`.
+
+#### Common issues
+
+* Many build fails due to missing dependencies. This also happens when submodules are missing or outdated (`git submodule update --recursive`).
+* If libraries and headers are not in standard places, or not on the search paths, CMake reports it cannot find what it needs (e.g. `libusb`). CMake can be hinted at where to look, for exmpale: `CMAKE_LIBRARY_PATH=/opt/local/lib CMAKE_INCLUDE_PATH=/opt/local/include pip install .`
+* Some distribution installers may not get the desired library. For example, an install on a RaspberryPi failed, missing `libusb`, as the default installation with APT led to v0.1.3 at the time, whereas the library here required v1.0.
 
 
 ## Running tests

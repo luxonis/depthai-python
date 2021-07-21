@@ -22,7 +22,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
 
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDefaultIntrinsics))
         .def("getDistortionCoefficients", &CalibrationHandler::getDistortionCoefficients, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDistortionCoefficients))
-        
+
         .def("getFov", &CalibrationHandler::getFov, py::arg("cameraId"), DOC(dai, CalibrationHandler, getFov))
         .def("getLensPosition", &CalibrationHandler::getLensPosition, py::arg("cameraId"), DOC(dai, CalibrationHandler, getLensPosition))
 
@@ -57,4 +57,4 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def("setStereoRight", &CalibrationHandler::setStereoRight, py::arg("cameraId"), py::arg("rectifiedRotation"), DOC(dai, CalibrationHandler, setStereoRight));
 
 
-} 
+}

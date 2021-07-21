@@ -33,7 +33,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 lrcheck = False
 subpixel = False
 
-stereo.setConfidenceThreshold(255)
+stereo.initialConfig.setConfidenceThreshold(255)
 stereo.setLeftRightCheck(lrcheck)
 stereo.setSubpixel(subpixel)
 
@@ -87,6 +87,9 @@ with dai.Device(pipeline) as device:
             ymin = int(roi.topLeft().y)
             xmax = int(roi.bottomRight().x)
             ymax = int(roi.bottomRight().y)
+
+            depthMin = depthData.depthMin
+            depthMax = depthData.depthMax
 
             fontType = cv2.FONT_HERSHEY_TRIPLEX
             cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)

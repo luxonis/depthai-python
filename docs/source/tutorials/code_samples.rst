@@ -18,7 +18,6 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Depth Preview` - Displays colorized stereo disparity
-- :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
@@ -28,6 +27,9 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`RGB & MobileNetSSD @ 4K` - Runs MobileNetSSD on RGB frames and displays detections on both preview and 4k frames
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
+- :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
+- :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
+- :ref:`Edge detector` - Edge detection on input frame
 
 .. rubric:: Complex
 
@@ -35,6 +37,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
+- :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Rotate Warp` - Demonstrates how to rotate, mirror, flip or perform perspective transform on a frame
 - :ref:`RGB Depth` - Displays RGB depth frames
 - :ref:`Auto Exposure on ROI` - Demonstrates how to use auto exposure based on the selected ROI
@@ -56,3 +59,9 @@ Code samples are used for automated testing. They are also a great starting poin
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
+- :ref:`Device Queue Event` - Demonstrates how to use device queue events
+- :ref:`Queue add callback` - Demonstrates how to use queue callbacks
+- :ref:`Calibration Flash v5` - Demonstrates how to flash calibration data of version 5 (gen1 calibration data) to the device
+- :ref:`Calibration Flash` - Demonstrates how to flash calibration data of version 6 (gen2 calibration data) to the device
+- :ref:`Calibration Reader` - Demonstrates how to read calibration data stored on device over XLink
+- :ref:`Calibration Load` - Demonstrates how to load and use calibration data of version6 (gen2 calibration data) in a pipeline

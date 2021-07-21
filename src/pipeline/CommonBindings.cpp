@@ -16,11 +16,12 @@
 void CommonBindings::bind(pybind11::module& m){
 
     using namespace dai;
-    
+
     py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
         .def(py::init<>())
         .def_readwrite("sec", &Timestamp::sec)
         .def_readwrite("nsec", &Timestamp::nsec)
+        .def("get", &Timestamp::get)
         ;
 
     py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
@@ -103,7 +104,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("rightCameraSocket", &StereoRectification::rightCameraSocket)
         ;
 
-    // Extrinsics 
+    // Extrinsics
     py::class_<Extrinsics> (m, "Extrinsics", DOC(dai, Extrinsics))
         .def(py::init<>())
         .def_readwrite("rotationMatrix", &Extrinsics::rotationMatrix)
@@ -112,7 +113,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("toCameraSocket", &Extrinsics::toCameraSocket)
         ;
 
-    // CameraInfo 
+    // CameraInfo
     py::class_<CameraInfo> (m, "CameraInfo", DOC(dai, CameraInfo))
         .def(py::init<>())
         .def_readwrite("width", &CameraInfo::width)
@@ -124,7 +125,7 @@ void CommonBindings::bind(pybind11::module& m){
         .def_readwrite("specHfovDeg", &CameraInfo::specHfovDeg)
         ;
 
-    // EepromData 
+    // EepromData
     py::class_<EepromData> (m, "EepromData", DOC(dai, EepromData))
         .def(py::init<>())
         .def_readwrite("version", &EepromData::version)
