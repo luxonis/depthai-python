@@ -9,7 +9,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
 
     using namespace dai;
 
-    py::class_<DeviceInfo>(m, "DeviceInfo")
+    py::class_<DeviceInfo>(m, "DeviceInfo", DOC(dai, DeviceInfo))
         .def(py::init<>())
         .def_readwrite("desc", &DeviceInfo::desc)
         .def_readwrite("state", &DeviceInfo::state)
@@ -20,7 +20,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("protocol", &deviceDesc_t::protocol)
         .def_readwrite("platform", &deviceDesc_t::platform)
-        .def_property("name", 
+        .def_property("name",
             [](deviceDesc_t& o){return std::string(o.name);},
             [](deviceDesc_t& o, std::string n){ std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE,(int) n.size()));}
         )
@@ -39,6 +39,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
         .value("X_LINK_USB_CDC", X_LINK_USB_CDC)
         .value("X_LINK_PCIE", X_LINK_PCIE)
+        .value("X_LINK_TCP_IP", X_LINK_TCP_IP)
         .value("X_LINK_IPC", X_LINK_IPC)
         .value("X_LINK_NMB_OF_PROTOCOLS", X_LINK_NMB_OF_PROTOCOLS)
         .value("X_LINK_ANY_PROTOCOL", X_LINK_ANY_PROTOCOL)
@@ -52,7 +53,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         .export_values()
         ;
 
-    py::class_<XLinkConnection>(m, "XLinkConnection")
+    py::class_<XLinkConnection>(m, "XLinkConnection", DOC(dai, XLinkConnection))
         .def(py::init<const DeviceInfo&, std::vector<std::uint8_t>>())
         .def(py::init<const DeviceInfo&, std::string>())
         .def(py::init<const DeviceInfo&>())
