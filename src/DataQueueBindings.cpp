@@ -11,16 +11,32 @@ void DataQueueBindings::bind(pybind11::module& m){
     using namespace dai;
     using namespace std::chrono;
 
-    // To prevent blocking whole python interpreter, blocking functions like 'get' and 'send' 
+    // To prevent blocking whole python interpreter, blocking functions like 'get' and 'send'
     // are pooled with a reasonable delay and check for python interrupt signal in between.
 
     // Bind DataOutputQueue
+    auto addCallbackLambda = [](DataOutputQueue& q, py::function cb) -> int {
+        pybind11::module inspect_module = pybind11::module::import("inspect");
+        pybind11::object result = inspect_module.attr("signature")(cb).attr("parameters");
+        auto numParams = pybind11::len(result);
+        if(numParams == 2){
+            return q.addCallback(cb.cast<std::function<void(std::string, std::shared_ptr<ADatatype>)>>());
+        } else if (numParams == 1){
+            return q.addCallback(cb.cast<std::function<void(std::shared_ptr<ADatatype>)>>());
+        } else if (numParams == 0){
+            return q.addCallback(cb.cast<std::function<void()>>());
+        } else {
+            throw py::value_error("Callback must take either zero, one or two arguments");
+        }
+    };
     py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue", DOC(dai, DataOutputQueue))
         .def("getName", &DataOutputQueue::getName, DOC(dai, DataOutputQueue, getName))
+        .def("isClosed", &DataOutputQueue::isClosed, DOC(dai, DataOutputQueue, isClosed))
+        .def("close", &DataOutputQueue::close, DOC(dai, DataOutputQueue, close))
 
-        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::string, std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"), DOC(dai, DataOutputQueue, addCallback))
-        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void(std::shared_ptr<ADatatype>)>)>(&DataOutputQueue::addCallback), py::arg("callback"), DOC(dai, DataOutputQueue, addCallback, 2))
-        .def("addCallback", static_cast<int(DataOutputQueue::*)(std::function<void()>)>(&DataOutputQueue::addCallback), py::arg("callback"), DOC(dai, DataOutputQueue, addCallback, 3))
+        .def("addCallback", addCallbackLambda, py::arg("callback"), DOC(dai, DataOutputQueue, addCallback))
+        .def("addCallback", addCallbackLambda, py::arg("callback"), DOC(dai, DataOutputQueue, addCallback, 2))
+        .def("addCallback", addCallbackLambda, py::arg("callback"), DOC(dai, DataOutputQueue, addCallback, 3))
         .def("removeCallback", &DataOutputQueue::removeCallback, py::arg("callbackId"), DOC(dai, DataOutputQueue, removeCallback))
 
         .def("setBlocking", &DataOutputQueue::setBlocking, py::arg("blocking"), DOC(dai, DataOutputQueue, setBlocking))
@@ -28,11 +44,11 @@ void DataQueueBindings::bind(pybind11::module& m){
         .def("setMaxSize", &DataOutputQueue::setMaxSize, py::arg("maxSize"), DOC(dai, DataOutputQueue, setMaxSize))
         .def("getMaxSize", &DataOutputQueue::getMaxSize, DOC(dai, DataOutputQueue, getMaxSize))
         .def("getAll", [](DataOutputQueue& obj){
-          
+
             std::vector<std::shared_ptr<ADatatype>> messages;
             bool timedout = true;
             do {
-                {          
+                {
                     // releases python GIL
                     py::gil_scoped_release release;
 
@@ -50,15 +66,15 @@ void DataQueueBindings::bind(pybind11::module& m){
             return messages;
         }, DOC(dai, DataOutputQueue, getAll, 2))
         .def("get", [](DataOutputQueue& obj){
-          
+
             std::shared_ptr<ADatatype> d = nullptr;
             bool timedout = true;
             do {
-                {          
+                {
                     // releases python GIL
                     py::gil_scoped_release release;
 
-                    // block for 100ms                    
+                    // block for 100ms
                     d = obj.get(milliseconds(100), timedout);
                 }
 
@@ -78,13 +94,15 @@ void DataQueueBindings::bind(pybind11::module& m){
 
     // Bind DataInputQueue
     py::class_<DataInputQueue, std::shared_ptr<DataInputQueue>>(m, "DataInputQueue", DOC(dai, DataInputQueue))
+        .def("isClosed", &DataInputQueue::isClosed, DOC(dai, DataInputQueue, isClosed))
+        .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close))
         .def("getName", &DataInputQueue::getName, DOC(dai, DataInputQueue, getName))
         .def("setBlocking", &DataInputQueue::setBlocking, py::arg("blocking"), DOC(dai, DataInputQueue, setBlocking))
         .def("getBlocking", &DataInputQueue::getBlocking, DOC(dai, DataInputQueue, getBlocking))
         .def("setMaxSize", &DataInputQueue::setMaxSize, py::arg("maxSize"), DOC(dai, DataInputQueue, setMaxSize))
         .def("getMaxSize", &DataInputQueue::getMaxSize, DOC(dai, DataInputQueue, getMaxSize))
         .def("send", [](DataInputQueue& obj, std::shared_ptr<ADatatype> d){
-            
+
             bool sent = false;
             do {
 

@@ -23,7 +23,7 @@ python3 -m pip install --extra-index-url https://artifacts.luxonis.com/artifacto
 ### Dependencies
  - cmake >= 3.4
  - C++14 compiler (clang, gcc, msvc, ...)
- - Python
+ - Python3
 
 Along these, dependencies of depthai-core are also required
 See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#dependencies)
@@ -31,35 +31,68 @@ See: [depthai-core dependencies](https://github.com/luxonis/depthai-core#depende
 
 ### Building
 
-To build a shared library from source perform the following:
+The first time you build, the repository submodules need be initialized:
 ```
-mkdir build && cd build
-cmake .. [-D PYTHON_EXECUTABLE=/full/path/to/python]
-cmake --build . --parallel
+git submodule update --init --recursive
+
+# Tip: You can ask Git to do that automatically:
+git config submodule.recurse true
 ```
 
-Where `-D PYTHON_EXECUTABLE` option can optionally specify an exact Python executable to use for building.
+Later submodules also need to be updated.
 
+#### Local build with pip
+To build and install using pip:
+```
+python3 -m pip install .
+```
+Add parameter `-v` to see the output of the building process.
+
+#### Wheel with pip
 To build a wheel, execute the following
 ```
 python3 -m pip wheel . -w wheelhouse
 ```
 
-To build and install using pip:
+#### Shared library
+To build a shared library from source perform the following:
+
+> ℹ️ To speed up build times, use `cmake --build build --parallel [num CPU cores]` (CMake >= 3.12).
+For older versions use: Linux/macOS: `cmake --build build -- -j[num CPU cores]`, MSVC: `cmake --build build -- /MP[num CPU cores]`
+
 ```
-python3 -m pip install .
+cmake -H. -Bbuild
+cmake --build build
 ```
+To specify custom Python executable to build for, use `cmake -H. -Bbuild -D PYTHON_EXECUTABLE=/full/path/to/python`.
+
+#### Common issues
+
+* Many build fails due to missing dependencies. This also happens when submodules are missing or outdated (`git submodule update --recursive`).
+* If libraries and headers are not in standard places, or not on the search paths, CMake reports it cannot find what it needs (e.g. `libusb`). CMake can be hinted at where to look, for exmpale: `CMAKE_LIBRARY_PATH=/opt/local/lib CMAKE_INCLUDE_PATH=/opt/local/include pip install .`
+* Some distribution installers may not get the desired library. For example, an install on a RaspberryPi failed, missing `libusb`, as the default installation with APT led to v0.1.3 at the time, whereas the library here required v1.0.
+
 
 ## Running tests
 
 To run the tests build the library with the following options
 ```
-mkdir build_tests && cd build_tests
-cmake .. -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
-cmake --build . --parallel
+git submodule update --init --recursive
+cmake -H. -Bbuild -D DEPTHAI_PYTHON_ENABLE_TESTS=ON -D DEPTHAI_PYTHON_ENABLE_EXAMPLES=ON -D DEPTHAI_PYTHON_TEST_EXAMPLES=ON
+cmake --build build
+```
+
+Then navigate to `build` folder and run `ctest`
+```
+cd build
 ctest
 ```
 
+To test a specific example/test with a custom timeout (in seconds) use following:
+```
+TEST_TIMEOUT=0 ctest -R "01_rgb_preview" --verbose
+```
+If `TEST_TIMEOUT=0`, the test will run until stopped or it ends.
 
 ## Tested platforms
 
@@ -67,7 +100,6 @@ ctest
 - Ubuntu 16.04, 18.04;
 - Raspbian 10;
 - macOS 10.14.6, 10.15.4;
-
 
 ### Building documentation
 
@@ -78,36 +110,35 @@ ctest
      sudo docker-compose build
      sudo docker-compose up
      ```
-     
-     > ℹ️ You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
 
+     > ℹ️ You can leave out the `sudo` if you have added your user to the `docker` group (or are using rootless docker).
      Then open [http://localhost:8000](http://localhost:8000).
-     
+
      This docker container will watch changes in the `docs/source` directory and rebuild the docs automatically
 
 - **Linux**
-     
+
      First, please install the required [dependencies](#Dependencies)
-  
+
      Then run the following commands to build the docs website
-  
+
      ```
      python3 -m pip install -U pip
      python3 -m pip install -r docs/requirements.txt
-     cmake -S . -B build -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
-     cmake --build build --parallel --target sphinx
+     cmake -H. -Bbuild -D DEPTHAI_BUILD_DOCS=ON -D DEPTHAI_PYTHON_BUILD_DOCS=ON
+     cmake --build build --target sphinx
      python3 -m http.server --bind 0.0.0.0 8000 --directory build/docs/sphinx
      ```
-  
+
      Then open [http://localhost:8000](http://localhost:8000).
 
      This will build documentation based on current sources, so if some new changes will be made, run this command
      in a new terminal window to update the website source
-  
+
      ```
-     cmake --build build --parallel --target sphinx
+     cmake --build build --target sphinx
      ```
-  
+
      Then refresh your page - it should load the updated website that was just built
 
 ## Troubleshooting
@@ -121,7 +152,7 @@ Build failure on Ubuntu 18.04 ("relocation ..." link error) with gcc 7.4.0 (defa
          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 70
          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 70
 ### Hunter
-Hunter is a CMake-only dependency manager for C/C++ projects. 
+Hunter is a CMake-only dependency manager for C/C++ projects.
 
 If you are stuck with error message which mentions external libraries (subdirectory of `.hunter`) like the following:
 ```
@@ -145,7 +176,7 @@ del C:/[user]/.hunter
 
 ### LTO - link time optimization
 
-If following message appears: 
+If following message appears:
 ```
 lto1: internal compiler error: in add_symbol_to_partition_1, at lto/lto-partition.c:152
 Please submit a full bug report,

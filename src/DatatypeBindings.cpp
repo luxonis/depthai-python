@@ -1,5 +1,6 @@
 #include "DatatypeBindings.hpp"
 
+#include "pipeline/CommonBindings.hpp"
 #include <unordered_map>
 #include <memory>
 
@@ -15,6 +16,10 @@
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorData.hpp"
 #include "depthai/pipeline/datatype/SpatialLocationCalculatorConfig.hpp"
+#include "depthai/pipeline/datatype/Tracklets.hpp"
+#include "depthai/pipeline/datatype/IMUData.hpp"
+#include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
+#include "depthai/pipeline/datatype/EdgeDetectorConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -27,13 +32,17 @@
 #include "depthai-shared/datatype/RawSystemInformation.hpp"
 #include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
 #include "depthai-shared/datatype/RawSpatialLocations.hpp"
-#include "depthai-shared/datatype/RawSpatialLocationCalculatorConfig.hpp"
+#include "depthai-shared/datatype/RawTracklets.hpp"
+#include "depthai-shared/datatype/RawIMUData.hpp"
+#include "depthai-shared/datatype/RawStereoDepthConfig.hpp"
+#include "depthai-shared/datatype/RawEdgeDetectorConfig.hpp"
 
 
 //pybind
 #include <pybind11/chrono.h>
 #include <pybind11/numpy.h>
 
+// #include "spdlog/spdlog.h"
 
 void DatatypeBindings::bind(pybind11::module& m){
 
@@ -62,14 +71,14 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("instanceNum", &RawImgFrame::instanceNum)
         .def_readwrite("sequenceNum", &RawImgFrame::sequenceNum)
         .def_property("ts",
-            [](const RawImgFrame& o){ 
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0; 
-                return ts; 
+            [](const RawImgFrame& o){
+                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+                return ts;
             },
-            [](RawImgFrame& o, double ts){ 
-                o.ts.sec = ts; 
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;   
-            }  
+            [](RawImgFrame& o, double ts){
+                o.ts.sec = ts;
+                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+            }
         )
         ;
 
@@ -110,6 +119,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         ;
 
     py::class_<RawImgFrame::Specs>(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs))
+        .def(py::init<>())
         .def_readwrite("type", &RawImgFrame::Specs::type)
         .def_readwrite("width", &RawImgFrame::Specs::width)
         .def_readwrite("height", &RawImgFrame::Specs::height)
@@ -148,7 +158,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .value("FP32", TensorInfo::DataType::FP32)
         .value("I8", TensorInfo::DataType::I8)
         ;
-        
+
     py::enum_<TensorInfo::StorageOrder>(tensorInfo, "StorageOrder")
         .value("NHWC", TensorInfo::StorageOrder::NHWC)
         .value("NHCW", TensorInfo::StorageOrder::NHCW)
@@ -192,7 +202,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         .def_readwrite("detections", &RawSpatialImgDetections::detections)
         ;
-    
+
     // Bind RawImageManipConfig
     py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig", DOC(dai, RawImageManipConfig));
     rawImageManipConfig
@@ -253,10 +263,155 @@ void DatatypeBindings::bind(pybind11::module& m){
     // Bind RawCameraControl
     py::class_<RawCameraControl, RawBuffer, std::shared_ptr<RawCameraControl>> rawCameraControl(m, "RawCameraControl", DOC(dai, RawCameraControl));
     rawCameraControl
+        .def(py::init<>())
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
         // TODO add more raw types here, not directly used
+        ;
+
+    py::class_<Tracklet> tracklet(m, "Tracklet", DOC(dai, Tracklet));
+    tracklet
+        .def(py::init<>())
+        .def_readwrite("roi", &Tracklet::roi)
+        .def_readwrite("id", &Tracklet::id)
+        .def_readwrite("label", &Tracklet::label)
+        .def_readwrite("status", &Tracklet::status)
+        .def_readwrite("srcImgDetection", &Tracklet::srcImgDetection)
+        .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
+        ;
+
+    py::enum_<Tracklet::TrackingStatus>(tracklet, "TrackingStatus", DOC(dai, Tracklet, TrackingStatus))
+        .value("NEW", Tracklet::TrackingStatus::NEW)
+        .value("TRACKED", Tracklet::TrackingStatus::TRACKED)
+        .value("LOST", Tracklet::TrackingStatus::LOST)
+        .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
+        ;
+
+    // Bind RawTracklets
+    py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
+    rawTacklets
+        .def(py::init<>())
+        .def_readwrite("tracklets", &RawTracklets::tracklets)
+        ;
+
+
+    py::class_<IMUReport, std::shared_ptr<IMUReport>> imureport(m, "IMUReport", DOC(dai, IMUReport));
+    imureport
+        .def(py::init<>())
+        .def_readwrite("sequence", &IMUReport::sequence)
+        .def_readwrite("accuracy", &IMUReport::accuracy)
+        .def_readwrite("timestamp", &IMUReport::timestamp)
+        ;
+
+    py::enum_<IMUReport::IMUReportAccuracy>(imureport, "IMUReportAccuracy")
+        .value("UNRELIABLE", IMUReport::IMUReportAccuracy::UNRELIABLE)
+        .value("LOW", IMUReport::IMUReportAccuracy::LOW)
+        .value("MEDIUM", IMUReport::IMUReportAccuracy::MEDIUM)
+        .value("HIGH", IMUReport::IMUReportAccuracy::HIGH)
+        ;
+
+    py::class_<IMUReportAccelerometer, IMUReport, std::shared_ptr<IMUReportAccelerometer>>(m, "IMUReportAccelerometer", DOC(dai, IMUReportAccelerometer))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportAccelerometer::x)
+        .def_readwrite("y", &IMUReportAccelerometer::y)
+        .def_readwrite("z", &IMUReportAccelerometer::z)
+        ;
+
+    py::class_<IMUReportGyroscope, IMUReport, std::shared_ptr<IMUReportGyroscope>>(m, "IMUReportGyroscope", DOC(dai, IMUReportGyroscope))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportGyroscope::x)
+        .def_readwrite("y", &IMUReportGyroscope::y)
+        .def_readwrite("z", &IMUReportGyroscope::z)
+        ;
+
+    py::class_<IMUReportMagneticField, IMUReport, std::shared_ptr<IMUReportMagneticField>>(m, "IMUReportMagneticField", DOC(dai, IMUReportMagneticField))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportMagneticField::x)
+        .def_readwrite("y", &IMUReportMagneticField::y)
+        .def_readwrite("z", &IMUReportMagneticField::z)
+        ;
+
+    py::class_<IMUReportRotationVectorWAcc, IMUReport, std::shared_ptr<IMUReportRotationVectorWAcc>>(m, "IMUReportRotationVectorWAcc", DOC(dai, IMUReportRotationVectorWAcc))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportRotationVectorWAcc::i)
+        .def_readwrite("j", &IMUReportRotationVectorWAcc::j)
+        .def_readwrite("k", &IMUReportRotationVectorWAcc::k)
+        .def_readwrite("real", &IMUReportRotationVectorWAcc::real)
+        .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
+        ;
+
+#if 0
+    py::class_<IMUReportRotationVector, IMUReport, std::shared_ptr<IMUReportRotationVector>>(m, "IMUReportRotationVector", DOC(dai, IMUReportRotationVector))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportRotationVector::i)
+        .def_readwrite("j", &IMUReportRotationVector::j)
+        .def_readwrite("k", &IMUReportRotationVector::k)
+        .def_readwrite("real", &IMUReportRotationVector::real)
+        ;
+
+    py::class_<IMUReportGyroscopeUncalibrated, IMUReport, std::shared_ptr<IMUReportGyroscopeUncalibrated>>(m, "IMUReportGyroscopeUncalibrated", DOC(dai, IMUReportGyroscopeUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportGyroscopeUncalibrated::x)
+        .def_readwrite("y", &IMUReportGyroscopeUncalibrated::y)
+        .def_readwrite("z", &IMUReportGyroscopeUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportGyroscopeUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportGyroscopeUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportGyroscopeUncalibrated::biasZ)
+        ;
+
+    py::class_<IMUReportMagneticFieldUncalibrated, IMUReport, std::shared_ptr<IMUReportMagneticFieldUncalibrated>>(m, "IMUReportMagneticFieldUncalibrated", DOC(dai, IMUReportMagneticFieldUncalibrated))
+        .def(py::init<>())
+        .def_readwrite("x", &IMUReportMagneticFieldUncalibrated::x)
+        .def_readwrite("y", &IMUReportMagneticFieldUncalibrated::y)
+        .def_readwrite("z", &IMUReportMagneticFieldUncalibrated::z)
+        .def_readwrite("biasX", &IMUReportMagneticFieldUncalibrated::biasX)
+        .def_readwrite("biasY", &IMUReportMagneticFieldUncalibrated::biasY)
+        .def_readwrite("biasZ", &IMUReportMagneticFieldUncalibrated::biasZ)
+        ;
+
+    py::class_<IMUReportGyroIntegratedRV, IMUReport, std::shared_ptr<IMUReportGyroIntegratedRV>>(m, "IMUReportGyroIntegratedRV", DOC(dai, IMUReportGyroIntegratedRV))
+        .def(py::init<>())
+        .def_readwrite("i", &IMUReportGyroIntegratedRV::i)
+        .def_readwrite("j", &IMUReportGyroIntegratedRV::j)
+        .def_readwrite("k", &IMUReportGyroIntegratedRV::k)
+        .def_readwrite("real", &IMUReportGyroIntegratedRV::real)
+        .def_readwrite("angVelX", &IMUReportGyroIntegratedRV::angVelX)
+        .def_readwrite("angVelY", &IMUReportGyroIntegratedRV::angVelY)
+        .def_readwrite("angVelZ", &IMUReportGyroIntegratedRV::angVelZ)
+        ;
+
+#endif
+
+    py::class_<IMUPacket> imuPackets(m, "IMUPacket", DOC(dai, IMUPacket));
+    imuPackets
+        .def(py::init<>())
+        .def_readwrite("acceleroMeter", &IMUPacket::acceleroMeter)
+        .def_readwrite("gyroscope", &IMUPacket::gyroscope)
+        .def_readwrite("magneticField", &IMUPacket::magneticField)
+        .def_readwrite("rotationVector", &IMUPacket::rotationVector)
+#if 0
+        .def_readwrite("rawAcceleroMeter", &IMUPacket::rawAcceleroMeter)
+        .def_readwrite("linearAcceleroMeter", &IMUPacket::linearAcceleroMeter)
+        .def_readwrite("gravity", &IMUPacket::gravity)
+        .def_readwrite("rawGyroscope", &IMUPacket::rawGyroscope)
+        .def_readwrite("gyroscopeUncalibrated", &IMUPacket::gyroscopeUncalibrated)
+        .def_readwrite("rawMagneticField", &IMUPacket::rawMagneticField)
+        .def_readwrite("magneticFieldUncalibrated", &IMUPacket::magneticFieldUncalibrated)
+        .def_readwrite("gameRotationVector", &IMUPacket::gameRotationVector)
+        .def_readwrite("geoMagRotationVector", &IMUPacket::geoMagRotationVector)
+        .def_readwrite("arvrStabilizedRotationVector", &IMUPacket::arvrStabilizedRotationVector)
+        .def_readwrite("arvrStabilizedGameRotationVector", &IMUPacket::arvrStabilizedGameRotationVector)
+        .def_readwrite("gyroIntegratedRotationVector", &IMUPacket::gyroIntegratedRotationVector)
+#endif
+        ;
+
+
+    // Bind RawIMUData
+    py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
+    rawIMUPackets
+        .def(py::init<>())
+        .def_readwrite("packets", &RawIMUData::packets)
         ;
 
     // RawCameraControl enum bindings
@@ -385,7 +540,7 @@ void DatatypeBindings::bind(pybind11::module& m){
 
             py::array contiguous = numpy.attr("ascontiguousarray")(arr);
             frm.getData().resize(contiguous.nbytes());
-            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());     
+            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());
 
         }, py::arg("array"), "Copies array bytes to ImgFrame buffer")
         .def("getFrame", [](py::object &obj, bool copy){
@@ -401,14 +556,14 @@ void DatatypeBindings::bind(pybind11::module& m){
             // obj is "Python" object, which we used then to bind the numpy view lifespan to
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
             auto& img = obj.cast<dai::ImgFrame&>();
-            
+
             // shape
             bool valid = img.getWidth() > 0 && img.getHeight() > 0;
             std::vector<std::size_t> shape = {img.getData().size()};
             py::dtype dtype = py::dtype::of<uint8_t>();
 
             switch(img.getType()){
-                
+
                 case ImgFrame::Type::RGB888i :
                 case ImgFrame::Type::BGR888i :
                     // HWC
@@ -438,12 +593,12 @@ void DatatypeBindings::bind(pybind11::module& m){
                 break;
 
                 case ImgFrame::Type::GRAYF16:
-                    shape = {img.getHeight(), img.getWidth()};  
+                    shape = {img.getHeight(), img.getWidth()};
                     dtype = py::dtype("half");
                 break;
 
                 case ImgFrame::Type::RAW16:
-                    shape = {img.getHeight(), img.getWidth()};  
+                    shape = {img.getHeight(), img.getWidth()};
                     dtype = py::dtype::of<uint16_t>();
                 break;
 
@@ -452,7 +607,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                     shape = {img.getHeight(), img.getWidth(), 3};
                     dtype = py::dtype("half");
                 break;
-                
+
                 case ImgFrame::Type::RGBF16F16F16p:
                 case ImgFrame::Type::BGRF16F16F16p:
                     shape = {3, img.getHeight(), img.getWidth()};
@@ -463,14 +618,19 @@ void DatatypeBindings::bind(pybind11::module& m){
                 default:
                     shape = {img.getData().size()};
                     dtype = py::dtype::of<uint8_t>();
-                    break;                
+                    break;
             }
 
             // Check if enough data
+            long actualSize = img.getData().size();
             long requiredSize = dtype.itemsize();
             for(const auto& dim : shape) requiredSize *= dim;
-            if(img.getData().size() < requiredSize){
-                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame. Maybe metadataOnly transfer was made?");
+            if(actualSize < requiredSize){
+                throw std::runtime_error("ImgFrame doesn't have enough data to encode specified frame, required " + std::to_string(requiredSize)
+                        + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
+            } else if(actualSize > requiredSize) {
+                // FIXME check build on Windows
+                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
@@ -479,13 +639,13 @@ void DatatypeBindings::bind(pybind11::module& m){
             if(copy){
                 py::array a(dtype, shape);
                 std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
-                return a; 
+                return a;
             } else {
                 return py::array(dtype, shape, img.getData().data(), obj);
             }
 
         }, py::arg("copy") = false, "Returns numpy array with shape as specified by width, height and type")
-        
+
         .def("getCvFrame", [](py::object &obj){
             using namespace pybind11::literals;
 
@@ -526,7 +686,7 @@ void DatatypeBindings::bind(pybind11::module& m){
                     break;
 
                 case ImgFrame::Type::YUV420p:
-                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV420p2BGR"));
+                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_IYUV"));
                     break;
 
                 case ImgFrame::Type::NV12:
@@ -564,35 +724,6 @@ void DatatypeBindings::bind(pybind11::module& m){
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
-
-    py::class_<Timestamp>(m, "Timestamp", DOC(dai, Timestamp))
-        .def(py::init<>())
-        .def_readwrite("sec", &Timestamp::sec)
-        .def_readwrite("nsec", &Timestamp::nsec)
-        ;
-
-    py::class_<Point2f>(m, "Point2f", DOC(dai, Point2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("x", &Point2f::x)
-        .def_readwrite("y", &Point2f::y)
-        ;
-
-    py::class_<Point3f>(m, "Point3f", DOC(dai, Point3f))
-        .def(py::init<>())
-        .def(py::init<float, float, float>())
-        .def_readwrite("x", &Point3f::x)
-        .def_readwrite("y", &Point3f::y)
-        .def_readwrite("z", &Point3f::z)
-        ;
-
-    py::class_<Size2f>(m, "Size2f", DOC(dai, Size2f))
-        .def(py::init<>())
-        .def(py::init<float, float>())
-        .def_readwrite("width", &Size2f::width)
-        .def_readwrite("height", &Size2f::height)
-        ;
-
     py::class_<RotatedRect>(m, "RotatedRect", DOC(dai, RotatedRect))
         .def(py::init<>())
         .def_readwrite("center", &RotatedRect::center)
@@ -608,9 +739,9 @@ void DatatypeBindings::bind(pybind11::module& m){
             std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
             obj.setLayer(name, std::move(vec));
         }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
-        .def("setLayer", (void(NNData::*)(const std::string&, const std::vector<int>&))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<float>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
-        .def("setLayer", (void(NNData::*)(const std::string&, std::vector<double>))&NNData::setLayer, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, const std::vector<int>&)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<float>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        .def("setLayer", static_cast<void(NNData::*)(const std::string&, std::vector<double>)>(&NNData::setLayer), py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
         .def("getLayer", &NNData::getLayer, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
         .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
         .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
@@ -690,7 +821,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
         .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
         .def("setSharpness", &CameraControl::setSharpness, py::arg("value"), DOC(dai, CameraControl, setSharpness))
-        .def("setNoiseReductionStrength", &CameraControl::setNoiseReductionStrength, py::arg("value"), DOC(dai, CameraControl, setNoiseReductionStrength))
         .def("setLumaDenoise", &CameraControl::setLumaDenoise, py::arg("value"), DOC(dai, CameraControl, setLumaDenoise))
         .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
         .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
@@ -717,11 +847,14 @@ void DatatypeBindings::bind(pybind11::module& m){
 
     py::class_<SpatialLocations> (m, "SpatialLocations", DOC(dai, SpatialLocations))
         .def(py::init<>())
-        .def_readwrite("config", &SpatialLocations::config)
-        .def_readwrite("depthAverage", &SpatialLocations::depthAverage)
-        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates)
+        .def_readwrite("config", &SpatialLocations::config, DOC(dai, SpatialLocations, config))
+        .def_readwrite("depthAverage", &SpatialLocations::depthAverage, DOC(dai, SpatialLocations, depthAverage))
+        .def_readwrite("depthMin", &SpatialLocations::depthMin, DOC(dai, SpatialLocations, depthMin))
+        .def_readwrite("depthMax", &SpatialLocations::depthMax, DOC(dai, SpatialLocations, depthMax))
+        .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount, DOC(dai, SpatialLocations, depthAveragePixelCount))
+        .def_readwrite("spatialCoordinates", &SpatialLocations::spatialCoordinates, DOC(dai, SpatialLocations, spatialCoordinates))
         ;
-    
+
 
     py::class_<Rect> (m, "Rect", DOC(dai, Rect))
         .def(py::init<>())
@@ -762,7 +895,6 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("getSpatialLocations", &SpatialLocationCalculatorData::getSpatialLocations, DOC(dai, SpatialLocationCalculatorData, getSpatialLocations))
         ;
 
-
     // SpatialLocationCalculatorConfig (after ConfigData)
     py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>>(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig))
         .def(py::init<>())
@@ -770,6 +902,60 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
         .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
         .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
+        ;
+
+    // Tracklets (after ConfigData)
+    py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>>(m, "Tracklets", DOC(dai, Tracklets))
+        .def(py::init<>())
+        .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
+        ;
+
+
+    // IMUData (after ConfigData)
+    py::class_<IMUData, Buffer, std::shared_ptr<IMUData>>(m, "IMUData", DOC(dai, IMUData))
+        .def(py::init<>())
+        .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
+        ;
+
+    // Bind RawStereoDepthConfig
+    py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
+    rawStereoDepthConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawStereoDepthConfig::config)
+        ;
+
+    // StereoDepthConfig (after ConfigData)
+    py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>>(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig))
+        .def(py::init<>())
+        .def("setConfidenceThreshold",  &StereoDepthConfig::setConfidenceThreshold, py::arg("confThr"), DOC(dai, StereoDepthConfig, setConfidenceThreshold))
+        .def("setMedianFilter",         &StereoDepthConfig::setMedianFilter, py::arg("median"), DOC(dai, StereoDepthConfig, setMedianFilter))
+        .def("setBilateralFilterSigma", &StereoDepthConfig::setBilateralFilterSigma, py::arg("sigma"), DOC(dai, StereoDepthConfig, setBilateralFilterSigma))
+        .def("setLeftRightCheckThreshold", &StereoDepthConfig::setLeftRightCheckThreshold, py::arg("sigma"), DOC(dai, StereoDepthConfig, setLeftRightCheckThreshold))
+        .def("getConfidenceThreshold",  &StereoDepthConfig::getConfidenceThreshold, DOC(dai, StereoDepthConfig, getConfidenceThreshold))
+        .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
+        .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
+        .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
+        ;
+
+
+    py::class_<EdgeDetectorConfigData> (m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData))
+        .def(py::init<>())
+        .def_readwrite("sobelFilterHorizontalKernel", &EdgeDetectorConfigData::sobelFilterHorizontalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterHorizontalKernel))
+        .def_readwrite("sobelFilterVerticalKernel", &EdgeDetectorConfigData::sobelFilterVerticalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterVerticalKernel))
+        ;
+
+    // Bind RawEdgeDetectorConfig
+    py::class_<RawEdgeDetectorConfig, RawBuffer, std::shared_ptr<RawEdgeDetectorConfig>> rawEdgeDetectorConfig(m, "RawEdgeDetectorConfig", DOC(dai, RawEdgeDetectorConfig));
+    rawEdgeDetectorConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawEdgeDetectorConfig::config)
+        ;
+
+    // EdgeDetectorConfig (after ConfigData)
+    py::class_<EdgeDetectorConfig, Buffer, std::shared_ptr<EdgeDetectorConfig>>(m, "EdgeDetectorConfig", DOC(dai, EdgeDetectorConfig))
+        .def(py::init<>())
+        .def("setSobelFilterKernels",  &EdgeDetectorConfig::setSobelFilterKernels, py::arg("horizontalKernel"), py::arg("verticalKernel"), DOC(dai, EdgeDetectorConfig, setSobelFilterKernels))
+        .def("getConfigData",         &EdgeDetectorConfig::getConfigData, DOC(dai, EdgeDetectorConfig, getConfigData))
         ;
 
 }
