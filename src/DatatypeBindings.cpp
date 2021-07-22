@@ -987,9 +987,22 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("config", &RawFeatureTrackerConfig::config)
         ;
 
-    py::class_<FeatureTrackerConfigData> (m, "FeatureTrackerConfigData", DOC(dai, FeatureTrackerConfigData))
+    py::class_<FeatureTrackerConfigData> featureTrackerConfigData(m, "FeatureTrackerConfigData", DOC(dai, FeatureTrackerConfigData));
+    featureTrackerConfigData
         .def(py::init<>())
-        .def_readwrite("dummy", &FeatureTrackerConfigData::dummy)
+        .def_readwrite("algorithmType", &FeatureTrackerConfigData::algorithmType, DOC(dai, FeatureTrackerConfigData, algorithmType))
+        .def_readwrite("cornerDetector", &FeatureTrackerConfigData::cornerDetector, DOC(dai, FeatureTrackerConfigData, cornerDetector))
+        .def_readwrite("targetNrFeatures", &FeatureTrackerConfigData::targetNrFeatures, DOC(dai, FeatureTrackerConfigData, targetNrFeatures))
+        ;
+
+    py::enum_<FeatureTrackerConfigData::AlgorithmType>(featureTrackerConfigData, "AlgorithmType")
+        .value("CORNER_DETECTION", FeatureTrackerConfigData::AlgorithmType::CORNER_DETECTION)
+        .value("CORNER_DETECTION_WITH_OPTICAL_FLOW", FeatureTrackerConfigData::AlgorithmType::CORNER_DETECTION_WITH_OPTICAL_FLOW)
+        ;
+
+    py::enum_<FeatureTrackerConfigData::CornerDetector>(featureTrackerConfigData, "CornerDetector")
+        .value("HARRIS", FeatureTrackerConfigData::CornerDetector::HARRIS)
+        .value("SHI_THOMASI", FeatureTrackerConfigData::CornerDetector::SHI_THOMASI)
         ;
 
     // Bind FeatureTrackerData
@@ -1001,6 +1014,9 @@ void DatatypeBindings::bind(pybind11::module& m){
     // FeatureTrackerConfig (after ConfigData)
     py::class_<FeatureTrackerConfig, Buffer, std::shared_ptr<FeatureTrackerConfig>>(m, "FeatureTrackerConfig", DOC(dai, FeatureTrackerConfig))
         .def(py::init<>())
+        .def("setAlgorithmType", &FeatureTrackerConfig::setAlgorithmType, DOC(dai, FeatureTrackerConfig, setAlgorithmType))
+        .def("setCornerDetector", &FeatureTrackerConfig::setCornerDetector, DOC(dai, FeatureTrackerConfig, setCornerDetector))
+        .def("setTargetNrFeatures", &FeatureTrackerConfig::setTargetNrFeatures, DOC(dai, FeatureTrackerConfig, setTargetNrFeatures))
         .def("getConfigData", &FeatureTrackerConfig::getConfigData, DOC(dai, FeatureTrackerConfig, getConfigData))
         ;
 
