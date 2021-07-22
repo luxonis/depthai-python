@@ -315,11 +315,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("timestamp", &IMUReport::timestamp)
         ;
 
-    py::enum_<IMUReport::IMUReportAccuracy>(imureport, "IMUReportAccuracy")
-        .value("UNRELIABLE", IMUReport::IMUReportAccuracy::UNRELIABLE)
-        .value("LOW", IMUReport::IMUReportAccuracy::LOW)
-        .value("MEDIUM", IMUReport::IMUReportAccuracy::MEDIUM)
-        .value("HIGH", IMUReport::IMUReportAccuracy::HIGH)
+    py::enum_<IMUReport::Accuracy>(imureport, "Accuracy")
+        .value("UNRELIABLE", IMUReport::Accuracy::UNRELIABLE)
+        .value("LOW", IMUReport::Accuracy::LOW)
+        .value("MEDIUM", IMUReport::Accuracy::MEDIUM)
+        .value("HIGH", IMUReport::Accuracy::HIGH)
         ;
 
     py::class_<IMUReportAccelerometer, IMUReport, std::shared_ptr<IMUReportAccelerometer>>(m, "IMUReportAccelerometer", DOC(dai, IMUReportAccelerometer))
@@ -349,7 +349,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("j", &IMUReportRotationVectorWAcc::j)
         .def_readwrite("k", &IMUReportRotationVectorWAcc::k)
         .def_readwrite("real", &IMUReportRotationVectorWAcc::real)
-        .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
+        .def_readwrite("rotationVectorAccuracy", &IMUReportRotationVectorWAcc::rotationVectorAccuracy)
         ;
 
 #if 0
