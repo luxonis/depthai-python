@@ -98,14 +98,24 @@ void DeviceBindings::bind(pybind11::module& m){
 
     using namespace dai;
 
-    // Bind preboot config
-    py::class_<PrebootConfig>(m, "PrebootConfig", DOC(dai, PrebootConfig))
+
+    // Bind PrebootConfig
+    py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
+
+    // Bind PrebootConfig::USB
+    py::class_<PrebootConfig::USB>(prebootConfig, "USB", DOC(dai, PrebootConfig, USB))
         .def(py::init<>())
-        .def_readwrite("vid", &PrebootConfig::vid)
-        .def_readwrite("pid", &PrebootConfig::pid)
-        .def_readwrite("flashBootedVid", &PrebootConfig::flashBootedVid)
-        .def_readwrite("flashBootedPid", &PrebootConfig::flashBootedPid)
-        .def_readwrite("maxUsbSpeed", &PrebootConfig::maxUsbSpeed)
+        .def_readwrite("vid", &PrebootConfig::USB::vid)
+        .def_readwrite("pid", &PrebootConfig::USB::pid)
+        .def_readwrite("flashBootedVid", &PrebootConfig::USB::flashBootedVid)
+        .def_readwrite("flashBootedPid", &PrebootConfig::USB::flashBootedPid)
+        .def_readwrite("maxSpeed", &PrebootConfig::USB::maxSpeed)
+    ;
+
+    prebootConfig
+        .def(py::init<>())
+        .def_readwrite("usb", &PrebootConfig::usb)
+        .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
     ;
 
 
