@@ -22,6 +22,7 @@ Simple
    ../samples/imu_accelerometer_gyroscope.rst
    ../samples/imu_rotation_vector.rst
    ../samples/edge_detector.rst
+   ../samples/script_camera_control.rst
 
 These samples are great starting point for the gen2 API.
 

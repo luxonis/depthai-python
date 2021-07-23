@@ -30,6 +30,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
 - :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`Script camera control` - Controlling the camera with the Script node
 
 .. rubric:: Complex
 
