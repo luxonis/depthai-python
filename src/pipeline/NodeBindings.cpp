@@ -11,6 +11,7 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/SPIIn.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
@@ -436,6 +437,30 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setStreamName", &SPIOut::setStreamName, py::arg("name"), DOC(dai, node, SPIOut, setStreamName))
         .def("setBusId", &SPIOut::setBusId, py::arg("id"), DOC(dai, node, SPIOut, setBusId))
         ;
+    // SPIIn node
+    py::class_<SPIIn, Node, std::shared_ptr<SPIIn>>(m, "SPIIn", DOC(dai, node, SPIIn))
+        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, out))
+        .def("setStreamName", &SPIIn::setStreamName, py::arg("name"), DOC(dai, node, SPIIn, setStreamName))
+        .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
+        ;
+
+    py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
+    spiOutProperties
+        .def_readwrite("streamName", &SPIOutProperties::streamName)
+        .def_readwrite("busId", &SPIOutProperties::busId)
+    ;
+    // ALIAS
+    m.attr("SPIOut").attr("Properties") = spiOutProperties;
+
+    py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    spiInProperties
+        .def_readwrite("streamName", &SPIInProperties::streamName)
+        .def_readwrite("busId", &SPIInProperties::busId)
+        .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
+        .def_readwrite("numFrames", &SPIInProperties::numFrames)
+    ;
+    // ALIAS
+    m.attr("SPIIn").attr("Properties") = spiInProperties;
 
     py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork", DOC(dai, node, DetectionNetwork))
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))

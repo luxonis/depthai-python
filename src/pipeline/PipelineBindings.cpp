@@ -10,6 +10,7 @@
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/SPIIn.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
@@ -70,6 +71,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
+        .def("createSPIIn", &Pipeline::create<node::SPIIn>)
         .def("createImageManip", &Pipeline::create<node::ImageManip>)
         .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
         .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
