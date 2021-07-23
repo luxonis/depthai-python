@@ -159,7 +159,7 @@ Save and reload the script by running the command :code:`source ~/.bashrc`. Then
   .. code-block:: bash
 
     #Download and install the dependency package
-    sudo wget-qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
 
     #Clone github repository
     git clone https://github.com/luxonis/depthai-python.git
@@ -234,7 +234,7 @@ Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux h
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        luxonis/depthai-library:latest \
-       python3 /depthai-python/examples/01_rgb_preview.py
+       python3 /depthai-python/examples/rgb_preview.py
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
@@ -402,7 +402,7 @@ Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` direc
 
 .. code-block:: bash
 
-  python3 01_rgb_preview.py
+  python3 rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
