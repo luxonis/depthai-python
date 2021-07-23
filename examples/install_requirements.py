@@ -2,6 +2,7 @@
 import sys, os, subprocess
 import argparse
 import re
+import platform
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-sdai', "--skip_depthai", action="store_true", help="Skip installation of depthai library.")
@@ -35,7 +36,12 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
+DEPENDENCIES = ['pyyaml', 'requests']
+if platform.machine() == "aarch64":
+    print('Skipping opencv install on aarch64.')
+else:
+    DEPENDENCIES.append('opencv-python')
+
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
