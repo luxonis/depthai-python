@@ -12,6 +12,7 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/SPIIn.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/Script.hpp"
@@ -372,6 +373,22 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
         .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
         .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
+    ;
+
+    // SPIOut properties
+    py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
+    spiOutProperties
+        .def_readwrite("streamName", &SPIOutProperties::streamName)
+        .def_readwrite("busId", &SPIOutProperties::busId)
+    ;
+
+    // SPIIn properties
+    py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    spiInProperties
+        .def_readwrite("streamName", &SPIInProperties::streamName)
+        .def_readwrite("busId", &SPIInProperties::busId)
+        .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
+        .def_readwrite("numFrames", &SPIInProperties::numFrames)
     ;
 
 
@@ -809,7 +826,26 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setStreamName", &SPIOut::setStreamName, py::arg("name"), DOC(dai, node, SPIOut, setStreamName))
         .def("setBusId", &SPIOut::setBusId, py::arg("id"), DOC(dai, node, SPIOut, setBusId))
         ;
+    // ALIAS
+    daiNodeModule.attr("SPIOut").attr("Properties") = spiOutProperties;
 
+
+    // SPIIn node
+    ADD_NODE(SPIIn)
+        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, out))
+        .def("setStreamName", &SPIIn::setStreamName, py::arg("name"), DOC(dai, node, SPIIn, setStreamName))
+        .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
+        .def("setMaxDataSize", &SPIIn::setMaxDataSize, py::arg("maxDataSize"), DOC(dai, node, SPIIn, setMaxDataSize))
+        .def("setNumFrames", &SPIIn::setNumFrames, py::arg("numFrames"), DOC(dai, node, SPIIn, setNumFrames))
+        .def("getStreamName", &SPIIn::getStreamName, DOC(dai, node, SPIIn, getStreamName))
+        .def("getBusId", &SPIIn::getBusId, DOC(dai, node, SPIIn, getBusId))
+        .def("getMaxDataSize", &SPIIn::getMaxDataSize, DOC(dai, node, SPIIn, getMaxDataSize))
+        .def("getNumFrames", &SPIIn::getNumFrames, DOC(dai, node, SPIIn, getNumFrames))
+        ;
+    // ALIAS
+    daiNodeModule.attr("SPIIn").attr("Properties") = spiInProperties;
+
+    // DetectionNetwork node
     ADD_NODE_DERIVED_ABSTRACT(DetectionNetwork, NeuralNetwork)
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
