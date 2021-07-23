@@ -98,7 +98,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.SpatialLocationCalculator
+    .. autoclass:: depthai.node.SpatialLocationCalculator
       :members:
       :inherited-members:
       :noindex:

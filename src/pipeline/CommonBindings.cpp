@@ -7,6 +7,7 @@
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
 #include "depthai-shared/common/CpuUsage.hpp"
+#include "depthai-shared/common/ProcessorType.hpp"
 #include "depthai-shared/common/Timestamp.hpp"
 #include "depthai-shared/common/Point2f.hpp"
 #include "depthai-shared/common/Point3f.hpp"
@@ -143,6 +144,12 @@ void CommonBindings::bind(pybind11::module& m){
         .value("HIGH", UsbSpeed::HIGH)
         .value("SUPER", UsbSpeed::SUPER)
         .value("SUPER_PLUS", UsbSpeed::SUPER_PLUS)
+    ;
+
+    // ProcessorType
+    py::enum_<ProcessorType>(m, "ProcessorType")
+        .value("LEON_CSS", ProcessorType::LEON_CSS)
+        .value("LEON_MSS", ProcessorType::LEON_MSS)
     ;
 
 }

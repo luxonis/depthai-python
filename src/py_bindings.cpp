@@ -38,21 +38,19 @@ PYBIND11_MODULE(depthai,m)
     m.attr("__commit_datetime__") = DEPTHAI_PYTHON_COMMIT_DATETIME;
     m.attr("__build_datetime__") = DEPTHAI_PYTHON_BUILD_DATETIME;
 
-
     // Add bindings
+    CommonBindings::bind(m);
+    DatatypeBindings::bind(m);
+    LogBindings::bind(m);
+    DataQueueBindings::bind(m);
     OpenVINOBindings::bind(m);
     AssetManagerBindings::bind(m);
-    NodeBindings::bind(m);
     PipelineBindings::bind(m);
+    NodeBindings::bind(m);
     XLinkConnectionBindings::bind(m);
     DeviceBindings::bind(m);
-    CommonBindings::bind(m);
-    CalibrationHandlerBindings::bind(m);
     DeviceBootloaderBindings::bind(m);
-    
-    DatatypeBindings::bind(m);
-    DataQueueBindings::bind(m);
-    LogBindings::bind(m);
+    CalibrationHandlerBindings::bind(m);
 
     // Call dai::initialize on 'import depthai' to initialize asap with additional information to print
     dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME);

@@ -1,4 +1,6 @@
+
 #include "PipelineBindings.hpp"
+#include "NodeBindings.hpp"
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"
@@ -15,6 +17,7 @@
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
+#include "depthai/pipeline/node/Script.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
@@ -24,6 +27,20 @@
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
+
+
+
+std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
+    auto nodeCreateMap = NodeBindings::getNodeCreateMap();
+    for(auto& kv : nodeCreateMap){
+        auto& node = kv.first;
+        auto& create = kv.second;
+        if(node.is(class_)){
+            return create(p, class_);
+        }
+    }
+    return nullptr;
+}
 
 void PipelineBindings::bind(pybind11::module& m){
 
@@ -56,7 +73,6 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("getNodeMap", &Pipeline::getNodeMap, DOC(dai, Pipeline, getNodeMap), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getNodeMap))
         .def("link", &Pipeline::link, DOC(dai, Pipeline, link), DOC(dai, Pipeline, link))
         .def("unlink", &Pipeline::unlink, DOC(dai, Pipeline, unlink), DOC(dai, Pipeline, unlink))
-        .def("getAllAssets", &Pipeline::getAllAssets, DOC(dai, Pipeline, getAllAssets))
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
@@ -64,7 +80,16 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
         .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
         .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
-         // templated create<NODE> function
+        // 'Template' create function
+        .def("create", [](dai::Pipeline& p, py::object class_) {
+            auto node = createNode(p, class_);
+            if(node == nullptr){
+                throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.node");
+            }
+            return node;
+        })
+        // TODO(themarpe) DEPRECATE, use pipeline.create([class name])
+        // templated create<NODE> function
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
@@ -85,6 +110,5 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createIMU", &Pipeline::create<node::IMU>)
         .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
         ;
-
 
 }

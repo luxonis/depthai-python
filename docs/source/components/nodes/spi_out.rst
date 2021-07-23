@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spi = pipeline.createSPIOut()
+    spi = pipeline.create(dai.node.SPIOut)
 
   .. code-tab:: c++
 
@@ -46,7 +46,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spi = pipeline.createSPIOut()
+    spi = pipeline.create(dai.node.SPIOut)
 
     spi.setStreamName("spimetaout")
     spi.setBusId(0)
@@ -72,7 +72,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.SPIOut
+    .. autoclass:: depthai.node.SPIOut
       :members:
       :inherited-members:
       :noindex:
