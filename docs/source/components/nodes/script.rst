@@ -27,12 +27,12 @@ Inputs and Outputs
 
 .. code-block::
 
-            ┌──────────────┐
-            │              │
-  inputs[]  │              │   outputs[]
-  ---------►│    Script    ├-----------►
-            │              │
-            │              │
+  inputs[]  ┌──────────────┐  outputs[]
+  ---------►│              ├-----------►
+  ---------►│              ├-----------►
+     ...    │    Script    |    ...
+     ...    │              │    ...
+  ---------►│              ├-----------►
             └──────────────┘
 
 Users can define as many inputs and outputs as they need. Inputs and outputs can be any :ref:`Message <components_messages>` type.
@@ -88,6 +88,34 @@ Usage
       device.setLogLevel(dai::LogLevel.WARN);
       device.setLogOutputLevel(dai::LogLevel.WARN);
 
+Interfacing with GPIOs
+######################
+
+In the script node you can interface with GPIOs of the VPU. Currently supported functions are:
+
+.. code-block:: python
+
+  import GPIO # module
+  GPIO.read(pin)
+  GPIO.write(pin, value)
+  GPIO.setPwm(pin, highCount, lowCount, repeat=0) # repeat == 0 means indefinite
+  GPIO.enablePwm(pin, enable)
+
+Using DepthAI :ref:`Messages <components_messages>`
+###################################################
+
+The depthai module is implicitly imported to the script node. You can create new
+depthai messages and assign data to it, for example:
+
+.. code-block:: python
+
+  buf = Buffer(100) # Assign 100 bytes to the Buffer message
+
+  # Create CameraControl message, set manual focus
+  control = CameraControl()
+  control.setManualFocus(100)
+
+  imgFrame = ImgFrame(300*300*3) # Buffer with 300x300x3 bytes
 
 
 Examples of functionality
