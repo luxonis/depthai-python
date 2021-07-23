@@ -3,14 +3,33 @@
 // depthai
 #include "depthai/device/DeviceBootloader.hpp"
 
-void DeviceBootloaderBindings::bind(pybind11::module& m){
+void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    // Bind DeviceBootloader
+    // Type definitions
     py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
+    py::class_<DeviceBootloader::Version> deviceBootloaderVersion(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version));
+    py::enum_<DeviceBootloader::Type> deviceBootloaderType(deviceBootloader, "Type");
+    py::enum_<DeviceBootloader::Memory> deviceBootloaderMemory(deviceBootloader, "Memory");
+    py::enum_<DeviceBootloader::Section> deviceBootloaderSection(deviceBootloader, "Section");
 
-    py::class_<DeviceBootloader::Version>(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version))
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
+    // Bind DeviceBootloader
+    deviceBootloaderVersion
         .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
         .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
         .def("__str__", &DeviceBootloader::Version::toString)
@@ -19,15 +38,15 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
         .def("__gt__", &DeviceBootloader::Version::operator>)
         ;
 
-    py::enum_<DeviceBootloader::Type>(deviceBootloader, "Type")
+    deviceBootloaderType
         .value("USB", DeviceBootloader::Type::USB)
         .value("NETWORK", DeviceBootloader::Type::NETWORK)
         ;
-    py::enum_<DeviceBootloader::Memory>(deviceBootloader, "Memory")
+    deviceBootloaderMemory
         .value("FLASH", DeviceBootloader::Memory::FLASH)
         .value("EMMC", DeviceBootloader::Memory::EMMC)
         ;
-    py::enum_<DeviceBootloader::Section>(deviceBootloader, "Section")
+    deviceBootloaderSection
         .value("HEADER", DeviceBootloader::Section::HEADER)
         .value("BOOTLOADER", DeviceBootloader::Section::BOOTLOADER)
         .value("BOOTLOADER_CONFIG", DeviceBootloader::Section::BOOTLOADER_CONFIG)

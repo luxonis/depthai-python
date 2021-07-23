@@ -42,13 +42,29 @@ std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
     return nullptr;
 }
 
-void PipelineBindings::bind(pybind11::module& m){
-
+void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
     using namespace dai;
+
+    // Type definitions
+    py::class_<GlobalProperties> globalProperties(m, "GlobalProperties", DOC(dai, GlobalProperties));
+    py::class_<Pipeline> pipeline(m, "Pipeline", DOC(dai, Pipeline, 2));
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
 
 
     // Bind global properties
-    py::class_<GlobalProperties>(m, "GlobalProperties", DOC(dai, GlobalProperties))
+    globalProperties
         .def_readwrite("leonOsFrequencyHz", &GlobalProperties::leonCssFrequencyHz)
         .def_readwrite("leonRtFrequencyHz", &GlobalProperties::leonMssFrequencyHz)
         .def_readwrite("pipelineName", &GlobalProperties::pipelineName)
@@ -58,7 +74,7 @@ void PipelineBindings::bind(pybind11::module& m){
         ;
 
     // bind pipeline
-    py::class_<Pipeline>(m, "Pipeline", DOC(dai, Pipeline, 2))
+    pipeline
         .def(py::init<>(), DOC(dai, Pipeline, Pipeline))
         //.def(py::init<const Pipeline&>())
         .def("getGlobalProperties", &Pipeline::getGlobalProperties, DOC(dai, Pipeline, getGlobalProperties))
@@ -110,5 +126,6 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createIMU", &Pipeline::create<node::IMU>)
         .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
         ;
+
 
 }
