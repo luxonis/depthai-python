@@ -444,6 +444,24 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
         ;
 
+    py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
+    spiOutProperties
+        .def_readwrite("streamName", &SPIOutProperties::streamName)
+        .def_readwrite("busId", &SPIOutProperties::busId)
+    ;
+    // ALIAS
+    m.attr("SPIOut").attr("Properties") = spiOutProperties;
+
+    py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    spiInProperties
+        .def_readwrite("streamName", &SPIInProperties::streamName)
+        .def_readwrite("busId", &SPIInProperties::busId)
+        .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
+        .def_readwrite("numFrames", &SPIInProperties::numFrames)
+    ;
+    // ALIAS
+    m.attr("SPIIn").attr("Properties") = spiInProperties;
+
     py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork", DOC(dai, node, DetectionNetwork))
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
