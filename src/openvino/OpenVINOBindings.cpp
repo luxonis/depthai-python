@@ -3,12 +3,31 @@
 // depthai
 #include "depthai/openvino/OpenVINO.hpp"
 
-void OpenVINOBindings::bind(pybind11::module& m){
+void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    // Bind OpenVINO
     py::class_<OpenVINO> openvino(m, "OpenVINO", DOC(dai, OpenVINO));
+    py::enum_<OpenVINO::Version> openvinoVersion(openvino, "Version", DOC(dai, OpenVINO, Version));
+
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
+
+    // Bind OpenVINO
     openvino
         .def_static("getVersions", &OpenVINO::getVersions, DOC(dai, OpenVINO, getVersions))
         .def_static("getVersionName", &OpenVINO::getVersionName, py::arg("version"), DOC(dai, OpenVINO, getVersionName))
@@ -24,7 +43,8 @@ void OpenVINOBindings::bind(pybind11::module& m){
     // and that the values are available directly under OpenVINO.VERSION_2021_4, ...
     // they are exported
     // By default, pybind creates strong typed enums, eg: OpenVINO::Version::VERSION_2021_4
-    py::enum_<OpenVINO::Version>(openvino, "Version", DOC(dai, OpenVINO, Version))
+
+    openvinoVersion
         .value("VERSION_2020_3", OpenVINO::Version::VERSION_2020_3)
         .value("VERSION_2020_4", OpenVINO::Version::VERSION_2020_4)
         .value("VERSION_2021_1", OpenVINO::Version::VERSION_2021_1)

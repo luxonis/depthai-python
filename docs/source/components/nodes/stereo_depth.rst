@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    stereo = pipeline.createStereoDepth()
+    stereo = pipeline.create(dai.node.StereoDepth)
 
   .. code-tab:: c++
 
@@ -127,7 +127,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    stereo = pipeline.createStereoDepth()
+    stereo = pipeline.create(dai.node.StereoDepth)
 
     # Better handling for occlusions:
     stereo.setLeftRightCheck(False)
@@ -170,7 +170,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.StereoDepth
+    .. autoclass:: depthai.node.StereoDepth
       :members:
       :inherited-members:
       :noindex:

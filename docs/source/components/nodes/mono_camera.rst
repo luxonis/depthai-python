@@ -12,7 +12,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mono = pipeline.createMonoCamera()
+    mono = pipeline.create(dai.node.MonoCamera)
 
   .. code-tab:: c++
 
@@ -48,7 +48,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mono = pipeline.createMonoCamera()
+    mono = pipeline.create(dai.node.MonoCamera)
     mono.setBoardSocket(dai.CameraBoardSocket.RIGHT)
     mono.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
@@ -73,7 +73,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.MonoCamera
+    .. autoclass:: depthai.node.MonoCamera
       :members:
       :inherited-members:
       :noindex:
