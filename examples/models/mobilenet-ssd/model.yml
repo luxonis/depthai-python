@@ -1,0 +1,33 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  mobilenet-ssd
+task_type: object_attributes
+files:
+  - name: mobilenet-ssd_openvino_2021.4_6shave.blob
+    size: 14499200
+    sha256: 5ae9cb636bfa40df02c2ca3e64bc68a6690abd8a147903d4580aea6b6feb9c1c
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_6shave.blob
+  - name: mobilenet-ssd_openvino_2021.4_5shave.blob
+    size: 14517568
+    sha256: 782d80902c5ce7da01f8fc83894b68da33216edc93d94afb16dd7576a25e50e2
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_5shave.blob
+  - name: mobilenet-ssd_openvino_2021.4_8shave.blob
+    size: 14493888
+    sha256: 8c9a0189d95580b2442c88539af3198a433efd41b9b0837cea8d09a4d16a2d4a
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_8shave.blob
+
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

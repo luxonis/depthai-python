@@ -35,7 +35,7 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests', 'blobconverter']
+DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
@@ -110,19 +110,27 @@ if not args.skip_depthai:
             print("Check https://github.com/luxonis/depthai-python#dependencies on retrieving dependencies for compiling from sources")
 
 downloader_cmd = [sys.executable, f"{examples_dir}/downloader/downloader.py", "--all", "--cache_dir", f"{examples_dir}/downloader/", "--num_attempts", "5", "-o", f"{examples_dir}/models"]
-nn_models_shaves = {
-    "mobilenet-ssd": [5, 6, 8],
-    "person-detection-retail-0013": [7],
-    "yolo-v4-tiny-tf": [6],
-    "yolo-v3-tiny-tf": [6],
-}
-blobconverter_cmds = [
-    [sys.executable, "-m", "blobconverter", "-zn", nn_name, "-sh", str(nn_shave), "-o", f"{examples_dir}/models", "-v", "2021.4"]
-    for nn_name in nn_models_shaves
-    for nn_shave in nn_models_shaves[nn_name]
-]
-for cmd in [downloader_cmd] + blobconverter_cmds:
-    if args.dry_run:
-        prettyPrint(cmd)
-    else:
-        subprocess.check_call(cmd)
+if args.dry_run:
+    prettyPrint(downloader_cmd)
+else:
+    subprocess.check_call(downloader_cmd)
+
+# Use when updating blobs to new OpenVINO version
+#
+# nn_models_shaves = {
+#     "mobilenet-ssd": [5, 6, 8],
+#     "person-detection-retail-0013": [7],
+#     "yolo-v4-tiny-tf": [6],
+#     "yolo-v3-tiny-tf": [6],
+# }
+# blobconverter_cmds = [
+#     [sys.executable, "-m", "blobconverter", "-zn", nn_name, "-sh", str(nn_shave), "-o", f"{examples_dir}/models", "-v", "2021.4"]
+#     for nn_name in nn_models_shaves
+#     for nn_shave in nn_models_shaves[nn_name]
+# ]
+# install_blobconverter_cmd = [*pip_install, "blobconverter"]
+# for cmd in [install_blobconverter_cmd] + blobconverter_cmds:
+#     if args.dry_run:
+#         prettyPrint(cmd)
+#     else:
+#         subprocess.check_call(cmd)
