@@ -112,13 +112,30 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
 }
 
 
-void DeviceBindings::bind(pybind11::module& m){
+void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
+    // Type definitions
+    py::class_<Device> device(m, "Device", DOC(dai, Device));
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
 
     // Bind Device, using DeviceWrapper to be able to destruct the object by calling close()
-    py::class_<Device>(m, "Device", DOC(dai, Device))
+    device
         // Python only methods
         .def("__enter__", [](py::object obj){ return obj; })
         .def("__exit__", [](Device& d, py::object type, py::object value, py::object traceback) {
