@@ -1156,11 +1156,13 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector::AlgorithmType)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
         .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector)>(&FeatureTrackerConfig::setCornerDetector), py::arg("config"), DOC(dai, FeatureTrackerConfig, setCornerDetector, 2))
-
+        .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
+        .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::MotionEstimator)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator, 2))
         .def("setOpticalFlow", &FeatureTrackerConfig::setOpticalFlow, py::arg("config"), DOC(dai, FeatureTrackerConfig, setOpticalFlow))
+        .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer))
+        .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::FeatureMaintainer)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer, 2))
         .def("setTargetNumFeatures", &FeatureTrackerConfig::setTargetNumFeatures, py::arg("targetNumFeatures"), DOC(dai, FeatureTrackerConfig, setTargetNumFeatures))
-        .def("setMotionEstimator", &FeatureTrackerConfig::setMotionEstimator, py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
-        .def("setFeatureMaintainer", &FeatureTrackerConfig::setFeatureMaintainer, py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer))
+
         .def("set", &FeatureTrackerConfig::set, py::arg("config"), DOC(dai, FeatureTrackerConfig, set))
         .def("get", &FeatureTrackerConfig::get, DOC(dai, FeatureTrackerConfig, get))
         ;
