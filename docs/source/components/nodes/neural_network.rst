@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    nn = pipeline.createNeuralNetwork()
+    nn = pipeline.create(dai.node.NeuralNetwork)
 
   .. code-tab:: c++
 
@@ -60,12 +60,12 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    nn = pipeline.createNeuralNetwork()
+    nn = pipeline.create(dai.node.NeuralNetwork)
     nn.setBlobPath(bbBlobPath)
     cam.out.link(nn.input)
 
     # Send NN out to the host via XLink
-    nnXout = pipeline.createXLinkOut()
+    nnXout = pipeline.create(dai.node.XLinkOut)
     nnXout.setStreamName("nn")
     nn.out.link(nnXout.input)
 
@@ -124,7 +124,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.NeuralNetwork
+    .. autoclass:: depthai.node.NeuralNetwork
       :members:
       :inherited-members:
       :noindex:

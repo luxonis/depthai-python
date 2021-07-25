@@ -1,5 +1,6 @@
 #include "NodeBindings.hpp"
 
+#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
@@ -11,8 +12,10 @@
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/ImageManip.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
+#include "depthai/pipeline/node/SPIIn.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/SystemLogger.hpp"
+#include "depthai/pipeline/node/Script.hpp"
 #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
@@ -23,19 +26,444 @@
 // Libraries
 #include "hedley/hedley.h"
 
-void NodeBindings::bind(pybind11::module& m){
+// pybind11
+#include "pybind11/stl_bind.h"
+
+// Map of python node classes and call to pipeline to create it
+std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&, py::object class_)>>> pyNodeCreateMap;
+
+py::handle daiNodeModule;
+
+template<typename T, typename DERIVED = dai::Node>
+py::class_<T> addNode(const char* name, const char* docstring = nullptr){
+    auto node = py::class_<T, DERIVED, std::shared_ptr<T>>(daiNodeModule, name, docstring);
+    pyNodeCreateMap.push_back(std::make_pair(node, [](dai::Pipeline& p, py::object class_){
+        return p.create<T>();
+    }));
+    return node;
+}
+
+template<typename T, typename DERIVED = dai::Node>
+py::class_<T> addNodeAbstract(const char* name, const char* docstring = nullptr){
+    auto node = py::class_<T, DERIVED, std::shared_ptr<T>>(daiNodeModule, name, docstring);
+    pyNodeCreateMap.push_back(std::make_pair(node, [](dai::Pipeline& p, py::object class_) -> std::shared_ptr<dai::Node> {
+        throw std::invalid_argument(std::string(py::str(class_)) + " is an abstract node. Choose an appropriate derived node instead");
+        return nullptr;
+    }));
+    return node;
+}
+
+std::vector<std::pair<py::handle, std::function<std::shared_ptr<dai::Node>(dai::Pipeline&, py::object class_)>>> NodeBindings::getNodeCreateMap(){
+    return pyNodeCreateMap;
+}
+
+// Macro helpers
+#define ADD_NODE(NodeName) addNode<NodeName>(#NodeName, DOC(dai, node, NodeName))
+#define ADD_NODE_DERIVED(NodeName, Derived) addNode<NodeName, Derived>(#NodeName, DOC(dai, node, NodeName))
+#define ADD_NODE_ABSTRACT(NodeName) addNodeAbstract<NodeName>(#NodeName, DOC(dai, node, NodeName))
+#define ADD_NODE_DERIVED_ABSTRACT(NodeName, Derived) addNodeAbstract<NodeName, Derived>(#NodeName, DOC(dai, node, NodeName))
+#define ADD_NODE_DOC(NodeName, docstring) addNode<NodeName>(#NodeName, docstring)
+#define ADD_NODE_DERIVED_DOC(NodeName, Derived, docstring) addNode<NodeName, Derived>(#NodeName, docstring)
+
+
+// Bind map - without init method
+template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &name, Args&&... args) {
+    using namespace py;
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+    using Class_ = class_<Map, holder_type>;
+
+    // If either type is a non-module-local bound type then make the map binding non-local as well;
+    // otherwise (e.g. both types are either module-local or converting) the map will be
+    // module-local.
+    auto tinfo = py::detail::get_type_info(typeid(MappedType));
+    bool local = !tinfo || tinfo->module_local;
+    if (local) {
+        tinfo = py::detail::get_type_info(typeid(KeyType));
+        local = !tinfo || tinfo->module_local;
+    }
+
+    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
+
+    // Register stream insertion operator (if possible)
+    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+
+    cl.def("__bool__",
+        [](const Map &m) -> bool { return !m.empty(); },
+        "Check whether the map is nonempty"
+    );
+
+    cl.def("__iter__",
+           [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    cl.def("items",
+           [](Map &m) { return make_iterator(m.begin(), m.end()); },
+           keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
+    );
+
+    // Modified __getitem__. Uses operator[] underneath
+    cl.def("__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            return m[k];
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    cl.def("__contains__",
+        [](Map &m, const KeyType &k) -> bool {
+            auto it = m.find(k);
+            if (it == m.end())
+              return false;
+           return true;
+        }
+    );
+
+    // Assignment provided only if the type is copyable
+    detail::map_assignment<Map, Class_>(cl);
+
+    cl.def("__delitem__",
+           [](Map &m, const KeyType &k) {
+               auto it = m.find(k);
+               if (it == m.end())
+                   throw key_error();
+               m.erase(it);
+           }
+    );
+
+    cl.def("__len__", &Map::size);
+
+    return cl;
+}
+
+
+void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
+    //// Bindings for actual nodes
+    // Create "namespace" (python submodule) for nodes
     using namespace dai::node;
+    // Move properties into nodes and nodes under 'node' submodule
+    daiNodeModule = m.def_submodule("node");
 
+
+    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
+    py::enum_<ColorCameraProperties::SensorResolution> colorCameraPropertiesSensorResolution(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution));
+    py::enum_<ColorCameraProperties::ColorOrder> colorCameraPropertiesColorOrder(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder));
+    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
+    py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
+    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
+    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
+    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
+    py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
+    py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
+    py::class_<SystemLoggerProperties> systemLoggerProperties(m, "SystemLoggerProperties", DOC(dai, SystemLoggerProperties));
+    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties", DOC(dai, NeuralNetworkProperties));
+    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
+    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
+    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
+    py::enum_<TrackerType> trackerType(m, "TrackerType");
+    py::enum_<TrackerIdAssigmentPolicy> trackerIdAssigmentPolicy(m, "TrackerIdAssigmentPolicy");
+    py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
+    py::enum_<IMUSensor> imuSensor(m, "IMUSensor", DOC(dai, IMUSensor));
+    py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>> imuSensorConfig(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig));
+    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
+    py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
+    py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
+    py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
+    py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
+    py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
+    py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
+    py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
+    // Node::Id bindings
+    py::class_<Node::Id>(pyNode, "Id", "Node identificator. Unique for every node on a single Pipeline");
+    // Node::Connection bindings
+    py::class_<Node::Connection> nodeConnection(pyNode, "Connection", DOC(dai, Node, Connection));
+    // Node::InputMap bindings
+    bindNodeMap<Node::InputMap>(pyNode, "InputMap");
+    // Node::OutputMap bindings
+    bindNodeMap<Node::OutputMap>(pyNode, "OutputMap");
+    auto xlinkIn = ADD_NODE(XLinkIn);
+    auto xlinkOut = ADD_NODE(XLinkOut);
+    auto colorCamera = ADD_NODE(ColorCamera);
+    auto neuralNetwork = ADD_NODE(NeuralNetwork);
+    auto imageManip = ADD_NODE(ImageManip);
+    auto monoCamera = ADD_NODE(MonoCamera);
+    auto stereoDepth = ADD_NODE(StereoDepth);
+    auto videoEncoder = ADD_NODE(VideoEncoder);
+    auto spiOut = ADD_NODE(SPIOut);
+    auto spiIn = ADD_NODE(SPIIn);
+    auto detectionNetwork = ADD_NODE_DERIVED_ABSTRACT(DetectionNetwork, NeuralNetwork);
+    auto mobileNetDetectionNetwork = ADD_NODE_DERIVED(MobileNetDetectionNetwork, DetectionNetwork);
+    auto yoloDetectionNetwork = ADD_NODE_DERIVED(YoloDetectionNetwork, DetectionNetwork);
+    auto spatialDetectionNetwork = ADD_NODE_DERIVED_ABSTRACT(SpatialDetectionNetwork, DetectionNetwork);
+    auto mobileNetSpatialDetectionNetwork = ADD_NODE_DERIVED(MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork);
+    auto yoloSpatialDetectionNetwork = ADD_NODE_DERIVED(YoloSpatialDetectionNetwork, SpatialDetectionNetwork);
+    auto spatialLocationCalculator = ADD_NODE(SpatialLocationCalculator);
+    auto systemLogger = ADD_NODE(SystemLogger);
+    auto objectTracker = ADD_NODE(ObjectTracker);
+    auto script = ADD_NODE(Script);
+    auto imu = ADD_NODE(IMU);
+    auto edgeDetector = ADD_NODE(EdgeDetector);
+
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
+
+    colorCameraPropertiesSensorResolution
+        .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
+        .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
+        .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
+        ;
+
+    colorCameraPropertiesColorOrder
+        .value("BGR", ColorCameraProperties::ColorOrder::BGR)
+        .value("RGB", ColorCameraProperties::ColorOrder::RGB)
+        ;
+
+    colorCameraProperties
+        .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
+        .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
+        .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
+        .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
+        .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
+        .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
+        .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
+        .def_readwrite("videoWidth", &ColorCameraProperties::videoWidth)
+        .def_readwrite("stillHeight", &ColorCameraProperties::stillHeight)
+        .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
+        .def_readwrite("resolution", &ColorCameraProperties::resolution)
+        .def_readwrite("fps", &ColorCameraProperties::fps)
+        .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
+        .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
+    ;
+
+
+
+    // MonoCamera props
+
+    monoCameraPropertiesSensorResolution
+        .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
+        .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
+        .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
+        ;
+
+    monoCameraProperties
+        .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
+        .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
+        .def_readwrite("resolution", &MonoCameraProperties::resolution)
+        .def_readwrite("fps",  &MonoCameraProperties::fps)
+    ;
+
+
+    // StereoDepth props
+
+    // MedianFilter
+    medianFilter
+        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
+        ;
+
+    stereoDepthProperties
+        .def_readwrite("calibration",             &StereoDepthProperties::calibration)
+        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
+        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
+        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
+        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
+        .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
+        .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
+        .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
+        .def_readwrite("rectifyMirrorFrame",      &StereoDepthProperties::rectifyMirrorFrame)
+        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
+        .def_readwrite("width",                   &StereoDepthProperties::width)
+        .def_readwrite("height",                  &StereoDepthProperties::height)
+        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        ;
+    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+
+    stereoDepthConfigData
+        .def(py::init<>())
+        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
+        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfigData::leftRightCheckThreshold,  DOC(dai, StereoDepthConfigData, leftRightCheckThreshold))
+        ;
+    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
+
+
+    // VideoEncoder props
+
+    videoEncoderPropertiesProfile
+        .value("H264_BASELINE", VideoEncoderProperties::Profile::H264_BASELINE)
+        .value("H264_HIGH", VideoEncoderProperties::Profile::H264_HIGH)
+        .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
+        .value("H265_MAIN", VideoEncoderProperties::Profile::H265_MAIN)
+        .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
+        ;
+
+    videoEncoderPropertiesProfileRateControlMode
+        .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
+        .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
+        ;
+
+    videoEncoderProperties
+        .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
+        .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
+        .def_readwrite("maxBitrate", &VideoEncoderProperties::maxBitrate)
+        .def_readwrite("numBFrames", &VideoEncoderProperties::numBFrames)
+        .def_readwrite("numFramesPool", &VideoEncoderProperties::numFramesPool)
+        .def_readwrite("profile", &VideoEncoderProperties::profile)
+        .def_readwrite("quality", &VideoEncoderProperties::quality)
+        .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
+        .def_readwrite("width", &VideoEncoderProperties::width)
+        .def_readwrite("height", &VideoEncoderProperties::height)
+        ;
+
+
+    // System logger
+    systemLoggerProperties
+        .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
+        ;
+
+    neuralNetworkProperties
+        .def_readwrite("blobSize", &NeuralNetworkProperties::blobSize)
+        .def_readwrite("blobUri", &NeuralNetworkProperties::blobUri)
+        .def_readwrite("numFrames", &NeuralNetworkProperties::numFrames)
+        .def_readwrite("numThreads", &NeuralNetworkProperties::numThreads)
+        .def_readwrite("numNCEPerThread", &NeuralNetworkProperties::numNCEPerThread)
+        ;
+
+
+    detectionNetworkProperties
+        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
+        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
+        .def_readwrite("classes", &DetectionNetworkProperties::classes)
+        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
+        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
+        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
+        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
+        ;
+
+
+    spatialDetectionNetworkProperties
+        .def_readwrite("detectedBBScaleFactor", &SpatialDetectionNetworkProperties::detectedBBScaleFactor)
+        .def_readwrite("depthThresholds", &SpatialDetectionNetworkProperties::depthThresholds)
+        ;
+
+    spatialLocationCalculatorProperties
+        .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
+        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
+        ;
+
+
+    trackerType
+        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS)
+        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM)
+    ;
+
+    trackerIdAssigmentPolicy
+        .value("UNIQUE_ID", TrackerIdAssigmentPolicy::UNIQUE_ID)
+        .value("SMALLEST_ID", TrackerIdAssigmentPolicy::SMALLEST_ID)
+    ;
+
+    objectTrackerProperties
+        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
+        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
+        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
+        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
+        .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
+        ;
+
+    // IMU node properties
+    imuSensor
+        .value("ACCELEROMETER_RAW", IMUSensor::ACCELEROMETER_RAW, DOC(dai, IMUSensor, ACCELEROMETER_RAW))
+        .value("ACCELEROMETER", IMUSensor::ACCELEROMETER, DOC(dai, IMUSensor, ACCELEROMETER))
+        .value("LINEAR_ACCELERATION", IMUSensor::LINEAR_ACCELERATION, DOC(dai, IMUSensor, LINEAR_ACCELERATION))
+        .value("GRAVITY", IMUSensor::GRAVITY, DOC(dai, IMUSensor, GRAVITY))
+        .value("GYROSCOPE_RAW", IMUSensor::GYROSCOPE_RAW, DOC(dai, IMUSensor, GYROSCOPE_RAW))
+        .value("GYROSCOPE_CALIBRATED", IMUSensor::GYROSCOPE_CALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_CALIBRATED))
+        .value("GYROSCOPE_UNCALIBRATED", IMUSensor::GYROSCOPE_UNCALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_UNCALIBRATED))
+        .value("MAGNETOMETER_RAW", IMUSensor::MAGNETOMETER_RAW, DOC(dai, IMUSensor, MAGNETOMETER_RAW))
+        .value("MAGNETOMETER_CALIBRATED", IMUSensor::MAGNETOMETER_CALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_CALIBRATED))
+        .value("MAGNETOMETER_UNCALIBRATED", IMUSensor::MAGNETOMETER_UNCALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_UNCALIBRATED))
+        .value("ROTATION_VECTOR", IMUSensor::ROTATION_VECTOR, DOC(dai, IMUSensor, ROTATION_VECTOR))
+        .value("GAME_ROTATION_VECTOR", IMUSensor::GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, GAME_ROTATION_VECTOR))
+        .value("GEOMAGNETIC_ROTATION_VECTOR", IMUSensor::GEOMAGNETIC_ROTATION_VECTOR, DOC(dai, IMUSensor, GEOMAGNETIC_ROTATION_VECTOR))
+        .value("ARVR_STABILIZED_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_ROTATION_VECTOR))
+        .value("ARVR_STABILIZED_GAME_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_GAME_ROTATION_VECTOR))
+        // .value("GYRO_INTEGRATED_ROTATION_VECTOR", IMUSensor::GYRO_INTEGRATED_ROTATION_VECTOR)
+    ;
+
+    imuSensorConfig
+        .def(py::init<>())
+        .def_readwrite("sensitivityEnabled", &IMUSensorConfig::sensitivityEnabled)
+        .def_readwrite("sensitivityRelative", &IMUSensorConfig::sensitivityRelative)
+        .def_readwrite("changeSensitivity", &IMUSensorConfig::changeSensitivity)
+        .def_readwrite("reportRate", &IMUSensorConfig::reportRate)
+        .def_readwrite("sensorId", &IMUSensorConfig::sensorId)
+        ;
+
+    imuProperties
+        .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
+        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
+        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
+    ;
+
+    // EdgeDetector node properties
+    edgeDetectorProperties
+        .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
+        .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
+        .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
+    ;
+
+    // SPIOut properties
+    spiOutProperties
+        .def_readwrite("streamName", &SPIOutProperties::streamName)
+        .def_readwrite("busId", &SPIOutProperties::busId)
+    ;
+
+    // SPIIn properties
+    spiInProperties
+        .def_readwrite("streamName", &SPIInProperties::streamName)
+        .def_readwrite("busId", &SPIInProperties::busId)
+        .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
+        .def_readwrite("numFrames", &SPIInProperties::numFrames)
+    ;
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Node Bindings after properties, so types are resolved
+    ////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////
 
     // Base 'Node' class binding
-    py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
-
 
     // Node::Input bindings
-    py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
-    py::enum_<Node::Input::Type>(pyInput, "Type")
+    nodeInputType
         .value("SReceiver", Node::Input::Type::SReceiver)
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
@@ -49,8 +477,7 @@ void NodeBindings::bind(pybind11::module& m){
     ;
 
     // Node::Output bindings
-    py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
-    py::enum_<Node::Output::Type>(pyOutput, "Type")
+    nodeOutputType
         .value("MSender", Node::Output::Type::MSender)
         .value("SSender", Node::Output::Type::SSender)
     ;
@@ -60,11 +487,9 @@ void NodeBindings::bind(pybind11::module& m){
         .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
-    // Node::Id bindings
-    py::class_<Node::Id>(pyNode, "Id", "Node identificator. Unique for every node on a single Pipeline");
 
-    // Node::Connection bindings
-    py::class_<Node::Connection>(pyNode, "Connection", DOC(dai, Node, Connection))
+
+    nodeConnection
         .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
         .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
         .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
@@ -76,13 +501,14 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getName", &Node::getName, DOC(dai, Node, getName))
         .def("getOutputs", &Node::getOutputs, DOC(dai, Node, getOutputs))
         .def("getInputs", &Node::getInputs, DOC(dai, Node, getInputs))
-        .def("getAssets", &Node::getAssets, DOC(dai, Node, getAssets))
         .def("getOutputRefs", static_cast<std::vector< Node::Output*> (Node::*)()>(&Node::getOutputRefs), DOC(dai, Node, getOutputRefs), py::return_value_policy::reference_internal)
         .def("getInputRefs", static_cast<std::vector<Node::Input*> (Node::*)()>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
         .def("getOutputRefs", static_cast<std::vector<const Node::Output*> (Node::*)() const>(&Node::getOutputRefs), DOC(dai, Node, getOutputRefs), py::return_value_policy::reference_internal)
         .def("getInputRefs", static_cast<std::vector<const Node::Input*> (Node::*)() const>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline), DOC(dai, Node, getParentPipeline))
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
+        .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
+        .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
     ;
 
     // MSVC errors out with:
@@ -95,10 +521,9 @@ void NodeBindings::bind(pybind11::module& m){
     //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
     // ;
 
-    //// Bindings for actual nodes
 
     // XLinkIn node
-    py::class_<XLinkIn, Node, std::shared_ptr<XLinkIn>>(m, "XLinkIn", DOC(dai, node, XLinkIn))
+    xlinkIn
         .def_readonly("out", &XLinkIn::out, DOC(dai, node, XLinkIn, out))
         .def("setStreamName", &XLinkIn::setStreamName, py::arg("streamName"), DOC(dai, node, XLinkIn, setStreamName))
         .def("setMaxDataSize", &XLinkIn::setMaxDataSize, py::arg("maxDataSize"), DOC(dai, node, XLinkIn, setMaxDataSize))
@@ -109,7 +534,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // XLinkOut node
-    py::class_<XLinkOut, Node, std::shared_ptr<XLinkOut>>(m, "XLinkOut", DOC(dai, node, XLinkOut))
+    xlinkOut
         .def_readonly("input", &XLinkOut::input, DOC(dai, node, XLinkOut, input))
         .def("setStreamName", &XLinkOut::setStreamName, py::arg("streamName"), DOC(dai, node, XLinkOut, setStreamName))
         .def("setFpsLimit", &XLinkOut::setFpsLimit, py::arg("fpsLimit"), DOC(dai, node, XLinkOut, setFpsLimit))
@@ -120,7 +545,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // ColorCamera node
-    py::class_<ColorCamera, Node, std::shared_ptr<ColorCamera>>(m, "ColorCamera", DOC(dai, node, ColorCamera))
+    colorCamera
         .def_readonly("inputConfig", &ColorCamera::inputConfig, DOC(dai, node, ColorCamera, inputConfig))
         .def_readonly("inputControl", &ColorCamera::inputControl, DOC(dai, node, ColorCamera, inputControl))
         .def_readonly("initialControl", &ColorCamera::initialControl, DOC(dai, node, ColorCamera, initialControl))
@@ -194,11 +619,13 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getIspWidth", &ColorCamera::getIspWidth, DOC(dai, node, ColorCamera, getIspWidth))
         .def("getIspHeight", &ColorCamera::getIspHeight, DOC(dai, node, ColorCamera, getIspHeight))
         ;
+    // ALIAS
+    daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
 
 
 
     // NeuralNetwork node
-    py::class_<NeuralNetwork, Node, std::shared_ptr<NeuralNetwork>>(m, "NeuralNetwork", DOC(dai, node, NeuralNetwork))
+    neuralNetwork
         .def_readonly("input", &NeuralNetwork::input, DOC(dai, node, NeuralNetwork, input))
         .def_readonly("out", &NeuralNetwork::out, DOC(dai, node, NeuralNetwork, out))
         .def_readonly("passthrough", &NeuralNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
@@ -208,10 +635,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, NeuralNetwork, setNumNCEPerInferenceThread))
         .def("getNumInferenceThreads", &NeuralNetwork::getNumInferenceThreads, DOC(dai, node, NeuralNetwork, getNumInferenceThreads))
         ;
+    // Properties alias
+    daiNodeModule.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
 
 
     // ImageManip node
-    py::class_<ImageManip, Node, std::shared_ptr<ImageManip>>(m, "ImageManip", DOC(dai, node, ImageManip))
+    imageManip
         .def_readonly("inputConfig", &ImageManip::inputConfig, DOC(dai, node, ImageManip, inputConfig))
         .def_readonly("inputImage", &ImageManip::inputImage, DOC(dai, node, ImageManip, inputImage))
         .def_readonly("out", &ImageManip::out, DOC(dai, node, ImageManip, out))
@@ -279,7 +708,7 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
      // MonoCamera node
-    py::class_<MonoCamera, Node, std::shared_ptr<MonoCamera>>(m, "MonoCamera", DOC(dai, node, MonoCamera))
+    monoCamera
         .def_readonly("inputControl", &MonoCamera::inputControl, DOC(dai, node, MonoCamera, inputControl))
         .def_readonly("out",  &MonoCamera::out, DOC(dai, node, MonoCamera, out))
         .def_readonly("raw",  &MonoCamera::raw, DOC(dai, node, MonoCamera, raw))
@@ -312,11 +741,12 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getResolutionWidth", &MonoCamera::getResolutionWidth, DOC(dai, node, MonoCamera, getResolutionWidth))
         .def("getResolutionHeight", &MonoCamera::getResolutionHeight, DOC(dai, node, MonoCamera, getResolutionHeight))
         ;
-
+    // ALIAS
+    daiNodeModule.attr("MonoCamera").attr("Properties") = monoCameraProperties;
 
 
     // StereoDepth node
-    py::class_<StereoDepth, Node, std::shared_ptr<StereoDepth>>(m, "StereoDepth", DOC(dai, node, StereoDepth))
+    stereoDepth
         .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
         .def_readonly("left",           &StereoDepth::left, DOC(dai, node, StereoDepth, left))
@@ -396,9 +826,11 @@ void NodeBindings::bind(pybind11::module& m){
         }, DOC(dai, node, StereoDepth, setEmptyCalibration))
         .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
+    // ALIAS
+    daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
 
     // VideoEncoder node
-    py::class_<VideoEncoder, Node, std::shared_ptr<VideoEncoder>>(m, "VideoEncoder", DOC(dai, node, VideoEncoder))
+    videoEncoder
         .def_readonly("input", &VideoEncoder::input, DOC(dai, node, VideoEncoder, input), DOC(dai, node, VideoEncoder, input))
         .def_readonly("bitstream", &VideoEncoder::bitstream, DOC(dai, node, VideoEncoder, bitstream), DOC(dai, node, VideoEncoder, bitstream))
         .def("setDefaultProfilePreset", static_cast<void(VideoEncoder::*)(int, int, float, VideoEncoderProperties::Profile)>(&VideoEncoder::setDefaultProfilePreset), py::arg("width"), py::arg("height"), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset))
@@ -430,27 +862,48 @@ void NodeBindings::bind(pybind11::module& m){
         .def("getSize", &VideoEncoder::getSize, DOC(dai, node, VideoEncoder, getSize))
         .def("getLossless", &VideoEncoder::getLossless, DOC(dai, node, VideoEncoder, getLossless))
     ;
+    // ALIAS
+    daiNodeModule.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
 
-    // SPIOut node
-    py::class_<SPIOut, Node, std::shared_ptr<SPIOut>>(m, "SPIOut", DOC(dai, node, SPIOut))
+
+    spiOut
         .def_readonly("input", &SPIOut::input, DOC(dai, node, SPIOut, input))
         .def("setStreamName", &SPIOut::setStreamName, py::arg("name"), DOC(dai, node, SPIOut, setStreamName))
         .def("setBusId", &SPIOut::setBusId, py::arg("id"), DOC(dai, node, SPIOut, setBusId))
         ;
+    // ALIAS
+    daiNodeModule.attr("SPIOut").attr("Properties") = spiOutProperties;
 
-    py::class_<DetectionNetwork, NeuralNetwork, std::shared_ptr<DetectionNetwork>>(m, "DetectionNetwork", DOC(dai, node, DetectionNetwork))
+
+    // SPIIn node
+    spiIn
+        .def_readonly("out", &SPIIn::out, DOC(dai, node, SPIIn, out))
+        .def("setStreamName", &SPIIn::setStreamName, py::arg("name"), DOC(dai, node, SPIIn, setStreamName))
+        .def("setBusId", &SPIIn::setBusId, py::arg("id"), DOC(dai, node, SPIIn, setBusId))
+        .def("setMaxDataSize", &SPIIn::setMaxDataSize, py::arg("maxDataSize"), DOC(dai, node, SPIIn, setMaxDataSize))
+        .def("setNumFrames", &SPIIn::setNumFrames, py::arg("numFrames"), DOC(dai, node, SPIIn, setNumFrames))
+        .def("getStreamName", &SPIIn::getStreamName, DOC(dai, node, SPIIn, getStreamName))
+        .def("getBusId", &SPIIn::getBusId, DOC(dai, node, SPIIn, getBusId))
+        .def("getMaxDataSize", &SPIIn::getMaxDataSize, DOC(dai, node, SPIIn, getMaxDataSize))
+        .def("getNumFrames", &SPIIn::getNumFrames, DOC(dai, node, SPIIn, getNumFrames))
+        ;
+    // ALIAS
+    daiNodeModule.attr("SPIIn").attr("Properties") = spiInProperties;
+
+    // DetectionNetwork node
+    detectionNetwork
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
         .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, DetectionNetwork, passthrough))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
         ;
+    // ALIAS
+    daiNodeModule.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
 
-    // MobileNetDetectionNetwork node
-    py::class_<MobileNetDetectionNetwork, DetectionNetwork, std::shared_ptr<MobileNetDetectionNetwork>>(m, "MobileNetDetectionNetwork", DOC(dai, node, MobileNetDetectionNetwork))
-        ;
+
 
     // YoloDetectionNetwork node
-    py::class_<YoloDetectionNetwork, DetectionNetwork, std::shared_ptr<YoloDetectionNetwork>>(m, "YoloDetectionNetwork", DOC(dai, node, YoloDetectionNetwork))
+    yoloDetectionNetwork
         .def("setNumClasses", &YoloDetectionNetwork::setNumClasses, py::arg("numClasses"), DOC(dai, node, YoloDetectionNetwork, setNumClasses))
         .def("setCoordinateSize", &YoloDetectionNetwork::setCoordinateSize, py::arg("coordinates"), DOC(dai, node, YoloDetectionNetwork, setCoordinateSize))
         .def("setAnchors", &YoloDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors))
@@ -458,7 +911,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
         ;
 
-    py::class_<SpatialDetectionNetwork, DetectionNetwork, std::shared_ptr<SpatialDetectionNetwork>>(m, "SpatialDetectionNetwork", DOC(dai, node, SpatialDetectionNetwork))
+    spatialDetectionNetwork
         .def_readonly("input", &SpatialDetectionNetwork::input, DOC(dai, node, SpatialDetectionNetwork, input))
         .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth, DOC(dai, node, SpatialDetectionNetwork, inputDepth))
         .def_readonly("out", &SpatialDetectionNetwork::out, DOC(dai, node, SpatialDetectionNetwork, out))
@@ -470,12 +923,13 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
         .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold, py::arg("upperThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthUpperThreshold))
         ;
+     // ALIAS
+    daiNodeModule.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
 
-    py::class_<MobileNetSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<MobileNetSpatialDetectionNetwork>>(m, "MobileNetSpatialDetectionNetwork", DOC(dai, node, MobileNetSpatialDetectionNetwork))
-        ;
+    // MobileNetSpatialDetectionNetwork
 
     // YoloSpatialDetectionNetwork node
-    py::class_<YoloSpatialDetectionNetwork, SpatialDetectionNetwork, std::shared_ptr<YoloSpatialDetectionNetwork>>(m, "YoloSpatialDetectionNetwork", DOC(dai, node, YoloSpatialDetectionNetwork))
+    yoloSpatialDetectionNetwork
         .def("setNumClasses", &YoloSpatialDetectionNetwork::setNumClasses, py::arg("numClasses"), DOC(dai, node, YoloSpatialDetectionNetwork, setNumClasses))
         .def("setCoordinateSize", &YoloSpatialDetectionNetwork::setCoordinateSize, py::arg("coordinates"), DOC(dai, node, YoloSpatialDetectionNetwork, setCoordinateSize))
         .def("setAnchors", &YoloSpatialDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchors))
@@ -484,7 +938,8 @@ void NodeBindings::bind(pybind11::module& m){
         ;
 
     // SpatialLocationCalculator node
-    py::class_<SpatialLocationCalculator, Node, std::shared_ptr<SpatialLocationCalculator>>(m, "SpatialLocationCalculator", DOC(dai, node, SpatialLocationCalculator))
+
+    spatialLocationCalculator
         .def_readonly("inputConfig", &SpatialLocationCalculator::inputConfig, DOC(dai, node, SpatialLocationCalculator, inputConfig))
         .def_readonly("inputDepth", &SpatialLocationCalculator::inputDepth, DOC(dai, node, SpatialLocationCalculator, inputDepth))
         .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
@@ -492,15 +947,17 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
         .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
         ;
+    // ALIAS
+    daiNodeModule.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
 
     // SystemLogger node
-    py::class_<SystemLogger, Node, std::shared_ptr<SystemLogger>>(m, "SystemLogger", DOC(dai, node, SystemLogger))
+    systemLogger
         .def_readonly("out", &SystemLogger::out, DOC(dai, node, SystemLogger, out))
         .def("setRate", &SystemLogger::setRate, py::arg("hz"), DOC(dai, node, SystemLogger, setRate))
         ;
 
     // NeuralNetwork node
-    py::class_<ObjectTracker, Node, std::shared_ptr<ObjectTracker>>(m, "ObjectTracker", DOC(dai, node, ObjectTracker))
+    objectTracker
         .def_readonly("inputTrackerFrame", &ObjectTracker::inputTrackerFrame, DOC(dai, node, ObjectTracker, inputTrackerFrame))
         .def_readonly("inputDetectionFrame", &ObjectTracker::inputDetectionFrame, DOC(dai, node, ObjectTracker, inputDetectionFrame))
         .def_readonly("inputDetections", &ObjectTracker::inputDetections, DOC(dai, node, ObjectTracker, inputDetections))
@@ -515,9 +972,24 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
         .def("setTrackerIdAssigmentPolicy", &ObjectTracker::setTrackerIdAssigmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssigmentPolicy))
         ;
+    daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
+
+    // Script node
+    script
+        .def_readonly("inputs", &Script::inputs)
+        .def_readonly("outputs", &Script::outputs)
+        .def("setScriptPath", &Script::setScriptPath, DOC(dai, node, Script, setScriptPath))
+        .def("setScript", py::overload_cast<const std::string&, const std::string&>(&Script::setScript), py::arg("script"), py::arg("name") = "", DOC(dai, node, Script, setScript))
+        .def("setScript", py::overload_cast<const std::vector<std::uint8_t>&, const std::string&>(&Script::setScript), py::arg("data"), py::arg("name") = "", DOC(dai, node, Script, setScript, 2))
+        .def("getScriptPath", &Script::getScriptPath, DOC(dai, node, Script, getScriptPath))
+        .def("getScriptName", &Script::getScriptName, DOC(dai, node, Script, getScriptName))
+        .def("setProcessor", &Script::setProcessor, DOC(dai, node, Script, setProcessor))
+        .def("getProcessor", &Script::getProcessor, DOC(dai, node, Script, getProcessor))
+        ;
+
 
     // IMU node
-    py::class_<IMU, Node, std::shared_ptr<IMU>>(m, "IMU", DOC(dai, node, IMU))
+    imu
         .def_readonly("out", &IMU::out, DOC(dai, node, IMU, out))
         .def("enableIMUSensor", static_cast<void(IMU::*)(IMUSensorConfig imuSensor)>(&IMU::enableIMUSensor), py::arg("sensorConfig"), DOC(dai, node, IMU, enableIMUSensor))
         .def("enableIMUSensor", static_cast<void(IMU::*)(const std::vector<IMUSensorConfig>& imuSensors)>(&IMU::enableIMUSensor), py::arg("sensorConfigs"), DOC(dai, node, IMU, enableIMUSensor, 2))
@@ -528,9 +1000,11 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setMaxBatchReports", &IMU::setMaxBatchReports, py::arg("maxBatchReports"), DOC(dai, node, IMU, setMaxBatchReports))
         .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
         ;
+    daiNodeModule.attr("IMU").attr("Properties") = imuProperties;
 
     // EdgeDetector node
-    py::class_<EdgeDetector, Node, std::shared_ptr<EdgeDetector>>(m, "EdgeDetector", DOC(dai, node, EdgeDetector))
+
+    edgeDetector
         .def_readonly("initialConfig", &EdgeDetector::initialConfig, DOC(dai, node, EdgeDetector, initialConfig))
         .def_readonly("inputConfig", &EdgeDetector::inputConfig, DOC(dai, node, EdgeDetector, inputConfig))
         .def_readonly("inputImage", &EdgeDetector::inputImage, DOC(dai, node, EdgeDetector, inputImage))
@@ -539,7 +1013,6 @@ void NodeBindings::bind(pybind11::module& m){
         .def("setNumFramesPool", &EdgeDetector::setNumFramesPool, DOC(dai, node, EdgeDetector, setNumFramesPool))
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
-
     // FeatureTracker node
     py::class_<FeatureTracker, Node, std::shared_ptr<FeatureTracker>>(m, "FeatureTracker", DOC(dai, node, FeatureTracker))
         .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))
@@ -549,259 +1022,7 @@ void NodeBindings::bind(pybind11::module& m){
         .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
         .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
         ;
-
-    ////////////////////////////////////
-    // Node properties bindings
-    ////////////////////////////////////
-    py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
-    colorCameraProperties
-        .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
-        .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
-        .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
-        .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
-        .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
-        .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
-        .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
-        .def_readwrite("videoWidth", &ColorCameraProperties::videoWidth)
-        .def_readwrite("stillHeight", &ColorCameraProperties::stillHeight)
-        .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
-        .def_readwrite("resolution", &ColorCameraProperties::resolution)
-        .def_readwrite("fps", &ColorCameraProperties::fps)
-        .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
-        .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
-    ;
-
-    py::enum_<ColorCameraProperties::SensorResolution>(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution))
-        .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
-        .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
-        .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
-        ;
-
-    py::enum_<ColorCameraProperties::ColorOrder>(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder))
-        .value("BGR", ColorCameraProperties::ColorOrder::BGR)
-        .value("RGB", ColorCameraProperties::ColorOrder::RGB)
-        ;
-    // ALIAS
-    m.attr("ColorCamera").attr("Properties") = colorCameraProperties;
-
-
-
-    // MonoCamera props
-    py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
-    monoCameraProperties
-        .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
-        .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
-        .def_readwrite("resolution", &MonoCameraProperties::resolution)
-        .def_readwrite("fps",  &MonoCameraProperties::fps)
-    ;
-
-    py::enum_<MonoCameraProperties::SensorResolution>(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution))
-        .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
-        .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
-        .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
-        ;
-    // ALIAS
-    m.attr("MonoCamera").attr("Properties") = monoCameraProperties;
-
-
-    // StereoDepth props
-    py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
-    stereoDepthProperties
-        .def_readwrite("calibration",             &StereoDepthProperties::calibration)
-        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
-        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
-        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
-        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
-        .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
-        .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
-        .def_readwrite("rectifyMirrorFrame",      &StereoDepthProperties::rectifyMirrorFrame)
-        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
-        .def_readwrite("width",                   &StereoDepthProperties::width)
-        .def_readwrite("height",                  &StereoDepthProperties::height)
-        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
-        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
-        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
-        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
-        ;
-
-    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
-    medianFilter
-        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
-        ;
-
-    py::enum_<StereoDepthProperties::DepthAlign>(stereoDepthProperties, "DepthAlign")
-        .value("RECTIFIED_RIGHT", StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT)
-        .value("RECTIFIED_LEFT",  StereoDepthProperties::DepthAlign::RECTIFIED_LEFT)
-        .value("CENTER",          StereoDepthProperties::DepthAlign::CENTER)
-        ;
-
-    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
-    stereoDepthConfigData
-        .def(py::init<>())
-        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
-        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
-        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
-        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfigData::leftRightCheckThreshold,  DOC(dai, StereoDepthConfigData, leftRightCheckThreshold))
-        ;
-
-    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
-    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
-
-    // ALIAS
-    m.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
-
-
-
-    // VideoEncoder props
-    py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
-    videoEncoderProperties
-        .def_readwrite("bitrate", &VideoEncoderProperties::bitrate)
-        .def_readwrite("keyframeFrequency", &VideoEncoderProperties::keyframeFrequency)
-        .def_readwrite("maxBitrate", &VideoEncoderProperties::maxBitrate)
-        .def_readwrite("numBFrames", &VideoEncoderProperties::numBFrames)
-        .def_readwrite("numFramesPool", &VideoEncoderProperties::numFramesPool)
-        .def_readwrite("profile", &VideoEncoderProperties::profile)
-        .def_readwrite("quality", &VideoEncoderProperties::quality)
-        .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
-        .def_readwrite("width", &VideoEncoderProperties::width)
-        .def_readwrite("height", &VideoEncoderProperties::height)
-        ;
-
-    py::enum_<VideoEncoderProperties::Profile>(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile))
-        .value("H264_BASELINE", VideoEncoderProperties::Profile::H264_BASELINE)
-        .value("H264_HIGH", VideoEncoderProperties::Profile::H264_HIGH)
-        .value("H264_MAIN", VideoEncoderProperties::Profile::H264_MAIN)
-        .value("H265_MAIN", VideoEncoderProperties::Profile::H265_MAIN)
-        .value("MJPEG", VideoEncoderProperties::Profile::MJPEG)
-        ;
-
-    py::enum_<VideoEncoderProperties::RateControlMode>(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode))
-        .value("CBR", VideoEncoderProperties::RateControlMode::CBR)
-        .value("VBR", VideoEncoderProperties::RateControlMode::VBR)
-        ;
-    // ALIAS
-    m.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
-
-
-
-
-    py::class_<SystemLoggerProperties>(m, "SystemLoggerProperties", DOC(dai, SystemLoggerProperties))
-        .def_readwrite("rateHz", &SystemLoggerProperties::rateHz)
-        ;
-
-    py::class_<NeuralNetworkProperties, std::shared_ptr<NeuralNetworkProperties>> neuralNetworkProperties(m, "NeuralNetworkProperties", DOC(dai, NeuralNetworkProperties));
-    neuralNetworkProperties
-        .def_readwrite("blobSize", &NeuralNetworkProperties::blobSize)
-        .def_readwrite("blobUri", &NeuralNetworkProperties::blobUri)
-        .def_readwrite("numFrames", &NeuralNetworkProperties::numFrames)
-        .def_readwrite("numThreads", &NeuralNetworkProperties::numThreads)
-        .def_readwrite("numNCEPerThread", &NeuralNetworkProperties::numNCEPerThread)
-        ;
-    m.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
-
-
-    py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
-    detectionNetworkProperties
-        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
-        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
-        .def_readwrite("classes", &DetectionNetworkProperties::classes)
-        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
-        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
-        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
-        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
-        ;
-    // ALIAS
-    m.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
-
-
-    py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
-    spatialDetectionNetworkProperties
-        .def_readwrite("detectedBBScaleFactor", &SpatialDetectionNetworkProperties::detectedBBScaleFactor)
-        .def_readwrite("depthThresholds", &SpatialDetectionNetworkProperties::depthThresholds)
-        ;
-    // ALIAS
-    m.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
-
-
-    py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
-    spatialLocationCalculatorProperties
-        .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
-        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
-        ;
-    m.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
-
-
-    py::enum_<TrackerType>(m, "TrackerType")
-        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS)
-        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM)
-    ;
-
-    py::enum_<TrackerIdAssigmentPolicy>(m, "TrackerIdAssigmentPolicy")
-        .value("UNIQUE_ID", TrackerIdAssigmentPolicy::UNIQUE_ID)
-        .value("SMALLEST_ID", TrackerIdAssigmentPolicy::SMALLEST_ID)
-    ;
-
-
-    py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
-    objectTrackerProperties
-        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
-        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
-        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
-        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
-        .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
-        ;
-    m.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
-
-    py::enum_<IMUSensor>(m, "IMUSensor", DOC(dai, IMUSensor))
-        .value("ACCELEROMETER_RAW", IMUSensor::ACCELEROMETER_RAW, DOC(dai, IMUSensor, ACCELEROMETER_RAW))
-        .value("ACCELEROMETER", IMUSensor::ACCELEROMETER, DOC(dai, IMUSensor, ACCELEROMETER))
-        .value("LINEAR_ACCELERATION", IMUSensor::LINEAR_ACCELERATION, DOC(dai, IMUSensor, LINEAR_ACCELERATION))
-        .value("GRAVITY", IMUSensor::GRAVITY, DOC(dai, IMUSensor, GRAVITY))
-        .value("GYROSCOPE_RAW", IMUSensor::GYROSCOPE_RAW, DOC(dai, IMUSensor, GYROSCOPE_RAW))
-        .value("GYROSCOPE_CALIBRATED", IMUSensor::GYROSCOPE_CALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_CALIBRATED))
-        .value("GYROSCOPE_UNCALIBRATED", IMUSensor::GYROSCOPE_UNCALIBRATED, DOC(dai, IMUSensor, GYROSCOPE_UNCALIBRATED))
-        .value("MAGNETOMETER_RAW", IMUSensor::MAGNETOMETER_RAW, DOC(dai, IMUSensor, MAGNETOMETER_RAW))
-        .value("MAGNETOMETER_CALIBRATED", IMUSensor::MAGNETOMETER_CALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_CALIBRATED))
-        .value("MAGNETOMETER_UNCALIBRATED", IMUSensor::MAGNETOMETER_UNCALIBRATED, DOC(dai, IMUSensor, MAGNETOMETER_UNCALIBRATED))
-        .value("ROTATION_VECTOR", IMUSensor::ROTATION_VECTOR, DOC(dai, IMUSensor, ROTATION_VECTOR))
-        .value("GAME_ROTATION_VECTOR", IMUSensor::GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, GAME_ROTATION_VECTOR))
-        .value("GEOMAGNETIC_ROTATION_VECTOR", IMUSensor::GEOMAGNETIC_ROTATION_VECTOR, DOC(dai, IMUSensor, GEOMAGNETIC_ROTATION_VECTOR))
-        .value("ARVR_STABILIZED_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_ROTATION_VECTOR))
-        .value("ARVR_STABILIZED_GAME_ROTATION_VECTOR", IMUSensor::ARVR_STABILIZED_GAME_ROTATION_VECTOR, DOC(dai, IMUSensor, ARVR_STABILIZED_GAME_ROTATION_VECTOR))
-        // .value("GYRO_INTEGRATED_ROTATION_VECTOR", IMUSensor::GYRO_INTEGRATED_ROTATION_VECTOR)
-    ;
-
-    py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>>(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig))
-        .def(py::init<>())
-        .def_readwrite("sensitivityEnabled", &IMUSensorConfig::sensitivityEnabled)
-        .def_readwrite("sensitivityRelative", &IMUSensorConfig::sensitivityRelative)
-        .def_readwrite("changeSensitivity", &IMUSensorConfig::changeSensitivity)
-        .def_readwrite("reportRate", &IMUSensorConfig::reportRate)
-        .def_readwrite("sensorId", &IMUSensorConfig::sensorId)
-        ;
-
-    py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
-    imuProperties
-        .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
-        .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
-        .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
-    ;
-    m.attr("IMU").attr("Properties") = imuProperties;
-
-
-    py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
-    edgeDetectorProperties
-        .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
-        .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
-        .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
-
-    ;
-    m.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
+    daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
 
 
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
@@ -812,5 +1033,5 @@ void NodeBindings::bind(pybind11::module& m){
     m.attr("SpatialLocationCalculator").attr("Properties") = featureTrackerProperties;
 
 
-
 }
+
