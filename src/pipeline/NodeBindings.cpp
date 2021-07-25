@@ -174,6 +174,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
     py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
     py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
@@ -209,6 +210,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto script = ADD_NODE(Script);
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
+    auto featureTracker = ADD_NODE(FeatureTracker);
 
 
 
@@ -452,6 +454,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
         .def_readwrite("numFrames", &SPIInProperties::numFrames)
     ;
+
+    // FeatureTracker properties
+    featureTrackerProperties
+        .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
+        ;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -1013,8 +1021,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setNumFramesPool", &EdgeDetector::setNumFramesPool, DOC(dai, node, EdgeDetector, setNumFramesPool))
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
+    daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
+
+
     // FeatureTracker node
-    py::class_<FeatureTracker, Node, std::shared_ptr<FeatureTracker>>(m, "FeatureTracker", DOC(dai, node, FeatureTracker))
+    featureTracker
         .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))
         .def_readonly("inputImage", &FeatureTracker::inputImage, DOC(dai, node, FeatureTracker, inputImage))
         .def_readonly("outputFeatures", &FeatureTracker::outputFeatures, DOC(dai, node, FeatureTracker, outputFeatures))
@@ -1022,15 +1033,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
         .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
         ;
-    daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
-
-
-    py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
-    featureTrackerProperties
-        .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
-        ;
-    m.attr("SpatialLocationCalculator").attr("Properties") = featureTrackerProperties;
+    daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
 
 
 }
