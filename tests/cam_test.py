@@ -69,8 +69,8 @@ for c in cam_list:
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
         cam[c].out.link(xout[c].input)
     cam[c].setBoardSocket(cam_socket_opts[c])
-    # Num frames to capture on trigger
-    cam[c].initialControl.setExternalTrigger(2)
+    # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
+    cam[c].initialControl.setExternalTrigger(3, 1)
     # There's a problem with this initial command, we're sending it at runtime instead
     # Note: first few frames may need to be discarded
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
