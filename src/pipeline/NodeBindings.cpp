@@ -1032,6 +1032,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("passthroughInputImage", &FeatureTracker::passthroughInputImage, DOC(dai, node, FeatureTracker, passthroughInputImage))
         .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
         .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+        .def("setHardwareResources", &FeatureTracker::setHardwareResources, py::arg("numShaves"), py::arg("numMemorySlices"), DOC(dai, node, FeatureTracker, setHardwareResources))
         ;
     daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
 

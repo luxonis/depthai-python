@@ -1108,7 +1108,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     cornerDetector
         .def(py::init<>())
         .def_readwrite("algorithmType", &FeatureTrackerConfigData::CornerDetector::algorithmType, DOC(dai, FeatureTrackerConfigData, CornerDetector, algorithmType))
-        .def_readwrite("numImageCells", &FeatureTrackerConfigData::CornerDetector::numImageCells, DOC(dai, FeatureTrackerConfigData, CornerDetector, numImageCells))
+        .def_readwrite("cellGridDimension", &FeatureTrackerConfigData::CornerDetector::cellGridDimension, DOC(dai, FeatureTrackerConfigData, CornerDetector, cellGridDimension))
         .def_readwrite("targetNumFeatures", &FeatureTrackerConfigData::CornerDetector::targetNumFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, targetNumFeatures))
         .def_readwrite("maxNumFeatures", &FeatureTrackerConfigData::CornerDetector::maxNumFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, maxNumFeatures))
         .def_readwrite("enableSobel", &FeatureTrackerConfigData::CornerDetector::enableSobel, DOC(dai, FeatureTrackerConfigData, CornerDetector, enableSobel))
@@ -1154,6 +1154,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     // FeatureTrackerConfig (after ConfigData)
     featureTrackerConfig
         .def(py::init<>())
+        .def(py::init<std::shared_ptr<RawFeatureTrackerConfig>>())
+
         .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector::AlgorithmType)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
         .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector)>(&FeatureTrackerConfig::setCornerDetector), py::arg("config"), DOC(dai, FeatureTrackerConfig, setCornerDetector, 2))
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
