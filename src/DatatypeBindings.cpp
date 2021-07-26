@@ -80,6 +80,16 @@ void DatatypeBindings::bind(pybind11::module& m){
                 o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
             }
         )
+        .def_property("tsDevice",
+            [](const RawImgFrame& o){
+                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawImgFrame& o, double ts){
+                o.tsDevice.sec = ts;
+                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+            }
+        )
         ;
 
     py::enum_<RawImgFrame::Type>(rawImgFrame, "Type")
@@ -130,6 +140,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
         ;
 
+        // TODO add RawImgFrame::CameraSettings
 
     // NNData
     py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
@@ -304,11 +315,11 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("timestamp", &IMUReport::timestamp)
         ;
 
-    py::enum_<IMUReport::IMUReportAccuracy>(imureport, "IMUReportAccuracy")
-        .value("UNRELIABLE", IMUReport::IMUReportAccuracy::UNRELIABLE)
-        .value("LOW", IMUReport::IMUReportAccuracy::LOW)
-        .value("MEDIUM", IMUReport::IMUReportAccuracy::MEDIUM)
-        .value("HIGH", IMUReport::IMUReportAccuracy::HIGH)
+    py::enum_<IMUReport::Accuracy>(imureport, "Accuracy")
+        .value("UNRELIABLE", IMUReport::Accuracy::UNRELIABLE)
+        .value("LOW", IMUReport::Accuracy::LOW)
+        .value("MEDIUM", IMUReport::Accuracy::MEDIUM)
+        .value("HIGH", IMUReport::Accuracy::HIGH)
         ;
 
     py::class_<IMUReportAccelerometer, IMUReport, std::shared_ptr<IMUReportAccelerometer>>(m, "IMUReportAccelerometer", DOC(dai, IMUReportAccelerometer))
@@ -338,7 +349,7 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def_readwrite("j", &IMUReportRotationVectorWAcc::j)
         .def_readwrite("k", &IMUReportRotationVectorWAcc::k)
         .def_readwrite("real", &IMUReportRotationVectorWAcc::real)
-        .def_readwrite("accuracy", &IMUReportRotationVectorWAcc::accuracy)
+        .def_readwrite("rotationVectorAccuracy", &IMUReportRotationVectorWAcc::rotationVectorAccuracy)
         ;
 
 #if 0
@@ -521,12 +532,16 @@ void DatatypeBindings::bind(pybind11::module& m){
         .def(py::init<>())
         // getters
         .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
+        .def("getTimestampDevice", &ImgFrame::getTimestampDevice, DOC(dai, ImgFrame, getTimestampDevice))
         .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
         .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
+        .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
+        .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
+        .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
