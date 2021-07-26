@@ -32,17 +32,19 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
+# Disable optical flow
+featureTrackerLeft.initialConfig.setMotionEstimator(False)
+featureTrackerRight.initialConfig.setMotionEstimator(False)
+
 # Linking
 monoLeft.out.link(featureTrackerLeft.inputImage)
 featureTrackerLeft.passthroughInputImage.link(xoutPassthroughFrameLeft.input)
 featureTrackerLeft.outputFeatures.link(xoutTrackedFeaturesLeft.input)
-featureTrackerLeft.initialConfig.setMotionEstimator(False)
 xinTrackedFeaturesConfig.out.link(featureTrackerLeft.inputConfig)
 
 monoRight.out.link(featureTrackerRight.inputImage)
 featureTrackerRight.passthroughInputImage.link(xoutPassthroughFrameRight.input)
 featureTrackerRight.outputFeatures.link(xoutTrackedFeaturesRight.input)
-featureTrackerRight.initialConfig.setMotionEstimator(False)
 xinTrackedFeaturesConfig.out.link(featureTrackerRight.inputConfig)
 
 featureTrackerConfig = featureTrackerRight.initialConfig.get()
@@ -60,12 +62,14 @@ with dai.Device(pipeline) as device:
 
     inputFeatureTrackerConfigQueue = device.getInputQueue("trackedFeaturesConfig")
 
-
     leftWindowName = "left"
     rightWindowName = "right"
 
-    pointColor = (0, 0, 255)
-    circleRadius = 2
+    def drawFeatures(frame, features):
+        pointColor = (0, 0, 255)
+        circleRadius = 2
+        for feature in features:
+            cv2.circle(frame, (int(feature.position.x), int(feature.position.y)), circleRadius, pointColor, -1, cv2.LINE_AA, 0)
 
     while True:
         inPassthroughFrameLeft = passthroughImageLeftQueue.get()
@@ -77,12 +81,10 @@ with dai.Device(pipeline) as device:
         rightFrame = cv2.cvtColor(passthroughFrameRight, cv2.COLOR_GRAY2BGR)
 
         trackedFeaturesLeft = outputFeaturesLeftQueue.get().trackedFeatures
-        for feature in trackedFeaturesLeft:
-            cv2.circle(leftFrame, (int(feature.position.x), int(feature.position.y)), circleRadius, pointColor, -1, cv2.LINE_AA, 0)
+        drawFeatures(leftFrame, trackedFeaturesLeft)
 
         trackedFeaturesRight = outputFeaturesRightQueue.get().trackedFeatures
-        for feature in trackedFeaturesRight:
-            cv2.circle(rightFrame, (int(feature.position.x), int(feature.position.y)), circleRadius, pointColor, -1, cv2.LINE_AA, 0)
+        drawFeatures(rightFrame, trackedFeaturesRight)
 
         # Show the frame
         cv2.imshow(leftWindowName, leftFrame)
@@ -94,14 +96,11 @@ with dai.Device(pipeline) as device:
         elif key == ord('s'):
             if featureTrackerConfig.cornerDetector.algorithmType == dai.FeatureTrackerConfigData.CornerDetector.AlgorithmType.HARRIS:
                 featureTrackerConfig.cornerDetector.algorithmType = dai.FeatureTrackerConfigData.CornerDetector.AlgorithmType.SHI_THOMASI
-                print("Switchig to Shi-Thomasi")
+                print("Switching to Shi-Thomasi")
             else:
                 featureTrackerConfig.cornerDetector.algorithmType = dai.FeatureTrackerConfigData.CornerDetector.AlgorithmType.HARRIS
-                print("Switchig to Harris")
+                print("Switching to Harris")
 
             cfg = dai.FeatureTrackerConfig()
             cfg.set(featureTrackerConfig)
             inputFeatureTrackerConfigQueue.send(cfg)
-
-
-            pass

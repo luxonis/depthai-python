@@ -6,17 +6,18 @@ from collections import deque
 
 class FeatureTrackerDrawer:
 
-    trackedIDs = None
-    trackedFeaturesPath = None
-
     lineColor = (200, 0, 200)
     pointColor = (0, 0, 255)
     circleRadius = 2
     maxTrackedFeaturesPathLength = 30
+    # for how many frames the feature is tracked
     trackedFeaturesPathLength = 10
 
+    trackedIDs = None
+    trackedFeaturesPath = None
+
     def onTrackBar(self, val):
-        self.trackedFeaturesPathLength = val
+        FeatureTrackerDrawer.trackedFeaturesPathLength = val
         pass
 
     def trackFeaturePath(self, features):
@@ -32,7 +33,7 @@ class FeatureTrackerDrawer:
             path = self.trackedFeaturesPath[currentID]
 
             path.append(currentFeature.position)
-            while(len(path) > max(1, self.trackedFeaturesPathLength)):
+            while(len(path) > max(1, FeatureTrackerDrawer.trackedFeaturesPathLength)):
                 path.popleft()
 
             self.trackedFeaturesPath[currentID] = path
@@ -49,11 +50,11 @@ class FeatureTrackerDrawer:
 
     def drawFeatures(self, img):
 
-        # For every feature,
+        cv2.setTrackbarPos(self.trackbarName, self.windowName, FeatureTrackerDrawer.trackedFeaturesPathLength)
+
         for featurePath in self.trackedFeaturesPath.values():
             path = featurePath
 
-            # Draw the feature movement path.
             for j in range(len(path) - 1):
                 src = (int(path[j].x), int(path[j].y))
                 dst = (int(path[j + 1].x), int(path[j + 1].y))
@@ -62,8 +63,10 @@ class FeatureTrackerDrawer:
             cv2.circle(img, (int(path[j].x), int(path[j].y)), self.circleRadius, self.pointColor, -1, cv2.LINE_AA, 0)
 
     def __init__(self, trackbarName, windowName):
+        self.trackbarName = trackbarName
+        self.windowName = windowName
         cv2.namedWindow(windowName)
-        cv2.createTrackbar(trackbarName, windowName, self.trackedFeaturesPathLength, self.maxTrackedFeaturesPathLength, self.onTrackBar)
+        cv2.createTrackbar(trackbarName, windowName, FeatureTrackerDrawer.trackedFeaturesPathLength, FeatureTrackerDrawer.maxTrackedFeaturesPathLength, self.onTrackBar)
         self.trackedIDs = set()
         self.trackedFeaturesPath = dict()
 
@@ -101,6 +104,13 @@ featureTrackerLeft.outputFeatures.link(xoutTrackedFeaturesLeft.input)
 monoRight.out.link(featureTrackerRight.inputImage)
 featureTrackerRight.passthroughInputImage.link(xoutPassthroughFrameRight.input)
 featureTrackerRight.outputFeatures.link(xoutTrackedFeaturesRight.input)
+
+# By default the least mount of resources are allocated
+# increasing it improves performance
+numShaves = 2
+numMemorySlices = 2
+featureTrackerLeft.setHardwareResources(numShaves, numMemorySlices)
+featureTrackerRight.setHardwareResources(numShaves, numMemorySlices)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
