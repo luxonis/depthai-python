@@ -19,6 +19,7 @@
 #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
+#include "depthai/pipeline/node/EdgeDetector.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 
 // depthai-shared
@@ -81,6 +82,7 @@ void PipelineBindings::bind(pybind11::module& m){
         .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
         .def("createIMU", &Pipeline::create<node::IMU>)
+		.def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
 
         ;
