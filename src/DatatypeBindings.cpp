@@ -20,7 +20,7 @@
 #include "depthai/pipeline/datatype/IMUData.hpp"
 #include "depthai/pipeline/datatype/StereoDepthConfig.hpp"
 #include "depthai/pipeline/datatype/EdgeDetectorConfig.hpp"
-#include "depthai/pipeline/datatype/FeatureTrackerData.hpp"
+#include "depthai/pipeline/datatype/TrackedFeatures.hpp"
 #include "depthai/pipeline/datatype/FeatureTrackerConfig.hpp"
 
 // depthai-shared
@@ -1145,10 +1145,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
 
-    // Bind FeatureTrackerData
-    py::class_<FeatureTrackerData, Buffer, std::shared_ptr<FeatureTrackerData>>(m, "FeatureTrackerData", DOC(dai, FeatureTrackerData))
+    // Bind TrackedFeatures
+    py::class_<TrackedFeatures, Buffer, std::shared_ptr<TrackedFeatures>>(m, "TrackedFeatures", DOC(dai, TrackedFeatures))
         .def(py::init<>())
-        .def_property("trackedFeatures", [](FeatureTrackerData& feat) { return &feat.trackedFeatures; }, [](FeatureTrackerData& feat, std::vector<TrackedFeature> val) { feat.trackedFeatures = val; }, DOC(dai, FeatureTrackerData, trackedFeatures))
+        .def_property("trackedFeatures", [](TrackedFeatures& feat) { return &feat.trackedFeatures; }, [](TrackedFeatures& feat, std::vector<TrackedFeature> val) { feat.trackedFeatures = val; }, DOC(dai, TrackedFeatures, trackedFeatures))
         ;
 
     // FeatureTrackerConfig (after ConfigData)
