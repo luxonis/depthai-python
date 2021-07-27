@@ -5,18 +5,41 @@
 #include <cmath>
 #include <cstring>
 
-void XLinkConnectionBindings::bind(pybind11::module& m){
+void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<DeviceInfo>(m, "DeviceInfo", DOC(dai, DeviceInfo))
+
+    // Type definitions
+    py::class_<DeviceInfo> deviceInfo(m, "DeviceInfo", DOC(dai, DeviceInfo));
+    py::class_<deviceDesc_t> deviceDesc(m, "DeviceDesc");
+    py::enum_<XLinkDeviceState_t> xLinkDeviceState(m, "XLinkDeviceState");
+    py::enum_<XLinkProtocol_t> xLinkProtocol(m, "XLinkProtocol");
+    py::enum_<XLinkPlatform_t> xLinkPlatform(m, "XLinkPlatform");
+    py::class_<XLinkConnection, std::shared_ptr<XLinkConnection>> xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    // Bindings
+    deviceInfo
         .def(py::init<>())
         .def_readwrite("desc", &DeviceInfo::desc)
         .def_readwrite("state", &DeviceInfo::state)
         .def("getMxId", &DeviceInfo::getMxId)
         ;
 
-    py::class_<deviceDesc_t>(m, "DeviceDesc")
+    deviceDesc
         .def(py::init<>())
         .def_readwrite("protocol", &deviceDesc_t::protocol)
         .def_readwrite("platform", &deviceDesc_t::platform)
@@ -26,7 +49,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         )
         ;
 
-    py::enum_<XLinkDeviceState_t>(m, "XLinkDeviceState")
+    xLinkDeviceState
         .value("X_LINK_ANY_STATE", X_LINK_ANY_STATE)
         .value("X_LINK_BOOTED", X_LINK_BOOTED)
         .value("X_LINK_UNBOOTED", X_LINK_UNBOOTED)
@@ -35,24 +58,25 @@ void XLinkConnectionBindings::bind(pybind11::module& m){
         ;
 
 
-    py::enum_<XLinkProtocol_t>(m, "XLinkProtocol")
+    xLinkProtocol
         .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
         .value("X_LINK_USB_CDC", X_LINK_USB_CDC)
         .value("X_LINK_PCIE", X_LINK_PCIE)
+        .value("X_LINK_TCP_IP", X_LINK_TCP_IP)
         .value("X_LINK_IPC", X_LINK_IPC)
         .value("X_LINK_NMB_OF_PROTOCOLS", X_LINK_NMB_OF_PROTOCOLS)
         .value("X_LINK_ANY_PROTOCOL", X_LINK_ANY_PROTOCOL)
         .export_values()
         ;
 
-    py::enum_<XLinkPlatform_t>(m, "XLinkPlatform")
+    xLinkPlatform
         .value("X_LINK_ANY_PLATFORM", X_LINK_ANY_PLATFORM)
         .value("X_LINK_MYRIAD_2", X_LINK_MYRIAD_2)
         .value("X_LINK_MYRIAD_X", X_LINK_MYRIAD_X)
         .export_values()
         ;
 
-    py::class_<XLinkConnection>(m, "XLinkConnection", DOC(dai, XLinkConnection))
+    xLinkConnection
         .def(py::init<const DeviceInfo&, std::vector<std::uint8_t>>())
         .def(py::init<const DeviceInfo&, std::string>())
         .def(py::init<const DeviceInfo&>())
