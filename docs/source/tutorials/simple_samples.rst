@@ -23,6 +23,7 @@ Simple
    ../samples/imu_rotation_vector.rst
    ../samples/edge_detector.rst
    ../samples/script_camera_control.rst
+   ../samples/bootloader_version.rst
 
 These samples are great starting point for the gen2 API.
 
@@ -40,3 +41,4 @@ These samples are great starting point for the gen2 API.
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
