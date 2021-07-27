@@ -56,10 +56,10 @@ with dai.Device(pipeline) as device:
 
         aprilTagData = aprilTagQueue.get().aprilTags
         for aprilTag in aprilTagData:
-            xmin = int(aprilTag.p.x)
-            ymin = int(aprilTag.p.y)
-            xmax = xmin + int(aprilTag.p.width)
-            ymax = ymin + int(aprilTag.p.height)
+            xmin = int(aprilTag.points.x)
+            ymin = int(aprilTag.points.y)
+            xmax = xmin + int(aprilTag.points.width)
+            ymax = ymin + int(aprilTag.points.height)
 
             idStr = "ID: " + str(aprilTag.id)
             cv2.putText(frame, idStr, (xmin + 10, ymin + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
