@@ -2,7 +2,7 @@ NeuralNetwork
 =============
 
 Runs a neural inference on input data. Neural network has to be a :code:`.blob` type. Instructions on how to compile your neural network (NN) to :code:`.blob`
-can be found at :ref:`Local OpenVINO Model Conversion`.
+can be found at `here <https://docs.luxonis.com/en/latest/pages/model_conversion/>`__.
 
 
 How to place it
