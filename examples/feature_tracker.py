@@ -84,11 +84,13 @@ xoutPassthroughFrameLeft = pipeline.createXLinkOut()
 xoutTrackedFeaturesLeft = pipeline.createXLinkOut()
 xoutPassthroughFrameRight = pipeline.createXLinkOut()
 xoutTrackedFeaturesRight = pipeline.createXLinkOut()
+xinTrackedFeaturesConfig = pipeline.createXLinkIn()
 
 xoutPassthroughFrameLeft.setStreamName("passthroughFrameLeft")
 xoutTrackedFeaturesLeft.setStreamName("trackedFeaturesLeft")
 xoutPassthroughFrameRight.setStreamName("passthroughFrameRight")
 xoutTrackedFeaturesRight.setStreamName("trackedFeaturesRight")
+xinTrackedFeaturesConfig.setStreamName("trackedFeaturesConfig")
 
 # Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
@@ -100,10 +102,12 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 monoLeft.out.link(featureTrackerLeft.inputImage)
 featureTrackerLeft.passthroughInputImage.link(xoutPassthroughFrameLeft.input)
 featureTrackerLeft.outputFeatures.link(xoutTrackedFeaturesLeft.input)
+xinTrackedFeaturesConfig.out.link(featureTrackerLeft.inputConfig)
 
 monoRight.out.link(featureTrackerRight.inputImage)
 featureTrackerRight.passthroughInputImage.link(xoutPassthroughFrameRight.input)
 featureTrackerRight.outputFeatures.link(xoutTrackedFeaturesRight.input)
+xinTrackedFeaturesConfig.out.link(featureTrackerRight.inputConfig)
 
 # By default the least mount of resources are allocated
 # increasing it improves performance
@@ -111,6 +115,9 @@ numShaves = 2
 numMemorySlices = 2
 featureTrackerLeft.setHardwareResources(numShaves, numMemorySlices)
 featureTrackerRight.setHardwareResources(numShaves, numMemorySlices)
+
+featureTrackerConfig = featureTrackerRight.initialConfig.get()
+print("Press 's' to switch between Lucas-Kanade optical flow and hardware accelerated motion estimation!")
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -120,6 +127,8 @@ with dai.Device(pipeline) as device:
     outputFeaturesLeftQueue = device.getOutputQueue("trackedFeaturesLeft", 8, False)
     passthroughImageRightQueue = device.getOutputQueue("passthroughFrameRight", 8, False)
     outputFeaturesRightQueue = device.getOutputQueue("trackedFeaturesRight", 8, False)
+
+    inputFeatureTrackerConfigQueue = device.getInputQueue("trackedFeaturesConfig")
 
     leftWindowName = "left"
     leftFeatureDrawer = FeatureTrackerDrawer("Feature tracking duration (frames)", leftWindowName)
@@ -151,3 +160,14 @@ with dai.Device(pipeline) as device:
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('s'):
+            if featureTrackerConfig.motionEstimator.algorithmType == dai.FeatureTrackerConfigData.MotionEstimator.AlgorithmType.LUCAS_KANADE_OPTICAL_FLOW:
+                featureTrackerConfig.motionEstimator.algorithmType = dai.FeatureTrackerConfigData.MotionEstimator.AlgorithmType.HW_MOTION_ESTIMATION
+                print("Switching to hardware accelerated motion estimation")
+            else:
+                featureTrackerConfig.motionEstimator.algorithmType = dai.FeatureTrackerConfigData.MotionEstimator.AlgorithmType.LUCAS_KANADE_OPTICAL_FLOW
+                print("Switching to Lucas-Kanade optical flow")
+
+            cfg = dai.FeatureTrackerConfig()
+            cfg.set(featureTrackerConfig)
+            inputFeatureTrackerConfigQueue.send(cfg)

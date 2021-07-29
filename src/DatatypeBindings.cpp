@@ -1118,6 +1118,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     motionEstimatorType
         .value("LUCAS_KANADE_OPTICAL_FLOW", FeatureTrackerConfigData::MotionEstimator::AlgorithmType::LUCAS_KANADE_OPTICAL_FLOW)
+        .value("HW_MOTION_ESTIMATION", FeatureTrackerConfigData::MotionEstimator::AlgorithmType::HW_MOTION_ESTIMATION)
     ;
 
     motionEstimatorOpticalFlow
@@ -1161,6 +1162,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::MotionEstimator)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator, 2))
         .def("setOpticalFlow", &FeatureTrackerConfig::setOpticalFlow, py::arg("config"), DOC(dai, FeatureTrackerConfig, setOpticalFlow))
+        .def("setHwMotionEstimation", &FeatureTrackerConfig::setHwMotionEstimation, DOC(dai, FeatureTrackerConfig, setHwMotionEstimation))
         .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer))
         .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::FeatureMaintainer)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer, 2))
         .def("setTargetNumFeatures", &FeatureTrackerConfig::setTargetNumFeatures, py::arg("targetNumFeatures"), DOC(dai, FeatureTrackerConfig, setTargetNumFeatures))
