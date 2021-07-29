@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import depthai as dai
+import numpy as np
 import argparse
 import time
 import cv2
@@ -14,6 +15,13 @@ parser.add_argument('-xm', '--xlink-mic',        default=False, action="store_tr
 parser.add_argument('-xc', '--xlink-cam',        default=False, action="store_true")
 parser.add_argument('-nc', '--no-camera',        default=False, action="store_true")
 parser.add_argument('-g',  '--mic-gain-db',      default=0, type=float)
+parser.add_argument('-cd', '--create-dap', type=str, const='upgrade.dap', nargs='?',
+                    help='Create a DepthAI Application Package file, optionally '
+                         'specifying the file name/path (default: %(const)s)')
+parser.add_argument('-fd', '--flash-dap', type=str, const='upgrade.dap', nargs='?',
+                    help='Flash a DepthAI Application Package file, optionally '
+                         'specifying the file name/path (default: %(const)s)')
+
 args = parser.parse_args()
 args.back_mic = False  # TODO again for UAC. Available with XLink
 
@@ -96,7 +104,7 @@ if args.xlink_cam:
     xout.setStreamName("cam")
     cam_rgb.video.link(xout.input)
 
-if args.flash_bootloader or args.flash_app:
+if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
     bootloader = dai.DeviceBootloader(bl)
 
@@ -108,14 +116,26 @@ if args.flash_bootloader or args.flash_app:
         progressCalled = True
         print(f'Flashing progress: {p*100:.1f}%')
 
+    if args.create_dap:
+        path = args.create_dap
+        bootloader.saveDepthaiApplicationPackage(path, pipeline)
+        print("Created DAP file:", path)
+        quit()
+
     startTime = time.monotonic()
     if args.flash_bootloader:
         print("Flashing bootloader...")
         bootloader.flashBootloader(progress)
         print("Note: make sure to change DIP switch to 0x8 (001000), if not done already")
-    else:
-        print("Flashing application pipeline...")
-        bootloader.flash(progress, pipeline)
+    elif args.flash_app or args.flash_dap:
+        if args.flash_app:
+            print("Flashing application pipeline...")
+            bootloader.flash(progress, pipeline)
+        else:
+            path = args.flash_dap
+            print("Flashing DAP file:", path)
+            content = np.fromfile(path, dtype=np.uint8)
+            bootloader.flashDepthaiApplicationPackage(progress, content)
     if not progressCalled:
         raise RuntimeError('Flashing failed, please try again')
     elapsedTime = round(time.monotonic() - startTime, 2)
