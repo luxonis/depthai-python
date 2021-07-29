@@ -116,10 +116,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawFeatureTrackerConfig, RawBuffer, std::shared_ptr<RawFeatureTrackerConfig>> rawFeatureTrackerConfig(m, "RawFeatureTrackerConfig", DOC(dai, RawFeatureTrackerConfig));
     py::class_<FeatureTrackerConfigData> featureTrackerConfigData(m, "FeatureTrackerConfigData", DOC(dai, FeatureTrackerConfigData));
     py::class_<FeatureTrackerConfigData::CornerDetector> cornerDetector(featureTrackerConfigData, "CornerDetector", DOC(dai, FeatureTrackerConfigData, CornerDetector));
-    py::enum_<FeatureTrackerConfigData::CornerDetector::AlgorithmType> cornerDetectorType(cornerDetector, "AlgorithmType", DOC(dai, FeatureTrackerConfigData, CornerDetector, AlgorithmType));
+    py::enum_<FeatureTrackerConfigData::CornerDetector::Type> cornerDetectorType(cornerDetector, "Type", DOC(dai, FeatureTrackerConfigData, CornerDetector, Type));
     py::class_<FeatureTrackerConfigData::CornerDetector::Thresholds> cornerDetectorThresholds(cornerDetector, "Thresholds", DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds));
     py::class_<FeatureTrackerConfigData::MotionEstimator> motionEstimator(featureTrackerConfigData, "MotionEstimator", DOC(dai, FeatureTrackerConfigData, MotionEstimator));
-    py::enum_<FeatureTrackerConfigData::MotionEstimator::AlgorithmType> motionEstimatorType(motionEstimator, "AlgorithmType", DOC(dai, FeatureTrackerConfigData, MotionEstimator, AlgorithmType));
+    py::enum_<FeatureTrackerConfigData::MotionEstimator::Type> motionEstimatorType(motionEstimator, "Type", DOC(dai, FeatureTrackerConfigData, MotionEstimator, Type));
     py::class_<FeatureTrackerConfigData::MotionEstimator::OpticalFlow> motionEstimatorOpticalFlow(motionEstimator, "OpticalFlow", DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow));
 
     py::class_<FeatureTrackerConfigData::FeatureMaintainer> featureMaintainer(featureTrackerConfigData, "FeatureMaintainer", DOC(dai, FeatureTrackerConfigData, FeatureMaintainer));
@@ -1092,8 +1092,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
     cornerDetectorType
-        .value("HARRIS", FeatureTrackerConfigData::CornerDetector::AlgorithmType::HARRIS)
-        .value("SHI_THOMASI", FeatureTrackerConfigData::CornerDetector::AlgorithmType::SHI_THOMASI)
+        .value("HARRIS", FeatureTrackerConfigData::CornerDetector::Type::HARRIS)
+        .value("SHI_THOMASI", FeatureTrackerConfigData::CornerDetector::Type::SHI_THOMASI)
     ;
 
     cornerDetectorThresholds
@@ -1107,18 +1107,18 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     cornerDetector
         .def(py::init<>())
-        .def_readwrite("algorithmType", &FeatureTrackerConfigData::CornerDetector::algorithmType, DOC(dai, FeatureTrackerConfigData, CornerDetector, algorithmType))
+        .def_readwrite("type", &FeatureTrackerConfigData::CornerDetector::type, DOC(dai, FeatureTrackerConfigData, CornerDetector, type))
         .def_readwrite("cellGridDimension", &FeatureTrackerConfigData::CornerDetector::cellGridDimension, DOC(dai, FeatureTrackerConfigData, CornerDetector, cellGridDimension))
-        .def_readwrite("targetNumFeatures", &FeatureTrackerConfigData::CornerDetector::targetNumFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, targetNumFeatures))
-        .def_readwrite("maxNumFeatures", &FeatureTrackerConfigData::CornerDetector::maxNumFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, maxNumFeatures))
+        .def_readwrite("numTargetFeatures", &FeatureTrackerConfigData::CornerDetector::numTargetFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, numTargetFeatures))
+        .def_readwrite("numMaxFeatures", &FeatureTrackerConfigData::CornerDetector::numMaxFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, numMaxFeatures))
         .def_readwrite("enableSobel", &FeatureTrackerConfigData::CornerDetector::enableSobel, DOC(dai, FeatureTrackerConfigData, CornerDetector, enableSobel))
         .def_readwrite("enableSorting", &FeatureTrackerConfigData::CornerDetector::enableSorting, DOC(dai, FeatureTrackerConfigData, CornerDetector, enableSorting))
         .def_readwrite("thresholds", &FeatureTrackerConfigData::CornerDetector::thresholds, DOC(dai, FeatureTrackerConfigData, CornerDetector, thresholds))
         ;
 
     motionEstimatorType
-        .value("LUCAS_KANADE_OPTICAL_FLOW", FeatureTrackerConfigData::MotionEstimator::AlgorithmType::LUCAS_KANADE_OPTICAL_FLOW)
-        .value("HW_MOTION_ESTIMATION", FeatureTrackerConfigData::MotionEstimator::AlgorithmType::HW_MOTION_ESTIMATION)
+        .value("LUCAS_KANADE_OPTICAL_FLOW", FeatureTrackerConfigData::MotionEstimator::Type::LUCAS_KANADE_OPTICAL_FLOW)
+        .value("HW_MOTION_ESTIMATION", FeatureTrackerConfigData::MotionEstimator::Type::HW_MOTION_ESTIMATION)
     ;
 
     motionEstimatorOpticalFlow
@@ -1133,7 +1133,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     motionEstimator
         .def(py::init<>())
         .def_readwrite("enable", &FeatureTrackerConfigData::MotionEstimator::enable, DOC(dai, FeatureTrackerConfigData, MotionEstimator, enable))
-        .def_readwrite("algorithmType", &FeatureTrackerConfigData::MotionEstimator::algorithmType, DOC(dai, FeatureTrackerConfigData, MotionEstimator, algorithmType))
+        .def_readwrite("type", &FeatureTrackerConfigData::MotionEstimator::type, DOC(dai, FeatureTrackerConfigData, MotionEstimator, type))
         .def_readwrite("opticalFlow", &FeatureTrackerConfigData::MotionEstimator::opticalFlow, DOC(dai, FeatureTrackerConfigData, MotionEstimator, opticalFlow))
         ;
 
@@ -1157,7 +1157,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def(py::init<std::shared_ptr<RawFeatureTrackerConfig>>())
 
-        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector::AlgorithmType)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
+        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector::Type)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
         .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector)>(&FeatureTrackerConfig::setCornerDetector), py::arg("config"), DOC(dai, FeatureTrackerConfig, setCornerDetector, 2))
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::MotionEstimator)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator, 2))
@@ -1165,7 +1165,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setHwMotionEstimation", &FeatureTrackerConfig::setHwMotionEstimation, DOC(dai, FeatureTrackerConfig, setHwMotionEstimation))
         .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer))
         .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::FeatureMaintainer)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer, 2))
-        .def("setTargetNumFeatures", &FeatureTrackerConfig::setTargetNumFeatures, py::arg("targetNumFeatures"), DOC(dai, FeatureTrackerConfig, setTargetNumFeatures))
+        .def("setNumTargetFeatures", &FeatureTrackerConfig::setNumTargetFeatures, py::arg("numTargetFeatures"), DOC(dai, FeatureTrackerConfig, setNumTargetFeatures))
 
         .def("set", &FeatureTrackerConfig::set, py::arg("config"), DOC(dai, FeatureTrackerConfig, set))
         .def("get", &FeatureTrackerConfig::get, DOC(dai, FeatureTrackerConfig, get))
