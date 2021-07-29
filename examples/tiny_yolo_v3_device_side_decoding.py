@@ -15,7 +15,7 @@ import numpy as np
 import time
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/tiny-yolo-v3_openvino_2021.2_6shave.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
@@ -43,7 +43,6 @@ syncNN = True
 
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_2)
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
