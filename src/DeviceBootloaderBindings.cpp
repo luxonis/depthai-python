@@ -66,8 +66,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion, DOC(dai, DeviceBootloader, getEmbeddedBootloaderVersion))
         .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary, DOC(dai, DeviceBootloader, getEmbeddedBootloaderBinary))
 
-        .def(py::init<const DeviceInfo&>(), py::arg("deviceDesc"), DOC(dai, DeviceBootloader, DeviceBootloader))
-        .def(py::init<const DeviceInfo&, std::string>(), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBootloader, DeviceBootloader, 2))
+        .def(py::init<const DeviceInfo&, bool>(), py::arg("devInfo"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader))
+        .def(py::init<const DeviceInfo&, std::string, bool>(), py::arg("devInfo"), py::arg("pathToCmd"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 2))
         .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, Pipeline& pipeline) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline); }, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
         .def("flashBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::string path) { py::gil_scoped_release release; return db.flashBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
@@ -76,6 +76,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getVersion(); }, DOC(dai, DeviceBootloader, getVersion))
 
         .def("isEmbeddedVersion", &DeviceBootloader::isEmbeddedVersion, DOC(dai, DeviceBootloader, isEmbeddedVersion))
+        .def("getType", &DeviceBootloader::getType, DOC(dai, DeviceBootloader, getType))
+        .def("isAllowedFlashingBootloader", &DeviceBootloader::isAllowedFlashingBootloader, DOC(dai, DeviceBootloader, isAllowedFlashingBootloader))
         ;
 
 }
