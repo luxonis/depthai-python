@@ -161,11 +161,11 @@ with dai.Device(pipeline) as device:
         if key == ord('q'):
             break
         elif key == ord('s'):
-            if featureTrackerConfig.motionEstimator.type == dai.FeatureTrackerConfigData.MotionEstimator.Type.LUCAS_KANADE_OPTICAL_FLOW:
-                featureTrackerConfig.motionEstimator.type = dai.FeatureTrackerConfigData.MotionEstimator.Type.HW_MOTION_ESTIMATION
+            if featureTrackerConfig.motionEstimator.type == dai.FeatureTrackerConfig.MotionEstimator.Type.LUCAS_KANADE_OPTICAL_FLOW:
+                featureTrackerConfig.motionEstimator.type = dai.FeatureTrackerConfig.MotionEstimator.Type.HW_MOTION_ESTIMATION
                 print("Switching to hardware accelerated motion estimation")
             else:
-                featureTrackerConfig.motionEstimator.type = dai.FeatureTrackerConfigData.MotionEstimator.Type.LUCAS_KANADE_OPTICAL_FLOW
+                featureTrackerConfig.motionEstimator.type = dai.FeatureTrackerConfig.MotionEstimator.Type.LUCAS_KANADE_OPTICAL_FLOW
                 print("Switching to Lucas-Kanade optical flow")
 
             cfg = dai.FeatureTrackerConfig()

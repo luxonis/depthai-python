@@ -114,15 +114,14 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawTrackedFeatures, RawBuffer, std::shared_ptr<RawTrackedFeatures>> rawTrackedFeatures(m, "RawTrackedFeatures", DOC(dai, RawTrackedFeatures));
     py::class_<TrackedFeature> trackedFeature(m, "TrackedFeature", DOC(dai, TrackedFeature));
     py::class_<RawFeatureTrackerConfig, RawBuffer, std::shared_ptr<RawFeatureTrackerConfig>> rawFeatureTrackerConfig(m, "RawFeatureTrackerConfig", DOC(dai, RawFeatureTrackerConfig));
-    py::class_<FeatureTrackerConfigData> featureTrackerConfigData(m, "FeatureTrackerConfigData", DOC(dai, FeatureTrackerConfigData));
-    py::class_<FeatureTrackerConfigData::CornerDetector> cornerDetector(featureTrackerConfigData, "CornerDetector", DOC(dai, FeatureTrackerConfigData, CornerDetector));
-    py::enum_<FeatureTrackerConfigData::CornerDetector::Type> cornerDetectorType(cornerDetector, "Type", DOC(dai, FeatureTrackerConfigData, CornerDetector, Type));
-    py::class_<FeatureTrackerConfigData::CornerDetector::Thresholds> cornerDetectorThresholds(cornerDetector, "Thresholds", DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds));
-    py::class_<FeatureTrackerConfigData::MotionEstimator> motionEstimator(featureTrackerConfigData, "MotionEstimator", DOC(dai, FeatureTrackerConfigData, MotionEstimator));
-    py::enum_<FeatureTrackerConfigData::MotionEstimator::Type> motionEstimatorType(motionEstimator, "Type", DOC(dai, FeatureTrackerConfigData, MotionEstimator, Type));
-    py::class_<FeatureTrackerConfigData::MotionEstimator::OpticalFlow> motionEstimatorOpticalFlow(motionEstimator, "OpticalFlow", DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow));
+    py::class_<RawFeatureTrackerConfig::CornerDetector> cornerDetector(rawFeatureTrackerConfig, "CornerDetector", DOC(dai, RawFeatureTrackerConfig, CornerDetector));
+    py::enum_<RawFeatureTrackerConfig::CornerDetector::Type> cornerDetectorType(cornerDetector, "Type", DOC(dai, RawFeatureTrackerConfig, CornerDetector, Type));
+    py::class_<RawFeatureTrackerConfig::CornerDetector::Thresholds> cornerDetectorThresholds(cornerDetector, "Thresholds", DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds));
+    py::class_<RawFeatureTrackerConfig::MotionEstimator> motionEstimator(rawFeatureTrackerConfig, "MotionEstimator", DOC(dai, RawFeatureTrackerConfig, MotionEstimator));
+    py::enum_<RawFeatureTrackerConfig::MotionEstimator::Type> motionEstimatorType(motionEstimator, "Type", DOC(dai, RawFeatureTrackerConfig, MotionEstimator, Type));
+    py::class_<RawFeatureTrackerConfig::MotionEstimator::OpticalFlow> motionEstimatorOpticalFlow(motionEstimator, "OpticalFlow", DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow));
 
-    py::class_<FeatureTrackerConfigData::FeatureMaintainer> featureMaintainer(featureTrackerConfigData, "FeatureMaintainer", DOC(dai, FeatureTrackerConfigData, FeatureMaintainer));
+    py::class_<RawFeatureTrackerConfig::FeatureMaintainer> featureMaintainer(rawFeatureTrackerConfig, "FeatureMaintainer", DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer));
     py::class_<FeatureTrackerConfig, Buffer, std::shared_ptr<FeatureTrackerConfig>> featureTrackerConfig(m, "FeatureTrackerConfig", DOC(dai, FeatureTrackerConfig));
 
 
@@ -1079,70 +1078,66 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
 
+
     rawFeatureTrackerConfig
         .def(py::init<>())
-        .def_readwrite("config", &RawFeatureTrackerConfig::config)
-        ;
-
-    featureTrackerConfigData
-        .def(py::init<>())
-        .def_readwrite("cornerDetector", &FeatureTrackerConfigData::cornerDetector, DOC(dai, FeatureTrackerConfigData, cornerDetector))
-        .def_readwrite("motionEstimator", &FeatureTrackerConfigData::motionEstimator, DOC(dai, FeatureTrackerConfigData, motionEstimator))
-        .def_readwrite("featureMaintainer", &FeatureTrackerConfigData::featureMaintainer, DOC(dai, FeatureTrackerConfigData, featureMaintainer))
+        .def_readwrite("cornerDetector", &RawFeatureTrackerConfig::cornerDetector, DOC(dai, RawFeatureTrackerConfig, cornerDetector))
+        .def_readwrite("motionEstimator", &RawFeatureTrackerConfig::motionEstimator, DOC(dai, RawFeatureTrackerConfig, motionEstimator))
+        .def_readwrite("featureMaintainer", &RawFeatureTrackerConfig::featureMaintainer, DOC(dai, RawFeatureTrackerConfig, featureMaintainer))
         ;
 
     cornerDetectorType
-        .value("HARRIS", FeatureTrackerConfigData::CornerDetector::Type::HARRIS)
-        .value("SHI_THOMASI", FeatureTrackerConfigData::CornerDetector::Type::SHI_THOMASI)
+        .value("HARRIS", RawFeatureTrackerConfig::CornerDetector::Type::HARRIS)
+        .value("SHI_THOMASI", RawFeatureTrackerConfig::CornerDetector::Type::SHI_THOMASI)
     ;
 
     cornerDetectorThresholds
         .def(py::init<>())
-        .def_readwrite("initialValue", &FeatureTrackerConfigData::CornerDetector::Thresholds::initialValue, DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds, initialValue))
-        .def_readwrite("min", &FeatureTrackerConfigData::CornerDetector::Thresholds::min, DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds, min))
-        .def_readwrite("max", &FeatureTrackerConfigData::CornerDetector::Thresholds::max, DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds, max))
-        .def_readwrite("decreaseFactor", &FeatureTrackerConfigData::CornerDetector::Thresholds::decreaseFactor, DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds, decreaseFactor))
-        .def_readwrite("increaseFactor", &FeatureTrackerConfigData::CornerDetector::Thresholds::increaseFactor, DOC(dai, FeatureTrackerConfigData, CornerDetector, Thresholds, increaseFactor))
+        .def_readwrite("initialValue", &RawFeatureTrackerConfig::CornerDetector::Thresholds::initialValue, DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds, initialValue))
+        .def_readwrite("min", &RawFeatureTrackerConfig::CornerDetector::Thresholds::min, DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds, min))
+        .def_readwrite("max", &RawFeatureTrackerConfig::CornerDetector::Thresholds::max, DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds, max))
+        .def_readwrite("decreaseFactor", &RawFeatureTrackerConfig::CornerDetector::Thresholds::decreaseFactor, DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds, decreaseFactor))
+        .def_readwrite("increaseFactor", &RawFeatureTrackerConfig::CornerDetector::Thresholds::increaseFactor, DOC(dai, RawFeatureTrackerConfig, CornerDetector, Thresholds, increaseFactor))
         ;
 
     cornerDetector
         .def(py::init<>())
-        .def_readwrite("type", &FeatureTrackerConfigData::CornerDetector::type, DOC(dai, FeatureTrackerConfigData, CornerDetector, type))
-        .def_readwrite("cellGridDimension", &FeatureTrackerConfigData::CornerDetector::cellGridDimension, DOC(dai, FeatureTrackerConfigData, CornerDetector, cellGridDimension))
-        .def_readwrite("numTargetFeatures", &FeatureTrackerConfigData::CornerDetector::numTargetFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, numTargetFeatures))
-        .def_readwrite("numMaxFeatures", &FeatureTrackerConfigData::CornerDetector::numMaxFeatures, DOC(dai, FeatureTrackerConfigData, CornerDetector, numMaxFeatures))
-        .def_readwrite("enableSobel", &FeatureTrackerConfigData::CornerDetector::enableSobel, DOC(dai, FeatureTrackerConfigData, CornerDetector, enableSobel))
-        .def_readwrite("enableSorting", &FeatureTrackerConfigData::CornerDetector::enableSorting, DOC(dai, FeatureTrackerConfigData, CornerDetector, enableSorting))
-        .def_readwrite("thresholds", &FeatureTrackerConfigData::CornerDetector::thresholds, DOC(dai, FeatureTrackerConfigData, CornerDetector, thresholds))
+        .def_readwrite("type", &RawFeatureTrackerConfig::CornerDetector::type, DOC(dai, RawFeatureTrackerConfig, CornerDetector, type))
+        .def_readwrite("cellGridDimension", &RawFeatureTrackerConfig::CornerDetector::cellGridDimension, DOC(dai, RawFeatureTrackerConfig, CornerDetector, cellGridDimension))
+        .def_readwrite("numTargetFeatures", &RawFeatureTrackerConfig::CornerDetector::numTargetFeatures, DOC(dai, RawFeatureTrackerConfig, CornerDetector, numTargetFeatures))
+        .def_readwrite("numMaxFeatures", &RawFeatureTrackerConfig::CornerDetector::numMaxFeatures, DOC(dai, RawFeatureTrackerConfig, CornerDetector, numMaxFeatures))
+        .def_readwrite("enableSobel", &RawFeatureTrackerConfig::CornerDetector::enableSobel, DOC(dai, RawFeatureTrackerConfig, CornerDetector, enableSobel))
+        .def_readwrite("enableSorting", &RawFeatureTrackerConfig::CornerDetector::enableSorting, DOC(dai, RawFeatureTrackerConfig, CornerDetector, enableSorting))
+        .def_readwrite("thresholds", &RawFeatureTrackerConfig::CornerDetector::thresholds, DOC(dai, RawFeatureTrackerConfig, CornerDetector, thresholds))
         ;
 
     motionEstimatorType
-        .value("LUCAS_KANADE_OPTICAL_FLOW", FeatureTrackerConfigData::MotionEstimator::Type::LUCAS_KANADE_OPTICAL_FLOW)
-        .value("HW_MOTION_ESTIMATION", FeatureTrackerConfigData::MotionEstimator::Type::HW_MOTION_ESTIMATION)
+        .value("LUCAS_KANADE_OPTICAL_FLOW", RawFeatureTrackerConfig::MotionEstimator::Type::LUCAS_KANADE_OPTICAL_FLOW)
+        .value("HW_MOTION_ESTIMATION", RawFeatureTrackerConfig::MotionEstimator::Type::HW_MOTION_ESTIMATION)
     ;
 
     motionEstimatorOpticalFlow
         .def(py::init<>())
-        .def_readwrite("pyramidLevels", &FeatureTrackerConfigData::MotionEstimator::OpticalFlow::pyramidLevels, DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow, pyramidLevels))
-        .def_readwrite("searchWindowWidth", &FeatureTrackerConfigData::MotionEstimator::OpticalFlow::searchWindowWidth, DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow, searchWindowWidth))
-        .def_readwrite("searchWindowHeight", &FeatureTrackerConfigData::MotionEstimator::OpticalFlow::searchWindowHeight, DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow, searchWindowHeight))
-        .def_readwrite("epsilon", &FeatureTrackerConfigData::MotionEstimator::OpticalFlow::epsilon, DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow, epsilon))
-        .def_readwrite("maxIterations", &FeatureTrackerConfigData::MotionEstimator::OpticalFlow::maxIterations, DOC(dai, FeatureTrackerConfigData, MotionEstimator, OpticalFlow, maxIterations))
+        .def_readwrite("pyramidLevels", &RawFeatureTrackerConfig::MotionEstimator::OpticalFlow::pyramidLevels, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow, pyramidLevels))
+        .def_readwrite("searchWindowWidth", &RawFeatureTrackerConfig::MotionEstimator::OpticalFlow::searchWindowWidth, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow, searchWindowWidth))
+        .def_readwrite("searchWindowHeight", &RawFeatureTrackerConfig::MotionEstimator::OpticalFlow::searchWindowHeight, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow, searchWindowHeight))
+        .def_readwrite("epsilon", &RawFeatureTrackerConfig::MotionEstimator::OpticalFlow::epsilon, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow, epsilon))
+        .def_readwrite("maxIterations", &RawFeatureTrackerConfig::MotionEstimator::OpticalFlow::maxIterations, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow, maxIterations))
         ;
 
     motionEstimator
         .def(py::init<>())
-        .def_readwrite("enable", &FeatureTrackerConfigData::MotionEstimator::enable, DOC(dai, FeatureTrackerConfigData, MotionEstimator, enable))
-        .def_readwrite("type", &FeatureTrackerConfigData::MotionEstimator::type, DOC(dai, FeatureTrackerConfigData, MotionEstimator, type))
-        .def_readwrite("opticalFlow", &FeatureTrackerConfigData::MotionEstimator::opticalFlow, DOC(dai, FeatureTrackerConfigData, MotionEstimator, opticalFlow))
+        .def_readwrite("enable", &RawFeatureTrackerConfig::MotionEstimator::enable, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, enable))
+        .def_readwrite("type", &RawFeatureTrackerConfig::MotionEstimator::type, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, type))
+        .def_readwrite("opticalFlow", &RawFeatureTrackerConfig::MotionEstimator::opticalFlow, DOC(dai, RawFeatureTrackerConfig, MotionEstimator, opticalFlow))
         ;
 
     featureMaintainer
         .def(py::init<>())
-        .def_readwrite("enable", &FeatureTrackerConfigData::FeatureMaintainer::enable, DOC(dai, FeatureTrackerConfigData, FeatureMaintainer, enable))
-        .def_readwrite("minimumDistanceBetweenFeatures", &FeatureTrackerConfigData::FeatureMaintainer::minimumDistanceBetweenFeatures, DOC(dai, FeatureTrackerConfigData, FeatureMaintainer, minimumDistanceBetweenFeatures))
-        .def_readwrite("lostFeatureErrorThreshold", &FeatureTrackerConfigData::FeatureMaintainer::lostFeatureErrorThreshold, DOC(dai, FeatureTrackerConfigData, FeatureMaintainer, lostFeatureErrorThreshold))
-        .def_readwrite("trackedFeatureThreshold", &FeatureTrackerConfigData::FeatureMaintainer::trackedFeatureThreshold, DOC(dai, FeatureTrackerConfigData, FeatureMaintainer, trackedFeatureThreshold))
+        .def_readwrite("enable", &RawFeatureTrackerConfig::FeatureMaintainer::enable, DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer, enable))
+        .def_readwrite("minimumDistanceBetweenFeatures", &RawFeatureTrackerConfig::FeatureMaintainer::minimumDistanceBetweenFeatures, DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer, minimumDistanceBetweenFeatures))
+        .def_readwrite("lostFeatureErrorThreshold", &RawFeatureTrackerConfig::FeatureMaintainer::lostFeatureErrorThreshold, DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer, lostFeatureErrorThreshold))
+        .def_readwrite("trackedFeatureThreshold", &RawFeatureTrackerConfig::FeatureMaintainer::trackedFeatureThreshold, DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer, trackedFeatureThreshold))
         ;
 
 
@@ -1157,18 +1152,22 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def(py::init<std::shared_ptr<RawFeatureTrackerConfig>>())
 
-        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector::Type)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
-        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::CornerDetector)>(&FeatureTrackerConfig::setCornerDetector), py::arg("config"), DOC(dai, FeatureTrackerConfig, setCornerDetector, 2))
+        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::RawFeatureTrackerConfig::CornerDetector::Type)>(&FeatureTrackerConfig::setCornerDetector), py::arg("cornerDetector"), DOC(dai, FeatureTrackerConfig, setCornerDetector))
+        .def("setCornerDetector", static_cast<void(FeatureTrackerConfig::*)(dai::RawFeatureTrackerConfig::CornerDetector)>(&FeatureTrackerConfig::setCornerDetector), py::arg("config"), DOC(dai, FeatureTrackerConfig, setCornerDetector, 2))
         .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setMotionEstimator))
-        .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::MotionEstimator)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator, 2))
+        .def("setMotionEstimator", static_cast<void(FeatureTrackerConfig::*)(dai::RawFeatureTrackerConfig::MotionEstimator)>(&FeatureTrackerConfig::setMotionEstimator), py::arg("config"), DOC(dai, FeatureTrackerConfig, setMotionEstimator, 2))
         .def("setOpticalFlow", &FeatureTrackerConfig::setOpticalFlow, py::arg("config"), DOC(dai, FeatureTrackerConfig, setOpticalFlow))
         .def("setHwMotionEstimation", &FeatureTrackerConfig::setHwMotionEstimation, DOC(dai, FeatureTrackerConfig, setHwMotionEstimation))
         .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(bool)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("enable"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer))
-        .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(dai::FeatureTrackerConfigData::FeatureMaintainer)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer, 2))
+        .def("setFeatureMaintainer", static_cast<void(FeatureTrackerConfig::*)(dai::RawFeatureTrackerConfig::FeatureMaintainer)>(&FeatureTrackerConfig::setFeatureMaintainer), py::arg("config"), DOC(dai, FeatureTrackerConfig, setFeatureMaintainer, 2))
         .def("setNumTargetFeatures", &FeatureTrackerConfig::setNumTargetFeatures, py::arg("numTargetFeatures"), DOC(dai, FeatureTrackerConfig, setNumTargetFeatures))
 
         .def("set", &FeatureTrackerConfig::set, py::arg("config"), DOC(dai, FeatureTrackerConfig, set))
         .def("get", &FeatureTrackerConfig::get, DOC(dai, FeatureTrackerConfig, get))
         ;
+
+    // add aliases
+    m.attr("FeatureTrackerConfig").attr("CornerDetector") = m.attr("RawFeatureTrackerConfig").attr("CornerDetector");
+    m.attr("FeatureTrackerConfig").attr("MotionEstimator") = m.attr("RawFeatureTrackerConfig").attr("MotionEstimator");
 
 }

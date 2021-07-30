@@ -94,11 +94,11 @@ with dai.Device(pipeline) as device:
         if key == ord('q'):
             break
         elif key == ord('s'):
-            if featureTrackerConfig.cornerDetector.type == dai.FeatureTrackerConfigData.CornerDetector.Type.HARRIS:
-                featureTrackerConfig.cornerDetector.type = dai.FeatureTrackerConfigData.CornerDetector.Type.SHI_THOMASI
+            if featureTrackerConfig.cornerDetector.type == dai.FeatureTrackerConfig.CornerDetector.Type.HARRIS:
+                featureTrackerConfig.cornerDetector.type = dai.FeatureTrackerConfig.CornerDetector.Type.SHI_THOMASI
                 print("Switching to Shi-Thomasi")
             else:
-                featureTrackerConfig.cornerDetector.type = dai.FeatureTrackerConfigData.CornerDetector.Type.HARRIS
+                featureTrackerConfig.cornerDetector.type = dai.FeatureTrackerConfig.CornerDetector.Type.HARRIS
                 print("Switching to Harris")
 
             cfg = dai.FeatureTrackerConfig()
