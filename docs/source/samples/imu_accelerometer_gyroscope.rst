@@ -7,6 +7,19 @@ Returns acceleration [m/s^2] and angular velocity [rad/s].
 Demo
 ####
 
+Example script output
+
+.. code-block::
+
+    ~/depthai-python/examples$ python3 imu_gyroscope_accelerometer.py
+    Accelerometer timestamp: 0.000 ms
+    Accelerometer [m/s^2]: x: -0.162806 y: 6.445191 z: 3.189077
+    Gyroscope timestamp: 1.642 ms
+    Gyroscope [rad/s]: x: -0.040480 y: 0.088417 z: -0.168312
+    Accelerometer timestamp: 2.073 ms
+    Accelerometer [m/s^2]: x: -0.229843 y: 6.263232 z: 3.572149
+    Gyroscope timestamp: 3.663 ms
+    Gyroscope [rad/s]: x: -0.072438 y: 0.115049 z: -0.350472
 
 Setup
 #####
