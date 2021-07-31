@@ -1169,5 +1169,6 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     // add aliases
     m.attr("FeatureTrackerConfig").attr("CornerDetector") = m.attr("RawFeatureTrackerConfig").attr("CornerDetector");
     m.attr("FeatureTrackerConfig").attr("MotionEstimator") = m.attr("RawFeatureTrackerConfig").attr("MotionEstimator");
+    m.attr("FeatureTrackerConfig").attr("FeatureMaintainer") = m.attr("RawFeatureTrackerConfig").attr("FeatureMaintainer");
 
 }
