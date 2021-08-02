@@ -71,6 +71,7 @@ Examples of functionality
 - :ref:`Mono & MobilenetSSD`
 - :ref:`RGB Encoding & Mono & MobilenetSSD`
 - :ref:`RGB Camera Control`
+- `Rotating mono frames <https://gist.github.com/Erol444/73383c07df936608bb7041790522dc16>`__
 
 Reference
 #########
