@@ -22,6 +22,8 @@ Simple
    ../samples/imu_accelerometer_gyroscope.rst
    ../samples/imu_rotation_vector.rst
    ../samples/edge_detector.rst
+   ../samples/image_manip_tiling.rst
+   ../samples/image_manip_rotate.rst
 
 These samples are great starting point for the gen2 API.
 
@@ -39,3 +41,5 @@ These samples are great starting point for the gen2 API.
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`ImageManip Tiling` - Using ImageManip for frame tiling
+- :ref:`ImageManip Rotate` - Using ImageManip to rotate color/mono frames

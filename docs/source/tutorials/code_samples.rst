@@ -30,6 +30,8 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
 - :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`ImageManip tiling` - Using ImageManip for frame tiling
+- :ref:`ImageManip rotate` - Using ImageManip to rotate color/mono frames
 
 .. rubric:: Complex
 

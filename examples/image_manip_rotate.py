@@ -13,7 +13,6 @@ camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 
 manipRgb = pipeline.createImageManip()
-manipRgb.setMaxOutputFrameSize(2000 * 1500 * 3)
 rgbRr = dai.RotatedRect()
 rgbRr.center.x, rgbRr.center.y = camRgb.getPreviewWidth() // 2, camRgb.getPreviewHeight() // 2
 rgbRr.size.width, rgbRr.size.height = camRgb.getPreviewHeight(), camRgb.getPreviewWidth()
