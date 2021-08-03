@@ -74,6 +74,13 @@ ImageManip node supports the following image formats:
 - :code:`RAW16` input, but can only for cropping (use-case: depth map), outputting same format
 - can output :code:`GRAY8` (either as single plane, or 3-plane RGB as set with setFrameType()), but only from these inputs: :code:`RAW8, :code:`GRAY8`, :code:`YUV420p` (:ref:`ColorCamera` isp), :code:`NV12` (:ref:`ColorCamera` video / still)
 
+Limitations
+###########
+
+Besides limitations mentioned above (unsupported frame formats), there are other limitations:
+
+- Due to HW warp constraint, rotating/warping can be done only on frames whose width values are multiples of 16. 
+
 Examples of functionality
 #########################
 
