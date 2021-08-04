@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
         exit()
 
 print("Warning! Flashing bootloader can potentially soft brick your device and should be done with caution.")
-print("Do not unplug your device in while the bootloader is flashing.")
+print("Do not unplug your device while the bootloader is flashing.")
 print("Type 'y' and press enter to proceed, otherwise exits: ")
 if input() != 'y':
     print("Prompt declined, exiting...")
