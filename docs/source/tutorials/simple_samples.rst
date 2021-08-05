@@ -22,6 +22,8 @@ Simple
    ../samples/imu_accelerometer_gyroscope.rst
    ../samples/imu_rotation_vector.rst
    ../samples/edge_detector.rst
+   ../samples/script_camera_control.rst
+   ../samples/bootloader_version.rst
    ../samples/image_manip_tiling.rst
    ../samples/image_manip_rotate.rst
 
@@ -41,5 +43,7 @@ These samples are great starting point for the gen2 API.
 - :ref:`Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame
 - :ref:`Video & MobilenetSSD` - Runs MobileNetSSD on the video from the host
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
 - :ref:`ImageManip Tiling` - Using ImageManip for frame tiling
 - :ref:`ImageManip Rotate` - Using ImageManip to rotate color/mono frames

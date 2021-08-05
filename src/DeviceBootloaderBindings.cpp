@@ -3,14 +3,33 @@
 // depthai
 #include "depthai/device/DeviceBootloader.hpp"
 
-void DeviceBootloaderBindings::bind(pybind11::module& m){
+void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    // Bind DeviceBootloader
+    // Type definitions
     py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
+    py::class_<DeviceBootloader::Version> deviceBootloaderVersion(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version));
+    py::enum_<DeviceBootloader::Type> deviceBootloaderType(deviceBootloader, "Type");
+    py::enum_<DeviceBootloader::Memory> deviceBootloaderMemory(deviceBootloader, "Memory");
+    py::enum_<DeviceBootloader::Section> deviceBootloaderSection(deviceBootloader, "Section");
 
-    py::class_<DeviceBootloader::Version>(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version))
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
+    // Bind DeviceBootloader
+    deviceBootloaderVersion
         .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
         .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
         .def("__str__", &DeviceBootloader::Version::toString)
@@ -19,15 +38,15 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
         .def("__gt__", &DeviceBootloader::Version::operator>)
         ;
 
-    py::enum_<DeviceBootloader::Type>(deviceBootloader, "Type")
+    deviceBootloaderType
         .value("USB", DeviceBootloader::Type::USB)
         .value("NETWORK", DeviceBootloader::Type::NETWORK)
         ;
-    py::enum_<DeviceBootloader::Memory>(deviceBootloader, "Memory")
+    deviceBootloaderMemory
         .value("FLASH", DeviceBootloader::Memory::FLASH)
         .value("EMMC", DeviceBootloader::Memory::EMMC)
         ;
-    py::enum_<DeviceBootloader::Section>(deviceBootloader, "Section")
+    deviceBootloaderSection
         .value("HEADER", DeviceBootloader::Section::HEADER)
         .value("BOOTLOADER", DeviceBootloader::Section::BOOTLOADER)
         .value("BOOTLOADER_CONFIG", DeviceBootloader::Section::BOOTLOADER_CONFIG)
@@ -49,12 +68,13 @@ void DeviceBootloaderBindings::bind(pybind11::module& m){
 
         .def(py::init<const DeviceInfo&>(), py::arg("deviceDesc"), DOC(dai, DeviceBootloader, DeviceBootloader))
         .def(py::init<const DeviceInfo&, std::string>(), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBootloader, DeviceBootloader, 2))
-        .def("flash", &DeviceBootloader::flash, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
-        .def("flashDepthaiApplicationPackage", &DeviceBootloader::flashDepthaiApplicationPackage, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
-        .def("flashBootloader", py::overload_cast<std::function<void(float)>, std::string>(&DeviceBootloader::flashBootloader), py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
-        .def("flashBootloader", py::overload_cast<DeviceBootloader::Memory, DeviceBootloader::Type, std::function<void(float)>, std::string>(&DeviceBootloader::flashBootloader), py::arg("memory"), py::arg("type"), py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader, 2))
+        .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, Pipeline& pipeline) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline); }, py::arg("progressCallback"), py::arg("pipeline"), DOC(dai, DeviceBootloader, flash))
+        .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
+        .def("flashBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::string path) { py::gil_scoped_release release; return db.flashBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
+        .def("flashBootloader", [](DeviceBootloader& db, DeviceBootloader::Memory memory, DeviceBootloader::Type type, std::function<void(float)> progressCallback, std::string path) { py::gil_scoped_release release; return db.flashBootloader(memory, type, progressCallback, path); }, py::arg("memory"), py::arg("type"), py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader, 2))
         //.def("flashCustom", &DeviceBootloader::flashCustom, py::arg("memory"), py::arg("offset"), py::arg("progressCallback"), py::arg("data"), DOC(dai, DeviceBootloader, flashCustom))
-        .def("getVersion", &DeviceBootloader::getVersion, DOC(dai, DeviceBootloader, getVersion))
+        .def("getVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getVersion(); }, DOC(dai, DeviceBootloader, getVersion))
+
         .def("isEmbeddedVersion", &DeviceBootloader::isEmbeddedVersion, DOC(dai, DeviceBootloader, isEmbeddedVersion))
         ;
 

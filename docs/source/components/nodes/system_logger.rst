@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    logger = pipeline.createSystemLogger()
+    logger = pipeline.create(dai.node.SystemLogger)
 
   .. code-tab:: c++
 
@@ -44,11 +44,11 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    logger = pipeline.createSystemLogger()
+    logger = pipeline.create(dai.node.SystemLogger)
     logger.setRate(1)  # 1 Hz
 
     # Send system info to the host via XLink
-    xout = pipeline.createXLinkOut()
+    xout = pipeline.create(dai.node.XLinkOut)
     xout.setStreamName("sysinfo")
     logger.out.link(xout.input)
 
@@ -76,7 +76,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.SystemLogger
+    .. autoclass:: depthai.node.SystemLogger
       :members:
       :inherited-members:
       :noindex:

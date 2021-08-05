@@ -7,6 +7,20 @@ Returns quaternion.
 Demo
 ####
 
+Example script output
+
+.. code-block::
+
+    ~/depthai-python/examples$ python3 imu_rotation_vector.py
+    Rotation vector timestamp: 0.000 ms
+    Quaternion: i: 0.089355 j: 0.355103 k: 0.034058 real: 0.929932
+    Accuracy (rad): 3.141602
+    Rotation vector timestamp: 3.601 ms
+    Quaternion: i: 0.088928 j: 0.354004 k: 0.036560 real: 0.930298
+    Accuracy (rad): 3.141602
+    Rotation vector timestamp: 6.231 ms
+    Quaternion: i: 0.094604 j: 0.344543 k: 0.040955 real: 0.933105
+    Accuracy (rad): 3.141602
 
 Setup
 #####
