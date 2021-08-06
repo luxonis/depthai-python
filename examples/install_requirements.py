@@ -3,9 +3,11 @@ import sys, os, subprocess
 import argparse
 import re
 
+convert_default = "empty"
 parser = argparse.ArgumentParser()
 parser.add_argument('-sdai', "--skip_depthai", action="store_true", help="Skip installation of depthai library.")
 parser.add_argument('-dr', "--dry_run", action="store_true", help="Print commands without executing.")
+parser.add_argument("--convert", nargs="?", default=convert_default, help="Convert the NN blobs using BlobConverter. Can be used as --convert 2021.4 to convert using OpenVINO 2021.4 or just --convert to use latest OpenVINO release")
 
 def prettyPrint(command):
 
@@ -114,3 +116,22 @@ if args.dry_run:
     prettyPrint(downloader_cmd)
 else:
     subprocess.check_call(downloader_cmd)
+
+if args.convert != convert_default:
+    nn_models_shaves = {
+        "mobilenet-ssd": [5, 6, 8],
+        "person-detection-retail-0013": [7],
+        "yolo-v4-tiny-tf": [6],
+        "yolo-v3-tiny-tf": [6],
+    }
+    blobconverter_cmds = [
+        [sys.executable, "-m", "blobconverter", "-zn", nn_name, "-sh", str(nn_shave), "-o", f"{examples_dir}/models", *(["-v", args.convert] if args.convert is not None else [])]
+        for nn_name in nn_models_shaves
+        for nn_shave in nn_models_shaves[nn_name]
+    ]
+    install_blobconverter_cmd = [*pip_install, "blobconverter"]
+    for cmd in [install_blobconverter_cmd] + blobconverter_cmds:
+        if args.dry_run:
+            prettyPrint(cmd)
+        else:
+            subprocess.check_call(cmd)

@@ -67,7 +67,7 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`Spatial location calculator`
+- :ref:`System information`
 
 Reference
 #########
