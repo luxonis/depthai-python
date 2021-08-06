@@ -459,6 +459,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     featureTrackerProperties
         .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
         .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
+        .def_readwrite("numShaves", &FeatureTrackerProperties::numShaves, DOC(dai, FeatureTrackerProperties, numShaves))
+        .def_readwrite("numMemorySlices", &FeatureTrackerProperties::numMemorySlices, DOC(dai, FeatureTrackerProperties, numMemorySlices))
         ;
 
 
