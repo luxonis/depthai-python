@@ -75,16 +75,16 @@ class FeatureTrackerDrawer:
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-featureTrackerLeft = pipeline.createFeatureTracker()
-featureTrackerRight = pipeline.createFeatureTracker()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+featureTrackerLeft = pipeline.create(dai.node.FeatureTracker)
+featureTrackerRight = pipeline.create(dai.node.FeatureTracker)
 
-xoutPassthroughFrameLeft = pipeline.createXLinkOut()
-xoutTrackedFeaturesLeft = pipeline.createXLinkOut()
-xoutPassthroughFrameRight = pipeline.createXLinkOut()
-xoutTrackedFeaturesRight = pipeline.createXLinkOut()
-xinTrackedFeaturesConfig = pipeline.createXLinkIn()
+xoutPassthroughFrameLeft = pipeline.create(dai.node.XLinkOut)
+xoutTrackedFeaturesLeft = pipeline.create(dai.node.XLinkOut)
+xoutPassthroughFrameRight = pipeline.create(dai.node.XLinkOut)
+xoutTrackedFeaturesRight = pipeline.create(dai.node.XLinkOut)
+xinTrackedFeaturesConfig = pipeline.create(dai.node.XLinkIn)
 
 xoutPassthroughFrameLeft.setStreamName("passthroughFrameLeft")
 xoutTrackedFeaturesLeft.setStreamName("trackedFeaturesLeft")
