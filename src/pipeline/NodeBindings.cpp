@@ -147,7 +147,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // Move properties into nodes and nodes under 'node' submodule
     daiNodeModule = m.def_submodule("node");
 
-
+    // Properties
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
     py::enum_<ColorCameraProperties::SensorResolution> colorCameraPropertiesSensorResolution(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution));
     py::enum_<ColorCameraProperties::ColorOrder> colorCameraPropertiesColorOrder(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder));
@@ -178,6 +178,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
+    py::class_<ScriptProperties> scriptProperties(m, "ScriptProperties", DOC(dai, ScriptProperties));
+
+
     // Node::Id bindings
     py::class_<Node::Id>(pyNode, "Id", "Node identificator. Unique for every node on a single Pipeline");
     // Node::Connection bindings
@@ -450,6 +453,13 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("busId", &SPIInProperties::busId)
         .def_readwrite("maxDataSize", &SPIInProperties::maxDataSize)
         .def_readwrite("numFrames", &SPIInProperties::numFrames)
+    ;
+
+    // Script properties
+    scriptProperties
+        .def_readwrite("scriptUri", &ScriptProperties::scriptUri, DOC(dai, ScriptProperties, scriptUri))
+        .def_readwrite("scriptName", &ScriptProperties::scriptName, DOC(dai, ScriptProperties, scriptName))
+        .def_readwrite("processor", &ScriptProperties::processor, DOC(dai, ScriptProperties, processor))
     ;
 
 
@@ -985,6 +995,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setProcessor", &Script::setProcessor, DOC(dai, node, Script, setProcessor))
         .def("getProcessor", &Script::getProcessor, DOC(dai, node, Script, getProcessor))
         ;
+    daiNodeModule.attr("Script").attr("Properties") = scriptProperties;
 
 
     // IMU node
