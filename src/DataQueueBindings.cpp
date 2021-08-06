@@ -6,10 +6,29 @@
 // depthai
 #include "depthai/device/DataQueue.hpp"
 
-void DataQueueBindings::bind(pybind11::module& m){
-
+void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
     using namespace dai;
     using namespace std::chrono;
+
+
+    // Type definitions
+    py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>> dataOutputQueue(m, "DataOutputQueue", DOC(dai, DataOutputQueue));
+    py::class_<DataInputQueue, std::shared_ptr<DataInputQueue>> dataInputQueue(m, "DataInputQueue", DOC(dai, DataInputQueue));
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
 
     // To prevent blocking whole python interpreter, blocking functions like 'get' and 'send'
     // are pooled with a reasonable delay and check for python interrupt signal in between.
@@ -29,7 +48,7 @@ void DataQueueBindings::bind(pybind11::module& m){
             throw py::value_error("Callback must take either zero, one or two arguments");
         }
     };
-    py::class_<DataOutputQueue, std::shared_ptr<DataOutputQueue>>(m, "DataOutputQueue", DOC(dai, DataOutputQueue))
+    dataOutputQueue
         .def("getName", &DataOutputQueue::getName, DOC(dai, DataOutputQueue, getName))
         .def("isClosed", &DataOutputQueue::isClosed, DOC(dai, DataOutputQueue, isClosed))
         .def("close", &DataOutputQueue::close, DOC(dai, DataOutputQueue, close))
@@ -93,7 +112,7 @@ void DataQueueBindings::bind(pybind11::module& m){
         ;
 
     // Bind DataInputQueue
-    py::class_<DataInputQueue, std::shared_ptr<DataInputQueue>>(m, "DataInputQueue", DOC(dai, DataInputQueue))
+    dataInputQueue
         .def("isClosed", &DataInputQueue::isClosed, DOC(dai, DataInputQueue, isClosed))
         .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close))
         .def("getName", &DataInputQueue::getName, DOC(dai, DataInputQueue, getName))
