@@ -15,12 +15,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spi = pipeline.create(dai.node.IMU)
+    imu = pipeline.create(dai.node.IMU)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto spi = pipeline.create<dai::node::IMU>();
+    auto imu = pipeline.create<dai::node::IMU>();
 
 
 Inputs and Outputs
@@ -100,6 +100,11 @@ When enabling the IMU sensors (:code:`imu.enableIMUSensor()`), you can select be
 - :code:`GEOMAGNETIC_ROTATION_VECTOR`
 - :code:`ARVR_STABILIZED_ROTATION_VECTOR`
 - :code:`ARVR_STABILIZED_GAME_ROTATION_VECTOR`
+
+Here are **descriptions of all sensors**:
+
+.. autoclass:: depthai.IMUSensor
+  :noindex:
 
 Examples of functionality
 #########################
