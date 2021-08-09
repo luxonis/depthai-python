@@ -1,7 +1,7 @@
 IMU
 ===
 
-IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to recieve data from the IMU chip on the device.
+IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data from the IMU chip on the device.
 Our DepthAI devices use `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ 9-axis sensor (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__)
 that supports sensor fusion on the (IMU) chip itself. The IMU chip is connected to the Myriad X (VPU) over SPI (we have integrated
 `this driver <https://github.com/hcrest/bno080-driver>`__ to the DepthAI).
