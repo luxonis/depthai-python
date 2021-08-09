@@ -9,7 +9,7 @@ import argparse
 
 labelMap = ["person", ""]
 
-nnPathDefault = str((Path(__file__).parent / Path('models/person-detection-0201_openvino_2021.3_7shave.blob')).resolve().absolute())
+nnPathDefault = str((Path(__file__).parent / Path('models/person-detection-retail-0013_openvino_2021.4_7shave.blob')).resolve().absolute())
 videoPathDefault = str((Path(__file__).parent / Path('models/construction_vest.mp4')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('-nnPath', help="Path to mobilenet detection network blob", default=nnPathDefault)
@@ -19,7 +19,6 @@ args = parser.parse_args()
 
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_3)
 
 # Define sources and outputs
 manip = pipeline.createImageManip()
@@ -41,7 +40,7 @@ nnOut.setStreamName("nn")
 # Properties
 xinFrame.setMaxDataSize(1920*1080*3)
 
-manip.initialConfig.setResizeThumbnail(384, 384)
+manip.initialConfig.setResizeThumbnail(544, 320)
 # manip.initialConfig.setResize(384, 384)
 # manip.initialConfig.setKeepAspectRatio(False) #squash the image to not lose FOV
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
@@ -56,7 +55,7 @@ detectionNetwork.input.setBlocking(True)
 objectTracker.inputTrackerFrame.setBlocking(True)
 objectTracker.inputDetectionFrame.setBlocking(True)
 objectTracker.inputDetections.setBlocking(True)
-objectTracker.setDetectionLabelsToTrack([0])  # track only person
+objectTracker.setDetectionLabelsToTrack([1])  # track only person
 # possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID

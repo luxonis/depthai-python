@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenetSpatial = pipeline.createMobileNetSpatialDetectionNetwork()
+    mobilenetSpatial = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
 
   .. code-tab:: c++
 
@@ -52,7 +52,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenetSpatial = pipeline.createMobileNetSpatialDetectionNetwork()
+    mobilenetSpatial = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
 
     mobilenetSpatial.setBlobPath(nnBlobPath)
     # Will ingore all detections whose confidence is below 50%
@@ -98,7 +98,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.MobileNetSpatialDetectionNetwork
+    .. autoclass:: depthai.node.MobileNetSpatialDetectionNetwork
       :members:
       :inherited-members:
       :noindex:

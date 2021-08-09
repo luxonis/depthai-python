@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    edgeDetector = pipeline.createEdgeDetector()
+    edgeDetector = pipeline.create(dai.node.EdgeDetector)
 
   .. code-tab:: c++
 
@@ -48,7 +48,7 @@ Usage
   .. code-tab:: py
 
       pipeline = dai.Pipeline()
-      edgeDetector = pipeline.createEdgeDetector()
+      edgeDetector = pipeline.create(dai.node.EdgeDetector)
 
       sobelHorizontalKernel = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
       sobelVerticalKernel = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
@@ -75,7 +75,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.EdgeDetector
+    .. autoclass:: depthai.node.EdgeDetector
       :members:
       :inherited-members:
       :noindex:

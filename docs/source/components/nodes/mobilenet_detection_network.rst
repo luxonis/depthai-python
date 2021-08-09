@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenetDet = pipeline.createMobileNetDetectionNetwork()
+    mobilenetDet = pipeline.create(dai.node.MobileNetDetectionNetwork)
 
   .. code-tab:: c++
 
@@ -50,7 +50,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    mobilenetDet = pipeline.createMobileNetDetectionNetwork()
+    mobilenetDet = pipeline.create(dai.node.MobileNetDetectionNetwork)
 
     mobilenetDet.setConfidenceThreshold(0.5)
     mobilenetDet.setBlobPath(nnBlobPath)
@@ -81,7 +81,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.MobileNetDetectionNetwork
+    .. autoclass:: depthai.node.MobileNetDetectionNetwork
       :members:
       :inherited-members:
       :noindex:
