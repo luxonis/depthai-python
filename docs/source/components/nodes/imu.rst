@@ -56,8 +56,8 @@ Usage
     pipeline = dai.Pipeline()
     imu = pipeline.create(dai.node.IMU)
 
-    # enable ACCELEROMETER and GRAVITY at 100 hz rate
-    imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER, dai.IMUSensor.GRAVITY], 100)
+    # enable ACCELEROMETER and MAGNETOMETER_CALIBRATED at 100 hz rate
+    imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER, dai.IMUSensor.MAGNETOMETER_CALIBRATED], 100)
     # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu.setBatchReportThreshold(1)
     # maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
@@ -70,8 +70,8 @@ Usage
     dai::Pipeline pipeline;
     auto imu = pipeline.create<dai::node::IMU>();
 
-    // enable ACCELEROMETER and GRAVITY at 100 hz rate
-    imu->enableIMUSensor({dai::IMUSensor::ACCELEROMETER, dai::IMUSensor::GRAVITY}, 100);
+    // enable ACCELEROMETER and MAGNETOMETER_CALIBRATED at 100 hz rate
+    imu->enableIMUSensor({dai::IMUSensor::ACCELEROMETER, dai::IMUSensor::MAGNETOMETER_CALIBRATED}, 100);
     // above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu->setBatchReportThreshold(1);
     // maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
