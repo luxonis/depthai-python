@@ -6,6 +6,7 @@ import os
 import cv2
 import argparse
 import depthai as dai
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={400, 720, 800},
@@ -17,22 +18,23 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
 args = parser.parse_args()
 
 # TODO as args
-#cam_list = ['rgb'] 
-cam_list = ['left', 'right']
+#cam_list = ['tof']
+#cam_list = ['mono', 'rgb']
+cam_list = ['tof', 'mono', 'rgb']
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb'  : dai.CameraBoardSocket.RGB,
-    'left' : dai.CameraBoardSocket.LEFT,
-    'right': dai.CameraBoardSocket.RIGHT,
+    'tof' : dai.CameraBoardSocket.RGB,
+    'mono': dai.CameraBoardSocket.LEFT,
+    'rgb' : dai.CameraBoardSocket.RIGHT,
 }
 
 rotate = {
-    'rgb'  : args.rotate in ['all', 'rgb'],
-    'left' : args.rotate in ['all', 'mono'],
-    'right': args.rotate in ['all', 'mono'],
+    'tof' : args.rotate in ['all', 'rgb'],
+    'mono': args.rotate in ['all', 'mono'],
+    'rgb' : args.rotate in ['all', 'mono'],
 }
 
 mono_res_opts = {
@@ -60,19 +62,23 @@ xout = {}
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
-    if 1:  # c == 'rgb':
+    if c in ['rgb', 'tof']:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
-        cam[c].isp.link(xout[c].input)
+        if c == 'rgb':
+            cam[c].isp.link(xout[c].input)
+        else:
+            cam[c].setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+            cam[c].raw.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
         cam[c].out.link(xout[c].input)
     cam[c].setBoardSocket(cam_socket_opts[c])
     # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
-    cam[c].initialControl.setExternalTrigger(2, 1)
+    #cam[c].initialControl.setExternalTrigger(2, 1)
 
-    cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
+    #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     control.out.link(cam[c].inputControl)
@@ -101,7 +107,13 @@ with dai.Device(pipeline) as device:
         for c in cam_list:
             pkt = q[c].tryGet()
             if pkt is not None:
-                frame = pkt.getCvFrame()
+                if c == 'tof':
+                    frame = pkt.getFrame()
+                    shape = (pkt.getHeight(), pkt.getWidth())
+                    # Left-justify for better visualization
+                    frame = (frame.view(np.uint16) * 16).reshape(shape)
+                else:
+                    frame = pkt.getCvFrame()
                 cv2.imshow(c, frame)
         if cv2.waitKey(1) == ord('q'):
             break
