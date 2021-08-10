@@ -24,6 +24,7 @@
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
+#include "depthai/pipeline/node/FeatureTracker.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -125,6 +126,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
         .def("createIMU", &Pipeline::create<node::IMU>)
         .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
+        .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
+
         ;
 
 
