@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
+    yoloDet = pipeline.createYoloDetectionNetwork()
 
   .. code-tab:: c++
 
@@ -50,7 +50,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
+    yoloDet = pipeline.createYoloDetectionNetwork()
     yoloDet.setBlobPath(nnBlobPath)
 
     # Yolo specific parameters
@@ -88,7 +88,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.node.YoloDetectionNetwork
+    .. autoclass:: depthai.YoloDetectionNetwork
       :members:
       :inherited-members:
       :noindex:
