@@ -13,13 +13,13 @@
 # limitations under the License.
 
 description: >-
-  person-detection-0201
+  person-detection-retail-0013
 task_type: object_attributes
 files:
-  - name: person-detection-0201_openvino_2021.3_7shave.blob
-    size: 8362880
-    sha256: c61e856bf2a733c18df039f10e1b24d317536051db846093aa644347c4d55c48
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection-0201_openvino_2021.3_7shave.blob
+  - name: person-detection-retail-0013_openvino_2021.4_7shave.blob
+    size: 2252352
+    sha256: 4a5d7ef7c27ddbae51a3bfe20b093006f44b3b6329c8d5f6482f9f348b21ad37
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection-retail-0013_openvino_2021.4_7shave.blob
 
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
