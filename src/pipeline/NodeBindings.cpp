@@ -21,6 +21,7 @@
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
+#include "depthai/pipeline/node/ToF.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -211,6 +212,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto script = ADD_NODE(Script);
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
+    auto tof = ADD_NODE(ToF);
 
 
 
@@ -533,6 +535,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
     // ;
 
+    // ToF node
+    tof
+      .def_readonly("inputImage", &ToF::inputImage, DOC(dai, node, ToF, input))
+      .def_readonly("out", &ToF::out, DOC(dai, node, ToF, out));
 
     // XLinkIn node
     xlinkIn
@@ -555,7 +561,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMetadataOnly", &XLinkOut::setMetadataOnly, DOC(dai, node, XLinkOut, setMetadataOnly))
         .def("getMetadataOnly", &XLinkOut::getMetadataOnly, DOC(dai, node, XLinkOut, getMetadataOnly))
         ;
-
+    
     // ColorCamera node
     colorCamera
         .def_readonly("inputConfig", &ColorCamera::inputConfig, DOC(dai, node, ColorCamera, inputConfig))
