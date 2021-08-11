@@ -44,8 +44,8 @@ Example results for 2x DepthAI on a system:
   14442C10D13EABCE00 XLinkDeviceState.X_LINK_UNBOOTED
   14442C1071659ACD00 XLinkDeviceState.X_LINK_UNBOOTED
 
-Selecting a Specific DepthAI device to be used.
-###############################################
+Selecting a Specific DepthAI device to be used
+##############################################
 
 From the Detected devices(s) above, use the following code to select the device you would like to use with your pipeline.
 For example, if the first device is desirable from above use the following code:
@@ -65,6 +65,12 @@ You can then use the `device_info` to specify on which device you want to run yo
 
 And you can use this code as a basis for your own use cases, such that you can run differing neural models
 on different DepthAI/uAI models.
+
+Specifying POE device to be used
+********************************
+
+You can specify the POE device to be used by the IP address as well. Here's the `code snippet <https://docs.luxonis.com/en/latest/pages/tutorials/getting-started-with-poe/#manually-specify-device-ip>`__.
+
 
 Now use as many DepthAI devices as you need!
 
