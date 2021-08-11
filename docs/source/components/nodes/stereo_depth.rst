@@ -110,17 +110,80 @@ is no longer limited by a feature being a full integer pixel-step apart, but rat
 
 For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
+Stereo depth FPS
+################
+
+.. list-table::
+   :header-rows: 1
+
+   * - Stereo depth mode
+     - FPS for 720P
+   * - Standard mode
+     - 150
+   * - Left-Right Check
+     - 60
+   * - Subpixel Disparity
+     - 30
+   * - Extended Disparity
+     - 60
+   * - Subpixel + LR check
+     - 15
+   * - Extended + LR check
+     - 30
+
+Internal block diagram of StereoDepth node
+##########################################
+
+.. image:: /_static/images/components/depth_diagram.jpeg
+   :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
+
+On the diagram, red rectangle are firmware settings that are configurable via the API. Gray rectangles are settings that that are not yet
+exposed to the API. We plan on exposing as much configurability as possible, but please inform us if you would like to see these settings
+configurable sooner.
+
+If you click on the image, you will be redirected to the webapp. Some blocks have notes that provide additional technical information.
+
+Currently configurable blocks
+*****************************
+
+.. tabs::
+
+  .. tab:: Stereo Mode
+
+    More information about this at :ref:`Depth Modes`. You can configure:
+
+    - :ref:`Left-Right Check`: :code:`stereo.setLeftRightCheck(False)`
+    - :ref:`Extended Disparity`: :code:`stereo.setExtendedDisparity(False)`
+    - :ref:`Subpixel Disparity`: :code:`stereo.setSubpixel(False)`
+
+  .. tab:: Mesh file / Homography matrix
+
+    You can configure homography matrix for left/right mono cameras.
+
+    .. doxygenfunction:: dai::node::StereoDepth::loadMeshFiles
+        :project: depthai-core
+        :no-link:
+
+    .. doxygenfunction:: dai::node::StereoDepth::loadMeshData
+        :project: depthai-core
+        :no-link:
+
+    .. doxygenfunction:: dai::node::StereoDepth::setMeshStep
+        :project: depthai-core
+        :no-link:
+
+  .. tab:: Confidence Threshold
+
+    Setting stereo confidence threshold to high values (eg. above 200) will result in higher chance that depth noise (incorrect values) will be included in the depth map.
+    If you set confidence threshold to lower values, there will be many disparity values missing (empty pixels).
+
+    .. doxygenfunction:: dai::node::StereoDepth::setConfidenceThreshold
+        :project: depthai-core
+        :no-link:
+
+
 Usage
 #####
-
-..
-  COnfigure different:
-  -median
-  -raw_depth
-  -rectified
-  -lr_check
-  -ext_disparity
-  -subpixel
 
 .. tabs::
 
