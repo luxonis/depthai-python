@@ -8,7 +8,7 @@ In the example, we are rotating by 90°.
     Due to HW warp constraint, input image (to be rotated) has to have **width value of multiples of 16.**
 
 Demos
-####
+#####
 
 .. image:: https://user-images.githubusercontent.com/18037362/128074634-d2baa78e-8f35-40fc-8661-321f3a3c3850.png
   :alt: Rotated mono and color frames
