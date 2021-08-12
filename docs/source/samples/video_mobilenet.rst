@@ -39,7 +39,7 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/video_mobilenet.py>`__
 
         .. literalinclude:: ../../../examples/video_mobilenet.py
            :language: python
