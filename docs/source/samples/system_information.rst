@@ -14,31 +14,33 @@ Example script output
   Cmx used / total - 2.24 / 2.50 MiB
   LeonCss heap used / total - 4.17 / 46.41 MiB
   LeonMss heap used / total - 2.87 / 27.58 MiB
-  Chip temperature - average: 38.59, css: 39.81, mss: 37.71, upa0: 38.65, upa1: 38.18
-  Cpu usage - Leon OS: 7.08%, Leon RT: 1.48 %
+  Chip temperature - average: 38.59, css: 39.81, mss: 37.71, upa: 38.65, dss: 38.18
+  Cpu usage - Leon CSS: 7.08%, Leon MSS: 1.48 %
   ----------------------------------------
   Ddr used / total - 0.13 / 414.80 MiB
   Cmx used / total - 2.24 / 2.50 MiB
   LeonCss heap used / total - 4.17 / 46.41 MiB
   LeonMss heap used / total - 2.87 / 27.58 MiB
-  Chip temperature - average: 38.59, css: 39.58, mss: 37.94, upa0: 38.18, upa1: 38.65
-  Cpu usage - Leon OS: 1.55%, Leon RT: 0.30 %
+  Chip temperature - average: 38.59, css: 39.58, mss: 37.94, upa: 38.18, dss: 38.65
+  Cpu usage - Leon CSS: 1.55%, Leon MSS: 0.30 %
   ----------------------------------------
   Ddr used / total - 0.13 / 414.80 MiB
   Cmx used / total - 2.24 / 2.50 MiB
   LeonCss heap used / total - 4.17 / 46.41 MiB
   LeonMss heap used / total - 2.87 / 27.58 MiB
-  Chip temperature - average: 38.94, css: 40.04, mss: 38.18, upa0: 39.35, upa1: 38.18
-  Cpu usage - Leon OS: 0.56%, Leon RT: 0.06 %
+  Chip temperature - average: 38.94, css: 40.04, mss: 38.18, upa: 39.35, dss: 38.18
+  Cpu usage - Leon CSS: 0.56%, Leon MSS: 0.06 %
   ----------------------------------------
   Ddr used / total - 0.13 / 414.80 MiB
   Cmx used / total - 2.24 / 2.50 MiB
   LeonCss heap used / total - 4.17 / 46.41 MiB
   LeonMss heap used / total - 2.87 / 27.58 MiB
-  Chip temperature - average: 39.46, css: 40.28, mss: 38.88, upa0: 39.81, upa1: 38.88
-  Cpu usage - Leon OS: 0.51%, Leon RT: 0.06 %
+  Chip temperature - average: 39.46, css: 40.28, mss: 38.88, upa: 39.81, dss: 38.88
+  Cpu usage - Leon CSS: 0.51%, Leon MSS: 0.06 %
   ----------------------------------------
 
+- :code:`upa` represents the temperature of the SHAVE block
+- :code:`dss` represents the temperature od the DRR subsystem
 
 Setup
 #####
