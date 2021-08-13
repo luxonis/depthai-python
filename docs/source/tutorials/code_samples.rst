@@ -30,6 +30,8 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`IMU Accelerometer & Gyroscope` - Accelerometer and gyroscope at 500hz rate
 - :ref:`IMU Rotation Vector` - Rotation vector at 400 hz rate
 - :ref:`Edge detector` - Edge detection on input frame
+- :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Bootloader version` - Retrieves Version of Bootloader on the device
 
 .. rubric:: Complex
 
@@ -61,3 +63,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
 - :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`Queue add callback` - Demonstrates how to use queue callbacks
+- :ref:`Calibration Flash v5` - Demonstrates how to flash calibration data of version 5 (gen1 calibration data) to the device
+- :ref:`Calibration Flash` - Demonstrates how to flash calibration data of version 6 (gen2 calibration data) to the device
+- :ref:`Calibration Reader` - Demonstrates how to read calibration data stored on device over XLink
+- :ref:`Calibration Load` - Demonstrates how to load and use calibration data of version6 (gen2 calibration data) in a pipeline

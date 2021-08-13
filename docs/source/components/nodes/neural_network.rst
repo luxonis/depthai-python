@@ -2,7 +2,7 @@ NeuralNetwork
 =============
 
 Runs a neural inference on input data. Neural network has to be a :code:`.blob` type. Instructions on how to compile your neural network (NN) to :code:`.blob`
-can be found at :ref:`Local OpenVINO Model Conversion`.
+can be found `here <https://docs.luxonis.com/en/latest/pages/model_conversion/>`__.
 
 
 How to place it
@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    nn = pipeline.createNeuralNetwork()
+    nn = pipeline.create(dai.node.NeuralNetwork)
 
   .. code-tab:: c++
 
@@ -60,12 +60,12 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    nn = pipeline.createNeuralNetwork()
+    nn = pipeline.create(dai.node.NeuralNetwork)
     nn.setBlobPath(bbBlobPath)
     cam.out.link(nn.input)
 
     # Send NN out to the host via XLink
-    nnXout = pipeline.createXLinkOut()
+    nnXout = pipeline.create(dai.node.XLinkOut)
     nnXout.setStreamName("nn")
     nn.out.link(nnXout.input)
 
@@ -124,7 +124,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.NeuralNetwork
+    .. autoclass:: depthai.node.NeuralNetwork
       :members:
       :inherited-members:
       :noindex:

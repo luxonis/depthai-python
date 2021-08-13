@@ -10,6 +10,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <cstdint>
+#include <stack>
 
 // Include docstring file
 #include "docstring.hpp"
@@ -24,4 +25,6 @@ namespace pybind11 { namespace detail {
 
 namespace py = pybind11;
 
+using StackFunction = void (*)(pybind11::module &m, void *pCallstack);
+using Callstack = std::stack<StackFunction>;
 

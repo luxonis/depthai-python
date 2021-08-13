@@ -112,17 +112,37 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
 }
 
 
-void DeviceBindings::bind(pybind11::module& m){
+void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
+    // Type definitions
+    py::class_<Device> device(m, "Device", DOC(dai, Device));
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+
 
     // Bind Device, using DeviceWrapper to be able to destruct the object by calling close()
-    py::class_<Device>(m, "Device", DOC(dai, Device))
+    device
         // Python only methods
         .def("__enter__", [](py::object obj){ return obj; })
-        .def("__exit__", [](Device& d, py::object type, py::object value, py::object traceback) { d.close(); })
-        .def("close", &Device::close, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
+        .def("__exit__", [](Device& d, py::object type, py::object value, py::object traceback) {
+            py::gil_scoped_release release;
+            d.close();
+        })
+        .def("close", [](Device& d) { py::gil_scoped_release release; d.close(); }, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
         .def("isClosed", &Device::isClosed, "Check if the device is still connected`")
 
         //dai::Device methods
@@ -155,7 +175,6 @@ void DeviceBindings::bind(pybind11::module& m){
             return std::unique_ptr<Device>(new Device(pipeline, deviceInfo, pathToCmd));
         }), py::arg("pipeline"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, Device, Device, 5))
 
-
         // Device constructor - OpenVINO version
         .def(py::init([](OpenVINO::Version version){ return deviceConstructorHelper(version); }), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Device, Device, 6))
         .def(py::init([](OpenVINO::Version version, bool usb2Mode){
@@ -175,16 +194,17 @@ void DeviceBindings::bind(pybind11::module& m){
             return std::unique_ptr<Device>(new Device(version, deviceInfo, pathToCmd));
         }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, Device, Device, 10))
 
-        .def("isPipelineRunning", &Device::isPipelineRunning, DOC(dai, Device, isPipelineRunning))
+        .def("isPipelineRunning", [](Device& d) { py::gil_scoped_release release; return d.isPipelineRunning(); }, DOC(dai, Device, isPipelineRunning))
         .def("startPipeline", [](Device& d){
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "Device(pipeline) starts the pipeline automatically. Use Device() and startPipeline(pipeline) otherwise", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            py::gil_scoped_release release;
             d.startPipeline();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, Device, startPipeline))
-        .def("startPipeline", py::overload_cast<const Pipeline&>(&Device::startPipeline), DOC(dai, Device, startPipeline, 2))
+        .def("startPipeline", [](Device& d, const Pipeline& pipeline) { py::gil_scoped_release release; return d.startPipeline(pipeline); }, DOC(dai, Device, startPipeline, 2))
 
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
@@ -226,24 +246,29 @@ void DeviceBindings::bind(pybind11::module& m){
         }, py::arg("timeout") = std::chrono::microseconds(-1), DOC(dai, Device, getQueueEvent, 4))
 
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
-        .def("setLogLevel", &Device::setLogLevel, py::arg("level"), DOC(dai, Device, setLogLevel))
-        .def("getLogLevel", &Device::getLogLevel, DOC(dai, Device, getLogLevel))
-        .def("getDeviceInfo", &Device::getDeviceInfo, DOC(dai, Device, getDeviceInfo))
-        .def("setSystemInformationLoggingRate", &Device::setSystemInformationLoggingRate, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
-        .def("getSystemInformationLoggingRate", &Device::getSystemInformationLoggingRate, DOC(dai, Device, getSystemInformationLoggingRate))
-        .def("getConnectedCameras", &Device::getConnectedCameras, DOC(dai, Device, getConnectedCameras))
-        .def("getDdrMemoryUsage", &Device::getDdrMemoryUsage, DOC(dai, Device, getDdrMemoryUsage))
-        .def("getCmxMemoryUsage", &Device::getCmxMemoryUsage, DOC(dai, Device, getCmxMemoryUsage))
-        .def("getLeonCssHeapUsage", &Device::getLeonCssHeapUsage, DOC(dai, Device, getLeonCssHeapUsage))
-        .def("getLeonMssHeapUsage", &Device::getLeonMssHeapUsage, DOC(dai, Device, getLeonMssHeapUsage))
-        .def("getChipTemperature", &Device::getChipTemperature, DOC(dai, Device, getChipTemperature))
-        .def("getLeonCssCpuUsage", &Device::getLeonCssCpuUsage, DOC(dai, Device, getLeonCssCpuUsage))
-        .def("getLeonMssCpuUsage", &Device::getLeonMssCpuUsage, DOC(dai, Device, getLeonMssCpuUsage))
-        .def("getUsbSpeed", &Device::getUsbSpeed, DOC(dai, Device, getUsbSpeed))
+
+        // Doesn't require GIL release (eg, don't do RPC or long blocking things in background)
         .def("setLogOutputLevel", &Device::setLogOutputLevel, py::arg("level"), DOC(dai, Device, setLogOutputLevel))
         .def("getLogOutputLevel", &Device::getLogOutputLevel, DOC(dai, Device, getLogOutputLevel))
-        .def("addLogCallback", &Device::addLogCallback, py::arg("callback"), DOC(dai, Device, addLogCallback))
-        .def("removeLogCallback", &Device::removeLogCallback, py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
-        ;
+
+        // Requires GIL release
+        .def("setLogLevel", [](Device& d, LogLevel l) { py::gil_scoped_release release; d.setLogLevel(l); }, py::arg("level"), DOC(dai, Device, setLogLevel))
+        .def("getLogLevel", [](Device& d) { py::gil_scoped_release release; return d.getLogLevel(); }, DOC(dai, Device, getLogLevel))
+        .def("setSystemInformationLoggingRate", [](Device& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, Device, setSystemInformationLoggingRate))
+        .def("getSystemInformationLoggingRate", [](Device& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, Device, getSystemInformationLoggingRate))
+        .def("getConnectedCameras", [](Device& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, Device, getConnectedCameras))
+        .def("getDdrMemoryUsage", [](Device& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, Device, getDdrMemoryUsage))
+        .def("getCmxMemoryUsage", [](Device& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, Device, getCmxMemoryUsage))
+        .def("getLeonCssHeapUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonCssHeapUsage(); }, DOC(dai, Device, getLeonCssHeapUsage))
+        .def("getLeonMssHeapUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonMssHeapUsage(); }, DOC(dai, Device, getLeonMssHeapUsage))
+        .def("getChipTemperature", [](Device& d) { py::gil_scoped_release release; return d.getChipTemperature(); }, DOC(dai, Device, getChipTemperature))
+        .def("getLeonCssCpuUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonCssCpuUsage(); }, DOC(dai, Device, getLeonCssCpuUsage))
+        .def("getLeonMssCpuUsage", [](Device& d) { py::gil_scoped_release release; return d.getLeonMssCpuUsage(); }, DOC(dai, Device, getLeonMssCpuUsage))
+        .def("addLogCallback", [](Device& d, std::function<void(LogMessage)> callback) { py::gil_scoped_release release; return d.addLogCallback(callback); }, py::arg("callback"), DOC(dai, Device, addLogCallback))
+        .def("removeLogCallback", [](Device& d, int cbId) { py::gil_scoped_release release; return d.removeLogCallback(cbId); }, py::arg("callbackId"), DOC(dai, Device, removeLogCallback))
+        .def("getUsbSpeed", [](Device& d) { py::gil_scoped_release release; return d.getUsbSpeed(); }, DOC(dai, Device, getUsbSpeed))
+        .def("getDeviceInfo", [](Device& d) { py::gil_scoped_release release; return d.getDeviceInfo(); }, DOC(dai, Device, getDeviceInfo))
+        .def("getMxId", [](Device& d) { py::gil_scoped_release release; return d.getMxId(); }, DOC(dai, Device, getMxId));
+    ;
 
 }
