@@ -16,14 +16,14 @@ description: >-
   tiny-yolo
 task_type: object_attributes
 files:
-  - name: tiny-yolo-v3_openvino_2021.2_6shave.blob
-    size: 17752512
-    sha256: 274540d3010765fbe505e2ba6bb5e380c021c2c0c13d7f9d1672fd4af38b8d15
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob
-  - name: tiny-yolo-v4_openvino_2021.2_6shave.blob
-    size: 12172416
-    sha256: 984c50e229652be9c25092df487185eae29e80e4ad7964ff3632f477dbf5e851
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob
+  - name: yolo-v3-tiny-tf_openvino_2021.4_6shave.blob
+    size: 17750208
+    sha256: f2729a42e277e994ba68f0e914b66fe52ce665175a80a5596b8d50d18b220343
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob
+  - name: yolo-v4-tiny-tf_openvino_2021.4_6shave.blob
+    size: 12168064
+    sha256: 0229c068ff220631affd323b84eece865bfe28d5fe8950ab602825a8444b86f4
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob
 
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
