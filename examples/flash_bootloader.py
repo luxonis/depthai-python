@@ -13,6 +13,9 @@ if len(sys.argv) > 1:
     else:
         print("Specify either 'usb' or 'network' bootloader type")
         exit()
+else:
+    print(f"Usage: {sys.argv[0]} <usb/network>")
+    exit()
 
 print("Warning! Flashing bootloader can potentially soft brick your device and should be done with caution.")
 print("Do not unplug your device while the bootloader is flashing.")
