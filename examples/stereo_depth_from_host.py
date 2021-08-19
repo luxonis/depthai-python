@@ -80,8 +80,8 @@ out_depth = True  # Disparity by default
 out_rectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled
-subpixel = False   # Better accuracy for longer distance, fractional disparity 32-levels
-median = dai.MedianFilter.KERNEL_7x7
+subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+median = dai.MedianFilter.MEDIAN_OFF
 
 # Sanitize some incompatible options
 if extended or subpixel:
@@ -229,7 +229,7 @@ with dai.Device(pipeline) as device:
         # Handle input streams, if any
         if in_q_list:
             dataset_size = 1  # Number of image pairs
-            frame_interval_ms = 500
+            frame_interval_ms = 50
             for i, q in enumerate(in_q_list):
                 path = args.dataset + '/' + str(index) + '/' + q.getName() + '.png'
                 data = cv2.imread(path, cv2.IMREAD_GRAYSCALE).reshape(720*1280)
