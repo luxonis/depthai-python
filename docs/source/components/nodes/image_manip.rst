@@ -87,6 +87,8 @@ Examples of functionality
 - :ref:`Mono & MobilenetSSD`
 - :ref:`RGB Encoding & Mono & MobilenetSSD`
 - :ref:`RGB Camera Control`
+- :ref:`ImageManip tiling` - Using ImageManip for frame tiling
+- :ref:`ImageManip rotate` - Using ImageManip to rotate color/mono frames
 
 Reference
 #########
