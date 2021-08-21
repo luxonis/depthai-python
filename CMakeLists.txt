@@ -157,6 +157,7 @@ target_link_libraries(${TARGET_NAME}
         pybind11::pybind11
         depthai::core # Use non-opencv target as we use opencv-python in bindings
         hedley
+        pybind11_json
 )
 
 # Find Git
