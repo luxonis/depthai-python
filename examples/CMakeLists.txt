@@ -53,7 +53,7 @@ function(add_python_example example_name python_script_path)
             "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
             # ASAN in case of sanitizers
             ${ASAN_ENVIRONMENT_VARS}
-            ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=5 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
+            ${CMAKE_COMMAND} -DTIMEOUT_SECONDS=10 -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ExecuteTestTimeout.cmake
             # Actual script to run
             ${PYTHON_EXECUTABLE} -Werror "${CMAKE_CURRENT_LIST_DIR}/${python_script_path}" ${arguments}
         )
@@ -126,3 +126,4 @@ add_python_example(imu_gyroscope_accelerometer imu_gyroscope_accelerometer.py)
 add_python_example(imu_rotation_vector imu_rotation_vector.py)
 add_python_example(rgb_depth_aligned rgb_depth_aligned.py)
 add_python_example(edge_detector edge_detector.py)
+add_python_example(script_camera_control script_camera_control.py)

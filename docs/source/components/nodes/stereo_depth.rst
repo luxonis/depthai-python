@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    stereo = pipeline.createStereoDepth()
+    stereo = pipeline.create(dai.node.StereoDepth)
 
   .. code-tab:: c++
 
@@ -74,60 +74,121 @@ If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`,
 
 Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
 
-Depth Modes
-###########
+Stereo depth FPS
+################
 
-Left-Right Check
-****************
+.. list-table::
+   :header-rows: 1
 
-Left-Right Check or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views
-are slightly different).
+   * - Stereo depth mode
+     - FPS for 720P
+   * - Standard mode
+     - 150
+   * - Left-Right Check
+     - 60
+   * - Subpixel Disparity
+     - 30
+   * - Extended Disparity
+     - 60
+   * - Subpixel + LR check
+     - 15
+   * - Extended + LR check
+     - 30
 
-#. Computes disparity by matching in R->L direction
-#. Computes disparity by matching in L->R direction
-#. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in the final disparity map is invalidated.
+Internal block diagram of StereoDepth node
+##########################################
 
-Extended Disparity
-******************
+.. image:: /_static/images/components/depth_diagram.jpeg
+   :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
 
-The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
-So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
-of :code:`focal_length * base_line_dist / 95`.
+On the diagram, red rectangle are firmware settings that are configurable via the API. Gray rectangles are settings that that are not yet
+exposed to the API. We plan on exposing as much configurability as possible, but please inform us if you would like to see these settings
+configurable sooner.
 
-#. Computes disparity on the original size images (e.g. 1280x720)
-#. Computes disparity on 2x downscaled images (e.g. 640x360)
-#. Combines the two level disparities on Shave, effectively covering a total disparity range of 191 pixels (in relation to the original resolution).
+If you click on the image, you will be redirected to the webapp. Some blocks have notes that provide additional technical information.
 
-Subpixel Disparity
-******************
+Currently configurable blocks
+*****************************
 
-Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals
+.. tabs::
 
-Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
-then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granular depth
-steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
-is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel.
+  .. tab:: Stereo Mode
 
-For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
+    .. tabs::
+
+      .. tab:: Left-Right Check
+
+        Left-Right Check or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views
+        are slightly different).
+
+        #. Computes disparity by matching in R->L direction
+        #. Computes disparity by matching in L->R direction
+        #. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in the final disparity map is invalidated.
+
+      .. tab:: Extended Disparity
+
+        The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
+        So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
+        of :code:`focal_length * base_line_dist / 95`.
+
+        #. Computes disparity on the original size images (e.g. 1280x720)
+        #. Computes disparity on 2x downscaled images (e.g. 640x360)
+        #. Combines the two level disparities on Shave, effectively covering a total disparity range of 191 pixels (in relation to the original resolution).
+
+      .. tab:: Subpixel Disparity
+
+        Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals
+
+        Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
+        then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granular depth
+        steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
+        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel.
+
+        For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
+
+  .. tab:: Mesh file / Homography matrix
+
+    Mesh files are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
+    These files helps in overcoming the distortions in the camera increasing the accuracy and also help in when `wide FOV <https://docs.luxonis.com/projects/hardware/en/latest/pages/arducam.html#arducam-compatible-cameras>`__ lens are used.
+
+    .. note::
+      Currently mesh files are generated only for stereo cameras on the host during calibration. The generated mesh files are stored in `depthai/resources <https://github.com/luxonis/depthai/tree/main/resources>`__ which users can load to the device. This process will be moved to on device in the upcoming releases.
+
+    .. doxygenfunction:: dai::node::StereoDepth::loadMeshFiles
+        :project: depthai-core
+        :no-link:
+
+    .. doxygenfunction:: dai::node::StereoDepth::loadMeshData
+        :project: depthai-core
+        :no-link:
+
+    .. doxygenfunction:: dai::node::StereoDepth::setMeshStep
+        :project: depthai-core
+        :no-link:
+
+  .. tab:: Confidence Threshold
+
+    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 dispairty levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
+    - **LR check threshold**: Disparity is considered for the output when the difference between LR and RL disparities is smaller than the LR check threshold.
+
+    .. doxygenfunction:: dai::StereoDepthConfig::setConfidenceThreshold
+        :project: depthai-core
+        :no-link:
+
+    .. doxygenfunction:: dai::StereoDepthConfig::setLeftRightCheckThreshold
+        :project: depthai-core
+        :no-link:
+
 
 Usage
 #####
-
-..
-  COnfigure different:
-  -median
-  -raw_depth
-  -rectified
-  -lr_check
-  -ext_disparity
-  -subpixel
 
 .. tabs::
 
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    stereo = pipeline.createStereoDepth()
+    stereo = pipeline.create(dai.node.StereoDepth)
 
     # Better handling for occlusions:
     stereo.setLeftRightCheck(False)
@@ -170,7 +231,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.StereoDepth
+    .. autoclass:: depthai.node.StereoDepth
       :members:
       :inherited-members:
       :noindex:
