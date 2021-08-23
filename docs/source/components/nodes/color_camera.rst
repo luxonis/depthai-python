@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    cam = pipeline.createColorCamera()
+    cam = pipeline.create(dai.node.ColorCamera)
 
   .. code-tab:: c++
 
@@ -67,7 +67,7 @@ Usage
   .. code-tab:: py
 
       pipeline = dai.Pipeline()
-      cam = pipeline.createColorCamera()
+      cam = pipeline.create(dai.node.ColorCamera)
       cam.setPreviewSize(300, 300)
       cam.setBoardSocket(dai.CameraBoardSocket.RGB)
       cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
@@ -98,7 +98,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.ColorCamera
+    .. autoclass:: depthai.node.ColorCamera
       :members:
       :inherited-members:
       :noindex:

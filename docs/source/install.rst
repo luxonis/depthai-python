@@ -221,7 +221,7 @@ tools in the `luxonis/depthai-library <https://hub.docker.com/r/luxonis/depthai-
 repository on Docker Hub. It builds upon the `luxonis/depthai-base
 <https://hub.docker.com/r/luxonis/depthai-base>`__ image.
 
-Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux host
+Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
 (with the X11 windowing system):
 
 .. code-block:: bash
@@ -234,7 +234,7 @@ Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux h
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        luxonis/depthai-library:latest \
-       python3 /depthai-python/examples/01_rgb_preview.py
+       python3 /depthai-python/examples/rgb_preview.py
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
@@ -398,11 +398,11 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
   cd examples
   python3 install_requirements.py
 
-Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
+Now, run the :code:`rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
 
 .. code-block:: bash
 
-  python3 01_rgb_preview.py
+  python3 rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 

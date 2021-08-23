@@ -7,7 +7,7 @@ import numpy as np
 import time
 import argparse
 
-nnPathDefault = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.2_6shave.blob')).resolve().absolute())
+nnPathDefault = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.4_6shave.blob')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection network blob", default=nnPathDefault)
 parser.add_argument('-s', '--sync', action="store_true", help="Sync RGB output with NN output", default=False)
@@ -23,7 +23,6 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_2)
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
