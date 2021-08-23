@@ -139,6 +139,9 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("readConfig", [](DeviceBootloader& db, DeviceBootloader::Memory memory, DeviceBootloader::Type type) { py::gil_scoped_release release; return db.readConfig(memory, type); }, py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("type") = DeviceBootloader::Type::AUTO, DOC(dai, DeviceBootloader, readConfig))
         .def("flashConfig", [](DeviceBootloader& db, const DeviceBootloader::Config& config, DeviceBootloader::Memory memory, DeviceBootloader::Type type) { py::gil_scoped_release release; return db.flashConfig(config, memory, type); }, py::arg("config"), py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("type") = DeviceBootloader::Type::AUTO, DOC(dai, DeviceBootloader, flashConfig))
 
+        .def("bootMemory", [](DeviceBootloader& db, const std::vector<uint8_t>& fw) { py::gil_scoped_release release; return db.bootMemory(fw); }, py::arg("fw"), DOC(dai, DeviceBootloader, bootMemory))
+        .def("bootUsbRomBootloader", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.bootUsbRomBootloader(); }, DOC(dai, DeviceBootloader, bootUsbRomBootloader))
+
         //.def("flashCustom", &DeviceBootloader::flashCustom, py::arg("memory"), py::arg("offset"), py::arg("progressCallback"), py::arg("data"), DOC(dai, DeviceBootloader, flashCustom))
         .def("getVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getVersion(); }, DOC(dai, DeviceBootloader, getVersion))
 
