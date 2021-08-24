@@ -83,7 +83,7 @@ void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE)
+        .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
         ;
-
 
 }
