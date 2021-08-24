@@ -64,6 +64,95 @@ as:
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
+Max Stereo Disparity Depth Resolution
+#####################################
+
+The maximum resolution for the depthai depth map is 1280x800 (1MP), with either a 92-pixel (default) or 192-pixel disparity search (when :ref:`Extended Disparity <extended_disparity>` is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when :ref:`Sub-Pixel Disparity <subpixel_disparity>` is enabled), resulting in a maximum theoretical depth precision of 192 (extended disparity search mode) * 32 (sub-pixel disparity search enabled) of 6,144.  Note however that sub-pixel and extended disparity, as of this writing, are not supported simultaneously (but will be Q2 2021), so the maximum depth precision is 3,072 depth steps.  More information on the disparity depth modes are below:
+
+#. Default (96-pixel disparity search): 1280x800 or 640x400, 96 depth steps
+#. Extended Disparity (192-pixel disparity search), :ref:`here <extended_disparity>`: 1280x800 or 640x400, 192 depth steps
+#. Subpixel Disparity (32 sub-pixel steps), :ref:`here <subpixel_disparity>`, 1280x800 or 640x400, 96 depth steps * 32 subpixel depth steps = 3,072 depth steps.
+#. LR-Check Disparity, :ref:`here <lrcheck_disparity>`: 1280x800, with disparity run in both directions for allowing recentering of the depth.
+
+Enable depthai to perceive closer distances
+###########################################
+
+If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of OAK-D.
+
+For OAK-D, the standard-settings minimum depth is around 70cm.
+
+This can be cut in 1/2 and 1/4 with the following options:
+
+1. Change the resolution to 640x400, instead of the standard 1280x800.
+
+Since the disparity-search of 96 is what limits the minimum depth, this means the minimum depth is now 1/2 of standard settings - 35cm instead of 70cm.  To do this with the example script, run `python3 depthai_demo.py -monor 400 -s previewout metaout depth -bb`.  In Gen1 software, this is the only option.  But in Gen2, Extended Disparity can again cut this min depth in 1/2.
+
+2. Enable Extended Disparity.
+
+In Gen2, Extended Disparity is supported, which extends the disparity search to 192 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth, so making the minimum depth for OAK-D 35cm for 1280x800 resolution and around 19.6cm (limited by the focal distance of the grayscale cameras) for 640x400 resolution.
+
+See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
+
+.. _extended_disparity:
+
+Extended Disparity Depth Mode
+#############################
+
+The :code:`extended disparity` mode affords a closer minimum distance for the given baseline. This increases the maximum disparity search from 96 to 192. So this cuts the minimum perceivable distance in half (given that the minimum distance is now :code:`focal_length * base_line_dist / 192` instead of :code:`focal_length * base_line_dist / 96`).
+
+- `OAK-D-CM4 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1097.html>`__: **0.414** meters
+- `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__ is **0.345** meters
+- `OAK-FFC-3P-OG <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098FFC.html>`__ is **0.115** meters
+
+See `here <https://github.com/luxonis/depthai-experiments#gen2-subpixel-and-lr-check-disparity-depth-here>`__ for examples of how to use Extended Disparity Mode.
+
+And for a bit more background as to how this mode is supported:
+
+Extended disparity: allows detecting closer distance objects, without compromising on long distance values (integer disparity) by running the following flow.
+
+#. Computes disparity on the original size images (e.g. 1280x720)
+#. Computes disparity on 2x downscaled images (e.g. 640x360)
+#. Combines the two level disparities on Shave, effectively covering a total disparity range of 192 pixels (in relation to the original resolution).
+
+.. _subpixel_disparity:
+
+Subpixel Disparity Depth Mode
+#############################
+
+Subpixel improves the precision and is especially useful for long range measurements.  It also helps for better estimating surface normals (comparison of normal disparity vs. subpixel disparity is `here <https://github.com/luxonis/depthai/issues/184>`__).
+
+Beside the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 bytes (disparities) per pixel, then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granual depth steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel.
+
+Examples of the difference in depth steps from standard disparity to subpixel disparity are shown below:
+
+Standard Disparity (96 depth steps):
+
+.. image:: https://user-images.githubusercontent.com/49298092/90796945-f2dee380-e34a-11ea-844d-0dd085b978de.png
+  :alt: Standard Disparity (96 depth steps)
+
+Subpixel Disparity (3,072 depth steps):
+
+.. image:: https://user-images.githubusercontent.com/32992551/98879214-388ae400-2442-11eb-8e5b-e7ddc35f3040.png
+  :alt: Subpixel Disparity (3,072 depth steps)
+
+.. image:: https://user-images.githubusercontent.com/32992551/98872146-500ea080-2433-11eb-950b-41b56e5d0293.png
+  :alt: Subpixel Disparity (3,072 depth steps)
+
+To run Subpixel on DepthAI/OAK, use the example `here <https://github.com/luxonis/depthai-experiments#gen2-subpixel-and-lr-check-disparity-depth-here>`__.
+
+.. _lrcheck_disparity:
+
+Left-Right Check Depth Mode
+###########################
+
+Left-Right Check, or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views are slightly different).
+
+#. Computes disparity by matching in R->L direction
+#. Computes disparity by matching in L->R direction
+#. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in final disparity map is invalidated.
+
+To run LR-Check on DepthAI/OAK, use the example `here <https://github.com/luxonis/depthai-experiments#gen2-subpixel-and-lr-check-disparity-depth-here>`__.
+
 Current limitations
 ###################
 
