@@ -21,6 +21,8 @@ with dai.Device() as device:
     print("LEFT Camera resized intrinsics...")
     print(M_left)
 
+    print(f"RGB FOV {calibData.getFov(dai.CameraBoardSocket.RGB)}, Mono FOV {calibData.getFov(dai.CameraBoardSocket.LEFT)}")
+
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
     R2 = np.array(calibData.getStereoRightRectificationRotation())
     M_right = np.array(calibData.getCameraIntrinsics(calibData.getStereoRightCameraId(), 1280, 720))
