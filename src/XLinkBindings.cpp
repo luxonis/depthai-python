@@ -18,9 +18,20 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
     py::enum_<XLinkProtocol_t> xLinkProtocol(m, "XLinkProtocol");
     py::enum_<XLinkPlatform_t> xLinkPlatform(m, "XLinkPlatform");
     py::class_<XLinkConnection, std::shared_ptr<XLinkConnection> > xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
-    py::class_<XLinkError> xLinkError(m, "XLinkError", DOC(dai, XLinkError));
-    py::class_<XLinkReadError, XLinkError> xLinkReadError(m, "XLinkReadError", DOC(dai, XLinkReadError));
-    py::class_<XLinkWriteError, XLinkError> xLinkWriteError(m, "XLinkWriteError", DOC(dai, XLinkWriteError));
+
+    // pybind11 limitation of having actual classes as exceptions
+    // Possible but requires a larger workaround
+    // https://stackoverflow.com/questions/62087383/how-can-you-bind-exceptions-with-custom-fields-and-constructors-in-pybind11-and
+
+    // For now just create simple exceptions that will expose what() message
+    auto xlinkError = py::register_exception<XLinkError>(m, "XLinkError", PyExc_RuntimeError);
+    auto xlinkReadError = py::register_exception<XLinkReadError>(m, "XLinkReadError", xlinkError.ptr());
+    auto xlinkWriteError = py::register_exception<XLinkWriteError>(m, "XLinkWriteError", xlinkError.ptr());
+
+    //py::class_<XLinkError> xLinkError(m, "XLinkError", DOC(dai, XLinkError));
+    //py::class_<XLinkReadError, XLinkError> xLinkReadError(m, "XLinkReadError", DOC(dai, XLinkReadError));
+    //py::class_<XLinkWriteError, XLinkError> xLinkWriteError(m, "XLinkWriteError", DOC(dai, XLinkWriteError));
+
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -84,15 +95,20 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE);
 
-    xLinkError
-        .def(py::init<XLinkError_t, const std::string &, const std::string &>())
-        .def_readonly("status", &XLinkError::status)
-        .def_readonly("streamName", &XLinkError::streamName)
-        .def("what", &XLinkError::what);
 
-    xLinkReadError
-        .def(py::init<XLinkError_t, const std::string &>());
+    //// Exceptions
 
-    xLinkWriteError
-        .def(py::init<XLinkError_t, const std::string &>());
+    // Applicable if above pybind11 limitation is removed
+    // xLinkError
+    //     .def(py::init<XLinkError_t, const std::string &, const std::string &>())
+    //     .def_readonly("status", &XLinkError::status)
+    //     .def_readonly("streamName", &XLinkError::streamName)
+    //     .def("what", &XLinkError::what);
+    //
+    // xLinkReadError
+    //     .def(py::init<XLinkError_t, const std::string &>());
+    //
+    // xLinkWriteError
+    //     .def(py::init<XLinkError_t, const std::string &>());
+
 }
