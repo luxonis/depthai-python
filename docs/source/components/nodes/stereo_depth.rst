@@ -67,12 +67,12 @@ the threshold get invalidated, i.e. their disparity value is set to zero. You ca
 Max Stereo Disparity Depth Resolution
 #####################################
 
-The maximum resolution for the depthai depth map is 1280x800 (1MP), with either a 92-pixel (default) or 192-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of 192 (extended disparity search mode) * 32 (sub-pixel disparity search enabled) of 6,144.  Note however that sub-pixel and extended disparity, as of this writing, are not supported simultaneously (but will be Q2 2021), so the maximum depth precision is 3,072 depth steps.  More information on the disparity depth modes are below:
+The resolution for the depthai depth map is 1280x800 (1MP), with either a 96-pixel (default) or 191-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of 191 (extended disparity search mode) * 32 (sub-pixel disparity search enabled) of 6,112.  However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__), so the maximum depth precision is currently 3,072 depth steps.  More information on the disparity depth modes are below:
 
-#. Default (96-pixel disparity search): 1280x800 or 640x400, 96 depth steps
-#. Extended Disparity (192-pixel disparity search): 1280x800 or 640x400, 192 depth steps
-#. Subpixel Disparity (32 sub-pixel steps): 1280x800 or 640x400, 96 depth steps * 32 subpixel depth steps = 3,072 depth steps.
-#. LR-Check Disparity: 1280x800, with disparity run in both directions for allowing recentering of the depth.
+#. Default (96-pixel disparity search): 96 depth steps
+#. Extended Disparity (191-pixel disparity search): 191 depth steps
+#. Subpixel Disparity (32 sub-pixel steps): 96 depth steps * 32 subpixel depth steps = 3,072 depth steps.
+#. LR-Check Disparity: with disparity run in both directions for allowing recentering of the depth.
 
 See :ref:`this <Currently configurable blocks>` table for more information about stereo modes.
 
