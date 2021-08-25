@@ -67,7 +67,9 @@ the threshold get invalidated, i.e. their disparity value is set to zero. You ca
 Max Stereo Disparity Depth Resolution
 #####################################
 
-The resolution for the depthai depth map is 1280x800 (1MP), with either a 96-pixel (default) or 191-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of 191 (extended disparity search mode) * 32 (sub-pixel disparity search enabled) of 6,112.  However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__), so the maximum depth precision is currently 3,072 depth steps.  More information on the disparity depth modes are below:
+DepthAI has either a 96-pixel (default) or 191-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of:
+:code:`191 * 32 = 6,112`.
+However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__), so the maximum depth precision is currently 3,072 depth steps.  More information on the disparity depth modes are below:
 
 #. Default (96-pixel disparity search): 96 depth steps
 #. Extended Disparity (191-pixel disparity search): 191 depth steps
@@ -79,19 +81,11 @@ See :ref:`this <Currently configurable blocks>` table for more information about
 Enable depthai to perceive closer distances
 ###########################################
 
-If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of OAK-D.
+If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
-For OAK-D, the standard-settings minimum depth is around 70cm.
+Minimum depth-perception distance can be cut in 1/2 and 1/4 by enabling `Extended Disparity <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity>`__ , which extends the disparity search to 191 pixels from the standard 96 pixels.
 
-This can be cut in 1/2 and 1/4 with the following options:
-
-1. Change the resolution to 640x400, instead of the standard 1280x800.
-
-Since the disparity-search of 96 is what limits the minimum depth, this means the minimum depth is now 1/2 of standard settings - 35cm instead of 70cm.  To do this with the example script, run `python3 depthai_demo.py -monor 400 -s previewout metaout depth -bb`.  In Gen1 software, this is the only option.  But in Gen2, Extended Disparity can again cut this min depth in 1/2.
-
-2. Enable Extended Disparity.
-
-In Gen2, Extended Disparity is supported, which extends the disparity search to 192 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth, so making the minimum depth for OAK-D 35cm for 1280x800 resolution and around 19.6cm (limited by the focal distance of the grayscale cameras) for 640x400 resolution.
+Note that minimum depth-perception distance may vary depending on the device, so please refer to documentation of your specific device for more information. For OAK-D, the standard-settings minimum depth is around 70cm at 800P resolution of mono cameras.
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
 

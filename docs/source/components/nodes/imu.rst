@@ -82,7 +82,7 @@ Usage
 IMU devices
 ###########
 
-Devices which support IMU are:
+List of devices that have an IMU sensor on-board:
 * OAK-D
 * OAK-D-IOT-40
 * OAK-D-IOT-75
