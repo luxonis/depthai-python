@@ -123,6 +123,17 @@ But these theoretical maximums are not achievable in the real-world, as the disp
 
 We also support subpixel depth mode, which extends this theoretical max, but again this will likely not be the *actual* limit of the max object detection distance, but rather the neural network itself will be. This subpixel use will likely have application-specific benefits.
 
+Calculate depth using dispairty map
+###################################
+
+Since dispairty and depth are inversely related, we can calculate depth by using this formula:
+
+.. code-block:: python
+
+  z = f * B / d
+  
+where f is focal length (in pixels), B is baseline and d is disparity (in pixels).
+
 Current limitations
 ###################
 
