@@ -208,7 +208,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ;
 
     // Bind constructors
-    bindConstructors<Device>(deviceBase);
+    bindConstructors<DeviceBase>(deviceBase);
     // Bind the rest
     deviceBase
         // Python only methods
