@@ -69,12 +69,16 @@ Max Stereo Disparity Depth Resolution
 
 DepthAI has either a 96-pixel (default) or 191-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of:
 :code:`191 * 32 = 6,112`.
-However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__), so the maximum depth precision is currently 3,072 depth steps.  More information on the disparity depth modes are below:
+However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__). More information on the disparity depth modes are below:
 
 #. Default (96-pixel disparity search): 96 depth steps
 #. Extended Disparity (191-pixel disparity search): 191 depth steps
 #. Subpixel Disparity (32 sub-pixel steps): 96 depth steps * 32 subpixel depth steps = 3,072 depth steps.
 #. LR-Check Disparity: with disparity run in both directions for allowing recentering of the depth.
+
+Keep in mind the disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then small variations in depth generate great depth differences. Similarly, if disparity value is big, then small variations in depth do not generate depth differences.
+
+Also note that depth accuracy decreases as distance increases. This is due to the fact that when an object is further away, the distance between stereo cameras (baseline) becomes negligible. This is essentially the same as if the two stereo cameras were moved closer and closer together, until only one camera, with no depth perception, would remain.
 
 See :ref:`this <Currently configurable blocks>` table for more information about stereo modes.
 
@@ -83,11 +87,41 @@ Enable depthai to perceive closer distances
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
-Minimum depth-perception distance can be cut in 1/2 and 1/4 by enabling `Extended Disparity <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity>`__ , which extends the disparity search to 191 pixels from the standard 96 pixels.
+For OAK-D, the standard-settings minimum depth is around 70cm, but note that default minimum depth-perception distance varies depending on baseline and mono sensor resolution/FOV, so please refer to documentation of your specific device for more information.
 
-Note that minimum depth-perception distance may vary depending on the device, so please refer to documentation of your specific device for more information. For OAK-D, the standard-settings minimum depth is around 70cm at 800P resolution of mono cameras.
+Minimum depth-perception distance can be cut in 1/2 (to around 35cm for the OAK-D) with the following options:
+
+1. Change the resolution to 640x400, instead of the standard 1280x800.
+
+Since the disparity-search of 96 is what limits the minimum depth, this means the minimum depth is now 1/2 of standard settings.
+
+2. Enable Extended Disparity.
+
+In Gen2, Extended Disparity is supported, which extends the disparity search to 191 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth.
+
+Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, however at such short distances the minimum depth is limited by focal length, which is around 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
+
+Maximum Depths Visible by DepthAI
+#################################
+
+The maximum depth perception for 3D object detection is limited by how far away the object detector (or other neural network) can detect objects, and after that, the minimum angle difference between the objects. We’ve found that OpenVINO detects people to about 22 meters or so.
+
+So if the object detector is not the limit, the maximum distance will be limited by the physics of the baseline and the number of pixels. So once an object is less than 0.056 degrees (which corresponds to 1 pixel) difference between one camera to the other, it is past the point where full-pixel disparity can be done. The formula used to calculate this distance is an approximation, but is as follows:
+
+.. code-block:: python
+
+  Dm = (baseline/2) * tan_d((90 - HFOV / HPixels)*pi/2)
+  
+So using this formula for existing models the *theoretical* max distance is:
+
+- `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__ (7.5cm baseline): 38.4 meters
+- `OAK-D-CM4 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1097.html>`__ (9cm baseline): 46 meters
+
+But these theoretical maximums are not achievable in the real-world, as the disparity matching is not perfect, nor are the optics, image sensor, etc., so the actual maximum depth will be application-specific depending on lighting, neural model, feature sizes, baselines, etc.
+
+We also support subpixel depth mode, which extends this theoretical max, but again this will likely not be the *actual* limit of the max object detection distance, but rather the neural network itself will be. This subpixel use will likely have application-specific benefits.
 
 Current limitations
 ###################
