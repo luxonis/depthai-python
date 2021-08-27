@@ -64,26 +64,8 @@ as:
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
-Max Stereo Disparity Depth Resolution
-#####################################
-
-DepthAI has either a 96-pixel (default) or 191-pixel disparity search (when Extended Disparity is enabled) and either a full-pixel (default) or sub-pixel matching with precision of 32 sub-pixel steps (when Sub-Pixel Disparity is enabled), resulting in a maximum theoretical depth precision of:
-:code:`191 * 32 = 6,112`.
-However sub-pixel and extended disparity are not yet supported simultaneously, but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__). More information on the disparity depth modes are below:
-
-#. Default (96-pixel disparity search): 96 depth steps
-#. Extended Disparity (191-pixel disparity search): 191 depth steps
-#. Subpixel Disparity (32 sub-pixel steps): 96 depth steps * 32 subpixel depth steps = 3,072 depth steps.
-#. LR-Check Disparity: with disparity run in both directions for allowing recentering of the depth.
-
-Keep in mind the disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then small variations in depth generate great depth differences. Similarly, if disparity value is big, then small variations in depth do not generate depth differences.
-
-Also note that depth accuracy decreases as distance increases. This is due to the fact that when an object is further away, the distance between stereo cameras (baseline) becomes negligible. This is essentially the same as if the two stereo cameras were moved closer and closer together, until only one camera, with no depth perception, would remain.
-
-See :ref:`this <Currently configurable blocks>` table for more information about stereo modes.
-
-Enable depthai to perceive closer distances
-###########################################
+Min stereo depth distance
+#########################
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
@@ -97,58 +79,69 @@ Since the disparity-search of 96 is what limits the minimum depth, this means th
 
 2. Enable Extended Disparity.
 
-In Gen2, Extended Disparity is supported, which extends the disparity search to 191 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth.
+This mode extends the disparity search to 191 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth.
 
 Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, however at such short distances the minimum depth is limited by focal length, which is around 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
 
-Maximum Depths Visible by DepthAI
-#################################
+Max stereo depth distance
+#########################
 
-The maximum depth perception for 3D object detection is limited by how far away the object detector (or other neural network) can detect objects, and after that, the minimum angle difference between the objects. We’ve found that OpenVINO detects people to about 22 meters or so.
-
-So if the object detector is not the limit, the maximum distance will be limited by the physics of the baseline and the number of pixels. So once an object is less than 0.056 degrees (which corresponds to 1 pixel) difference between one camera to the other, it is past the point where full-pixel disparity can be done. The formula used to calculate this distance is an approximation, but is as follows:
+The maximum depth perception distance depends on lighting, feature sizes, baselines, etc. The formula used to calculate this distance is an approximation, but is as follows:
 
 .. code-block:: python
 
-  Dm = (baseline/2) * tan_d((90 - HFOV / HPixels)*pi/2)
+  Dm = (baseline/2) * tan((90 - HFOV / HPixels)*pi/180)
   
 So using this formula for existing models the *theoretical* max distance is:
 
-- `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__ (7.5cm baseline): 38.4 meters
-- `OAK-D-CM4 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1097.html>`__ (9cm baseline): 46 meters
+.. code-block:: python
 
-But these theoretical maximums are not achievable in the real-world, as the disparity matching is not perfect, nor are the optics, image sensor, etc., so the actual maximum depth will be application-specific depending on lighting, neural model, feature sizes, baselines, etc.
+  # For OAK-D (7.5cm baseline)
+  Dm = (7.5/2) * tan((90 - 71.9/1280)*pi/180) = 3825.03cm = 38.25 meters
+  
+  # For OAK-D-CM4 (9cm baseline)
+  Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
 
-We also support subpixel depth mode, which extends this theoretical max, but again this will likely not be the *actual* limit of the max object detection distance, but rather the neural network itself will be. This subpixel use will likely have application-specific benefits.
+Note that depth accuracy decreases as distance increases. This is due to the fact that when an object is further away, the distance between stereo cameras (baseline) becomes negligible. This is essentially the same as if the two stereo cameras were moved closer and closer together, until only one camera, with no depth perception, would remain. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+
+If greater precision for long range measurements is required, consider enabling Subpixel Disparity. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
 
 Calculate depth using dispairty map
 ###################################
 
-Since dispairty and depth are inversely related, we can calculate depth by using this formula:
+Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then small variations in depth generate great depth differences. Similarly, if disparity value is big, then small variations in depth do not generate depth differences.
+
+By considering this fact, depth can be calculated using this formula:
 
 .. code-block:: python
 
-  z = f * B / d
+  depth = focal_length_in_pixels * baseline / disparity_in_pixels
   
-where f is focal length (in pixels), B is distance between two mono cameras - baseline and d is disparity (in pixels). Note the unit used for baseline and depth (result) is the same.
+where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
 
 To get focal length in pixels, use this formula:
 
 .. code-block:: python
 
-  focal_pixel = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
+  focal_length_in_pixels = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
+  
+  # With 400P mono camera resolution where HFOV=71.9 degrees
+  focal_length_in_pixels = 640 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 441.25
+  
+  # With 800P mono camera resolution where HFOV=71.9 degrees
+  focal_length_in_pixels = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
 
-where image_width_in_pixels is either 1280 or 640 depending on your current resolution and HFOV is 71.9 degrees.
-
-For example OAK-D has a baseline of 7.5cm, focal length of 883 pixels and a value of 1000 pixels will be used for dispairty. By using the formula above we get:
+Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
 
 .. code-block:: python
 
-  883 * 7.5cm / 1000 = 6.6225cm
-
-It can be intuitively seen why greater values of disparity yield smaller depths. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+  # For OAK-D @ 400P mono cameras and disparity of eg. 50 pixels
+  depth = 441.25 * 7.5 / 50 = 66.19 # cm
+  
+  # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
+  depth = 882.5 * 7.5 / 10 = 661.88 # cm
 
 Current limitations
 ###################
@@ -214,8 +207,8 @@ Currently configurable blocks
       .. tab:: Extended Disparity
 
         The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
-        So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
-        of :code:`focal_length * base_line_dist / 95`.
+        So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 191` instead
+        of :code:`focal_length * base_line_dist / 96`.
 
         #. Computes disparity on the original size images (e.g. 1280x720)
         #. Computes disparity on 2x downscaled images (e.g. 640x360)
@@ -223,12 +216,14 @@ Currently configurable blocks
 
       .. tab:: Subpixel Disparity
 
-        Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals
+        Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals.
 
         Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
         then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granular depth
         steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
-        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel.
+        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel. In this mode, stereo cameras perform:
+		:code:`96 depth steps * 32 subpixel depth steps = 3,072 depth steps.`
+		Note that Subpixel and Extended Disparity are not yet supported simultaneously (which would result in :code:`191 * 32 = 6,112 depth steps`), but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__).
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
