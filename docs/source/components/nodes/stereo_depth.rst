@@ -132,7 +132,23 @@ Since dispairty and depth are inversely related, we can calculate depth by using
 
   z = f * B / d
   
-where f is focal length (in pixels), B is baseline and d is disparity (in pixels).
+where f is focal length (in pixels), B is distance between two mono cameras - baseline and d is disparity (in pixels). Note the unit used for baseline and depth (result) is the same.
+
+To get focal length in pixels, use this formula:
+
+.. code-block:: python
+
+  focal_pixel = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
+
+where image_width_in_pixels is either 1280 or 640 depending on your current resolution and HFOV is 71.9 degrees.
+
+For example OAK-D has a baseline of 7.5cm, focal length of 883 pixels and a value of 1000 pixels will be used for dispairty. By using the formula above we get:
+
+.. code-block:: python
+
+  883 * 7.5cm / 1000 = 6.6225cm
+
+It can be intuitively seen why greater values of disparity yield smaller depths. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
 
 Current limitations
 ###################
