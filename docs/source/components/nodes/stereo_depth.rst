@@ -99,6 +99,8 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
   # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
   depth = 882.5 * 7.5 / 10 = 661.88 # cm
 
+Note the value of disparity depth data is stored in uint16, where 0 is a special value, meaning that distance is unknown.
+
 Min stereo depth distance
 #########################
 
@@ -145,7 +147,7 @@ So using this formula for existing models the *theoretical* max distance is:
   # For OAK-D-CM4 (9cm baseline)
   Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
 
-If greater precision for long range measurements is required, consider enabling Subpixel Disparity. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
+If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
 
 Depth perception accuracy
 #########################
@@ -166,7 +168,7 @@ Lower baseline leads to less accurate depth perception, which also means accurac
 
 .. note::
 
-   OAK-D-PRO will include an IR dot projector, which will enable operation in no light. For outdoors, the IR laser dot projector is only relevant at night. It is purely like a "visual spray-paint" to put texture onto textureless things (like big/blank/clean walls indoors). For more information see the development progress `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
+   OAK-D-PRO will include both IR dot projector and IR LED, which will enable operation in no light. IR LED is used to illuminate the whole area (for mono/color frames), while IR dot projector is mostly for accurate disparity matching - to have good quality depth maps on blank surfaces as well. For outdoors, the IR laser dot projector is only relevant at night. For more information see the development progress `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
 
 Current limitations
 ###################
