@@ -106,11 +106,11 @@ If the depth results for close-in objects look weird, this is likely because the
 
 To calcualte this miminum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
 
-For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **96**. By using the above formula we get:
+For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the above formula we get:
 
 .. code-block:: python
 
-  min_distance = 882.5 * 7.5cm / 96 = 68.95cm
+  min_distance = 882.5 * 7.5cm / 95 = 68.95cm
 
 or roughly 70cm.
 
@@ -232,8 +232,8 @@ Currently configurable blocks
       .. tab:: Extended Disparity
 
         The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
-        So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 191` instead
-        of :code:`focal_length * base_line_dist / 96`.
+        So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
+        of :code:`focal_length * base_line_dist / 95`.
 
         #. Computes disparity on the original size images (e.g. 1280x720)
         #. Computes disparity on 2x downscaled images (e.g. 640x360)
