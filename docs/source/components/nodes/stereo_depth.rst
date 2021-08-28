@@ -231,7 +231,7 @@ Currently configurable blocks
 
       .. tab:: Extended Disparity
 
-        The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191.
+        The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191, meaning the range is now: **[0..190]**.
         So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
         of :code:`focal_length * base_line_dist / 95`.
 
