@@ -110,7 +110,7 @@ For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5
 
 .. code-block:: python
 
-  min_distance = 882.5 * 7.5cm / 95 = 68.95cm
+  min_distance = 882.5 * 7.5cm / 95 = 69.67cm
 
 or roughly 70cm.
 
