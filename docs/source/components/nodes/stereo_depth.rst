@@ -64,50 +64,6 @@ as:
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
-Min stereo depth distance
-#########################
-
-If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
-
-For OAK-D, the standard-settings minimum depth is around 70cm, but note that default minimum depth-perception distance varies depending on baseline and mono sensor resolution/FOV, so please refer to documentation of your specific device for more information.
-
-Minimum depth-perception distance can be cut in 1/2 (to around 35cm for the OAK-D) with the following options:
-
-1. Change the resolution to 640x400, instead of the standard 1280x800.
-
-Since the disparity-search of 96 is what limits the minimum depth, this means the minimum depth is now 1/2 of standard settings.
-
-2. Enable Extended Disparity.
-
-This mode extends the disparity search to 191 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth.
-
-Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, however at such short distances the minimum depth is limited by focal length, which is around 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
-
-See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
-
-Max stereo depth distance
-#########################
-
-The maximum depth perception distance depends on lighting, feature sizes, baselines, etc. The formula used to calculate this distance is an approximation, but is as follows:
-
-.. code-block:: python
-
-  Dm = (baseline/2) * tan((90 - HFOV / HPixels)*pi/180)
-  
-So using this formula for existing models the *theoretical* max distance is:
-
-.. code-block:: python
-
-  # For OAK-D (7.5cm baseline)
-  Dm = (7.5/2) * tan((90 - 71.9/1280)*pi/180) = 3825.03cm = 38.25 meters
-  
-  # For OAK-D-CM4 (9cm baseline)
-  Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
-
-Note that depth accuracy decreases as distance increases. This is due to the fact that when an object is further away, the distance between stereo cameras (baseline) becomes negligible. This is essentially the same as if the two stereo cameras were moved closer and closer together, until only one camera, with no depth perception, would remain. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
-
-If greater precision for long range measurements is required, consider enabling Subpixel Disparity. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
-
 Calculate depth using dispairty map
 ###################################
 
@@ -142,6 +98,75 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
   
   # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
   depth = 882.5 * 7.5 / 10 = 661.88 # cm
+
+Min stereo depth distance
+#########################
+
+If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
+
+To calcualte this miminum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
+
+For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **96**. By using the above formula we get:
+
+.. code-block:: python
+
+  min_distance = 882.5 * 7.5cm / 96 = 68.95cm
+
+or roughly 70cm.
+
+However this distance can be cut in 1/2 (to around 35cm for the OAK-D) with the following options:
+
+1. Changing the resolution to 640x400, instead of the standard 1280x800.
+
+2. Enabling Extended Disparity.
+
+This mode extends the disparity search to a maximum of 191 pixels from the standard 96 pixels, thereby 1/2-ing the minimum depth.
+
+Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, but at such short distances the minimum depth is limited by focal length, which is 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
+
+See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
+
+Max stereo depth distance
+#########################
+
+The maximum depth perception distance depends on the :ref:`accuracy of the depth perception <Depth perception accuracy>`. The formula used to calculate this distance is an approximation, but is as follows:
+
+.. code-block:: python
+
+  Dm = (baseline/2) * tan((90 - HFOV / HPixels)*pi/180)
+  
+So using this formula for existing models the *theoretical* max distance is:
+
+.. code-block:: python
+
+  # For OAK-D (7.5cm baseline)
+  Dm = (7.5/2) * tan((90 - 71.9/1280)*pi/180) = 3825.03cm = 38.25 meters
+  
+  # For OAK-D-CM4 (9cm baseline)
+  Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
+
+If greater precision for long range measurements is required, consider enabling Subpixel Disparity. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
+
+Depth perception accuracy
+#########################
+
+Disparity depth works by matching features from one image to the other and its accuracy is based on multiple parameters:
+
+* Texture of objects / backgrounds
+
+Backgrounds may interfere with the object detection, since backgrounds are objects too, which will make depth perception less accurate. So disparity depth works very well outdoors as there are very rarely perfectly-clean/blank surfaces there - but these are relatively commonplace indoors (in clean buildings at least).
+
+* Lighting
+
+If the illumination is low, the diparity map will be of low confidence, which will result in a noisy depth map.
+
+* Baseline / distance to objects
+
+Lower baseline leads to less accurate depth perception, which also means accuracy decreases as distance to objects increases. This is due to the fact that when an object is further away, the distance between mono cameras (baseline) becomes negligible. This is essentially the same as if the two cameras were moved closer and closer together, until only one camera would remain. At that point baseline would be equal to 0 and no depth information would be available. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+
+.. note::
+
+   OAK-D-PRO will include an IR dot projector, which will enable operation in no light. For outdoors, the IR laser dot projector is only relevant at night. It is purely like a "visual spray-paint" to put texture onto textureless things (like big/blank/clean walls indoors). For more information see the development progress `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
 
 Current limitations
 ###################
