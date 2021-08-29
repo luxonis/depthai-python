@@ -53,6 +53,16 @@ Inputs and Outputs
 Disparity
 #########
 
+Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
+By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)`in the :code:`Right view`.
+
+.. image:: /_static/images/components/disparity_explanation.jpeg
+   :target: https://stackoverflow.com/a/17620159
+
+Since we know points :code:`XL` and :code:`XR` refer to the same point: :code:`X`, the disparity for this point is equal to the magnitude of the vector between :code:`(u, v)` and :code:`(p, q)`.
+
+For a more detailed explanation see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+
 When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
 as:
 
@@ -164,7 +174,7 @@ If the illumination is low, the diparity map will be of low confidence, which wi
 
 * Baseline / distance to objects
 
-Lower baseline leads to less accurate depth perception, which also means accuracy decreases as distance to objects increases. This is due to the fact that when an object is further away, the distance between mono cameras (baseline) becomes negligible. This is essentially the same as if the two cameras were moved closer and closer together, until only one camera would remain. At that point baseline would be equal to 0 and no depth information would be available. For more information see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+Lower baseline leads to less accurate depth perception, which also means accuracy decreases as distance to objects increases. This is due to the fact that when an object is further away, the distance between mono cameras (baseline) becomes negligible. This is essentially the same as if the two cameras were moved closer and closer together, until only one camera would remain. At that point baseline would be equal to 0 and no depth information would be available.
 
 .. note::
 
