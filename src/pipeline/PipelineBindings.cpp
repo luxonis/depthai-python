@@ -24,6 +24,7 @@
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
+#include "depthai/pipeline/node/FeatureTracker.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -71,6 +72,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("pipelineVersion", &GlobalProperties::pipelineVersion)
         .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize, DOC(dai, GlobalProperties, cameraTuningBlobSize))
         .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri, DOC(dai, GlobalProperties, cameraTuningBlobUri))
+        .def_readwrite("xlinkChunkSize", &GlobalProperties::xlinkChunkSize, DOC(dai, GlobalProperties, xlinkChunkSize))
         ;
 
     // bind pipeline
@@ -94,6 +96,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
         .def("getOpenVINOVersion", &Pipeline::getOpenVINOVersion, DOC(dai, Pipeline, getOpenVINOVersion))
         .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
+        .def("setXLinkChunkSize", &Pipeline::setXLinkChunkSize, py::arg("sizeBytes"), DOC(dai, Pipeline, setXLinkChunkSize))
         .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
         .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
         // 'Template' create function
@@ -125,6 +128,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
         .def("createIMU", &Pipeline::create<node::IMU>)
         .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
+        .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
+
         ;
 
 
