@@ -91,6 +91,7 @@ List of devices that have an IMU sensor on-board:
 * OAK-D-LITE
 * OAK-D-PRO
 * OAK-D-FFC-3P
+* OAK-WD-PRO
 
 
 IMU sensors
