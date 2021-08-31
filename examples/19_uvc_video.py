@@ -118,14 +118,14 @@ if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
 
     if args.create_dap:
         path = args.create_dap
-        bootloader.saveDepthaiApplicationPackage(path, pipeline)
+        bootloader.saveDepthaiApplicationPackage(path, pipeline, "usbboot.bin")
         print("Created DAP file:", path)
         quit()
 
     startTime = time.monotonic()
     if args.flash_bootloader:
         print("Flashing bootloader...")
-        bootloader.flashBootloader(progress, "usbboot.bin")
+        bootloader.flashBootloader(progress)
         print("Note: make sure to change DIP switch to 0x8 (001000), if not done already")
     elif args.flash_app or args.flash_dap:
         if args.flash_app:
