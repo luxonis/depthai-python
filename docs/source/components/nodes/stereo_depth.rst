@@ -84,7 +84,7 @@ By considering this fact, depth can be calculated using this formula:
 .. code-block:: python
 
   depth = focal_length_in_pixels * baseline / disparity_in_pixels
-  
+
 where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
 
 To get focal length in pixels, use this formula:
@@ -109,7 +109,7 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
   # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
   depth = 882.5 * 7.5 / 10 = 661.88 # cm
 
-Note the value of disparity depth data is stored in uint16, where 0 is a special value, meaning that distance is unknown.
+Note the value of disparity depth data is stored in :code:`uint16`, where 0 is a special value, meaning that distance is unknown.
 
 Min stereo depth distance
 #########################
@@ -146,7 +146,7 @@ The maximum depth perception distance depends on the :ref:`accuracy of the depth
 .. code-block:: python
 
   Dm = (baseline/2) * tan((90 - HFOV / HPixels)*pi/180)
-  
+
 So using this formula for existing models the *theoretical* max distance is:
 
 .. code-block:: python
