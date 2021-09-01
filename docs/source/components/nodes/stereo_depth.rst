@@ -50,30 +50,6 @@ Inputs and Outputs
 - :code:`rectifiedRight` - :ref:`ImgFrame`
 - :code:`syncedRight` - :ref:`ImgFrame`
 
-Disparity
-#########
-
-Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
-By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
-
-.. image:: /_static/images/components/disparity_explanation.jpeg
-   :target: https://stackoverflow.com/a/17620159
-
-Since we know points :code:`XL` and :code:`XR` refer to the same point: :code:`X`, the disparity for this point is equal to the magnitude of the vector between :code:`(u, v)` and :code:`(p, q)`.
-
-For a more detailed explanation see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
-
-When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
-as:
-
-- :code:`0` - maximum confidence that it holds a valid value
-- :code:`255` - minimum confidence, so there is more chance that the value is incorrect
-
-(this confidence score is kind-of inverted, if say comparing with NN)
-
-For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
-the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
-
 Internal block diagram of StereoDepth node
 ##########################################
 
@@ -179,6 +155,30 @@ Reference
       :members:
       :private-members:
       :undoc-members:
+
+Disparity
+#########
+
+Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
+By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
+
+.. image:: /_static/images/components/disparity_explanation.jpeg
+   :target: https://stackoverflow.com/a/17620159
+
+Since we know points :code:`XL` and :code:`XR` refer to the same point: :code:`X`, the disparity for this point is equal to the magnitude of the vector between :code:`(u, v)` and :code:`(p, q)`.
+
+For a more detailed explanation see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
+
+When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
+as:
+
+- :code:`0` - maximum confidence that it holds a valid value
+- :code:`255` - minimum confidence, so there is more chance that the value is incorrect
+
+(this confidence score is kind-of inverted, if say comparing with NN)
+
+For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
+the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
 Calculate depth using dispairty map
 ###################################
