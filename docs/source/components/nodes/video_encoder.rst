@@ -74,6 +74,10 @@ Usage
     cam->still.link(stillEncoder->input);
     cam->video.link(videoEncoder->input);
 
+Limitations
+###########
+
+- Due to a HW constraint, video encoding can be done only on frames whose width values are multiples of 32.
 
 Examples of functionality
 #########################
