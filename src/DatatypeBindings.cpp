@@ -808,8 +808,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSequenceNum", &ImgFrame::setSequenceNum, py::arg("seq"), DOC(dai, ImgFrame, setSequenceNum))
         .def("setWidth", &ImgFrame::setWidth, py::arg("width"), DOC(dai, ImgFrame, setWidth))
         .def("setHeight", &ImgFrame::setHeight, py::arg("height"), DOC(dai, ImgFrame, setHeight))
-        .def("setSize", static_cast<void(ImgFrame::*)(unsigned int, unsigned int)>(&ImgFrame::setSize), py::arg("width"), py::arg("height"), DOC(dai, node, ImgFrame, setSize))
-        .def("setSize", static_cast<void(ImgFrame::*)(std::tuple<unsigned int, unsigned int>)>(&ImgFrame::setSize), py::arg("sizer"), DOC(dai, node, ImgFrame, setSize, 2))
+        .def("setSize", static_cast<void(ImgFrame::*)(unsigned int, unsigned int)>(&ImgFrame::setSize), py::arg("width"), py::arg("height"), DOC(dai, ImgFrame, setSize))
+        .def("setSize", static_cast<void(ImgFrame::*)(std::tuple<unsigned int, unsigned int>)>(&ImgFrame::setSize), py::arg("sizer"), DOC(dai, ImgFrame, setSize, 2))
         .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
         ;
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
@@ -867,8 +867,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     imageManipConfig
         .def(py::init<>())
         // setters
-        .def("setCropRect", static_cast<void(ImageManipConfig::*)(float, float, float, float)>(&ImageManipConfig::setCropRect), py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, node, ImageManipConfig, setCropRect))
-        .def("setCropRect", static_cast<void(ImageManipConfig::*)(std::tuple<float, float, float, float>)>(&ImageManipConfig::setCropRect), py::arg("coordinates"), DOC(dai, node, ImageManipConfig, setCropRect, 2))
+        .def("setCropRect", static_cast<void(ImageManipConfig::*)(float, float, float, float)>(&ImageManipConfig::setCropRect), py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
+        .def("setCropRect", static_cast<void(ImageManipConfig::*)(std::tuple<float, float, float, float>)>(&ImageManipConfig::setCropRect), py::arg("coordinates"), DOC(dai, ImageManipConfig, setCropRect, 2))
         .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords") = true, DOC(dai, ImageManipConfig, setCropRotatedRect))
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio")=1.0f, DOC(dai, ImageManipConfig, setCenterCrop))
         .def("setWarpTransformFourPoints", &ImageManipConfig::setWarpTransformFourPoints, py::arg("pt"), py::arg("normalizedCoords"), DOC(dai, ImageManipConfig, setWarpTransformFourPoints))
@@ -877,10 +877,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setWarpBorderFillColor", &ImageManipConfig::setWarpBorderFillColor, py::arg("red"), py::arg("green"), py::arg("blue"), DOC(dai, ImageManipConfig, setWarpBorderFillColor))
         .def("setRotationDegrees", &ImageManipConfig::setRotationDegrees, py::arg("deg"), DOC(dai, ImageManipConfig, setRotationDegrees))
         .def("setRotationRadians", &ImageManipConfig::setRotationRadians, py::arg("rad"), DOC(dai, ImageManipConfig, setRotationRadians))
-        .def("setResize", static_cast<void(ImageManipConfig::*)(int, int)>(&ImageManipConfig::setResize), py::arg("w"), py::arg("h"), DOC(dai, node, ImageManipConfig, setResize))
-        .def("setResize", static_cast<void(ImageManipConfig::*)(std::tuple<int, int>)>(&ImageManipConfig::setResize), py::arg("size"), DOC(dai, node, ImageManipConfig, setResize, 2))
-        .def("setResizeThumbnail", static_cast<void(ImageManipConfig::*)(int, int, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, node, ImageManipConfig, setResizeThumbnail))
-        .def("setResizeThumbnail", static_cast<void(ImageManipConfig::*)(std::tuple<int, int>, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("size"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, node, ImageManipConfig, setResizeThumbnail, 2))
+        .def("setResize", static_cast<void(ImageManipConfig::*)(int, int)>(&ImageManipConfig::setResize), py::arg("w"), py::arg("h"), DOC(dai, ImageManipConfig, setResize))
+        .def("setResize", static_cast<void(ImageManipConfig::*)(std::tuple<int, int>)>(&ImageManipConfig::setResize), py::arg("size"), DOC(dai, ImageManipConfig, setResize, 2))
+        .def("setResizeThumbnail", static_cast<void(ImageManipConfig::*)(int, int, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail))
+        .def("setResizeThumbnail", static_cast<void(ImageManipConfig::*)(std::tuple<int, int>, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("size"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail, 2))
         .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
