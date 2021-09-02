@@ -79,6 +79,20 @@ Usage
     // useful to reduce device's CPU load  and number of lost packets, if CPU load is high on device side due to multiple nodes
     imu->setMaxBatchReports(10);
 
+IMU devices
+###########
+
+List of devices that have an IMU sensor on-board:
+* OAK-D
+* OAK-D-IOT-40
+* OAK-D-IOT-75
+* OAK-D-CM4-POE
+* OAK-D-POE
+* OAK-D-LITE
+* OAK-D-PRO
+* OAK-D-FFC-3P
+* OAK-WD-PRO
+
 
 IMU sensors
 ###########
