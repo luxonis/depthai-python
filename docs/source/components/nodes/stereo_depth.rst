@@ -183,7 +183,7 @@ the threshold get invalidated, i.e. their disparity value is set to zero. You ca
 Calculate depth using dispairty map
 ###################################
 
-Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then small variations in depth generate great depth differences. Similarly, if disparity value is big, then small variations in depth do not generate depth differences.
+Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
 
 By considering this fact, depth can be calculated using this formula:
 
@@ -280,7 +280,8 @@ If the illumination is low, the diparity map will be of low confidence, which wi
 
 * Baseline / distance to objects
 
-Lower baseline leads to less accurate depth perception, which also means accuracy decreases as distance to objects increases. This is due to the fact that when an object is further away, the distance between mono cameras (baseline) becomes negligible. This is essentially the same as if the two cameras were moved closer and closer together, until only one camera would remain. At that point baseline would be equal to 0 and no depth information would be available.
+Lower baseline enables us to detect the depth at a closer distance as long as the object is visible in both the frames. However, this reduces the accuracy for large distances due to less pixels representing the object and disparity decreasing towards 0 much faster.
+So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
 
 .. note::
 
