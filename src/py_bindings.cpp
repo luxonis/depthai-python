@@ -59,8 +59,28 @@ PYBIND11_MODULE(depthai,m)
     // Initial call
     CommonBindings::bind(m, &callstackAdapter);
 
+    // Install signal handler option
+    bool installSignalHandler = true;
+    constexpr static const char* signalHandlerKey = "DEPTHAI_INSTALL_SIGNAL_HANDLER";
+    try {
+        auto sysModule = py::module_::import("sys");
+        if(py::hasattr(sysModule, signalHandlerKey)){
+            installSignalHandler = installSignalHandler && sysModule.attr(signalHandlerKey).cast<bool>();
+        }
+    } catch (...) {
+        // ignore
+    }
+    try {
+        auto builtinsModule = py::module_::import("builtins");
+        if(py::hasattr(builtinsModule, signalHandlerKey)){
+            installSignalHandler = installSignalHandler && builtinsModule.attr(signalHandlerKey).cast<bool>();
+        }
+    } catch (...){
+        // ignore
+    }
+
     // Call dai::initialize on 'import depthai' to initialize asap with additional information to print
-    dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME);
+    dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME, installSignalHandler);
 
 }
 
