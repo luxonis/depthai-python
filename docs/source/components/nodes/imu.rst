@@ -83,15 +83,15 @@ IMU devices
 ###########
 
 List of devices that have an IMU sensor on-board:
-* OAK-D
-* OAK-D-IOT-40
-* OAK-D-IOT-75
-* OAK-D-CM4-POE
-* OAK-D-POE
-* OAK-D-LITE
-* OAK-D-PRO
-* OAK-D-FFC-3P
-* OAK-WD-PRO
+* `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__
+* `OAK-D-IoT-40 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1092.html>`__
+* `OAK-D-IoT-75 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1098OBC.html>`__
+* `OAK-D-CM4 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1097.html>`__
+* `OAK-D-PoE <https://docs.luxonis.com/projects/hardware/en/latest/pages/SJ2088POE.html>`__
+* `OAK-FFC-3P <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__
+* OAK-D-Lite
+* OAK-D-Pro
+* OAK-WD-Pro
 
 
 IMU sensors
