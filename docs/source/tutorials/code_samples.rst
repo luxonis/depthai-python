@@ -32,6 +32,8 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Edge detector` - Edge detection on input frame
 - :ref:`Script camera control` - Controlling the camera with the Script node
 - :ref:`Bootloader version` - Retrieves Version of Bootloader on the device
+- :ref:`ImageManip tiling` - Using ImageManip for frame tiling
+- :ref:`ImageManip rotate` - Using ImageManip to rotate color/mono frames
 
 .. rubric:: Complex
 

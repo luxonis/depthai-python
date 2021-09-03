@@ -83,7 +83,7 @@ find_package(pybind11 CONFIG REQUIRED)
 # Add files for python module
 pybind11_add_module(${TARGET_NAME}
     src/py_bindings.cpp
-    src/XLinkConnectionBindings.cpp
+    src/XLinkBindings.cpp
     src/DeviceBindings.cpp
     src/CalibrationHandlerBindings.cpp
     src/DeviceBootloaderBindings.cpp
