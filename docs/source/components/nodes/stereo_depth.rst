@@ -222,13 +222,23 @@ Min stereo depth distance
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
+There are two ways to use DepthAI for 3D object detection and/or using neural information to get real-time 3D position of features (e.g. facial landmarks):
+
+#. :ref:`Monocular Neural Inference fused with Stereo Depth`
+#. Stereo Neural Inference
+
+Monocular Neural Inference fused with Stereo Depth
+**************************************************
+
+In this mode, the AI (object detection) is run on the left, right, or RGB camera, and the results are fused with stereo disparity depth, based on semi global matching (SGBM).  The minimum depth is limited by the maximum disparity search, which is by default 96, but is extendable to 191 in extended disparity mode.
+
 To calcualte this miminum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
 
-For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the above formula we get:
+For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the :ref:`depth formula <Calculate depth using dispairty map>` we get:
 
 .. code-block:: python
 
-  min_distance = 882.5 * 7.5cm / 95 = 69.67cm
+  min_distance = focal_length_in_pixels * baseline / disparity_in_pixels = 882.5 * 7.5cm / 95 = 69.67cm
 
 or roughly 70cm.
 
@@ -238,9 +248,19 @@ However this distance can be cut in 1/2 (to around 35cm for the OAK-D) with the 
 
 2. Enabling Extended Disparity.
 
-Extended Disparity mode increases the levels of disparity to 191 from the standard 96 pixels, thereby 1/2-ing the minimum depth. It does so by computing the 96-pixel disparities on the original 1280x720 and on the downscaled 640x360 image, which are then merged to a 191-level disparity.
+Extended Disparity mode increases the levels of disparity to 191 from the standard 96 pixels, thereby 1/2-ing the minimum depth. It does so by computing the 96-pixel disparities on the original 1280x720 and on the downscaled 640x360 image, which are then merged to a 191-level disparity. For more information see the Extended Disparity tab in :ref:`this table <Currently configurable blocks>`.
 
-Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, but at such short distances the minimum depth is limited by focal length, which is 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
+Using the previous OAK-D example, disparity_in_pixels now becomes **190** and the minimum distance is:
+
+.. code-block:: python
+
+  min_distance = focal_length_in_pixels * baseline / disparity_in_pixels = 882.5 * 7.5cm / 190 = 34.84cm
+
+or roughly 35cm.
+
+.. note:: 
+    Applying both of those options is possible, which would set the minimum depth to 1/4 of the standard settings, but at such short distances the minimum depth is limited by focal length, which is 19.6cm, since OAK-D mono cameras have fixed focus distance: 19.6cm - infinity.
+
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
 
@@ -263,7 +283,7 @@ So using this formula for existing models the *theoretical* max distance is:
   # For OAK-D-CM4 (9cm baseline)
   Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
 
-If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this <Currently configurable blocks>` table.
+If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this table <Currently configurable blocks>`.
 
 Depth perception accuracy
 #########################
