@@ -894,6 +894,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getCropYMax", &ImageManipConfig::getCropYMax, DOC(dai, ImageManipConfig, getCropYMax))
         .def("getResizeWidth", &ImageManipConfig::getResizeWidth, DOC(dai, ImageManipConfig, getResizeWidth))
         .def("getResizeHeight", &ImageManipConfig::getResizeHeight, DOC(dai, ImageManipConfig, getResizeHeight))
+        .def("getCropConfig", &ImageManipConfig::getCropConfig, DOC(dai, ImageManipConfig, getCropConfig))
+        .def("getResizeConfig", &ImageManipConfig::getResizeConfig, DOC(dai, ImageManipConfig, getResizeConfig))
+        .def("getFormatConfig", &ImageManipConfig::getFormatConfig, DOC(dai, ImageManipConfig, getFormatConfig))
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         ;
 
