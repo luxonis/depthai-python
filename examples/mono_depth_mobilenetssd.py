@@ -19,8 +19,6 @@ if not Path(nnPath).exists():
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-flipRectified = True
-
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -107,16 +105,6 @@ with dai.Device(pipeline) as device:
 
         if inRight is not None:
             rightFrame = inRight.getCvFrame()
-            if flipRectified:
-                rightFrame = cv2.flip(rightFrame, 1)
-
-        if inDet is not None:
-            detections = inDet.detections
-            if flipRectified:
-                for detection in detections:
-                    swap = detection.xmin
-                    detection.xmin = 1 - detection.xmax
-                    detection.xmax = 1 - swap
 
         if inDisparity is not None:
             # Frame is transformed, normalized, and color map will be applied to highlight the depth info

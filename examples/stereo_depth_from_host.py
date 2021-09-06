@@ -81,6 +81,7 @@ out_rectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled
 subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+subpixelLevels = 8
 median = dai.MedianFilter.MEDIAN_OFF
 
 # Sanitize some incompatible options
@@ -170,9 +171,9 @@ def convert_to_cv2_frame(name, image):
     if (extended):
         max_disp *= 2
     if (subpixel):
-        max_disp *= 32
+        max_disp *= subpixelLevels
         disp_type = np.uint16
-        disp_levels = 32
+        disp_levels = subpixelLevels
 
     data, w, h = image.getData(), image.getWidth(), image.getHeight()
     if name == 'depth':
@@ -196,8 +197,6 @@ def convert_to_cv2_frame(name, image):
 
     else: # mono streams / single channel
         frame = np.array(data).reshape((h, w)).astype(np.uint8)
-        if name.startswith('rectified_'):
-            frame = cv2.flip(frame, 1)
         if name == 'rectified_right':
             last_rectif_right = frame
     return frame
