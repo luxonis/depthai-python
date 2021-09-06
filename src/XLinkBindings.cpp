@@ -50,7 +50,8 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def(py::init<>())
         .def_readwrite("desc", &DeviceInfo::desc)
         .def_readwrite("state", &DeviceInfo::state)
-        .def("getMxId", &DeviceInfo::getMxId);
+        .def("getMxId", &DeviceInfo::getMxId)
+        ;
 
     deviceDesc
         .def(py::init<>())
@@ -61,15 +62,17 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
             [](deviceDesc_t &o)
             { return std::string(o.name); },
             [](deviceDesc_t &o, std::string n)
-            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); });
+            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); })
+        ;
 
     xLinkDeviceState
         .value("X_LINK_ANY_STATE", X_LINK_ANY_STATE)
         .value("X_LINK_BOOTED", X_LINK_BOOTED)
         .value("X_LINK_UNBOOTED", X_LINK_UNBOOTED)
         .value("X_LINK_BOOTLOADER", X_LINK_BOOTLOADER)
-        .export_values();
-    ;
+        .value("X_LINK_FLASH_BOOTED", X_LINK_FLASH_BOOTED)
+        .export_values()
+        ;
 
     xLinkProtocol
         .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
@@ -79,13 +82,15 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .value("X_LINK_IPC", X_LINK_IPC)
         .value("X_LINK_NMB_OF_PROTOCOLS", X_LINK_NMB_OF_PROTOCOLS)
         .value("X_LINK_ANY_PROTOCOL", X_LINK_ANY_PROTOCOL)
-        .export_values();
+        .export_values()
+        ;
 
     xLinkPlatform
         .value("X_LINK_ANY_PLATFORM", X_LINK_ANY_PLATFORM)
         .value("X_LINK_MYRIAD_2", X_LINK_MYRIAD_2)
         .value("X_LINK_MYRIAD_X", X_LINK_MYRIAD_X)
-        .export_values();
+        .export_values()
+        ;
 
     xLinkConnection
         .def(py::init<const DeviceInfo &, std::vector<std::uint8_t> >())
@@ -93,8 +98,9 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def(py::init<const DeviceInfo &>())
         .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE)
-        .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE);
-
+        .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE)
+        .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
+        ;
 
     //// Exceptions
 
@@ -110,5 +116,6 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
     //
     // xLinkWriteError
     //     .def(py::init<XLinkError_t, const std::string &>());
+
 
 }

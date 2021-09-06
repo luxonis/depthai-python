@@ -9,6 +9,7 @@
 #include <pybind11/chrono.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
+#include <pybind11_json/pybind11_json.hpp>
 #include <cstdint>
 #include <stack>
 
