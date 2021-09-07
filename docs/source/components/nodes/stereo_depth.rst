@@ -135,6 +135,81 @@ Currently configurable blocks
         :project: depthai-core
         :no-link:
 
+Current limitations
+###################
+
+If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`, :code:`subpixel`) are enabled, then:
+
+- median filtering is disabled on device
+- with subpixel, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output
+
+Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
+
+Stereo depth FPS
+################
+
+.. list-table::
+   :header-rows: 1
+
+   * - Stereo depth mode
+     - FPS for 720P
+   * - Standard mode
+     - 150
+   * - Left-Right Check
+     - 60
+   * - Subpixel Disparity
+     - 30
+   * - Extended Disparity
+     - 60
+   * - Subpixel + LR check
+     - 15
+   * - Extended + LR check
+     - 30
+
+
+Usage
+#####
+
+.. tabs::
+
+  .. code-tab:: py
+
+    pipeline = dai.Pipeline()
+    stereo = pipeline.create(dai.node.StereoDepth)
+
+    # Better handling for occlusions:
+    stereo.setLeftRightCheck(False)
+    # Closer-in minimum depth, disparity range is doubled:
+    stereo.setExtendedDisparity(False)
+    # Better accuracy for longer distance, fractional disparity 32-levels:
+    stereo.setSubpixel(False)
+
+    # Define and configure MonoCamera nodes beforehand
+    left.out.link(stereo.left)
+    right.out.link(stereo.right)
+
+  .. code-tab:: c++
+
+    dai::Pipeline pipeline;
+    auto stereo = pipeline.create<dai::node::StereoDepth>();
+
+    // Better handling for occlusions:
+    stereo->setLeftRightCheck(false);
+    // Closer-in minimum depth, disparity range is doubled:
+    stereo->setExtendedDisparity(false);
+    // Better accuracy for longer distance, fractional disparity 32-levels:
+    stereo->setSubpixel(false);
+
+    // Define and configure MonoCamera nodes beforehand
+    left->out.link(stereo->left);
+    right->out.link(stereo->right);
+
+Examples of functionality
+#########################
+
+- :ref:`Depth Preview`
+- :ref:`Mono & MobilenetSSD & Depth`
+- :ref:`RGB & MobilenetSSD with spatial data`
 
 Reference
 #########
@@ -306,81 +381,5 @@ So the common norm is to adjust the baseline according to how far/close we want 
 .. note::
 
    OAK-D-PRO will include both IR dot projector and IR LED, which will enable operation in no light. IR LED is used to illuminate the whole area (for mono/color frames), while IR dot projector is mostly for accurate disparity matching - to have good quality depth maps on blank surfaces as well. For outdoors, the IR laser dot projector is only relevant at night. For more information see the development progress `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
-
-Current limitations
-###################
-
-If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`, :code:`subpixel`) are enabled, then:
-
-- median filtering is disabled on device
-- with subpixel, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output
-
-Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
-
-Stereo depth FPS
-################
-
-.. list-table::
-   :header-rows: 1
-
-   * - Stereo depth mode
-     - FPS for 720P
-   * - Standard mode
-     - 150
-   * - Left-Right Check
-     - 60
-   * - Subpixel Disparity
-     - 30
-   * - Extended Disparity
-     - 60
-   * - Subpixel + LR check
-     - 15
-   * - Extended + LR check
-     - 30
-
-
-Usage
-#####
-
-.. tabs::
-
-  .. code-tab:: py
-
-    pipeline = dai.Pipeline()
-    stereo = pipeline.create(dai.node.StereoDepth)
-
-    # Better handling for occlusions:
-    stereo.setLeftRightCheck(False)
-    # Closer-in minimum depth, disparity range is doubled:
-    stereo.setExtendedDisparity(False)
-    # Better accuracy for longer distance, fractional disparity 32-levels:
-    stereo.setSubpixel(False)
-
-    # Define and configure MonoCamera nodes beforehand
-    left.out.link(stereo.left)
-    right.out.link(stereo.right)
-
-  .. code-tab:: c++
-
-    dai::Pipeline pipeline;
-    auto stereo = pipeline.create<dai::node::StereoDepth>();
-
-    // Better handling for occlusions:
-    stereo->setLeftRightCheck(false);
-    // Closer-in minimum depth, disparity range is doubled:
-    stereo->setExtendedDisparity(false);
-    // Better accuracy for longer distance, fractional disparity 32-levels:
-    stereo->setSubpixel(false);
-
-    // Define and configure MonoCamera nodes beforehand
-    left->out.link(stereo->left);
-    right->out.link(stereo->right);
-
-Examples of functionality
-#########################
-
-- :ref:`Depth Preview`
-- :ref:`Mono & MobilenetSSD & Depth`
-- :ref:`RGB & MobilenetSSD with spatial data`
 
 .. include::  ../../includes/footer-short.rst
