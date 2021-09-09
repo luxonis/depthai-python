@@ -16,18 +16,18 @@ description: >-
   mobilenet-ssd
 task_type: object_attributes
 files:
-  - name: mobilenet-ssd_openvino_2021.2_6shave.blob
-    size: 14510848
-    sha256: 5150d0e5d18abd0ecb21c8280e09870977358c04a7d2cfa539e1e0f6c2a93e71
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob
-  - name: mobilenet-ssd_openvino_2021.2_5shave.blob
-    size: 14531840
-    sha256: c682a0f9be33ce601ce460abc580e3488ced413a7c597dfab4b74ea407d7c6d6
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_5shave.blob
-  - name: mobilenet-ssd_openvino_2021.2_8shave.blob
-    size: 14505024
-    sha256: e0c60156ee97b01ac115ad838d13c8d90559064fec04c6d423bb03fdc40524eb
-    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_8shave.blob
+  - name: mobilenet-ssd_openvino_2021.4_6shave.blob
+    size: 14499200
+    sha256: 5ae9cb636bfa40df02c2ca3e64bc68a6690abd8a147903d4580aea6b6feb9c1c
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_6shave.blob
+  - name: mobilenet-ssd_openvino_2021.4_5shave.blob
+    size: 14517568
+    sha256: 782d80902c5ce7da01f8fc83894b68da33216edc93d94afb16dd7576a25e50e2
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_5shave.blob
+  - name: mobilenet-ssd_openvino_2021.4_8shave.blob
+    size: 14493888
+    sha256: 8c9a0189d95580b2442c88539af3198a433efd41b9b0837cea8d09a4d16a2d4a
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.4_8shave.blob
 
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

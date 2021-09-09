@@ -14,7 +14,7 @@ Spatial Tiny-yolo example
 '''
 
 # Get argument first
-nnBlobPath = str((Path(__file__).parent / Path('models/tiny-yolo-v4_openvino_2021.2_6shave.blob')).resolve().absolute())
+nnBlobPath = str((Path(__file__).parent / Path('models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnBlobPath = sys.argv[1]
 
@@ -42,7 +42,6 @@ syncNN = True
 
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_2)
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()

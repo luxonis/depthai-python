@@ -36,6 +36,8 @@ or update the bootloader itself.
 progressCb parameter takes a callback function, which will be called each time an progress update occurs (rate limited to 1 second). This is mainly
 used to inform the user of the current flashing progress.
 
+You can also check the version of the current bootloader by using the :ref:`Bootloader Version` example.
+
 DepthAI Application Package (.dap)
 ##################################
 

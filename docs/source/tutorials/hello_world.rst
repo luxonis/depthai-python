@@ -108,7 +108,7 @@ Now, first node we will add is a :class:`ColorCamera`. We will use the :code:`pr
 
 .. code-block:: python
 
-  cam_rgb = pipeline.createColorCamera()
+  cam_rgb = pipeline.create(dai.node.ColorCamera)
   cam_rgb.setPreviewSize(300, 300)
   cam_rgb.setInterleaved(False)
 
@@ -119,8 +119,8 @@ to filter out the incorrect results
 
 .. code-block:: python
 
-  detection_nn = pipeline.createMobileNetDetectionNetwork()
-  detection_nn.setBlobPath(str(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6)))
+  detection_nn = pipeline.create(dai.node.NeuralNetwork)
+  detection_nn.setBlobPath("/path/to/mobilenet-ssd.blob")
   detection_nn.setConfidenceThreshold(0.5)
 
 And now, let's connect a color camera :code:`preview` output to neural network input
@@ -135,11 +135,11 @@ and in our case, since we want to receive data from device to host, we will use 
 
 .. code-block:: python
 
-  xout_rgb = pipeline.createXLinkOut()
+  xout_rgb = pipeline.create(dai.node.XLinkOut)
   xout_rgb.setStreamName("rgb")
   cam_rgb.preview.link(xout_rgb.input)
 
-  xout_nn = pipeline.createXLinkOut()
+  xout_nn = pipeline.create(dai.node.XLinkOut)
   xout_nn.setStreamName("nn")
   detection_nn.out.link(xout_nn.input)
 
@@ -259,7 +259,7 @@ Finally, we add a way to terminate our program (as it's running inside an infini
 method, that waits for a key to be pressed by user - in our case, we want to break out of the loop when user presses :code:`q` key
 
 .. code-block:: python
-    
+
     if cv2.waitKey(1) == ord('q'):
         break
 
@@ -271,7 +271,7 @@ Putting it all together, only thing left to do is to run the file we've prepared
 .. code-block:: bash
 
   python3 hello_world.py
-  
+
 You're on your way! You can find the `complete code for this tutorial on GitHub <https://github.com/luxonis/depthai-tutorials/blob/master/1-hello-world/hello_world.py>`__.
 
 .. include::  /includes/footer-short.rst

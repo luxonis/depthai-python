@@ -3,12 +3,27 @@
 #include "depthai-shared/common/Point2f.hpp"
 #include <vector>
 
-void CalibrationHandlerBindings::bind(pybind11::module& m){
+void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    // bind pipeline
-    py::class_<CalibrationHandler>(m, "CalibrationHandler", DOC(dai, CalibrationHandler))
+    // Type definitions
+    py::class_<CalibrationHandler> calibrationHandler(m, "CalibrationHandler", DOC(dai, CalibrationHandler));
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    // Bindings
+    calibrationHandler
         .def(py::init<>(), DOC(dai, CalibrationHandler, CalibrationHandler))
         .def(py::init<std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
         .def(py::init<std::string, std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
@@ -27,6 +42,9 @@ void CalibrationHandlerBindings::bind(pybind11::module& m){
         .def("getLensPosition", &CalibrationHandler::getLensPosition, py::arg("cameraId"), DOC(dai, CalibrationHandler, getLensPosition))
 
         .def("getCameraExtrinsics", &CalibrationHandler::getCameraExtrinsics, py::arg("srcCamera"), py::arg("dstCamera"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getCameraExtrinsics))
+
+        .def("getCameraTranslationVector", &CalibrationHandler::getCameraTranslationVector, py::arg("srcCamera"), py::arg("dstCamera"), py::arg("useSpecTranslation") = true, DOC(dai, CalibrationHandler, getCameraTranslationVector))
+        .def("getBaselineDistance", &CalibrationHandler::getBaselineDistance, py::arg("cam1") = dai::CameraBoardSocket::RIGHT, py::arg("cam2") = dai::CameraBoardSocket::LEFT, py::arg("useSpecTranslation") = true, DOC(dai, CalibrationHandler, getBaselineDistance))
 
         .def("getCameraToImuExtrinsics", &CalibrationHandler::getCameraToImuExtrinsics, py::arg("cameraId"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getCameraToImuExtrinsics))
         .def("getImuToCameraExtrinsics", &CalibrationHandler::getImuToCameraExtrinsics, py::arg("cameraId"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getImuToCameraExtrinsics))

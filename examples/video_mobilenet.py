@@ -9,7 +9,7 @@ from time import monotonic
 
 # Get argument first
 parentDir = Path(__file__).parent
-nnPath = str((parentDir / Path('models/mobilenet-ssd_openvino_2021.2_8shave.blob')).resolve().absolute())
+nnPath = str((parentDir / Path('models/mobilenet-ssd_openvino_2021.4_8shave.blob')).resolve().absolute())
 videoPath = str((parentDir / Path('models/construction_vest.mp4')).resolve().absolute())
 if len(sys.argv) > 2:
     nnPath = sys.argv[1]
@@ -25,7 +25,6 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setOpenVINOVersion(dai.OpenVINO.Version.VERSION_2021_2)
 
 # Define sources and outputs
 nn = pipeline.createMobileNetDetectionNetwork()
