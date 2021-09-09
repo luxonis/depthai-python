@@ -37,18 +37,33 @@ import cv2
 import argparse
 import depthai as dai
 
+def socket_type_pair(arg):
+    socket, type = arg.split(',')
+    if not (socket in ['rgb', 'left', 'right']):  raise ValueError("")
+    if not (type in ['m', 'mono', 'c', 'color']): raise ValueError("")
+    is_color = True if type in ['c', 'color'] else False
+    return [socket, is_color]
+
 parser = argparse.ArgumentParser()
-parser.add_argument('-mres', '--mono-resolution', type=int, default=480, choices={480, 400, 720, 800},
+parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
+                    default=[['rgb', True], ['left', False], ['right', False]],
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
+                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m")
+parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='12mp', choices={'720', '800', '1080', '4k', '12mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '12mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 args = parser.parse_args()
 
-# TODO as args
-cam_list = ['rgb', 'left', 'right']
-#cam_list = ['left', 'right']
+cam_list = []
+cam_type_color = {}
+print("Enabled cameras:")
+for socket, is_color in args.cameras:
+    cam_list.append(socket)
+    cam_type_color[socket] = is_color
+    print(socket.rjust(7), ':', 'color' if is_color else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -94,11 +109,11 @@ xout = {}
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
-    if 1:  # c == 'rgb':
+    if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
-        #cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].setResolution(color_res_opts[args.color_resolution])
-        cam[c].setIspScale(1, 2)
+        #cam[c].setIspScale(1, 2)
+        #cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
@@ -115,11 +130,6 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
-# TODO controls for each camera, Mono too
-controlIn = pipeline.createXLinkIn()
-controlIn.setStreamName('control')
-controlIn.out.link(cam['rgb'].inputControl)
-
 if 0:
     print("=== Using custom camera tuning, and limiting RGB FPS to 10")
     pipeline.setCameraTuningBlobPath("/home/user/Downloads/tuning_color_low_light.bin")
@@ -135,7 +145,7 @@ with dai.Device(pipeline) as device:
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
-        if c == 'rgb':
+        if 0 and c == 'rgb':
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
 
