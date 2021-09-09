@@ -38,7 +38,7 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
+DEPENDENCIES = ['numpy', 'opencv-python', 'pyyaml', 'requests']
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
