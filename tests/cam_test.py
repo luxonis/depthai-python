@@ -39,16 +39,16 @@ import depthai as dai
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right']):  raise ValueError("")
+    if not (socket in ['rgb', 'left', 'right', 'camd']):  raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color']): raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     return [socket, is_color]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True], ['left', False], ['right', False]],
+                    default=[['rgb', True], ['left', False], ['right', False], ['camd', True]],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
-                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m")
+                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
 parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '12mp'},
@@ -69,15 +69,17 @@ print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb'  : dai.CameraBoardSocket.RGB,
-    'left' : dai.CameraBoardSocket.LEFT,
-    'right': dai.CameraBoardSocket.RIGHT,
+    'rgb'  : dai.CameraBoardSocket.RGB,   # Or CAM_A
+    'left' : dai.CameraBoardSocket.LEFT,  # Or CAM_B
+    'right': dai.CameraBoardSocket.RIGHT, # Or CAM_C
+    'camd' : dai.CameraBoardSocket.CAM_D,
 }
 
 rotate = {
     'rgb'  : args.rotate in ['all', 'rgb'],
     'left' : args.rotate in ['all', 'mono'],
     'right': args.rotate in ['all', 'mono'],
+    'camd' : args.rotate in ['all', 'rgb'],
 }
 
 mono_res_opts = {
