@@ -21,6 +21,7 @@
 #include "depthai/pipeline/node/ObjectTracker.hpp"
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
+#include "depthai/pipeline/node/FeatureTracker.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -173,6 +174,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
+    py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
     py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
     py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
@@ -211,6 +213,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto script = ADD_NODE(Script);
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
+    auto featureTracker = ADD_NODE(FeatureTracker);
 
 
 
@@ -461,6 +464,15 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("scriptName", &ScriptProperties::scriptName, DOC(dai, ScriptProperties, scriptName))
         .def_readwrite("processor", &ScriptProperties::processor, DOC(dai, ScriptProperties, processor))
     ;
+
+
+    // FeatureTracker properties
+    featureTrackerProperties
+        .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
+        .def_readwrite("numShaves", &FeatureTrackerProperties::numShaves, DOC(dai, FeatureTrackerProperties, numShaves))
+        .def_readwrite("numMemorySlices", &FeatureTrackerProperties::numMemorySlices, DOC(dai, FeatureTrackerProperties, numMemorySlices))
+        ;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -769,7 +781,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
         .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
         .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
-        .def("setInputResolution",      &StereoDepth::setInputResolution, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
+        .def("setInputResolution",      static_cast<void(StereoDepth::*)(int,int)>(&StereoDepth::setInputResolution), py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setInputResolution))
+        .def("setInputResolution",      static_cast<void(StereoDepth::*)(std::tuple<int,int>)>(&StereoDepth::setInputResolution), py::arg("resolution"), DOC(dai, node, StereoDepth, setInputResolution, 2))
         .def("setOutputSize",           &StereoDepth::setOutputSize, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setOutputSize))
         .def("setOutputKeepAspectRatio",&StereoDepth::setOutputKeepAspectRatio, py::arg("keep"), DOC(dai, node, StereoDepth, setOutputKeepAspectRatio))
         .def("setDepthAlign",           static_cast<void(StereoDepth::*)(StereoDepthProperties::DepthAlign)>(&StereoDepth::setDepthAlign), py::arg("align"), DOC(dai, node, StereoDepth, setDepthAlign))
@@ -1024,6 +1037,19 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
     daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
+
+
+    // FeatureTracker node
+    featureTracker
+        .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))
+        .def_readonly("inputImage", &FeatureTracker::inputImage, DOC(dai, node, FeatureTracker, inputImage))
+        .def_readonly("outputFeatures", &FeatureTracker::outputFeatures, DOC(dai, node, FeatureTracker, outputFeatures))
+        .def_readonly("passthroughInputImage", &FeatureTracker::passthroughInputImage, DOC(dai, node, FeatureTracker, passthroughInputImage))
+        .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
+        .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+        .def("setHardwareResources", &FeatureTracker::setHardwareResources, py::arg("numShaves"), py::arg("numMemorySlices"), DOC(dai, node, FeatureTracker, setHardwareResources))
+        ;
+    daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
 
 
 }
