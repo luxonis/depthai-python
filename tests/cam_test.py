@@ -102,6 +102,7 @@ def clamp(num, v0, v1):
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
+#pipeline.setXLinkChunkSize(0)
 
 control = pipeline.createXLinkIn()
 control.setStreamName('control')
@@ -131,6 +132,7 @@ for c in cam_list:
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+    #cam[c].setFps(10)
 
 if 0:
     print("=== Using custom camera tuning, and limiting RGB FPS to 10")
