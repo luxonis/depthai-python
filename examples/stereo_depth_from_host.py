@@ -44,17 +44,17 @@ class depthHandler:
         if key == ord('m'):
             self._send_new_config = True
             medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5, dai.MedianFilter.KERNEL_7x7]
-            currentMedian = self.initialConfig.config.postProcessing.median
+            currentMedian = self.initialConfig.postProcessing.median
             # circle through median settins
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
-            self.initialConfig.config.postProcessing.median = nextMedian
+            self.initialConfig.postProcessing.median = nextMedian
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
         elif key == ord('1'):
             self._send_new_config = True
-            self.initialConfig.config.algorithmControl.enableLeftRightCheck = not self.initialConfig.config.algorithmControl.enableLeftRightCheck
+            self.initialConfig.algorithmControl.enableLeftRightCheck = not self.initialConfig.algorithmControl.enableLeftRightCheck
         elif key == ord('2'):
             self._send_new_config = True
-            self.initialConfig.config.algorithmControl.enableSubpixel = not self.initialConfig.config.algorithmControl.enableSubpixel
+            self.initialConfig.algorithmControl.enableSubpixel = not self.initialConfig.algorithmControl.enableSubpixel
 
         self.sendConfig(stereoDepthConfigInQueue)
 
@@ -64,9 +64,9 @@ class depthHandler:
         print("Use slider to adjust bilateral filter intensity.")
         print("Use slider to adjust left-right check threshold.")
         self.initialConfig = initialConfig
-        self._confidence = self.initialConfig.config.costMatching.confidenceThreshold
-        self._sigma = self.initialConfig.config.postProcessing.bilateralSigmaValue
-        self._lrCheckThreshold = self.initialConfig.config.algorithmControl.leftRightCheckThreshold
+        self._confidence = self.initialConfig.costMatching.confidenceThreshold
+        self._sigma = self.initialConfig.postProcessing.bilateralSigmaValue
+        self._lrCheckThreshold = self.initialConfig.algorithmControl.leftRightCheckThreshold
         cv2.namedWindow(self.depthStream)
         self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, self._confidence, self.on_trackbar_change_confidence)
         self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, self._sigma, self.on_trackbar_change_sigma)
@@ -80,9 +80,9 @@ class depthHandler:
             self._send_new_config = False
             configMessage = dai.StereoDepthConfig()
             configMessage.set(self.initialConfig)
-            self.initialConfig.config.costMatching.confidenceThreshold = self._confidence
-            self.initialConfig.config.postProcessing.bilateralSigmaValue = self._sigma
-            self.initialConfig.config.algorithmControl.leftRightCheckThreshold = self._lrCheckThreshold
+            self.initialConfig.costMatching.confidenceThreshold = self._confidence
+            self.initialConfig.postProcessing.bilateralSigmaValue = self._sigma
+            self.initialConfig.algorithmControl.leftRightCheckThreshold = self._lrCheckThreshold
             stereoDepthConfigInQueue.send(configMessage)
 
 # StereoDepth config options.
