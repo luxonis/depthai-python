@@ -106,7 +106,19 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>> tracklets(m, "Tracklets", DOC(dai, Tracklets));
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>> imuData(m, "IMUData", DOC(dai, IMUData));
     py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
+    // Stereo depth
+    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
+    py::class_<StereoDepthConfigData::AlgorithmControl> algorithmControl(stereoDepthConfigData, "AlgorithmControl", DOC(dai, StereoDepthConfigData, AlgorithmControl));
+    py::class_<StereoDepthConfigData::PostProcessing> postProcessing(stereoDepthConfigData, "PostProcessing", DOC(dai, StereoDepthConfigData, PostProcessing));
+    py::class_<StereoDepthConfigData::CostAggregation> costAggregation(stereoDepthConfigData, "CostAggregation", DOC(dai, StereoDepthConfigData, CostAggregation));
+    py::class_<StereoDepthConfigData::CostMatching> costMatching(stereoDepthConfigData, "CostMatching", DOC(dai, StereoDepthConfigData, CostMatching));
+    py::class_<StereoDepthConfigData::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, StereoDepthConfigData, CostMatching, LinearEquationParameters));
+    py::enum_<StereoDepthConfigData::CostMatching::DisparityWidth> costMatchingDisparityWidth(costMatching, "DisparityWidth", DOC(dai, StereoDepthConfigData, CostMatching, DisparityWidth));
+    py::class_<StereoDepthConfigData::CensusTransform> censusTransform(stereoDepthConfigData, "CensusTransform", DOC(dai, StereoDepthConfigData, CensusTransform));
+    py::enum_<StereoDepthConfigData::CensusTransform::KernelSize> censusTransformKernelSize(censusTransform, "KernelSize", DOC(dai, StereoDepthConfigData, CensusTransform, KernelSize));
     py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>> stereoDepthConfig(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig));
+    // Edge detector
     py::class_<EdgeDetectorConfigData> edgeDetectorConfigData(m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData));
     py::class_<RawEdgeDetectorConfig, RawBuffer, std::shared_ptr<RawEdgeDetectorConfig>> rawEdgeDetectorConfig(m, "RawEdgeDetectorConfig", DOC(dai, RawEdgeDetectorConfig));
     py::class_<EdgeDetectorConfig, Buffer, std::shared_ptr<EdgeDetectorConfig>> edgeDetectorConfig(m, "EdgeDetectorConfig", DOC(dai, EdgeDetectorConfig));
@@ -1030,6 +1042,85 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
         ;
 
+    // StereoDepth config
+
+    // MedianFilter
+    medianFilter
+        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
+        ;
+    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+
+    algorithmControl
+        .def(py::init<>())
+        .def_readwrite("enableLeftRightCheck", &StereoDepthConfigData::AlgorithmControl::enableLeftRightCheck, DOC(dai, StereoDepthConfigData, AlgorithmControl, enableLeftRightCheck))
+        .def_readwrite("enableSubpixel", &StereoDepthConfigData::AlgorithmControl::enableSubpixel, DOC(dai, StereoDepthConfigData, AlgorithmControl, enableSubpixel))
+        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfigData::AlgorithmControl::leftRightCheckThreshold, DOC(dai, StereoDepthConfigData, AlgorithmControl, leftRightCheckThreshold))
+        .def_readwrite("subpixelFractionalBits", &StereoDepthConfigData::AlgorithmControl::subpixelFractionalBits, DOC(dai, StereoDepthConfigData, AlgorithmControl, subpixelFractionalBits))
+        ;
+
+    postProcessing
+        .def(py::init<>())
+        .def_readwrite("median", &StereoDepthConfigData::PostProcessing::median, DOC(dai, StereoDepthConfigData, PostProcessing, median))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::PostProcessing::bilateralSigmaValue, DOC(dai, StereoDepthConfigData, PostProcessing, bilateralSigmaValue))
+        ;
+
+    // KernelSize
+    censusTransformKernelSize
+        .value("AUTO", StereoDepthConfigData::CensusTransform::KernelSize::AUTO)
+        .value("KERNEL_5x5", StereoDepthConfigData::CensusTransform::KernelSize::KERNEL_5x5)
+        .value("KERNEL_7x7", StereoDepthConfigData::CensusTransform::KernelSize::KERNEL_7x7)
+        .value("KERNEL_7x9", StereoDepthConfigData::CensusTransform::KernelSize::KERNEL_7x9)
+        ;
+
+    censusTransform
+        .def(py::init<>())
+        .def_readwrite("kernelSize", &StereoDepthConfigData::CensusTransform::kernelSize, DOC(dai, StereoDepthConfigData, CensusTransform, kernelSize))
+        .def_readwrite("kernelMask", &StereoDepthConfigData::CensusTransform::kernelMask, DOC(dai, StereoDepthConfigData, CensusTransform, kernelMask))
+        .def_readwrite("threshold", &StereoDepthConfigData::CensusTransform::threshold, DOC(dai, StereoDepthConfigData, CensusTransform, threshold))
+        ;
+
+    costMatchingLinearEquationParameters
+        .def(py::init<>())
+        .def_readwrite("alpha", &StereoDepthConfigData::CostMatching::LinearEquationParameters::alpha, DOC(dai, StereoDepthConfigData, CostMatching, LinearEquationParameters, alpha))
+        .def_readwrite("beta", &StereoDepthConfigData::CostMatching::LinearEquationParameters::beta, DOC(dai, StereoDepthConfigData, CostMatching, LinearEquationParameters, beta))
+        .def_readwrite("threshold", &StereoDepthConfigData::CostMatching::LinearEquationParameters::threshold, DOC(dai, StereoDepthConfigData, CostMatching, LinearEquationParameters, threshold))
+        ;
+
+    // Disparity width
+    costMatchingDisparityWidth
+        .value("DISPARITY_64", StereoDepthConfigData::CostMatching::DisparityWidth::DISPARITY_64)
+        .value("DISPARITY_96", StereoDepthConfigData::CostMatching::DisparityWidth::DISPARITY_96)
+        ;
+
+    costMatching
+        .def(py::init<>())
+        .def_readwrite("disparityWidth", &StereoDepthConfigData::CostMatching::disparityWidth, DOC(dai, StereoDepthConfigData, CostMatching, disparityWidth))
+        .def_readwrite("enableCompanding", &StereoDepthConfigData::CostMatching::enableCompanding, DOC(dai, StereoDepthConfigData, CostMatching, enableCompanding))
+        .def_readwrite("invalidDisparityValue", &StereoDepthConfigData::CostMatching::invalidDisparityValue, DOC(dai, StereoDepthConfigData, CostMatching, invalidDisparityValue))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::CostMatching::confidenceThreshold, DOC(dai, StereoDepthConfigData, CostMatching, confidenceThreshold))
+        .def_readwrite("linearEquationParameters", &StereoDepthConfigData::CostMatching::linearEquationParameters, DOC(dai, StereoDepthConfigData, CostMatching, linearEquationParameters))
+        ;
+
+    costAggregation
+        .def(py::init<>())
+        .def_readwrite("divisionFactor", &StereoDepthConfigData::CostAggregation::divisionFactor, DOC(dai, StereoDepthConfigData, CostAggregation, divisionFactor))
+        .def_readwrite("horizontalPenaltyCosts", &StereoDepthConfigData::CostAggregation::horizontalPenaltyCosts, DOC(dai, StereoDepthConfigData, CostAggregation, horizontalPenaltyCosts))
+        .def_readwrite("verticalPenaltyCosts", &StereoDepthConfigData::CostAggregation::verticalPenaltyCosts, DOC(dai, StereoDepthConfigData, CostAggregation, verticalPenaltyCosts))
+        ;
+
+    stereoDepthConfigData
+        .def(py::init<>())
+        .def_readwrite("algorithmControl", &StereoDepthConfigData::algorithmControl,  DOC(dai, StereoDepthConfigData, algorithmControl))
+        .def_readwrite("postProcessing", &StereoDepthConfigData::postProcessing,  DOC(dai, StereoDepthConfigData, postProcessing))
+        .def_readwrite("censusTransform", &StereoDepthConfigData::censusTransform,  DOC(dai, StereoDepthConfigData, censusTransform))
+        .def_readwrite("costMatching", &StereoDepthConfigData::costMatching,  DOC(dai, StereoDepthConfigData, costMatching))
+        .def_readwrite("costAggregation", &StereoDepthConfigData::costAggregation,  DOC(dai, StereoDepthConfigData, costAggregation))
+        ;
+    // legacy
+    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
 
     rawStereoDepthConfig
         .def(py::init<>())
@@ -1047,6 +1138,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
         .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
+        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, DOC(dai, StereoDepthConfig, setLeftRightCheck))
+        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
+        .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
 
     edgeDetectorConfigData

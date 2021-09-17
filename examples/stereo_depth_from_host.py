@@ -25,7 +25,8 @@ class trackbar:
 class depthHandler:
     depthStream = "depth"
     _send_new_config = False
-    currentConfig = dai.StereoDepthConfig()
+
+    initialConfig = None
 
     def on_trackbar_change_sigma(self, value):
         self._sigma = value
@@ -43,26 +44,33 @@ class depthHandler:
         if key == ord('m'):
             self._send_new_config = True
             medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5, dai.MedianFilter.KERNEL_7x7]
-            currentMedian = self.currentConfig.getMedianFilter()
+            currentMedian = self.initialConfig.config.postProcessing.median
             # circle through median settins
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
-            self.currentConfig.setMedianFilter(nextMedian)
+            self.initialConfig.config.postProcessing.median = nextMedian
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
+        elif key == ord('1'):
+            self._send_new_config = True
+            self.initialConfig.config.algorithmControl.enableLeftRightCheck = not self.initialConfig.config.algorithmControl.enableLeftRightCheck
+        elif key == ord('2'):
+            self._send_new_config = True
+            self.initialConfig.config.algorithmControl.enableSubpixel = not self.initialConfig.config.algorithmControl.enableSubpixel
+
         self.sendConfig(stereoDepthConfigInQueue)
 
-    def __init__(self, _confidence, _sigma, _lrCheckThreshold):
+    def __init__(self, initialConfig):
         print("Control median filter using the 'm' key.")
         print("Use slider to adjust disparity confidence.")
         print("Use slider to adjust bilateral filter intensity.")
         print("Use slider to adjust left-right check threshold.")
-
-        self._confidence = _confidence
-        self._sigma = _sigma
-        self._lrCheckThreshold = _lrCheckThreshold
+        self.initialConfig = initialConfig
+        self._confidence = self.initialConfig.config.costMatching.confidenceThreshold
+        self._sigma = self.initialConfig.config.postProcessing.bilateralSigmaValue
+        self._lrCheckThreshold = self.initialConfig.config.algorithmControl.leftRightCheckThreshold
         cv2.namedWindow(self.depthStream)
-        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, _confidence, self.on_trackbar_change_confidence)
-        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, _sigma, self.on_trackbar_change_sigma)
-        self.lrcheckTrackbar  = trackbar('LR-check threshold',  self.depthStream, 0, 10, _lrCheckThreshold, self.on_trackbar_change_lr_threshold)
+        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, self._confidence, self.on_trackbar_change_confidence)
+        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, self._sigma, self.on_trackbar_change_sigma)
+        self.lrcheckTrackbar  = trackbar('LR-check threshold',  self.depthStream, 0, 10, self._lrCheckThreshold, self.on_trackbar_change_lr_threshold)
 
     def imshow(self, frame):
         cv2.imshow(self.depthStream, frame)
@@ -70,19 +78,24 @@ class depthHandler:
     def sendConfig(self, stereoDepthConfigInQueue):
         if self._send_new_config:
             self._send_new_config = False
-            self.currentConfig.setConfidenceThreshold(self._confidence)
-            self.currentConfig.setBilateralFilterSigma(self._sigma)
-            self.currentConfig.setLeftRightCheckThreshold(self._lrCheckThreshold)
-            stereoDepthConfigInQueue.send(self.currentConfig)
+            configMessage = dai.StereoDepthConfig()
+            configMessage.set(self.initialConfig)
+            self.initialConfig.config.costMatching.confidenceThreshold = self._confidence
+            self.initialConfig.config.postProcessing.bilateralSigmaValue = self._sigma
+            self.initialConfig.config.algorithmControl.leftRightCheckThreshold = self._lrCheckThreshold
+            stereoDepthConfigInQueue.send(configMessage)
 
 # StereoDepth config options.
 out_depth = True  # Disparity by default
 out_rectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled
-subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+subpixel = False   # Better accuracy for longer distance, fractional disparity 32-levels
 subpixelLevels = 8
 median = dai.MedianFilter.MEDIAN_OFF
+
+width = 1280
+height = 800
 
 # Sanitize some incompatible options
 if extended or subpixel:
@@ -126,15 +139,15 @@ def create_stereo_depth_pipeline():
     stereo.setLeftRightCheck(lrcheck)
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)
+    stereo.setRuntimeModeSwitch(True)
     xinStereoDepthConfig.out.link(stereo.inputConfig)
+    stereoCurrentConfig = stereo.initialConfig.get()
+
     global depth_handler
-    _confidence=stereo.initialConfig.getConfidenceThreshold()
-    _sigma=stereo.initialConfig.getBilateralFilterSigma()
-    _lrCheckThreshold=stereo.initialConfig.getLeftRightCheckThreshold()
-    depth_handler = depthHandler(_confidence, _sigma, _lrCheckThreshold)
+    depth_handler = depthHandler(stereoCurrentConfig)
 
 
-    stereo.setInputResolution(1280, 720)
+    stereo.setInputResolution(width, height)
     stereo.setRectification(False)
 
     xoutLeft.setStreamName('left')
@@ -163,17 +176,10 @@ def create_stereo_depth_pipeline():
     return pipeline, streams
 
 def convert_to_cv2_frame(name, image):
+
     baseline = 75 #mm
     focal = right_intrinsic[0][0]
     max_disp = 96
-    disp_type = np.uint8
-    disp_levels = 1
-    if (extended):
-        max_disp *= 2
-    if (subpixel):
-        max_disp *= subpixelLevels
-        disp_type = np.uint16
-        disp_levels = subpixelLevels
 
     data, w, h = image.getData(), image.getWidth(), image.getHeight()
     if name == 'depth':
@@ -183,6 +189,18 @@ def convert_to_cv2_frame(name, image):
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
         frame = depthFrameColor
     elif name == 'disparity':
+        bpp = int(len(data) / (h * w))
+
+        disp_type = np.uint8
+        disp_levels = 1
+        if (extended):
+            max_disp *= 2
+        if bpp == 2:
+            max_disp *= subpixelLevels
+            disp_type = np.uint16
+            disp_levels = subpixelLevels
+
+
         disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
 
         # Compute depth from disparity
@@ -231,7 +249,9 @@ with dai.Device(pipeline) as device:
             frame_interval_ms = 50
             for i, q in enumerate(in_q_list):
                 path = args.dataset + '/' + str(index) + '/' + q.getName() + '.png'
-                data = cv2.imread(path, cv2.IMREAD_GRAYSCALE).reshape(720*1280)
+                data = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+                data = cv2.resize(data, (width, height), interpolation = cv2.INTER_AREA)
+                data = data.reshape(height*width)
                 tstamp = datetime.timedelta(seconds = timestamp_ms // 1000,
                                             milliseconds = timestamp_ms % 1000)
                 img = dai.ImgFrame()
@@ -239,12 +259,12 @@ with dai.Device(pipeline) as device:
                 img.setTimestamp(tstamp)
                 img.setInstanceNum(inStreamsCameraID[i])
                 img.setType(dai.ImgFrame.Type.RAW8)
-                img.setWidth(1280)
-                img.setHeight(720)
+                img.setWidth(width)
+                img.setHeight(height)
                 q.send(img)
                 if timestamp_ms == 0:  # Send twice for first iteration
                     q.send(img)
-                print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
+                # print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
             sleep(frame_interval_ms / 1000)
