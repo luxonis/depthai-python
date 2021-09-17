@@ -6,6 +6,98 @@ The valid features are obtained from the Harris score or Shi-Tomasi.
 The default number of target features is 320 and the default maximum number of features is 480.
 It supports 720p and 480p resolutions.
 
+
+How to place it
+###############
+
+.. tabs::
+
+  .. code-tab:: py
+
+    pipeline = dai.Pipeline()
+    featureTracker = pipeline.create(dai.node.FeatureTracker)
+
+  .. code-tab:: c++
+
+    dai::Pipeline pipeline;
+    auto featureTracker = pipeline.create<dai::node::FeatureTracker>();
+
+
+Inputs and Outputs
+##################
+
+.. code-block::
+
+               ┌─────────────────┐
+  initialConfig│                 │
+  ────────────►│                 │outputFeatures
+  inputConfig  │     Feature     ├────────────────────►
+  ────────────►│     Tracker     │
+  inputImage   │                 │passthroughInputImage
+  ────────────►│-----------------├────────────────────►
+               └─────────────────┘
+
+
+**Message types**
+
+- :code:`initialConfig` - `FeatureTrackerProperties <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.FeatureTrackerProperties>`__
+- :code:`inputConfig` - `FeatureTrackerConfig <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.FeatureTrackerConfig>`__
+- :code:`inputImage` - :ref:`ImgFrame`
+- :code:`outputFeatures` - `TrackedFeatures <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.TrackedFeatures>`__
+- :code:`passthroughInputImage` - UNKNOWN - TODO
+
+
+Usage
+#####
+
+.. tabs::
+
+  .. code-tab:: py
+
+      pipeline = dai.Pipeline()
+      featureTracker = pipeline.create(dai.node.FeatureTracker)
+
+      # Set number of shaves and number of memory slices to maximum
+      featureTracker.setHardwareResources(2, 2)
+      # Specify to wait until configuration message arrives to inputConfig Input.
+      featureTracker.setWaitForConfigInput(True)
+
+      # You have to use Feature tracker in combination with
+      # an image frame source - mono/color camera or xlinkIn node
+
+  .. code-tab:: c++
+
+      dai::Pipeline pipeline;
+      auto featureTracker = pipeline.create<dai::node::FeatureTracker>();
+
+      // Set number of shaves and number of memory slices to maximum
+      featureTracker->setHardwareResources(2, 2);
+      // Specify to wait until configuration message arrives to inputConfig Input.
+      featureTracker->setWaitForConfigInput(true);
+
+      // You have to use Feature tracker in combination with
+      // an image frame source - mono/color camera or xlinkIn node
+
+Reference
+#########
+
+.. tabs::
+
+  .. tab:: Python
+
+    .. autoclass:: depthai.node.FeatureTracker
+      :members:
+      :inherited-members:
+      :noindex:
+
+  .. tab:: C++
+
+    .. doxygenclass:: dai::node::FeatureTracker
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
+
 Image cells
 ###########
 
@@ -27,9 +119,9 @@ Entry conditions for new features
 #################################
 
 The entry conditions for new features are:
-    features must not be too close to each other (minimum distance criteria - default value is 50, the unit of measurement being squared euclidean distance in pixels),
-    Harris score of the feature is high enough,
-    there is enough *room* in the cell for the feature (target feature count is not achieved).
+- features must not be too close to each other (minimum distance criteria - default value is 50, the unit of measurement being squared euclidean distance in pixels),
+- Harris score of the feature is high enough,
+- there is enough *room* in the cell for the feature (target feature count is not achieved).
 
 
 Harris Threshold for Tracked Features
@@ -47,8 +139,8 @@ Feature Maintenance
 The algorithm has to decide which feature will be removed and which will be kept in the
 subsequent frames. Note that tracked features have priority over new features.
 It will remove the features which:
-    have too large tracking error (wasn't tracked correctly),
-    have too small Harris score (configurable threshold).
+- have too large tracking error (wasn't tracked correctly),
+- have too small Harris score (configurable threshold).
 
 New position calculation
 ########################
@@ -56,20 +148,5 @@ New position calculation
 A position of the previous features on the current frame can be calculated in two ways:
 1. Using the pyramidal Lucas-Kanade optical flow method.
 2. Using a dense motion estimation hardware block (Block matcher).
-
-Window size
-###########
-
-Window size defines the image patch size used for tracking the feature. Increasing this value will allow 
-tracking higher motions, but it will cause a decrease in runtime. The supported values are 
-between 11x11 and 23x23.
-As 11x11 and 19x19 are assembly optimized, we suggest using one of these two configurations.
-
-Feature prediction
-##################
-
-Feature prediction is performed by accepting a rotation matrix at each frame to predict the new feature positions. 
-If no rotation matrix is provided, feature prediction is disabled.
-Using feature prediction greatly improves runtime and power consumption.
 
 .. include::  ../../includes/footer-short.rst
