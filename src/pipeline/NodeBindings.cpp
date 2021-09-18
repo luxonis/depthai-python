@@ -944,6 +944,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
         .def("setDepthUpperThreshold", &SpatialDetectionNetwork::setDepthUpperThreshold, py::arg("upperThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthUpperThreshold))
+        .def("setSpatialCalculationAlgorithm", &SpatialDetectionNetwork::setSpatialCalculationAlgorithm, py::arg("calculationAlgorithm"), DOC(dai, node, SpatialDetectionNetwork, setSpatialCalculationAlgorithm))
         ;
      // ALIAS
     daiNodeModule.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
