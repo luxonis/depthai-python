@@ -29,22 +29,19 @@ Inputs and Outputs
 .. code-block::
 
                ┌─────────────────┐
-  initialConfig│                 │
-  ────────────►│                 │outputFeatures
-  inputConfig  │     Feature     ├────────────────────►
-  ────────────►│     Tracker     │
-  inputImage   │                 │passthroughInputImage
+  inputConfig  │                 │outputFeatures
+  ────────────►│     Feature     ├────────────────────►
+  inputImage   │     Tracker     │passthroughInputImage
   ────────────►│-----------------├────────────────────►
                └─────────────────┘
 
 
 **Message types**
 
-- :code:`initialConfig` - `FeatureTrackerProperties <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.FeatureTrackerProperties>`__
 - :code:`inputConfig` - `FeatureTrackerConfig <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.FeatureTrackerConfig>`__
 - :code:`inputImage` - :ref:`ImgFrame`
 - :code:`outputFeatures` - `TrackedFeatures <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.TrackedFeatures>`__
-- :code:`passthroughInputImage` - UNKNOWN - TODO
+- :code:`passthroughInputImage` - :ref:`ImgFrame`
 
 
 Usage
