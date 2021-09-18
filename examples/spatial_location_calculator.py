@@ -125,6 +125,7 @@ with dai.Device(pipeline) as device:
 
         if newConfig:
             config.roi = dai.Rect(topLeft, bottomRight)
+            config.calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.AVERAGE
             cfg = dai.SpatialLocationCalculatorConfig()
             cfg.addROI(config)
             spatialCalcConfigInQueue.send(cfg)
