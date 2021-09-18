@@ -100,6 +100,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<SpatialLocations> spatialLocations(m, "SpatialLocations", DOC(dai, SpatialLocations));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
     py::class_<SpatialLocationCalculatorConfigThresholds> spatialLocationCalculatorConfigThresholds(m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds));
+    py::enum_<SpatialLocationCalculatorAlgorithm> spatialLocationCalculatorAlgorithm(m, "SpatialLocationCalculatorAlgorithm", DOC(dai, SpatialLocationCalculatorAlgorithm));
     py::class_<SpatialLocationCalculatorConfigData> spatialLocationCalculatorConfigData(m, "SpatialLocationCalculatorConfigData", DOC(dai, SpatialLocationCalculatorConfigData));
     py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>> spatialLocationCalculatorData(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData));
     py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>> spatialLocationCalculatorConfig(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig));
@@ -1001,11 +1002,17 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
         ;
 
+    spatialLocationCalculatorAlgorithm
+        .value("AVERAGE", SpatialLocationCalculatorAlgorithm::AVERAGE)
+        .value("MIN", SpatialLocationCalculatorAlgorithm::MIN)
+        .value("MAX", SpatialLocationCalculatorAlgorithm::MAX)
+        ;
 
     spatialLocationCalculatorConfigData
         .def(py::init<>())
-        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
-        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
+        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi, DOC(dai, SpatialLocationCalculatorConfigData, roi))
+        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds, DOC(dai, SpatialLocationCalculatorConfigData, depthThresholds))
+        .def_readwrite("calculationAlgorithm", &SpatialLocationCalculatorConfigData::calculationAlgorithm, DOC(dai, SpatialLocationCalculatorConfigData, calculationAlgorithm))
         ;
 
     // Bind SpatialLocationCalculatorData
