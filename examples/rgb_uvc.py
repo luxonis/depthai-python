@@ -3,7 +3,7 @@
 import depthai as dai
 import time
 
-enable_4k = True
+enable_4k = True  # Will downscale 4K -> 1080p
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -26,14 +26,12 @@ cam_rgb.video.link(uvc.input)
 
 # Pipeline defined, now the device is connected to
 with dai.Device(pipeline) as device:
-    # Start pipeline
-    device.startPipeline()
-
     print("\nDevice started, please keep this process running")
     print("and open an UVC viewer. Example on Linux:")
     print("    guvcview -d /dev/video0")
     print("\nTo close: Ctrl+C")
 
+    # Doing nothing here, just keeping the host feeding the watchdog
     while True:
         try:
             time.sleep(0.1)
