@@ -13,7 +13,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloDet = pipeline.createYoloDetectionNetwork()
+    yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
 
   .. code-tab:: c++
 
@@ -50,7 +50,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloDet = pipeline.createYoloDetectionNetwork()
+    yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
     yoloDet.setBlobPath(nnBlobPath)
 
     # Yolo specific parameters
@@ -78,8 +78,8 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`22.1 - RGB & TinyYoloV3 decoding on device`
-- :ref:`22.2 - RGB & TinyYoloV4 decoding on device`
+- :ref:`RGB & TinyYoloV3 decoding on device`
+- :ref:`RGB & TinyYoloV4 decoding on device`
 
 Reference
 #########
@@ -88,7 +88,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.YoloDetectionNetwork
+    .. autoclass:: depthai.node.YoloDetectionNetwork
       :members:
       :inherited-members:
       :noindex:

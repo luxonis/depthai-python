@@ -56,6 +56,8 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             # Docstring wrap width
             -w 80
             -o "${output_path}"
+            # C++ standard
+            -std=c++14
             # List of include directories
             "-I$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
             # List of compiler definitions

@@ -50,10 +50,17 @@ extensions = [
     "sphinx.ext.autosectionlabel",  # https://github.com/sphinx-doc/sphinx/issues/7697 wait for this and implement
     "sphinx_rtd_theme",
     "zephyr.warnings_filter",
+    'sphinx.ext.mathjax',
 ]
 
 # See https://github.com/sphinx-doc/sphinx/issues/7728
 suppress_warnings = ['autosectionlabel.*']
+
+# # Debug docstrings
+# def autodoc_process_docstring(app, what, name, obj, options, lines):
+#     print('process: ', what, name, obj, options, lines)
+# def setup(app):
+#     app.connect("autodoc-process-docstring", autodoc_process_docstring)
 
 # substitutions
 rst_prolog = '.. |release| replace:: ' + release

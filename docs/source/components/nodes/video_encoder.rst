@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    encoder = pipeline.createVideoEncoder()
+    encoder = pipeline.create(dai.node.VideoEncoder)
 
   .. code-tab:: c++
 
@@ -48,11 +48,11 @@ Usage
 
     # Create ColorCamera beforehand
     # Set H265 encoding for the ColorCamera video output
-    videoEncoder = pipeline.createVideoEncoder()
+    videoEncoder = pipeline.create(dai.node.VideoEncoder)
     videoEncoder.setDefaultProfilePreset(cam.getVideoSize(), cam.getFps(), dai.VideoEncoderProperties.Profile.H265_MAIN)
 
     # Create MJPEG encoding for still images
-    stillEncoder = pipeline.createVideoEncoder()
+    stillEncoder = pipeline.create(dai.node.VideoEncoder)
     stillEncoder.setDefaultProfilePreset(cam.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 
     cam.still.link(stillEncoder.input)
@@ -68,7 +68,7 @@ Usage
     videoEncoder->setDefaultProfilePreset(cam->getVideoSize(), cam->getFps(), dai::VideoEncoderProperties::Profile::H265_MAIN);
 
     // Create MJPEG encoding for still images
-    stillEncoder = pipeline.createVideoEncoder();
+    stillEncoder = pipeline.create(dai.node.VideoEncoder);
     stillEncoder->setDefaultProfilePreset(cam->getStillSize(), 1, dai::VideoEncoderProperties::Profile::MJPEG);
 
     cam->still.link(stillEncoder->input);
@@ -78,9 +78,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`04 - RGB Encoding`
-- :ref:`13 - Encoding Max Limit`
-- :ref:`18 - RGB Encoding with MobilenetSSD`
+- :ref:`RGB Encoding`
+- :ref:`Encoding Max Limit`
+- :ref:`RGB Encoding & MobilenetSSD`
 
 Reference
 #########
@@ -89,7 +89,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.VideoEncoder
+    .. autoclass:: depthai.node.VideoEncoder
       :members:
       :inherited-members:
       :noindex:

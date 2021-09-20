@@ -26,12 +26,12 @@ lr_check = False
 pipeline = dai.Pipeline()
 
 # Define a source - two mono (grayscale) cameras
-left = pipeline.createMonoCamera()
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+left = pipeline.createColorCamera()
+left.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-right = pipeline.createMonoCamera()
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+right = pipeline.createColorCamera()
+right.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
@@ -52,12 +52,15 @@ depth.setExtendedDisparity(extended_disparity)
 if subpixel: max_disparity *= 32 # 5 fractional bits, x32
 depth.setSubpixel(subpixel)
 
+# TODO fix in FW to be optional
+depth.setInputResolution(1280, 800)
+
 # When we get disparity to the host, we will multiply all values with the multiplier
 # for better visualization
 multiplier = 255 / max_disparity
 
-left.out.link(depth.left)
-right.out.link(depth.right)
+left.isp.link(depth.left)
+right.isp.link(depth.right)
 
 # Create output
 xout = pipeline.createXLinkOut()

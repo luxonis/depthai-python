@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlinkIn = pipeline.createXLinkIn()
+    xlinkIn = pipeline.create(dai.node.XLinkIn)
 
   .. code-tab:: c++
 
@@ -44,7 +44,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xIn = pipeline.createXLinkIn()
+    xIn = pipeline.create(dai.node.XLinkIn)
     xIn.setStreamName("camControl")
 
     # Create ColorCamera beforehand
@@ -84,9 +84,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`14.1 - Color Camera Control`
-- :ref:`17 - Video & MobilenetSSD`
-- :ref:`20 - Color Rotate Warp`
+- :ref:`RGB Camera Control`
+- :ref:`Video & MobilenetSSD`
+- :ref:`RGB Rotate Warp`
 
 Reference
 #########
@@ -95,7 +95,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.XLinkIn
+    .. autoclass:: depthai.node.XLinkIn
       :members:
       :inherited-members:
       :noindex:

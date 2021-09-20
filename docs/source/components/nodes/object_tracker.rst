@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    objectTracker = pipeline.createObjectTracker()
+    objectTracker = pipeline.create(dai.node.ObjectTracker)
 
   .. code-tab:: c++
 
@@ -53,7 +53,7 @@ Usage
   .. code-tab:: py
 
       pipeline = dai.Pipeline()
-      objectTracker = pipeline.createObjectTracker()
+      objectTracker = pipeline.create(dai.node.ObjectTracker)
 
       objectTracker.setDetectionLabelsToTrack([15])  # Track only person
       # Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
@@ -81,9 +81,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`29.1 - Object tracker on RGB camera`
-- :ref:`29.2 - Spatial object tracker on RGB camera`
-- :ref:`29.3 - Object tracker on video`
+- :ref:`Object tracker on RGB`
+- :ref:`Spatial object tracker on RGB`
+- :ref:`Object tracker on video`
 
 Reference
 #########
@@ -92,7 +92,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.ObjectTracker
+    .. autoclass:: depthai.node.ObjectTracker
       :members:
       :inherited-members:
       :noindex:

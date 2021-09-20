@@ -8,9 +8,9 @@ scenes, effects etc.
 Examples of functionality
 #########################
 
-- :ref:`14.1 - Color Camera Control`
-- :ref:`19 - Mono Camera Control`
-- :ref:`23 - Auto Exposure on ROI`
+- :ref:`RGB Camera Control`
+- :ref:`Mono Camera Control`
+- :ref:`Auto Exposure on ROI`
 
 Reference
 #########

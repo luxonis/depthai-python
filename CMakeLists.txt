@@ -83,8 +83,9 @@ find_package(pybind11 CONFIG REQUIRED)
 # Add files for python module
 pybind11_add_module(${TARGET_NAME}
     src/py_bindings.cpp
-    src/XLinkConnectionBindings.cpp
+    src/XLinkBindings.cpp
     src/DeviceBindings.cpp
+    src/CalibrationHandlerBindings.cpp
     src/DeviceBootloaderBindings.cpp
     src/DatatypeBindings.cpp
     src/DataQueueBindings.cpp
@@ -156,11 +157,34 @@ target_link_libraries(${TARGET_NAME}
         pybind11::pybind11
         depthai::core # Use non-opencv target as we use opencv-python in bindings
         hedley
+        pybind11_json
 )
 
-# Add default commit hash ('dev') if not build by CI
+# Find Git
+find_package(Git)
+
+# Add build information (commit, date)
+set(BUILD_COMMIT "dev")
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE BUILD_COMMIT
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} show -s --format=%ci ${BUILD_COMMIT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        OUTPUT_VARIABLE BUILD_COMMIT_DATETIME
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+
+# Add local commit hash (or 'dev' if unable to retrieve) if not build by CI
 if(NOT DEFINED ENV{CI} AND NOT DEPTHAI_PYTHON_COMMIT_HASH)
-    set(DEPTHAI_PYTHON_COMMIT_HASH "dev")
+    set(DEPTHAI_PYTHON_COMMIT_HASH ${BUILD_COMMIT})
 endif()
 
 # Get version to use
@@ -174,8 +198,15 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} "-c" "${version_command}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add version definition
-target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}")
+
+string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d %H:%M:%S +0000" UTC)
+target_compile_definitions(${TARGET_NAME}
+    PRIVATE
+        DEPTHAI_PYTHON_VERSION="${DEPTHAI_PYTHON_VERSION}"
+        DEPTHAI_PYTHON_COMMIT_HASH="${BUILD_COMMIT}"
+        DEPTHAI_PYTHON_COMMIT_DATETIME="${BUILD_COMMIT_DATETIME}"
+        DEPTHAI_PYTHON_BUILD_DATETIME="${BUILD_DATETIME}"
+)
 
 # Set compiler features (c++14), and disables extensions
 set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 14)

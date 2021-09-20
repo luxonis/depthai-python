@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xlinkOut = pipeline.createXLinkOut()
+    xlinkOut = pipeline.create(dai.node.XLinkOut)
 
   .. code-tab:: c++
 
@@ -44,7 +44,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    xOut = pipeline.createXLinkOut()
+    xOut = pipeline.create(dai.node.XLinkOut)
     xOut.setStreamName("camOut")
 
     # Here we will send camera preview (ImgFrame) to the host via XLink.
@@ -64,9 +64,9 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`01 - RGB Preview`
-- :ref:`09 - Mono & MobilenetSSD`
-- :ref:`10 - Mono & MobilenetSSD & Depth`
+- :ref:`RGB Preview`
+- :ref:`Mono & MobilenetSSD`
+- :ref:`Mono & MobilenetSSD & Depth`
 
 
 Reference
@@ -76,7 +76,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.XLinkOut
+    .. autoclass:: depthai.node.XLinkOut
       :members:
       :inherited-members:
       :noindex:

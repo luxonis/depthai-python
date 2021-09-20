@@ -11,7 +11,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloSpatial = pipeline.createYoloSpatialDetectionNetwork()
+    yoloSpatial = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
 
   .. code-tab:: c++
 
@@ -52,7 +52,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    yoloSpatial = pipeline.createYoloSpatialDetectionNetwork()
+    yoloSpatial = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
     yoloSpatial.setBlobPath(nnBlobPath)
 
     # Spatial detection specific parameters
@@ -92,7 +92,7 @@ Usage
 Examples of functionality
 #########################
 
-- :ref:`26.3 - RGB & TinyYolo with spatial data`
+- :ref:`RGB & TinyYolo with spatial data`
 
 Reference
 #########
@@ -101,7 +101,7 @@ Reference
 
   .. tab:: Python
 
-    .. autoclass:: depthai.YoloSpatialDetectionNetwork
+    .. autoclass:: depthai.node.YoloSpatialDetectionNetwork
       :members:
       :inherited-members:
       :noindex:
