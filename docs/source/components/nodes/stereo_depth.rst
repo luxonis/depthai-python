@@ -297,17 +297,7 @@ Min stereo depth distance
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
-There are two ways to use DepthAI for 3D object detection and/or using neural information to get real-time 3D position of features (e.g. facial landmarks):
-
-#. :ref:`Monocular Neural Inference fused with Stereo Depth`
-#. Stereo Neural Inference
-
-Monocular Neural Inference fused with Stereo Depth
-**************************************************
-
-In this mode, the AI (object detection) is run on the left, right, or RGB camera, and the results are fused with stereo disparity depth, based on semi global matching (SGBM).  The minimum depth is limited by the maximum disparity search, which is by default 96, but is extendable to 191 in extended disparity mode.
-
-To calcualte this miminum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
+To calcualte this minimum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
 
 For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the :ref:`depth formula <Calculate depth using dispairty map>` we get:
 
