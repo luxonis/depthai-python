@@ -36,6 +36,8 @@ import os
 import cv2
 import argparse
 import depthai as dai
+import collections
+import time
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -100,8 +102,24 @@ color_res_opts = {
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
+# Calculates FPS over a moving window, configurable
+class FPS:
+    def __init__(self, window_size=30):
+        self.dq = collections.deque(maxlen=window_size)
+        self.fps = 0
+
+    def update(self, timestamp=None):
+        if timestamp == None: timestamp = time.monotonic()
+        count = len(self.dq)
+        if count > 0: self.fps = count / (timestamp - self.dq[0])
+        self.dq.append(timestamp)
+
+    def get(self):
+        return self.fps
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
+# Uncomment to get better throughput
 #pipeline.setXLinkChunkSize(0)
 
 control = pipeline.createXLinkIn()
@@ -146,12 +164,16 @@ with dai.Device(pipeline) as device:
     print('USB speed:', device.getUsbSpeed().name)
 
     q = {}
+    fps_host = {}  # FPS computed based on the time we receive frames in app
+    fps_capt = {}  # FPS computed based on capture timestamps from device
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
         if 0 and c == 'rgb':
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
+        fps_host[c] = FPS()
+        fps_capt[c] = FPS()
 
     controlQueue = device.getInputQueue('control')
 
@@ -219,12 +241,19 @@ with dai.Device(pipeline) as device:
     chroma_denoise = 0
     control = 'none'
 
+    print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
+
     while True:
         for c in cam_list:
             pkt = q[c].tryGet()
             if pkt is not None:
+                fps_host[c].update()
+                fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 frame = pkt.getCvFrame()
                 cv2.imshow(c, frame)
+        print("\rFPS:",
+              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
+              end='', flush=True)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
