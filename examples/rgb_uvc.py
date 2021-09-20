@@ -12,7 +12,7 @@ pipeline = dai.Pipeline()
 cam_rgb = pipeline.createColorCamera()
 cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 cam_rgb.setInterleaved(False)
-cam_rgb.initialControl.setManualFocus(130)
+#cam_rgb.initialControl.setManualFocus(130)
 
 if enable_4k:
     cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
