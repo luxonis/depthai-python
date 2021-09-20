@@ -177,6 +177,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
     py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
+    py::class_<Node::Input::Options> pyInputOptions(pyInput, "Options", DOC(dai, Node, Input, Options));
     py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
@@ -291,7 +292,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     stereoDepthProperties
         .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
-        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
         .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
         .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
         .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
@@ -379,7 +379,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     spatialLocationCalculatorProperties
         .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
-        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
         ;
 
 
@@ -439,7 +438,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // EdgeDetector node properties
     edgeDetectorProperties
         .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
         .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
         .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
     ;
@@ -469,7 +467,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // FeatureTracker properties
     featureTrackerProperties
         .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
         .def_readwrite("numShaves", &FeatureTrackerProperties::numShaves, DOC(dai, FeatureTrackerProperties, numShaves))
         .def_readwrite("numMemorySlices", &FeatureTrackerProperties::numMemorySlices, DOC(dai, FeatureTrackerProperties, numMemorySlices))
         ;
@@ -489,12 +486,16 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
     pyInput
-        .def_property_readonly("name", [](const Node::Input& input){ return input.name; })
-        .def_property_readonly("type", [](const Node::Input& input){ return input.type; })
+        .def_property("group", [](Node::Input& obj) { return obj.group; }, [](Node::Input& obj, std::string group) { obj.group = group; })
+        .def_property("name", [](Node::Input& obj) { return obj.name; }, [](Node::Input& obj, std::string name) { obj.name = name; })
+        .def_property("type", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, Node::Input::Type type) { obj.type = type; })
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
+    ;
+    pyInputOptions
+        .def_readwrite("waitForMessage", &Node::Input::Options::waitForMessage)
     ;
 
     // Node::Output bindings
@@ -503,6 +504,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
+        .def_property("group", [](Node::Output& obj) { return obj.group; }, [](Node::Output& obj, std::string group) { obj.group = group; })
+        .def_property("name", [](Node::Output& obj) { return obj.name; }, [](Node::Output& obj, std::string name) { obj.name = name; })
+        .def_property("type", [](Node::Output& obj) { return obj.type; }, [](Node::Output& obj, Node::Output::Type type) { obj.type = type; })
         .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
@@ -513,8 +517,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     nodeConnection
         .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
         .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
+        .def_property("outputGroup", [](Node::Connection& conn) { return conn.outputGroup; }, [](Node::Connection& conn, std::string group) {conn.outputGroup = group; }, DOC(dai, Node, Connection, outputGroup))
         .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
         .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
+        .def_property("inputGroup", [](Node::Connection& conn) { return conn.inputGroup; }, [](Node::Connection& conn, std::string group) {conn.inputGroup = group; }, DOC(dai, Node, Connection, inputGroup))
     ;
 
     pyNode
@@ -628,8 +634,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getSensorCrop", &ColorCamera::getSensorCrop, DOC(dai, node, ColorCamera, getSensorCrop))
         .def("getSensorCropX", &ColorCamera::getSensorCropX, DOC(dai, node, ColorCamera, getSensorCropX))
         .def("getSensorCropY", &ColorCamera::getSensorCropY, DOC(dai, node, ColorCamera, getSensorCropY))
-        .def("setWaitForConfigInput", &ColorCamera::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, ColorCamera, setWaitForConfigInput))
-        .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput, DOC(dai, node, ColorCamera, getWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](ColorCamera& cam, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            cam.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, ColorCamera, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](ColorCamera& cam){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return cam.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, ColorCamera, getWaitForConfigInput))
+
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, ColorCamera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio, DOC(dai, node, ColorCamera, getPreviewKeepAspectRatio))
         .def("setIspScale", static_cast<void(ColorCamera::*)(int,int)>(&ColorCamera::setIspScale), py::arg("numerator"), py::arg("denominator"), DOC(dai, node, ColorCamera, setIspScale))
@@ -723,7 +746,24 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio, DOC(dai, node, ImageManip, setKeepAspectRatio))
 
-        .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput, DOC(dai, node, ImageManip, setWaitForConfigInput))
+        .def("setWaitForConfigInput", [](ImageManip& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, ImageManip, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](ImageManip& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, ImageManip, getWaitForConfigInput))
+
         .def("setNumFramesPool", &ImageManip::setNumFramesPool, DOC(dai, node, ImageManip, setNumFramesPool))
         .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize, DOC(dai, node, ImageManip, setMaxOutputFrameSize))
         ;
@@ -914,9 +954,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // DetectionNetwork node
     detectionNetwork
-        .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))
-        .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
-        .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, DetectionNetwork, passthrough))
+        .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, NeuralNetwork, input))
+        .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, NeuralNetwork, out))
+        .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
         ;
     // ALIAS
@@ -931,7 +971,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setAnchors", &YoloDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors))
         .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloDetectionNetwork, setAnchorMasks))
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
-        ;
+        .def("getNumClasses", &YoloDetectionNetwork::getNumClasses, DOC(dai, node, YoloDetectionNetwork, getNumClasses))
+        .def("getCoordinateSize", &YoloDetectionNetwork::getCoordinateSize, DOC(dai, node, YoloDetectionNetwork, getCoordinateSize))
+        .def("getAnchors", &YoloDetectionNetwork::getAnchors, DOC(dai, node, YoloDetectionNetwork, getAnchors))
+        .def("getAnchorMasks", &YoloDetectionNetwork::getAnchorMasks, DOC(dai, node, YoloDetectionNetwork, getAnchorMasks))
+        .def("getIouThreshold", &YoloDetectionNetwork::getIouThreshold, DOC(dai, node, YoloDetectionNetwork, getIouThreshold))
+    ;
 
     spatialDetectionNetwork
         .def_readonly("input", &SpatialDetectionNetwork::input, DOC(dai, node, SpatialDetectionNetwork, input))
@@ -957,6 +1002,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setAnchors", &YoloSpatialDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchors))
         .def("setAnchorMasks", &YoloSpatialDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchorMasks))
         .def("setIouThreshold", &YoloSpatialDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloSpatialDetectionNetwork, setIouThreshold))
+        .def("getNumClasses", &YoloSpatialDetectionNetwork::getNumClasses, DOC(dai, node, YoloSpatialDetectionNetwork, getNumClasses))
+        .def("getCoordinateSize", &YoloSpatialDetectionNetwork::getCoordinateSize, DOC(dai, node, YoloSpatialDetectionNetwork, getCoordinateSize))
+        .def("getAnchors", &YoloSpatialDetectionNetwork::getAnchors, DOC(dai, node, YoloSpatialDetectionNetwork, getAnchors))
+        .def("getAnchorMasks", &YoloSpatialDetectionNetwork::getAnchorMasks, DOC(dai, node, YoloSpatialDetectionNetwork, getAnchorMasks))
+        .def("getIouThreshold", &YoloSpatialDetectionNetwork::getIouThreshold, DOC(dai, node, YoloSpatialDetectionNetwork, getIouThreshold))
         ;
 
     // SpatialLocationCalculator node
@@ -967,7 +1017,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
         .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
         .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
-        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](SpatialLocationCalculator& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](SpatialLocationCalculator& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, SpatialLocationCalculator, getWaitForConfigInput))
+
         ;
     // ALIAS
     daiNodeModule.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
@@ -1032,7 +1100,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("inputConfig", &EdgeDetector::inputConfig, DOC(dai, node, EdgeDetector, inputConfig))
         .def_readonly("inputImage", &EdgeDetector::inputImage, DOC(dai, node, EdgeDetector, inputImage))
         .def_readonly("outputImage", &EdgeDetector::outputImage, DOC(dai, node, EdgeDetector, outputImage))
-        .def("setWaitForConfigInput", &EdgeDetector::setWaitForConfigInput, DOC(dai, node, EdgeDetector, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](EdgeDetector& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, EdgeDetector, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](EdgeDetector& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, EdgeDetector, getWaitForConfigInput))
+
         .def("setNumFramesPool", &EdgeDetector::setNumFramesPool, DOC(dai, node, EdgeDetector, setNumFramesPool))
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
@@ -1046,7 +1132,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("outputFeatures", &FeatureTracker::outputFeatures, DOC(dai, node, FeatureTracker, outputFeatures))
         .def_readonly("passthroughInputImage", &FeatureTracker::passthroughInputImage, DOC(dai, node, FeatureTracker, passthroughInputImage))
         .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
-        .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](FeatureTracker& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](FeatureTracker& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, FeatureTracker, getWaitForConfigInput))
+
         .def("setHardwareResources", &FeatureTracker::setHardwareResources, py::arg("numShaves"), py::arg("numMemorySlices"), DOC(dai, node, FeatureTracker, setHardwareResources))
         ;
     daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
