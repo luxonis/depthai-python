@@ -29,7 +29,7 @@ Inputs and Outputs
 .. code-block::
 
                ┌─────────────────┐
-  inputConfig  │                 │outputFeatures
+  inputConfig  │                 │       outputFeatures
   ────────────►│     Feature     ├────────────────────►
   inputImage   │     Tracker     │passthroughInputImage
   ────────────►│-----------------├────────────────────►
