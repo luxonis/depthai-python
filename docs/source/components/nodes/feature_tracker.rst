@@ -101,7 +101,7 @@ Image cells
 To have features all around the image, it is divided into cells which are then processed separately.
 Each cell has a :code:`target feature count = frame target features / number of cells`.
 The number of cells can be configured in horizontal and in vertical direction. The default number of cells is
-:code:`4`(horizontal) x :code:`4` (vertical). This means that the default number of target features per cell is:
+:code:`4` (horizontal) x :code:`4` (vertical). This means that the default number of target features per cell is:
 :code:`320 / (4 * 4) = 20`. Note that if an already tracked point happens to have its new coordinate in a 
 full cell, it will not be removed, therefore number of features can exceed this limit.
 
@@ -116,6 +116,7 @@ Entry conditions for new features
 #################################
 
 The entry conditions for new features are:
+
 - features must not be too close to each other (minimum distance criteria - default value is 50, the unit of measurement being squared euclidean distance in pixels),
 - Harris score of the feature is high enough,
 - there is enough *room* in the cell for the feature (target feature count is not achieved).
@@ -136,6 +137,7 @@ Feature Maintenance
 The algorithm has to decide which feature will be removed and which will be kept in the
 subsequent frames. Note that tracked features have priority over new features.
 It will remove the features which:
+
 - have too large tracking error (wasn't tracked correctly),
 - have too small Harris score (configurable threshold).
 
@@ -143,6 +145,7 @@ New position calculation
 ########################
 
 A position of the previous features on the current frame can be calculated in two ways:
+
 1. Using the pyramidal Lucas-Kanade optical flow method.
 2. Using a dense motion estimation hardware block (Block matcher).
 
