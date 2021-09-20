@@ -101,7 +101,7 @@ Image cells
 To have features all around the image, it is divided into cells which are then processed separately.
 Each cell has a :code:`target feature count = frame target features / number of cells`.
 The number of cells can be configured in horizontal and in vertical direction. The default number of cells is
-:code:`4`(horizontal) x :code:`4` (vertical). This means that the default number of target features per cell is:
+:code:`4` (horizontal) x :code:`4` (vertical). This means that the default number of target features per cell is:
 :code:`320 / (4 * 4) = 20`. Note that if an already tracked point happens to have its new coordinate in a 
 full cell, it will not be removed, therefore number of features can exceed this limit.
 
