@@ -1142,6 +1142,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
         .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, DOC(dai, StereoDepthConfig, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepthConfig::setSubpixel, DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
