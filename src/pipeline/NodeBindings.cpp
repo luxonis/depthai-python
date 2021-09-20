@@ -837,7 +837,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRuntimeModeSwitch", &StereoDepth::setRuntimeModeSwitch, DOC(dai, node, StereoDepth, setRuntimeModeSwitch))
         .def("setNumFramesPool", &StereoDepth::setNumFramesPool, DOC(dai, node, StereoDepth, setNumFramesPool))
         .def("getMaxDisparity", [](StereoDepth& s){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "getMaxDisparity() is deprecated, Use 'setRectification(False)' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "getMaxDisparity() is deprecated, Use 'initialConfig.getMaxDisparity()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             s.getMaxDisparity();
