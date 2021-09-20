@@ -38,9 +38,9 @@ Inputs and Outputs
 
 **Message types**
 
-- :code:`inputConfig` - `FeatureTrackerConfig <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.FeatureTrackerConfig>`__
+- :code:`inputConfig` - :ref:`FeatureTrackerConfig`
 - :code:`inputImage` - :ref:`ImgFrame`
-- :code:`outputFeatures` - `TrackedFeatures <https://docs.luxonis.com/projects/api/en/latest/references/python/#depthai.TrackedFeatures>`__
+- :code:`outputFeatures` - :ref:`TrackedFeatures`
 - :code:`passthroughInputImage` - :ref:`ImgFrame`
 
 
