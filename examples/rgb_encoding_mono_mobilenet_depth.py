@@ -77,7 +77,7 @@ manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
 # Disparity range is used for normalization
-disparityMultiplier = 255 / depth.getMaxDisparity()
+disparityMultiplier = 255 / depth.initialConfig.getMaxDisparity()
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:

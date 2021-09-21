@@ -95,7 +95,7 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    disparityMultiplier = 255 / stereo.getMaxDisparity()
+    disparityMultiplier = 255 / stereo.initialConfig.getMaxDisparity()
 
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
