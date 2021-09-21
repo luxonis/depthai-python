@@ -54,15 +54,13 @@ imageManip.initialConfig.setResize(300, 300)
 # The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
 imageManip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # StereoDepth
 stereo.initialConfig.setConfidenceThreshold(255)
-stereo.setLeftRightCheck(True)
-stereo.setSubpixel(True)
 
 # Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
