@@ -38,7 +38,7 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
+DEPENDENCIES = ['numpy', 'opencv-python', 'pyyaml', 'requests']
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
@@ -47,7 +47,7 @@ ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snap
 in_venv = getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix)) != sys.prefix
 pip_call = [sys.executable, "-m", "pip"]
 pip_installed = True
-pip_install = pip_call + ["install"]
+pip_install = pip_call + ["install", "-U"]
 
 try:
     subprocess.check_call(pip_call + ["--version"])
@@ -66,14 +66,14 @@ if platform.machine() == "arm64" and platform.system() == "Darwin":
     raise RuntimeError(err_str)
 
 is_pi = platform.machine().startswith("arm") or platform.machine().startswith("aarch")
-if is_pi and sys.version_info[1] in (7, 9):
+if is_pi and sys.version_info[1] == 9:
     print("[WARNING] There are no prebuilt wheels for Python 3.{} for OpenCV, building process on this device may be long and unstable".format(sys.version_info[1]))
 
 if not in_venv:
     pip_install.append("--user")
 
 # Update pip
-pip_update_cmd = [*pip_install, "pip", "-U"]
+pip_update_cmd = [*pip_install, "pip"]
 if args.dry_run:
     prettyPrint(pip_update_cmd)
 else:
