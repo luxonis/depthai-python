@@ -155,8 +155,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
-    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
-    py::class_<StereoDepthConfigData> stereoDepthConfigData(m, "StereoDepthConfigData", DOC(dai, StereoDepthConfigData));
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
     py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
@@ -280,24 +278,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // StereoDepth props
 
-    // MedianFilter
-    medianFilter
-        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
-        ;
-
     stereoDepthProperties
-        .def_readwrite("calibration",             &StereoDepthProperties::calibration)
         .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
         .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
         .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
         .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("enableLeftRightCheck",    &StereoDepthProperties::enableLeftRightCheck)
-        .def_readwrite("enableSubpixel",          &StereoDepthProperties::enableSubpixel)
         .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
-        .def_readwrite("rectifyMirrorFrame",      &StereoDepthProperties::rectifyMirrorFrame)
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
@@ -306,16 +292,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
         .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
         ;
-    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
-
-    stereoDepthConfigData
-        .def(py::init<>())
-        .def_readwrite("median", &StereoDepthConfigData::median,  DOC(dai, StereoDepthConfigData, median))
-        .def_readwrite("confidenceThreshold", &StereoDepthConfigData::confidenceThreshold,  DOC(dai, StereoDepthConfigData, confidenceThreshold))
-        .def_readwrite("bilateralSigmaValue", &StereoDepthConfigData::bilateralSigmaValue,  DOC(dai, StereoDepthConfigData, bilateralSigmaValue))
-        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfigData::leftRightCheckThreshold,  DOC(dai, StereoDepthConfigData, leftRightCheckThreshold))
-        ;
-    m.attr("StereoDepthConfigData").attr("MedianFilter") = medianFilter;
 
 
     // VideoEncoder props
@@ -778,6 +754,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("syncedRight",    &StereoDepth::syncedRight, DOC(dai, node, StereoDepth, syncedRight))
         .def_readonly("rectifiedLeft",  &StereoDepth::rectifiedLeft, DOC(dai, node, StereoDepth, rectifiedLeft))
         .def_readonly("rectifiedRight", &StereoDepth::rectifiedRight, DOC(dai, node, StereoDepth, rectifiedRight))
+        .def_readonly("outConfig",      &StereoDepth::outConfig, DOC(dai, node, StereoDepth, outConfig))
+        .def_readonly("debugDispLrCheckIt1", &StereoDepth::debugDispLrCheckIt1, DOC(dai, node, StereoDepth, debugDispLrCheckIt1))
+        .def_readonly("debugDispLrCheckIt2", &StereoDepth::debugDispLrCheckIt2, DOC(dai, node, StereoDepth, debugDispLrCheckIt2))
+        .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
         .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
         .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
@@ -792,7 +772,15 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
-        .def("setRectifyMirrorFrame",   &StereoDepth::setRectifyMirrorFrame, py::arg("enable"), DOC(dai, node, StereoDepth, setRectifyMirrorFrame))
+        .def("setRectifyMirrorFrame", [](StereoDepth& s, bool enable) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setRectifyMirrorFrame() is deprecated.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.setRectifyMirrorFrame(enable);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setRectifyMirrorFrame))
+
         .def("setConfidenceThreshold", [](StereoDepth& s, int confThr) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setConfidenceThreshold() is deprecated, Use 'initialConfig.setConfidenceThreshold()' instead", 1);
@@ -846,7 +834,15 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             s.setEmptyCalibration();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, setEmptyCalibration))
-        .def("getMaxDisparity", &StereoDepth::getMaxDisparity, DOC(dai, node, StereoDepth, getMaxDisparity))
+        .def("setRuntimeModeSwitch", &StereoDepth::setRuntimeModeSwitch, DOC(dai, node, StereoDepth, setRuntimeModeSwitch))
+        .def("setNumFramesPool", &StereoDepth::setNumFramesPool, DOC(dai, node, StereoDepth, setNumFramesPool))
+        .def("getMaxDisparity", [](StereoDepth& s){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "getMaxDisparity() is deprecated, Use 'initialConfig.getMaxDisparity()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            s.getMaxDisparity();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, getMaxDisparity))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;

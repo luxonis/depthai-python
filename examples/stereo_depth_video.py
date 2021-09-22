@@ -85,7 +85,7 @@ with dai.Device(pipeline) as device:
         rectifRightQueue = device.getOutputQueue(name="rectified_right", maxSize=8, blocking=False)
 
     # Disparity range is used for normalization
-    disparityMultiplier = 255 / stereo.getMaxDisparity()
+    disparityMultiplier = 255 / stereo.initialConfig.getMaxDisparity()
 
     while True:
         left = leftQueue.get()
