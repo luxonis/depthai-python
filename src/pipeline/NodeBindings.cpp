@@ -177,7 +177,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
     py::class_<Node, std::shared_ptr<Node>> pyNode(m, "Node", DOC(dai, Node));
     py::class_<Node::Input> pyInput(pyNode, "Input", DOC(dai, Node, Input));
-    py::class_<Node::Input::Options> pyInputOptions(pyInput, "Options", DOC(dai, Node, Input, Options));
     py::enum_<Node::Input::Type> nodeInputType(pyInput, "Type");
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
@@ -493,9 +492,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
-    ;
-    pyInputOptions
-        .def_readwrite("waitForMessage", &Node::Input::Options::waitForMessage)
+        .def_property("waitForMessage", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, bool waitForMessage) { obj.waitForMessage = waitForMessage; })
+        .def("setWaitForMessage", &Node::Input::setWaitForMessage, py::arg("waitForMessage"), DOC(dai, Node, Input, setWaitForMessage))
+        .def("getWaitForMessage", &Node::Input::getWaitForMessage, DOC(dai, Node, Input, getWaitForMessage))
+        .def("setReusePreviousMessage", &Node::Input::setReusePreviousMessage, py::arg("reusePreviousMessage"), DOC(dai, Node, Input, setReusePreviousMessage))
+        .def("getReusePreviousMessage", &Node::Input::getReusePreviousMessage, DOC(dai, Node, Input, getReusePreviousMessage))
     ;
 
     // Node::Output bindings
@@ -637,7 +638,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setWaitForConfigInput", [](ColorCamera& cam, bool wait){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             cam.setWaitForConfigInput(wait);
@@ -646,7 +647,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getWaitForConfigInput", [](ColorCamera& cam){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             return cam.getWaitForConfigInput();
@@ -678,6 +679,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads, py::arg("numThreads"), DOC(dai, node, NeuralNetwork, setNumInferenceThreads))
         .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, NeuralNetwork, setNumNCEPerInferenceThread))
         .def("getNumInferenceThreads", &NeuralNetwork::getNumInferenceThreads, DOC(dai, node, NeuralNetwork, getNumInferenceThreads))
+
+        .def_readonly("inputs", &NeuralNetwork::inputs, DOC(dai, node, NeuralNetwork, inputs))
+        .def_readonly("passthroughs", &NeuralNetwork::passthroughs, DOC(dai, node, NeuralNetwork, passthroughs))
+
         ;
     // Properties alias
     daiNodeModule.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
@@ -748,7 +753,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setWaitForConfigInput", [](ImageManip& obj, bool wait){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             obj.setWaitForConfigInput(wait);
@@ -757,7 +762,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getWaitForConfigInput", [](ImageManip& obj){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             return obj.getWaitForConfigInput();
@@ -1020,7 +1025,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setWaitForConfigInput", [](SpatialLocationCalculator& obj, bool wait){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             obj.setWaitForConfigInput(wait);
@@ -1029,7 +1034,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getWaitForConfigInput", [](SpatialLocationCalculator& obj){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             return obj.getWaitForConfigInput();
@@ -1103,7 +1108,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setWaitForConfigInput", [](EdgeDetector& obj, bool wait){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             obj.setWaitForConfigInput(wait);
@@ -1112,7 +1117,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getWaitForConfigInput", [](EdgeDetector& obj){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             return obj.getWaitForConfigInput();
@@ -1135,7 +1140,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setWaitForConfigInput", [](FeatureTracker& obj, bool wait){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             obj.setWaitForConfigInput(wait);
@@ -1144,7 +1149,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getWaitForConfigInput", [](FeatureTracker& obj){
             // Issue a deprecation warning
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.options.waitForMessage' instead", 1);
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
             HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
             return obj.getWaitForConfigInput();
