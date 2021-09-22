@@ -46,7 +46,7 @@ config.depthThresholds.lowerThreshold = 100
 config.depthThresholds.upperThreshold = 10000
 config.roi = dai.Rect(topLeft, bottomRight)
 
-spatialLocationCalculator.setWaitForConfigInput(False)
+spatialLocationCalculator.inputConfig.setWaitForMessage(False)
 spatialLocationCalculator.initialConfig.addROI(config)
 
 # Linking
