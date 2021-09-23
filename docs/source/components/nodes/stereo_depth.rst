@@ -124,7 +124,7 @@ Currently configurable blocks
 
   .. tab:: Confidence Threshold
 
-    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 dispairty levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
+    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
     - **LR check threshold**: Disparity is considered for the output when the difference between LR and RL disparities is smaller than the LR check threshold.
 
     .. doxygenfunction:: dai::StereoDepthConfig::setConfidenceThreshold
@@ -255,7 +255,7 @@ as:
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
-Calculate depth using dispairty map
+Calculate depth using disparity map
 ###################################
 
 Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
@@ -297,9 +297,9 @@ Min stereo depth distance
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
-To calcualte this minimum distance, use the :ref:`depth formula <Calculate depth using dispairty map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
+To calcualte this minimum distance, use the :ref:`depth formula <Calculate depth using disparity map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
 
-For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the :ref:`depth formula <Calculate depth using dispairty map>` we get:
+For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the :ref:`depth formula <Calculate depth using disparity map>` we get:
 
 .. code-block:: python
 
