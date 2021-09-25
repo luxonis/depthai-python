@@ -3,7 +3,6 @@
 import cv2
 import numpy as np
 import depthai as dai
-from time import sleep
 import argparse
 from pathlib import Path
 
@@ -24,7 +23,7 @@ parser.add_argument(
     "--resolution",
     type=str,
     default="720",
-    help="Sets the resolution on mono cameras. Options: 720 | 400",
+    help="Sets the resolution on mono cameras. Options: 800 | 720 | 400",
 )
 parser.add_argument(
     "-md",
@@ -42,10 +41,13 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-resolution = (640, 400) if args.resolution == "400" else (1280, 720)
-if args.resolution not in ("720", "400"):
-    print("Unsupported resolution, 720P will be used")
+resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
 
+if args.resolution not in resolutionMap:
+    print("Unsupported resolution, 720P will be used")
+    args.resolution = "720"
+
+resolution = resolutionMap[args.resolution]
 
 mesh_directory = args.mesh_dir  # Directory which contains mesh files
 
@@ -95,7 +97,9 @@ def create_stereo_pipeline(calibData, from_camera=True, mesh_directory=None):
         cam_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
         cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
         res = (
-            dai.MonoCameraProperties.SensorResolution.THE_720_P
+            dai.MonoCameraProperties.SensorResolution.THE_800_P
+            if resolution[1] == 800
+            else dai.MonoCameraProperties.SensorResolution.THE_720_P
             if resolution[1] == 720
             else dai.MonoCameraProperties.SensorResolution.THE_400_P
         )
@@ -106,8 +110,6 @@ def create_stereo_pipeline(calibData, from_camera=True, mesh_directory=None):
         cam_left.setStreamName("in_left")
         cam_right.setStreamName("in_right")
 
-    stereo.setOutputDepth(out_depth)
-    stereo.setOutputRectified(out_rectified)
     stereo.setConfidenceThreshold(200)
     stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
     stereo.setMedianFilter(median)  # KERNEL_7x7 default
@@ -155,7 +157,7 @@ def create_stereo_pipeline(calibData, from_camera=True, mesh_directory=None):
 
 
 def generate_mesh(calibData, output_path):
-    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT))
+    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
     d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
     R2 = np.array(calibData.getStereoRightRectificationRotation())
@@ -163,12 +165,6 @@ def generate_mesh(calibData, output_path):
     d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
     map_x_l, map_y_l = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
     map_x_r, map_y_r = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
-
-    print("shape of maps")
-    print(map_x_l.shape)
-    print(map_y_l.shape)
-    print(map_x_r.shape)
-    print(map_y_r.shape)
 
     meshCellSize = 16
     mesh_left = []
@@ -216,29 +212,21 @@ def generate_mesh(calibData, output_path):
     mesh_right.tofile(output_path + "/right_mesh.calib")
 
 
-# The operations done here seem very CPU-intensive, TODO
-def convert_to_cv2_frame(name, image):
-    global last_rectif_right
+def get_depth_frame(image):
     max_disp = 95
+    disp_type = np.uint8
     if extended:
         max_disp *= 2
     if subpixel:
         max_disp *= 32
-
+        disp_type = np.uint16  # 5 bits fractional disparity
+    
     data, w, h = image.getData(), image.getWidth(), image.getHeight()
-    # TODO check image frame type instead of name
-    if name == "rgb_preview":
-        frame = np.array(data).reshape((3, h, w)).transpose(1, 2, 0).astype(np.uint8)
-    elif name == "rgb_video":  # YUV NV12
-        yuv = np.array(data).reshape((h * 3 // 2, w)).astype(np.uint8)
-        frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_NV12)
-    elif name == "depth":
-        # TODO: this contains FP16 with (lrcheck or extended or subpixel)
-        frame = np.array(data).astype(np.uint8).view(np.uint16).reshape((h, w))
-    else:  # mono streams / single channel
-        frame = np.array(data).reshape((h, w)).astype(np.uint8)
-        if name.startswith("rectified_"):
-            frame = cv2.flip(frame, 1)
+    disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
+
+    frame = (disp * 255. / max_disp).astype(np.uint8)
+    frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
+
     return frame
 
 
@@ -258,7 +246,7 @@ def test_pipeline():
             for q in q_list:
                 name = q.getName()
                 image = q.get()
-                frame = convert_to_cv2_frame(name, image)
+                frame = get_depth_frame(image) if name == "depth" else image.getCvFrame()
                 cv2.imshow(name, frame)
             if cv2.waitKey(1) == ord("q"):
                 break
