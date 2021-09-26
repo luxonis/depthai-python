@@ -52,8 +52,10 @@ When obtaining the output queue (example code below), the :code:`maxSize` and :c
 the messages are intended to be used, where :code:`name` is the name of the outputting stream.
 
 .. code-block:: python
+
   with dai.Device(pipeline) as device:
     queueLeft = device.getOutputQueue(name="manip_left", maxSize=8, blocking=False)
+    
 If only the latest results are relevant and previous don't matter, one can set :code:`maxSize = 1` and :code:`blocking = False`.
 That way only latest messages will be kept (:code:`maxSize = 1`) and will also be overwritten if necessary (:code:`blocking = False`).
 
