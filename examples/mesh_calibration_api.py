@@ -160,9 +160,9 @@ def generate_mesh(calibData, output_path):
     M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
     d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
-    R2 = np.array(calibData.getStereoRightRectificationRotation())
-    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT))
+    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
     d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+    R2 = np.array(calibData.getStereoRightRectificationRotation())
     map_x_l, map_y_l = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
     map_x_r, map_y_r = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
 
