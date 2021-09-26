@@ -45,6 +45,29 @@ The reason behind this is that OpenVINO doesn't provide version inside the blob.
   # Set the correct version:
   pipeline.setOpenVINOVersion(depthai.OpenVINO.Version.VERSION_2021_4)
 
+Specifying arguments for :code:`getOutputQueue` method
+######################################################
+
+When obtaining the output queue (example code below), the :code:`maxSize` and :code:`blocking` arguments should be set depending on how
+the messages are intended to be used, where :code:`name` is the name of the outputting stream.
+
+.. code-block:: python
+  with dai.Device(pipeline) as device:
+    queueLeft = device.getOutputQueue(name="manip_left", maxSize=8, blocking=False)
+If only the latest results are relevant and previous don't matter, one can set :code:`maxSize = 1` and :code:`blocking = False`.
+That way only latest messages will be kept (:code:`maxSize = 1`) and will also be overwritten if necessary (:code:`blocking = False`).
+
+If however there is a need to have some intervals of wait between retrieving messages, one could specify that differently.
+An example would be checking the results of :code:`DetectionNetwork` for the last 1 second based on some other event,
+in which case one could set :code:`maxSize = 30` and :code:`blocking = False`
+(assuming :code:`DetectionNetwork` produces messages at ~30FPS).
+
+The :code:`blocking = True` option is mostly used when correct order of messages is needed.
+Two examples would be:
+
+- matching passthrough frames and their original frames (eg. full 4K frames and smaller preview frames that went into NN),
+- encoding (most prominently H264/H265 as frame drops can lead to artifacts).
+
 How to place it
 ###############
 
