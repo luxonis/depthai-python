@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import depthai as dai
 import argparse
-from pathlib import Path
 
 """
 If one or more of the additional depth modes (lrcheck, extended, subpixel)
@@ -30,7 +29,7 @@ parser.add_argument(
     "--mesh_dir",
     type=str,
     default=None,
-    help="Contains mesh files, if not specified data from EEPROM will be used",
+    help="Output directory for mesh files. If not specified mesh files won't be saved",
 )
 parser.add_argument(
     "-static",
@@ -49,7 +48,7 @@ if args.resolution not in resolutionMap:
 
 resolution = resolutionMap[args.resolution]
 
-mesh_directory = args.mesh_dir  # Directory which contains mesh files
+mesh_directory = args.mesh_dir  # Output dir for mesh files
 
 # StereoDepth config options. TODO move to command line options
 source_camera = not args.static_frames
@@ -72,7 +71,7 @@ print("    Subpixel:          ", subpixel)
 print("    Median filtering:  ", median)
 
 
-def create_stereo_pipeline(calibData, from_camera=True, mesh_directory=None):
+def create_stereo_pipeline(calibData, mesh_directory, from_camera=True):
     print("Creating Stereo Depth pipeline: ", end="")
     if from_camera:
         print("MONO CAMS -> STEREO -> XLINK OUT")
@@ -144,19 +143,19 @@ def create_stereo_pipeline(calibData, from_camera=True, mesh_directory=None):
         streams.extend(["rectified_left", "rectified_right"])
     streams.extend(["left", "right"])
 
-    parent_path = Path(__file__).resolve().parents[1]
-    mesh_directory = str(parent_path) + "/generated" if mesh_directory is None else mesh_directory
-    generate_mesh(calibData, mesh_directory)
+    left_mesh, right_mesh = get_lr_mesh(calibData)
 
-    # Load mesh files
-    left_mesh = mesh_directory + "/left_mesh.calib"
-    right_mesh = mesh_directory + "/right_mesh.calib"
-    stereo.loadMeshFiles(left_mesh, right_mesh)
+    mesh_left = list(left_mesh.tobytes())
+    mesh_right = list(right_mesh.tobytes())
+    stereo.loadMeshData(mesh_left, mesh_right)
+
+    if mesh_directory is not None:
+        save_mesh_files(left_mesh, right_mesh, mesh_directory)
 
     return pipeline, streams
 
 
-def generate_mesh(calibData, output_path):
+def get_lr_mesh(calibData):
     M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
     d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
@@ -207,6 +206,11 @@ def generate_mesh(calibData, output_path):
 
     mesh_left = np.array(mesh_left)
     mesh_right = np.array(mesh_right)
+
+    return mesh_left, mesh_right
+
+
+def save_mesh_files(mesh_left, mesh_right, output_path):
     print("Saving mesh to:", output_path)
     mesh_left.tofile(output_path + "/left_mesh.calib")
     mesh_right.tofile(output_path + "/right_mesh.calib")
@@ -232,15 +236,12 @@ def get_depth_frame(image):
 
 def test_pipeline():
     calibData = dai.Device().readCalibration()
-    pipeline, streams = create_stereo_pipeline(calibData, source_camera)  # Also creates mesh files
+    pipeline, streams = create_stereo_pipeline(calibData, mesh_directory, source_camera)
 
     print("Creating DepthAI device")
     with dai.Device(pipeline) as device:
         # Create a receive queue for each stream
-        q_list = []
-        for s in streams:
-            q = device.getOutputQueue(s, 8, blocking=False)
-            q_list.append(q)
+        q_list = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
 
         while True:
             for q in q_list:
