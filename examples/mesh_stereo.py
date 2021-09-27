@@ -32,6 +32,13 @@ parser.add_argument(
     help="Output directory for mesh files. If not specified mesh files won't be saved",
 )
 parser.add_argument(
+    "-lm",
+    "--load_mesh",
+    default=False,
+    action="store_true",
+    help="Read camera intrinsics, generate mesh files and load them into the stereo node.",
+)
+parser.add_argument(
     "-rect",
     "--out_rectified",
     default=False,
@@ -66,6 +73,13 @@ parser.add_argument(
     default="7x7",
     help="Choose the size of median filtering. Options: OFF | 3x3 | 5x5 | 7x7 (default)",
 )
+parser.add_argument(
+    "-d",
+    "--depth",
+    default=False,
+    action="store_true",
+    help="Display depth frames",
+)
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -73,13 +87,14 @@ if args.resolution not in resolutionMap:
     exit("Unsupported resolution!")
 
 resolution = resolutionMap[args.resolution]
-
 mesh_directory = args.mesh_dir  # Output dir for mesh files
+generate_mesh = args.load_mesh  # Load mesh files
 
 out_rectified = args.out_rectified  # Output and display rectified streams
 lrcheck = args.lrcheck  # Better handling for occlusions
 extended = args.extended  # Closer-in minimum depth, disparity range is doubled
 subpixel = args.subpixel  # Better accuracy for longer distance, fractional disparity 32-levels
+depth = args.depth  # Display depth frames
 
 medianMap = {
     "OFF": dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF,
@@ -104,10 +119,13 @@ if lrcheck or extended or subpixel:
     median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF
 
 print("StereoDepth config options:")
+print("    Resolution:  ", resolution)
 print("    Left-Right check:  ", lrcheck)
 print("    Extended disparity:", extended)
 print("    Subpixel:          ", subpixel)
 print("    Median filtering:  ", median)
+print("    Generating mesh files:  ", generate_mesh)
+print("    Outputting mesh files to:  ", mesh_directory)
 
 
 def create_stereo_pipeline(calibData, mesh_directory):
@@ -119,6 +137,7 @@ def create_stereo_pipeline(calibData, mesh_directory):
     stereo = pipeline.createStereoDepth()
     xout_left = pipeline.createXLinkOut()
     xout_right = pipeline.createXLinkOut()
+    xout_disparity = pipeline.createXLinkOut()
     xout_depth = pipeline.createXLinkOut()
     xout_rectif_left = pipeline.createXLinkOut()
     xout_rectif_right = pipeline.createXLinkOut()
@@ -145,6 +164,7 @@ def create_stereo_pipeline(calibData, mesh_directory):
 
     xout_left.setStreamName("left")
     xout_right.setStreamName("right")
+    xout_disparity.setStreamName("disparity")
     xout_depth.setStreamName("depth")
     xout_rectif_left.setStreamName("rectified_left")
     xout_rectif_right.setStreamName("rectified_right")
@@ -153,21 +173,25 @@ def create_stereo_pipeline(calibData, mesh_directory):
     cam_right.out.link(stereo.right)
     stereo.syncedLeft.link(xout_left.input)
     stereo.syncedRight.link(xout_right.input)
-    stereo.depth.link(xout_depth.input)
+    stereo.disparity.link(xout_disparity.input)
+    if depth:
+        stereo.depth.link(xout_depth.input)
     if out_rectified:
         stereo.rectifiedLeft.link(xout_rectif_left.input)
         stereo.rectifiedRight.link(xout_rectif_right.input)
 
-    streams = ["depth"]
+    streams = ["disparity"]
+    if depth:
+        streams.append("depth")
     if out_rectified:
         streams.extend(["rectified_left", "rectified_right"])
     streams.extend(["left", "right"])
 
     left_mesh, right_mesh = get_lr_mesh(calibData)
-
-    mesh_left = list(left_mesh.tobytes())
-    mesh_right = list(right_mesh.tobytes())
-    stereo.loadMeshData(mesh_left, mesh_right)
+    if generate_mesh:
+        mesh_left = list(left_mesh.tobytes())
+        mesh_right = list(right_mesh.tobytes())
+        stereo.loadMeshData(mesh_left, mesh_right)
 
     if mesh_directory is not None:
         save_mesh_files(left_mesh, right_mesh, mesh_directory)
@@ -236,21 +260,17 @@ def save_mesh_files(mesh_left, mesh_right, output_path):
     mesh_right.tofile(output_path + "/right_mesh.calib")
 
 
-def get_depth_frame(image):
+def get_disparity_frame(frame):
     max_disp = 95
-    disp_type = np.uint16  # 5 bits fractional disparity
     if extended:
         max_disp *= 2
     if subpixel:
         max_disp *= 32
 
-    data, w, h = image.getData(), image.getWidth(), image.getHeight()
-    disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
+    disp = (frame * (255.0 / max_disp)).astype(np.uint8)
+    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
 
-    frame = (disp * 255.0 / max_disp).astype(np.uint8)
-    frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
-
-    return frame
+    return disp
 
 
 def test_pipeline():
@@ -265,8 +285,12 @@ def test_pipeline():
         while True:
             for q in q_list:
                 name = q.getName()
-                image = q.get()
-                frame = get_depth_frame(image) if name == "depth" else image.getCvFrame()
+                frame = q.get().getCvFrame()
+                if name == "depth":
+                    frame = frame.astype(np.uint16 if subpixel else np.uint8)
+                elif name == "disparity":
+                    frame = get_disparity_frame(frame)
+                
                 cv2.imshow(name, frame)
             if cv2.waitKey(1) == ord("q"):
                 break
