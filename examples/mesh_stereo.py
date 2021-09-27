@@ -32,6 +32,42 @@ parser.add_argument(
     help="Output directory for mesh files. If not specified mesh files won't be saved",
 )
 parser.add_argument(
+    "-rect",
+    "--out_rectified",
+    default=False,
+    action="store_true",
+    help="Generate and display rectified streams",
+)
+parser.add_argument(
+    "-lr",
+    "--lrcheck",
+    default=False,
+    action="store_true",
+    help="Better handling for occlusions",
+)
+# NOTE: Not yet implemented
+# parser.add_argument(
+#     "-e",
+#     "--extended",
+#     default=False,
+#     action="store_true",
+#     help="Closer-in minimum depth, disparity range is doubled",
+# )
+parser.add_argument(
+    "-s",
+    "--subpixel",
+    default=False,
+    action="store_true",
+    help="Better accuracy for longer distance, fractional disparity 32-levels",
+)
+parser.add_argument(
+    "-m",
+    "--median",
+    type=str,
+    default="7x7",
+    help="Choose the size of median filtering. Options: OFF | 3x3 | 5x5 | 7x7 (default)",
+)
+parser.add_argument(
     "-static",
     "--static_frames",
     default=False,
@@ -41,28 +77,39 @@ parser.add_argument(
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
-
 if args.resolution not in resolutionMap:
-    print("Unsupported resolution, 720P will be used")
-    args.resolution = "720"
+    exit("Unsupported resolution!")
 
 resolution = resolutionMap[args.resolution]
 
 mesh_directory = args.mesh_dir  # Output dir for mesh files
 
-# StereoDepth config options. TODO move to command line options
-source_camera = not args.static_frames
-out_depth = False  # Disparity by default
-out_rectified = True  # Output and display rectified streams
-lrcheck = True  # Better handling for occlusions
-extended = False  # Closer-in minimum depth, disparity range is doubled
-subpixel = True  # Better accuracy for longer distance, fractional disparity 32-levels
-# Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7
-median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
+out_rectified = args.out_rectified  # Output and display rectified streams
+lrcheck = args.lrcheck  # Better handling for occlusions
+extended = False  # NOTE: Not yet implemented. Closer-in minimum depth, disparity range is doubled
+subpixel = args.subpixel  # Better accuracy for longer distance, fractional disparity 32-levels
+
+medianMap = {
+    "OFF": dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF,
+    "3x3": dai.StereoDepthProperties.MedianFilter.KERNEL_3x3,
+    "5x5": dai.StereoDepthProperties.MedianFilter.KERNEL_5x5,
+    "7x7": dai.StereoDepthProperties.MedianFilter.KERNEL_7x7,
+}
+if args.median not in medianMap:
+    exit("Unsupported median size!")
+
+median = medianMap[args.median]
 
 # Sanitize some incompatible options
 if lrcheck or extended or subpixel:
-    median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF  # TODO
+    print(
+        "Median filtering will be set to OFF, since",
+        "lrcheck and" * lrcheck,
+        "extended and" * extended,
+        "subpixel" * subpixel,
+        "is enabled.",
+    )
+    median = dai.StereoDepthProperties.MedianFilter.MEDIAN_OFF
 
 print("StereoDepth config options:")
 print("    Left-Right check:  ", lrcheck)
@@ -71,20 +118,12 @@ print("    Subpixel:          ", subpixel)
 print("    Median filtering:  ", median)
 
 
-def create_stereo_pipeline(calibData, mesh_directory, from_camera=True):
-    print("Creating Stereo Depth pipeline: ", end="")
-    if from_camera:
-        print("MONO CAMS -> STEREO -> XLINK OUT")
-    else:
-        print("XLINK IN -> STEREO -> XLINK OUT")
+def create_stereo_pipeline(calibData, mesh_directory):
+    print("Creating Stereo Depth pipeline")
     pipeline = dai.Pipeline()
 
-    if from_camera:
-        cam_left = pipeline.createMonoCamera()
-        cam_right = pipeline.createMonoCamera()
-    else:
-        cam_left = pipeline.createXLinkIn()
-        cam_right = pipeline.createXLinkIn()
+    cam_left = pipeline.createMonoCamera()
+    cam_right = pipeline.createMonoCamera()
     stereo = pipeline.createStereoDepth()
     xout_left = pipeline.createXLinkOut()
     xout_right = pipeline.createXLinkOut()
@@ -92,36 +131,25 @@ def create_stereo_pipeline(calibData, mesh_directory, from_camera=True):
     xout_rectif_left = pipeline.createXLinkOut()
     xout_rectif_right = pipeline.createXLinkOut()
 
-    if from_camera:
-        cam_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-        cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-        res = (
-            dai.MonoCameraProperties.SensorResolution.THE_800_P
-            if resolution[1] == 800
-            else dai.MonoCameraProperties.SensorResolution.THE_720_P
-            if resolution[1] == 720
-            else dai.MonoCameraProperties.SensorResolution.THE_400_P
-        )
-        for mono_cam in (cam_left, cam_right):  # Common config
-            mono_cam.setResolution(res)
-            # mono_cam.setFps(20.0)
-    else:
-        cam_left.setStreamName("in_left")
-        cam_right.setStreamName("in_right")
+    cam_left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    cam_right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    res = (
+        dai.MonoCameraProperties.SensorResolution.THE_800_P
+        if resolution[1] == 800
+        else dai.MonoCameraProperties.SensorResolution.THE_720_P
+        if resolution[1] == 720
+        else dai.MonoCameraProperties.SensorResolution.THE_400_P
+    )
+    for mono_cam in (cam_left, cam_right):  # Common config
+        mono_cam.setResolution(res)
+        # mono_cam.setFps(20.0)
 
-    stereo.setConfidenceThreshold(200)
+    stereo.initialConfig.setConfidenceThreshold(200)
+    stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
     stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
-    stereo.setMedianFilter(median)  # KERNEL_7x7 default
     stereo.setLeftRightCheck(lrcheck)
     stereo.setExtendedDisparity(extended)
     stereo.setSubpixel(subpixel)
-    if from_camera:
-        # Default: EEPROM calib is used, and resolution taken from MonoCamera nodes
-        # stereo.loadCalibrationFile(path)
-        pass
-    else:
-        stereo.setEmptyCalibration()  # Set if the input frames are already rectified
-        stereo.setInputResolution(1280, 720)
 
     xout_left.setStreamName("left")
     xout_right.setStreamName("right")
@@ -218,17 +246,16 @@ def save_mesh_files(mesh_left, mesh_right, output_path):
 
 def get_depth_frame(image):
     max_disp = 95
-    disp_type = np.uint8
+    disp_type = np.uint16  # 5 bits fractional disparity
     if extended:
         max_disp *= 2
     if subpixel:
         max_disp *= 32
-        disp_type = np.uint16  # 5 bits fractional disparity
-    
+
     data, w, h = image.getData(), image.getWidth(), image.getHeight()
     disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
 
-    frame = (disp * 255. / max_disp).astype(np.uint8)
+    frame = (disp * 255.0 / max_disp).astype(np.uint8)
     frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
     return frame
@@ -236,7 +263,7 @@ def get_depth_frame(image):
 
 def test_pipeline():
     calibData = dai.Device().readCalibration()
-    pipeline, streams = create_stereo_pipeline(calibData, mesh_directory, source_camera)
+    pipeline, streams = create_stereo_pipeline(calibData, mesh_directory)
 
     print("Creating DepthAI device")
     with dai.Device(pipeline) as device:
