@@ -45,14 +45,13 @@ parser.add_argument(
     action="store_true",
     help="Better handling for occlusions",
 )
-# NOTE: Not yet implemented
-# parser.add_argument(
-#     "-e",
-#     "--extended",
-#     default=False,
-#     action="store_true",
-#     help="Closer-in minimum depth, disparity range is doubled",
-# )
+parser.add_argument(
+    "-e",
+    "--extended",
+    default=False,
+    action="store_true",
+    help="Closer-in minimum depth, disparity range is doubled",
+)
 parser.add_argument(
     "-s",
     "--subpixel",
@@ -67,13 +66,6 @@ parser.add_argument(
     default="7x7",
     help="Choose the size of median filtering. Options: OFF | 3x3 | 5x5 | 7x7 (default)",
 )
-parser.add_argument(
-    "-static",
-    "--static_frames",
-    default=False,
-    action="store_true",
-    help="Run stereo on static frames passed from host 'dataset' folder",
-)
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -86,7 +78,7 @@ mesh_directory = args.mesh_dir  # Output dir for mesh files
 
 out_rectified = args.out_rectified  # Output and display rectified streams
 lrcheck = args.lrcheck  # Better handling for occlusions
-extended = False  # NOTE: Not yet implemented. Closer-in minimum depth, disparity range is doubled
+extended = args.extended  # Closer-in minimum depth, disparity range is doubled
 subpixel = args.subpixel  # Better accuracy for longer distance, fractional disparity 32-levels
 
 medianMap = {
