@@ -759,6 +759,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("debugDispLrCheckIt2", &StereoDepth::debugDispLrCheckIt2, DOC(dai, node, StereoDepth, debugDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
+#if 0 //will be enabled when confidence map RGB aligment/LR-check support will be added
+        .def_readonly("debugConfMapLrCheckIt1", &StereoDepth::debugConfMapLrCheckIt1, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt1))
+        .def_readonly("debugConfMapLrCheckIt2", &StereoDepth::debugConfMapLrCheckIt2, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt2))
+#endif
         .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
         .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
         .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
