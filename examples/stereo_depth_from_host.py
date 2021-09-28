@@ -12,7 +12,13 @@ import math
 datasetDefault = str((Path(__file__).parent / Path('models/dataset')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', nargs='?', help="Path to recorded frames", default=datasetDefault)
+parser.add_argument('-debug', "--debug", action="store_true", help="Enable debug outputs.")
+parser.add_argument('-dumpdispcost', "--dumpdisparitycostvalues", action="store_true", help="Dumps the disparity cost values for each disparity range. 96 byte for each pixel.")
 args = parser.parse_args()
+
+if args.debug and args.dumpdisparitycostvalues:
+    print("-debug and --dumpdisparitycostvalues are mutually exclusive!")
+    exit(1)
 
 if not Path(datasetDefault).exists():
     import sys
@@ -166,6 +172,7 @@ class StereoConfigHandler:
 
 # StereoDepth initial config options.
 outDepth = True  # Disparity by default
+outConfidenceMap = True  # Output disparity confidence map
 outRectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled. Unsupported for now.
@@ -189,21 +196,34 @@ xinStereoDepthConfig = pipeline.createXLinkIn()
 xoutLeft = pipeline.createXLinkOut()
 xoutRight = pipeline.createXLinkOut()
 xoutDepth = pipeline.createXLinkOut()
+xoutConfMap = pipeline.createXLinkOut()
 xoutDisparity = pipeline.createXLinkOut()
 xoutRectifLeft = pipeline.createXLinkOut()
 xoutRectifRight = pipeline.createXLinkOut()
 xoutStereoCfg = pipeline.createXLinkOut()
+if args.debug:
+    xoutDebugLrCheckIt1 = pipeline.createXLinkOut()
+    xoutDebugLrCheckIt2 = pipeline.createXLinkOut()
+if args.dumpdisparitycostvalues:
+    xoutDebugCostDump = pipeline.createXLinkOut()
+
+xinStereoDepthConfig.setStreamName("stereoDepthConfig")
+monoLeft.setStreamName('in_left')
+monoRight.setStreamName('in_right')
 
 xoutLeft.setStreamName('left')
 xoutRight.setStreamName('right')
 xoutDepth.setStreamName('depth')
+xoutConfMap.setStreamName('confidence_map')
 xoutDisparity.setStreamName('disparity')
 xoutRectifLeft.setStreamName('rectified_left')
 xoutRectifRight.setStreamName('rectified_right')
 xoutStereoCfg.setStreamName('stereo_cfg')
-xinStereoDepthConfig.setStreamName("stereoDepthConfig")
-monoLeft.setStreamName('in_left')
-monoRight.setStreamName('in_right')
+if args.debug:
+    xoutDebugLrCheckIt1.setStreamName('disparity_lr_check_iteration1')
+    xoutDebugLrCheckIt2.setStreamName('disparity_lr_check_iteration2')
+if args.dumpdisparitycostvalues:
+    xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
 # Properties
 stereo.initialConfig.setConfidenceThreshold(220)
@@ -223,11 +243,18 @@ stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
 if outDepth:
     stereo.depth.link(xoutDepth.input)
+if outConfidenceMap:
+    stereo.confidenceMap.link(xoutConfMap.input)
 stereo.disparity.link(xoutDisparity.input)
 if outRectified:
     stereo.rectifiedLeft.link(xoutRectifLeft.input)
     stereo.rectifiedRight.link(xoutRectifRight.input)
 stereo.outConfig.link(xoutStereoCfg.input)
+if args.debug:
+    stereo.debugDispLrCheckIt1.link(xoutDebugLrCheckIt1.input)
+    stereo.debugDispLrCheckIt2.link(xoutDebugLrCheckIt2.input)
+if args.dumpdisparitycostvalues:
+    stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
 StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow('disparity')
@@ -246,6 +273,13 @@ if outRectified:
 streams.append('disparity')
 if outDepth:
     streams.append('depth')
+if outConfidenceMap:
+    streams.append('confidence_map')
+debugStreams = []
+if args.debug:
+    debugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+if args.dumpdisparitycostvalues:
+    debugStreams.append('disparity_cost_dump')
 
 def convertToCv2Frame(name, image, config):
 
@@ -256,6 +290,8 @@ def convertToCv2Frame(name, image, config):
 
     frame = image.getFrame()
 
+    # frame.tofile(name+".raw")
+
     if name == 'depth':
         dispScaleFactor = baseline * focal
         with np.errstate(divide='ignore'):
@@ -263,8 +299,12 @@ def convertToCv2Frame(name, image, config):
 
         frame = (frame * 255. / dispIntegerLevels).astype(np.uint8)
         frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
-
-    elif name == 'disparity':
+    elif 'confidence_map' in name:
+        pass
+    elif name == 'disparity_cost_dump':
+        # frame.tofile(name+'.raw')
+        pass
+    elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
 
@@ -287,9 +327,17 @@ with dai.Device(pipeline) as device:
 
     # Create a receive queue for each stream
     q_list = []
+    q_list_debug = []
     for s in streams:
         q = device.getOutputQueue(s, 8, blocking=False)
         q_list.append(q)
+
+    if args.debug or args.dumpdisparitycostvalues:
+        q_list_debug = q_list.copy()
+        for s in debugStreams:
+            q = device.getOutputQueue(s, 8, blocking=False)
+            q_list_debug.append(q)
+
     inCfg = device.getOutputQueue("stereo_cfg", 8, blocking=False)
 
     # Need to set a timestamp for input frames, for the sync stage in Stereo node
@@ -321,10 +369,20 @@ with dai.Device(pipeline) as device:
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
             sleep(frame_interval_ms / 1000)
+
         # Handle output streams
         currentConfig = inCfg.get()
 
-        for q in q_list:
+        lrCheckEnabled = currentConfig.get().algorithmControl.enableLeftRightCheck
+        queues = q_list
+
+        if (args.debug and lrCheckEnabled) or args.dumpdisparitycostvalues:
+            queues = q_list_debug
+        else:
+            for s in debugStreams:
+                cv2.destroyWindow(s)
+
+        for q in queues:
             if q.getName() in ['left', 'right']: continue
             data = q.get()
             frame = convertToCv2Frame(q.getName(), data, currentConfig)
