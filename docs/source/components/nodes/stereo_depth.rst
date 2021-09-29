@@ -297,7 +297,7 @@ Min stereo depth distance
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
-To calcualte this minimum distance, use the :ref:`depth formula <Calculate depth using disparity map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
+To calculate this minimum distance, use the :ref:`depth formula <Calculate depth using disparity map>` and choose the maximum value for disparity_in_pixels parameter (keep in mind it is inveresly related, so maximum value will yield the smallest result).
 
 For example OAK-D has a baseline of **7.5cm**, focal_length_in_pixels of **882.5 pixels** and the default maximum value for disparity_in_pixels is **95**. By using the :ref:`depth formula <Calculate depth using disparity map>` we get:
 
@@ -367,6 +367,51 @@ If the illumination is low, the diparity map will be of low confidence, which wi
 
 Lower baseline enables us to detect the depth at a closer distance as long as the object is visible in both the frames. However, this reduces the accuracy for large distances due to less pixels representing the object and disparity decreasing towards 0 much faster.
 So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
+
+Limitation
+##########
+
+Since depth is calculated from disparity, which requires the pixels to overlap, there is inherently a vertical
+band on the left side of the left mono camera and on the right side of the right mono camera, where depth
+cannot be calculated, since it is seen by only 1 camera. That band is marked with :code:`B`
+on the following picture.
+
+.. image:: https://user-images.githubusercontent.com/59799831/135310921-67726c28-07e7-4ffa-bc8d-74861049517e.png
+
+Meaning of variables on the picture:
+
+- :code:`BL [cm]` - Baseline of stereo cameras.
+- :code:`Dv [cm]` - Minimum distace where both cameras see an object (thus where depth can be calculated).
+- :code:`B [pixels]` - Width of the band where depth cannot be calculated.
+- :code:`W [pixels]` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
+- :code:`D [cm]` - Distance from the cameras to an object.
+- :code:`F [cm]` - Width of image at the distance :code:`D`.
+
+.. image:: https://user-images.githubusercontent.com/59799831/135310972-c37ba40b-20ad-4967-92a7-c71078bcef99.png
+
+With the use of the :code:`tan` function, the following formulas can be obtained:
+
+- :code:`F = 2 * D * tan(HFOV/2)`
+- :code:`Dv = (BL/2) * tan(90 - HFOV/2)`
+
+In order to obtain :code:`B`, we can use :code:`tan` function again (same as for :code:`F`), but this time
+we must also multiply it by the ratio between :code:`W` and :code:`F` in order to convert units to pixels.
+That gives the following formula:
+
+.. code-block:: python
+
+  B = 2 * Dv * tan(HFOV/2) * W / F
+  B = 2 * Dv * tan(HFOV/2) * W / (2 * D * tan(HFOV/2))
+  B = W * Dv / D  # pixels
+
+Example: If we are using OAK-D, which has a :code:`HFOV` of 72°, a baseline (:code:`BL`) of 7.5 cm and
+:code:`640x400 (400P)` resolution is used, therefore :code:`W = 640` and an object is :code:`D = 100` cm away, we can
+calculate :code:`B` in the following way:
+
+.. code-block:: python
+
+  Dv = 7.5 / 2 * tan(90 - 72/2) = 3.75 * tan(54°) = 5.16 cm
+  B = 640 * 5.16 / 100 = 33 # pixels
 
 .. note::
 
