@@ -19,8 +19,6 @@ if not Path(nnPath).exists():
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
-flipRectified = True
-
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -54,9 +52,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-# Note: the rectified streams are horizontally mirrored by default
 depth.initialConfig.setConfidenceThreshold(255)
-depth.setRectifyMirrorFrame(False)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 
 nn.setConfidenceThreshold(0.5)
@@ -81,7 +77,7 @@ manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
 # Disparity range is used for normalization
-disparityMultiplier = 255 / depth.getMaxDisparity()
+disparityMultiplier = 255 / depth.initialConfig.getMaxDisparity()
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -126,10 +122,8 @@ with dai.Device(pipeline) as device:
             frameManip = inManip.getCvFrame()
 
         if inDisparity is not None:
-            # Flip disparity frame, normalize it and apply color map for better visualization
+            # Apply color map for better visualization
             frameDisparity = inDisparity.getCvFrame()
-            if flipRectified:
-                frameDisparity = cv2.flip(frameDisparity, 1)
             frameDisparity = (frameDisparity*disparityMultiplier).astype(np.uint8)
             frameDisparity = cv2.applyColorMap(frameDisparity, cv2.COLORMAP_JET)
 
