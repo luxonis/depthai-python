@@ -6,6 +6,8 @@ import cv2
 import depthai as dai
 import numpy as np
 
+NN_SIZE = (300,300)
+
 # Get argument first
 nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.4_5shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
@@ -24,31 +26,30 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
-nn = pipeline.createMobileNetDetectionNetwork()
-
-xoutVideo = pipeline.createXLinkOut()
-xoutPreview = pipeline.createXLinkOut()
-nnOut = pipeline.createXLinkOut()
-
-xoutVideo.setStreamName("video")
-xoutPreview.setStreamName("preview")
-nnOut.setStreamName("nn")
-
-# Properties
-camRgb.setPreviewSize(300, 300)    # NN input
+camRgb.setPreviewSize(NN_SIZE)    # NN input
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 camRgb.setInterleaved(False)
-camRgb.setPreviewKeepAspectRatio(False)
+
 # Define a neural network that will make predictions based on the source frames
+nn = pipeline.createMobileNetDetectionNetwork()
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
-# Linking
-camRgb.video.link(xoutVideo.input)
-camRgb.preview.link(xoutPreview.input)
 camRgb.preview.link(nn.input)
+
+# XLink outputs
+xoutVideo = pipeline.createXLinkOut()
+xoutVideo.setStreamName("video")
+camRgb.video.link(xoutVideo.input)
+
+xoutPreview = pipeline.createXLinkOut()
+xoutPreview.setStreamName("preview")
+camRgb.preview.link(xoutPreview.input)
+
+nnOut = pipeline.createXLinkOut()
+nnOut.setStreamName("nn")
 nn.out.link(nnOut.input)
 
 # Connect to device and start pipeline
@@ -64,15 +65,21 @@ with dai.Device(pipeline) as device:
     detections = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
-    def frameNorm(frame, bbox):
+    def frameNorm(frame, NN_SIZE, bbox):
+        # Check difference in aspect ratio and apply correction to BBs
+        ar_diff = NN_SIZE[0] / NN_SIZE[0] - frame.shape[0] / frame.shape[1]
+        sel = 0 if 0 < ar_diff else 1
+        bbox[sel::2] *= 1-abs(ar_diff)
+        bbox[sel::2] += abs(ar_diff)/2
+        # Normalize bounding boxes
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]
-        return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
+        return (np.clip(bbox, 0, 1) * normVals).astype(int)
 
     def displayFrame(name, frame):
         color = (255, 0, 0)
         for detection in detections:
-            bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+            bbox = frameNorm(frame, NN_SIZE, np.array([detection.xmin, detection.ymin, detection.xmax, detection.ymax]))
             cv2.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
             cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
