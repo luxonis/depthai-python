@@ -270,6 +270,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
+        .def("irWriteReg", [](DeviceBase& d, int r, int v) { py::gil_scoped_release release; d.irWriteReg(r, v); }, py::arg("reg"), py::arg("value"), DOC(dai, DeviceBase, irWriteReg))
+        .def("irReadReg", [](DeviceBase& d, int r) { py::gil_scoped_release release; return d.irReadReg(r); }, py::arg("reg"), DOC(dai, DeviceBase, irReadReg))
     ;
 
 
