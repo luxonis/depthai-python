@@ -46,7 +46,7 @@ Let's say we have linked :ref:`ColorCamera` :code:`preview` output with :ref:`Ne
   └─────────────┘                    └───────────────┘
 
 If **input is set to blocking mode**, and input queue fills up, no new messages from ColorCamera will be able to enter the input queue. This means ColorCamera
-will block and wait with sending its messages untill it can push the message to the queue of NeuralNetwork input. If ColorCamera preview is connected to
+will block and wait with sending its messages until it can push the message to the queue of NeuralNetwork input. If ColorCamera preview is connected to
 multiple inputs, the same behavior implies, with the messages being pushed sequentially to each input.
 
 .. warning::
