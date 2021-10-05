@@ -38,7 +38,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDefaultIntrinsics))
         .def("getDistortionCoefficients", &CalibrationHandler::getDistortionCoefficients, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDistortionCoefficients))
 
-        .def("getFov", &CalibrationHandler::getFov, py::arg("cameraId"), DOC(dai, CalibrationHandler, getFov))
+        .def("getFov", &CalibrationHandler::getFov, py::arg("cameraId"), py::arg("useSpec") = true, DOC(dai, CalibrationHandler, getFov))
         .def("getLensPosition", &CalibrationHandler::getLensPosition, py::arg("cameraId"), DOC(dai, CalibrationHandler, getLensPosition))
 
         .def("getCameraExtrinsics", &CalibrationHandler::getCameraExtrinsics, py::arg("srcCamera"), py::arg("dstCamera"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getCameraExtrinsics))

@@ -100,13 +100,25 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<SpatialLocations> spatialLocations(m, "SpatialLocations", DOC(dai, SpatialLocations));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
     py::class_<SpatialLocationCalculatorConfigThresholds> spatialLocationCalculatorConfigThresholds(m, "SpatialLocationCalculatorConfigThresholds", DOC(dai, SpatialLocationCalculatorConfigThresholds));
+    py::enum_<SpatialLocationCalculatorAlgorithm> spatialLocationCalculatorAlgorithm(m, "SpatialLocationCalculatorAlgorithm", DOC(dai, SpatialLocationCalculatorAlgorithm));
     py::class_<SpatialLocationCalculatorConfigData> spatialLocationCalculatorConfigData(m, "SpatialLocationCalculatorConfigData", DOC(dai, SpatialLocationCalculatorConfigData));
     py::class_<SpatialLocationCalculatorData, Buffer, std::shared_ptr<SpatialLocationCalculatorData>> spatialLocationCalculatorData(m, "SpatialLocationCalculatorData", DOC(dai, SpatialLocationCalculatorData));
     py::class_<SpatialLocationCalculatorConfig, Buffer, std::shared_ptr<SpatialLocationCalculatorConfig>> spatialLocationCalculatorConfig(m, "SpatialLocationCalculatorConfig", DOC(dai, SpatialLocationCalculatorConfig));
     py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>> tracklets(m, "Tracklets", DOC(dai, Tracklets));
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>> imuData(m, "IMUData", DOC(dai, IMUData));
+    // Stereo depth
     py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
+    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
+    py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
+    py::class_<RawStereoDepthConfig::CostAggregation> costAggregation(rawStereoDepthConfig, "CostAggregation", DOC(dai, RawStereoDepthConfig, CostAggregation));
+    py::class_<RawStereoDepthConfig::CostMatching> costMatching(rawStereoDepthConfig, "CostMatching", DOC(dai, RawStereoDepthConfig, CostMatching));
+    py::class_<RawStereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters));
+    py::enum_<RawStereoDepthConfig::CostMatching::DisparityWidth> costMatchingDisparityWidth(costMatching, "DisparityWidth", DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth));
+    py::class_<RawStereoDepthConfig::CensusTransform> censusTransform(rawStereoDepthConfig, "CensusTransform", DOC(dai, RawStereoDepthConfig, CensusTransform));
+    py::enum_<RawStereoDepthConfig::CensusTransform::KernelSize> censusTransformKernelSize(censusTransform, "KernelSize", DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize));
     py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>> stereoDepthConfig(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig));
+    // Edge detector
     py::class_<EdgeDetectorConfigData> edgeDetectorConfigData(m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData));
     py::class_<RawEdgeDetectorConfig, RawBuffer, std::shared_ptr<RawEdgeDetectorConfig>> rawEdgeDetectorConfig(m, "RawEdgeDetectorConfig", DOC(dai, RawEdgeDetectorConfig));
     py::class_<EdgeDetectorConfig, Buffer, std::shared_ptr<EdgeDetectorConfig>> edgeDetectorConfig(m, "EdgeDetectorConfig", DOC(dai, EdgeDetectorConfig));
@@ -990,11 +1002,17 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("upperThreshold", &SpatialLocationCalculatorConfigThresholds::upperThreshold)
         ;
 
+    spatialLocationCalculatorAlgorithm
+        .value("AVERAGE", SpatialLocationCalculatorAlgorithm::AVERAGE)
+        .value("MIN", SpatialLocationCalculatorAlgorithm::MIN)
+        .value("MAX", SpatialLocationCalculatorAlgorithm::MAX)
+        ;
 
     spatialLocationCalculatorConfigData
         .def(py::init<>())
-        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi)
-        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds)
+        .def_readwrite("roi", &SpatialLocationCalculatorConfigData::roi, DOC(dai, SpatialLocationCalculatorConfigData, roi))
+        .def_readwrite("depthThresholds", &SpatialLocationCalculatorConfigData::depthThresholds, DOC(dai, SpatialLocationCalculatorConfigData, depthThresholds))
+        .def_readwrite("calculationAlgorithm", &SpatialLocationCalculatorConfigData::calculationAlgorithm, DOC(dai, SpatialLocationCalculatorConfigData, calculationAlgorithm))
         ;
 
     // Bind SpatialLocationCalculatorData
@@ -1030,11 +1048,87 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_property("packets", [](IMUData& imuDta) { return &imuDta.packets; }, [](IMUData& imuDta, std::vector<IMUPacket> val) { imuDta.packets = val; }, DOC(dai, IMUData, packets))
         ;
 
+    // StereoDepth config
+
+    // MedianFilter
+    medianFilter
+        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
+        ;
+    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+
+    algorithmControl
+        .def(py::init<>())
+        .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
+        .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
+        .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
+        .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
+        ;
+
+    postProcessing
+        .def(py::init<>())
+        .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
+        .def_readwrite("bilateralSigmaValue", &RawStereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, RawStereoDepthConfig, PostProcessing, bilateralSigmaValue))
+        ;
+
+    // KernelSize
+    censusTransformKernelSize
+        .value("AUTO", RawStereoDepthConfig::CensusTransform::KernelSize::AUTO)
+        .value("KERNEL_5x5", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_5x5)
+        .value("KERNEL_7x7", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x7)
+        .value("KERNEL_7x9", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x9)
+        ;
+
+    censusTransform
+        .def(py::init<>())
+        .def_readwrite("kernelSize", &RawStereoDepthConfig::CensusTransform::kernelSize, DOC(dai, RawStereoDepthConfig, CensusTransform, kernelSize))
+        .def_readwrite("kernelMask", &RawStereoDepthConfig::CensusTransform::kernelMask, DOC(dai, RawStereoDepthConfig, CensusTransform, kernelMask))
+        .def_readwrite("enableMeanMode", &RawStereoDepthConfig::CensusTransform::enableMeanMode, DOC(dai, RawStereoDepthConfig, CensusTransform, enableMeanMode))
+        .def_readwrite("threshold", &RawStereoDepthConfig::CensusTransform::threshold, DOC(dai, RawStereoDepthConfig, CensusTransform, threshold))
+        ;
+
+    costMatchingLinearEquationParameters
+        .def(py::init<>())
+        .def_readwrite("alpha", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::alpha, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, alpha))
+        .def_readwrite("beta", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::beta, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, beta))
+        .def_readwrite("threshold", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::threshold, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, threshold))
+        ;
+
+    // Disparity width
+    costMatchingDisparityWidth
+        .value("DISPARITY_64", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_64)
+        .value("DISPARITY_96", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_96)
+        ;
+
+    costMatching
+        .def(py::init<>())
+        .def_readwrite("disparityWidth", &RawStereoDepthConfig::CostMatching::disparityWidth, DOC(dai, RawStereoDepthConfig, CostMatching, disparityWidth))
+        .def_readwrite("enableCompanding", &RawStereoDepthConfig::CostMatching::enableCompanding, DOC(dai, RawStereoDepthConfig, CostMatching, enableCompanding))
+        .def_readwrite("invalidDisparityValue", &RawStereoDepthConfig::CostMatching::invalidDisparityValue, DOC(dai, RawStereoDepthConfig, CostMatching, invalidDisparityValue))
+        .def_readwrite("confidenceThreshold", &RawStereoDepthConfig::CostMatching::confidenceThreshold, DOC(dai, RawStereoDepthConfig, CostMatching, confidenceThreshold))
+        .def_readwrite("linearEquationParameters", &RawStereoDepthConfig::CostMatching::linearEquationParameters, DOC(dai, RawStereoDepthConfig, CostMatching, linearEquationParameters))
+        ;
+
+    costAggregation
+        .def(py::init<>())
+        .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
+        .def_readwrite("horizontalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCosts))
+        .def_readwrite("verticalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCosts))
+        ;
 
     rawStereoDepthConfig
         .def(py::init<>())
-        .def_readwrite("config", &RawStereoDepthConfig::config)
+        .def_readwrite("algorithmControl", &RawStereoDepthConfig::algorithmControl,  DOC(dai, RawStereoDepthConfig, algorithmControl))
+        .def_readwrite("postProcessing", &RawStereoDepthConfig::postProcessing,  DOC(dai, RawStereoDepthConfig, postProcessing))
+        .def_readwrite("censusTransform", &RawStereoDepthConfig::censusTransform,  DOC(dai, RawStereoDepthConfig, censusTransform))
+        .def_readwrite("costMatching", &RawStereoDepthConfig::costMatching,  DOC(dai, RawStereoDepthConfig, costMatching))
+        .def_readwrite("costAggregation", &RawStereoDepthConfig::costAggregation,  DOC(dai, RawStereoDepthConfig, costAggregation))
         ;
+    // legacy
+    m.attr("RawStereoDepthConfig").attr("MedianFilter") = medianFilter;
+
 
 
     stereoDepthConfig
@@ -1047,6 +1141,11 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
         .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
+        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, DOC(dai, StereoDepthConfig, setLeftRightCheck))
+        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
+        .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
+        .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
 
     edgeDetectorConfigData
