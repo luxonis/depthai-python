@@ -38,7 +38,7 @@ Inputs and Outputs
 
 **Message types**
 
-- :code:`input` - :ref:`ImgFrame`
+- :code:`input` - Any message type
 - :code:`out` - :ref:`NNData`
 - :code:`passthrough` - :ref:`ImgFrame`
 
