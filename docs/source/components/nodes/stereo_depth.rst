@@ -413,6 +413,10 @@ calculate :code:`B` in the following way:
   Dv = 7.5 / 2 * tan(90 - 72/2) = 3.75 * tan(54°) = 5.16 cm
   B = 640 * 5.16 / 100 = 33 # pixels
 
+Credit for calculations and images goes to our community member gregflurry, which he made on
+`this <https://discuss.luxonis.com/d/339-naive-question-regarding-stereodepth-disparity-and-depth-outputs/7>`__
+forum post.
+
 .. note::
 
    OAK-D-PRO will include both IR dot projector and IR LED, which will enable operation in no light.
