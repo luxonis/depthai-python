@@ -1,4 +1,4 @@
-Edge detector
+Edge Detector
 =============
 
 This example performs edge detection on 3 different inputs: left, right and RGB camera.
@@ -8,7 +8,7 @@ Sobel filter parameters can be changed by keys 1 and 2.
 Demo
 ####
 
-.. image:: /_static/images/examples/edge_detections.jpg
+.. image:: /_static/images/examples/edge_detections.png
 
 Setup
 #####
@@ -22,9 +22,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/edge_detector.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/EdgeDetector/edge_detector.py>`__
 
-        .. literalinclude:: ../../../examples/edge_detector.py
+        .. literalinclude:: ../../../../examples/EdgeDetector/edge_detector.py
            :language: python
            :linenos:
 
@@ -32,7 +32,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/edge_detector.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/edge_detector.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/edge_detector.cpp
            :language: cpp
            :linenos:
 

@@ -28,9 +28,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/stereo_depth_from_host.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/StereoDepth/stereo_depth_from_host.py>`__
 
-        .. literalinclude:: ../../../examples/stereo_depth_from_host.py
+        .. literalinclude:: ../../../../examples/StereoDepth/stereo_depth_from_host.py
            :language: python
            :linenos:
 

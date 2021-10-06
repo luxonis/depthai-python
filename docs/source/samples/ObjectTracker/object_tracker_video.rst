@@ -6,7 +6,6 @@ This example shows how to run MobileNetv2SSD on video input frame, and perform o
 .. rubric:: Similiar samples:
 
 - :ref:`Object tracker on RGB`
-- :ref:`Spatial YOLO object tracker on RGB`
 - :ref:`Spatial object tracker on RGB`
 
 Demo
@@ -28,9 +27,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/object_tracker_video.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ObjectTracker/object_tracker_video.py>`__
 
-        .. literalinclude:: ../../../examples/object_tracker_video.py
+        .. literalinclude:: ../../../../examples/ObjectTracker/object_tracker_video.py
            :language: python
            :linenos:
 
@@ -38,7 +37,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/object_tracker_video.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/object_tracker_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/object_tracker_video.cpp
            :language: cpp
            :linenos:
 

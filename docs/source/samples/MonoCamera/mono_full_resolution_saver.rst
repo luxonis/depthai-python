@@ -32,9 +32,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mono_full_resolution_saver.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/MonoCamera/mono_full_resolution_saver.py>`__
 
-        .. literalinclude:: ../../../examples/mono_full_resolution_saver.py
+        .. literalinclude:: ../../../../examples/MonoCamera/mono_full_resolution_saver.py
            :language: python
            :linenos:
 
@@ -42,7 +42,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mono_full_resolution_saver.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/mono_full_resolution_saver.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/mono_full_resolution_saver.cpp
            :language: cpp
            :linenos:
 

@@ -21,9 +21,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_depth_aligned.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/StereoDepth/rgb_depth_aligned.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_depth_aligned.py
+        .. literalinclude:: ../../../../examples/StereoDepth/rgb_depth_aligned.py
            :language: python
            :linenos:
 
@@ -31,7 +31,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_depth_aligned.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_depth_aligned.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_depth_aligned.cpp
            :language: cpp
            :linenos:
 

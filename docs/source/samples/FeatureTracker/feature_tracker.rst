@@ -1,7 +1,7 @@
 Feature Tracker
 ===============
 
-Example shows capabilities of :ref:`FeatureDetector`. It detects features and tracks them.
+Example shows capabilities of :code:`:ref:`FeatureTracker``. It detects features and tracks them.
 :ref:`Feature Detector` example only detects features.
 
 Demo
@@ -25,17 +25,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_video.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/FeatureTracker/feature_tracker.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_video.py
+        .. literalinclude:: ../../../../examples/FeatureTracker/feature_tracker.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_video.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/feature_tracker.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/feature_tracker.cpp
            :language: cpp
            :linenos:
 

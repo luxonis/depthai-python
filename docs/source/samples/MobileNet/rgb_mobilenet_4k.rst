@@ -39,9 +39,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_mobilenet_4k.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/MobileNet/rgb_mobilenet_4k.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_mobilenet_4k.py
+        .. literalinclude:: ../../../../examples/MobileNet/rgb_mobilenet_4k.py
            :language: python
            :linenos:
 
@@ -49,7 +49,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_mobilenet_4k.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_mobilenet_4k.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_mobilenet_4k.cpp
            :language: cpp
            :linenos:
 

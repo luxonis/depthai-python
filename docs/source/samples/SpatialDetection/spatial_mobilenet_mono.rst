@@ -39,9 +39,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_mobilenet_mono.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/SpatialDetection/spatial_mobilenet_mono.py>`__
 
-        .. literalinclude:: ../../../examples/spatial_mobilenet_mono.py
+        .. literalinclude:: ../../../../examples/SpatialDetection/spatial_mobilenet_mono.py
            :language: python
            :linenos:
 
@@ -49,7 +49,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_mobilenet_mono.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/spatial_mobilenet_mono.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/spatial_mobilenet_mono.cpp
            :language: cpp
            :linenos:
 

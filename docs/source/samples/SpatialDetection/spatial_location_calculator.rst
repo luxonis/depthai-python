@@ -34,9 +34,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_location_calculator.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/SpatialDetection/spatial_location_calculator.py>`__
 
-        .. literalinclude:: ../../../examples/spatial_location_calculator.py
+        .. literalinclude:: ../../../../examples/SpatialDetection/spatial_location_calculator.py
            :language: python
            :linenos:
 
@@ -44,7 +44,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_location_calculator.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/spatial_location_calculator.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/spatial_location_calculator.cpp
            :language: cpp
            :linenos:
 

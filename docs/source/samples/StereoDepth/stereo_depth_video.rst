@@ -28,9 +28,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/stereo_depth_video.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/StereoDepth/stereo_depth_video.py>`__
 
-        .. literalinclude:: ../../../examples/stereo_depth_video.py
+        .. literalinclude:: ../../../../examples/StereoDepth/stereo_depth_video.py
            :language: python
            :linenos:
 
@@ -38,7 +38,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/stereo_depth_video.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/stereo_depth_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/stereo_depth_video.cpp
            :language: cpp
            :linenos:
 

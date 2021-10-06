@@ -37,9 +37,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ColorCamera/autoexposure_roi.py>`__
 
-        .. literalinclude:: ../../../examples/autoexposure_roi.py
+        .. literalinclude:: ../../../../examples/ColorCamera/autoexposure_roi.py
            :language: python
            :linenos:
 

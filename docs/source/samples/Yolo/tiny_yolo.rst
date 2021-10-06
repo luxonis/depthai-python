@@ -5,12 +5,13 @@ This example shows how to run Tiny YOLOv4 or YOLOv3 on the RGB input frame, and 
 preview and the metadata results from the YOLO model on the preview. Decoding is done on the VPU (Myriad X) instead on the host.
 
 Configurable, network dependent parameters are required for correct decoding:
-setNumClasses - number of YOLO classes
-setCoordinateSize - size of coordinate
-setAnchors - yolo anchors
-setAnchorMasks - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for full YOLOv4)
-setIouThreshold - intersection over union threshold
-setConfidenceThreshold - confidence threshold above which objects are detected
+
+- **setNumClasses** - number of YOLO classes
+- **setCoordinateSize** - size of coordinate
+- **setAnchors** - yolo anchors
+- **setAnchorMasks** - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for full YOLOv4)
+- **setIouThreshold** - intersection over union threshold
+- **setConfidenceThreshold** - confidence threshold above which objects are detected
 
 **By default, Tiny YOLOv4 is used**. You can add :code:`yolo3` as a CMD argument to use Tiny YOLOv3.
 
@@ -38,17 +39,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/tiny_yolo_v4_device_side_decoding.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Yolo/tiny_yolo.py>`__
 
-        .. literalinclude:: ../../../examples/tiny_yolo.py
+        .. literalinclude:: ../../../../examples/Yolo/tiny_yolo.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/tiny_yolo_v4_device_side_decoding.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/tiny_yolo.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/tiny_yolo.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/tiny_yolo.cpp
            :language: cpp
            :linenos:
 

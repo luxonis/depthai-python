@@ -27,9 +27,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/image_manip_rotate.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ImageManip/image_manip_rotate.py>`__
 
-        .. literalinclude:: ../../../examples/image_manip_rotate.py
+        .. literalinclude:: ../../../../examples/ImageManip/image_manip_rotate.py
            :language: python
            :linenos:
 
@@ -37,7 +37,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/image_manip_rotate.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/image_manip_rotate.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/image_manip_rotate.cpp
            :language: cpp
            :linenos:
 

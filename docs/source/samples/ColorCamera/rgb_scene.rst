@@ -9,7 +9,7 @@ This example shows how to select :ref:`ColorCamera` scene and effect.
 Demo
 ####
 
-.. image:: /_static/images/examples/scene.jpg
+.. image:: /_static/images/examples/scene.png
 
 Setup
 #####
@@ -23,9 +23,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_video.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ColorCamera/rgb_video.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_video.py
+        .. literalinclude:: ../../../../examples/ColorCamera/rgb_video.py
            :language: python
            :linenos:
 
@@ -33,7 +33,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_video.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_video.cpp
            :language: cpp
            :linenos:
 

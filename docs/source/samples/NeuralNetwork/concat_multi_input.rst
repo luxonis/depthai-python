@@ -21,17 +21,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/edge_detector.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/NeuralNetwork/concat_multiple_input.py>`__
 
-        .. literalinclude:: ../../../examples/edge_detector.py
+        .. literalinclude:: ../../../../examples/NeuralNetwork/concat_multi_input.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/edge_detector.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/concat_multiple_input.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/edge_detector.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/concat_multi_input.cpp
            :language: cpp
            :linenos:
 

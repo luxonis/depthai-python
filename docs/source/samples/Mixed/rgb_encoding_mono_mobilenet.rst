@@ -47,9 +47,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_encoding_mono_mobilenet.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Mixed/rgb_encoding_mono_mobilenet.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_encoding_mono_mobilenet.py
+        .. literalinclude:: ../../../../examples/Mixed/rgb_encoding_mono_mobilenet.py
            :language: python
            :linenos:
 
@@ -57,7 +57,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_encoding_mono_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_encoding_mono_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_encoding_mono_mobilenet.cpp
            :language: cpp
            :linenos:
 

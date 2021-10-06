@@ -38,9 +38,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_preview.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ColorCamera/rgb_preview.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_preview.py
+        .. literalinclude:: ../../../../examples/ColorCamera/rgb_preview.py
            :language: python
            :linenos:
 
@@ -48,7 +48,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_preview.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_preview.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_preview.cpp
            :language: cpp
            :linenos:
 

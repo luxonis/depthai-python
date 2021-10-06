@@ -25,9 +25,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/script_camera_control.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Script/script_camera_control.py>`__
 
-        .. literalinclude:: ../../../examples/script_camera_control.py
+        .. literalinclude:: ../../../../examples/Script/script_camera_control.py
            :language: python
            :linenos:
 
@@ -35,7 +35,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/script_camera_control.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/script_camera_control.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/script_camera_control.cpp
            :language: cpp
            :linenos:
 

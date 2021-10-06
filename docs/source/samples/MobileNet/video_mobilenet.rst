@@ -39,9 +39,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/video_mobilenet.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/MobileNet/video_mobilenet.py>`__
 
-        .. literalinclude:: ../../../examples/video_mobilenet.py
+        .. literalinclude:: ../../../../examples/MobileNet/video_mobilenet.py
            :language: python
            :linenos:
 
@@ -49,7 +49,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/video_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/video_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/video_mobilenet.cpp
            :language: cpp
            :linenos:
 

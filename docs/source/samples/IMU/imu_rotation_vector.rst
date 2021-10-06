@@ -34,9 +34,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/imu_rotation_vector.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/IMU/imu_rotation_vector.py>`__
 
-        .. literalinclude:: ../../../examples/imu_rotation_vector.py
+        .. literalinclude:: ../../../../examples/IMU/imu_rotation_vector.py
            :language: python
            :linenos:
 
@@ -44,7 +44,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/imu_rotation_vector.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/imu_rotation_vector.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/imu_rotation_vector.cpp
            :language: cpp
            :linenos:
 

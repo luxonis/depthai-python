@@ -21,9 +21,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/calibration_load.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Calibration/calibration_load.py>`__
 
-        .. literalinclude:: ../../../examples/calibration_load.py
+        .. literalinclude:: ../../../../examples/Calibration/calibration_load.py
            :language: python
            :linenos:
 
@@ -31,7 +31,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/calibration_load.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/calibration_load.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/calibration_load.cpp
            :language: cpp
            :linenos:
 

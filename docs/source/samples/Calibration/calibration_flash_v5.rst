@@ -21,9 +21,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/calibration_flash_v5.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Calibration/calibration_flash_v5.py>`__
 
-        .. literalinclude:: ../../../examples/calibration_flash_v5.py
+        .. literalinclude:: ../../../../examples/Calibration/calibration_flash_v5.py
            :language: python
            :linenos:
 
@@ -31,7 +31,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/calibration_flash_v5.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/calibration_flash_v5.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/calibration_flash_v5.cpp
            :language: cpp
            :linenos:
 

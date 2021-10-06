@@ -43,9 +43,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/encoding_max_limit.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/VideoEncoder/encoding_max_limit.py>`__
 
-        .. literalinclude:: ../../../examples/encoding_max_limit.py
+        .. literalinclude:: ../../../../examples/VideoEncoder/encoding_max_limit.py
            :language: python
            :linenos:
 
@@ -53,7 +53,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/encoding_max_limit.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/encoding_max_limit.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/encoding_max_limit.cpp
            :language: cpp
            :linenos:
 

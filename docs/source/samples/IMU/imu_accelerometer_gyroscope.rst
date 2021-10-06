@@ -33,9 +33,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/imu_gyroscope_accelerometer.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/IMU/imu_gyroscope_accelerometer.py>`__
 
-        .. literalinclude:: ../../../examples/imu_gyroscope_accelerometer.py
+        .. literalinclude:: ../../../../examples/IMU/imu_gyroscope_accelerometer.py
            :language: python
            :linenos:
 
@@ -43,7 +43,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/imu_gyroscope_accelerometer.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/imu_gyroscope_accelerometer.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/imu_gyroscope_accelerometer.cpp
            :language: cpp
            :linenos:
 

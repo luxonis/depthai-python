@@ -54,9 +54,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/system_information.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/SystemLogger/system_information.py>`__
 
-        .. literalinclude:: ../../../examples/system_information.py
+        .. literalinclude:: ../../../../examples/SystemLogger/system_information.py
            :language: python
            :linenos:
 
@@ -64,7 +64,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/system_information.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/system_information.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/system_information.cpp
            :language: cpp
            :linenos:
 

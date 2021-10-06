@@ -48,9 +48,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_tiny_yolo.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/SpatialDetection/spatial_tiny_yolo.py>`__
 
-        .. literalinclude:: ../../../examples/spatial_tiny_yolo.py
+        .. literalinclude:: ../../../../examples/SpatialDetection/spatial_tiny_yolo.py
            :language: python
            :linenos:
 
@@ -58,7 +58,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_tiny_yolo.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/spatial_tiny_yolo.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/spatial_tiny_yolo.cpp
            :language: cpp
            :linenos:
 

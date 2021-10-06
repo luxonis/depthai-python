@@ -25,9 +25,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_rotate_warp.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ImageManip/rgb_rotate_warp.py>`__
 
-        .. literalinclude:: ../../../examples/rgb_rotate_warp.py
+        .. literalinclude:: ../../../../examples/ImageManip/rgb_rotate_warp.py
            :language: python
            :linenos:
 
@@ -35,7 +35,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_rotate_warp.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/rgb_rotate_warp.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_rotate_warp.cpp
            :language: cpp
            :linenos:
 

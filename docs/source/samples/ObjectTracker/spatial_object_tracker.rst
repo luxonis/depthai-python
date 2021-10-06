@@ -7,10 +7,8 @@ setConfidenceThreshold - confidence threshold above which objects are detected
 
 .. rubric:: Similiar samples:
 
-- :ref:`Spatial location calculator`
-- :ref:`RGB & MobilenetSSD with spatial data`
-- :ref:`Mono & MobilenetSSD with spatial data`
-- :ref:`RGB & TinyYolo with spatial data`
+- :ref:`Object tracker on video`
+- :ref:`Object tracker on RGB`
 
 Demo
 ####
@@ -31,9 +29,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/spatial_object_tracker.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ObjectTracker/spatial_object_tracker.py>`__
 
-        .. literalinclude:: ../../../examples/spatial_object_tracker.py
+        .. literalinclude:: ../../../../examples/ObjectTracker/spatial_object_tracker.py
            :language: python
            :linenos:
 
@@ -41,7 +39,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_object_tracker.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/spatial_object_tracker.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/spatial_object_tracker.cpp
            :language: cpp
            :linenos:
 
