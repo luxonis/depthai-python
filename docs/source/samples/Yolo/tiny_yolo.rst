@@ -1,8 +1,8 @@
-RGB & TinyYoloV4 decoding on device
-===================================
+RGB & Tiny YOLO
+===============
 
-This example shows how to run TinyYoloV4 on the RGB input frame, and how to display both the RGB
-preview and the metadata results from the TinyYoloV4 on the preview. Decoding is done on Myriad instead on the host.
+This example shows how to run Tiny YOLOv4 or YOLOv3 on the RGB input frame, and how to display both the RGB
+preview and the metadata results from the YOLO model on the preview. Decoding is done on the VPU (Myriad X) instead on the host.
 
 Configurable, network dependent parameters are required for correct decoding:
 setNumClasses - number of YOLO classes
@@ -12,9 +12,7 @@ setAnchorMasks - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for 
 setIouThreshold - intersection over union threshold
 setConfidenceThreshold - confidence threshold above which objects are detected
 
-.. rubric:: Similiar samples:
-
-- :ref:`RGB & TinyYoloV3 decoding on device`
+**By default, Tiny YOLOv4 is used**. You can add :code:`yolo3` as a CMD argument to use Tiny YOLOv3.
 
 Demo
 ####
@@ -42,7 +40,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/tiny_yolo_v4_device_side_decoding.py>`__
 
-        .. literalinclude:: ../../../examples/tiny_yolo_v4_device_side_decoding.py
+        .. literalinclude:: ../../../examples/tiny_yolo.py
            :language: python
            :linenos:
 
@@ -50,7 +48,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/tiny_yolo_v4_device_side_decoding.cpp>`__
 
-        .. literalinclude:: ../../../depthai-core/examples/src/tiny_yolo_v4_device_side_decoding.cpp
+        .. literalinclude:: ../../../depthai-core/examples/src/tiny_yolo.cpp
            :language: cpp
            :linenos:
 

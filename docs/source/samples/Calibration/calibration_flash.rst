@@ -9,6 +9,18 @@ This example shows how to flash calibration data of version 6 (gen2 calibration 
 - :ref:`Calibration Reader`
 - :ref:`Calibration Load`
 
+Demo
+####
+
+Example script output
+
+.. code-block:: bash
+
+    ~/depthai-python/examples$ python3 Calibration/calibration_flash.py
+    Calibration Data on the device is backed up at:
+    /home/erik/Luxonis/depthai-python/examples/Calibration/depthai_calib_backup.json
+    Calibration Flash Successful
+
 Setup
 #####
 

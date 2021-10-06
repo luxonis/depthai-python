@@ -8,6 +8,7 @@ Sobel filter parameters can be changed by keys 1 and 2.
 Demo
 ####
 
+.. image:: /_static/images/examples/edge_detections.jpg
 
 Setup
 #####

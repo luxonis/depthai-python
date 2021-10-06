@@ -6,6 +6,7 @@ This example shows how to run MobileNetv2SSD on video input frame, and perform o
 .. rubric:: Similiar samples:
 
 - :ref:`Object tracker on RGB`
+- :ref:`Spatial YOLO object tracker on RGB`
 - :ref:`Spatial object tracker on RGB`
 
 Demo

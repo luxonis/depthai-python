@@ -3,6 +3,8 @@ Bootloader Version
 
 This example shows basic bootloader interaction, retrieving the version of bootloader running on the device.
 
+Click on :ref:`Bootloader` for more information.
+
 Demo
 ####
 
@@ -11,8 +13,8 @@ Example script output
 .. code-block:: bash
 
     ~/depthai-python/examples$ python3 bootloader_version.py
-    Found device with name: 14442C1031425FD700-ma2480
-    Version: 0.0.12
+    Found device with name: 14442C10D1789ACD00-ma2480
+    Version: 0.0.15
 
 Setup
 #####
