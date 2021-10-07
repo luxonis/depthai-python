@@ -226,7 +226,7 @@ if args.dumpdisparitycostvalues:
     xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
 # Properties
-stereo.initialConfig.setConfidenceThreshold(220)
+stereo.initialConfig.setConfidenceThreshold(240)
 stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)

@@ -52,7 +52,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
-depth.initialConfig.setConfidenceThreshold(255)
+depth.initialConfig.setConfidenceThreshold(240)
 depth.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 
 nn.setConfidenceThreshold(0.5)

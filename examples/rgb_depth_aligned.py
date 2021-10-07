@@ -45,7 +45,7 @@ right.setResolution(monoResolution)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 right.setFps(fps)
 
-stereo.initialConfig.setConfidenceThreshold(230)
+stereo.initialConfig.setConfidenceThreshold(240)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)

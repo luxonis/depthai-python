@@ -201,7 +201,7 @@ for monoCam in (camLeft, camRight):  # Common config
     monoCam.setResolution(res)
     # monoCam.setFps(20.0)
 
-stereo.initialConfig.setConfidenceThreshold(200)
+stereo.initialConfig.setConfidenceThreshold(240)
 stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)

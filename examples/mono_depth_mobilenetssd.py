@@ -44,7 +44,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 # Produce the depth map (using disparity output as it's easier to visualize depth this way)
-stereo.initialConfig.setConfidenceThreshold(255)
+stereo.initialConfig.setConfidenceThreshold(240)
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout from rectification (black stripe on the edges)
 # Convert the grayscale frame into the nn-acceptable form
 manip.initialConfig.setResize(300, 300)
