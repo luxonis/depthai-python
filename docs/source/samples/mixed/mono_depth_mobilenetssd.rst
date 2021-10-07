@@ -37,9 +37,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Mixed/mono_depth_mobilenetssd.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mixed/mono_depth_mobilenetssd.py>`__
 
-        .. literalinclude:: ../../../../examples/Mixed/mono_depth_mobilenetssd.py
+        .. literalinclude:: ../../../../examples/mixed/mono_depth_mobilenetssd.py
            :language: python
            :linenos:
 

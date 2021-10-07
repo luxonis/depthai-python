@@ -26,9 +26,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/HostSide/device_queue_event.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/host_side/device_queue_event.py>`__
 
-        .. literalinclude:: ../../../../examples/HostSide/device_queue_event.py
+        .. literalinclude:: ../../../../examples/host_side/device_queue_event.py
            :language: python
            :linenos:
 

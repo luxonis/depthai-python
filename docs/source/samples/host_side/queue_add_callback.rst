@@ -22,9 +22,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/HostSide/queue_add_callback.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/host_side/queue_add_callback.py>`__
 
-        .. literalinclude:: ../../../../examples/HostSide/queue_add_callback.py
+        .. literalinclude:: ../../../../examples/host_side/queue_add_callback.py
            :language: python
            :linenos:
 

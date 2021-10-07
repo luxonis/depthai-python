@@ -1,8 +1,7 @@
-Flash Bootloader
-================
+Bootloader Version
+==================
 
-This script will flash bootloader to the connected DepthAI device. Bootloader can
-only be flashed to devices that have flash on-board.
+This example shows basic bootloader interaction, retrieving the version of bootloader running on the device.
 
 Click on :ref:`Bootloader` for more information.
 
@@ -14,7 +13,7 @@ Example script output
 .. code-block:: bash
 
     ~/depthai-python/examples$ python3 bootloader_version.py
-    Found device with name: 14442C1031425FD700-ma2480
+    Found device with name: 14442C10D1789ACD00-ma2480
     Version: 0.0.15
 
 Setup
@@ -29,9 +28,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Bootloader/bootloader_version.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/bootloader/bootloader_version.py>`__
 
-        .. literalinclude:: ../../../../examples/Bootloader/bootloader_version.py
+        .. literalinclude:: ../../../../examples/bootloader/bootloader_version.py
            :language: python
            :linenos:
 

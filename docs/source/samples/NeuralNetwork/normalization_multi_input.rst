@@ -10,8 +10,9 @@ allows users to specify mean and scale factors that will apply for all frame val
 
    output = (input - mean) / scale
 
-On the host, values are converted back to :code:`0`-:code:`255`, so they can be displayed by OpenCV.
+.. image:: /_static/images/examples/normalize)model.png
 
+On the host, values are converted back to :code:`0`-:code:`255`, so they can be displayed by OpenCV.
 
 .. note::
     This is just a demo, for normalization you should look into OpenVINO's `model optimizer <https://docs.openvinotoolkit.org/latest/openvino_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html>`__ arguments :code:`--mean_values` and :code:`--scale_values`.
