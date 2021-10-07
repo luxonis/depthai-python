@@ -39,7 +39,8 @@ monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 manip.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manip.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
-stereo.initialConfig.setConfidenceThreshold(200)
+stereo.initialConfig.setConfidenceThreshold(230)
+stereo.setLeftRightCheck(True)
 
 # Linking
 configIn.out.link(manip.inputConfig)
@@ -63,7 +64,7 @@ with dai.Device(pipeline) as device:
         # Frame is transformed, the color map will be applied to highlight the depth info
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
 
         # Frame is ready to be shown
         cv2.imshow("depth", depthFrameColor)
