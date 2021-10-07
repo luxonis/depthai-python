@@ -177,7 +177,7 @@ setup(
     name='depthai',
     version=__version__,
     author='Martin Peterlin',
-    author_email='martin@luxonis.com',
+    author_email='support@luxonis.com',
     description='DepthAI Python Library',
     license="MIT",
     long_description=long_description,
