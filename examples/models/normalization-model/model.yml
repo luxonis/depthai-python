@@ -17,8 +17,8 @@ description: >-
 task_type: image_inpainting # Just random task type, so it's supported by model downloader
 files:
   - name: normalize_openvino_2021.4_4shave.blob
-    size: 1024
-    sha256: 7089a0d464515f6871b340ff3babdee75525dbc3918ac6a6b53d43d26554c631
+    size: 1216
+    sha256:   9b5dc4b375ed9218c2910284556f8152cbfcc0130e7b7a42d9a9991eae8be23a
     source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/normalize_openvino_2021.4_4shave.blob
 
 framework: dldt

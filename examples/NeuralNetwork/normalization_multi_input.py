@@ -32,24 +32,28 @@ nn.setNumInferenceThreads(2)
 script = p.create(dai.node.Script)
 script.setScript("""
 # Run script only once
+# Model formula:
+# output = (input - mean) / scale
 
-# This configuration will divide frame values from 0.0-255.0 to 0.0 to 2.0
-mul = NNData(2)
-mul.setLayer("multiplier", [1/127.5])
-node.io['mul'].send(mul)
+# This configuration will subtract all frame values (pixels) by 127.5
+# 0.0 .. 255.0 -> -127.5 .. 127.5
+data = NNData(2)
+data.setLayer("mean", [127.5])
+node.io['mean'].send(data)
 
-# This configuration will substract frame values from 0.0-2.0 to -1.0-1.0
-add = NNData(2)
-add.setLayer("addend", [-1.0])
-node.io['add'].send(add)
+# This configuration will divide all frame values (pixels) by 255.0
+# -127.5 .. 127.5 -> -0.5 .. 0.5
+data = NNData(2)
+data.setLayer("scale", [255.0])
+node.io['scale'].send(data)
 """)
 
 # Re-use the initial values for multiplier/addend
-script.outputs['mul'].link(nn.inputs['multiplier'])
-nn.inputs['multiplier'].setWaitForMessage(False)
+script.outputs['mean'].link(nn.inputs['mean'])
+nn.inputs['mean'].setWaitForMessage(False)
 
-script.outputs['add'].link(nn.inputs['addend'])
-nn.inputs['addend'].setWaitForMessage(False)
+script.outputs['scale'].link(nn.inputs['scale'])
+nn.inputs['scale'].setWaitForMessage(False)
 # Always wait for the new frame before starting inference
 camRgb.preview.link(nn.inputs['frame'])
 
@@ -66,8 +70,8 @@ with dai.Device(p) as device:
         inNn = np.array(qNn.get().getData())
         # Get back the frame. It's currently normalized to -1.0 - 1.0
         frame = inNn.view(np.float16).reshape(shape).transpose(1, 2, 0)
-        # To get original frame back (0-255), we add 1 and multiply all frame values by 127.5
-        frame = ((frame + 1) * 127.5).astype(np.uint8).copy()
+        # To get original frame back (0-255), we add multiply all frame values (pixels) by 255 and then add 127.5 to them.
+        frame = (frame * 255.0 + 127.5).astype(np.uint8)
         cv2.imshow("Original frame", frame)
 
         if cv2.waitKey(1) == ord('q'):
