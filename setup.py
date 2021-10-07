@@ -176,7 +176,7 @@ class CMakeBuild(build_ext):
 setup(
     name='depthai',
     version=__version__,
-    author='Martin Peterlin',
+    author='Luxonis',
     author_email='support@luxonis.com',
     description='DepthAI Python Library',
     license="MIT",
