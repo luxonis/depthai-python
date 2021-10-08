@@ -6,6 +6,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
+from utility import calculateDispScaleFactor, parseDepthPacket
 
 '''
 Spatial Tiny-yolo example
@@ -73,7 +74,6 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
 stereo.initialConfig.setConfidenceThreshold(240)
-stereo.setLeftRightCheck(True)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -118,18 +118,15 @@ with dai.Device(pipeline) as device:
     counter = 0
     fps = 0
     color = (255, 255, 255)
+    dispScaleFactor = calculateDispScaleFactor(device)
 
     while True:
         inPreview = previewQueue.get()
         inDet = detectionNNQueue.get()
-        depth = depthQueue.get()
+        inDepth = depthQueue.get()
 
         frame = inPreview.getCvFrame()
-        depthFrame = depth.getFrame()
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
-
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.getMaxDisparity())
         counter+=1
         current_time = time.monotonic()
         if (current_time - startTime) > 1 :
@@ -144,7 +141,7 @@ with dai.Device(pipeline) as device:
 
             for roiData in roiDatas:
                 roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+                roi = roi.denormalize(depthFrame.shape[1], depthFrame.shape[0])
                 topLeft = roi.topLeft()
                 bottomRight = roi.bottomRight()
                 xmin = int(topLeft.x)
@@ -152,7 +149,7 @@ with dai.Device(pipeline) as device:
                 xmax = int(bottomRight.x)
                 ymax = int(bottomRight.y)
 
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+                cv2.rectangle(depthFrame, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
 
         # If the frame is available, draw bounding boxes on it and show the frame
@@ -177,7 +174,7 @@ with dai.Device(pipeline) as device:
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
-        cv2.imshow("depth", depthFrameColor)
+        cv2.imshow("depth", depthFrame)
         cv2.imshow("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):

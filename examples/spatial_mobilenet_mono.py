@@ -6,6 +6,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
+from utility import calculateDispScaleFactor, parseDepthPacket
 
 '''
 Mobilenet SSD device side decoding demo
@@ -61,7 +62,6 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # StereoDepth
 stereo.initialConfig.setConfidenceThreshold(240)
-stereo.setLeftRightCheck(True)
 
 # Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -86,7 +86,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
 stereo.rectifiedRight.link(imageManip.inputImage)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
-spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
+stereo.depth.link(xoutDepth.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -104,6 +104,7 @@ with dai.Device(pipeline) as device:
     counter = 0
     fps = 0
     color = (255, 255, 255)
+    dispScaleFactor = calculateDispScaleFactor(device)
 
     while True:
         inRectified = previewQueue.get()
@@ -119,10 +120,7 @@ with dai.Device(pipeline) as device:
 
         rectifiedRight = inRectified.getCvFrame()
 
-        depthFrame = inDepth.getFrame()
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.getMaxDisparity())
 
         detections = inDet.detections
         if len(detections) != 0:
@@ -131,14 +129,14 @@ with dai.Device(pipeline) as device:
 
             for roiData in roiDatas:
                 roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+                roi = roi.denormalize(depthFrame.shape[1], depthFrame.shape[0])
                 topLeft = roi.topLeft()
                 bottomRight = roi.bottomRight()
                 xmin = int(topLeft.x)
                 ymin = int(topLeft.y)
                 xmax = int(bottomRight.x)
                 ymax = int(bottomRight.y)
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+                cv2.rectangle(depthFrame, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
         # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
@@ -164,7 +162,7 @@ with dai.Device(pipeline) as device:
             cv2.rectangle(rectifiedRight, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
         cv2.putText(rectifiedRight, "NN fps: {:.2f}".format(fps), (2, rectifiedRight.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
-        cv2.imshow("depth", depthFrameColor)
+        cv2.imshow("depth", depthFrame)
         cv2.imshow("rectified right", rectifiedRight)
 
         if cv2.waitKey(1) == ord('q'):
