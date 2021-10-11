@@ -120,7 +120,7 @@ with dai.Device(pipeline) as device:
 
         rectifiedRight = inRectified.getCvFrame()
 
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.getMaxDisparity())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity()())
 
         detections = inDet.detections
         if len(detections) != 0:

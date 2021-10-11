@@ -112,7 +112,7 @@ with dai.Device(pipeline) as device:
             startTime = current_time
 
         frame = inPreview.getCvFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.getMaxDisparity())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity()())
 
         detections = inDet.detections
         if len(detections) != 0:
