@@ -2,6 +2,7 @@
 
 import cv2
 import depthai as dai
+from utility import calculateDispScaleFactor, parseDepthPacket
 
 stepSize = 0.05
 
@@ -68,6 +69,7 @@ with dai.Device(pipeline) as device:
     spatialCalcConfigInQueue = device.getInputQueue("spatialCalcConfig")
 
     color = (255, 255, 255)
+    dispScaleFactor = calculateDispScaleFactor(device)
 
     print("Use WASD keys to move ROI!")
 
@@ -75,14 +77,12 @@ with dai.Device(pipeline) as device:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
 
         depthFrame = inDepth.getFrame()
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
 
         spatialData = spatialCalcQueue.get().getSpatialLocations()
         for depthData in spatialData:
             roi = depthData.config.roi
-            roi = roi.denormalize(width=depthFrameColor.shape[1], height=depthFrameColor.shape[0])
+            roi = roi.denormalize(width=depthFrame.shape[1], height=depthFrame.shape[0])
             xmin = int(roi.topLeft().x)
             ymin = int(roi.topLeft().y)
             xmax = int(roi.bottomRight().x)
@@ -92,12 +92,12 @@ with dai.Device(pipeline) as device:
             depthMax = depthData.depthMax
 
             fontType = cv2.FONT_HERSHEY_TRIPLEX
-            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
-            cv2.putText(depthFrameColor, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, 255)
-            cv2.putText(depthFrameColor, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, 255)
-            cv2.putText(depthFrameColor, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, 255)
+            cv2.rectangle(depthFrame, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+            cv2.putText(depthFrame, f"X: {int(depthData.spatialCoordinates.x)} mm", (xmin + 10, ymin + 20), fontType, 0.5, 255)
+            cv2.putText(depthFrame, f"Y: {int(depthData.spatialCoordinates.y)} mm", (xmin + 10, ymin + 35), fontType, 0.5, 255)
+            cv2.putText(depthFrame, f"Z: {int(depthData.spatialCoordinates.z)} mm", (xmin + 10, ymin + 50), fontType, 0.5, 255)
         # Show the frame
-        cv2.imshow("depth", depthFrameColor)
+        cv2.imshow("depth", depthFrame)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
