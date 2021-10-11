@@ -126,7 +126,7 @@ with dai.Device(pipeline) as device:
         inDepth = depthQueue.get()
 
         frame = inPreview.getCvFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity()())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
         counter+=1
         current_time = time.monotonic()
         if (current_time - startTime) > 1 :

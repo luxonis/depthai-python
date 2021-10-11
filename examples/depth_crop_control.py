@@ -8,6 +8,7 @@ Use 'WASD' in order to do it.
 import cv2
 import depthai as dai
 import numpy as np
+from utility import calculateDispScaleFactor, parseDepthPacket
 
 # Step size ('W','A','S','D' controls)
 stepSize = 0.02
@@ -57,17 +58,13 @@ with dai.Device(pipeline) as device:
     configQueue = device.getInputQueue(configIn.getStreamName())
 
     sendCamConfig = False
+    dispScaleFactor = calculateDispScaleFactor(device)
 
     while True:
         inDepth = q.get()
-        depthFrame = inDepth.getFrame()
-        # Frame is transformed, the color map will be applied to highlight the depth info
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
-
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
         # Frame is ready to be shown
-        cv2.imshow("depth", depthFrameColor)
+        cv2.imshow("depth", depthFrame)
 
         # Update screen
         key = cv2.waitKey(10)
