@@ -108,7 +108,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
         python-architecture: [x64, x86]
     steps:
       - name: Cache .hunter folder
@@ -159,7 +159,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v2
