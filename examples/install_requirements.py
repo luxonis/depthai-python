@@ -40,9 +40,18 @@ import find_version
 
 # 3rdparty dependencies to install
 DEPENDENCIES = ['pyyaml', 'requests']
-if platform.machine() == "aarch64":
-    print('Skipping opencv install on aarch64.')
-else:
+requireOpenCv = True
+thisPlatform = platform.machine()
+if thisPlatform == "aarch64":
+    # try to import opencv, numpy in a subprocess, since it might fail with illegal instruction
+    # if it was previously installed w/ pip without setting OPENBLAS_CORE_TYPE=ARMV8 env variable
+    try:
+        subprocess.check_call(["python3", "-c", "import numpy, cv2;"])
+        requireOpenCv = False
+    except subprocess.CalledProcessError as ex:
+        requireOpenCv = True
+
+if requireOpenCv:
     DEPENDENCIES.append('opencv-python')
 
 
@@ -67,12 +76,13 @@ if not pip_installed:
 if sys.version_info[0] != 3:
     raise RuntimeError("Examples require Python 3 to run (detected: Python {})".format(sys.version_info[0]))
 
-if platform.machine() == "arm64" and platform.system() == "Darwin":
+if thisPlatform == "arm64" and platform.system() == "Darwin":
     err_str = "There are no prebuilt wheels for M1 processors. Please open the following link for a solution - https://discuss.luxonis.com/d/69-running-depthai-on-apple-m1-based-macs"
     raise RuntimeError(err_str)
 
-is_pi = platform.machine().startswith("arm") or platform.machine().startswith("aarch")
-if is_pi and sys.version_info[1] == 9:
+is_pi = thisPlatform.startswith("arm") or thisPlatform.startswith("aarch")
+prebuiltWheelsPythonVersion = [7,9]
+if is_pi and sys.version_info[1] not in prebuiltWheelsPythonVersion:
     print("[WARNING] There are no prebuilt wheels for Python 3.{} for OpenCV, building process on this device may be long and unstable".format(sys.version_info[1]))
 
 if not in_venv:
@@ -164,3 +174,14 @@ if args.convert != convert_default:
             prettyPrint(cmd)
         else:
             subprocess.check_call(cmd)
+
+if requireOpenCv and thisPlatform == "aarch64":
+    from os import environ
+    OPENBLAS_CORE_TYPE = environ.get('OPENBLAS_CORE_TYPE')
+    if OPENBLAS_CORE_TYPE != 'ARMV8':
+        WARNING='\033[1;5;31m'
+        RED='\033[91m'
+        LINE_CL='\033[0m'
+        SUGGESTION='echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc && source ~/.bashrc'
+        print(f'{WARNING}WARNING:{LINE_CL} Need to set OPENBLAS_CORE_TYPE environment variable, otherwise opencv will fail with illegal instruction.')
+        print(f'Run: {RED}{SUGGESTION}{LINE_CL}')
