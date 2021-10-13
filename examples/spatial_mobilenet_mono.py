@@ -28,7 +28,6 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 syncNN = True
-flipRectified = True
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -118,8 +117,6 @@ with dai.Device(pipeline) as device:
             startTime = currentTime
 
         rectifiedRight = inRectified.getCvFrame()
-        if flipRectified:
-            rectifiedRight = cv2.flip(rectifiedRight, 1)
 
         depthFrame = inDepth.getFrame()
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
@@ -146,10 +143,6 @@ with dai.Device(pipeline) as device:
         height = rectifiedRight.shape[0]
         width = rectifiedRight.shape[1]
         for detection in detections:
-            if flipRectified:
-                swap = detection.xmin
-                detection.xmin = 1 - detection.xmax
-                detection.xmax = 1 - swap
             # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)

@@ -82,7 +82,7 @@ with dai.Device(pipeline) as device:
 
         if latestPacket["depth"] is not None:
             frameDepth = latestPacket["depth"].getFrame()
-            maxDisparity = stereo.getMaxDisparity()
+            maxDisparity = stereo.initialConfig.getMaxDisparity()
             # Optional, extend range 0..95 -> 0..255, for a better visualisation
             if 1: frameDepth = (frameDepth * 255. / maxDisparity).astype(np.uint8)
             # Optional, apply false colorization

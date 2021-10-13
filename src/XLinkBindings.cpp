@@ -1,14 +1,15 @@
-#include "XLinkConnectionBindings.hpp"
+#include "XLinkBindings.hpp"
 
 #include "depthai/xlink/XLinkConnection.hpp"
+#include "depthai/xlink/XLinkStream.hpp"
 
 #include <cmath>
 #include <cstring>
 
-void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
+void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
+{
 
     using namespace dai;
-
 
     // Type definitions
     py::class_<DeviceInfo> deviceInfo(m, "DeviceInfo", DOC(dai, DeviceInfo));
@@ -16,14 +17,27 @@ void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<XLinkDeviceState_t> xLinkDeviceState(m, "XLinkDeviceState");
     py::enum_<XLinkProtocol_t> xLinkProtocol(m, "XLinkProtocol");
     py::enum_<XLinkPlatform_t> xLinkPlatform(m, "XLinkPlatform");
-    py::class_<XLinkConnection, std::shared_ptr<XLinkConnection>> xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
+    py::class_<XLinkConnection, std::shared_ptr<XLinkConnection> > xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
+
+    // pybind11 limitation of having actual classes as exceptions
+    // Possible but requires a larger workaround
+    // https://stackoverflow.com/questions/62087383/how-can-you-bind-exceptions-with-custom-fields-and-constructors-in-pybind11-and
+
+    // For now just create simple exceptions that will expose what() message
+    auto xlinkError = py::register_exception<XLinkError>(m, "XLinkError", PyExc_RuntimeError);
+    auto xlinkReadError = py::register_exception<XLinkReadError>(m, "XLinkReadError", xlinkError.ptr());
+    auto xlinkWriteError = py::register_exception<XLinkWriteError>(m, "XLinkWriteError", xlinkError.ptr());
+
+    //py::class_<XLinkError> xLinkError(m, "XLinkError", DOC(dai, XLinkError));
+    //py::class_<XLinkReadError, XLinkError> xLinkReadError(m, "XLinkReadError", DOC(dai, XLinkReadError));
+    //py::class_<XLinkWriteError, XLinkError> xLinkWriteError(m, "XLinkWriteError", DOC(dai, XLinkWriteError));
 
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     // Call the rest of the type defines, then perform the actual bindings
-    Callstack* callstack = (Callstack*) pCallstack;
+    Callstack *callstack = (Callstack *)pCallstack;
     auto cb = callstack->top();
     callstack->pop();
     cb(m, pCallstack);
@@ -43,10 +57,12 @@ void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("protocol", &deviceDesc_t::protocol)
         .def_readwrite("platform", &deviceDesc_t::platform)
-        .def_property("name",
-            [](deviceDesc_t& o){return std::string(o.name);},
-            [](deviceDesc_t& o, std::string n){ std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE,(int) n.size()));}
-        )
+        .def_property(
+            "name",
+            [](deviceDesc_t &o)
+            { return std::string(o.name); },
+            [](deviceDesc_t &o, std::string n)
+            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); })
         ;
 
     xLinkDeviceState
@@ -54,9 +70,9 @@ void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
         .value("X_LINK_BOOTED", X_LINK_BOOTED)
         .value("X_LINK_UNBOOTED", X_LINK_UNBOOTED)
         .value("X_LINK_BOOTLOADER", X_LINK_BOOTLOADER)
-        .export_values();
+        .value("X_LINK_FLASH_BOOTED", X_LINK_FLASH_BOOTED)
+        .export_values()
         ;
-
 
     xLinkProtocol
         .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
@@ -77,13 +93,29 @@ void XLinkConnectionBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
     xLinkConnection
-        .def(py::init<const DeviceInfo&, std::vector<std::uint8_t>>())
-        .def(py::init<const DeviceInfo&, std::string>())
-        .def(py::init<const DeviceInfo&>())
+        .def(py::init<const DeviceInfo &, std::vector<std::uint8_t> >())
+        .def(py::init<const DeviceInfo &, std::string>())
+        .def(py::init<const DeviceInfo &>())
         .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE)
         .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE)
+        .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
         ;
+
+    //// Exceptions
+
+    // Applicable if above pybind11 limitation is removed
+    // xLinkError
+    //     .def(py::init<XLinkError_t, const std::string &, const std::string &>())
+    //     .def_readonly("status", &XLinkError::status)
+    //     .def_readonly("streamName", &XLinkError::streamName)
+    //     .def("what", &XLinkError::what);
+    //
+    // xLinkReadError
+    //     .def(py::init<XLinkError_t, const std::string &>());
+    //
+    // xLinkWriteError
+    //     .def(py::init<XLinkError_t, const std::string &>());
 
 
 }
