@@ -46,7 +46,7 @@ if thisPlatform == "aarch64":
     # try to import opencv, numpy in a subprocess, since it might fail with illegal instruction
     # if it was previously installed w/ pip without setting OPENBLAS_CORE_TYPE=ARMV8 env variable
     try:
-        subprocess.check_call(["python3", "-c", "import numpy, cv2;"])
+        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"])
         requireOpenCv = False
     except subprocess.CalledProcessError as ex:
         requireOpenCv = True
@@ -82,7 +82,7 @@ if thisPlatform == "arm64" and platform.system() == "Darwin":
 
 is_pi = thisPlatform.startswith("arm") or thisPlatform.startswith("aarch")
 prebuiltWheelsPythonVersion = [7,9]
-if is_pi and sys.version_info[1] not in prebuiltWheelsPythonVersion:
+if requireOpenCv and is_pi and sys.version_info[1] not in prebuiltWheelsPythonVersion:
     print("[WARNING] There are no prebuilt wheels for Python 3.{} for OpenCV, building process on this device may be long and unstable".format(sys.version_info[1]))
 
 if not in_venv:
