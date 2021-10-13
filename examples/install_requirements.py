@@ -80,7 +80,7 @@ if thisPlatform == "arm64" and platform.system() == "Darwin":
     err_str = "There are no prebuilt wheels for M1 processors. Please open the following link for a solution - https://discuss.luxonis.com/d/69-running-depthai-on-apple-m1-based-macs"
     raise RuntimeError(err_str)
 
-is_pi = thisPlatform.startswith("arm") or thisPlatform.startswith("aarch")
+is_pi = thisPlatform.startswith("arm")
 prebuiltWheelsPythonVersion = [7,9]
 if requireOpenCv and is_pi and sys.version_info[1] not in prebuiltWheelsPythonVersion:
     print("[WARNING] There are no prebuilt wheels for Python 3.{} for OpenCV, building process on this device may be long and unstable".format(sys.version_info[1]))
