@@ -26,9 +26,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/HostSide/opencv_support.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/host_side/opencv_support.py>`__
 
-        .. literalinclude:: ../../../../examples/HostSide/opencv_support.py
+        .. literalinclude:: ../../../../examples/host_side/opencv_support.py
            :language: python
            :linenos:
 

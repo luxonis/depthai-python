@@ -46,9 +46,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Mixed/rgb_encoding_mobilenet.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mixed/rgb_encoding_mobilenet.py>`__
 
-        .. literalinclude:: ../../../../examples/Mixed/rgb_encoding_mobilenet.py
+        .. literalinclude:: ../../../../examples/mixed/rgb_encoding_mobilenet.py
            :language: python
            :linenos:
 

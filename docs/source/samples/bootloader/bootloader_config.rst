@@ -35,9 +35,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Bootloader/bootloader_version.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/bootloader/bootloader_version.py>`__
 
-        .. literalinclude:: ../../../../examples/Bootloader/bootloader_version.py
+        .. literalinclude:: ../../../../examples/bootloader/bootloader_version.py
            :language: python
            :linenos:
 

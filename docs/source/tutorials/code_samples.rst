@@ -57,7 +57,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
 
-.. rubric:: Host Side
+.. rubric:: Host side
 
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
 - :ref:`Device Queue Event` - Demonstrates how to use device queue events
