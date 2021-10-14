@@ -5,8 +5,8 @@ import cv2
 import depthai as dai
 import argparse
 
-boardConfigFile = str((Path(__file__).parent / Path('models/BW1098OBC.json')).resolve().absolute())
-calibBinaryFile = str((Path(__file__).parent / Path('models/depthai_v5.calib')).resolve().absolute())
+boardConfigFile = str((Path(__file__).parent / Path('../models/BW1098OBC.json')).resolve().absolute())
+calibBinaryFile = str((Path(__file__).parent / Path('../models/depthai_v5.calib')).resolve().absolute())
 calibBackUpFile = str((Path(__file__).parent / Path('depthai_calib_backup.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()

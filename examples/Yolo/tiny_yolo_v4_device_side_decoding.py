@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
 """
-Tiny-yolo-v3 device side decoding demo
-  YOLO v3 Tiny is a real-time object detection model implemented with Keras* from
-  this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
-  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+Tiny-yolo-v4 device side decoding demo
+The code is the same as for Tiny-yolo-V3, the only difference is the blob file.
+The blob was compiled following this tutorial: https://github.com/TNTWEN/OpenVINO-YOLOV4
 """
 
 from pathlib import Path
@@ -15,7 +14,7 @@ import numpy as np
 import time
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
@@ -23,7 +22,7 @@ if not Path(nnPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
-# Tiny yolo v3 label texts
+# tiny yolo v4 label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",

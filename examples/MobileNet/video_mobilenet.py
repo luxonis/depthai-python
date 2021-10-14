@@ -9,8 +9,8 @@ from time import monotonic
 
 # Get argument first
 parentDir = Path(__file__).parent
-nnPath = str((parentDir / Path('models/mobilenet-ssd_openvino_2021.4_8shave.blob')).resolve().absolute())
-videoPath = str((parentDir / Path('models/construction_vest.mp4')).resolve().absolute())
+nnPath = str((parentDir / Path('../models/mobilenet-ssd_openvino_2021.4_8shave.blob')).resolve().absolute())
+videoPath = str((parentDir / Path('../models/construction_vest.mp4')).resolve().absolute())
 if len(sys.argv) > 2:
     nnPath = sys.argv[1]
     videoPath = sys.argv[2]

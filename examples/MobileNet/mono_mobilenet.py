@@ -7,7 +7,7 @@ import depthai as dai
 import numpy as np
 
 # Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.4_5shave.blob')).resolve().absolute())
+nnPath = str((Path(__file__).parent / Path('../models/mobilenet-ssd_openvino_2021.4_6shave.blob')).resolve().absolute())
 if len(sys.argv) > 1:
     nnPath = sys.argv[1]
 
@@ -23,44 +23,43 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
+monoRight = pipeline.createMonoCamera()
+manip = pipeline.createImageManip()
 nn = pipeline.createMobileNetDetectionNetwork()
-
-xoutVideo = pipeline.createXLinkOut()
-xoutPreview = pipeline.createXLinkOut()
+manipOut = pipeline.createXLinkOut()
 nnOut = pipeline.createXLinkOut()
 
-xoutVideo.setStreamName("video")
-xoutPreview.setStreamName("preview")
+manipOut.setStreamName("right")
 nnOut.setStreamName("nn")
 
 # Properties
-camRgb.setPreviewSize(300, 300)    # NN input
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-camRgb.setInterleaved(False)
-camRgb.setPreviewKeepAspectRatio(False)
-# Define a neural network that will make predictions based on the source frames
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+
+# Convert the grayscale frame into the nn-acceptable form
+manip.initialConfig.setResize(300, 300)
+# The NN model expects BGR input. By default ImageManip output type would be same as input (gray in this case)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
+
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
 # Linking
-camRgb.video.link(xoutVideo.input)
-camRgb.preview.link(xoutPreview.input)
-camRgb.preview.link(nn.input)
+monoRight.out.link(manip.inputImage)
+manip.out.link(nn.input)
+manip.out.link(manipOut.input)
 nn.out.link(nnOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    # Output queues will be used to get the frames and nn data from the outputs defined above
-    qVideo = device.getOutputQueue(name="video", maxSize=4, blocking=False)
-    qPreview = device.getOutputQueue(name="preview", maxSize=4, blocking=False)
-    qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
+    # Output queues will be used to get the grayscale frames and nn data from the outputs defined above
+    qRight = device.getOutputQueue("right", maxSize=4, blocking=False)
+    qDet = device.getOutputQueue("nn", maxSize=4, blocking=False)
 
-    previewFrame = None
-    videoFrame = None
+    frame = None
     detections = []
 
     # nn data, being the bounding box locations, are in <0..1> range - they need to be normalized with frame width/height
@@ -79,30 +78,19 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    cv2.namedWindow("video", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("video", 1280, 720)
-    print("Resize video window with mouse drag!")
-
     while True:
         # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
-        inVideo = qVideo.tryGet()
-        inPreview = qPreview.tryGet()
+        inRight = qRight.tryGet()
         inDet = qDet.tryGet()
 
-        if inVideo is not None:
-            videoFrame = inVideo.getCvFrame()
-
-        if inPreview is not None:
-            previewFrame = inPreview.getCvFrame()
+        if inRight is not None:
+            frame = inRight.getCvFrame()
 
         if inDet is not None:
             detections = inDet.detections
 
-        if videoFrame is not None:
-            displayFrame("video", videoFrame)
-
-        if previewFrame is not None:
-            displayFrame("preview", previewFrame)
+        if frame is not None:
+            displayFrame("right", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import cv2
 
-calibJsonFile = str((Path(__file__).parent / Path('models/depthai_calib.json')).resolve().absolute())
+calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('calibJsonFile', nargs='?', help="Path to V6 calibration file in json", default=calibJsonFile)

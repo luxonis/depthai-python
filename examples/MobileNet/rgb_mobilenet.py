@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-import sys
 import cv2
 import depthai as dai
 import numpy as np
+import time
+import argparse
 
-# Get argument first
-nnPath = str((Path(__file__).parent / Path('models/mobilenet-ssd_openvino_2021.4_6shave.blob')).resolve().absolute())
-if len(sys.argv) > 1:
-    nnPath = sys.argv[1]
+nnPathDefault = str((Path(__file__).parent / Path('../models/mobilenet-ssd_openvino_2021.4_6shave.blob')).resolve().absolute())
+parser = argparse.ArgumentParser()
+parser.add_argument('nnPath', nargs='?', help="Path to mobilenet detection network blob", default=nnPathDefault)
+parser.add_argument('-s', '--sync', action="store_true", help="Sync RGB output with NN output", default=False)
+args = parser.parse_args()
 
-if not Path(nnPath).exists():
+if not Path(nnPathDefault).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
@@ -24,49 +26,46 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 camRgb = pipeline.createColorCamera()
-videoEncoder = pipeline.createVideoEncoder()
 nn = pipeline.createMobileNetDetectionNetwork()
-
 xoutRgb = pipeline.createXLinkOut()
-videoOut = pipeline.createXLinkOut()
 nnOut = pipeline.createXLinkOut()
 
 xoutRgb.setStreamName("rgb")
-videoOut.setStreamName("h265")
 nnOut.setStreamName("nn")
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setPreviewSize(300, 300)
 camRgb.setInterleaved(False)
-
-videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-
+camRgb.setFps(40)
+# Define a neural network that will make predictions based on the source frames
 nn.setConfidenceThreshold(0.5)
-nn.setBlobPath(nnPath)
+nn.setBlobPath(args.nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
 # Linking
-camRgb.video.link(videoEncoder.input)
-camRgb.preview.link(xoutRgb.input)
+if args.sync:
+    nn.passthrough.link(xoutRgb.input)
+else:
+    camRgb.preview.link(xoutRgb.input)
+
 camRgb.preview.link(nn.input)
-videoEncoder.bitstream.link(videoOut.input)
 nn.out.link(nnOut.input)
 
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
+with dai.Device(pipeline) as device:
 
-    # Queues
-    queue_size = 8
-    qRgb = device.getOutputQueue("rgb", queue_size)
-    qDet = device.getOutputQueue("nn", queue_size)
-    qRgbEnc = device.getOutputQueue('h265', maxSize=30, blocking=True)
+    # Output queues will be used to get the rgb frames and nn data from the outputs defined above
+    qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
     frame = None
     detections = []
+    startTime = time.monotonic()
+    counter = 0
+    color2 = (255, 255, 255)
 
+    # nn data (bounding box locations) are in <0..1> range - they need to be normalized with frame width/height
     def frameNorm(frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]
@@ -83,23 +82,27 @@ with dai.Device(pipeline) as device, open('video.h265', 'wb') as videoFile:
         cv2.imshow(name, frame)
 
     while True:
-        inRgb = qRgb.tryGet()
-        inDet = qDet.tryGet()
-
-        while qRgbEnc.has():
-            qRgbEnc.get().getData().tofile(videoFile)
+        if args.sync:
+            # Use blocking get() call to catch frame and inference result synced
+            inRgb = qRgb.get()
+            inDet = qDet.get()
+        else:
+            # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
+            inRgb = qRgb.tryGet()
+            inDet = qDet.tryGet()
 
         if inRgb is not None:
             frame = inRgb.getCvFrame()
+            cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - startTime)),
+                        (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color2)
 
         if inDet is not None:
             detections = inDet.detections
+            counter += 1
 
+        # If the frame is available, draw bounding boxes on it and show the frame
         if frame is not None:
             displayFrame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break
-
-print("To view the encoded data, convert the stream file (.h265) into a video file (.mp4), using a command below:")
-print("ffmpeg -framerate 30 -i video.h265 -c copy video.mp4")

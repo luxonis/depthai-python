@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 import math
 
-datasetDefault = str((Path(__file__).parent / Path('models/dataset')).resolve().absolute())
+datasetDefault = str((Path(__file__).parent / Path('../models/dataset')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', nargs='?', help="Path to recorded frames", default=datasetDefault)
 parser.add_argument('-debug', "--debug", action="store_true", help="Enable debug outputs.")
