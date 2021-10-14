@@ -61,12 +61,7 @@ jobs:
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
     needs: build-docstrings
-    runs-on: luxonis-armhf
-    container:
-      image: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
-      # Mount local hunter cache directory, instead of transfering to Github and back
-      volumes:
-        - /.hunter:/github/home/.hunter
+    runs-on: rpi-buster
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
