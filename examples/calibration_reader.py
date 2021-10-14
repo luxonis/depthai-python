@@ -26,6 +26,18 @@ with dai.Device() as device:
     print("LEFT Camera resized intrinsics...")
     print(M_left)
 
+    D_left = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+    print("LEFT Distortion Coefficients...")
+    [print(name+": "+value) for (name, value) in zip(["k1","k2","p1","p2","k3","k4","k5","k6","s1","s2","s3","s4","τx","τy"],[str(data) for data in D_left])]
+
+    M_right = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, 1280, 720))
+    print("RIGHT Camera resized intrinsics...")
+    print(M_right)
+
+    D_right = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+    print("RIGHT Distortion Coefficients...")
+    [print(name+": "+value) for (name, value) in zip(["k1","k2","p1","p2","k3","k4","k5","k6","s1","s2","s3","s4","τx","τy"],[str(data) for data in D_right])]
+
     print(f"RGB FOV {calibData.getFov(dai.CameraBoardSocket.RGB)}, Mono FOV {calibData.getFov(dai.CameraBoardSocket.LEFT)}")
 
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
