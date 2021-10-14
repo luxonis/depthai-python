@@ -29,7 +29,7 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-depth.initialConfig.setConfidenceThreshold(200)
+depth.initialConfig.setConfidenceThreshold(245)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
 depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(lr_check)
@@ -51,7 +51,7 @@ with dai.Device(pipeline) as device:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
         # Normalization for better visualization
-        frame = (frame * (255 / depth.initialConfig.getMaxDisparity())).astype(np.uint8)
+        frame = (frame * (255 / depth.getMaxDisparity())).astype(np.uint8)
 
         cv2.imshow("disparity", frame)
 
