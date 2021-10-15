@@ -136,6 +136,62 @@ depthai messages and assign data to it, for example:
 
   imgFrame = ImgFrame(300*300*3) # Buffer with 300x300x3 bytes
 
+Available modules and libraries
+###############################
+
+.. tabs::
+
+  .. tab:: **Modules**
+
+    .. code-block::
+
+      "posix", "errno", "pwd", "_sre", "_codecs", "_weakref", "_functools", "_operator",
+      "_collections", "_abc", "itertools", "atexit", "_stat", "time", "_datetime", "math",
+      "_thread", "_io", "_symtable", "marshal", "_ast", "gc", "_warnings", "_string", "_struct"
+
+  .. tab:: **Modules** for **LEON_CSS**
+
+    .. code-block::
+
+      "binascii", "_random", "_socket", "_md5", "_sha1", "_sha256", "_sha512", "select",
+      "array", "unicodedata"
+
+  .. tab:: **Libraries**
+
+    .. code-block::
+
+      "__main__", "_collections_abc", "_frozen_importlib", "_frozen_importlib_external",
+      "_sitebuiltins", "abc", "codecs", "datetime", "encodings", "encodings.aliases",
+      "encodings.ascii", "encodings.latin_1", "encodings.mbcs", "encodings.utf_8", "genericpath",
+      "io", "os", "posixpath", "site", "stat", "threading", "types", "struct", "copyreg",
+      "reprlib", "operator", "keyword", "heapq", "collections", "functools", "sre_constants",
+      "sre_parse", "sre_compile", "enum", "re", "json", "json.decoder", "json.encoder",
+      "json.scanner", "textwrap"
+
+  .. tab:: **Libraries** for **LEON_CSS**
+
+    .. code-block::
+
+      "http", "http.client", "http.server", "html", "mimetypes", "copy", "shutil", "fnmatch",
+      "socketserver", "contextlib", "email", "email._encoded_words", "email._header_value_parser",
+      "email._parseaddr", "email._policybase", "email.base64mime", "email.charset",
+      "email.contentmanager",  "email.encoders", "email.errors", "email.feedparser",
+      "email.generator", "email.header", "email.headerregistry", "email.iterators", "email.message",
+      "email.parser", "email.policy", "email.quoprimime", "email.utils", "string", "base64",
+      "quopri", "random", "warnings", "bisect", "hashlib", "logging", "traceback", "linecache",
+      "socket", "token", "tokenize", "weakref", "_weakrefset", "collections.abc", "selectors",
+      "urllib", "urllib.parse", "calendar", "locale", "uu", "encodings.idna", "stringprep"
+
+The **difference between module and library** is that module is a precompiled C source with Python bindings, whereas library is Python source code
+packed into a library and precompiled into Python bytecode (before loaded into our Firmware).
+
+**Networking/protocol modules/libraries** that are available on the LEON_CSS **can only be used on** `OAK POE device <https://docs.luxonis.com/projects/hardware/en/latest/#poe-designs>`__.
+You can specify on which processor the script will run, eg. for LEON_CSS:
+
+.. code-block:: python
+
+  script = pipeline.create(dai.node.Script)
+  script.setProcessor(dai.ProcessorType.LEON_CSS)
 
 Examples of functionality
 #########################
