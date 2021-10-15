@@ -1,8 +1,8 @@
 Feature Tracker
 ===============
 
-Example shows capabilities of :code:`:ref:`FeatureTracker``. It detects features and tracks them.
-:ref:`Feature Detector` example only detects features.
+Example shows capabilities of :ref:`FeatureTracker`. It detects features and tracks them between consecutive frames using optical
+flow by assigning unique ID to matching features. :ref:`Feature Detector` example only detects features.
 
 Demo
 ####

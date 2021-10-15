@@ -1,7 +1,7 @@
 Feature Detector
 ================
 
-Example shows capabilities of :code:`:ref:`FeatureTracker``. It only detects features.
+Example shows capabilities of :ref:`FeatureTracker`. It only detects features.
 :ref:`Feature Tracker` example also tracks these features.
 
 Demo
