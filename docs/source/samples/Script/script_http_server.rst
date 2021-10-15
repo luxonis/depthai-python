@@ -20,7 +20,7 @@ If you open this IP in the browser (eg. chrome), you will see this:
 .. image:: /_static/images/components/http_server.png
 
 if you click on the :code:`here` href, you will get a static image. For video stream,
-you should check out :ref:`Script HTTP stream`
+you should check out :ref:`Script HTTP stream`.
 
 Setup
 #####
