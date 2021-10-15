@@ -35,9 +35,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/image_manip_rotate.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/ImageManip/image_manip_rotate.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/image_manip_rotate.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/ImageManip/image_manip_rotate.cpp
            :language: cpp
            :linenos:
 

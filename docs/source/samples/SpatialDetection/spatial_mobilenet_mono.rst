@@ -47,9 +47,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/spatial_mobilenet_mono.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/SpatialDetection/spatial_mobilenet_mono.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/spatial_mobilenet_mono.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/SpatialDetection/spatial_mobilenet_mono.cpp
            :language: cpp
            :linenos:
 

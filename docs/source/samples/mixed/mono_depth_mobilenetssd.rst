@@ -45,9 +45,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mono_depth_mobilenetssd.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mixed/mono_depth_mobilenetssd.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/mono_depth_mobilenetssd.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/mixed/mono_depth_mobilenetssd.cpp
            :language: cpp
            :linenos:
 

@@ -35,11 +35,7 @@ Source code
 
     .. tab:: Python
 
-<<<<<<< HEAD
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_mobilenet.py>`__
-=======
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/MobileNet/rgb_preview.py>`__
->>>>>>> da3f700... Corrected source path. Removed complex/simple/mixed example pages.
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/MobileNet/rgb_mobilenet.py>`__
 
         .. literalinclude:: ../../../../examples/MobileNet/rgb_mobilenet.py
            :language: python
@@ -47,9 +43,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_mobilenet.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/MobileNet/rgb_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/MobileNet/rgb_mobilenet.cpp
            :language: cpp
            :linenos:
 

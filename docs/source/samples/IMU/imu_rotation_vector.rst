@@ -42,9 +42,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/imu_rotation_vector.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/IMU/imu_rotation_vector.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/imu_rotation_vector.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/IMU/imu_rotation_vector.cpp
            :language: cpp
            :linenos:
 

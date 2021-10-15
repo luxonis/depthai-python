@@ -47,9 +47,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/tiny_yolo.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/Yolo/tiny_yolo.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/tiny_yolo.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/Yolo/tiny_yolo.cpp
            :language: cpp
            :linenos:
 

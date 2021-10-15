@@ -37,9 +37,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_video.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/ColorCamera/rgb_video.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/ColorCamera/rgb_video.cpp
            :language: cpp
            :linenos:
 

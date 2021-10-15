@@ -54,9 +54,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/depth_preview.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/StereoDepth/depth_preview.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/depth_preview.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/StereoDepth/depth_preview.cpp
            :language: cpp
            :linenos:
 

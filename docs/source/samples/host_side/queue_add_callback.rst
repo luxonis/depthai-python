@@ -30,9 +30,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/queue_add_callback.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/host_side/queue_add_callback.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/queue_add_callback.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/host_side/queue_add_callback.cpp
            :language: cpp
            :linenos:
 

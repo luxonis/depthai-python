@@ -43,9 +43,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/depth_crop_control.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/StereoDepth/depth_crop_control.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/depth_crop_control.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/StereoDepth/depth_crop_control.cpp
            :language: cpp
            :linenos:
 

@@ -47,9 +47,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/video_mobilenet.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/MobileNet/video_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/video_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/MobileNet/video_mobilenet.cpp
            :language: cpp
            :linenos:
 

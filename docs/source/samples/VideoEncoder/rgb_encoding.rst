@@ -49,9 +49,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/rgb_encoding.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/VideoEncoder/rgb_encoding.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/rgb_encoding.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/VideoEncoder/rgb_encoding.cpp
            :language: cpp
            :linenos:
 

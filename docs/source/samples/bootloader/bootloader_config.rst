@@ -35,17 +35,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/bootloader/bootloader_version.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/bootloader/bootloader_config.py>`__
 
-        .. literalinclude:: ../../../../examples/bootloader/bootloader_version.py
+        .. literalinclude:: ../../../../examples/bootloader/bootloader_config.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/bootloader_version.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/bootloader/bootloader_config.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/bootloader_version.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/bootloader/bootloader_config.cpp
            :language: cpp
            :linenos:
 

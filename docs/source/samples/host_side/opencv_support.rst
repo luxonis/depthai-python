@@ -34,9 +34,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/opencv_support.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/host_side/opencv_support.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/opencv_support.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/host_side/opencv_support.cpp
            :language: cpp
            :linenos:
 

@@ -36,9 +36,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/stereo_depth_video.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/StereoDepth/stereo_depth_video.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/stereo_depth_video.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/src/StereoDepth/stereo_depth_video.cpp
            :language: cpp
            :linenos:
 
