@@ -51,9 +51,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/VideoEncoder/encoding_max_limit.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/VideoEncoder/encoding_max_limit.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/VideoEncoder/encoding_max_limit.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/VideoEncoder/encoding_max_limit.cpp
            :language: cpp
            :linenos:
 

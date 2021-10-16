@@ -1,5 +1,5 @@
-Script NNData Datatype
-======================
+Script NNData example
+=====================
 
 This example shows how to create a :ref:`NNData` message inside the :ref:`Script` node and then
 send it to the host (where it gets printed to the console).
@@ -27,17 +27,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Script/script_nndata_datatype.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Script/script_nndata_example.py>`__
 
-        .. literalinclude:: ../../../../examples/Script/script_nndata_datatype.py
+        .. literalinclude:: ../../../../examples/Script/script_nndata_example.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/Script/script_nndata_datatype.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Script/script_nndata_example.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/Script/script_nndata_datatype.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/Script/script_nndata_example.cpp
            :language: cpp
            :linenos:
 

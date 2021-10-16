@@ -40,9 +40,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/Script/script_get_ip.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Script/script_get_ip.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/Script/script_get_ip.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/Script/script_get_ip.cpp
            :language: cpp
            :linenos:
 

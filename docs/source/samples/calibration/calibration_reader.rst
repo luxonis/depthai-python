@@ -29,9 +29,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/calibration/calibration_reader.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/calibration/calibration_reader.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/calibration/calibration_reader.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/calibration/calibration_reader.cpp
            :language: cpp
            :linenos:
 

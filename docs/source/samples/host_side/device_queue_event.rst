@@ -34,9 +34,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/host_side/device_queue_event.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/host_side/device_queue_event.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/host_side/device_queue_event.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/host_side/device_queue_event.cpp
            :language: cpp
            :linenos:
 

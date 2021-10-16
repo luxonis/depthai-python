@@ -33,9 +33,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/FeatureTracker/feature_tracker.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/FeatureTracker/feature_tracker.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/FeatureTracker/feature_tracker.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/FeatureTracker/feature_tracker.cpp
            :language: cpp
            :linenos:
 

@@ -43,9 +43,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/MobileNet/mono_mobilenet.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/MobileNet/mono_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/MobileNet/mono_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/MobileNet/mono_mobilenet.cpp
            :language: cpp
            :linenos:
 

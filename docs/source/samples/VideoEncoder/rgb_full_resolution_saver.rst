@@ -43,9 +43,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/VideoEncoder/rgb_full_resolution_saver.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/VideoEncoder/rgb_full_resolution_saver.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/VideoEncoder/rgb_full_resolution_saver.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/VideoEncoder/rgb_full_resolution_saver.cpp
            :language: cpp
            :linenos:
 

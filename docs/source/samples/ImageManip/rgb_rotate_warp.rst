@@ -33,9 +33,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/ImageManip/rgb_rotate_warp.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/ImageManip/rgb_rotate_warp.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/ImageManip/rgb_rotate_warp.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/ImageManip/rgb_rotate_warp.cpp
            :language: cpp
            :linenos:
 

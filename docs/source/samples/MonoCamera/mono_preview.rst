@@ -38,9 +38,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/MonoCamera/mono_preview.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/MonoCamera/mono_preview.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/MonoCamera/mono_preview.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/MonoCamera/mono_preview.cpp
            :language: cpp
            :linenos:
 

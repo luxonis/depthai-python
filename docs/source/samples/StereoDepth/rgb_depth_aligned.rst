@@ -29,9 +29,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/StereoDepth/rgb_depth_aligned.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/StereoDepth/rgb_depth_aligned.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/StereoDepth/rgb_depth_aligned.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/StereoDepth/rgb_depth_aligned.cpp
            :language: cpp
            :linenos:
 

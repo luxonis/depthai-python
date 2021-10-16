@@ -32,9 +32,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/ImageManip/image_manip_tiling.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/ImageManip/image_manip_tiling.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/ImageManip/image_manip_tiling.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/ImageManip/image_manip_tiling.cpp
            :language: cpp
            :linenos:
 

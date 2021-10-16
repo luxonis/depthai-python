@@ -36,9 +36,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/bootloader/bootloader_version.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/bootloader/bootloader_version.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/bootloader/bootloader_version.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/bootloader/bootloader_version.cpp
            :language: cpp
            :linenos:
 

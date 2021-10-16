@@ -54,9 +54,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/mixed/rgb_encoding_mobilenet.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/mixed/rgb_encoding_mobilenet.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/mixed/rgb_encoding_mobilenet.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/mixed/rgb_encoding_mobilenet.cpp
            :language: cpp
            :linenos:
 

@@ -30,9 +30,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/EdgeDetector/edge_detector.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/EdgeDetector/edge_detector.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/EdgeDetector/edge_detector.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/EdgeDetector/edge_detector.cpp
            :language: cpp
            :linenos:
 

@@ -200,8 +200,8 @@ Examples of functionality
 - :ref:`Script get local IP` - Get local IP
 - :ref:`Script HTTP client` - Send HTTP request
 - :ref:`Script HTTP server` - still image over HTTP
-- :ref:`Script HTTP stream` - MJPEG video stream over HTTP
-- :ref:`Script NNData Datatype` - Constructs :ref:`NNData`
+- :ref:`Script MJPEG server` - MJPEG video stream over HTTP
+- :ref:`Script NNData example` - Constructs :ref:`NNData`
 - `Triangulation experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-triangulation/main.py>`__
 - `Movenet decoding (edge mode) <https://github.com/geaxgx/depthai_movenet/blob/main/template_processing_script.py>`__ - A bit more complex example by geaxgx
 

@@ -42,9 +42,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/SpatialDetection/spatial_location_calculator.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/SpatialDetection/spatial_location_calculator.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/SpatialDetection/spatial_location_calculator.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/SpatialDetection/spatial_location_calculator.cpp
            :language: cpp
            :linenos:
 

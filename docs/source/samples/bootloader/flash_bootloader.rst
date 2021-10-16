@@ -37,9 +37,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/bootloader/flash_bootloader.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/bootloader/flash_bootloader.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/bootloader/flash_bootloader.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/bootloader/flash_bootloader.cpp
            :language: cpp
            :linenos:
 
