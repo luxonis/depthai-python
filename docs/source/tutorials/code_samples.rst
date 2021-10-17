@@ -105,8 +105,8 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
-- :ref:`Script HTTP stream` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
-- :ref:`Script NNData Datatype` - Constructs :ref:`NNData` in Script node and sends it to the host
+- :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
+- :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
 
 .. rubric:: SpatialDetection
 

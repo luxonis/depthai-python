@@ -20,7 +20,7 @@ If you open this IP in the browser (eg. chrome), you will see this:
 .. image:: /_static/images/components/http_server.png
 
 if you click on the :code:`here` href, you will get a static image. For video stream,
-you should check out :ref:`Script HTTP stream`.
+you should check out :ref:`Script MJPEG server`.
 
 Setup
 #####
@@ -42,9 +42,9 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/Script/script_http_server.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Script/script_http_server.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/Script/script_http_server.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/Script/script_http_server.cpp
            :language: cpp
            :linenos:
 
