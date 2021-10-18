@@ -75,6 +75,12 @@ Usage
       // You have to use Feature tracker in combination with
       // an image frame source - mono/color camera or xlinkIn node
 
+Examples of functionality
+#########################
+
+- :ref:`Feature Detector`
+- :ref:`Feature Tracker`
+
 Reference
 #########
 
