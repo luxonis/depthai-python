@@ -51,7 +51,7 @@ with dai.Device(pipeline) as device:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
         # Normalization for better visualization
-        frame = (frame * (255 / depth.getMaxDisparity())).astype(np.uint8)
+        frame = (frame * (255 / depth.initialConfig.getMaxDisparity())).astype(np.uint8)
 
         cv2.imshow("disparity", frame)
 
