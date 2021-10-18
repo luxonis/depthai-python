@@ -7,202 +7,311 @@ from time import sleep
 import datetime
 import argparse
 from pathlib import Path
+import math
 
 datasetDefault = str((Path(__file__).parent / Path('models/dataset')).resolve().absolute())
 parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', nargs='?', help="Path to recorded frames", default=datasetDefault)
+parser.add_argument('-debug', "--debug", action="store_true", help="Enable debug outputs.")
+parser.add_argument('-dumpdispcost', "--dumpdisparitycostvalues", action="store_true", help="Dumps the disparity cost values for each disparity range. 96 byte for each pixel.")
 args = parser.parse_args()
+
+if args.debug and args.dumpdisparitycostvalues:
+    print("-debug and --dumpdisparitycostvalues are mutually exclusive!")
+    exit(1)
 
 if not Path(datasetDefault).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
-class trackbar:
-    def __init__(self, trackbarName, windowName, minValue, maxValue, defaultValue, handler):
-        cv2.createTrackbar(trackbarName, windowName, minValue, maxValue, handler)
-        cv2.setTrackbarPos(trackbarName, windowName, defaultValue)
 
-class depthHandler:
-    depthStream = "depth"
-    _send_new_config = False
-    currentConfig = dai.StereoDepthConfig()
+class StereoConfigHandler:
 
-    def on_trackbar_change_sigma(self, value):
-        self._sigma = value
-        self._send_new_config = True
+    class Trackbar:
+        def __init__(self, trackbarName, windowName, minValue, maxValue, defaultValue, handler):
+            self.min = minValue
+            self.max = maxValue
+            self.windowName = windowName
+            self.trackbarName = trackbarName
+            cv2.createTrackbar(trackbarName, windowName, minValue, maxValue, handler)
+            cv2.setTrackbarPos(trackbarName, windowName, defaultValue)
 
-    def on_trackbar_change_confidence(self, value):
-        self._confidence = value
-        self._send_new_config = True
+        def set(self, value):
+            if value < self.min:
+                value = self.min
+                print(f'{self.trackbarName} min value is {self.min}')
+            if value > self.max:
+                value = self.max
+                print(f'{self.trackbarName} max value is {self.max}')
+            cv2.setTrackbarPos(self.trackbarName, self.windowName, value)
 
-    def on_trackbar_change_lr_threshold(self, value):
-        self._lrCheckThreshold = value
-        self._send_new_config = True
+    newConfig = False
+    config = None
+    trSigma = list()
+    trConfidence = list()
+    trLrCheck = list()
+    trFractionalBits = list()
+    trLineqAlpha = list()
+    trLineqBeta = list()
+    trLineqThreshold = list()
 
-    def handleKeypress(self, key, stereoDepthConfigInQueue):
+    def trackbarSigma(value):
+        StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSigma:
+            tr.set(value)
+
+    def trackbarConfidence(value):
+        StereoConfigHandler.config.costMatching.confidenceThreshold = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trConfidence:
+            tr.set(value)
+
+    def trackbarLrCheckThreshold(value):
+        StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trLrCheck:
+            tr.set(value)
+
+    def trackbarFractionalBits(value):
+        StereoConfigHandler.config.algorithmControl.subpixelFractionalBits = value
+        for tr in StereoConfigHandler.trFractionalBits:
+            tr.set(value)
+
+    def trackbarLineqAlpha(value):
+        StereoConfigHandler.config.costMatching.linearEquationParameters.alpha = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trLineqAlpha:
+            tr.set(value)
+
+    def trackbarLineqBeta(value):
+        StereoConfigHandler.config.costMatching.linearEquationParameters.beta = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trLineqBeta:
+            tr.set(value)
+
+    def trackbarLineqThreshold(value):
+        StereoConfigHandler.config.costMatching.linearEquationParameters.threshold = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trLineqThreshold:
+            tr.set(value)
+
+    def handleKeypress(key, stereoDepthConfigInQueue):
         if key == ord('m'):
-            self._send_new_config = True
+            StereoConfigHandler.newConfig = True
             medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5, dai.MedianFilter.KERNEL_7x7]
-            currentMedian = self.currentConfig.getMedianFilter()
-            # circle through median settins
+            currentMedian = StereoConfigHandler.config.postProcessing.median
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
-            self.currentConfig.setMedianFilter(nextMedian)
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
-        self.sendConfig(stereoDepthConfigInQueue)
+            StereoConfigHandler.config.postProcessing.median = nextMedian
+        elif key == ord('c'):
+            StereoConfigHandler.newConfig = True
+            censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
+            currentCensus = StereoConfigHandler.config.censusTransform.kernelSize
+            nextCensus = censusSettings[(censusSettings.index(currentCensus)+1) % len(censusSettings)]
+            print(f"Changing census transform to {nextCensus.name} from {currentCensus.name}")
+            StereoConfigHandler.config.censusTransform.kernelSize = nextCensus
+        elif key == ord('d'):
+            StereoConfigHandler.newConfig = True
+            dispRangeSettings = [dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_64, dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_96]
+            currentDispRange = StereoConfigHandler.config.costMatching.disparityWidth
+            nextDispRange = dispRangeSettings[(dispRangeSettings.index(currentDispRange)+1) % len(dispRangeSettings)]
+            print(f"Changing disparity range to {nextDispRange.name} from {currentDispRange.name}")
+            StereoConfigHandler.config.costMatching.disparityWidth = nextDispRange
+        elif key == ord('f'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.costMatching.enableCompanding = not StereoConfigHandler.config.costMatching.enableCompanding
+            state = "on" if StereoConfigHandler.config.costMatching.enableCompanding else "off"
+            print(f"Companding {state}")
+        elif key == ord('v'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.censusTransform.enableMeanMode = not StereoConfigHandler.config.censusTransform.enableMeanMode
+            state = "on" if StereoConfigHandler.config.censusTransform.enableMeanMode else "off"
+            print(f"Census transform mean mode {state}")
+        elif key == ord('1'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.algorithmControl.enableLeftRightCheck = not StereoConfigHandler.config.algorithmControl.enableLeftRightCheck
+            state = "on" if StereoConfigHandler.config.algorithmControl.enableLeftRightCheck else "off"
+            print(f"LR-check {state}")
+        elif key == ord('2'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.algorithmControl.enableSubpixel = not StereoConfigHandler.config.algorithmControl.enableSubpixel
+            state = "on" if StereoConfigHandler.config.algorithmControl.enableSubpixel else "off"
+            print(f"Subpixel {state}")
 
-    def __init__(self, _confidence, _sigma, _lrCheckThreshold):
+        StereoConfigHandler.sendConfig(stereoDepthConfigInQueue)
+
+    def sendConfig(stereoDepthConfigInQueue):
+        if StereoConfigHandler.newConfig:
+            StereoConfigHandler.newConfig = False
+            configMessage = dai.StereoDepthConfig()
+            configMessage.set(StereoConfigHandler.config)
+            stereoDepthConfigInQueue.send(configMessage)
+
+    def registerWindow(stream):
+        cv2.namedWindow(stream)
+        StereoConfigHandler.trConfidence.append(StereoConfigHandler.Trackbar('Disparity confidence', stream, 0, 255, StereoConfigHandler.config.costMatching.confidenceThreshold, StereoConfigHandler.trackbarConfidence))
+        StereoConfigHandler.trSigma.append(StereoConfigHandler.Trackbar('Bilateral sigma', stream, 0, 100, StereoConfigHandler.config.postProcessing.bilateralSigmaValue, StereoConfigHandler.trackbarSigma))
+        StereoConfigHandler.trLrCheck.append(StereoConfigHandler.Trackbar('LR-check threshold', stream, 0, 16, StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold, StereoConfigHandler.trackbarLrCheckThreshold))
+        StereoConfigHandler.trFractionalBits.append(StereoConfigHandler.Trackbar('Subpixel fractional bits', stream, 3, 5, StereoConfigHandler.config.algorithmControl.subpixelFractionalBits, StereoConfigHandler.trackbarFractionalBits))
+        StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
+        StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
+        StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
+
+    def __init__(self, config):
         print("Control median filter using the 'm' key.")
-        print("Use slider to adjust disparity confidence.")
-        print("Use slider to adjust bilateral filter intensity.")
-        print("Use slider to adjust left-right check threshold.")
+        print("Control census transform kernel size using the 'c' key.")
+        print("Control disparity search range using the 'd' key.")
+        print("Control disparity companding using the 'f' key.")
+        print("Control census transform mean mode using the 'v' key.")
+        print("Control left-right check mode using the '1' key.")
+        print("Control subpixel mode using the '2' key.")
 
-        self._confidence = _confidence
-        self._sigma = _sigma
-        self._lrCheckThreshold = _lrCheckThreshold
-        cv2.namedWindow(self.depthStream)
-        self.lambdaTrackbar = trackbar('Disparity confidence', self.depthStream, 0, 255, _confidence, self.on_trackbar_change_confidence)
-        self.sigmaTrackbar  = trackbar('Bilateral sigma',  self.depthStream, 0, 250, _sigma, self.on_trackbar_change_sigma)
-        self.lrcheckTrackbar  = trackbar('LR-check threshold',  self.depthStream, 0, 10, _lrCheckThreshold, self.on_trackbar_change_lr_threshold)
+        StereoConfigHandler.config = config
 
-    def imshow(self, frame):
-        cv2.imshow(self.depthStream, frame)
 
-    def sendConfig(self, stereoDepthConfigInQueue):
-        if self._send_new_config:
-            self._send_new_config = False
-            self.currentConfig.setConfidenceThreshold(self._confidence)
-            self.currentConfig.setBilateralFilterSigma(self._sigma)
-            self.currentConfig.setLeftRightCheckThreshold(self._lrCheckThreshold)
-            stereoDepthConfigInQueue.send(self.currentConfig)
-
-# StereoDepth config options.
-out_depth = True  # Disparity by default
-out_rectified = True   # Output and display rectified streams
+# StereoDepth initial config options.
+outDepth = True  # Disparity by default
+outConfidenceMap = True  # Output disparity confidence map
+outRectified = True   # Output and display rectified streams
 lrcheck = True   # Better handling for occlusions
-extended = False  # Closer-in minimum depth, disparity range is doubled
-subpixel = False   # Better accuracy for longer distance, fractional disparity 32-levels
-median = dai.MedianFilter.KERNEL_7x7
+extended = False  # Closer-in minimum depth, disparity range is doubled. Unsupported for now.
+subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
 
-# Sanitize some incompatible options
-if extended or subpixel:
-    median = dai.MedianFilter.MEDIAN_OFF
+width = 1280
+height = 800
 
-depth_handler = None
+xoutStereoCfg = None
 
-print("StereoDepth config options: ")
-print("Left-Right check: ", lrcheck)
-print("Extended disparity: ", extended)
-print("Subpixel: ", subpixel)
-print("Median filtering: ", median)
+# Create pipeline
+pipeline = dai.Pipeline()
 
-right_intrinsic = [[860.0, 0.0, 640.0], [0.0, 860.0, 360.0], [0.0, 0.0, 1.0]]
+# Define sources and outputs
+stereo = pipeline.createStereoDepth()
 
-def create_stereo_depth_pipeline():
-    print("Creating Stereo Depth pipeline: ", end='')
+monoLeft = pipeline.createXLinkIn()
+monoRight = pipeline.createXLinkIn()
+xinStereoDepthConfig = pipeline.createXLinkIn()
 
-    print("XLINK IN -> STEREO -> XLINK OUT")
-    pipeline = dai.Pipeline()
+xoutLeft = pipeline.createXLinkOut()
+xoutRight = pipeline.createXLinkOut()
+xoutDepth = pipeline.createXLinkOut()
+xoutConfMap = pipeline.createXLinkOut()
+xoutDisparity = pipeline.createXLinkOut()
+xoutRectifLeft = pipeline.createXLinkOut()
+xoutRectifRight = pipeline.createXLinkOut()
+xoutStereoCfg = pipeline.createXLinkOut()
+if args.debug:
+    xoutDebugLrCheckIt1 = pipeline.createXLinkOut()
+    xoutDebugLrCheckIt2 = pipeline.createXLinkOut()
+if args.dumpdisparitycostvalues:
+    xoutDebugCostDump = pipeline.createXLinkOut()
 
-    monoLeft = pipeline.createXLinkIn()
-    monoRight = pipeline.createXLinkIn()
-    xinStereoDepthConfig = pipeline.createXLinkIn()
+xinStereoDepthConfig.setStreamName("stereoDepthConfig")
+monoLeft.setStreamName('in_left')
+monoRight.setStreamName('in_right')
 
-    stereo = pipeline.createStereoDepth()
-    xoutLeft = pipeline.createXLinkOut()
-    xoutRight = pipeline.createXLinkOut()
-    xoutDepth = pipeline.createXLinkOut()
-    xoutDisparity = pipeline.createXLinkOut()
-    xoutRectifLeft = pipeline.createXLinkOut()
-    xoutRectifRight = pipeline.createXLinkOut()
+xoutLeft.setStreamName('left')
+xoutRight.setStreamName('right')
+xoutDepth.setStreamName('depth')
+xoutConfMap.setStreamName('confidence_map')
+xoutDisparity.setStreamName('disparity')
+xoutRectifLeft.setStreamName('rectified_left')
+xoutRectifRight.setStreamName('rectified_right')
+xoutStereoCfg.setStreamName('stereo_cfg')
+if args.debug:
+    xoutDebugLrCheckIt1.setStreamName('disparity_lr_check_iteration1')
+    xoutDebugLrCheckIt2.setStreamName('disparity_lr_check_iteration2')
+if args.dumpdisparitycostvalues:
+    xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
-    xinStereoDepthConfig.setStreamName("stereoDepthConfig")
-    monoLeft.setStreamName('in_left')
-    monoRight.setStreamName('in_right')
+# Properties
+stereo.initialConfig.setConfidenceThreshold(220)
+stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
+stereo.setLeftRightCheck(lrcheck)
+stereo.setExtendedDisparity(extended)
+stereo.setSubpixel(subpixel)
+# allocates resources for worst case scenario
+# allowing runtime switch of stereo modes
+stereo.setRuntimeModeSwitch(True)
 
-    stereo.initialConfig.setConfidenceThreshold(200)
-    stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
-    stereo.initialConfig.setMedianFilter(median) # KERNEL_7x7 default
-    stereo.setLeftRightCheck(lrcheck)
-    stereo.setExtendedDisparity(extended)
-    stereo.setSubpixel(subpixel)
-    xinStereoDepthConfig.out.link(stereo.inputConfig)
-    global depth_handler
-    _confidence=stereo.initialConfig.getConfidenceThreshold()
-    _sigma=stereo.initialConfig.getBilateralFilterSigma()
-    _lrCheckThreshold=stereo.initialConfig.getLeftRightCheckThreshold()
-    depth_handler = depthHandler(_confidence, _sigma, _lrCheckThreshold)
+# Linking
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+xinStereoDepthConfig.out.link(stereo.inputConfig)
+stereo.syncedLeft.link(xoutLeft.input)
+stereo.syncedRight.link(xoutRight.input)
+if outDepth:
+    stereo.depth.link(xoutDepth.input)
+if outConfidenceMap:
+    stereo.confidenceMap.link(xoutConfMap.input)
+stereo.disparity.link(xoutDisparity.input)
+if outRectified:
+    stereo.rectifiedLeft.link(xoutRectifLeft.input)
+    stereo.rectifiedRight.link(xoutRectifRight.input)
+stereo.outConfig.link(xoutStereoCfg.input)
+if args.debug:
+    stereo.debugDispLrCheckIt1.link(xoutDebugLrCheckIt1.input)
+    stereo.debugDispLrCheckIt2.link(xoutDebugLrCheckIt2.input)
+if args.dumpdisparitycostvalues:
+    stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
+StereoConfigHandler(stereo.initialConfig.get())
+StereoConfigHandler.registerWindow('disparity')
+if outDepth:
+    StereoConfigHandler.registerWindow('depth')
 
-    stereo.setInputResolution(1280, 720)
-    stereo.setRectification(False)
+stereo.setInputResolution(width, height)
+stereo.setRectification(False)
+baseline = 75
+fov = 71.86
+focal = width / (2 * math.tan(fov / 2 / 180 * math.pi))
 
-    xoutLeft.setStreamName('left')
-    xoutRight.setStreamName('right')
-    xoutDepth.setStreamName('depth')
-    xoutDisparity.setStreamName('disparity')
-    xoutRectifLeft.setStreamName('rectified_left')
-    xoutRectifRight.setStreamName('rectified_right')
+streams = ['left', 'right']
+if outRectified:
+    streams.extend(['rectified_left', 'rectified_right'])
+streams.append('disparity')
+if outDepth:
+    streams.append('depth')
+if outConfidenceMap:
+    streams.append('confidence_map')
+debugStreams = []
+if args.debug:
+    debugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+if args.dumpdisparitycostvalues:
+    debugStreams.append('disparity_cost_dump')
 
-    monoLeft.out.link(stereo.left)
-    monoRight.out.link(stereo.right)
-    stereo.syncedLeft.link(xoutLeft.input)
-    stereo.syncedRight.link(xoutRight.input)
-    if out_depth:
-        stereo.depth.link(xoutDepth.input)
-    stereo.disparity.link(xoutDisparity.input)
-    if out_rectified:
-        stereo.rectifiedLeft.link(xoutRectifLeft.input)
-        stereo.rectifiedRight.link(xoutRectifRight.input)
+def convertToCv2Frame(name, image, config):
 
-    streams = ['left', 'right']
-    if out_rectified:
-        streams.extend(['rectified_left', 'rectified_right'])
-    streams.extend(['disparity', 'depth'])
+    maxDisp = config.getMaxDisparity()
+    subpixelLevels = pow(2, config.get().algorithmControl.subpixelFractionalBits)
+    subpixel = config.get().algorithmControl.enableSubpixel
+    dispIntegerLevels = maxDisp if not subpixel else maxDisp / subpixelLevels
 
-    return pipeline, streams
+    frame = image.getFrame()
 
-def convert_to_cv2_frame(name, image):
-    baseline = 75 #mm
-    focal = right_intrinsic[0][0]
-    max_disp = 96
-    disp_type = np.uint8
-    disp_levels = 1
-    if (extended):
-        max_disp *= 2
-    if (subpixel):
-        max_disp *= 32
-        disp_type = np.uint16
-        disp_levels = 32
+    # frame.tofile(name+".raw")
 
-    data, w, h = image.getData(), image.getWidth(), image.getHeight()
     if name == 'depth':
-        depthFrame = image.getFrame()
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
-        frame = depthFrameColor
-    elif name == 'disparity':
-        disp = np.array(data).astype(np.uint8).view(disp_type).reshape((h, w))
-
-        # Compute depth from disparity
+        dispScaleFactor = baseline * focal
         with np.errstate(divide='ignore'):
-            depth = (disp_levels * baseline * focal / disp).astype(np.uint16)
+            frame = dispScaleFactor / frame
 
+        frame = (frame * 255. / dispIntegerLevels).astype(np.uint8)
+        frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
+    elif 'confidence_map' in name:
+        pass
+    elif name == 'disparity_cost_dump':
+        # frame.tofile(name+'.raw')
+        pass
+    elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
-            frame = (disp * 255. / max_disp).astype(np.uint8)
+            frame = (frame * 255. / maxDisp).astype(np.uint8)
 
         if 1: # Optionally, apply a color map
             frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
-    else: # mono streams / single channel
-        frame = np.array(data).reshape((h, w)).astype(np.uint8)
-        if name.startswith('rectified_'):
-            frame = cv2.flip(frame, 1)
-        if name == 'rectified_right':
-            last_rectif_right = frame
     return frame
-
-pipeline, streams = create_stereo_depth_pipeline()
 
 print("Connecting and starting the pipeline")
 # Connect to device and start pipeline
@@ -218,9 +327,18 @@ with dai.Device(pipeline) as device:
 
     # Create a receive queue for each stream
     q_list = []
+    q_list_debug = []
     for s in streams:
         q = device.getOutputQueue(s, 8, blocking=False)
         q_list.append(q)
+
+    if args.debug or args.dumpdisparitycostvalues:
+        q_list_debug = q_list.copy()
+        for s in debugStreams:
+            q = device.getOutputQueue(s, 8, blocking=False)
+            q_list_debug.append(q)
+
+    inCfg = device.getOutputQueue("stereo_cfg", 8, blocking=False)
 
     # Need to set a timestamp for input frames, for the sync stage in Stereo node
     timestamp_ms = 0
@@ -229,10 +347,12 @@ with dai.Device(pipeline) as device:
         # Handle input streams, if any
         if in_q_list:
             dataset_size = 1  # Number of image pairs
-            frame_interval_ms = 500
+            frame_interval_ms = 50
             for i, q in enumerate(in_q_list):
                 path = args.dataset + '/' + str(index) + '/' + q.getName() + '.png'
-                data = cv2.imread(path, cv2.IMREAD_GRAYSCALE).reshape(720*1280)
+                data = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+                data = cv2.resize(data, (width, height), interpolation = cv2.INTER_AREA)
+                data = data.reshape(height*width)
                 tstamp = datetime.timedelta(seconds = timestamp_ms // 1000,
                                             milliseconds = timestamp_ms % 1000)
                 img = dai.ImgFrame()
@@ -240,25 +360,36 @@ with dai.Device(pipeline) as device:
                 img.setTimestamp(tstamp)
                 img.setInstanceNum(inStreamsCameraID[i])
                 img.setType(dai.ImgFrame.Type.RAW8)
-                img.setWidth(1280)
-                img.setHeight(720)
+                img.setWidth(width)
+                img.setHeight(height)
                 q.send(img)
                 if timestamp_ms == 0:  # Send twice for first iteration
                     q.send(img)
-                print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
+                # print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
             sleep(frame_interval_ms / 1000)
+
         # Handle output streams
-        for q in q_list:
+        currentConfig = inCfg.get()
+
+        lrCheckEnabled = currentConfig.get().algorithmControl.enableLeftRightCheck
+        queues = q_list
+
+        if (args.debug and lrCheckEnabled) or args.dumpdisparitycostvalues:
+            queues = q_list_debug
+        else:
+            for s in debugStreams:
+                cv2.destroyWindow(s)
+
+        for q in queues:
             if q.getName() in ['left', 'right']: continue
-            frame = convert_to_cv2_frame(q.getName(), q.get())
-            if q.getName() == 'depth':
-                depth_handler.imshow(frame)
-            else:
-                cv2.imshow(q.getName(), frame)
+            data = q.get()
+            frame = convertToCv2Frame(q.getName(), data, currentConfig)
+            cv2.imshow(q.getName(), frame)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
-        depth_handler.handleKeypress(key, stereoDepthConfigInQueue)
+
+        StereoConfigHandler.handleKeypress(key, stereoDepthConfigInQueue)
