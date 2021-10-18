@@ -20,10 +20,10 @@ pipeline = dai.Pipeline()
 pipeline.setCalibrationData(calibData)
 
 # Define sources and output
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-xoutDepth = pipeline.createXLinkOut()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("depth")
 
 # MonoCamera

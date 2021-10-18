@@ -6,9 +6,9 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define sources and output
-camRgb = pipeline.createColorCamera()
-videoEnc = pipeline.createVideoEncoder()
-xout = pipeline.createXLinkOut()
+camRgb = pipeline.create(dai.node.ColorCamera)
+videoEnc = pipeline.create(dai.node.VideoEncoder)
+xout = pipeline.create(dai.node.XLinkOut)
 
 xout.setStreamName('h265')
 

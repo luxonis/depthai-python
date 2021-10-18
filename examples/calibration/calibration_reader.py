@@ -14,13 +14,13 @@ with dai.Device() as device:
     calibData = device.readCalibration()
     calibData.eepromToJsonFile(calibFile)
 
-    M_rgb, width, height = np.array(calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB))
+    M_rgb, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB)
     print("RGB Camera Default intrinsics...")
     print(M_rgb)
     print(width)
     print(height)
 
-    M_rgb, width, height = np.array(calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB))
+    M_rgb, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB)
 
     M_left = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, 1280, 720))
     print("LEFT Camera resized intrinsics...")

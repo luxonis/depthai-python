@@ -8,18 +8,18 @@ import numpy as np
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
 
-edgeDetectorLeft = pipeline.createEdgeDetector()
-edgeDetectorRight = pipeline.createEdgeDetector()
-edgeDetectorRgb = pipeline.createEdgeDetector()
+edgeDetectorLeft = pipeline.create(dai.node.EdgeDetector)
+edgeDetectorRight = pipeline.create(dai.node.EdgeDetector)
+edgeDetectorRgb = pipeline.create(dai.node.EdgeDetector)
 
-xoutEdgeLeft = pipeline.createXLinkOut()
-xoutEdgeRight = pipeline.createXLinkOut()
-xoutEdgeRgb = pipeline.createXLinkOut()
-xinEdgeCfg = pipeline.createXLinkIn()
+xoutEdgeLeft = pipeline.create(dai.node.XLinkOut)
+xoutEdgeRight = pipeline.create(dai.node.XLinkOut)
+xoutEdgeRgb = pipeline.create(dai.node.XLinkOut)
+xinEdgeCfg = pipeline.create(dai.node.XLinkIn)
 
 edgeLeftStr = "edge left"
 edgeRightStr = "edge right"

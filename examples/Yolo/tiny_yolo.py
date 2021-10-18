@@ -19,6 +19,8 @@ if 1 < len(sys.argv):
     arg = sys.argv[1]
     if arg == "yolo3":
         nnPath = str((Path(__file__).parent / Path('../models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+    elif arg == "yolo4":
+        nnPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
     else:
         nnPath = arg
 else:
@@ -50,10 +52,10 @@ syncNN = True
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-detectionNetwork = pipeline.createYoloDetectionNetwork()
-xoutRgb = pipeline.createXLinkOut()
-nnOut = pipeline.createXLinkOut()
+camRgb = pipeline.create(dai.node.ColorCamera)
+detectionNetwork = pipeline.create(dai.node.YoloDetectionNetwork)
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+nnOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 nnOut.setStreamName("nn")

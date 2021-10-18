@@ -30,15 +30,15 @@ def clamp(num, v0, v1):
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-videoEncoder = pipeline.createVideoEncoder()
-stillEncoder = pipeline.createVideoEncoder()
+camRgb = pipeline.create(dai.node.ColorCamera)
+videoEncoder = pipeline.create(dai.node.VideoEncoder)
+stillEncoder = pipeline.create(dai.node.VideoEncoder)
 
-controlIn = pipeline.createXLinkIn()
-configIn = pipeline.createXLinkIn()
-videoMjpegOut = pipeline.createXLinkOut()
-stillMjpegOut = pipeline.createXLinkOut()
-previewOut = pipeline.createXLinkOut()
+controlIn = pipeline.create(dai.node.XLinkIn)
+configIn = pipeline.create(dai.node.XLinkIn)
+videoMjpegOut = pipeline.create(dai.node.XLinkOut)
+stillMjpegOut = pipeline.create(dai.node.XLinkOut)
+previewOut = pipeline.create(dai.node.XLinkOut)
 
 controlIn.setStreamName('control')
 configIn.setStreamName('config')

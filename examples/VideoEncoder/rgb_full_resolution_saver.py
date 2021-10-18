@@ -9,10 +9,10 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-videoEnc = pipeline.createVideoEncoder()
-xoutJpeg = pipeline.createXLinkOut()
-xoutRgb = pipeline.createXLinkOut()
+camRgb = pipeline.create(dai.node.ColorCamera)
+videoEnc = pipeline.create(dai.node.VideoEncoder)
+xoutJpeg = pipeline.create(dai.node.XLinkOut)
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 
 xoutJpeg.setStreamName("jpeg")
 xoutRgb.setStreamName("rgb")

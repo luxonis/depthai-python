@@ -60,12 +60,12 @@ warpList = [
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-manip = pipeline.createImageManip()
+camRgb = pipeline.create(dai.node.ColorCamera)
+manip = pipeline.create(dai.node.ImageManip)
 
-camOut = pipeline.createXLinkOut()
-manipOut = pipeline.createXLinkOut()
-manipCfg = pipeline.createXLinkIn()
+camOut = pipeline.create(dai.node.XLinkOut)
+manipOut = pipeline.create(dai.node.XLinkOut)
+manipCfg = pipeline.create(dai.node.XLinkIn)
 
 camOut.setStreamName("preview")
 manipOut.setStreamName("manip")

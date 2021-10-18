@@ -15,10 +15,10 @@ lr_check = False
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-depth = pipeline.createStereoDepth()
-xout = pipeline.createXLinkOut()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+depth = pipeline.create(dai.node.StereoDepth)
+xout = pipeline.create(dai.node.XLinkOut)
 
 xout.setStreamName("disparity")
 
@@ -51,7 +51,7 @@ with dai.Device(pipeline) as device:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
         # Normalization for better visualization
-        frame = (frame * (255 / depth.getMaxDisparity())).astype(np.uint8)
+        frame = (frame * (255 / depth.initialConfig.getMaxDisparity())).astype(np.uint8)
 
         cv2.imshow("disparity", frame)
 

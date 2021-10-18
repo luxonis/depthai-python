@@ -27,10 +27,10 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-nn = pipeline.createMobileNetDetectionNetwork()
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 
-xinFrame = pipeline.createXLinkIn()
-nnOut = pipeline.createXLinkOut()
+xinFrame = pipeline.create(dai.node.XLinkIn)
+nnOut = pipeline.create(dai.node.XLinkOut)
 
 xinFrame.setStreamName("inFrame")
 nnOut.setStreamName("nn")

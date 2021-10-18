@@ -10,14 +10,14 @@ curr_effect = "OFF"
 # Create pipeline
 pipeline = dai.Pipeline()
 
-camRgb = pipeline.createColorCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setIspScale(1,3)
 
-xoutRgb = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("video")
 camRgb.video.link(xoutRgb.input)
 
-camControlIn = pipeline.createXLinkIn()
+camControlIn = pipeline.create(dai.node.XLinkIn)
 camControlIn.setStreamName("camControl")
 camControlIn.out.link(camRgb.inputControl)
 

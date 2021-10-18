@@ -6,28 +6,28 @@ import depthai as dai
 # Create pipeline
 pipeline = dai.Pipeline()
 
-camRgb = pipeline.createColorCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setPreviewSize(1000, 500)
 camRgb.setInterleaved(False)
 maxFrameSize = camRgb.getPreviewHeight() * camRgb.getPreviewHeight() * 3
 
 # In this example we use 2 imageManips for splitting the original 1000x500
 # preview frame into 2 500x500 frames
-manip1 = pipeline.createImageManip()
+manip1 = pipeline.create(dai.node.ImageManip)
 manip1.initialConfig.setCropRect(0, 0, 0.5, 1)
 manip1.setMaxOutputFrameSize(maxFrameSize)
 camRgb.preview.link(manip1.inputImage)
 
-manip2 = pipeline.createImageManip()
+manip2 = pipeline.create(dai.node.ImageManip)
 manip2.initialConfig.setCropRect(0.5, 0, 1, 1)
 manip2.setMaxOutputFrameSize(maxFrameSize)
 camRgb.preview.link(manip2.inputImage)
 
-xout1 = pipeline.createXLinkOut()
+xout1 = pipeline.create(dai.node.XLinkOut)
 xout1.setStreamName('out1')
 manip1.out.link(xout1.input)
 
-xout2 = pipeline.createXLinkOut()
+xout2 = pipeline.create(dai.node.XLinkOut)
 xout2.setStreamName('out2')
 manip2.out.link(xout2.input)
 

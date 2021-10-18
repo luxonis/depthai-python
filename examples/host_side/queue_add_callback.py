@@ -7,12 +7,12 @@ import queue
 pipeline = dai.Pipeline()
 
 # Add all three cameras
-camRgb = pipeline.createColorCamera()
-left = pipeline.createMonoCamera()
-right = pipeline.createMonoCamera()
+camRgb = pipeline.create(dai.node.ColorCamera)
+left = pipeline.create(dai.node.MonoCamera)
+right = pipeline.create(dai.node.MonoCamera)
 
 # Create XLink output
-xout = pipeline.createXLinkOut()
+xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName("frames")
 
 # Properties
