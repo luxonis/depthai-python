@@ -52,7 +52,7 @@ if thisPlatform == "aarch64":
         requireOpenCv = True
 
 if requireOpenCv:
-    DEPENDENCIES.append('opencv-python')
+    DEPENDENCIES.extend(['numpy','opencv-python'])
 
 
 # Constants
