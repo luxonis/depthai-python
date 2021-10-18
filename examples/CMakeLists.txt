@@ -149,7 +149,7 @@ add_python_example(mono_camera_control MonoCamera/mono_camera_control.py)
 ## ObjectTracker
 add_python_example(object_tracker_video ObjectTracker/object_tracker_video.py)
 add_python_example(object_tracker ObjectTracker/object_tracker.py)
-add_python_example(spatial_object_tracker_mobilenet ObjectTracker/spatial_object_tracker_mobilenet.py)
+add_python_example(spatial_object_tracker ObjectTracker/spatial_object_tracker.py)
 # add_python_example(spatial_object_tracker_yolo ObjectTracker/spatial_object_tracker_yolo.py)
 
 ## Script

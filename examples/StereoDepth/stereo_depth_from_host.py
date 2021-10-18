@@ -187,25 +187,25 @@ xoutStereoCfg = None
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-stereo = pipeline.createStereoDepth()
+stereo = pipeline.create(dai.node.StereoDepth)
 
-monoLeft = pipeline.createXLinkIn()
-monoRight = pipeline.createXLinkIn()
-xinStereoDepthConfig = pipeline.createXLinkIn()
+monoLeft = pipeline.create(dai.node.XLinkIn)
+monoRight = pipeline.create(dai.node.XLinkIn)
+xinStereoDepthConfig = pipeline.create(dai.node.XLinkIn)
 
-xoutLeft = pipeline.createXLinkOut()
-xoutRight = pipeline.createXLinkOut()
-xoutDepth = pipeline.createXLinkOut()
-xoutConfMap = pipeline.createXLinkOut()
-xoutDisparity = pipeline.createXLinkOut()
-xoutRectifLeft = pipeline.createXLinkOut()
-xoutRectifRight = pipeline.createXLinkOut()
-xoutStereoCfg = pipeline.createXLinkOut()
+xoutLeft = pipeline.create(dai.node.XLinkOut)
+xoutRight = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutConfMap = pipeline.create(dai.node.XLinkOut)
+xoutDisparity = pipeline.create(dai.node.XLinkOut)
+xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
+xoutRectifRight = pipeline.create(dai.node.XLinkOut)
+xoutStereoCfg = pipeline.create(dai.node.XLinkOut)
 if args.debug:
-    xoutDebugLrCheckIt1 = pipeline.createXLinkOut()
-    xoutDebugLrCheckIt2 = pipeline.createXLinkOut()
+    xoutDebugLrCheckIt1 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugLrCheckIt2 = pipeline.create(dai.node.XLinkOut)
 if args.dumpdisparitycostvalues:
-    xoutDebugCostDump = pipeline.createXLinkOut()
+    xoutDebugCostDump = pipeline.create(dai.node.XLinkOut)
 
 xinStereoDepthConfig.setStreamName("stereoDepthConfig")
 monoLeft.setStreamName('in_left')

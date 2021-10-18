@@ -23,16 +23,16 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-monoRight = pipeline.createMonoCamera()
-videoEncoder = pipeline.createVideoEncoder()
-nn = pipeline.createMobileNetDetectionNetwork()
-manip = pipeline.createImageManip()
+camRgb = pipeline.create(dai.node.ColorCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+videoEncoder = pipeline.create(dai.node.VideoEncoder)
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
+manip = pipeline.create(dai.node.ImageManip)
 
-videoOut = pipeline.createXLinkOut()
-xoutRight = pipeline.createXLinkOut()
-manipOut = pipeline.createXLinkOut()
-nnOut = pipeline.createXLinkOut()
+videoOut = pipeline.create(dai.node.XLinkOut)
+xoutRight = pipeline.create(dai.node.XLinkOut)
+manipOut = pipeline.create(dai.node.XLinkOut)
+nnOut = pipeline.create(dai.node.XLinkOut)
 
 videoOut.setStreamName('h265')
 xoutRight.setStreamName("right")

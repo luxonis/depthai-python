@@ -23,15 +23,15 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoRight = pipeline.createMonoCamera()
-monoLeft = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-manip = pipeline.createImageManip()
-nn = pipeline.createMobileNetDetectionNetwork()
+monoRight = pipeline.create(dai.node.MonoCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
+manip = pipeline.create(dai.node.ImageManip)
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 
-nnOut = pipeline.createXLinkOut()
-disparityOut = pipeline.createXLinkOut()
-xoutRight = pipeline.createXLinkOut()
+nnOut = pipeline.create(dai.node.XLinkOut)
+disparityOut = pipeline.create(dai.node.XLinkOut)
+xoutRight = pipeline.create(dai.node.XLinkOut)
 
 disparityOut.setStreamName("disparity")
 xoutRight.setStreamName("rectifiedRight")

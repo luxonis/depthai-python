@@ -23,15 +23,15 @@ fullFrameTracking = args.full_frame
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-objectTracker = pipeline.createObjectTracker()
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
+objectTracker = pipeline.create(dai.node.ObjectTracker)
 
-xoutRgb = pipeline.createXLinkOut()
-trackerOut = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+trackerOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("preview")
 trackerOut.setStreamName("tracklets")

@@ -11,14 +11,14 @@ newConfig = False
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
-spatialLocationCalculator = pipeline.createSpatialLocationCalculator()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
+spatialLocationCalculator = pipeline.create(dai.node.SpatialLocationCalculator)
 
-xoutDepth = pipeline.createXLinkOut()
-xoutSpatialData = pipeline.createXLinkOut()
-xinSpatialCalcConfig = pipeline.createXLinkIn()
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutSpatialData = pipeline.create(dai.node.XLinkOut)
+xinSpatialCalcConfig = pipeline.create(dai.node.XLinkIn)
 
 xoutDepth.setStreamName("depth")
 xoutSpatialData.setStreamName("spatialData")

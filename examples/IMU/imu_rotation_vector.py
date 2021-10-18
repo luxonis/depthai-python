@@ -9,8 +9,8 @@ import math
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-imu = pipeline.createIMU()
-xlinkOut = pipeline.createXLinkOut()
+imu = pipeline.create(dai.node.IMU)
+xlinkOut = pipeline.create(dai.node.XLinkOut)
 
 xlinkOut.setStreamName("imu")
 

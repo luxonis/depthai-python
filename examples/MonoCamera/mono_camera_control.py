@@ -28,15 +28,15 @@ sendCamConfig = False
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoRight = pipeline.createMonoCamera()
-monoLeft = pipeline.createMonoCamera()
-manipRight = pipeline.createImageManip()
-manipLeft = pipeline.createImageManip()
+monoRight = pipeline.create(dai.node.MonoCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+manipRight = pipeline.create(dai.node.ImageManip)
+manipLeft = pipeline.create(dai.node.ImageManip)
 
-controlIn = pipeline.createXLinkIn()
-configIn = pipeline.createXLinkIn()
-manipOutRight = pipeline.createXLinkOut()
-manipOutLeft = pipeline.createXLinkOut()
+controlIn = pipeline.create(dai.node.XLinkIn)
+configIn = pipeline.create(dai.node.XLinkIn)
+manipOutRight = pipeline.create(dai.node.XLinkOut)
+manipOutLeft = pipeline.create(dai.node.XLinkOut)
 
 controlIn.setStreamName('control')
 configIn.setStreamName('config')

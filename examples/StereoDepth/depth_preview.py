@@ -15,10 +15,10 @@ lr_check = False
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-depth = pipeline.createStereoDepth()
-xout = pipeline.createXLinkOut()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+depth = pipeline.create(dai.node.StereoDepth)
+xout = pipeline.create(dai.node.XLinkOut)
 
 xout.setStreamName("disparity")
 
