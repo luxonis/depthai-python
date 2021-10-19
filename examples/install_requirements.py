@@ -3,6 +3,7 @@ import platform
 import sys, os, subprocess
 import argparse
 import re
+import platform
 
 convert_default = "empty"
 parser = argparse.ArgumentParser()
@@ -38,7 +39,21 @@ sys.path.insert(1, parent_dir)
 import find_version
 
 # 3rdparty dependencies to install
-DEPENDENCIES = ['opencv-python', 'pyyaml', 'requests']
+DEPENDENCIES = ['pyyaml', 'requests']
+requireOpenCv = True
+thisPlatform = platform.machine()
+if thisPlatform == "aarch64":
+    # try to import opencv, numpy in a subprocess, since it might fail with illegal instruction
+    # if it was previously installed w/ pip without setting OPENBLAS_CORE_TYPE=ARMV8 env variable
+    try:
+        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"])
+        requireOpenCv = False
+    except subprocess.CalledProcessError as ex:
+        requireOpenCv = True
+
+if requireOpenCv:
+    DEPENDENCIES.extend(['numpy','opencv-python'])
+
 
 # Constants
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
@@ -47,7 +62,7 @@ ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snap
 in_venv = getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix)) != sys.prefix
 pip_call = [sys.executable, "-m", "pip"]
 pip_installed = True
-pip_install = pip_call + ["install"]
+pip_install = pip_call + ["install", "-U"]
 
 try:
     subprocess.check_call(pip_call + ["--version"])
@@ -61,19 +76,20 @@ if not pip_installed:
 if sys.version_info[0] != 3:
     raise RuntimeError("Examples require Python 3 to run (detected: Python {})".format(sys.version_info[0]))
 
-if platform.machine() == "arm64" and platform.system() == "Darwin":
+if thisPlatform == "arm64" and platform.system() == "Darwin":
     err_str = "There are no prebuilt wheels for M1 processors. Please open the following link for a solution - https://discuss.luxonis.com/d/69-running-depthai-on-apple-m1-based-macs"
     raise RuntimeError(err_str)
 
-is_pi = platform.machine().startswith("arm") or platform.machine().startswith("aarch")
-if is_pi and sys.version_info[1] in (7, 9):
+is_pi = thisPlatform.startswith("arm")
+prebuiltWheelsPythonVersion = [7,9]
+if requireOpenCv and is_pi and sys.version_info[1] not in prebuiltWheelsPythonVersion:
     print("[WARNING] There are no prebuilt wheels for Python 3.{} for OpenCV, building process on this device may be long and unstable".format(sys.version_info[1]))
 
 if not in_venv:
     pip_install.append("--user")
 
 # Update pip
-pip_update_cmd = [*pip_install, "pip", "-U"]
+pip_update_cmd = [*pip_install, "pip"]
 if args.dry_run:
     prettyPrint(pip_update_cmd)
 else:
@@ -158,3 +174,14 @@ if args.convert != convert_default:
             prettyPrint(cmd)
         else:
             subprocess.check_call(cmd)
+
+if requireOpenCv and thisPlatform == "aarch64":
+    from os import environ
+    OPENBLAS_CORE_TYPE = environ.get('OPENBLAS_CORE_TYPE')
+    if OPENBLAS_CORE_TYPE != 'ARMV8':
+        WARNING='\033[1;5;31m'
+        RED='\033[91m'
+        LINE_CL='\033[0m'
+        SUGGESTION='echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc && source ~/.bashrc'
+        print(f'{WARNING}WARNING:{LINE_CL} Need to set OPENBLAS_CORE_TYPE environment variable, otherwise opencv will fail with illegal instruction.')
+        print(f'Run: {RED}{SUGGESTION}{LINE_CL}')

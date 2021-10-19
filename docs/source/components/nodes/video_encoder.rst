@@ -74,6 +74,11 @@ Usage
     cam->still.link(stillEncoder->input);
     cam->video.link(videoEncoder->input);
 
+Limitations
+###########
+
+- HW limit for the encoder is: 3840x2160 pixels at 30FPS or :code:`248 million pixels/second`. The resolution and frame rate can be divided into multiple streams - but the sum of all the pixels/second needs to be below 248 million.
+- Due to a HW constraint, video encoding can be done only on frames whose width values are multiples of 32.
 
 Examples of functionality
 #########################
