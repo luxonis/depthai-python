@@ -15,8 +15,16 @@ Spatial Tiny-yolo example
 
 # Get argument first
 nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
-if len(sys.argv) > 1:
-    nnBlobPath = sys.argv[1]
+if 1 < len(sys.argv):
+    arg = sys.argv[1]
+    if arg == "yolo3":
+        nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+    elif arg == "yolo4":
+        nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+    else:
+        nnBlobPath = arg
+else:
+    print("Using Tiny YoloV4 model. If you wish to use Tiny YOLOv3, call 'tiny_yolo.py yolo3'")
 
 if not Path(nnBlobPath).exists():
     import sys
@@ -44,16 +52,16 @@ syncNN = True
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-spatialDetectionNetwork = pipeline.createYoloSpatialDetectionNetwork()
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
 
-xoutRgb = pipeline.createXLinkOut()
-xoutNN = pipeline.createXLinkOut()
-xoutBoundingBoxDepthMapping = pipeline.createXLinkOut()
-xoutDepth = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutNN = pipeline.create(dai.node.XLinkOut)
+xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")

@@ -21,15 +21,15 @@ args = parser.parse_args()
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-manip = pipeline.createImageManip()
-objectTracker = pipeline.createObjectTracker()
-detectionNetwork = pipeline.createMobileNetDetectionNetwork()
+manip = pipeline.create(dai.node.ImageManip)
+objectTracker = pipeline.create(dai.node.ObjectTracker)
+detectionNetwork = pipeline.create(dai.node.MobileNetDetectionNetwork)
 
-manipOut = pipeline.createXLinkOut()
-xinFrame = pipeline.createXLinkIn()
-trackerOut = pipeline.createXLinkOut()
-xlinkOut = pipeline.createXLinkOut()
-nnOut = pipeline.createXLinkOut()
+manipOut = pipeline.create(dai.node.XLinkOut)
+xinFrame = pipeline.create(dai.node.XLinkIn)
+trackerOut = pipeline.create(dai.node.XLinkOut)
+xlinkOut = pipeline.create(dai.node.XLinkOut)
+nnOut = pipeline.create(dai.node.XLinkOut)
 
 manipOut.setStreamName("manip")
 xinFrame.setStreamName("inFrame")

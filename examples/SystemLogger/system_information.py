@@ -18,8 +18,8 @@ def printSystemInformation(info):
 pipeline = dai.Pipeline()
 
 # Define source and output
-sysLog = pipeline.createSystemLogger()
-linkOut = pipeline.createXLinkOut()
+sysLog = pipeline.create(dai.node.SystemLogger)
+linkOut = pipeline.create(dai.node.XLinkOut)
 
 linkOut.setStreamName("sysinfo")
 

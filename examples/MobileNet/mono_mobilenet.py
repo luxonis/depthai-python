@@ -23,11 +23,11 @@ labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoRight = pipeline.createMonoCamera()
-manip = pipeline.createImageManip()
-nn = pipeline.createMobileNetDetectionNetwork()
-manipOut = pipeline.createXLinkOut()
-nnOut = pipeline.createXLinkOut()
+monoRight = pipeline.create(dai.node.MonoCamera)
+manip = pipeline.create(dai.node.ImageManip)
+nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
+manipOut = pipeline.create(dai.node.XLinkOut)
+nnOut = pipeline.create(dai.node.XLinkOut)
 
 manipOut.setStreamName("right")
 nnOut.setStreamName("nn")

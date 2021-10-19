@@ -9,8 +9,8 @@ import time
 pipeline = dai.Pipeline()
 
 # Define source and output
-monoRight = pipeline.createMonoCamera()
-xoutRight = pipeline.createXLinkOut()
+monoRight = pipeline.create(dai.node.MonoCamera)
+xoutRight = pipeline.create(dai.node.XLinkOut)
 
 xoutRight.setStreamName("right")
 

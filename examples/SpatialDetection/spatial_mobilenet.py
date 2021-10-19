@@ -31,16 +31,16 @@ syncNN = True
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-spatialDetectionNetwork = pipeline.createMobileNetSpatialDetectionNetwork()
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-stereo = pipeline.createStereoDepth()
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
 
-xoutRgb = pipeline.createXLinkOut()
-xoutNN = pipeline.createXLinkOut()
-xoutBoundingBoxDepthMapping = pipeline.createXLinkOut()
-xoutDepth = pipeline.createXLinkOut()
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutNN = pipeline.create(dai.node.XLinkOut)
+xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")

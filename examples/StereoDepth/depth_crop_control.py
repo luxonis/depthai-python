@@ -16,13 +16,13 @@ stepSize = 0.02
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoRight = pipeline.createMonoCamera()
-monoLeft = pipeline.createMonoCamera()
-manip = pipeline.createImageManip()
-stereo = pipeline.createStereoDepth()
+monoRight = pipeline.create(dai.node.MonoCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+manip = pipeline.create(dai.node.ImageManip)
+stereo = pipeline.create(dai.node.StereoDepth)
 
-configIn = pipeline.createXLinkIn()
-xout = pipeline.createXLinkOut()
+configIn = pipeline.create(dai.node.XLinkIn)
+xout = pipeline.create(dai.node.XLinkOut)
 
 configIn.setStreamName('config')
 xout.setStreamName("depth")

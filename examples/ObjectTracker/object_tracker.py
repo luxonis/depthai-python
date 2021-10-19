@@ -23,12 +23,12 @@ fullFrameTracking = args.full_frame
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-detectionNetwork = pipeline.createMobileNetDetectionNetwork()
-objectTracker = pipeline.createObjectTracker()
+camRgb = pipeline.create(dai.node.ColorCamera)
+detectionNetwork = pipeline.create(dai.node.MobileNetDetectionNetwork)
+objectTracker = pipeline.create(dai.node.ObjectTracker)
 
-xlinkOut = pipeline.createXLinkOut()
-trackerOut = pipeline.createXLinkOut()
+xlinkOut = pipeline.create(dai.node.XLinkOut)
+trackerOut = pipeline.create(dai.node.XLinkOut)
 
 xlinkOut.setStreamName("preview")
 trackerOut.setStreamName("tracklets")

@@ -6,16 +6,16 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-monoLeft = pipeline.createMonoCamera()
-monoRight = pipeline.createMonoCamera()
-ve1 = pipeline.createVideoEncoder()
-ve2 = pipeline.createVideoEncoder()
-ve3 = pipeline.createVideoEncoder()
+camRgb = pipeline.create(dai.node.ColorCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+ve1 = pipeline.create(dai.node.VideoEncoder)
+ve2 = pipeline.create(dai.node.VideoEncoder)
+ve3 = pipeline.create(dai.node.VideoEncoder)
 
-ve1Out = pipeline.createXLinkOut()
-ve2Out = pipeline.createXLinkOut()
-ve3Out = pipeline.createXLinkOut()
+ve1Out = pipeline.create(dai.node.XLinkOut)
+ve2Out = pipeline.create(dai.node.XLinkOut)
+ve3Out = pipeline.create(dai.node.XLinkOut)
 
 ve1Out.setStreamName('ve1Out')
 ve2Out.setStreamName('ve2Out')
