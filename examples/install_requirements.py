@@ -62,7 +62,7 @@ ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snap
 in_venv = getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix)) != sys.prefix
 pip_call = [sys.executable, "-m", "pip"]
 pip_installed = True
-pip_install = pip_call + ["install", "-U"]
+pip_install = pip_call + ["install", "-U", "--prefer-binary"]
 
 try:
     subprocess.check_call(pip_call + ["--version"])
