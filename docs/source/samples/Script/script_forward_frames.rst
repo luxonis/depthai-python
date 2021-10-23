@@ -7,6 +7,7 @@ Script also changes exposure ratio for each frame, which results in two streams,
 Demo
 ####
 
+.. image:: https://user-images.githubusercontent.com/18037362/138553268-c2bd3525-c407-4b8e-bd0d-f87f13b8546d.png
 
 Setup
 #####
