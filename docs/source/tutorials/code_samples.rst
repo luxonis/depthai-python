@@ -130,6 +130,7 @@ Code samples are used for automated testing. They are also a great starting poin
 
 .. rubric:: VideoEncoder
 
+- :ref:`Disparity encoding` - Encodes stereo disparity into :code:`.mjpeg`
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
