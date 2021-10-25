@@ -59,7 +59,7 @@ Click `here <https://en.wikipedia.org/wiki/Image_processor>`__ for more informat
 
 **Image Post-Processing** converts YUV420 planar frames from the **ISP** into :code:`video`/:code:`preview`/:code:`still` frames.
 
-When setting sensor resolution to 12MP and using :code:`video`, you will get 4k video output. 4k frames are cropped from 12MP frames (not downsampled).
+When setting sensor resolution to 12MP and using :code:`video`, you will get 4k video output. 4K frames are cropped from 12MP frames (not downsampled).
 
 Usage
 #####
