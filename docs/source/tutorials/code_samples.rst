@@ -102,6 +102,7 @@ Code samples are used for automated testing. They are also a great starting poin
 .. rubric:: Script
 
 - :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
