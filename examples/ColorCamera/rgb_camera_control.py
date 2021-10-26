@@ -55,6 +55,8 @@ camRgb = pipeline.create(dai.node.ColorCamera)
 videoEncoder = pipeline.create(dai.node.VideoEncoder)
 stillEncoder = pipeline.create(dai.node.VideoEncoder)
 
+#camRgb.initialControl.setAutoFocusLensRange(90, 204)
+
 controlIn = pipeline.create(dai.node.XLinkIn)
 configIn = pipeline.create(dai.node.XLinkIn)
 videoMjpegOut = pipeline.create(dai.node.XLinkOut)
@@ -74,7 +76,6 @@ videoEncoder.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai
 stillEncoder.setDefaultProfilePreset(camRgb.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 
 # Linking
-camRgb.video.link(videoEncoder.input)
 camRgb.still.link(stillEncoder.input)
 camRgb.preview.link(previewOut.input)
 controlIn.out.link(camRgb.inputControl)
@@ -82,10 +83,10 @@ configIn.out.link(camRgb.inputConfig)
 videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 if videoMjpeg:
-    colorCam.video.link(videoEncoder.input)
+    camRgb.video.link(videoEncoder.input)
     videoEncoder.bitstream.link(videoMjpegOut.input)
 else:
-    colorCam.video.link(videoMjpegOut.input)
+    camRgb.video.link(videoMjpegOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -169,6 +170,7 @@ with dai.Device(pipeline) as device:
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
             cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
+            #print(previewFrame.getLensPosition(), previewFrame.getExposureTime())
 
         videoFrames = videoQueue.tryGetAll()
         for videoFrame in videoFrames:

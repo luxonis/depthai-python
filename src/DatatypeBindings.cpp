@@ -927,6 +927,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setExternalTrigger", &CameraControl::setExternalTrigger, py::arg("numFramesBurst"), py::arg("numFramesDiscard"), DOC(dai, CameraControl, setExternalTrigger))
         .def("setAutoFocusMode", &CameraControl::setAutoFocusMode, py::arg("mode"), DOC(dai, CameraControl, setAutoFocusMode))
         .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger, DOC(dai, CameraControl, setAutoFocusTrigger))
+        .def("setAutoFocusLensRange", &CameraControl::setAutoFocusLensRange, py::arg("infinityPosition"), py::arg("macroPosition"), DOC(dai, CameraControl, setAutoFocusLensRange))
         .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoFocusRegion))
         .def("setManualFocus", &CameraControl::setManualFocus, py::arg("lensPosition"), DOC(dai, CameraControl, setManualFocus))
         .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable, DOC(dai, CameraControl, setAutoExposureEnable))
