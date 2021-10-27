@@ -25,30 +25,43 @@ Inputs and Outputs
 .. code-block::
 
                  ┌───────────────────┐
+                 │                   │ confidenceMap
+                 │                   ├─────────────►
                  │                   │rectifiedLeft
                  │                   ├─────────────►
   left           │                   │   syncedLeft
-  ──────────────►│                   ├─────────────►
+  ──────────────►│-------------------├─────────────►
                  │                   │        depth
                  │                   ├─────────────►
                  │    StereoDepth    │    disparity
                  │                   ├─────────────►
-  right          │                   │rectifiedRight
-  ──────────────►│                   ├─────────────►
-                 │                   │   syncedRight
+  right          │                   │   syncedRight
+  ──────────────►│-------------------├─────────────►
+                 │                   │rectifiedRight
                  │                   ├─────────────►
+  inputConfig    │                   |     outConfig
+  ──────────────►│-------------------├─────────────►
                  └───────────────────┘
 
 **Message types**
 
 - :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
 - :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
+- :code:`inputConfig` - :ref:`StereoDepthConfig`
+
+- :code:`confidenceMap` - :ref:`ImgFrame`
 - :code:`rectifiedLeft` - :ref:`ImgFrame`
 - :code:`syncedLeft` - :ref:`ImgFrame`
 - :code:`depth` - :ref:`ImgFrame`
 - :code:`disparity` - :ref:`ImgFrame`
 - :code:`rectifiedRight` - :ref:`ImgFrame`
 - :code:`syncedRight` - :ref:`ImgFrame`
+
+**Debug outputs**
+
+- :code:`debugDispLrCheckIt1` - :ref:`ImgFrame`
+- :code:`debugDispLrCheckIt2` - :ref:`ImgFrame`
+- :code:`debugDispCostDump` - :ref:`ImgFrame`
 
 Internal block diagram of StereoDepth node
 ##########################################
