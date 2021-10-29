@@ -138,6 +138,11 @@ class StereoConfigHandler:
             StereoConfigHandler.config.algorithmControl.enableSubpixel = not StereoConfigHandler.config.algorithmControl.enableSubpixel
             state = "on" if StereoConfigHandler.config.algorithmControl.enableSubpixel else "off"
             print(f"Subpixel {state}")
+        elif key == ord('3'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.algorithmControl.enableExtended = not StereoConfigHandler.config.algorithmControl.enableExtended
+            state = "on" if StereoConfigHandler.config.algorithmControl.enableExtended else "off"
+            print(f"Extended {state}")
 
         StereoConfigHandler.sendConfig(stereoDepthConfigInQueue)
 
