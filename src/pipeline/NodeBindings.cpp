@@ -759,6 +759,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("outConfig",      &StereoDepth::outConfig, DOC(dai, node, StereoDepth, outConfig))
         .def_readonly("debugDispLrCheckIt1", &StereoDepth::debugDispLrCheckIt1, DOC(dai, node, StereoDepth, debugDispLrCheckIt1))
         .def_readonly("debugDispLrCheckIt2", &StereoDepth::debugDispLrCheckIt2, DOC(dai, node, StereoDepth, debugDispLrCheckIt2))
+        .def_readonly("debugExtDispLrCheckIt1", &StereoDepth::debugExtDispLrCheckIt1, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt1))
+        .def_readonly("debugExtDispLrCheckIt2", &StereoDepth::debugExtDispLrCheckIt2, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
 #if 0 //will be enabled when confidence map RGB aligment/LR-check support will be added
