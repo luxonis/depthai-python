@@ -863,7 +863,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRateControlMode", &VideoEncoder::setRateControlMode, py::arg("mode"), DOC(dai, node, VideoEncoder, setRateControlMode))
         .def("setProfile", static_cast<void(VideoEncoder::*)(std::tuple<int,int>, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("size"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile))
         .def("setProfile", static_cast<void(VideoEncoder::*)(int, int, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("width"), py::arg("height"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile, 2))
-        .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrate))
+        .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrate"), DOC(dai, node, VideoEncoder, setBitrate))
         .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
