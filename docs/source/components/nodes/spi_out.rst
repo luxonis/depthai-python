@@ -4,7 +4,7 @@ SPIOut
 SPIOut node is used for **sending data to a MCU** (via SPI). `OAK-IOT <https://docs.luxonis.com/projects/hardware/en/latest/#iot-designs>`__ devices
 have an on-board ESP32 that is connected to the VPU (MyriadX) via SPI. You can find demos `here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi>`__.
 
-:ref:`SPIIn` is used for recieving data from the MCU (via SPI).
+:ref:`SPIIn` is used for receiving data from the MCU (via SPI).
 
 How to place it
 ###############

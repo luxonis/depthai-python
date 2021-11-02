@@ -1,7 +1,7 @@
 SPIIn
 =====
 
-SPIIn node is used for **recieving data** that was sent **from a MCU** (via SPI). `OAK-IOT <https://docs.luxonis.com/projects/hardware/en/latest/#iot-designs>`__ devices
+SPIIn node is used for **receiving data** that was sent **from a MCU** (via SPI). `OAK-IOT <https://docs.luxonis.com/projects/hardware/en/latest/#iot-designs>`__ devices
 have an on-board ESP32 that is connected to the VPU (MyriadX) via SPI. You can find demos `here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-spi>`__.
 
 This allows you for example to control eg. :ref:`ColorCamera` or :ref:`ImageManip` from the MCU or send a :ref:`Buffer` of data from the MCU to a :ref:`Script` node.
