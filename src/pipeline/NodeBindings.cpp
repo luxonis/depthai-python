@@ -479,18 +479,18 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
-        .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
-        .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
-        .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
+        .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
+        .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
+        .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
 
 
     nodeConnection
-        .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
-        .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
-        .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
-        .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
+        .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
+        .def_property("outputName", [](Node::Connection& conn) -> std::string& { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
+        .def_property("inputId", [](Node::Connection& conn) -> Node::Id& { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
+        .def_property("inputName", [](Node::Connection& conn) -> std::string& { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
     ;
 
     pyNode
