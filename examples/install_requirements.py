@@ -52,7 +52,12 @@ if thisPlatform == "aarch64":
         requireOpenCv = True
 
 if requireOpenCv:
-    DEPENDENCIES.extend(['numpy','opencv-python'])
+    DEPENDENCIES.append('numpy')
+    if sys.version_info[1] == '9':
+        DEPENDENCIES.append('opencv-python!=4.5.4.58')
+    else:
+        DEPENDENCIES.append('opencv-python')
+
 
 
 # Constants
