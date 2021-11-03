@@ -479,9 +479,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
-        .def_property("group", [](Node::Output& obj) -> std::string& { return obj.group; }, [](Node::Output& obj, std::string group) { obj.group = group; })
-        .def_property("name", [](Node::Output& obj) -> std::string& { return obj.name; }, [](Node::Output& obj, std::string name) { obj.name = name; })
-        .def_property("type", [](Node::Output& obj) -> Node::Output::Type& { return obj.type; }, [](Node::Output& obj, Node::Output::Type type) { obj.type = type; })
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
