@@ -167,7 +167,7 @@ Last step is to edit :code:`.bashrc` with the line:
 
   .. code-block:: bash
 
-    echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc
+    echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 
 
 Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python rgb_preview.py`.
