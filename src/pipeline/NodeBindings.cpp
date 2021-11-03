@@ -232,8 +232,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     colorCameraPropertiesSensorResolution
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
+        .value("THE_1200_P", ColorCameraProperties::SensorResolution::THE_1200_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
+        .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
         .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         ;
