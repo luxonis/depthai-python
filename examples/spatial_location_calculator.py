@@ -2,7 +2,7 @@
 
 import cv2
 import depthai as dai
-from utility import getDisparityScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, colorizeDepthPacket
 
 stepSize = 0.05
 
@@ -77,7 +77,7 @@ with dai.Device(pipeline) as device:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
 
         depthFrame = inDepth.getFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
+        depthFrame = colorizeDepthPacket(inDepth, dispScaleFactor, stereo)
 
         spatialData = spatialCalcQueue.get().getSpatialLocations()
         for depthData in spatialData:

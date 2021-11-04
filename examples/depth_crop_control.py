@@ -8,7 +8,7 @@ Use 'WASD' in order to do it.
 import cv2
 import depthai as dai
 import numpy as np
-from utility import getDisparityScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, colorizeDepthPacket
 
 # Step size ('W','A','S','D' controls)
 stepSize = 0.02
@@ -62,7 +62,7 @@ with dai.Device(pipeline) as device:
 
     while True:
         inDepth = q.get()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
+        depthFrame = colorizeDepthPacket(inDepth, dispScaleFactor, stereo)
         # Frame is ready to be shown
         cv2.imshow("depth", depthFrame)
 

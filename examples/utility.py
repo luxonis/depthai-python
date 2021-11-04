@@ -22,7 +22,7 @@ def getDisparityScaleFactor(device, width):
     return baseline * focal
 
 
-def parseDepthPacket(inPacket, dispScaleFactor, stereoNode, colorMap=cv2.COLORMAP_JET):
+def colorizeDepthPacket(inPacket, dispScaleFactor, stereoNode, colorMap=cv2.COLORMAP_JET):
     maxDisparity = stereoNode.initialConfig.getMaxDisparity()
     subpixelBits = stereoNode.initialConfig.get().algorithmControl.subpixelFractionalBits if stereoNode.initialConfig.get().algorithmControl.enableSubpixel else 0
     subpixelLevels = pow(2, subpixelBits)

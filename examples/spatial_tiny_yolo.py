@@ -6,7 +6,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
-from utility import getDisparityScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, colorizeDepthPacket
 
 '''
 Spatial Tiny-yolo example
@@ -126,7 +126,7 @@ with dai.Device(pipeline) as device:
         inDepth = depthQueue.get()
 
         frame = inPreview.getCvFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
+        depthFrame = colorizeDepthPacket(inDepth, dispScaleFactor, stereo)
         counter+=1
         current_time = time.monotonic()
         if (current_time - startTime) > 1 :

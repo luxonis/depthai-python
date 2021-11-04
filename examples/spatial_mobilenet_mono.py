@@ -6,7 +6,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
-from utility import getDisparityScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, colorizeDepthPacket
 
 '''
 Mobilenet SSD device side decoding demo
@@ -120,7 +120,7 @@ with dai.Device(pipeline) as device:
 
         rectifiedRight = inRectified.getCvFrame()
 
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
+        depthFrame = colorizeDepthPacket(inDepth, dispScaleFactor, stereo)
 
         detections = inDet.detections
         if len(detections) != 0:
