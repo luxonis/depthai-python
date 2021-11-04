@@ -109,6 +109,7 @@ add_python_example(edge_detector EdgeDetector/edge_detector.py)
 
 ## FeatureTracker
 add_python_example(feature_tracker FeatureTracker/feature_tracker.py)
+add_python_example(feature_tracker_color FeatureTracker/feature_tracker_color.py)
 add_python_example(feature_detector FeatureTracker/feature_detector.py)
 
 ## HostSide
