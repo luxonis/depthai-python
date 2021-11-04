@@ -2,7 +2,7 @@
 
 import cv2
 import depthai as dai
-from utility import calculateDispScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, parseDepthPacket
 
 stepSize = 0.05
 
@@ -69,7 +69,7 @@ with dai.Device(pipeline) as device:
     spatialCalcConfigInQueue = device.getInputQueue("spatialCalcConfig")
 
     color = (255, 255, 255)
-    dispScaleFactor = calculateDispScaleFactor(device)
+    dispScaleFactor = getDisparityScaleFactor(device, monoRight.getResolutionWidth())
 
     print("Use WASD keys to move ROI!")
 
@@ -77,7 +77,7 @@ with dai.Device(pipeline) as device:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
 
         depthFrame = inDepth.getFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
 
         spatialData = spatialCalcQueue.get().getSpatialLocations()
         for depthData in spatialData:

@@ -6,7 +6,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
-from utility import calculateDispScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, parseDepthPacket
 
 '''
 Spatial detection network demo.
@@ -97,7 +97,7 @@ with dai.Device(pipeline) as device:
     startTime = time.monotonic()
     counter = 0
     fps = 0
-    dispScaleFactor = calculateDispScaleFactor(device)
+    dispScaleFactor = getDisparityScaleFactor(device, monoRight.getResolutionWidth())
 
     while True:
         inPreview = previewQueue.get()
@@ -112,7 +112,7 @@ with dai.Device(pipeline) as device:
             startTime = current_time
 
         frame = inPreview.getCvFrame()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
 
         detections = inDet.detections
         if len(detections) != 0:

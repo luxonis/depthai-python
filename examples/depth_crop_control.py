@@ -8,7 +8,7 @@ Use 'WASD' in order to do it.
 import cv2
 import depthai as dai
 import numpy as np
-from utility import calculateDispScaleFactor, parseDepthPacket
+from utility import getDisparityScaleFactor, parseDepthPacket
 
 # Step size ('W','A','S','D' controls)
 stepSize = 0.02
@@ -58,11 +58,11 @@ with dai.Device(pipeline) as device:
     configQueue = device.getInputQueue(configIn.getStreamName())
 
     sendCamConfig = False
-    dispScaleFactor = calculateDispScaleFactor(device)
+    dispScaleFactor = getDisparityScaleFactor(device, monoRight.getResolutionWidth())
 
     while True:
         inDepth = q.get()
-        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo.initialConfig.getMaxDisparity())
+        depthFrame = parseDepthPacket(inDepth, dispScaleFactor, stereo)
         # Frame is ready to be shown
         cv2.imshow("depth", depthFrame)
 
