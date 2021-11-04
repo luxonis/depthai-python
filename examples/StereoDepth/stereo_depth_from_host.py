@@ -167,6 +167,7 @@ class StereoConfigHandler:
         print("Control census transform mean mode using the 'v' key.")
         print("Control left-right check mode using the '1' key.")
         print("Control subpixel mode using the '2' key.")
+        print("Control extended mode using the '3' key.")
 
         StereoConfigHandler.config = config
 
