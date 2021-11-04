@@ -102,6 +102,7 @@ Code samples are used for automated testing. They are also a great starting poin
 .. rubric:: Script
 
 - :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
@@ -129,6 +130,7 @@ Code samples are used for automated testing. They are also a great starting poin
 
 .. rubric:: VideoEncoder
 
+- :ref:`Disparity encoding` - Encodes stereo disparity into :code:`.mjpeg`
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host

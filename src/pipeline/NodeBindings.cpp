@@ -478,18 +478,18 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
-        .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
-        .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
-        .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
+        .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
+        .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
+        .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
 
 
     nodeConnection
-        .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
-        .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
-        .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
-        .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
+        .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
+        .def_property("outputName", [](Node::Connection& conn) -> std::string& { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
+        .def_property("inputId", [](Node::Connection& conn) -> Node::Id& { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
+        .def_property("inputName", [](Node::Connection& conn) -> std::string& { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
     ;
 
     pyNode
@@ -867,7 +867,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRateControlMode", &VideoEncoder::setRateControlMode, py::arg("mode"), DOC(dai, node, VideoEncoder, setRateControlMode))
         .def("setProfile", static_cast<void(VideoEncoder::*)(std::tuple<int,int>, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("size"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile))
         .def("setProfile", static_cast<void(VideoEncoder::*)(int, int, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("width"), py::arg("height"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile, 2))
-        .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrate))
+        .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrate"), DOC(dai, node, VideoEncoder, setBitrate))
         .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)

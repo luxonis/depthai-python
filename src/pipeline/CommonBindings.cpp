@@ -13,6 +13,7 @@
 #include "depthai-shared/common/Point3f.hpp"
 #include "depthai-shared/common/Size2f.hpp"
 #include "depthai-shared/common/UsbSpeed.hpp"
+#include "depthai-shared/common/DetectionNetworkType.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -34,6 +35,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<EepromData> eepromData(m, "EepromData", DOC(dai, EepromData));
     py::enum_<UsbSpeed> usbSpeed(m, "UsbSpeed", DOC(dai, UsbSpeed));
     py::enum_<ProcessorType> processorType(m, "ProcessorType");
+    py::enum_<DetectionNetworkType> detectionNetworkType(m, "DetectionNetworkType");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -184,4 +186,8 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("LEON_MSS", ProcessorType::LEON_MSS)
     ;
 
+    detectionNetworkType
+        .value("YOLO", DetectionNetworkType::YOLO)
+        .value("MOBILENET", DetectionNetworkType::MOBILENET)
+    ;
 }

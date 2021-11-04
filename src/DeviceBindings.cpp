@@ -212,7 +212,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind the rest
     deviceBase
         // Python only methods
-        .def("__enter__", [](py::object obj){ return obj; })
+        .def("__enter__", [](DeviceBase& d) -> DeviceBase& { return d; })
         .def("__exit__", [](DeviceBase& d, py::object type, py::object value, py::object traceback) {
             py::gil_scoped_release release;
             d.close();
