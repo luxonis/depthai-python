@@ -50,6 +50,8 @@ class StereoConfigHandler:
     trLineqAlpha = list()
     trLineqBeta = list()
     trLineqThreshold = list()
+    trCostAggregationP1 = list()
+    trCostAggregationP2 = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -90,6 +92,18 @@ class StereoConfigHandler:
         StereoConfigHandler.config.costMatching.linearEquationParameters.threshold = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trLineqThreshold:
+            tr.set(value)
+
+    def trackbarCostAggregationP1(value):
+        StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1 = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCostAggregationP1:
+            tr.set(value)
+
+    def trackbarCostAggregationP2(value):
+        StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2 = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCostAggregationP2:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -158,6 +172,8 @@ class StereoConfigHandler:
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
+        StereoConfigHandler.trCostAggregationP1.append(StereoConfigHandler.Trackbar('Cost aggregation P1', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1, StereoConfigHandler.trackbarCostAggregationP1))
+        StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
