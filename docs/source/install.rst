@@ -21,9 +21,9 @@ Platform                 Instructions                                   Support
 ======================== ============================================== ================================================================================
 Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
-Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
+Ubuntu                   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
 Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-Jestson Nano             :ref:`Platform dependencies <Jetson Nano>`     `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
+Jestson Nano/Xavier      :ref:`Platform dependencies <Jetson>`          `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
 ======================== ============================================== ================================================================================
 
 And the following platforms are also supported by a combination of the community and Luxonis.
@@ -63,8 +63,6 @@ See the `Video preview window fails to appear on macOS <https://discuss.luxonis.
 Ubuntu
 ******
 
-These Ubuntu instructions also work for the **Jetson** and **Xavier** series.
-
 .. code-block:: bash
 
   sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
@@ -86,11 +84,11 @@ Raspberry Pi OS
     sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
 
 
-Jetson Nano
-***********
+Jetson
+******
 
-To install DepthAI on Jetson Nano, perform the following steps, after completing a fresh install and setup. On the first log in, 
-**do not** immediately run updates.
+To install DepthAI on `Jetson Nano <https://developer.nvidia.com/embedded/jetson-nano-developer-kit>`__ or `Jetson Xavier <https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit>`__,
+perform the following steps, after completing a fresh install and setup. On the first log in, **do not** immediately run updates.
 
 This first step is optional: go to the *Software* (App Store) and delete the apps or software that you probably will not use. 
 
@@ -101,7 +99,7 @@ Open a terminal window and run the following commands:
     sudo apt update && sudo apt upgrade
     sudo reboot now
 
-Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson Nano <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from nvidia:
+Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from Nvidia:
 
   .. code-block:: bash
 
@@ -169,7 +167,7 @@ Last step is to edit :code:`.bashrc` with the line:
 
   .. code-block:: bash
 
-    echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc
+    echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 
 
 Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python rgb_preview.py`.
