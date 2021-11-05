@@ -1115,8 +1115,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     costAggregation
         .def(py::init<>())
         .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
-        .def_readwrite("horizontalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCosts))
-        .def_readwrite("verticalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCosts))
+        .def_readwrite("horizontalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP1))
+        .def_readwrite("horizontalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
+        .def_readwrite("verticalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
+        .def_readwrite("verticalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
         ;
 
     rawStereoDepthConfig
