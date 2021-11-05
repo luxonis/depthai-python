@@ -96,12 +96,14 @@ class StereoConfigHandler:
 
     def trackbarCostAggregationP1(value):
         StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1 = value
+        StereoConfigHandler.config.costAggregation.verticalPenaltyCostP1 = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trCostAggregationP1:
             tr.set(value)
 
     def trackbarCostAggregationP2(value):
         StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2 = value
+        StereoConfigHandler.config.costAggregation.verticalPenaltyCostP2 = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trCostAggregationP2:
             tr.set(value)
