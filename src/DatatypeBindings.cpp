@@ -933,7 +933,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoExposureRegion))
         .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation, py::arg("compensation"), DOC(dai, CameraControl, setAutoExposureCompensation))
         .def("setAntiBandingMode", &CameraControl::setAntiBandingMode, py::arg("mode"), DOC(dai, CameraControl, setAntiBandingMode))
-        .def("setManualExposure", &CameraControl::setManualExposure, py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
+        .def("setManualExposure", py::overload_cast<uint32_t, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
+        .def("setManualExposure", py::overload_cast<std::chrono::microseconds, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTime"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure, 2))
         .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode, py::arg("mode"), DOC(dai, CameraControl, setAutoWhiteBalanceMode))
         .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock, py::arg("lock"), DOC(dai, CameraControl, setAutoWhiteBalanceLock))
         .def("setBrightness", &CameraControl::setBrightness, py::arg("value"), DOC(dai, CameraControl, setBrightness))
@@ -946,6 +947,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setEffectMode", &CameraControl::setEffectMode, py::arg("mode"), DOC(dai, CameraControl, setEffectMode))
         // getters
         .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
+        .def("getExposureTime", &CameraControl::getExposureTime, DOC(dai, CameraControl, getExposureTime))
+        .def("getSensitivity", &CameraControl::getSensitivity, DOC(dai, CameraControl, getSensitivity))
+        .def("getLensPosition", &CameraControl::getLensPosition, DOC(dai, CameraControl, getLensPosition))
         ;
     // Add also enum attributes from RawCameraControl
     for (const auto& a : camCtrlAttr) {
