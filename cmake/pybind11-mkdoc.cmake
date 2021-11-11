@@ -56,6 +56,8 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
             # Docstring wrap width
             -w 80
             -o "${output_path}"
+            # C++ standard
+            -std=c++14
             # List of include directories
             "-I$<JOIN:$<TARGET_PROPERTY:${target},INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
             # List of compiler definitions
@@ -79,8 +81,5 @@ function(pybind11_mkdoc_setup_internal target output_path mkdoc_headers enforce)
 
     # Force target build
     file(TOUCH_NOCREATE ${mkdoc_headers})
-
-    # Add dependency to mkdoc target (makes sure that mkdoc is executed, and docstrings available)
-    add_dependencies(${target} ${PYBIND11_MKDOC_TARGET_NAME})
 
 endfunction()

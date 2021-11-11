@@ -1,1 +1,0 @@
-This example was moved to :ref:`08 - RGB & MobilenetSSD`
