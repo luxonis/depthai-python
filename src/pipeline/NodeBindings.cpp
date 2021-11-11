@@ -214,8 +214,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
-
-
+    auto uvc = ADD_NODE(UVC);
+    auto uac = ADD_NODE(UAC);
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -1059,6 +1059,24 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
     daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
 
+    // UVC node
+    uvc
+        .def_readonly("input", &UVC::input, DOC(dai, node, UVC, input))
+        .def("setGpiosOnInit", &UVC::setGpiosOnInit, py::arg("list"), DOC(dai, node, UVC, setGpiosOnInit))
+        .def("setGpiosOnStreamOn", &UVC::setGpiosOnStreamOn, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOn))
+        .def("setGpiosOnStreamOff", &UVC::setGpiosOnStreamOff, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOff))
+        ;
+
+    // UAC node
+    uac
+        .def_readonly("out", &UAC::out, DOC(dai, node, UAC, out))
+        .def("setStreamBackMic", &UAC::setStreamBackMic, py::arg("enable"), DOC(dai, node, UAC, setStreamBackMic))
+        .def("setMicGainDecibels", &UAC::setMicGainDecibels, py::arg("dB"), DOC(dai, node, UAC, setMicGainDecibels))
+        .def("setMicGainTimes", &UAC::setMicGainTimes, py::arg("times"), DOC(dai, node, UAC, setMicGainTimes))
+        .def("setMicAutoGain", &UAC::setMicAutoGain, py::arg("enable"), DOC(dai, node, UAC, setMicAutoGain))
+        .def("setXlinkApplyMicGain", &UAC::setXlinkApplyMicGain, py::arg("enable"), DOC(dai, node, UAC, setXlinkApplyMicGain))
+        .def("setXlinkSampleSizeBytes", &UAC::setXlinkSampleSizeBytes, py::arg("size"), DOC(dai, node, UAC, setXlinkSampleSizeBytes))
+        ;
 
 }
 
