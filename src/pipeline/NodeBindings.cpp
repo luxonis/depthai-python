@@ -359,8 +359,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     trackerType
-        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS)
-        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM)
+        .value("SHORT_TERM_KCF", TrackerType::SHORT_TERM_KCF, DOC(dai, TrackerType, SHORT_TERM_KCF))
+        .value("SHORT_TERM_IMAGELESS", TrackerType::SHORT_TERM_IMAGELESS, DOC(dai, TrackerType, SHORT_TERM_IMAGELESS))
+        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS, DOC(dai, TrackerType, ZERO_TERM_IMAGELESS))
+        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM, DOC(dai, TrackerType, ZERO_TERM_COLOR_HISTOGRAM))
     ;
 
     trackerIdAssigmentPolicy
