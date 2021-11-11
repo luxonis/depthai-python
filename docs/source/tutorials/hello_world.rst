@@ -22,7 +22,7 @@ Let's get your development environment setup first. This tutorial uses:
 
 - Python 3.6 (Ubuntu) or Python 3.7 (Raspbian).
 - The DepthAI :ref:`Python API <Installation>`
-- The :code:`cv2` and :code:`numpy` Python modules.
+- The :code:`cv2`, :code:`blobconverter` and :code:`numpy` Python modules.
 
 
 Code Overview
@@ -58,7 +58,7 @@ Download and install the requirements for this tutorial:
 
 .. code-block:: bash
 
-  python3 -m pip install numpy opencv-python depthai --user
+  python3 -m pip install numpy opencv-python depthai blobconverter --user
 
 
 Test your environment
