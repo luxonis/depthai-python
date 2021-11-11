@@ -77,6 +77,7 @@ def switch_to_usb_boot():
                 raise RuntimeError("Failed to find USB bootROM device. Please run again")
     return switch_done
 
+# This is used only if old 2.1-based FW is running (from flash)
 try_reset_booted_device()
 
 # Start defining a pipeline
@@ -139,11 +140,12 @@ if args.xlink_cam:
     cam_rgb.video.link(xout.input)
 
 if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
-    if args.flash_bootloader:
-        did_switch = switch_to_usb_boot()  # safety measure
+    #if args.flash_bootloader:
+        # TODO! Still needed with latest bootloader? No transition to bootROM otherwise!
+        #did_switch = switch_to_usb_boot()  # safety measure
 
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
-    bootloader = dai.DeviceBootloader(bl)
+    bootloader = dai.DeviceBootloader(bl, True)
 
     # Workaround for a bug with the timeout-enabled bootloader
     progressCalled = False
@@ -163,8 +165,8 @@ if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
     if args.flash_bootloader:
         print("Flashing bootloader...")
         bootloader.flashBootloader(progress)
-        if did_switch:
-            print("Bootloader upgraded, please do a power-cycle test after everything is flashed")
+        #if did_switch:
+        #    print("Bootloader upgraded, please do a power-cycle test after everything is flashed")
     elif args.flash_app or args.flash_dap:
         if args.flash_app:
             print("Flashing application pipeline...")
