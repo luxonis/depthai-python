@@ -1,5 +1,5 @@
-Displaying detections on High-Res frames
-========================================
+Displaying detections in High-Res
+=================================
 
 If you are running object detection model eg. MobileNet or Yolo, they usually require smaller frame for inferencing (eg. :code:`300x300` or
 :code:`416x416`). **Instead of displaying bounding boxes on such small frames**, you could also **stream higher resolution frames** (eg. :code:`video`
