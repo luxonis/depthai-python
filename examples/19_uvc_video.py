@@ -103,17 +103,19 @@ if not args.no_camera:
     if args.rotate_cam:
         cam_rgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
-    # Create an UVC (USB Video Class) output node
-    uvc = pipeline.createUVC()
-    cam_rgb.video.link(uvc.input)
-    if 1:  # Set custom GPIOs
-        uvc.setGpiosOnInit(      {58:0, 37:0, 34:0})
-        uvc.setGpiosOnStreamOn(  {58:1, 37:1, 34:1})
-        uvc.setGpiosOnStreamOff( {58:0, 37:0, 34:0})
-    else:  # Safe test with SoM LED
-        uvc.setGpiosOnInit(      {56:0})
-        uvc.setGpiosOnStreamOn(  {56:1})
-        uvc.setGpiosOnStreamOff( {56:0})
+    if args.flash_app:
+        # Create an UVC (USB Video Class) output node
+        # Would hang when the pipeline is USB-loaded, as UVC descriptor is disabled
+        uvc = pipeline.createUVC()
+        cam_rgb.video.link(uvc.input)
+        if 1:  # Set custom GPIOs
+            uvc.setGpiosOnInit(      {58:0, 37:0, 34:0})
+            uvc.setGpiosOnStreamOn(  {58:1, 37:1, 34:1})
+            uvc.setGpiosOnStreamOff( {58:0, 37:0, 34:0})
+        else:  # Safe test with SoM LED
+            uvc.setGpiosOnInit(      {56:0})
+            uvc.setGpiosOnStreamOn(  {56:1})
+            uvc.setGpiosOnStreamOff( {56:0})
 
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
