@@ -21,6 +21,9 @@ parser.add_argument('-cd', '--create-dap', type=str, const='upgrade.dap', nargs=
 parser.add_argument('-fd', '--flash-dap', type=str, const='upgrade.dap', nargs='?',
                     help='Flash a DepthAI Application Package file, optionally '
                          'specifying the file name/path (default: %(const)s)')
+parser.add_argument("-spk", "--enable_speaker", type=int, const=70, nargs="?",
+                    help="Enable the speaker (instead of the mics), optionally "
+                    "specifying the volume 0..100 (default: %(const)s)")
 
 args = parser.parse_args()
 args.back_mic = False  # TODO again for UAC. Available with XLink
@@ -121,8 +124,12 @@ if not args.no_camera:
 uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
 uac.setMicGainDecibels(args.mic_gain_db)
-print("UAC using:", "Back mic," if args.back_mic else "Front mics,",
-      "Gain {} dB".format(args.mic_gain_db))
+uac.setEnableSpeaker(args.enable_speaker)
+if args.enable_speaker:
+    uac.setSpeakerVolume(args.enable_speaker)
+    print("UAC speaker with volume:", args.enable_speaker)
+else:
+    print("UAC microphones, gain {} dB".format(args.mic_gain_db))
 
 uac.setXlinkApplyMicGain(True)
 uac.setXlinkSampleSizeBytes(3)
@@ -188,7 +195,6 @@ if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
 with dai.Device(pipeline) as device, open(filename, "wb") as f:
     # Start pipeline
     tstart = time.monotonic()
-    device.startPipeline()
 
     print("\nDevice started, please keep this process running")
     print("and open an UVC viewer. Example on Linux:")
@@ -205,13 +211,25 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
             if args.xlink_mic:
                 pkt = qmic.tryGet()
                 if pkt is not None:
-                    print('MIC seq:', pkt.getSequenceNum(),
+                    mics = pkt.getWidth()
+                    if 0: print('MIC seq:', pkt.getSequenceNum(),
                               'timestamp:{:.6f}'.format(
                                   pkt.getTimestamp().total_seconds() - tstart),
                               'samples:', pkt.getHeight(),
-                              'mics:', pkt.getWidth())
+                              'mics:', mics)
                     data = pkt.getData()
                     data.tofile(f)
+                    if 1:  # Display amplitude bars for each mic
+                        a = np.empty((len(data)//3, 4), dtype='u1')
+                        a[:, :3] = data.reshape((-1, 3))
+                        a[:, 3:] = (a[:, 3 - 1:3] >> 7) * 255
+                        data = a.view('<i4').reshape((a.shape[:-1][0]//mics, mics))
+                        max = np.amax(data, axis=0)
+                        for i, v in enumerate(max):
+                            maxlen = 10
+                            amplitude = '=' * (maxlen * v // (256*256*256//2-1))
+                            print(f'{i+1}:[{amplitude:{maxlen}}] ', end='')
+                        print()
             if args.xlink_cam:
                 pkt = qcam.tryGet()
                 if pkt is not None:

@@ -1076,6 +1076,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMicAutoGain", &UAC::setMicAutoGain, py::arg("enable"), DOC(dai, node, UAC, setMicAutoGain))
         .def("setXlinkApplyMicGain", &UAC::setXlinkApplyMicGain, py::arg("enable"), DOC(dai, node, UAC, setXlinkApplyMicGain))
         .def("setXlinkSampleSizeBytes", &UAC::setXlinkSampleSizeBytes, py::arg("size"), DOC(dai, node, UAC, setXlinkSampleSizeBytes))
+        .def("setEnableSpeaker", &UAC::setEnableSpeaker, py::arg("enable"), DOC(dai, node, UAC, setEnableSpeaker))
+        .def("setSpeakerVolume", &UAC::setSpeakerVolume, py::arg("volume"), DOC(dai, node, UAC, setSpeakerVolume))
         ;
 
 }
