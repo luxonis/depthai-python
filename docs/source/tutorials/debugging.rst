@@ -1,5 +1,8 @@
-Debugging DepthAI API
-#####################
+Debugging DepthAI pipeline
+##########################
+
+Currently, tools for debugging the DepthAI pipeline are limited. We plan on creating a software that would track all messages and queues,
+which would allow users to debug a "frozen" pipeline much easier, which is usually caused by a filled up :ref:`blocking queue <Blocking behaviour>`.
 
 DepthAI debugging level
 =======================
@@ -23,7 +26,7 @@ Level             Logging
 :code:`trace`     Trace will print out a :ref:`Message <components_messages>` whenever one is received from the device.
 ================  =======
 
-Debugging can be enabled either in code:
+Debugging can be enabled either **in code**:
 
 .. code-block:: python
 
@@ -32,7 +35,7 @@ Debugging can be enabled either in code:
         device.setLogLevel(dai.LogLevel.DEBUG)
         device.setLogOutputLevel(dai.LogLevel.DEBUG)
 
-Or using environmental variable:
+Or using **environmental variable DEPTHAI_LEVEL**:
 
 .. tabs::
 
