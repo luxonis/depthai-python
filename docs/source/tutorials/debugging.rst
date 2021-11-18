@@ -6,23 +6,22 @@ DepthAI debugging level
 
 You can enable debugging by changing the debugging level. It's set to :code:`error` by default.
 
-.. list-table::
-   :header-rows: 1
+================  =======
+Level             Logging
+================  =======
+:code:`critical`  Only a critical error that stops/crashes the program.
+:code:`error`     Errors will not stop the program, but won't complete the action. Examples:
+                    - When :ref:`ImageManip` cropping ROI was out of bounds, error will get printed and the cropping won't take place
 
-   * - Level
-     - Logging
-   * - :code:`critical`
-     - Only a critical error that stops/crashes the program.
-   * - :code:`error`
-     - Errors will not stop the program, but won't complete the action. Example: :ref:`ImageManip` cropping ROI was out of bounds, error will get printed and the cropping won't take place. Or when :ref:`NeuralNetwork` gets a frame whose shape (width/heigth/channel) isn't that of the :code:`.blob`.
-   * - :code:`warn`
-     - Warnings (add example here)
-   * - :code:`info`
-     - Will print information about CPU/RAM consumption, temperature, CMX slices and SHAVE core allocation.
-   * - :code:`debug`
-     - Useful especially on starting and stopping the pipeline. Debug will print information about device initialization eg. Pipeline JSON, firmware/bootloader/OpenVINO version, and how device/XLink is being closed.
-   * - :code:`trace`
-     - Trace will print out a :ref:`Message <components_messages>` whenever one is received from the device.
+                    - When :ref:`NeuralNetwork` gets a frame whose shape (width/heigth/channel) isn't that of the :code:`.blob`
+:code:`warn`      Warnings (add example here)
+:code:`info`      Will print information about CPU/RAM consumption, temperature, CMX slices and SHAVE core allocation.
+:code:`debug`     Useful especially on starting and stopping the pipeline. Debug will print:
+                    - Information about device initialization eg. Pipeline JSON, firmware/bootloader/OpenVINO version
+
+                    - How device/XLink is being closed/disposed
+:code:`trace`     Trace will print out a :ref:`Message <components_messages>` whenever one is received from the device.
+================  =======
 
 Debugging can be enabled either in code:
 
