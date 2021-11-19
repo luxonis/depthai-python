@@ -1,17 +1,18 @@
 RAM usage
 =========
 
-All devices have 0.5GB (4Gbit) RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and the rest of it
-is used by resources, such as node pools where messages are stored.
+All devices have 0.5GB (4Gbit) on-board RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and other
+resources, such as message pools where messages are stored.
 
 If you enable :code:`info` :ref:`logging <depthai_logging>`, you will see how RAM is used:
 
 .. code-block:: bash
 
-    [info] Memory Usage - DDR: 41.23 / 358.82 MiB, CMX: 2.17 / 2.50 MiB, LeonOS Heap: 20.70 / 78.63 MiB, LeonRT Heap: 3.51 / 23.84 MiB
+    [info] Memory Usage - DDR: 41.23 / 358.82 MiB, CMX: 2.17 / 2.50 MiB,
+    LeonOS Heap: 20.70 / 78.63 MiB, LeonRT Heap: 3.51 / 23.84 MiB
 
 As you can see, RAM is split between the two LEON (CPU) cores, :code:`CMX` (used for image manipulation), and :code:`DDR` (everything else).
-If :code:`DDR` usage is close to the max (356MiB), you might get an error such as
+If :code:`DDR` usage is close to the max (358 MiB), you might get an error such as:
 
 .. code-block:: bash
 
@@ -24,20 +25,20 @@ Decreasing RAM consumption
 
 - **Large frames**
 
-    If we change resolution from 1080P to 4K in the :ref:`RGB video` example, DDR usage will increase from 41 MiB to 161 MiB. That's because
-    4K takes 4x more space compared to 1080P. So easy way to decrease RAM consumption is to use lower resolution / smaller frames.
+    If we change the resolution from 1080P to 4K in the :ref:`RGB video` example, DDR usage will increase from 41 MiB to 161 MiB. That's because
+    4K uses 4x more RAM compared to 1080P frame. An easy way to decrease RAM consumption is to use lower resolution / smaller frames.
 
 - **VideoEncoder**
 
     :ref:`VideoEncoder` nodes can consume a lot of RAM, especially at high resolutions. For example, :ref:`RGB Encoding` example consumes
-    259 MiB. If we change resolution from 4K to 1080P, we decrease DDR consumption to only 65 MiB.
+    259 MiB. If we change the resolution from 4K to 1080P, we decrease DDR consumption to only 65 MiB.
 
 - **ImageManip**
 
     Each :ref:`ImageManip` node will have it's own (output) pool of 4 frames (by default), so having multiple ImageManips that are manipulating
     high resolution frames will consume a lot of DDR RAM. You can change the pool size with :code:`manip.setNumFramesPool(4)`. By default,
     each pool "spot" will consume 1 MiB, even if it's a small 300x300 RGB frame (which is 270kB). Specifying the output frame size
-    can therefore decrease the RAM as well. Example for 300x300 RGB frame: :code:`manip.setMaxOutputFrameSize(270000)`.
+    can therefore decrease the RAM as well, eg. for a 300x300 RGB frame, you can set :code:`manip.setMaxOutputFrameSize(270000)`.
 
 - **XLinkIn**
 
