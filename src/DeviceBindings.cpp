@@ -2,6 +2,7 @@
 
 // depthai
 #include "depthai/device/Device.hpp"
+#include "depthai/pipeline/Pipeline.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -10,11 +11,13 @@
 // hedley
 #include <hedley/hedley.h>
 
+
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
 
-template<typename DEVICE, typename ARG1>
-static std::unique_ptr<DEVICE> deviceConstructorHelper(const ARG1& arg, const std::string& pathToCmd = "", bool usb2Mode = false){
+template<typename DEVICE, class... Args>
+static auto deviceSearchHelper(Args&&... args){
+
     auto startTime = std::chrono::steady_clock::now();
     bool found;
     dai::DeviceInfo deviceInfo = {};
@@ -42,17 +45,11 @@ static std::unique_ptr<DEVICE> deviceConstructorHelper(const ARG1& arg, const st
     // if no devices found, then throw
     if(!found) throw std::runtime_error("No available devices");
 
-    // Check if pathToCmd supplied
-    if(pathToCmd.empty()){
-        return std::make_unique<DEVICE>(arg, deviceInfo, usb2Mode);
-    } else {
-        return std::make_unique<DEVICE>(arg, deviceInfo, pathToCmd);
-    }
-    return nullptr;
+    return deviceInfo;
 }
 
 
-std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout){
+static std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout){
     using namespace std::chrono;
 
     // if timeout < 0, unlimited timeout
@@ -75,6 +72,92 @@ std::vector<std::string> deviceGetQueueEventsHelper(dai::Device& d, const std::v
 }
 
 
+template<typename D, typename ARG>
+static void bindConstructors(ARG& arg){
+    using namespace dai;
+
+    arg
+    .def(py::init([](const Pipeline& pipeline){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, dev);
+    }), py::arg("pipeline"), DOC(dai, DeviceBase, DeviceBase))
+    .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, dev, usb2Mode);
+    }), py::arg("pipeline"), py::arg("usb2Mode"), DOC(dai, DeviceBase, DeviceBase, 2))
+    .def(py::init([](const Pipeline& pipeline, UsbSpeed maxUsbSpeed){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, dev, maxUsbSpeed);
+    }), py::arg("pipeline"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 3))
+    .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, dev, pathToCmd);
+    }), py::arg("pipeline"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 4))
+    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, deviceInfo, usb2Mode);
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 7))
+    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, deviceInfo, maxUsbSpeed);
+    }), py::arg("pipeline"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 8))
+    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, std::string pathToCmd){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, deviceInfo, pathToCmd);
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 9))
+
+    // DeviceBase constructor - OpenVINO version
+    .def(py::init([](OpenVINO::Version version){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, dev);
+    }), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, DeviceBase, 11))
+    .def(py::init([](OpenVINO::Version version, bool usb2Mode){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, dev, usb2Mode);
+    }), py::arg("version"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 13))
+    .def(py::init([](OpenVINO::Version version, UsbSpeed maxUsbSpeed){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, dev, maxUsbSpeed);
+    }), py::arg("version"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 14))
+    .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, dev, pathToCmd);
+    }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 15))
+    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, deviceInfo, usb2Mode);
+    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 18))
+    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 19))
+    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(version, deviceInfo, pathToCmd);
+    }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 20))
+    .def(py::init([](typename D::Config config){
+        auto dev = deviceSearchHelper<D>();
+        py::gil_scoped_release release;
+        return std::make_unique<D>(config, dev);
+    }), py::arg("config"), DOC(dai, DeviceBase, DeviceBase, 22))
+    .def(py::init([](typename D::Config config, const DeviceInfo& deviceInfo){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(config, deviceInfo);
+    }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 23))
+    ;
+
+}
+
+
+
 void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
@@ -82,6 +165,9 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Type definitions
     py::class_<DeviceBase> deviceBase(m, "DeviceBase", DOC(dai, DeviceBase));
     py::class_<Device, DeviceBase> device(m, "Device", DOC(dai, Device));
+    py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
+    py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
+    py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -97,11 +183,36 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
 
+    // Bind PrebootConfig::USB
+    prebootConfigUsb
+        .def(py::init<>())
+        .def_readwrite("vid", &PrebootConfig::USB::vid)
+        .def_readwrite("pid", &PrebootConfig::USB::pid)
+        .def_readwrite("flashBootedVid", &PrebootConfig::USB::flashBootedVid)
+        .def_readwrite("flashBootedPid", &PrebootConfig::USB::flashBootedPid)
+        .def_readwrite("maxSpeed", &PrebootConfig::USB::maxSpeed)
+    ;
 
-    // Bind Device, using DeviceWrapper to be able to destruct the object by calling close()
+    // Bind PrebootConfig
+    prebootConfig
+        .def(py::init<>())
+        .def_readwrite("usb", &PrebootConfig::usb)
+        .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
+    ;
+
+    // Bind Device::Config
+    deviceConfig
+        .def(py::init<>())
+        .def_readwrite("version", &Device::Config::version)
+        .def_readwrite("preboot", &Device::Config::preboot)
+    ;
+
+    // Bind constructors
+    bindConstructors<DeviceBase>(deviceBase);
+    // Bind the rest
     deviceBase
         // Python only methods
-        .def("__enter__", [](py::object obj){ return obj; })
+        .def("__enter__", [](DeviceBase& d) -> DeviceBase& { return d; })
         .def("__exit__", [](DeviceBase& d, py::object type, py::object value, py::object traceback) {
             py::gil_scoped_release release;
             d.close();
@@ -115,53 +226,11 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
-        .def_static("getEmbeddedDeviceBinary", &DeviceBase::getEmbeddedDeviceBinary, py::arg("usb2Mode"), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
+        .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
+        .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
 
         // methods
-
-        // Device constructor - Pipeline
-        .def(py::init([](const Pipeline& pipeline){ return deviceConstructorHelper<DeviceBase>(pipeline); }), py::arg("pipeline"), DOC(dai, DeviceBase, DeviceBase))
-        .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
-            // Blocking constructor
-            return deviceConstructorHelper<DeviceBase>(pipeline, std::string(""), usb2Mode);
-        }), py::arg("pipeline"), py::arg("usb2Mode"), DOC(dai, DeviceBase, DeviceBase, 2))
-        .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
-            // Blocking constructor
-            return deviceConstructorHelper<DeviceBase>(pipeline, pathToCmd);
-        }), py::arg("pipeline"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 3))
-        .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<DeviceBase>(pipeline, deviceInfo, usb2Mode);
-        }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 6))
-        .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, std::string pathToCmd){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<DeviceBase>(pipeline, deviceInfo, pathToCmd);
-        }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 7))
-
-        // DeviceBase constructor - OpenVINO version
-        .def(py::init([](OpenVINO::Version version){ return deviceConstructorHelper<DeviceBase>(version); }), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, DeviceBase, DeviceBase, 10))
-        .def(py::init([](OpenVINO::Version version, bool usb2Mode){
-            // Blocking constructor
-            return deviceConstructorHelper<DeviceBase>(version, std::string(""), usb2Mode);
-        }), py::arg("version"), py::arg("usb2Mode"), DOC(dai, DeviceBase, DeviceBase, 11))
-        .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
-            // Blocking constructor
-            return deviceConstructorHelper<DeviceBase>(version, pathToCmd);
-        }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 12))
-        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<DeviceBase>(version, deviceInfo, usb2Mode);
-        }), py::arg("version"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
-        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<DeviceBase>(version, deviceInfo, pathToCmd);
-        }), py::arg("version"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 16))
-
         .def("isPipelineRunning", [](DeviceBase& d) { py::gil_scoped_release release; return d.isPipelineRunning(); }, DOC(dai, DeviceBase, isPipelineRunning))
         .def("startPipeline", [](DeviceBase& d){
             // Issue an deprecation warning
@@ -203,48 +272,10 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ;
 
 
+    // Bind constructors
+    bindConstructors<Device>(device);
+    // Bind the rest
     device
-        .def(py::init([](const Pipeline& pipeline){ return deviceConstructorHelper<Device>(pipeline); }), py::arg("pipeline"), DOC(dai, Device, Device))
-        .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
-            // Blocking constructor
-            return deviceConstructorHelper<Device>(pipeline, std::string(""), usb2Mode);
-        }), py::arg("pipeline"), py::arg("usb2Mode"), DOC(dai, Device, Device, 2))
-        .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
-            // Blocking constructor
-            return deviceConstructorHelper<Device>(pipeline, pathToCmd);
-        }), py::arg("pipeline"), py::arg("pathToCmd"), DOC(dai, Device, Device, 3))
-        .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<Device>(pipeline, deviceInfo, usb2Mode);
-        }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, Device, Device, 6))
-        .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, std::string pathToCmd){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<Device>(pipeline, deviceInfo, pathToCmd);
-        }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, Device, Device, 7))
-
-        // Device constructor - OpenVINO version
-        .def(py::init([](OpenVINO::Version version){ return deviceConstructorHelper<Device>(version); }), py::arg("version") = Pipeline::DEFAULT_OPENVINO_VERSION, DOC(dai, DeviceBase, DeviceBase, 10))
-        .def(py::init([](OpenVINO::Version version, bool usb2Mode){
-            // Blocking constructor
-            return deviceConstructorHelper<Device>(version, std::string(""), usb2Mode);
-        }), py::arg("version"), py::arg("usb2Mode"), DOC(dai, DeviceBase, DeviceBase, 11))
-        .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
-            // Blocking constructor
-            return deviceConstructorHelper<Device>(version, pathToCmd);
-        }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 12))
-        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<Device>(version, deviceInfo, usb2Mode);
-        }), py::arg("version"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
-        .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
-            // Non blocking constructor
-            py::gil_scoped_release release;
-            return std::make_unique<Device>(version, deviceInfo, pathToCmd);
-        }), py::arg("version"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 16))
-
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
         .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
         .def("getOutputQueueNames", &Device::getOutputQueueNames, DOC(dai, Device, getOutputQueueNames))

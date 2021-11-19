@@ -11,12 +11,14 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
+### NAME
+MODULE_NAME = 'depthai'
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
 version_file = os.path.join(here, "generated", "version.py")
 os.makedirs(os.path.join(here, "generated"), exist_ok=True)
-if os.environ.get('CI') != None : 
+if os.environ.get('CI') != None :
     ### If CI build, respect 'BUILD_COMMIT_HASH' to determine final version if set
     final_version = find_version.get_package_version()
     if os.environ.get('BUILD_COMMIT_HASH') != None:
@@ -67,7 +69,7 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
-    
+
     def run(self):
         try:
             out = subprocess.check_output(['cmake', '--version'])
@@ -133,13 +135,13 @@ class CMakeBuild(build_ext):
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
             cmake_args += ['-DCMAKE_TOOLCHAIN_FILE={}'.format(os.path.dirname(os.path.abspath(__file__)) + '/cmake/toolchain/msvc.cmake')]
-            
+
             # Detect whether 32 / 64 bit Python is used and compile accordingly
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             else:
                 cmake_args += ['-A', 'Win32']
-            
+
             # Add flag to build with maximum available threads
             build_args += ['--', '/m']
         # Unix
@@ -155,13 +157,13 @@ class CMakeBuild(build_ext):
             num_threads = (freeMemory // 1000)
             num_threads = min(num_threads, max_threads)
             if num_threads <= 0:
-                num_threads = 1            
+                num_threads = 1
             build_args += ['--', '-j' + str(num_threads)]
             cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
-        
+
         # Add additional cmake args from environment
         if 'CMAKE_ARGS' in os.environ:
             cmake_args += [os.environ['CMAKE_ARGS']]
@@ -171,19 +173,44 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
+        # Create stubs, add PYTHONPATH to find the build module
+        # CWD to to extdir where the built module can be found to extract the types
+        subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{extdir}'], cwd=extdir)
+
+        # Add py.typed
+        open(f'{extdir}/depthai/py.typed', 'a').close()
+
+        # imports and overloads
+        with open(f'{extdir}/depthai/__init__.pyi' ,'r+') as file:
+            # Read
+            contents = file.read()
+
+            # Add imports
+            stubs_import = 'import depthai.node as node\nimport typing\nimport json\n' + contents
+            # Create 'create' overloads
+            nodes = re.findall('def \S*\(self\) -> node.(\S*):', stubs_import)
+            overloads = ''
+            for node in nodes:
+                overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
+            print(f'{overloads}')
+            final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
+
+            # Writeout changes
+            file.seek(0)
+            file.write(final_stubs)
 
 
 setup(
-    name='depthai',
+    name=MODULE_NAME,
     version=__version__,
-    author='Martin Peterlin',
-    author_email='martin@luxonis.com',
+    author='Luxonis',
+    author_email='support@luxonis.com',
     description='DepthAI Python Library',
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
-    ext_modules=[CMakeExtension('depthai')],
+    ext_modules=[CMakeExtension(MODULE_NAME)],
     cmdclass={
         'build_ext': CMakeBuild
     },
@@ -200,15 +227,15 @@ setup(
         "Operating System :: Unix",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development",
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.6',
 )

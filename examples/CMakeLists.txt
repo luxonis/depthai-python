@@ -85,47 +85,100 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
 endif()
 
 # Add examples
-add_python_example(rgb_preview rgb_preview.py)
-add_python_example(mono_preview mono_preview.py)
-add_python_example(depth_preview depth_preview.py)
-add_python_example(rgb_encoding rgb_encoding.py)
-add_python_example(rgb_mono_encoding rgb_mono_encoding.py)
-add_python_example(rgb_full_resolution_saver rgb_full_resolution_saver.py)
-add_python_example(mono_full_resolution_saver mono_full_resolution_saver.py)
-add_python_example(rgb_mobilenet rgb_mobilenet.py)
-add_python_example(mono_mobilenet mono_mobilenet.py)
-add_python_example(mono_depth_mobilenetssd mono_depth_mobilenetssd.py)
-add_python_example(rgb_encoding_mono_mobilenet rgb_encoding_mono_mobilenet.py)
-add_python_example(rgb_encoding_mono_mobilenet_depth rgb_encoding_mono_mobilenet_depth.py)
-add_python_example(encoding_max_limit encoding_max_limit.py)
-add_python_example(rgb_camera_control rgb_camera_control.py)
-add_python_example(mono_camera_control mono_camera_control.py)
-add_python_example(depth_crop_control depth_crop_control.py)
-add_python_example(rgb_mobilenet_4k rgb_mobilenet_4k.py)
-add_python_example(device_queue_event device_queue_event.py)
-add_python_example(video_mobilenet video_mobilenet.py)
-add_python_example(rgb_encoding_mobilenet rgb_encoding_mobilenet.py)
-add_python_example(rgb_rotate_warp rgb_rotate_warp.py)
-add_python_example(tiny_yolo_v3_device_side_decoding tiny_yolo_v3_device_side_decoding.py)
-add_python_example(tiny_yolo_v4_device_side_decoding tiny_yolo_v4_device_side_decoding.py)
-add_python_example(autoexposure_roi autoexposure_roi.py)
-add_python_example(opencv_support opencv_support.py)
-add_python_example(system_information system_information.py)
-add_python_example(spatial_mobilenet spatial_mobilenet.py)
-add_python_example(spatial_mobilenet_mono spatial_mobilenet_mono.py)
-add_python_example(spatial_tiny_yolo_v3 spatial_tiny_yolo.py)
-add_python_example(spatial_tiny_yolo_v4 spatial_tiny_yolo.py)
-add_python_example(spatial_location_calculator spatial_location_calculator.py)
-add_python_example(rgb_video rgb_video.py)
-add_python_example(object_tracker object_tracker.py)
-add_python_example(spatial_object_tracker spatial_object_tracker.py)
-add_python_example(object_tracker_video object_tracker_video.py)
-add_python_example(stereo_depth_from_host stereo_depth_from_host.py)
-add_python_example(stereo_depth_video stereo_depth_video.py)
-add_python_example(imu_gyroscope_accelerometer imu_gyroscope_accelerometer.py)
-add_python_example(imu_rotation_vector imu_rotation_vector.py)
-add_python_example(rgb_depth_aligned rgb_depth_aligned.py)
-add_python_example(edge_detector edge_detector.py)
-add_python_example(script_camera_control script_camera_control.py)
-add_python_example(feature_tracker feature_tracker.py)
-add_python_example(corner_detector corner_detector.py)
+
+## Bootloader
+# add_python_example(bootloader_config bootloader/bootloader_config.py)
+add_python_example(bootloader_version bootloader/bootloader_version.py)
+# add_python_example(flash_bootloader bootloader/flash_bootloader.py)
+
+## Calibration
+# add_python_example(calibration_flash_v5 calibration/calibration_flash_v5.py)
+# add_python_example(calibration_flash calibration/calibration_flash.py)
+add_python_example(calibration_load calibration/calibration_load.py)
+add_python_example(calibration_reader calibration/calibration_reader.py)
+
+## ColorCamera
+add_python_example(autoexposure_roi ColorCamera/autoexposure_roi.py)
+add_python_example(rgb_camera_control ColorCamera/rgb_camera_control.py)
+add_python_example(rgb_preview ColorCamera/rgb_preview.py)
+add_python_example(rgb_scene ColorCamera/rgb_scene.py)
+add_python_example(rgb_video ColorCamera/rgb_video.py)
+
+## EdgeDetector
+add_python_example(edge_detector EdgeDetector/edge_detector.py)
+
+## FeatureTracker
+add_python_example(feature_tracker FeatureTracker/feature_tracker.py)
+add_python_example(feature_tracker_color FeatureTracker/feature_tracker_color.py)
+add_python_example(feature_detector FeatureTracker/feature_detector.py)
+
+## HostSide
+add_python_example(device_queue_event host_side/device_queue_event.py)
+add_python_example(opencv_support host_side/opencv_support.py)
+add_python_example(queue_add_callback host_side/queue_add_callback.py)
+
+## ImageManip
+add_python_example(image_manip_rotate ImageManip/image_manip_rotate.py)
+add_python_example(image_manip_tiling ImageManip/image_manip_tiling.py)
+add_python_example(rgb_rotate_warp ImageManip/rgb_rotate_warp.py)
+
+## IMU
+add_python_example(imu_gyroscope_accelerometer IMU/imu_gyroscope_accelerometer.py)
+add_python_example(imu_rotation_vector IMU/imu_rotation_vector.py)
+
+## Mixed
+add_python_example(mono_depth_mobilenetssd mixed/mono_depth_mobilenetssd.py)
+add_python_example(rgb_encoding_mobilenet mixed/rgb_encoding_mobilenet.py)
+add_python_example(rgb_encoding_mono_mobilenet mixed/rgb_encoding_mono_mobilenet.py)
+add_python_example(rgb_encoding_mono_mobilenet_depth mixed/rgb_encoding_mono_mobilenet_depth.py)
+
+## MobileNet
+add_python_example(mono_mobilenet MobileNet/mono_mobilenet.py)
+add_python_example(rgb_mobilenet_4k MobileNet/rgb_mobilenet_4k.py)
+add_python_example(rgb_mobilenet MobileNet/rgb_mobilenet.py)
+add_python_example(video_mobilenet MobileNet/video_mobilenet.py)
+
+## MonoCamera
+add_python_example(mono_preview MonoCamera/mono_preview.py)
+add_python_example(mono_full_resolution_saver MonoCamera/mono_full_resolution_saver.py)
+add_python_example(mono_camera_control MonoCamera/mono_camera_control.py)
+
+## NeuralNetwork
+# add_python_example(concat_multiple_input NeuralNetwork/concat_multiple_input.py)
+# add_python_example(normalization_multiple_input NeuralNetwork/normalization_multiple_input.py)
+
+## ObjectTracker
+add_python_example(object_tracker_video ObjectTracker/object_tracker_video.py)
+add_python_example(object_tracker ObjectTracker/object_tracker.py)
+add_python_example(spatial_object_tracker ObjectTracker/spatial_object_tracker.py)
+# add_python_example(spatial_object_tracker_yolo ObjectTracker/spatial_object_tracker_yolo.py)
+
+## Script
+add_python_example(script_camera_control Script/script_camera_control.py)
+
+## SpatialDetection
+add_python_example(spatial_tiny_yolo_v3 SpatialDetection/spatial_tiny_yolo.py yolo3)
+add_python_example(spatial_tiny_yolo_v4 SpatialDetection/spatial_tiny_yolo.py yolo4)
+add_python_example(spatial_mobilenet SpatialDetection/spatial_mobilenet.py)
+add_python_example(spatial_mobilenet_mono SpatialDetection/spatial_mobilenet_mono.py)
+add_python_example(spatial_location_calculator SpatialDetection/spatial_location_calculator.py)
+
+## StereoDepth
+add_python_example(depth_crop_control StereoDepth/depth_crop_control.py)
+add_python_example(depth_preview StereoDepth/depth_preview.py)
+add_python_example(rgb_depth_aligned StereoDepth/rgb_depth_aligned.py)
+add_python_example(stereo_depth_from_host StereoDepth/stereo_depth_from_host.py)
+add_python_example(stereo_depth_video StereoDepth/stereo_depth_video.py)
+
+## SystemLogger
+add_python_example(system_information SystemLogger/system_information.py)
+
+## VideoEncoder
+add_python_example(encoding_max_limit VideoEncoder/encoding_max_limit.py)
+add_python_example(rgb_encoding VideoEncoder/rgb_encoding.py)
+add_python_example(rgb_full_resolution_saver VideoEncoder/rgb_full_resolution_saver.py)
+add_python_example(rgb_mono_encoding VideoEncoder/rgb_mono_encoding.py)
+
+## Yolo
+add_python_example(tiny_yolo_v3_device_side_decoding Yolo/tiny_yolo.py yolo3)
+add_python_example(tiny_yolo_v4_device_side_decoding Yolo/tiny_yolo.py yolo4)
