@@ -1,7 +1,7 @@
 RAM usage
 =========
 
-All devices have 0.5GB (4Gbit) on-board RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and other
+All devices have 512 MiB (4 Gbit) on-board RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and other
 resources, such as message pools where messages are stored.
 
 If you enable :code:`info` :ref:`logging <depthai_logging>`, you will see how RAM is used:
@@ -12,7 +12,7 @@ If you enable :code:`info` :ref:`logging <depthai_logging>`, you will see how RA
     LeonOS Heap: 20.70 / 78.63 MiB, LeonRT Heap: 3.51 / 23.84 MiB
 
 As you can see, RAM is split between the two LEON (CPU) cores, :code:`CMX` (used for image manipulation), and :code:`DDR` (everything else).
-If :code:`DDR` usage is close to the max (358 MiB), you might get an error such as:
+If :code:`DDR` usage is close to the max (in this example, 358 MiB), you might get an error such as:
 
 .. code-block:: bash
 
