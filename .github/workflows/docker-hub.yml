@@ -21,7 +21,9 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Build amd64 image
-        run: docker build --push -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+        run: docker build -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+      - name: Push image
+        run: docker push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
   build_armv7:
     name: Build armv7 docker image
     runs-on: luxonis-armhf
@@ -40,7 +42,9 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Build armv7 image
-        run: docker build --push -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+        run: docker build -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+      - name: Push image
+        run: docker push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
   build_armv8:
     name: Build armv8 docker image
     runs-on: ARM64
@@ -59,4 +63,6 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Build armv8 image
-        run: docker build --push -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+        run: docker build -t luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} -f ci/Dockerfile .
+      - name: Push image
+        run: docker push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
