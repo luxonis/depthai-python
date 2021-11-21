@@ -121,7 +121,7 @@ Currently configurable blocks
         Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
         then software interpolation is done on Shave, resulting a final disparity with 3 fractional bits, resulting in significantly more granular depth
         steps (8 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
-        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/8 of a pixel. In this mode, stereo cameras perform: :code:`95 depth steps * 8 subpixel depth steps + 1(invalid disparity 0) = 761 depth steps`
+        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/8 of a pixel. In this mode, stereo cameras perform: :code:`94 depth steps * 8 subpixel depth steps + 2 (min/max values) = 754 depth steps`
         Note that Subpixel and Extended Disparity are not yet supported simultaneously.
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
