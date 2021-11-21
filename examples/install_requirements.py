@@ -52,7 +52,13 @@ if thisPlatform == "aarch64":
         requireOpenCv = True
 
 if requireOpenCv:
-    DEPENDENCIES.extend(['numpy','opencv-python'])
+    DEPENDENCIES.append('numpy')
+    # 4.5.4.58 package is broken for python 3.9
+    if sys.version_info[0] == 3 and sys.version_info[1] == 9:
+        DEPENDENCIES.append('opencv-python!=4.5.4.58')
+    else:
+        DEPENDENCIES.append('opencv-python')
+
 
 
 # Constants
@@ -184,6 +190,6 @@ if requireOpenCv and thisPlatform == "aarch64":
         WARNING='\033[1;5;31m'
         RED='\033[91m'
         LINE_CL='\033[0m'
-        SUGGESTION='echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc && source ~/.bashrc'
+        SUGGESTION='echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc && source ~/.bashrc'
         print(f'{WARNING}WARNING:{LINE_CL} Need to set OPENBLAS_CORE_TYPE environment variable, otherwise opencv will fail with illegal instruction.')
         print(f'Run: {RED}{SUGGESTION}{LINE_CL}')

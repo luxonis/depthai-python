@@ -283,7 +283,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
         .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
         .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("enableExtendedDisparity", &StereoDepthProperties::enableExtendedDisparity)
         .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
         .def_readwrite("width",                   &StereoDepthProperties::width)
         .def_readwrite("height",                  &StereoDepthProperties::height)
@@ -360,8 +359,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     trackerType
-        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS)
-        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM)
+        .value("SHORT_TERM_KCF", TrackerType::SHORT_TERM_KCF, DOC(dai, TrackerType, SHORT_TERM_KCF))
+        .value("SHORT_TERM_IMAGELESS", TrackerType::SHORT_TERM_IMAGELESS, DOC(dai, TrackerType, SHORT_TERM_IMAGELESS))
+        .value("ZERO_TERM_IMAGELESS", TrackerType::ZERO_TERM_IMAGELESS, DOC(dai, TrackerType, ZERO_TERM_IMAGELESS))
+        .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM, DOC(dai, TrackerType, ZERO_TERM_COLOR_HISTOGRAM))
     ;
 
     trackerIdAssigmentPolicy
@@ -479,18 +480,18 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
-        .def("canConnect", &Node::Output::canConnect, py::arg("in"), DOC(dai, Node, Output, canConnect))
-        .def("link", &Node::Output::link, py::arg("in"), DOC(dai, Node, Output, link))
-        .def("unlink", &Node::Output::unlink, py::arg("in"), DOC(dai, Node, Output, unlink))
+        .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
+        .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
+        .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
 
 
     nodeConnection
-        .def_property("outputId", [](Node::Connection& conn) { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
-        .def_property("outputName", [](Node::Connection& conn) { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
-        .def_property("inputId", [](Node::Connection& conn) { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
-        .def_property("inputName", [](Node::Connection& conn) { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
+        .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
+        .def_property("outputName", [](Node::Connection& conn) -> std::string& { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
+        .def_property("inputId", [](Node::Connection& conn) -> Node::Id& { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
+        .def_property("inputName", [](Node::Connection& conn) -> std::string& { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
     ;
 
     pyNode
@@ -626,7 +627,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("input", &NeuralNetwork::input, DOC(dai, node, NeuralNetwork, input))
         .def_readonly("out", &NeuralNetwork::out, DOC(dai, node, NeuralNetwork, out))
         .def_readonly("passthrough", &NeuralNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
-        .def("setBlobPath", &NeuralNetwork::setBlobPath, py::arg("path"), DOC(dai, node, NeuralNetwork, setBlobPath))
+        .def("setBlobPath", [](NeuralNetwork& nn, py::object obj){
+            // Allows to call this function with paths as well as strings
+            nn.setBlobPath(py::str(obj));
+        }, py::arg("path"), DOC(dai, node, NeuralNetwork, setBlobPath))
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames, py::arg("numFrames"), DOC(dai, node, NeuralNetwork, setNumPoolFrames))
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads, py::arg("numThreads"), DOC(dai, node, NeuralNetwork, setNumInferenceThreads))
         .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, NeuralNetwork, setNumNCEPerInferenceThread))
@@ -757,6 +761,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("outConfig",      &StereoDepth::outConfig, DOC(dai, node, StereoDepth, outConfig))
         .def_readonly("debugDispLrCheckIt1", &StereoDepth::debugDispLrCheckIt1, DOC(dai, node, StereoDepth, debugDispLrCheckIt1))
         .def_readonly("debugDispLrCheckIt2", &StereoDepth::debugDispLrCheckIt2, DOC(dai, node, StereoDepth, debugDispLrCheckIt2))
+        .def_readonly("debugExtDispLrCheckIt1", &StereoDepth::debugExtDispLrCheckIt1, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt1))
+        .def_readonly("debugExtDispLrCheckIt2", &StereoDepth::debugExtDispLrCheckIt2, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
 #if 0 //will be enabled when confidence map RGB aligment/LR-check support will be added

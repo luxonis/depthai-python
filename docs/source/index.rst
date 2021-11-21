@@ -78,6 +78,8 @@ Now, pick a tutorial or code sample and start utilizing Gen2 capabilities
    tutorials/hello_world.rst
    tutorials/multiple.rst
    tutorials/maximize_fov.rst
+   tutorials/dispaying_detections.rst
+   tutorials/debugging.rst
 
 .. toctree::
    :maxdepth: 1
