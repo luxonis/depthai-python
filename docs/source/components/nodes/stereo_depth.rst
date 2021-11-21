@@ -162,7 +162,8 @@ Currently configurable blocks
 Current limitations
 ###################
 
-When using subpixel mode, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output.
+- When using subpixel mode, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output.
+- Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 
 Stereo depth FPS
 ################
