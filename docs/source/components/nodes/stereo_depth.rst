@@ -43,25 +43,32 @@ Inputs and Outputs
   ──────────────►│-------------------├─────────────►
                  └───────────────────┘
 
-**Message types**
+.. tabs::
 
-- :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
-- :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
-- :code:`inputConfig` - :ref:`StereoDepthConfig`
+  .. tab:: **Inputs**
 
-- :code:`confidenceMap` - :ref:`ImgFrame`
-- :code:`rectifiedLeft` - :ref:`ImgFrame`
-- :code:`syncedLeft` - :ref:`ImgFrame`
-- :code:`depth` - :ref:`ImgFrame`
-- :code:`disparity` - :ref:`ImgFrame`
-- :code:`rectifiedRight` - :ref:`ImgFrame`
-- :code:`syncedRight` - :ref:`ImgFrame`
+    - :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
+    - :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
+    - :code:`inputConfig` - :ref:`StereoDepthConfig`
 
-**Debug outputs**
+  .. tab:: **Outputs**
 
-- :code:`debugDispLrCheckIt1` - :ref:`ImgFrame`
-- :code:`debugDispLrCheckIt2` - :ref:`ImgFrame`
-- :code:`debugDispCostDump` - :ref:`ImgFrame`
+    - :code:`confidenceMap` - :ref:`ImgFrame`
+    - :code:`rectifiedLeft` - :ref:`ImgFrame`
+    - :code:`syncedLeft` - :ref:`ImgFrame`
+    - :code:`depth` - :ref:`ImgFrame`
+    - :code:`disparity` - :ref:`ImgFrame`
+    - :code:`rectifiedRight` - :ref:`ImgFrame`
+    - :code:`syncedRight` - :ref:`ImgFrame`
+    - :code:`outConfig` - :ref:`StereoDepthConfig`
+
+  .. tab:: **Debug outputs**
+
+    - :code:`debugDispLrCheckIt1` - :ref:`ImgFrame`
+    - :code:`debugDispLrCheckIt2` - :ref:`ImgFrame`
+    - :code:`debugExtDispLrCheckIt1` - :ref:`ImgFrame`
+    - :code:`debugExtDispLrCheckIt2` - :ref:`ImgFrame`
+    - :code:`debugDispCostDump` - :ref:`ImgFrame`
 
 Internal block diagram of StereoDepth node
 ##########################################
@@ -93,6 +100,8 @@ Currently configurable blocks
         #. Computes disparity by matching in L->R direction
         #. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in the final disparity map is invalidated.
 
+        You can use :code:`debugDispLrCheckIt1` and :code:`debugDispLrCheckIt2` debug outputs for debugging/fine-tuning purposes.
+
       .. tab:: Extended Disparity
 
         The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191, meaning the range is now: **[0..190]**.
@@ -102,6 +111,8 @@ Currently configurable blocks
         #. Computes disparity on the original size images (e.g. 1280x720)
         #. Computes disparity on 2x downscaled images (e.g. 640x360)
         #. Combines the two level disparities on Shave, effectively covering a total disparity range of 191 pixels (in relation to the original resolution).
+
+        You can use :code:`debugExtDispLrCheckIt1` and :code:`debugExtDispLrCheckIt2` debug outputs for debugging/fine-tuning purposes.
 
       .. tab:: Subpixel Disparity
 
