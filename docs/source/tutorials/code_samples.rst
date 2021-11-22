@@ -24,7 +24,8 @@ Code Samples
    ../samples/VideoEncoder/*
    ../samples/Yolo/*
 
-Code samples are used for automated testing. They are also a great starting point for the gen2 API.
+Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
+are presented with code.
 
 .. rubric:: Bootloader
 

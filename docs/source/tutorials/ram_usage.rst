@@ -1,7 +1,7 @@
 RAM usage
 =========
 
-All devices have 512 MiB (4 Gbit) on-board RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and other
+All OAK devices have 512 MiB (4 Gbit) on-board RAM, which is used for firmware (about 15MB), assets (a few KB up to 100MB+, eg. NN models), and other
 resources, such as message pools where messages are stored.
 
 If you enable :code:`info` :ref:`logging <depthai_logging>`, you will see how RAM is used:
