@@ -55,7 +55,7 @@ Usage
           b = Buffer(len(x_serial))
           while True:
               time.sleep(1)
-              b.getData()[:] = x_serial
+              b.setData(x_serial)
               node.io['out'].send(b)
       """)
       script.outputs['out'].link(xout.input)
@@ -78,7 +78,7 @@ Usage
           b = Buffer(len(x_serial))
           while True:
               time.sleep(1)
-              b.getData()[:] = x_serial
+              b.setData(x_serial)
               node.io['out'].send(b)
       )");
       script->outputs["out"].link(xout->input);
