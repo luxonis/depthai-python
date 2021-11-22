@@ -29,7 +29,7 @@ monoRight.out.link(depth.right)
 
 videoEnc = pipeline.create(dai.node.VideoEncoder)
 # Depth resolution/FPS will be the same as mono resolution/FPS
-videoEnc.setDefaultProfilePreset(monoLeft.getResolutionSize(), monoLeft.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+videoEnc.setDefaultProfilePreset(monoLeft.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
 depth.disparity.link(videoEnc.input)
 
 xout = pipeline.create(dai.node.XLinkOut)
