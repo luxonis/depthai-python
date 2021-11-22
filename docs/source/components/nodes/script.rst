@@ -3,8 +3,8 @@ Script
 
 Script node allows users to run **custom Python scripts on the device**. Due to the computational resource constraints,
 script node shouldn't be used for heavy computing (eg. image manipulation/CV), but for managing the flow
-of the pipeline. Example use cases would be controlling nodes like :ref:`ImageManip`, :ref:`ColorCamera`, :ref:`SpatialLocationCalculator`,
-decoding :ref:`NeuralNetwork` results, or interfacing with GPIOs.
+of the pipeline (business logic). Example use cases would be controlling nodes like :ref:`ImageManip`, :ref:`ColorCamera`, :ref:`SpatialLocationCalculator`,
+decoding :ref:`NeuralNetwork` results, or interfacing with GPIOs. For **debugging scripts**, we suggest :ref:`Script node logging <script_logging>`.
 
 How to place it
 ###############
