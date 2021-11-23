@@ -1078,6 +1078,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     algorithmControl
         .def(py::init<>())
         .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
+        .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
@@ -1130,8 +1131,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     costAggregation
         .def(py::init<>())
         .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
-        .def_readwrite("horizontalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCosts))
-        .def_readwrite("verticalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCosts))
+        .def_readwrite("horizontalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP1))
+        .def_readwrite("horizontalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
+        .def_readwrite("verticalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
+        .def_readwrite("verticalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
         ;
 
     rawStereoDepthConfig
@@ -1157,8 +1160,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
         .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
-        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, DOC(dai, StereoDepthConfig, setLeftRightCheck))
-        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, py::arg("enable"), DOC(dai, StereoDepthConfig, setLeftRightCheck))
+        .def("setExtendedDisparity",    &StereoDepthConfig::setExtendedDisparity, py::arg("enable"), DOC(dai, StereoDepthConfig, setExtendedDisparity))
+        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, py::arg("enable"), DOC(dai, StereoDepthConfig, setSubpixel))
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))

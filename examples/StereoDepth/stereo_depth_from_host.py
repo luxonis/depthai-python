@@ -16,10 +16,6 @@ parser.add_argument('-debug', "--debug", action="store_true", help="Enable debug
 parser.add_argument('-dumpdispcost', "--dumpdisparitycostvalues", action="store_true", help="Dumps the disparity cost values for each disparity range. 96 byte for each pixel.")
 args = parser.parse_args()
 
-if args.debug and args.dumpdisparitycostvalues:
-    print("-debug and --dumpdisparitycostvalues are mutually exclusive!")
-    exit(1)
-
 if not Path(datasetDefault).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
@@ -54,6 +50,8 @@ class StereoConfigHandler:
     trLineqAlpha = list()
     trLineqBeta = list()
     trLineqThreshold = list()
+    trCostAggregationP1 = list()
+    trCostAggregationP2 = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -94,6 +92,20 @@ class StereoConfigHandler:
         StereoConfigHandler.config.costMatching.linearEquationParameters.threshold = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trLineqThreshold:
+            tr.set(value)
+
+    def trackbarCostAggregationP1(value):
+        StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1 = value
+        StereoConfigHandler.config.costAggregation.verticalPenaltyCostP1 = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCostAggregationP1:
+            tr.set(value)
+
+    def trackbarCostAggregationP2(value):
+        StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2 = value
+        StereoConfigHandler.config.costAggregation.verticalPenaltyCostP2 = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCostAggregationP2:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -138,6 +150,11 @@ class StereoConfigHandler:
             StereoConfigHandler.config.algorithmControl.enableSubpixel = not StereoConfigHandler.config.algorithmControl.enableSubpixel
             state = "on" if StereoConfigHandler.config.algorithmControl.enableSubpixel else "off"
             print(f"Subpixel {state}")
+        elif key == ord('3'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.algorithmControl.enableExtended = not StereoConfigHandler.config.algorithmControl.enableExtended
+            state = "on" if StereoConfigHandler.config.algorithmControl.enableExtended else "off"
+            print(f"Extended {state}")
 
         StereoConfigHandler.sendConfig(stereoDepthConfigInQueue)
 
@@ -157,6 +174,8 @@ class StereoConfigHandler:
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
+        StereoConfigHandler.trCostAggregationP1.append(StereoConfigHandler.Trackbar('Cost aggregation P1', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1, StereoConfigHandler.trackbarCostAggregationP1))
+        StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
@@ -166,6 +185,7 @@ class StereoConfigHandler:
         print("Control census transform mean mode using the 'v' key.")
         print("Control left-right check mode using the '1' key.")
         print("Control subpixel mode using the '2' key.")
+        print("Control extended mode using the '3' key.")
 
         StereoConfigHandler.config = config
 
@@ -204,6 +224,8 @@ xoutStereoCfg = pipeline.create(dai.node.XLinkOut)
 if args.debug:
     xoutDebugLrCheckIt1 = pipeline.create(dai.node.XLinkOut)
     xoutDebugLrCheckIt2 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugExtLrCheckIt1 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugExtLrCheckIt2 = pipeline.create(dai.node.XLinkOut)
 if args.dumpdisparitycostvalues:
     xoutDebugCostDump = pipeline.create(dai.node.XLinkOut)
 
@@ -222,11 +244,13 @@ xoutStereoCfg.setStreamName('stereo_cfg')
 if args.debug:
     xoutDebugLrCheckIt1.setStreamName('disparity_lr_check_iteration1')
     xoutDebugLrCheckIt2.setStreamName('disparity_lr_check_iteration2')
+    xoutDebugExtLrCheckIt1.setStreamName('disparity_ext_lr_check_iteration1')
+    xoutDebugExtLrCheckIt2.setStreamName('disparity_ext_lr_check_iteration2')
 if args.dumpdisparitycostvalues:
     xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
 # Properties
-stereo.initialConfig.setConfidenceThreshold(220)
+stereo.initialConfig.setConfidenceThreshold(245)
 stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)
@@ -253,6 +277,8 @@ stereo.outConfig.link(xoutStereoCfg.input)
 if args.debug:
     stereo.debugDispLrCheckIt1.link(xoutDebugLrCheckIt1.input)
     stereo.debugDispLrCheckIt2.link(xoutDebugLrCheckIt2.input)
+    stereo.debugExtDispLrCheckIt1.link(xoutDebugExtLrCheckIt1.input)
+    stereo.debugExtDispLrCheckIt2.link(xoutDebugExtLrCheckIt2.input)
 if args.dumpdisparitycostvalues:
     stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
@@ -278,6 +304,7 @@ if outConfidenceMap:
 debugStreams = []
 if args.debug:
     debugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+    debugStreams.extend(['disparity_ext_lr_check_iteration1', 'disparity_ext_lr_check_iteration2'])
 if args.dumpdisparitycostvalues:
     debugStreams.append('disparity_cost_dump')
 
@@ -327,22 +354,17 @@ with dai.Device(pipeline) as device:
 
     # Create a receive queue for each stream
     q_list = []
-    q_list_debug = []
     for s in streams:
         q = device.getOutputQueue(s, 8, blocking=False)
         q_list.append(q)
 
-    if args.debug or args.dumpdisparitycostvalues:
-        q_list_debug = q_list.copy()
-        for s in debugStreams:
-            q = device.getOutputQueue(s, 8, blocking=False)
-            q_list_debug.append(q)
 
     inCfg = device.getOutputQueue("stereo_cfg", 8, blocking=False)
 
     # Need to set a timestamp for input frames, for the sync stage in Stereo node
     timestamp_ms = 0
     index = 0
+    prevQueues = q_list.copy()
     while True:
         # Handle input streams, if any
         if in_q_list:
@@ -374,13 +396,38 @@ with dai.Device(pipeline) as device:
         currentConfig = inCfg.get()
 
         lrCheckEnabled = currentConfig.get().algorithmControl.enableLeftRightCheck
-        queues = q_list
+        extendedEnabled = currentConfig.get().algorithmControl.enableExtended
+        queues = q_list.copy()
 
-        if (args.debug and lrCheckEnabled) or args.dumpdisparitycostvalues:
-            queues = q_list_debug
-        else:
-            for s in debugStreams:
-                cv2.destroyWindow(s)
+        if args.dumpdisparitycostvalues:
+            q = device.getOutputQueue('disparity_cost_dump', 8, blocking=False)
+            queues.append(q)
+
+        if args.debug:
+            q_list_debug = []
+
+            activeDebugStreams = []
+            if lrCheckEnabled:
+                activeDebugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+            if extendedEnabled:
+                activeDebugStreams.extend(['disparity_ext_lr_check_iteration1'])
+                if lrCheckEnabled:
+                    activeDebugStreams.extend(['disparity_ext_lr_check_iteration2'])
+
+            for s in activeDebugStreams:
+                q = device.getOutputQueue(s, 8, blocking=False)
+                q_list_debug.append(q)
+
+            queues.extend(q_list_debug)
+
+        def ListDiff(li1, li2):
+            return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
+
+        diff = ListDiff(prevQueues, queues)
+        for s in diff:
+            name = s.getName()
+            cv2.destroyWindow(name)
+        prevQueues = queues.copy()
 
         for q in queues:
             if q.getName() in ['left', 'right']: continue

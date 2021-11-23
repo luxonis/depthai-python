@@ -72,8 +72,8 @@ previewOut.setStreamName('preview')
 # Properties
 camRgb.setVideoSize(640, 360)
 camRgb.setPreviewSize(300, 300)
-videoEncoder.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
-stillEncoder.setDefaultProfilePreset(camRgb.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
+videoEncoder.setDefaultProfilePreset(camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+stillEncoder.setDefaultProfilePreset(1, dai.VideoEncoderProperties.Profile.MJPEG)
 
 # Linking
 camRgb.still.link(stillEncoder.input)
