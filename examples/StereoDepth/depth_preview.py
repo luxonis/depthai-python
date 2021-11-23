@@ -37,6 +37,8 @@ class StereoConfigHandler:
     trCostAggregationP2 = list()
     trTemporalAlpha = list()
     trTemporalDelta = list()
+    trThresholdMinRange = list()
+    trThresholdMaxRange = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -103,6 +105,18 @@ class StereoConfigHandler:
         StereoConfigHandler.config.postProcessing.temporalFilter.delta = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trTemporalDelta:
+            tr.set(value)
+
+    def trackbarThresholdMinRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMinRange:
+            tr.set(value)
+
+    def trackbarThresholdMaxRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMaxRange:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -196,6 +210,8 @@ class StereoConfigHandler:
         StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
         StereoConfigHandler.trTemporalAlpha.append(StereoConfigHandler.Trackbar('Temporal filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.temporalFilter.alpha*100), StereoConfigHandler.trackbarTemporalFilterAlpha))
         StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 1, 200, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
+        StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
+        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
