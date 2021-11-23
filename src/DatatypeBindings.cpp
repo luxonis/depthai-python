@@ -111,6 +111,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
     py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
+    py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
+    py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
+    py::class_<RawStereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter));
     py::class_<RawStereoDepthConfig::CostAggregation> costAggregation(rawStereoDepthConfig, "CostAggregation", DOC(dai, RawStereoDepthConfig, CostAggregation));
     py::class_<RawStereoDepthConfig::CostMatching> costMatching(rawStereoDepthConfig, "CostMatching", DOC(dai, RawStereoDepthConfig, CostMatching));
     py::class_<RawStereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters));
@@ -1068,10 +1071,39 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         ;
 
+
+    persistencyMode
+        .value("PERSISTENCY_OFF", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_OFF)
+        .value("VALID_8_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_8_OUT_OF_8)
+        .value("VALID_2_IN_LAST_3", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_3)
+        .value("VALID_2_IN_LAST_4", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_4)
+        .value("VALID_2_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_OUT_OF_8)
+        .value("VALID_1_IN_LAST_2", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_2)
+        .value("VALID_1_IN_LAST_5", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_5)
+        .value("VALID_1_IN_LAST_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_8)
+        .value("PERSISTENCY_INDEFINITELY", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_INDEFINITELY)
+        ;
+
+    temporalFilter
+        .def(py::init<>())
+        .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::TemporalFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, enable))
+        .def_readwrite("persistencyMode", &RawStereoDepthConfig::PostProcessing::TemporalFilter::persistencyMode, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, persistencyMode))
+        .def_readwrite("alpha", &RawStereoDepthConfig::PostProcessing::TemporalFilter::alpha, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, alpha))
+        .def_readwrite("delta", &RawStereoDepthConfig::PostProcessing::TemporalFilter::delta, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, delta))
+        ;
+
+    thresholdFilter
+        .def(py::init<>())
+        .def_readwrite("minRange", &RawStereoDepthConfig::PostProcessing::ThresholdFilter::minRange, DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter, minRange))
+        .def_readwrite("maxRange", &RawStereoDepthConfig::PostProcessing::ThresholdFilter::maxRange, DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter, maxRange))
+        ;
+
     postProcessing
         .def(py::init<>())
         .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
         .def_readwrite("bilateralSigmaValue", &RawStereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, RawStereoDepthConfig, PostProcessing, bilateralSigmaValue))
+        .def_readwrite("temporalFilter", &RawStereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, temporalFilter))
+        .def_readwrite("thresholdFilter", &RawStereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, thresholdFilter))
         ;
 
     // KernelSize
