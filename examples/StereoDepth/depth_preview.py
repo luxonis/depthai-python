@@ -39,6 +39,7 @@ class StereoConfigHandler:
     trTemporalDelta = list()
     trThresholdMinRange = list()
     trThresholdMaxRange = list()
+    trSpeckleRange = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -119,6 +120,12 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trThresholdMaxRange:
             tr.set(value)
 
+    def trackbarSpeckleRange(value):
+        StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpeckleRange:
+            tr.set(value)
+
     def handleKeypress(key, stereoDepthConfigInQueue):
         if key == ord('m'):
             StereoConfigHandler.newConfig = True
@@ -132,6 +139,11 @@ class StereoConfigHandler:
             StereoConfigHandler.config.postProcessing.temporalFilter.enable = not StereoConfigHandler.config.postProcessing.temporalFilter.enable
             state = "on" if StereoConfigHandler.config.postProcessing.temporalFilter.enable else "off"
             print(f"Temporal filter {state}")
+        if key == ord('s'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.speckleFilter.enable = not StereoConfigHandler.config.postProcessing.speckleFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.speckleFilter.enable else "off"
+            print(f"Speckle filter {state}")
         if key == ord('r'):
             StereoConfigHandler.newConfig = True
             temporalSettings = [dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_OFF,
@@ -212,6 +224,7 @@ class StereoConfigHandler:
         StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 1, 200, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
         StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
         StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
+        StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 100, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
