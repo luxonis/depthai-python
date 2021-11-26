@@ -24,13 +24,15 @@ Code Samples
    ../samples/VideoEncoder/*
    ../samples/Yolo/*
 
-Code samples are used for automated testing. They are also a great starting point for the gen2 API.
+Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
+are presented with code.
 
 .. rubric:: Bootloader
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
 - :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
 
