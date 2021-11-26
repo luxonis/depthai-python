@@ -707,7 +707,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setNumFramesPool", &ImageManip::setNumFramesPool, DOC(dai, node, ImageManip, setNumFramesPool))
         .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize, DOC(dai, node, ImageManip, setMaxOutputFrameSize))
 
-        .def("setWarpMesh", &ImageManip::setWarpMesh, DOC(dai, node, ImageManip, setWarpMesh))
+        .def("setWarpMesh", py::overload_cast<const std::vector<Point2f>&, int, int>(&ImageManip::setWarpMesh), DOC(dai, node, ImageManip, setWarpMesh))
+        .def("setWarpMesh", py::overload_cast<const std::vector<std::pair<float,float>>&, int, int>(&ImageManip::setWarpMesh), DOC(dai, node, ImageManip, setWarpMesh))
         ;
 
      // MonoCamera node
