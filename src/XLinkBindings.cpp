@@ -48,9 +48,16 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
     // Bindings
     deviceInfo
         .def(py::init<>())
-        .def_readwrite("desc", &DeviceInfo::desc)
-        .def_readwrite("state", &DeviceInfo::state)
+        .def(py::init<std::string>(), py::arg("mxidOrName"), DOC(dai, DeviceInfo))
+        .def(py::init<const deviceDesc_t&>())
         .def("getMxId", &DeviceInfo::getMxId)
+        .def("getXLinkDeviceDesc", &DeviceInfo::getXLinkDeviceDesc)
+        .def_readwrite("name", &DeviceInfo::name)
+        .def_readwrite("mxid", &DeviceInfo::mxid)
+        .def_readwrite("state", &DeviceInfo::state)
+        .def_readwrite("protocol", &DeviceInfo::protocol)
+        .def_readwrite("platform", &DeviceInfo::platform)
+        .def("__str__", &DeviceInfo::toString)
         ;
 
     deviceDesc
@@ -62,7 +69,10 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
             [](deviceDesc_t &o)
             { return std::string(o.name); },
             [](deviceDesc_t &o, std::string n)
-            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); })
+            {
+                memset(o.name, 0, sizeof(o.name));
+                std::strncpy(o.name, n.c_str(), sizeof(o.name));
+            })
         ;
 
     xLinkDeviceState
