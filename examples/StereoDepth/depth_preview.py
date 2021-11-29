@@ -134,6 +134,11 @@ class StereoConfigHandler:
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
             StereoConfigHandler.config.postProcessing.median = nextMedian
+        if key == ord('w'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.spatialFilter.enable = not StereoConfigHandler.config.postProcessing.spatialFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.spatialFilter.enable else "off"
+            print(f"Spatial filter {state}")
         if key == ord('t'):
             StereoConfigHandler.newConfig = True
             StereoConfigHandler.config.postProcessing.temporalFilter.enable = not StereoConfigHandler.config.postProcessing.temporalFilter.enable

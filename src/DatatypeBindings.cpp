@@ -111,6 +111,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
     py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
+    py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
     py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
     py::class_<RawStereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter));
@@ -1072,17 +1073,25 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         ;
 
+    spatialFilter
+        .def(py::init<>())
+        .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::SpatialFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, enable))
+        .def_readwrite("holeFillingRadius", &RawStereoDepthConfig::PostProcessing::SpatialFilter::holeFillingRadius, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, holeFillingRadius))
+        .def_readwrite("alpha", &RawStereoDepthConfig::PostProcessing::SpatialFilter::alpha, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, alpha))
+        .def_readwrite("delta", &RawStereoDepthConfig::PostProcessing::SpatialFilter::delta, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, delta))
+        .def_readwrite("numIterations", &RawStereoDepthConfig::PostProcessing::SpatialFilter::numIterations, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, numIterations))
+        ;
 
     persistencyMode
-        .value("PERSISTENCY_OFF", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_OFF)
-        .value("VALID_8_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_8_OUT_OF_8)
-        .value("VALID_2_IN_LAST_3", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_3)
-        .value("VALID_2_IN_LAST_4", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_4)
-        .value("VALID_2_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_OUT_OF_8)
-        .value("VALID_1_IN_LAST_2", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_2)
-        .value("VALID_1_IN_LAST_5", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_5)
-        .value("VALID_1_IN_LAST_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_8)
-        .value("PERSISTENCY_INDEFINITELY", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_INDEFINITELY)
+        .value("PERSISTENCY_OFF", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_OFF, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_OFF))
+        .value("VALID_8_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_8_OUT_OF_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_8_OUT_OF_8))
+        .value("VALID_2_IN_LAST_3", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_3, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_3))
+        .value("VALID_2_IN_LAST_4", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_4, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_4))
+        .value("VALID_2_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_OUT_OF_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_OUT_OF_8))
+        .value("VALID_1_IN_LAST_2", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_2, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_2))
+        .value("VALID_1_IN_LAST_5", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_5, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_5))
+        .value("VALID_1_IN_LAST_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_8))
+        .value("PERSISTENCY_INDEFINITELY", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_INDEFINITELY, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_INDEFINITELY))
         ;
 
     temporalFilter
@@ -1109,6 +1118,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
         .def_readwrite("bilateralSigmaValue", &RawStereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, RawStereoDepthConfig, PostProcessing, bilateralSigmaValue))
+        .def_readwrite("spatialFilter", &RawStereoDepthConfig::PostProcessing::spatialFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, spatialFilter))
         .def_readwrite("temporalFilter", &RawStereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, temporalFilter))
         .def_readwrite("thresholdFilter", &RawStereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, thresholdFilter))
         .def_readwrite("speckleFilter", &RawStereoDepthConfig::PostProcessing::speckleFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, speckleFilter))
@@ -1116,10 +1126,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // KernelSize
     censusTransformKernelSize
-        .value("AUTO", RawStereoDepthConfig::CensusTransform::KernelSize::AUTO)
-        .value("KERNEL_5x5", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_5x5)
-        .value("KERNEL_7x7", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x7)
-        .value("KERNEL_7x9", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x9)
+        .value("AUTO", RawStereoDepthConfig::CensusTransform::KernelSize::AUTO, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, AUTO))
+        .value("KERNEL_5x5", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_5x5, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_5x5))
+        .value("KERNEL_7x7", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x7, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x7))
+        .value("KERNEL_7x9", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x9, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x9))
         ;
 
     censusTransform
@@ -1139,8 +1149,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Disparity width
     costMatchingDisparityWidth
-        .value("DISPARITY_64", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_64)
-        .value("DISPARITY_96", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_96)
+        .value("DISPARITY_64", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_64, DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_64))
+        .value("DISPARITY_96", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_96, DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_96))
         ;
 
     costMatching

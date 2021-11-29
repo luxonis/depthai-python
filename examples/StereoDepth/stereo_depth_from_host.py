@@ -21,6 +21,7 @@ if not Path(datasetDefault).exists():
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 
+
 class StereoConfigHandler:
 
     class Trackbar:
@@ -52,6 +53,11 @@ class StereoConfigHandler:
     trLineqThreshold = list()
     trCostAggregationP1 = list()
     trCostAggregationP2 = list()
+    trTemporalAlpha = list()
+    trTemporalDelta = list()
+    trThresholdMinRange = list()
+    trThresholdMaxRange = list()
+    trSpeckleRange = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -108,6 +114,36 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trCostAggregationP2:
             tr.set(value)
 
+    def trackbarTemporalFilterAlpha(value):
+        StereoConfigHandler.config.postProcessing.temporalFilter.alpha = value / 100.
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trTemporalAlpha:
+            tr.set(value)
+
+    def trackbarTemporalFilterDelta(value):
+        StereoConfigHandler.config.postProcessing.temporalFilter.delta = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trTemporalDelta:
+            tr.set(value)
+
+    def trackbarThresholdMinRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMinRange:
+            tr.set(value)
+
+    def trackbarThresholdMaxRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMaxRange:
+            tr.set(value)
+
+    def trackbarSpeckleRange(value):
+        StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpeckleRange:
+            tr.set(value)
+
     def handleKeypress(key, stereoDepthConfigInQueue):
         if key == ord('m'):
             StereoConfigHandler.newConfig = True
@@ -116,6 +152,37 @@ class StereoConfigHandler:
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
             StereoConfigHandler.config.postProcessing.median = nextMedian
+        if key == ord('w'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.spatialFilter.enable = not StereoConfigHandler.config.postProcessing.spatialFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.spatialFilter.enable else "off"
+            print(f"Spatial filter {state}")
+        if key == ord('t'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.temporalFilter.enable = not StereoConfigHandler.config.postProcessing.temporalFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.temporalFilter.enable else "off"
+            print(f"Temporal filter {state}")
+        if key == ord('s'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.speckleFilter.enable = not StereoConfigHandler.config.postProcessing.speckleFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.speckleFilter.enable else "off"
+            print(f"Speckle filter {state}")
+        if key == ord('r'):
+            StereoConfigHandler.newConfig = True
+            temporalSettings = [dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_OFF,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_8_OUT_OF_8,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_3,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_4,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_OUT_OF_8,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_2,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_5,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_8,
+            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_INDEFINITELY,
+            ]
+            currentTemporal = StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode
+            nextTemporal = temporalSettings[(temporalSettings.index(currentTemporal)+1) % len(temporalSettings)]
+            print(f"Changing temporal persistency to {nextTemporal.name} from {currentTemporal.name}")
+            StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode = nextTemporal
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
             censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
@@ -176,6 +243,11 @@ class StereoConfigHandler:
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
         StereoConfigHandler.trCostAggregationP1.append(StereoConfigHandler.Trackbar('Cost aggregation P1', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1, StereoConfigHandler.trackbarCostAggregationP1))
         StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
+        StereoConfigHandler.trTemporalAlpha.append(StereoConfigHandler.Trackbar('Temporal filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.temporalFilter.alpha*100), StereoConfigHandler.trackbarTemporalFilterAlpha))
+        StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 1, 200, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
+        StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
+        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
+        StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 100, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
@@ -335,8 +407,8 @@ def convertToCv2Frame(name, image, config):
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
 
-        if 1: # Optionally, apply a color map
-            frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
+        # if 1: # Optionally, apply a color map
+        #     frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
     return frame
 
