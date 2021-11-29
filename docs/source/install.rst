@@ -1,9 +1,8 @@
 Installation
 ============
 
-Please :ref:`install the necessary dependencies <Supported Platforms>` for your
-platform by referring to the table below. Once installed you can :ref:`install
-the DepthAI library <Install from PyPI>`.
+Please install the necessary dependencies for your platform by :ref:`referring to the table below <Supported Platforms>`.
+Once installed, you can :ref:`install the DepthAI library <Install from PyPI>`.
 
 We are constantly striving to improve how we release our software to keep up
 with countless platforms and the numerous ways to package it.  If you do not
@@ -14,31 +13,29 @@ or on `Github <https://github.com/luxonis/depthai>`__.
 Supported Platforms
 ###################
 
-We keep up-to-date, pre-compiled, libraries for the following platforms.  Note that a new change is that for Ubuntu now also work unchanged for the Jetson/Xavier series:
-
 ======================== ============================================== ================================================================================
 Platform                 Instructions                                   Support
 ======================== ============================================== ================================================================================
 Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
 macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
-Ubuntu & Jetson/Xavier   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
+Ubuntu                   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
 Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-Jestson Nano             :ref:`Platform dependencies <Jetson Nano>`     `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
+Jestson Nano/Xavier      :ref:`Platform dependencies <Jetson>`          `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
 ======================== ============================================== ================================================================================
 
-And the following platforms are also supported by a combination of the community and Luxonis.
+The following platforms are also supported by a combination of the community and Luxonis:
 
-====================== ===================================================== ================================================================================
-Platform               Instructions                                          Support
-====================== ===================================================== ================================================================================
-Fedora                                                                       `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
-Robot Operating System                                                       `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
-Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
-Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`            `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-====================== ===================================================== ================================================================================
+====================== =========================================================================== ================================================================================
+Platform               Instructions                                                                Support
+====================== =========================================================================== ================================================================================
+Fedora                                                                                             `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
+Robot Operating System Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__ `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
+Windows 7              :ref:`WinUSB driver <Windows 7>`                                            `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+Docker                 :ref:`Pull and run official images <Docker>`                                `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
+Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`                                  `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+VMware                 :ref:`Run on VMware <vmware>`                                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`                                     `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+====================== =========================================================================== ================================================================================
 
 macOS
 *****
@@ -63,8 +60,6 @@ See the `Video preview window fails to appear on macOS <https://discuss.luxonis.
 Ubuntu
 ******
 
-These Ubuntu instructions also work for the **Jetson** and **Xavier** series.
-
 .. code-block:: bash
 
   sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
@@ -86,11 +81,11 @@ Raspberry Pi OS
     sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
 
 
-Jetson Nano
-***********
+Jetson
+******
 
-To install DepthAI on Jetson Nano, perform the following steps, after completing a fresh install and setup. On the first log in, 
-**do not** immediately run updates.
+To install DepthAI on `Jetson Nano <https://developer.nvidia.com/embedded/jetson-nano-developer-kit>`__ or `Jetson Xavier <https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit>`__,
+perform the following steps, after completing a fresh install and setup. On the first log in, **do not** immediately run updates.
 
 This first step is optional: go to the *Software* (App Store) and delete the apps or software that you probably will not use. 
 
@@ -101,7 +96,7 @@ Open a terminal window and run the following commands:
     sudo apt update && sudo apt upgrade
     sudo reboot now
 
-Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson Nano <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from nvidia:
+Change the size of your SWAP. These instructions come from the `Getting Started with AI on Jetson <https://developer.nvidia.com/embedded/learn/jetson-ai-certification-programs>`__ from Nvidia:
 
   .. code-block:: bash
 
@@ -169,7 +164,7 @@ Last step is to edit :code:`.bashrc` with the line:
 
   .. code-block:: bash
 
-    echo "export OPENBLAS_CORETYPE=AMRV8" >> ~/.bashrc
+    echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 
 
 Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python rgb_preview.py`.
