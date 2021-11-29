@@ -61,7 +61,10 @@ jobs:
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
     needs: build-docstrings
-    runs-on: rpi-buster
+    strategy:
+      matrix:
+        rpi-os: [rpi-buster, rpi-bullseye]
+    runs-on: ${{ matrix.rpi-os }}
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
@@ -211,7 +214,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux2014_x86_64
+      image: quay.io/pypa/manylinux2014_x86_64:2021-11-15-a808c18
       env:
         PLAT: manylinux2014_x86_64
     steps:
@@ -275,7 +278,7 @@ jobs:
     needs: build-docstrings
     runs-on: [self-hosted, linux, ARM64]
     container:
-      image: quay.io/pypa/manylinux2014_aarch64
+      image: quay.io/pypa/manylinux2014_aarch64:2021-11-15-a808c18
       env:
         PLAT: manylinux2014_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
