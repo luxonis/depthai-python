@@ -42,7 +42,7 @@ macOS
 
 .. code-block:: bash
 
-  bash -c "$(curl -fL https://docs.luxonis.com/projects/api/en/latest/_static/install_dependencies.sh)"
+  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
 Close and re-open the terminal window after this command.
 
@@ -62,7 +62,7 @@ Ubuntu
 
 .. code-block:: bash
 
-  sudo wget -qO- https://docs.luxonis.com/projects/api/en/latest/_static/install_dependencies.sh | bash
+  sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Note! If opencv fails with illegal instruction after installing from PyPi, add:
@@ -78,7 +78,7 @@ Raspberry Pi OS
   
   .. code-block:: bash
   
-    sudo curl -fL https://docs.luxonis.com/projects/api/en/latest/_static/install_dependencies.sh | bash
+    sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Jetson
@@ -154,7 +154,7 @@ Save and reload the script by running the command :code:`source ~/.bashrc`. Then
   .. code-block:: bash
 
     #Download and install the dependency package
-    sudo wget -qO- https://docs.luxonis.com/projects/api/en/latest/_static/install_dependencies.sh | bash
+    sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
     #Clone github repository
     git clone https://github.com/luxonis/depthai-python.git
