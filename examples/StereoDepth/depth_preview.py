@@ -275,7 +275,7 @@ depth.setLeftRightCheck(True)
 depth.setExtendedDisparity(extended_disparity)
 depth.setSubpixel(subpixel)
 depth.setRuntimeModeSwitch(True)
-
+depth.setHardwareResources(16)
 # Linking
 monoLeft.out.link(depth.left)
 monoRight.out.link(depth.right)

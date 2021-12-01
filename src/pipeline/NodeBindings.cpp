@@ -854,6 +854,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             return s.getMaxDisparity();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
+        .def("setHardwareResources", &StereoDepth::setHardwareResources, DOC(dai, node, StereoDepth, setHardwareResources))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
