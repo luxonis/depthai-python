@@ -274,6 +274,7 @@ depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
 depth.setLeftRightCheck(True)
 depth.setExtendedDisparity(extended_disparity)
 depth.setSubpixel(subpixel)
+depth.setRuntimeModeSwitch(True)
 
 # Linking
 monoLeft.out.link(depth.left)
