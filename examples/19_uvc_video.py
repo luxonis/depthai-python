@@ -50,33 +50,6 @@ def try_reset_booted_device():
             if time.monotonic() - tstart > 3:
                 raise RuntimeError("Failed to find device after reset. Please power-cycle")
 
-def switch_to_usb_boot():
-    switch_done = False
-    try:
-        import usb.core
-    except ModuleNotFoundError:
-        print("==== Please install `pyusb` for bootloader flash checks:")
-        print("     python3 -m pip install pyusb")
-        raise RuntimeError("'pyusb' required to ensure no soft-bricking happens")
-    dev = usb.core.find(idVendor=0x03e7, idProduct=0xf63c)  # bootloader
-    if dev is not None:
-        print("Device in bootloader, resetting to USB bootROM before upgrade")
-        try:
-            dai.Device(dai.Pipeline(), "non-existing-file.bin")
-        except RuntimeError as e:
-            if not str(e).startswith("Error path"):
-                raise
-        # Wait for the new device to show up
-        tstart = time.monotonic()
-        while True:
-            dev = usb.core.find(idVendor=0x03e7, idProduct=0x2485)  # bootROM
-            if dev is not None:
-                switch_done = True
-                break
-            if time.monotonic() - tstart > 3:
-                raise RuntimeError("Failed to find USB bootROM device. Please run again")
-    return switch_done
-
 # This is used only if old 2.1-based FW is running (from flash)
 try_reset_booted_device()
 
@@ -142,10 +115,6 @@ if args.xlink_cam:
     cam_rgb.video.link(xout.input)
 
 if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
-    #if args.flash_bootloader:
-        # TODO! Still needed with latest bootloader? No transition to bootROM otherwise!
-        #did_switch = switch_to_usb_boot()  # safety measure
-
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
     bootloader = dai.DeviceBootloader(bl, True)
 
@@ -167,8 +136,6 @@ if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
     if args.flash_bootloader:
         print("Flashing bootloader...")
         bootloader.flashBootloader(progress)
-        #if did_switch:
-        #    print("Bootloader upgraded, please do a power-cycle test after everything is flashed")
     elif args.flash_app or args.flash_dap:
         if args.flash_app:
             print("Flashing application pipeline...")
