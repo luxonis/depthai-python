@@ -117,6 +117,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
     py::class_<RawStereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::SpeckleFilter> speckleFilter(postProcessing, "SpeckleFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter));
+    py::class_<RawStereoDepthConfig::PostProcessing::DecimationFilter> decimationFilter(postProcessing, "DecimationFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter));
     py::class_<RawStereoDepthConfig::CostAggregation> costAggregation(rawStereoDepthConfig, "CostAggregation", DOC(dai, RawStereoDepthConfig, CostAggregation));
     py::class_<RawStereoDepthConfig::CostMatching> costMatching(rawStereoDepthConfig, "CostMatching", DOC(dai, RawStereoDepthConfig, CostMatching));
     py::class_<RawStereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters));
@@ -1174,6 +1175,11 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("speckleRange", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::speckleRange, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, speckleRange))
         ;
 
+    decimationFilter
+        .def(py::init<>())
+        .def_readwrite("decimationFactor", &RawStereoDepthConfig::PostProcessing::DecimationFilter::decimationFactor, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, decimationFactor))
+        ;
+
     postProcessing
         .def(py::init<>())
         .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
@@ -1182,6 +1188,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("temporalFilter", &RawStereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, temporalFilter))
         .def_readwrite("thresholdFilter", &RawStereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, thresholdFilter))
         .def_readwrite("speckleFilter", &RawStereoDepthConfig::PostProcessing::speckleFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, speckleFilter))
+        .def_readwrite("decimationFilter", &RawStereoDepthConfig::PostProcessing::decimationFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, decimationFilter))
         ;
 
     // KernelSize

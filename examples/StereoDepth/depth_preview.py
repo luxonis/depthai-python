@@ -40,6 +40,11 @@ class StereoConfigHandler:
     trThresholdMinRange = list()
     trThresholdMaxRange = list()
     trSpeckleRange = list()
+    trSpatialAlpha = list()
+    trSpatialDelta = list()
+    trSpatialHoleFilling = list()
+    trSpatialNumIterations = list()
+    trDecimationFactor = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -108,6 +113,30 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trTemporalDelta:
             tr.set(value)
 
+    def trackbarSpatialFilterAlpha(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.alpha = value / 100.
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialAlpha:
+            tr.set(value)
+
+    def trackbarSpatialFilterDelta(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.delta = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialDelta:
+            tr.set(value)
+
+    def trackbarSpatialFilterHoleFillingRadius(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.holeFillingRadius = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialHoleFilling:
+            tr.set(value)
+
+    def trackbarSpatialFilterNumIterations(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.numIterations = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialNumIterations:
+            tr.set(value)
+
     def trackbarThresholdMinRange(value):
         StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value
         StereoConfigHandler.newConfig = True
@@ -124,6 +153,12 @@ class StereoConfigHandler:
         StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trSpeckleRange:
+            tr.set(value)
+
+    def trackbarDecimationFactor(value):
+        StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trDecimationFactor:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -227,9 +262,14 @@ class StereoConfigHandler:
         StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
         StereoConfigHandler.trTemporalAlpha.append(StereoConfigHandler.Trackbar('Temporal filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.temporalFilter.alpha*100), StereoConfigHandler.trackbarTemporalFilterAlpha))
         StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 1, 200, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
+        StereoConfigHandler.trSpatialAlpha.append(StereoConfigHandler.Trackbar('Spatial filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.spatialFilter.alpha*100), StereoConfigHandler.trackbarSpatialFilterAlpha))
+        StereoConfigHandler.trSpatialDelta.append(StereoConfigHandler.Trackbar('Spatial filter delta', stream, 0, 200, StereoConfigHandler.config.postProcessing.spatialFilter.delta, StereoConfigHandler.trackbarSpatialFilterDelta))
+        StereoConfigHandler.trSpatialHoleFilling.append(StereoConfigHandler.Trackbar('Spatial filter hole filling radius', stream, 0, 16, StereoConfigHandler.config.postProcessing.spatialFilter.holeFillingRadius, StereoConfigHandler.trackbarSpatialFilterHoleFillingRadius))
+        StereoConfigHandler.trSpatialNumIterations.append(StereoConfigHandler.Trackbar('Spatial filter number of iterations', stream, 0, 4, StereoConfigHandler.config.postProcessing.spatialFilter.numIterations, StereoConfigHandler.trackbarSpatialFilterNumIterations))
         StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
-        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
-        StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 100, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
+        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 65535, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
+        StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 240, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
+        StereoConfigHandler.trDecimationFactor.append(StereoConfigHandler.Trackbar('Decimation factor', stream, 1, 4, StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor, StereoConfigHandler.trackbarDecimationFactor))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
@@ -262,9 +302,9 @@ xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName("disparity")
 
 # Properties
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
