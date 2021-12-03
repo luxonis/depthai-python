@@ -62,6 +62,7 @@ class StereoConfigHandler:
     trSpatialDelta = list()
     trSpatialHoleFilling = list()
     trSpatialNumIterations = list()
+    trDecimationFactor = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -172,6 +173,12 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trSpeckleRange:
             tr.set(value)
 
+    def trackbarDecimationFactor(value):
+        StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trDecimationFactor:
+            tr.set(value)
+
     def handleKeypress(key, stereoDepthConfigInQueue):
         if key == ord('m'):
             StereoConfigHandler.newConfig = True
@@ -211,6 +218,16 @@ class StereoConfigHandler:
             nextTemporal = temporalSettings[(temporalSettings.index(currentTemporal)+1) % len(temporalSettings)]
             print(f"Changing temporal persistency to {nextTemporal.name} from {currentTemporal.name}")
             StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode = nextTemporal
+        if key == ord('n'):
+            StereoConfigHandler.newConfig = True
+            decimationSettings = [dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.PIXEL_SKIPPING,
+            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEDIAN,
+            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEAN,
+            ]
+            currentDecimation = StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode
+            nextDecimation = decimationSettings[(decimationSettings.index(currentDecimation)+1) % len(decimationSettings)]
+            print(f"Changing decimation mode to {nextDecimation.name} from {currentDecimation.name}")
+            StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
             censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
@@ -280,6 +297,7 @@ class StereoConfigHandler:
         StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
         StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 65535, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
         StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 240, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
+        StereoConfigHandler.trDecimationFactor.append(StereoConfigHandler.Trackbar('Decimation factor', stream, 1, 4, StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor, StereoConfigHandler.trackbarDecimationFactor))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")

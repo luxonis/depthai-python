@@ -200,6 +200,16 @@ class StereoConfigHandler:
             nextTemporal = temporalSettings[(temporalSettings.index(currentTemporal)+1) % len(temporalSettings)]
             print(f"Changing temporal persistency to {nextTemporal.name} from {currentTemporal.name}")
             StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode = nextTemporal
+        if key == ord('n'):
+            StereoConfigHandler.newConfig = True
+            decimationSettings = [dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.PIXEL_SKIPPING,
+            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEDIAN,
+            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEAN,
+            ]
+            currentDecimation = StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode
+            nextDecimation = decimationSettings[(decimationSettings.index(currentDecimation)+1) % len(decimationSettings)]
+            print(f"Changing decimation mode to {nextDecimation.name} from {currentDecimation.name}")
+            StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
             censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
@@ -296,7 +306,7 @@ pipeline = dai.Pipeline()
 # Define sources and outputs
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
-depth = pipeline.create(dai.node.StereoDepth)
+stereo = pipeline.create(dai.node.StereoDepth)
 xout = pipeline.create(dai.node.XLinkOut)
 
 xout.setStreamName("disparity")
@@ -308,25 +318,25 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-depth.initialConfig.setConfidenceThreshold(245)
+stereo.initialConfig.setConfidenceThreshold(245)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
-depth.setLeftRightCheck(True)
-depth.setExtendedDisparity(extended_disparity)
-depth.setSubpixel(subpixel)
-depth.setRuntimeModeSwitch(True)
-depth.setHardwareResources(16)
+stereo.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
+stereo.setLeftRightCheck(True)
+stereo.setExtendedDisparity(extended_disparity)
+stereo.setSubpixel(subpixel)
+stereo.setRuntimeModeSwitch(True)
+stereo.setHardwareResources(16)
 # Linking
-monoLeft.out.link(depth.left)
-monoRight.out.link(depth.right)
-depth.depth.link(xout.input)
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+stereo.disparity.link(xout.input)
 
-StereoConfigHandler(depth.initialConfig.get())
+StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow('disparity')
 
 xinStereoDepthConfig = pipeline.create(dai.node.XLinkIn)
 xinStereoDepthConfig.setStreamName("stereoDepthConfig")
-xinStereoDepthConfig.out.link(depth.inputConfig)
+xinStereoDepthConfig.out.link(stereo.inputConfig)
 
 
 
