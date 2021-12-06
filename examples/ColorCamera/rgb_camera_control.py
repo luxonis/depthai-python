@@ -2,15 +2,17 @@
 
 """
 This example shows usage of Camera Control message as well as ColorCamera configInput to change crop x and y
-Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to trigger autofocus, 'IOKL,.'
-for manual exposure/focus:
+Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to trigger autofocus, 'IOKL,.[]'
+for manual exposure/focus/white-balance:
   Control:      key[dec/inc]  min..max
   exposure time:     I   O      1..33000 [us]
   sensitivity iso:   K   L    100..1600
   focus:             ,   .      0..255 [far..near]
+  white balance:     [   ]   1000..12000 (light color temperature K)
 To go back to auto controls:
   'E' - autoexposure
   'F' - autofocus (continuous)
+  'B' - auto white-balance
 
 Other controls:
 '1' - AWB lock (true / false)
@@ -36,10 +38,11 @@ import cv2
 
 # Step size ('W','A','S','D' controls)
 STEP_SIZE = 8
-# Manual exposure/focus set step
+# Manual exposure/focus/white-balance set step
 EXP_STEP = 500  # us
 ISO_STEP = 50
 LENS_STEP = 3
+WB_STEP = 200
 
 # On some host systems it's faster to display uncompressed video
 videoMjpeg = False
@@ -119,6 +122,10 @@ with dai.Device(pipeline) as device:
     sensIso = 800
     sensMin = 100
     sensMax = 1600
+    
+    wbManual = 4000
+    wbMin = 1000
+    wbMax = 12000
 
     # TODO make auto-iterable
     awb_mode_idx = -1
@@ -221,6 +228,11 @@ with dai.Device(pipeline) as device:
             ctrl = dai.CameraControl()
             ctrl.setAutoExposureEnable()
             controlQueue.send(ctrl)
+        elif key == ord('b'):
+            print("Auto white-balance enable")
+            ctrl = dai.CameraControl()
+            ctrl.setAutoWhiteBalanceMode(dai.CameraControl.AutoWhiteBalanceMode.AUTO)
+            controlQueue.send(ctrl)
         elif key in [ord(','), ord('.')]:
             if key == ord(','): lensPos -= LENS_STEP
             if key == ord('.'): lensPos += LENS_STEP
@@ -239,6 +251,14 @@ with dai.Device(pipeline) as device:
             print("Setting manual exposure, time: ", expTime, "iso: ", sensIso)
             ctrl = dai.CameraControl()
             ctrl.setManualExposure(expTime, sensIso)
+            controlQueue.send(ctrl)
+        elif key in [ord('['), ord(']')]:
+            if key == ord('['): wbManual -= WB_STEP
+            if key == ord(']'): wbManual += WB_STEP
+            wbManual = clamp(wbManual, wbMin, wbMax)
+            print("Setting manual white balance, temperature: ", wbManual, "K")
+            ctrl = dai.CameraControl()
+            ctrl.setManualWhiteBalance(wbManual)
             controlQueue.send(ctrl)
         elif key in [ord('w'), ord('a'), ord('s'), ord('d')]:
             if key == ord('a'):
