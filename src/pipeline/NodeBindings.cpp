@@ -155,6 +155,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
+    py::class_<StereoDepthProperties::RectificationMesh> rectificationMesh(stereoDepthProperties, "RectificationMesh", DOC(dai, StereoDepthProperties, RectificationMesh));
+    py::enum_<StereoDepthProperties::DepthAlign> depthAlign(stereoDepthProperties, "DepthAlign", DOC(dai, StereoDepthProperties, DepthAlign));
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
     py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
@@ -274,24 +276,35 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
-        .def_readwrite("fps",  &MonoCameraProperties::fps)
-    ;
-
+        .def_readwrite("fps", &MonoCameraProperties::fps)
+        ;
 
     // StereoDepth props
 
+    rectificationMesh
+        .def_readwrite("meshLeftUri", &StereoDepthProperties::RectificationMesh::meshLeftUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshLeftUri))
+        .def_readwrite("meshRightUri", &StereoDepthProperties::RectificationMesh::meshRightUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshRightUri))
+        .def_readwrite("meshSize", &StereoDepthProperties::RectificationMesh::meshSize, DOC(dai, StereoDepthProperties, RectificationMesh, meshSize))
+        .def_readwrite("stepWidth", &StereoDepthProperties::RectificationMesh::stepWidth, DOC(dai, StereoDepthProperties, RectificationMesh, stepWidth))
+        .def_readwrite("stepHeight", &StereoDepthProperties::RectificationMesh::stepHeight, DOC(dai, StereoDepthProperties, RectificationMesh, stepHeight));
+
+    depthAlign
+        .value("RECTIFIED_RIGHT", StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT, DOC(dai, StereoDepthProperties, DepthAlign, RECTIFIED_RIGHT))
+        .value("RECTIFIED_LEFT", StereoDepthProperties::DepthAlign::RECTIFIED_LEFT, DOC(dai, StereoDepthProperties, DepthAlign, RECTIFIED_LEFT))
+        .value("CENTER", StereoDepthProperties::DepthAlign::CENTER, DOC(dai, StereoDepthProperties, DepthAlign, CENTER));
+
     stereoDepthProperties
-        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
-        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
-        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
-        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
-        .def_readwrite("width",                   &StereoDepthProperties::width)
-        .def_readwrite("height",                  &StereoDepthProperties::height)
-        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
-        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
-        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
-        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("initialConfig", &StereoDepthProperties::initialConfig, DOC(dai, StereoDepthProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &StereoDepthProperties::inputConfigSync, DOC(dai, StereoDepthProperties, inputConfigSync))
+        .def_readwrite("depthAlign", &StereoDepthProperties::depthAlign, DOC(dai, StereoDepthProperties, depthAlign))
+        .def_readwrite("depthAlignCamera", &StereoDepthProperties::depthAlignCamera, DOC(dai, StereoDepthProperties, depthAlignCamera))
+        .def_readwrite("rectifyEdgeFillColor", &StereoDepthProperties::rectifyEdgeFillColor, DOC(dai, StereoDepthProperties, rectifyEdgeFillColor))
+        .def_readwrite("width", &StereoDepthProperties::width, DOC(dai, StereoDepthProperties, width))
+        .def_readwrite("height", &StereoDepthProperties::height, DOC(dai, StereoDepthProperties, height))
+        .def_readwrite("outWidth", &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight", &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio", &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh", &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
         ;
 
 
