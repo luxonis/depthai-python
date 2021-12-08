@@ -53,10 +53,18 @@ Zero term tracking performs object association, which means that it does not con
 Object association would mean that detected objects from an external detector are mapped with tracked objects which has been detected and is being tracked from
 previous frames.
 
-Supported object tracker types:
+Supported object tracker types
+##############################
 
 - :code:`ZERO_TERM_COLOR_HISTOGRAM`: Utilizes position, shape and input image information such as RGB histogram to perform object tracking.
 - :code:`ZERO_TERM_IMAGELESS`: Only utilizes rectangular shape of detected object and position information for object tracking. It does not use color information of tracking objects. It achieves higher throughput than ZERO_TERM_COLOR_HISTOGRAM. User needs to consider the trade-off between throughput and accuracy when choosing the object tracker type.
+- :code:`SHORT_TERM_IMAGELESS`: Short-term tracking allows to track objects between frames.
+- :code:`SHORT_TERM_KCF`: Kernelized Correlation Filter tracking. KCF  utilizes properties of circulant matrix to enhance the processing speed. Paper `here <https://www.robots.ox.ac.uk/~joao/publications/henriques_tpami2015.pdf>`__.
+
+Maximum number of tracked objects
+#################################
+
+:code:`SHORT_TERM_KCF` can track up to 60 objects at once, while all other trackers can (theoretically) track up to 1000 objects at once.
 
 Usage
 #####
@@ -69,7 +77,7 @@ Usage
       objectTracker = pipeline.create(dai.node.ObjectTracker)
 
       objectTracker.setDetectionLabelsToTrack([15])  # Track only person
-      # Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
+      # Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS, SHORT_TERM_IMAGELESS, SHORT_TERM_KCF
       objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
       # Take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
       objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
@@ -83,7 +91,7 @@ Usage
       auto objectTracker = pipeline.create<dai::node::ObjectTracker>();
 
       objectTracker->setDetectionLabelsToTrack({15});  // Track only person
-      // Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
+      // Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS, SHORT_TERM_IMAGELESS, SHORT_TERM_KCF
       objectTracker->setTrackerType(dai::TrackerType::ZERO_TERM_COLOR_HISTOGRAM);
       // Take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
       objectTracker->setTrackerIdAssigmentPolicy(dai::TrackerIdAssigmentPolicy::SMALLEST_ID);
