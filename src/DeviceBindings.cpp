@@ -3,6 +3,7 @@
 // depthai
 #include "depthai/device/Device.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
+#include "depthai/utility/Clock.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -168,6 +169,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
     py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
+    struct PyClock{};
+    py::class_<PyClock> clock(m, "Clock");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -316,5 +319,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
 
     ;
+
+    clock.def("now", &Clock::now);
 
 }
