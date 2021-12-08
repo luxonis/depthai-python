@@ -298,6 +298,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("inputConfigSync", &StereoDepthProperties::inputConfigSync, DOC(dai, StereoDepthProperties, inputConfigSync))
         .def_readwrite("depthAlign", &StereoDepthProperties::depthAlign, DOC(dai, StereoDepthProperties, depthAlign))
         .def_readwrite("depthAlignCamera", &StereoDepthProperties::depthAlignCamera, DOC(dai, StereoDepthProperties, depthAlignCamera))
+        .def_readwrite("enableRectification", &StereoDepthProperties::enableRectification, DOC(dai, StereoDepthProperties, enableRectification))
         .def_readwrite("rectifyEdgeFillColor", &StereoDepthProperties::rectifyEdgeFillColor, DOC(dai, StereoDepthProperties, rectifyEdgeFillColor))
         .def_readwrite("width", &StereoDepthProperties::width, DOC(dai, StereoDepthProperties, width))
         .def_readwrite("height", &StereoDepthProperties::height, DOC(dai, StereoDepthProperties, height))
@@ -305,6 +306,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("outHeight", &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
         .def_readwrite("outKeepAspectRatio", &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
         .def_readwrite("mesh", &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("enableRuntimeStereoModeSwitch", &StereoDepthProperties::enableRuntimeStereoModeSwitch, DOC(dai, StereoDepthProperties, enableRuntimeStereoModeSwitch))
+        .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
+        .def_readwrite("numShaves", &StereoDepthProperties::numShaves, DOC(dai, StereoDepthProperties, numShaves))
         ;
 
 
