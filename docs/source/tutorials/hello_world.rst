@@ -120,7 +120,7 @@ to filter out the incorrect results
 
 .. code-block:: python
 
-  detection_nn = pipeline.create(depthai.node.NeuralNetwork)
+  detection_nn = pipeline.create(depthai.node.MobileNetDetectionNetwork)
   # Set path of the blob (NN model). We will use blobconverter to convert&download the model
   # detection_nn.setBlobPath("/path/to/model.blob")
   detection_nn.setBlobPath(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
