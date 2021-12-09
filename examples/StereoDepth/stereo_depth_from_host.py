@@ -408,6 +408,8 @@ StereoConfigHandler.registerWindow('disparity')
 if outDepth:
     StereoConfigHandler.registerWindow('depth')
 
+stereo.setPostProcessingHardwareResources(3, 3)
+
 stereo.setInputResolution(width, height)
 stereo.setRectification(False)
 baseline = 75

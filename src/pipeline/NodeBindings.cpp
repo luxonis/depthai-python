@@ -215,6 +215,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
 
+    py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
+
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -308,7 +310,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("mesh", &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
         .def_readwrite("enableRuntimeStereoModeSwitch", &StereoDepthProperties::enableRuntimeStereoModeSwitch, DOC(dai, StereoDepthProperties, enableRuntimeStereoModeSwitch))
         .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
-        .def_readwrite("numShaves", &StereoDepthProperties::numShaves, DOC(dai, StereoDepthProperties, numShaves))
+        .def_readwrite("numPostProcessingShaves", &StereoDepthProperties::numPostProcessingShaves, DOC(dai, StereoDepthProperties, numPostProcessingShaves))
+        .def_readwrite("numPostProcessingMemorySlices", &StereoDepthProperties::numPostProcessingMemorySlices, DOC(dai, StereoDepthProperties, numPostProcessingMemorySlices))
         ;
 
 
@@ -764,6 +767,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     // StereoDepth node
+    stereoDepthPresetMode
+        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY)
+        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY)
+        ;
+
     stereoDepth
         .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
@@ -871,7 +879,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             return s.getMaxDisparity();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
-        .def("setHardwareResources", &StereoDepth::setHardwareResources, DOC(dai, node, StereoDepth, setHardwareResources))
+        .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
+        .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
