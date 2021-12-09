@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import cv2
 import depthai as dai
+import cv2
 import numpy as np
+import time
 
 class StereoConfigHandler:
 
@@ -309,12 +310,12 @@ monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 xout = pipeline.create(dai.node.XLinkOut)
 
-xout.setStreamName("disparity")
+xout.setStreamName("depth")
 
 # Properties
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
@@ -325,31 +326,41 @@ stereo.setLeftRightCheck(True)
 stereo.setExtendedDisparity(extended_disparity)
 stereo.setSubpixel(subpixel)
 stereo.setRuntimeModeSwitch(True)
-stereo.setHardwareResources(16)
+stereo.setPostProcessingHardwareResources(3, 3)
 # Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
-stereo.disparity.link(xout.input)
+stereo.depth.link(xout.input)
 
 StereoConfigHandler(stereo.initialConfig.get())
-StereoConfigHandler.registerWindow('disparity')
+StereoConfigHandler.registerWindow('depth')
 
 xinStereoDepthConfig = pipeline.create(dai.node.XLinkIn)
 xinStereoDepthConfig.setStreamName("stereoDepthConfig")
 xinStereoDepthConfig.out.link(stereo.inputConfig)
 
-
-
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    # Output queue will be used to get the disparity frames from the outputs defined above
-    q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
+    # Output queue will be used to get the depth frames from the outputs defined above
+    q = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
+
+    startTime = time.monotonic()
+    counter = 0
+    fps = 0
 
     while True:
         inDepth = q.get()  # blocking call, will wait until a new data has arrived
         frame = inDepth.getFrame()
+
+        counter+=1
+        current_time = time.monotonic()
+        if (current_time - startTime) > 1 :
+            fps = counter / (current_time - startTime)
+            counter = 0
+            startTime = current_time
+
         # Normalization for better visualization
         depthFrame = frame
 
@@ -357,7 +368,8 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-        cv2.imshow("disparity", depthFrameColor)
+        cv2.putText(depthFrameColor, "Fps: {:.2f}".format(fps), (2, depthFrameColor.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255,255,255))
+        cv2.imshow("depth", depthFrameColor)
 
 
         key = cv2.waitKey(1)
