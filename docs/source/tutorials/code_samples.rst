@@ -107,6 +107,7 @@ are presented with code.
 - :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
+- :ref:`Script JSON communication` - 2-way JSON communication between Script <-> Host
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
