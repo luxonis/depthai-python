@@ -48,7 +48,7 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
-stereo.initialConfig.setConfidenceThreshold(255)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 spatialDetectionNetwork.setBlobPath(args.nnPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)

@@ -387,7 +387,7 @@ if args.dumpdisparitycostvalues:
     xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
 # Properties
-stereo.initialConfig.setConfidenceThreshold(245)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)
