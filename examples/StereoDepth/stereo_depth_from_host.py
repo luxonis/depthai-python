@@ -156,13 +156,13 @@ class StereoConfigHandler:
             tr.set(value)
 
     def trackbarThresholdMinRange(value):
-        StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value
+        StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value * 1000
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trThresholdMinRange:
             tr.set(value)
 
     def trackbarThresholdMaxRange(value):
-        StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange = value
+        StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange = value * 1000
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trThresholdMaxRange:
             tr.set(value)
@@ -287,6 +287,9 @@ class StereoConfigHandler:
             configMessage.set(StereoConfigHandler.config)
             stereoDepthConfigInQueue.send(configMessage)
 
+    def updateDefaultConfig(config):
+        StereoConfigHandler.config = config
+
     def registerWindow(stream):
         cv2.namedWindow(stream)
         StereoConfigHandler.trConfidence.append(StereoConfigHandler.Trackbar('Disparity confidence', stream, 0, 255, StereoConfigHandler.config.costMatching.confidenceThreshold, StereoConfigHandler.trackbarConfidence))
@@ -299,13 +302,13 @@ class StereoConfigHandler:
         StereoConfigHandler.trCostAggregationP1.append(StereoConfigHandler.Trackbar('Cost aggregation P1', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1, StereoConfigHandler.trackbarCostAggregationP1))
         StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
         StereoConfigHandler.trTemporalAlpha.append(StereoConfigHandler.Trackbar('Temporal filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.temporalFilter.alpha*100), StereoConfigHandler.trackbarTemporalFilterAlpha))
-        StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 1, 200, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
+        StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 0, 100, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
         StereoConfigHandler.trSpatialAlpha.append(StereoConfigHandler.Trackbar('Spatial filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.spatialFilter.alpha*100), StereoConfigHandler.trackbarSpatialFilterAlpha))
-        StereoConfigHandler.trSpatialDelta.append(StereoConfigHandler.Trackbar('Spatial filter delta', stream, 0, 200, StereoConfigHandler.config.postProcessing.spatialFilter.delta, StereoConfigHandler.trackbarSpatialFilterDelta))
+        StereoConfigHandler.trSpatialDelta.append(StereoConfigHandler.Trackbar('Spatial filter delta', stream, 0, 100, StereoConfigHandler.config.postProcessing.spatialFilter.delta, StereoConfigHandler.trackbarSpatialFilterDelta))
         StereoConfigHandler.trSpatialHoleFilling.append(StereoConfigHandler.Trackbar('Spatial filter hole filling radius', stream, 0, 16, StereoConfigHandler.config.postProcessing.spatialFilter.holeFillingRadius, StereoConfigHandler.trackbarSpatialFilterHoleFillingRadius))
         StereoConfigHandler.trSpatialNumIterations.append(StereoConfigHandler.Trackbar('Spatial filter number of iterations', stream, 0, 4, StereoConfigHandler.config.postProcessing.spatialFilter.numIterations, StereoConfigHandler.trackbarSpatialFilterNumIterations))
-        StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 15000, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
-        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 65535, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
+        StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 65, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
+        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 65, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
         StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 240, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
         StereoConfigHandler.trDecimationFactor.append(StereoConfigHandler.Trackbar('Decimation factor', stream, 1, 4, StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor, StereoConfigHandler.trackbarDecimationFactor))
 
