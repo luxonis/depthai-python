@@ -204,15 +204,15 @@ class StereoConfigHandler:
             print(f"Speckle filter {state}")
         if key == ord('r'):
             StereoConfigHandler.newConfig = True
-            temporalSettings = [dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_OFF,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_8_OUT_OF_8,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_3,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_4,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_OUT_OF_8,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_2,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_5,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_8,
-            dai.RawStereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_INDEFINITELY,
+            temporalSettings = [dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_OFF,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_8_OUT_OF_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_3,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_4,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_OUT_OF_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_2,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_5,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_INDEFINITELY,
             ]
             currentTemporal = StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode
             nextTemporal = temporalSettings[(temporalSettings.index(currentTemporal)+1) % len(temporalSettings)]
@@ -220,24 +220,34 @@ class StereoConfigHandler:
             StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode = nextTemporal
         if key == ord('n'):
             StereoConfigHandler.newConfig = True
-            decimationSettings = [dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.PIXEL_SKIPPING,
-            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEDIAN,
-            dai.RawStereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEAN,
+            decimationSettings = [dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.PIXEL_SKIPPING,
+            dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEDIAN,
+            dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEAN,
             ]
             currentDecimation = StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode
             nextDecimation = decimationSettings[(decimationSettings.index(currentDecimation)+1) % len(decimationSettings)]
             print(f"Changing decimation mode to {nextDecimation.name} from {currentDecimation.name}")
             StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
+        if key == ord('a'):
+            StereoConfigHandler.newConfig = True
+            aligmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
+            dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT,
+            dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER,
+            ]
+            currentAligment = StereoConfigHandler.config.algorithmControl.depthAlign
+            nextAligment = aligmentSettings[(aligmentSettings.index(currentAligment)+1) % len(aligmentSettings)]
+            print(f"Changing aligment mode to {nextAligment.name} from {currentAligment.name}")
+            StereoConfigHandler.config.algorithmControl.depthAlign = nextAligment
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
-            censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
+            censusSettings = [dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
             currentCensus = StereoConfigHandler.config.censusTransform.kernelSize
             nextCensus = censusSettings[(censusSettings.index(currentCensus)+1) % len(censusSettings)]
             print(f"Changing census transform to {nextCensus.name} from {currentCensus.name}")
             StereoConfigHandler.config.censusTransform.kernelSize = nextCensus
         elif key == ord('d'):
             StereoConfigHandler.newConfig = True
-            dispRangeSettings = [dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_64, dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_96]
+            dispRangeSettings = [dai.StereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_64, dai.StereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_96]
             currentDispRange = StereoConfigHandler.config.costMatching.disparityWidth
             nextDispRange = dispRangeSettings[(dispRangeSettings.index(currentDispRange)+1) % len(dispRangeSettings)]
             print(f"Changing disparity range to {nextDispRange.name} from {currentDispRange.name}")
@@ -305,6 +315,12 @@ class StereoConfigHandler:
         print("Control disparity search range using the 'd' key.")
         print("Control disparity companding using the 'f' key.")
         print("Control census transform mean mode using the 'v' key.")
+        print("Control depth aligment using the 'a' key.")
+        print("Control decimation algorithm using the 'a' key.")
+        print("Control temporal persistency mode using the 'r' key.")
+        print("Control spatial filter using the 'w' key.")
+        print("Control temporal filter using the 't' key.")
+        print("Control speckle filter using the 's' key.")
         print("Control left-right check mode using the '1' key.")
         print("Control subpixel mode using the '2' key.")
         print("Control extended mode using the '3' key.")
@@ -408,7 +424,7 @@ StereoConfigHandler.registerWindow('disparity')
 if outDepth:
     StereoConfigHandler.registerWindow('depth')
 
-stereo.setPostProcessingHardwareResources(3, 3)
+# stereo.setPostProcessingHardwareResources(3, 3)
 
 stereo.setInputResolution(width, height)
 stereo.setRectification(False)

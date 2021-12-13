@@ -156,7 +156,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
     py::class_<StereoDepthProperties::RectificationMesh> rectificationMesh(stereoDepthProperties, "RectificationMesh", DOC(dai, StereoDepthProperties, RectificationMesh));
-    py::enum_<StereoDepthProperties::DepthAlign> depthAlign(stereoDepthProperties, "DepthAlign", DOC(dai, StereoDepthProperties, DepthAlign));
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
     py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
@@ -290,15 +289,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("stepWidth", &StereoDepthProperties::RectificationMesh::stepWidth, DOC(dai, StereoDepthProperties, RectificationMesh, stepWidth))
         .def_readwrite("stepHeight", &StereoDepthProperties::RectificationMesh::stepHeight, DOC(dai, StereoDepthProperties, RectificationMesh, stepHeight));
 
-    depthAlign
-        .value("RECTIFIED_RIGHT", StereoDepthProperties::DepthAlign::RECTIFIED_RIGHT, DOC(dai, StereoDepthProperties, DepthAlign, RECTIFIED_RIGHT))
-        .value("RECTIFIED_LEFT", StereoDepthProperties::DepthAlign::RECTIFIED_LEFT, DOC(dai, StereoDepthProperties, DepthAlign, RECTIFIED_LEFT))
-        .value("CENTER", StereoDepthProperties::DepthAlign::CENTER, DOC(dai, StereoDepthProperties, DepthAlign, CENTER));
 
     stereoDepthProperties
         .def_readwrite("initialConfig", &StereoDepthProperties::initialConfig, DOC(dai, StereoDepthProperties, initialConfig))
         .def_readwrite("inputConfigSync", &StereoDepthProperties::inputConfigSync, DOC(dai, StereoDepthProperties, inputConfigSync))
-        .def_readwrite("depthAlign", &StereoDepthProperties::depthAlign, DOC(dai, StereoDepthProperties, depthAlign))
         .def_readwrite("depthAlignCamera", &StereoDepthProperties::depthAlignCamera, DOC(dai, StereoDepthProperties, depthAlignCamera))
         .def_readwrite("enableRectification", &StereoDepthProperties::enableRectification, DOC(dai, StereoDepthProperties, enableRectification))
         .def_readwrite("rectifyEdgeFillColor", &StereoDepthProperties::rectifyEdgeFillColor, DOC(dai, StereoDepthProperties, rectifyEdgeFillColor))

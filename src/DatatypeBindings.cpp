@@ -111,6 +111,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
     py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
     py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
+    py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
     py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
@@ -1126,8 +1127,16 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
     m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
 
+    depthAlign
+        .value("RECTIFIED_RIGHT", RawStereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_RIGHT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_RIGHT))
+        .value("RECTIFIED_LEFT", RawStereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_LEFT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_LEFT))
+        .value("CENTER", RawStereoDepthConfig::AlgorithmControl::DepthAlign::CENTER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, CENTER));
+
+    m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
+
     algorithmControl
         .def(py::init<>())
+        .def_readwrite("depthAlign", &RawStereoDepthConfig::AlgorithmControl::depthAlign, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthAlign))
         .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
         .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
@@ -1261,6 +1270,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     stereoDepthConfig
         .def(py::init<>())
+        .def("setDepthAlign", &StereoDepthConfig::setDepthAlign, py::arg("align"), DOC(dai, StereoDepthConfig, setDepthAlign))
         .def("setConfidenceThreshold",  &StereoDepthConfig::setConfidenceThreshold, py::arg("confThr"), DOC(dai, StereoDepthConfig, setConfidenceThreshold))
         .def("setMedianFilter",         &StereoDepthConfig::setMedianFilter, py::arg("median"), DOC(dai, StereoDepthConfig, setMedianFilter))
         .def("setBilateralFilterSigma", &StereoDepthConfig::setBilateralFilterSigma, py::arg("sigma"), DOC(dai, StereoDepthConfig, setBilateralFilterSigma))
@@ -1276,6 +1286,13 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
+
+    m.attr("StereoDepthConfig").attr("MedianFilter") = medianFilter;
+    m.attr("StereoDepthConfig").attr("AlgorithmControl") = algorithmControl;
+    m.attr("StereoDepthConfig").attr("PostProcessing") = postProcessing;
+    m.attr("StereoDepthConfig").attr("CensusTransform") = censusTransform;
+    m.attr("StereoDepthConfig").attr("CostMatching") = costMatching;
+    m.attr("StereoDepthConfig").attr("CostAggregation") = costAggregation;
 
     edgeDetectorConfigData
         .def(py::init<>())
