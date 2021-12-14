@@ -2,6 +2,7 @@ import sys
 import subprocess
 import re
 import tempfile
+import os
 
 # Usage
 if len(sys.argv) < 3:
@@ -17,7 +18,10 @@ try:
 
     # Create stubs, add PYTHONPATH to find the build module
     # CWD to to extdir where the built module can be found to extract the types
-    subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY)
+    env = os.environ
+    env['PYTHONPATH'] = f'{DIRECTORY}{os.pathsep}{env.get("PYTHONPATH", "")}'
+    print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
+    subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
 
     # Add py.typed
     open(f'{DIRECTORY}/depthai/py.typed', 'a').close()
@@ -48,7 +52,7 @@ try:
     with tempfile.NamedTemporaryFile() as config:
         config.write('[mypy]\nignore_errors = True\n'.encode())
         config.flush()
-        subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'])
+        subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'], env=env)
 
 except subprocess.CalledProcessError as err:
     exit(err.returncode)
