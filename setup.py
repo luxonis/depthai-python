@@ -173,33 +173,6 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
-        # Create stubs, add PYTHONPATH to find the build module
-        # CWD to to extdir where the built module can be found to extract the types
-        subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{extdir}'], cwd=extdir)
-
-        # Add py.typed
-        open(f'{extdir}/depthai/py.typed', 'a').close()
-
-        # imports and overloads
-        with open(f'{extdir}/depthai/__init__.pyi' ,'r+') as file:
-            # Read
-            contents = file.read()
-
-            # Add imports
-            stubs_import = 'import depthai.node as node\nimport typing\nimport json\n' + contents
-            # Create 'create' overloads
-            nodes = re.findall('def \S*\(self\) -> node.(\S*):', stubs_import)
-            overloads = ''
-            for node in nodes:
-                overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
-            print(f'{overloads}')
-            final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
-
-            # Writeout changes
-            file.seek(0)
-            file.write(final_stubs)
-
-
 setup(
     name=MODULE_NAME,
     version=__version__,

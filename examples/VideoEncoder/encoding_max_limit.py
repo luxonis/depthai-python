@@ -28,9 +28,9 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Setting to 26fps will trigger error
-ve1.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
-ve2.setDefaultProfilePreset(3840, 2160, 25, dai.VideoEncoderProperties.Profile.H265_MAIN)
-ve3.setDefaultProfilePreset(1280, 720, 25, dai.VideoEncoderProperties.Profile.H264_MAIN)
+ve1.setDefaultProfilePreset(25, dai.VideoEncoderProperties.Profile.H264_MAIN)
+ve2.setDefaultProfilePreset(25, dai.VideoEncoderProperties.Profile.H265_MAIN)
+ve3.setDefaultProfilePreset(25, dai.VideoEncoderProperties.Profile.H264_MAIN)
 
 # Linking
 monoLeft.out.link(ve1.input)

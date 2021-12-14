@@ -2,6 +2,7 @@
 
 import depthai as dai
 import sys
+import json
 
 usage = False
 read = True
@@ -34,7 +35,7 @@ if res:
     with dai.DeviceBootloader(info) as bl:
         if read:
             print('Current flashed configuration')
-            print(f'{bl.readConfigData()}')
+            print(json.dumps(bl.readConfigData()))
         else:
             success = None
             error = None

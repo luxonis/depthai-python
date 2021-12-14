@@ -81,6 +81,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<IMUReportRotationVectorWAcc, IMUReport, std::shared_ptr<IMUReportRotationVectorWAcc>> imuReportRotationVectorWAcc(m, "IMUReportRotationVectorWAcc", DOC(dai, IMUReportRotationVectorWAcc));
     py::class_<IMUPacket> imuPacket(m, "IMUPacket", DOC(dai, IMUPacket));
     py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
+    py::enum_<RawCameraControl::Command> rawCameraControlCommand(rawCameraControl, "Command", DOC(dai, RawCameraControl, Command));
     py::enum_<RawCameraControl::AutoFocusMode> rawCameraControlAutoFocusMode(rawCameraControl, "AutoFocusMode", DOC(dai, RawCameraControl, AutoFocusMode));
     py::enum_<RawCameraControl::AutoWhiteBalanceMode> rawCameraControlAutoWhiteBalanceMode(rawCameraControl, "AutoWhiteBalanceMode", DOC(dai, RawCameraControl, AutoWhiteBalanceMode));
     py::enum_<RawCameraControl::SceneMode> rawCameraControlSceneMode(rawCameraControl, "SceneMode", DOC(dai, RawCameraControl, SceneMode));
@@ -372,7 +373,25 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
-        // TODO add more raw types here, not directly used
+        .def_readwrite("expManual", &RawCameraControl::expManual)
+        .def_readwrite("afRegion", &RawCameraControl::afRegion)
+        .def_readwrite("awbMode", &RawCameraControl::awbMode)
+        .def_readwrite("sceneMode", &RawCameraControl::sceneMode)
+        .def_readwrite("antiBandingMode", &RawCameraControl::antiBandingMode)
+        .def_readwrite("effectMode", &RawCameraControl::effectMode)
+        .def_readwrite("aeLockMode", &RawCameraControl::aeLockMode)
+        .def_readwrite("awbLockMode", &RawCameraControl::awbLockMode)
+        .def_readwrite("expCompensation", &RawCameraControl::expCompensation)
+        .def_readwrite("brightness", &RawCameraControl::brightness)
+        .def_readwrite("contrast", &RawCameraControl::contrast)
+        .def_readwrite("saturation", &RawCameraControl::saturation)
+        .def_readwrite("sharpness", &RawCameraControl::sharpness)
+        .def_readwrite("lumaDenoise", &RawCameraControl::lumaDenoise)
+        .def_readwrite("chromaDenoise", &RawCameraControl::chromaDenoise)
+        .def_readwrite("wbColorTemp", &RawCameraControl::wbColorTemp)
+        .def("setCommand", &RawCameraControl::setCommand)
+        .def("clearCommand", &RawCameraControl::clearCommand)
+        .def("getCommand", &RawCameraControl::getCommand)
         ;
 
     tracklet
@@ -518,6 +537,46 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     // RawCameraControl enum bindings
     // The enum fields will also be exposed in 'CameraControl', store them for later
     std::vector<const char *> camCtrlAttr;
+    camCtrlAttr.push_back("Command");
+    rawCameraControlCommand
+        .value("START_STREAM", RawCameraControl::Command::START_STREAM)
+        .value("STOP_STREAM", RawCameraControl::Command::STOP_STREAM)
+        .value("STILL_CAPTURE", RawCameraControl::Command::STILL_CAPTURE)
+        .value("MOVE_LENS", RawCameraControl::Command::MOVE_LENS)
+        .value("AF_TRIGGER", RawCameraControl::Command::AF_TRIGGER)
+        .value("AE_MANUAL", RawCameraControl::Command::AE_MANUAL)
+        .value("AE_AUTO", RawCameraControl::Command::AE_AUTO)
+        .value("AWB_MODE", RawCameraControl::Command::AWB_MODE)
+        .value("SCENE_MODE", RawCameraControl::Command::SCENE_MODE)
+        .value("ANTIBANDING_MODE", RawCameraControl::Command::ANTIBANDING_MODE)
+        .value("EXPOSURE_COMPENSATION", RawCameraControl::Command::EXPOSURE_COMPENSATION)
+        .value("AE_LOCK", RawCameraControl::Command::AE_LOCK)
+        .value("AE_TARGET_FPS_RANGE", RawCameraControl::Command::AE_TARGET_FPS_RANGE)
+        .value("AWB_LOCK", RawCameraControl::Command::AWB_LOCK)
+        .value("CAPTURE_INTENT", RawCameraControl::Command::CAPTURE_INTENT)
+        .value("CONTROL_MODE", RawCameraControl::Command::CONTROL_MODE)
+        .value("FRAME_DURATION", RawCameraControl::Command::FRAME_DURATION)
+        .value("SENSITIVITY", RawCameraControl::Command::SENSITIVITY)
+        .value("EFFECT_MODE", RawCameraControl::Command::EFFECT_MODE)
+        .value("AF_MODE", RawCameraControl::Command::AF_MODE)
+        .value("NOISE_REDUCTION_STRENGTH", RawCameraControl::Command::NOISE_REDUCTION_STRENGTH)
+        .value("SATURATION", RawCameraControl::Command::SATURATION)
+        .value("BRIGHTNESS", RawCameraControl::Command::BRIGHTNESS)
+        .value("STREAM_FORMAT", RawCameraControl::Command::STREAM_FORMAT)
+        .value("RESOLUTION", RawCameraControl::Command::RESOLUTION)
+        .value("SHARPNESS", RawCameraControl::Command::SHARPNESS)
+        .value("CUSTOM_USECASE", RawCameraControl::Command::CUSTOM_USECASE)
+        .value("CUSTOM_CAPT_MODE", RawCameraControl::Command::CUSTOM_CAPT_MODE)
+        .value("CUSTOM_EXP_BRACKETS", RawCameraControl::Command::CUSTOM_EXP_BRACKETS)
+        .value("CUSTOM_CAPTURE", RawCameraControl::Command::CUSTOM_CAPTURE)
+        .value("CONTRAST", RawCameraControl::Command::CONTRAST)
+        .value("AE_REGION", RawCameraControl::Command::AE_REGION)
+        .value("AF_REGION", RawCameraControl::Command::AF_REGION)
+        .value("LUMA_DENOISE", RawCameraControl::Command::LUMA_DENOISE)
+        .value("CHROMA_DENOISE", RawCameraControl::Command::CHROMA_DENOISE)
+        .value("WB_COLOR_TEMP", RawCameraControl::Command::WB_COLOR_TEMP)
+        ;
+
     camCtrlAttr.push_back("AutoFocusMode");
     rawCameraControlAutoFocusMode
         .value("OFF", RawCameraControl::AutoFocusMode::OFF)
@@ -932,6 +991,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setManualExposure", &CameraControl::setManualExposure, py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
         .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode, py::arg("mode"), DOC(dai, CameraControl, setAutoWhiteBalanceMode))
         .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock, py::arg("lock"), DOC(dai, CameraControl, setAutoWhiteBalanceLock))
+        .def("setManualWhiteBalance", &CameraControl::setManualWhiteBalance, py::arg("colorTemperatureK"), DOC(dai, CameraControl, setManualWhiteBalance))
         .def("setBrightness", &CameraControl::setBrightness, py::arg("value"), DOC(dai, CameraControl, setBrightness))
         .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
         .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
@@ -1062,6 +1122,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     algorithmControl
         .def(py::init<>())
         .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
+        .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
@@ -1114,8 +1175,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     costAggregation
         .def(py::init<>())
         .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
-        .def_readwrite("horizontalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCosts))
-        .def_readwrite("verticalPenaltyCosts", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCosts, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCosts))
+        .def_readwrite("horizontalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP1))
+        .def_readwrite("horizontalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
+        .def_readwrite("verticalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
+        .def_readwrite("verticalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
         ;
 
     rawStereoDepthConfig
@@ -1141,8 +1204,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMedianFilter",         &StereoDepthConfig::getMedianFilter, DOC(dai, StereoDepthConfig, getMedianFilter))
         .def("getBilateralFilterSigma", &StereoDepthConfig::getBilateralFilterSigma, DOC(dai, StereoDepthConfig, getBilateralFilterSigma))
         .def("getLeftRightCheckThreshold",         &StereoDepthConfig::getLeftRightCheckThreshold, DOC(dai, StereoDepthConfig, getLeftRightCheckThreshold))
-        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, DOC(dai, StereoDepthConfig, setLeftRightCheck))
-        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, py::arg("enable"), DOC(dai, StereoDepthConfig, setLeftRightCheck))
+        .def("setExtendedDisparity",    &StereoDepthConfig::setExtendedDisparity, py::arg("enable"), DOC(dai, StereoDepthConfig, setExtendedDisparity))
+        .def("setSubpixel",             &StereoDepthConfig::setSubpixel, py::arg("enable"), DOC(dai, StereoDepthConfig, setSubpixel))
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
