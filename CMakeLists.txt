@@ -97,6 +97,22 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
+# Add stubs (pyi) generation step after building bindings
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
+if(error)
+    message(WARNING "Mypy not available - stubs won't be generated or checked")
+else()
+    get_target_property(bindings_directory ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
+    if(NOT bindings_directory)
+        set(bindings_directory ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
+    message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "${bindings_directory}"
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+endif()
 
 # Docstring options
 if(DEPTHAI_PYTHON_DOCSTRINGS_INPUT AND DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT)
