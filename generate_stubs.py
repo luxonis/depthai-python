@@ -49,10 +49,14 @@ try:
     sys.stdout.flush()
 
     # Check syntax
-    with tempfile.NamedTemporaryFile() as config:
-        config.write('[mypy]\nignore_errors = True\n'.encode())
-        config.flush()
-        subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'], env=env)
+    # Windows limitation - another process cannot normally read temporary file that is opened by this process
+    # Close first and delete manually afterwards
+    config = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    config.write('[mypy]\nignore_errors = True\n')
+    config.close()
+    print(f'Mypy config file: {config.name}')
+    subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'], env=env)
+    os.unlink(config.name)
 
 except subprocess.CalledProcessError as err:
     exit(err.returncode)
