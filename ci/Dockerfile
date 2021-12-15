@@ -19,5 +19,5 @@ RUN mkdir -p depthai-python/build
 RUN cd /depthai-python && \
     cd build && \
     cmake .. && \
-    make -j
+    make
 ENV PYTHONPATH=/depthai-python/build
