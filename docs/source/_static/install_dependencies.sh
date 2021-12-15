@@ -123,9 +123,13 @@ elif [ -f /etc/os-release ]; then
         exit 99
     fi
 
-    # Allow all users to read and write to Myriad X devices
-    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
-    sudo udevadm control --reload-rules && sudo udevadm trigger
+    if [ -d "/etc/udev" ]; then
+      echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+      # Allow all users to read and write to Myriad X devices
+      sudo udevadm control --reload-rules && sudo udevadm trigger
+    else
+      echo "No udev detected in /etc/udev, skipping udev rules and trigger..."
+    fi
 else
     echo "ERROR: Host not supported"
     exit 99
