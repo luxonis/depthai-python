@@ -7,6 +7,7 @@ RUN adduser lux sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER lux
+WORKDIR /home/lux
 
 RUN wget http://docs.luxonis.com/install_dependencies.sh && chmod +x install_dependencies.sh && ./install_dependencies.sh
 RUN wget https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2
