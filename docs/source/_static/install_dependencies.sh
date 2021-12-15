@@ -124,9 +124,7 @@ elif [ -f /etc/os-release ]; then
     fi
 
     if [ -d "/etc/udev" ]; then
-      echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
-      # Allow all users to read and write to Myriad X devices
-      sudo udevadm control --reload-rules && sudo udevadm trigger
+      echo "Udev detected in /etc/udev"
     else
       echo "No udev detected in /etc/udev, skipping udev rules and trigger..."
     fi
