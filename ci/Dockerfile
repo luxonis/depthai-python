@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y wget build-essential cmake pkg-config l
 
 RUN adduser --disabled-password --gecos '' lux
 RUN adduser lux sudo
+RUN adduser lux root
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 USER lux
