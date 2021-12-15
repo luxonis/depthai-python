@@ -20,7 +20,7 @@ readonly ubuntu_pkgs=(
     libavcodec-dev
     libavformat-dev
     libswscale-dev
-    python-dev
+    python3-dev
     libtbb2
     libtbb-dev
     libjpeg-dev
@@ -32,6 +32,18 @@ readonly ubuntu_pkgs=(
     libsm6
     libxext6
     libgl1-mesa-glx
+    python3-pyqt5
+    python3-pyqt5.qtquick
+    qml-module-qtquick-controls2
+    qml-module-qt-labs-platform
+    qtdeclarative5-dev
+    qml-module-qtquick2
+    qtbase5-dev
+    qtchooser
+    qt5-qmake
+    qtbase5-dev-tools
+    qml-module-qtquick-layouts
+    qml-module-qtquick-window2
 )
 
 readonly ubuntu_arm_pkgs=(
@@ -41,8 +53,6 @@ readonly ubuntu_arm_pkgs=(
     libhdf5-dev
     libatlas-base-dev
     libjasper-dev
-    libqtgui4
-    libqt4-test
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
     libilmbase-dev
     libopenexr-dev

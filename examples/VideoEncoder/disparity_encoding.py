@@ -18,7 +18,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map
 depth = pipeline.create(dai.node.StereoDepth)
-depth.initialConfig.setConfidenceThreshold(245)
+depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(False)
 depth.setExtendedDisparity(False)
@@ -29,7 +29,7 @@ monoRight.out.link(depth.right)
 
 videoEnc = pipeline.create(dai.node.VideoEncoder)
 # Depth resolution/FPS will be the same as mono resolution/FPS
-videoEnc.setDefaultProfilePreset(monoLeft.getResolutionSize(), monoLeft.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+videoEnc.setDefaultProfilePreset(monoLeft.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
 depth.disparity.link(videoEnc.input)
 
 xout = pipeline.create(dai.node.XLinkOut)

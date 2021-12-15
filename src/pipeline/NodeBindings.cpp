@@ -155,6 +155,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
+    py::class_<StereoDepthProperties::RectificationMesh> rectificationMesh(stereoDepthProperties, "RectificationMesh", DOC(dai, StereoDepthProperties, RectificationMesh));
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
     py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
@@ -213,6 +214,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
 
+    py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
+
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -234,6 +237,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
+        .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
         ;
 
     colorCameraPropertiesColorOrder
@@ -266,30 +270,42 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("THE_720_P", MonoCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", MonoCameraProperties::SensorResolution::THE_800_P)
         .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
+        .value("THE_480_P", MonoCameraProperties::SensorResolution::THE_480_P)
         ;
 
     monoCameraProperties
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
-        .def_readwrite("fps",  &MonoCameraProperties::fps)
-    ;
-
+        .def_readwrite("fps", &MonoCameraProperties::fps)
+        ;
 
     // StereoDepth props
 
+    rectificationMesh
+        .def_readwrite("meshLeftUri", &StereoDepthProperties::RectificationMesh::meshLeftUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshLeftUri))
+        .def_readwrite("meshRightUri", &StereoDepthProperties::RectificationMesh::meshRightUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshRightUri))
+        .def_readwrite("meshSize", &StereoDepthProperties::RectificationMesh::meshSize, DOC(dai, StereoDepthProperties, RectificationMesh, meshSize))
+        .def_readwrite("stepWidth", &StereoDepthProperties::RectificationMesh::stepWidth, DOC(dai, StereoDepthProperties, RectificationMesh, stepWidth))
+        .def_readwrite("stepHeight", &StereoDepthProperties::RectificationMesh::stepHeight, DOC(dai, StereoDepthProperties, RectificationMesh, stepHeight));
+
+
     stereoDepthProperties
-        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
-        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
-        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
-        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
-        .def_readwrite("width",                   &StereoDepthProperties::width)
-        .def_readwrite("height",                  &StereoDepthProperties::height)
-        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
-        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
-        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
-        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("initialConfig", &StereoDepthProperties::initialConfig, DOC(dai, StereoDepthProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &StereoDepthProperties::inputConfigSync, DOC(dai, StereoDepthProperties, inputConfigSync))
+        .def_readwrite("depthAlignCamera", &StereoDepthProperties::depthAlignCamera, DOC(dai, StereoDepthProperties, depthAlignCamera))
+        .def_readwrite("enableRectification", &StereoDepthProperties::enableRectification, DOC(dai, StereoDepthProperties, enableRectification))
+        .def_readwrite("rectifyEdgeFillColor", &StereoDepthProperties::rectifyEdgeFillColor, DOC(dai, StereoDepthProperties, rectifyEdgeFillColor))
+        .def_readwrite("width", &StereoDepthProperties::width, DOC(dai, StereoDepthProperties, width))
+        .def_readwrite("height", &StereoDepthProperties::height, DOC(dai, StereoDepthProperties, height))
+        .def_readwrite("outWidth", &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight", &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio", &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh", &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("enableRuntimeStereoModeSwitch", &StereoDepthProperties::enableRuntimeStereoModeSwitch, DOC(dai, StereoDepthProperties, enableRuntimeStereoModeSwitch))
+        .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
+        .def_readwrite("numPostProcessingShaves", &StereoDepthProperties::numPostProcessingShaves, DOC(dai, StereoDepthProperties, numPostProcessingShaves))
+        .def_readwrite("numPostProcessingMemorySlices", &StereoDepthProperties::numPostProcessingMemorySlices, DOC(dai, StereoDepthProperties, numPostProcessingMemorySlices))
         ;
 
 
@@ -317,8 +333,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("profile", &VideoEncoderProperties::profile)
         .def_readwrite("quality", &VideoEncoderProperties::quality)
         .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
-        .def_readwrite("width", &VideoEncoderProperties::width)
-        .def_readwrite("height", &VideoEncoderProperties::height)
         ;
 
 
@@ -747,6 +761,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     // StereoDepth node
+    stereoDepthPresetMode
+        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY)
+        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY)
+        ;
+
     stereoDepth
         .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
@@ -854,6 +873,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             return s.getMaxDisparity();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
+        .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
+        .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -862,13 +883,39 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     videoEncoder
         .def_readonly("input", &VideoEncoder::input, DOC(dai, node, VideoEncoder, input), DOC(dai, node, VideoEncoder, input))
         .def_readonly("bitstream", &VideoEncoder::bitstream, DOC(dai, node, VideoEncoder, bitstream), DOC(dai, node, VideoEncoder, bitstream))
-        .def("setDefaultProfilePreset", static_cast<void(VideoEncoder::*)(int, int, float, VideoEncoderProperties::Profile)>(&VideoEncoder::setDefaultProfilePreset), py::arg("width"), py::arg("height"), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset))
-        .def("setDefaultProfilePreset", static_cast<void(VideoEncoder::*)(std::tuple<int,int>, float, VideoEncoderProperties::Profile)>(&VideoEncoder::setDefaultProfilePreset), py::arg("size"), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset, 2))
+        .def("setDefaultProfilePreset", static_cast<void(VideoEncoder::*)(float, VideoEncoderProperties::Profile)>(&VideoEncoder::setDefaultProfilePreset), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset))
+        .def("setDefaultProfilePreset", [](VideoEncoder& v, int width, int height, float fps, VideoEncoderProperties::Profile profile){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input width/height no longer needed, automatically determined from first frame", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            v.setDefaultProfilePreset(width, height, fps, profile);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, setDefaultProfilePreset, 2))
+        .def("setDefaultProfilePreset", [](VideoEncoder& v, std::tuple<int,int> size, float fps, VideoEncoderProperties::Profile profile){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input size no longer needed, automatically determined from first frame", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            v.setDefaultProfilePreset(size, fps, profile);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, setDefaultProfilePreset, 3))
         .def("setNumFramesPool", &VideoEncoder::setNumFramesPool, py::arg("frames"), DOC(dai, node, VideoEncoder, setNumFramesPool))
         .def("getNumFramesPool", &VideoEncoder::getNumFramesPool, DOC(dai, node, VideoEncoder, getNumFramesPool))
         .def("setRateControlMode", &VideoEncoder::setRateControlMode, py::arg("mode"), DOC(dai, node, VideoEncoder, setRateControlMode))
-        .def("setProfile", static_cast<void(VideoEncoder::*)(std::tuple<int,int>, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("size"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile))
-        .def("setProfile", static_cast<void(VideoEncoder::*)(int, int, VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("width"), py::arg("height"), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile, 2))
+        .def("setProfile", static_cast<void(VideoEncoder::*)(VideoEncoder::Properties::Profile)>(&VideoEncoder::setProfile), py::arg("profile"), DOC(dai, node, VideoEncoder, setProfile))
+        .def("setProfile", [](VideoEncoder& v, std::tuple<int,int> size, VideoEncoderProperties::Profile profile){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input width/height no longer needed, automatically determined from first frame", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            v.setProfile(size, profile);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, setProfile, 2))
+        .def("setProfile", [](VideoEncoder& v, int width, int height, VideoEncoderProperties::Profile profile){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input width/height no longer needed, automatically determined from first frame", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            v.setProfile(width, height, profile);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, setProfile, 3))
         .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrate"), DOC(dai, node, VideoEncoder, setBitrate))
         .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
@@ -885,10 +932,28 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         //.def("getMaxBitrate", &VideoEncoder::getMaxBitrate)
         .def("getNumBFrames", &VideoEncoder::getNumBFrames, DOC(dai, node, VideoEncoder, getNumBFrames))
         .def("getQuality", &VideoEncoder::getQuality, DOC(dai, node, VideoEncoder, getQuality))
-        .def("getWidth", &VideoEncoder::getWidth, DOC(dai, node, VideoEncoder, getWidth))
-        .def("getHeight", &VideoEncoder::getHeight, DOC(dai, node, VideoEncoder, getHeight))
+        .def("getWidth", [](VideoEncoder& v){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input size no longer available, it's determined when first frame arrives", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return v.getWidth();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, getWidth))
+        .def("getHeight", [](VideoEncoder& v){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input size no longer available, it's determined when first frame arrives", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return v.getHeight();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, getHeight))
+        .def("getSize", [](VideoEncoder& v){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Input size no longer available, it's determined when first frame arrives", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return v.getSize();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, VideoEncoder, getSize))
         .def("getFrameRate", &VideoEncoder::getFrameRate, DOC(dai, node, VideoEncoder, getFrameRate))
-        .def("getSize", &VideoEncoder::getSize, DOC(dai, node, VideoEncoder, getSize))
         .def("getLossless", &VideoEncoder::getLossless, DOC(dai, node, VideoEncoder, getLossless))
     ;
     // ALIAS
