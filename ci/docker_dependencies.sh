@@ -36,7 +36,6 @@ readonly ubuntu_arm_pkgs=(
     libhdf5-dev
     libhdf5-dev
     libatlas-base-dev
-    libjasper-dev
     libqtgui4
     libqt4-test
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
