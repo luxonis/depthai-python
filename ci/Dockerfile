@@ -1,17 +1,10 @@
 FROM python:3.8-buster
 
-RUN apt-get update && apt-get install -y wget build-essential cmake pkg-config libjpeg-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libgtk-3-dev libatlas-base-dev gfortran sudo
+RUN apt-get update && apt-get install -y wget build-essential cmake pkg-config libjpeg-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libgtk-3-dev libatlas-base-dev gfortran git
 
-RUN adduser --disabled-password --gecos '' lux
-RUN adduser lux sudo
-RUN adduser lux root
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-USER lux
-WORKDIR /home/lux
-
+ADD ci/docker_dependencies.sh .
 # RUN wget http://docs.luxonis.com/install_dependencies.sh && chmod +x install_dependencies.sh && ./install_dependencies.sh
-RUN wget https://raw.githubusercontent.com/luxonis/depthai-python/enable_multiarch_build/docs/source/_static/install_dependencies.sh && chmod +x install_dependencies.sh && ./install_dependencies.sh  # for development only, should be removed before merge
+RUN ./docker_dependencies.sh  # for development only, should be removed before merge
 RUN wget https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2
 RUN tar xf libusb-1.0.24.tar.bz2
 RUN cd libusb-1.0.24 && \
