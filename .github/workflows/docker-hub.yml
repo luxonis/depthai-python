@@ -25,7 +25,7 @@ jobs:
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:ubuntu-${{ steps.vars.outputs.short_ref }}
   build_armv7:
     name: Build armv7 docker image
     runs-on: luxonis-armhf
@@ -52,7 +52,7 @@ jobs:
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:armv7-${{ steps.vars.outputs.short_ref }}
   build_armv8:
     name: Build armv8 docker image
     runs-on: ARM64
@@ -79,4 +79,4 @@ jobs:
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:armv8-${{ steps.vars.outputs.short_ref }}
