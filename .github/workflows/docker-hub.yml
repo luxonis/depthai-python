@@ -1,7 +1,11 @@
 name: Publish Docker image
 on:
   push:
-    branches: [ enable_multiarch_build ]
+    branches:
+    - main
+    - develop
+    tags:
+    - 'v*'
 jobs:
   build_amd64:
     name: Build amd64 docker image
