@@ -31,6 +31,10 @@ jobs:
     runs-on: luxonis-armhf
     timeout-minutes: 240
     steps:
+      - name: Clean the workspace
+        uses: docker://alpine
+        with:
+          args: /bin/sh -c "rm -rf /github/workspace/.* || rm -rf /github/workspace/*"
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -54,6 +58,10 @@ jobs:
     runs-on: ARM64
     timeout-minutes: 240
     steps:
+      - name: Clean the workspace
+        uses: docker://alpine
+        with:
+          args: /bin/sh -c "rm -rf /github/workspace/.* || rm -rf /github/workspace/*"
       - name: Checkout
         uses: actions/checkout@v2
         with:
