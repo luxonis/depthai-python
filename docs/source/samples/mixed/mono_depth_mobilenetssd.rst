@@ -6,7 +6,7 @@ the disparity depth results, displaying both the depth map and the right graysca
 bounding box from the neural network overlaid.
 It's a combination of :ref:`Depth Preview` and :ref:`Mono & MobilenetSSD`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB & MobilenetSSD`
 - :ref:`RGB & MobileNetSSD @ 4K`

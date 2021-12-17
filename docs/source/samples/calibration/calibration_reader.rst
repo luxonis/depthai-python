@@ -3,7 +3,7 @@ Calibration Reader
 
 This example shows how to read calibration data stored on device over XLink.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Calibration Flash v5`
 - :ref:`Calibration Flash`

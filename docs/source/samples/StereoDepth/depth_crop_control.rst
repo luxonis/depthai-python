@@ -9,7 +9,7 @@ You can manipulate the movement of the cropped frame by using the following keys
 #. `s` will move the crop down
 #. `d` will move the crop right
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Camera Control`
 - :ref:`Mono Camera Control`

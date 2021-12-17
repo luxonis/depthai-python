@@ -14,7 +14,7 @@ setAnchorMasks - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for 
 setIouThreshold - intersection over union threshold
 setConfidenceThreshold - confidence threshold above which objects are detected
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Spatial location calculator`
 - :ref:`Spatial object tracker on RGB`
