@@ -1034,9 +1034,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // DetectionNetwork node
     detectionNetwork
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, NeuralNetwork, input))
-        .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, NeuralNetwork, out))
+        .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
         .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
+        .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold))
         ;
     // ALIAS
     daiNodeModule.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
