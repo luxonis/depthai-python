@@ -17,8 +17,8 @@ def updateBlendWeights(percent_rgb):
     """
     global depthWeight
     global rgbWeight
-    depthWeight = float(100.0 - percent_rgb)/100.0
     rgbWeight = float(percent_rgb)/100.0
+    depthWeight = 1.0 - rgbWeight
 
 
 # Optional. If set (True), the ColorCamera is downscaled from 1080p to 720p.
@@ -86,10 +86,10 @@ with dai.Device(pipeline) as device:
     rgbWindowName = "rgb"
     depthWindowName = "depth"
     blendedWindowName = "rgb-depth"
-    cv2.namedWindow(rgbWindowName, cv2.WINDOW_AUTOSIZE)
-    cv2.namedWindow(depthWindowName, cv2.WINDOW_AUTOSIZE)
-    cv2.namedWindow(blendedWindowName, cv2.WINDOW_AUTOSIZE)
-    cv2.createTrackbar('RGB Weight', blendedWindowName, int(rgbWeight*100), 100, updateBlendWeights)
+    cv2.namedWindow(rgbWindowName)
+    cv2.namedWindow(depthWindowName)
+    cv2.namedWindow(blendedWindowName)
+    cv2.createTrackbar('RGB Weight %', blendedWindowName, int(rgbWeight*100), 100, updateBlendWeights)
 
     while True:
         latestPacket = {}
