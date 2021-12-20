@@ -26,10 +26,10 @@ When you create the device in the code, firmware is uploaded together with the p
     print('USB speed:',device.getUsbSpeed())
     print('Connected cameras:',device.getConnectedCameras())
 
-    # Input queue, to send message from the host to the device (you can recieve the message on the device with XLinkIn)
+    # Input queue, to send message from the host to the device (you can receive the message on the device with XLinkIn)
     input_q = device.getInputQueue("input_name", maxSize=4, blocking=False)
 
-    # Output queue, to recieve message on the host from the device (you can send the message on the device with XLinkOut)
+    # Output queue, to receive message on the host from the device (you can send the message on the device with XLinkOut)
     output_q = device.getOutputQueue("output_name", maxSize=4, blocking=False)
 
     while True:
@@ -91,7 +91,7 @@ the host to process every frame, thus providing only the latest data (:code:`blo
 However, if there are a lot of dropped/overwritten frames, because the host isn't able to process them fast enough
 (eg. one-threaded environment which does some heavy computing), the :code:`maxSize` could be set to a higher
 number, which would increase the queue size and reduce the number of dropped frames.
-Specifically, at 30 FPS, a new frame is recieved every ~33ms, so if your host is able to process a frame in that time, the :code:`maxSize`
+Specifically, at 30 FPS, a new frame is received every ~33ms, so if your host is able to process a frame in that time, the :code:`maxSize`
 could be set to :code:`1`, otherwise to :code:`2` for processing times up to 66ms and so on.
 
 If, however, there is a need to have some intervals of wait between retrieving messages, one could specify that differently.
