@@ -164,7 +164,7 @@ Having the pipeline defined, we can now initialize a device with pipeline and st
 
   .. code-block:: python
 
-    device = depthai.Device(pipeline, usb2mode=True)
+    device = depthai.Device(pipeline, usb2Mode=True)
 
 
 
