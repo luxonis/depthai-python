@@ -89,7 +89,7 @@ Usage
       # Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS, SHORT_TERM_IMAGELESS, SHORT_TERM_KCF
       objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
       # Take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
-      objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
+      objectTracker.setTrackerIdAssignmentPolicy(dai.TrackerIdAssignmentPolicy.SMALLEST_ID)
 
       # You have to use Object tracker in combination with detection network
       # and an image frame source - mono/color camera or xlinkIn node
@@ -103,7 +103,7 @@ Usage
       // Possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS, SHORT_TERM_IMAGELESS, SHORT_TERM_KCF
       objectTracker->setTrackerType(dai::TrackerType::ZERO_TERM_COLOR_HISTOGRAM);
       // Take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
-      objectTracker->setTrackerIdAssigmentPolicy(dai::TrackerIdAssigmentPolicy::SMALLEST_ID);
+      objectTracker->setTrackerIdAssignmentPolicy(dai::TrackerIdAssignmentPolicy::SMALLEST_ID);
 
       // You have to use Object tracker in combination with detection network
       // and an image frame source - mono/color camera or xlinkIn node

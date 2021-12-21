@@ -165,7 +165,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
     py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
     py::enum_<TrackerType> trackerType(m, "TrackerType");
-    py::enum_<TrackerIdAssigmentPolicy> trackerIdAssigmentPolicy(m, "TrackerIdAssigmentPolicy");
+    py::enum_<TrackerIdAssignmentPolicy> trackerIdAssignmentPolicy(m, "TrackerIdAssignmentPolicy");
     py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
     py::enum_<IMUSensor> imuSensor(m, "IMUSensor", DOC(dai, IMUSensor));
     py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>> imuSensorConfig(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig));
@@ -378,17 +378,17 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM, DOC(dai, TrackerType, ZERO_TERM_COLOR_HISTOGRAM))
     ;
 
-    trackerIdAssigmentPolicy
-        .value("UNIQUE_ID", TrackerIdAssigmentPolicy::UNIQUE_ID)
-        .value("SMALLEST_ID", TrackerIdAssigmentPolicy::SMALLEST_ID)
+    trackerIdAssignmentPolicy
+        .value("UNIQUE_ID", TrackerIdAssignmentPolicy::UNIQUE_ID)
+        .value("SMALLEST_ID", TrackerIdAssignmentPolicy::SMALLEST_ID)
     ;
 
     objectTrackerProperties
-        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
-        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
-        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
-        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
-        .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
+        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold, DOC(dai, ObjectTrackerProperties, trackerThreshold))
+        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack, DOC(dai, ObjectTrackerProperties, maxObjectsToTrack))
+        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack, DOC(dai, ObjectTrackerProperties, detectionLabelsToTrack))
+        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType, DOC(dai, ObjectTrackerProperties, trackerType))
+        .def_readwrite("trackerIdAssignmentPolicy", &ObjectTrackerProperties::trackerIdAssignmentPolicy, DOC(dai, ObjectTrackerProperties, trackerIdAssignmentPolicy))
         ;
 
     // IMU node properties
@@ -1142,7 +1142,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMaxObjectsToTrack", &ObjectTracker::setMaxObjectsToTrack, py::arg("maxObjectsToTrack"), DOC(dai, node, ObjectTracker, setMaxObjectsToTrack))
         .def("setDetectionLabelsToTrack", &ObjectTracker::setDetectionLabelsToTrack, py::arg("labels"), DOC(dai, node, ObjectTracker, setDetectionLabelsToTrack))
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
-        .def("setTrackerIdAssigmentPolicy", &ObjectTracker::setTrackerIdAssigmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssigmentPolicy))
+        .def("setTrackerIdAssignmentPolicy", &ObjectTracker::setTrackerIdAssignmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssignmentPolicy))
         ;
     daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
