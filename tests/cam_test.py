@@ -36,6 +36,8 @@ import os
 import cv2
 import argparse
 import depthai as dai
+import collections
+import time
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -51,7 +53,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '12mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '5mp', '12mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -94,14 +96,31 @@ color_res_opts = {
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
+    '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
 }
 
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
+# Calculates FPS over a moving window, configurable
+class FPS:
+    def __init__(self, window_size=30):
+        self.dq = collections.deque(maxlen=window_size)
+        self.fps = 0
+
+    def update(self, timestamp=None):
+        if timestamp == None: timestamp = time.monotonic()
+        count = len(self.dq)
+        if count > 0: self.fps = count / (timestamp - self.dq[0])
+        self.dq.append(timestamp)
+
+    def get(self):
+        return self.fps
+
 # Start defining a pipeline
 pipeline = dai.Pipeline()
+# Uncomment to get better throughput
 #pipeline.setXLinkChunkSize(0)
 
 control = pipeline.createXLinkIn()
@@ -142,16 +161,26 @@ if 0:
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
-    print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
+    #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
+    print('Connected cameras:')
+    for p in device.getConnectedCameraProperties():
+        print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
+        print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
+        print(*[type.name for type in p.supportedTypes])
+
     print('USB speed:', device.getUsbSpeed().name)
 
     q = {}
+    fps_host = {}  # FPS computed based on the time we receive frames in app
+    fps_capt = {}  # FPS computed based on capture timestamps from device
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
         if 0 and c == 'rgb':
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
+        fps_host[c] = FPS()
+        fps_capt[c] = FPS()
 
     controlQueue = device.getInputQueue('control')
 
@@ -219,12 +248,19 @@ with dai.Device(pipeline) as device:
     chroma_denoise = 0
     control = 'none'
 
+    print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
+
     while True:
         for c in cam_list:
             pkt = q[c].tryGet()
             if pkt is not None:
+                fps_host[c].update()
+                fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 frame = pkt.getCvFrame()
                 cv2.imshow(c, frame)
+        print("\rFPS:",
+              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
+              end='', flush=True)
 
         key = cv2.waitKey(1)
         if key == ord('q'):

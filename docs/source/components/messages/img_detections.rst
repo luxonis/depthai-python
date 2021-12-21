@@ -9,7 +9,7 @@ Examples of functionality
 
 - :ref:`RGB & MobilenetSSD`
 - :ref:`Mono & MobilenetSSD`
-- :ref:`RGB & TinyYoloV4 decoding on device`
+- :ref:`RGB & Tiny YOLO`
 
 Reference
 #########

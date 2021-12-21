@@ -38,7 +38,7 @@ Inputs and Outputs
 
 **Message types**
 
-- :code:`input` - :ref:`ImgFrame`
+- :code:`input` - Any message type
 - :code:`out` - :ref:`NNData`
 - :code:`passthrough` - :ref:`ImgFrame`
 
@@ -113,9 +113,9 @@ Usage
 Examples of functionality
 #########################
 
-- `DepplabV3 experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-deeplabv3_person/deeplabv3_person_256.py>`__
+- `DeeplabV3 experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-deeplabv3_person/deeplabv3_person_256.py>`__
 - `Age/gender experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-age-gender/main.py>`__
-- `License plate recognition experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-license-plate-recognition/main.py>`__
+- `EfficientDet demo <https://github.com/luxonis/depthai-experiments/blob/master/gen2-efficientDet/main.py>`__
 
 Reference
 #########

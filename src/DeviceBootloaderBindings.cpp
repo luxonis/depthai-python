@@ -110,14 +110,14 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     deviceBootloader
       // Python only methods
-        .def("__enter__", [](py::object obj){ return obj; })
+        .def("__enter__", [](DeviceBootloader& d) -> DeviceBootloader& { return d; })
         .def("__exit__", [](DeviceBootloader& bl, py::object type, py::object value, py::object traceback) { bl.close(); })
         .def("close", &DeviceBootloader::close, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.DeviceBootloader(deviceInfo) as bootloader:`")
 
         .def_static("getFirstAvailableDevice", &DeviceBootloader::getFirstAvailableDevice, DOC(dai, DeviceBootloader, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBootloader::getAllAvailableDevices, DOC(dai, DeviceBootloader, getAllAvailableDevices))
         .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, std::string, bool>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage))
-        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, bool>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("compress") = false, DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage, 2))
+        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, bool>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("compress"), DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage, 2))
         .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, std::string, bool>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, DOC(dai, DeviceBootloader, createDepthaiApplicationPackage))
         .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, bool>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("compress"), DOC(dai, DeviceBootloader, createDepthaiApplicationPackage, 2))
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion, DOC(dai, DeviceBootloader, getEmbeddedBootloaderVersion))
