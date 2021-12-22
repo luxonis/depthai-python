@@ -123,6 +123,25 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
         fi
+
+        UVC_DYN_INSTALLED=$(dpkg-query -W --showformat='${Status}\n' uvcdynctrl|grep "install ok installed")
+        if [ "" != "$UVC_DYN_INSTALLED" ]; then
+          echo "We detected \"uvcdynctrl\" installed on your system. "
+          echo "We recommend to remove this package, as it creates a huge log files if a camera is used in UVC mode (webcam)"
+          echo "You can do so by running the following commands:"
+          echo "$ sudo apt remove uvcdynctrl"
+          echo "$ sudo rm -f /var/log/uvcdynctrl-udev.log"
+          echo ""
+        fi
+
+        OS_VERSION=$(lsb_release -r |cut -f2)
+        if [ "$OS_VERSION" == "21.04" ]; then
+            echo "There are known issues with running our demo script on Ubuntu 21.04, due to package \"python3-pyqt5.sip\" not being in a correct version (>=12.9)"
+            echo "We recommend to install the updated version manually using the following commands"
+            echo "$ wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pyqt5-sip/python3-pyqt5.sip_12.9.0-1_amd64.deb"
+            echo "$ sudo dpkg -i python3-pyqt5.sip_12.9.0-1_amd64.deb"
+            echo ""
+        fi
     elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y
         sudo dnf install -y "${fedora_pkgs[@]}"
