@@ -14,7 +14,7 @@ you could fill up your storage on your host.
 
 It's a variation of :ref:`RGB Encoding` and :ref:`RGB & Mono Encoding`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Encoding`
 - :ref:`RGB & Mono Encoding`

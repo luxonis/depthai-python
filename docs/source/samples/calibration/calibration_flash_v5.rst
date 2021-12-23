@@ -3,7 +3,7 @@ Calibration Flash v5
 
 This example shows how to flash calibration data of version 5 (gen1 calibration data) to the device.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Calibration Flash`
 - :ref:`Calibration Reader`
