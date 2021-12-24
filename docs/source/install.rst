@@ -397,7 +397,7 @@ Now, run the :code:`rgb_preview.py` script from within :code:`examples` director
 
 .. code-block:: bash
 
-  python3 rgb_preview.py
+  python3 ColorCamera/rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
