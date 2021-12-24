@@ -7,7 +7,7 @@ The preview size is set to 4K resolution.
 
 It's a variation of :ref:`RGB & MobilenetSSD`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB & MobilenetSSD`
 - :ref:`Mono & MobilenetSSD`

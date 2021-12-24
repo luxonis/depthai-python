@@ -167,6 +167,7 @@ add_python_example(spatial_location_calculator SpatialDetection/spatial_location
 ## StereoDepth
 add_python_example(depth_crop_control StereoDepth/depth_crop_control.py)
 add_python_example(depth_preview StereoDepth/depth_preview.py)
+add_python_example(depth_post_processing StereoDepth/depth_post_processing.py)
 add_python_example(rgb_depth_aligned StereoDepth/rgb_depth_aligned.py)
 add_python_example(stereo_depth_from_host StereoDepth/stereo_depth_from_host.py)
 add_python_example(stereo_depth_video StereoDepth/stereo_depth_video.py)

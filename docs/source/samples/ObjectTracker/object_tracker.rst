@@ -3,7 +3,7 @@ Object tracker on RGB
 
 This example shows how to run MobileNetv2SSD on the RGB input frame, and perform object tracking on persons.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Object tracker on video`
 - :ref:`Spatial object tracker on RGB`
