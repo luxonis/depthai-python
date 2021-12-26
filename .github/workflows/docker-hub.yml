@@ -133,7 +133,6 @@ jobs:
 
       - name: Build and push (development)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        uses: docker/build-push-action@v2
         run: |
           docker manifest create \
           luxonis/depthai-library:${{ github.sha}} \
