@@ -14,9 +14,4 @@ RUN cd libusb-1.0.24 && \
 RUN pip install --extra-index-url https://www.piwheels.org/simple/ opencv-python
 
 COPY . /depthai-python
-RUN mkdir -p depthai-python/build
-RUN cd /depthai-python && \
-    cd build && \
-    cmake .. && \
-    make
-ENV PYTHONPATH=/depthai-python/build
+RUN cd /depthai-python && python3 -m pip install .
