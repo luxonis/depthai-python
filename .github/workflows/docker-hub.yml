@@ -5,6 +5,7 @@ on:
     branches:
     - main
     - develop
+    - docker_image_armv7
     tags:
     - 'v*'
 jobs:
