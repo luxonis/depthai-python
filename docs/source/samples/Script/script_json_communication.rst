@@ -49,11 +49,9 @@ Source code
 
     .. tab:: C++
 
-        TODO: add c++ equivalent
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Script/script_json_communication.cpp>`__
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Script/script_nndata_example.cpp>`__
-
-        .. literalinclude:: ../../../../depthai-core/examples/Script/script_nndata_example.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/Script/script_json_communication.cpp
            :language: cpp
            :linenos:
 
