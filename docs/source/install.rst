@@ -233,6 +233,8 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
+**Note: If you are using OAK POE** device on Linux host machine, you should add :code:`--network=host` argument to your docker command, so depthai inside docker will be able to communicate with the OAK POE.
+
 Kernel Virtual Machine
 **********************
 
