@@ -3,6 +3,7 @@
 // depthai
 #include "depthai/device/Device.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
+#include "depthai/utility/Clock.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -168,6 +169,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
     py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
+    struct PyClock{};
+    py::class_<PyClock> clock(m, "Clock");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -212,7 +215,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind the rest
     deviceBase
         // Python only methods
-        .def("__enter__", [](py::object obj){ return obj; })
+        .def("__enter__", [](DeviceBase& d) -> DeviceBase& { return d; })
         .def("__exit__", [](DeviceBase& d, py::object type, py::object value, py::object traceback) {
             py::gil_scoped_release release;
             d.close();
@@ -253,6 +256,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
+        .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, DeviceBase, getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getLeonCssHeapUsage(); }, DOC(dai, DeviceBase, getLeonCssHeapUsage))
@@ -315,5 +319,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         //.def("setCallback", DeviceWrapper::wrap(&Device::setCallback), py::arg("name"), py::arg("callback"))
 
     ;
+
+    clock.def("now", &Clock::now);
 
 }

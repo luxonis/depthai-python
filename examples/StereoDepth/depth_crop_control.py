@@ -39,7 +39,7 @@ monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 manip.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manip.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
-stereo.initialConfig.setConfidenceThreshold(200)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 # Linking
 configIn.out.link(manip.inputConfig)

@@ -33,7 +33,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 lrcheck = False
 subpixel = False
 
-stereo.initialConfig.setConfidenceThreshold(255)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setLeftRightCheck(lrcheck)
 stereo.setSubpixel(subpixel)
 
@@ -46,7 +46,7 @@ config.depthThresholds.lowerThreshold = 100
 config.depthThresholds.upperThreshold = 10000
 config.roi = dai.Rect(topLeft, bottomRight)
 
-spatialLocationCalculator.setWaitForConfigInput(False)
+spatialLocationCalculator.inputConfig.setWaitForMessage(False)
 spatialLocationCalculator.initialConfig.addROI(config)
 
 # Linking

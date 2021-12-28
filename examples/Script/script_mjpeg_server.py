@@ -10,7 +10,7 @@ pipeline = dai.Pipeline()
 cam = pipeline.create(dai.node.ColorCamera)
 # VideoEncoder
 jpeg = pipeline.create(dai.node.VideoEncoder)
-jpeg.setDefaultProfilePreset(cam.getVideoSize(), cam.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
+jpeg.setDefaultProfilePreset(cam.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
 
 # Script node
 script = pipeline.create(dai.node.Script)

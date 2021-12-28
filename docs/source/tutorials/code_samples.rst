@@ -24,13 +24,15 @@ Code Samples
    ../samples/VideoEncoder/*
    ../samples/Yolo/*
 
-Code samples are used for automated testing. They are also a great starting point for the gen2 API.
+Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
+are presented with code.
 
 .. rubric:: Bootloader
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
 - :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
 
@@ -102,8 +104,10 @@ Code samples are used for automated testing. They are also a great starting poin
 .. rubric:: Script
 
 - :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
+- :ref:`Script JSON communication` - 2-way JSON communication between Script <-> Host
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
@@ -129,6 +133,7 @@ Code samples are used for automated testing. They are also a great starting poin
 
 .. rubric:: VideoEncoder
 
+- :ref:`Disparity encoding` - Encodes stereo disparity into :code:`.mjpeg`
 - :ref:`RGB Encoding` - Encodes RGB (1080P, 30FPS) into :code:`.h265` and saves it on the host
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host

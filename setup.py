@@ -11,6 +11,8 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
+### NAME
+MODULE_NAME = 'depthai'
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
@@ -171,10 +173,8 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
-
-
 setup(
-    name='depthai',
+    name=MODULE_NAME,
     version=__version__,
     author='Luxonis',
     author_email='support@luxonis.com',
@@ -183,7 +183,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
-    ext_modules=[CMakeExtension('depthai')],
+    ext_modules=[CMakeExtension(MODULE_NAME)],
     cmdclass={
         'build_ext': CMakeBuild
     },
