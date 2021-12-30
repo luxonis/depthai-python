@@ -16,7 +16,7 @@ you could fill up your storage on your host.
 
 It's a combination of :ref:`RGB Encoding` and :ref:`Mono & MobilenetSSD & Depth`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Encoding`
 - :ref:`RGB & Mono Encoding`

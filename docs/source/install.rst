@@ -42,7 +42,7 @@ macOS
 
 .. code-block:: bash
 
-  bash -c "$(curl -fL http://docs.luxonis.com/_static/install_dependencies.sh)"
+  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
 Close and re-open the terminal window after this command.
 
@@ -62,7 +62,7 @@ Ubuntu
 
 .. code-block:: bash
 
-  sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+  sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Note! If opencv fails with illegal instruction after installing from PyPi, add:
@@ -78,7 +78,7 @@ Raspberry Pi OS
   
   .. code-block:: bash
   
-    sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Jetson
@@ -154,7 +154,7 @@ Save and reload the script by running the command :code:`source ~/.bashrc`. Then
   .. code-block:: bash
 
     #Download and install the dependency package
-    sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
     #Clone github repository
     git clone https://github.com/luxonis/depthai-python.git
@@ -232,6 +232,8 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
        python3 /depthai-python/examples/rgb_preview.py
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
+
+**Note: If you are using OAK POE** device on Linux host machine, you should add :code:`--network=host` argument to your docker command, so depthai inside docker will be able to communicate with the OAK POE.
 
 Kernel Virtual Machine
 **********************
@@ -397,7 +399,7 @@ Now, run the :code:`rgb_preview.py` script from within :code:`examples` director
 
 .. code-block:: bash
 
-  python3 rgb_preview.py
+  python3 ColorCamera/rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
