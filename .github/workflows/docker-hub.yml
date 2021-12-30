@@ -1,5 +1,6 @@
 name: Publish Docker image
 on:
+  workflow_dispatch:
   push:
     branches:
     - main
@@ -24,12 +25,22 @@ jobs:
       - name: Get Version
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Build and push
+
+      - name: Build and push (development)
+        if: startsWith(github.ref, 'refs/tags/v') != true
         uses: docker/build-push-action@v2
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:ubuntu-${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:${{github.sha}}-amd64
+      - name: Build and push (release)
+        if: startsWith(github.ref, 'refs/tags/v') == true
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: ci/Dockerfile
+          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64
+
   build_armv7:
     name: Build armv7 docker image
     runs-on: luxonis-armhf
@@ -51,12 +62,22 @@ jobs:
       - name: Get Version
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Build and push
+
+      - name: Build and push (development)
+        if: startsWith(github.ref, 'refs/tags/v') != true
         uses: docker/build-push-action@v2
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:armv7-${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:${{github.sha}}-armv7
+      - name: Build and push (release)
+        if: startsWith(github.ref, 'refs/tags/v') == true
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: ci/Dockerfile
+          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7
+
   build_armv8:
     name: Build armv8 docker image
     runs-on: ARM64
@@ -78,9 +99,57 @@ jobs:
       - name: Get Version
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Build and push
+
+      - name: Build and push (development)
+        if: startsWith(github.ref, 'refs/tags/v') != true
         uses: docker/build-push-action@v2
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:armv8-${{ steps.vars.outputs.short_ref }}
+          tags: luxonis/depthai-library:${{github.sha}}-armv8
+      - name: Build and push (release)
+        if: startsWith(github.ref, 'refs/tags/v') == true
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: ci/Dockerfile
+          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
+
+  upload:
+    needs: [build_amd64, build_armv7, build_armv8]
+    name: Combine into a single multi-arch image and upload tags
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Get Version
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - name: Build and push (development)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: |
+          docker manifest create \
+          luxonis/depthai-library:${{ github.sha}} \
+          --amend luxonis/depthai-library:${{ github.sha }}-amd64 \
+          --amend luxonis/depthai-library:${{ github.sha }}-armv7 \
+          --amend luxonis/depthai-library:${{ github.sha }}-armv8
+          # Push
+          docker manifest push luxonis/depthai-library:${{ github.sha }}
+
+      - name: Build and push (release)
+        if: startsWith(github.ref, 'refs/tags/v') == true
+        run: |
+          docker manifest create \
+          luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
+          # Push
+          docker manifest push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          docker manifest push luxonis/depthai-library:latest
