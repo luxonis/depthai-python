@@ -167,7 +167,7 @@ Last step is to edit :code:`.bashrc` with the line:
     echo "export OPENBLAS_CORETYPE=ARMV8" >> ~/.bashrc
 
 
-Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python rgb_preview.py`.
+Navigate to the folder with :code:`depthai` examples folder, run :code:`python install_requirements.py` and then run :code:`python 01_rgb_preview.py`.
 
 Solution provided by `iacisme <https://github.com/iacisme>`__ via our `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__ channel.
 
@@ -216,7 +216,7 @@ tools in the `luxonis/depthai-library <https://hub.docker.com/r/luxonis/depthai-
 repository on Docker Hub. It builds upon the `luxonis/depthai-base
 <https://hub.docker.com/r/luxonis/depthai-base>`__ image.
 
-Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
+Run the :code:`01_rgb_preview.py` example inside a Docker container on a Linux host
 (with the X11 windowing system):
 
 .. code-block:: bash
@@ -395,11 +395,11 @@ Using a virtual environment (or system-wide, if you prefer), run the following t
   cd examples
   python3 install_requirements.py
 
-Now, run the :code:`rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
+Now, run the :code:`01_rgb_preview.py` script from within :code:`examples` directory to make sure everything is working:
 
 .. code-block:: bash
 
-  python3 ColorCamera/rgb_preview.py
+  python3 ColorCamera/01_rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
