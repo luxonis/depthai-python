@@ -262,6 +262,7 @@ with dai.Device(pipeline) as device:
         for c in cam_list:
             pkt = q[c].tryGet()
             if pkt is not None:
+                print("=== Got data from:", c)
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 if cam_type_tof[c]:
@@ -272,7 +273,7 @@ with dai.Device(pipeline) as device:
                 else:
                     frame = pkt.getCvFrame()
                 cv2.imshow(c, frame)
-        print("\rFPS:",
+        if 0: print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end='', flush=True)
 
