@@ -32,8 +32,6 @@ readonly ubuntu_pkgs=(
     libsm6
     libxext6
     libgl1-mesa-glx
-    python3-pyqt5
-    python3-pyqt5.qtquick
     qml-module-qtquick-controls2
     qml-module-qt-labs-platform
     qtdeclarative5-dev
@@ -51,6 +49,8 @@ readonly ubuntu_arm_pkgs=(
     # https://stackoverflow.com/a/53402396/5494277
     libhdf5-dev
     libhdf5-dev
+    python3-pyqt5
+    python3-pyqt5.qtquick
     libatlas-base-dev
     libjasper-dev
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
