@@ -5,7 +5,7 @@
 #include "depthai-shared/common/EepromData.hpp"
 #include "depthai-shared/common/CameraImageOrientation.hpp"
 #include "depthai-shared/common/CameraSensorType.hpp"
-#include "depthai-shared/common/CameraProperties.hpp"
+#include "depthai-shared/common/CameraFeatures.hpp"
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
 #include "depthai-shared/common/CpuUsage.hpp"
@@ -28,7 +28,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
-    py::class_<CameraProperties> cameraProperties(m, "CameraProperties", DOC(dai, CameraProperties));
+    py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
     py::class_<CpuUsage> cpuUsage(m, "CpuUsage", DOC(dai, CpuUsage));
@@ -119,16 +119,16 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("ROTATE_180_DEG", CameraImageOrientation::ROTATE_180_DEG)
     ;
 
-    // CameraProperties
-    cameraProperties
+    // CameraFeatures
+    cameraFeatures
         .def(py::init<>())
-        .def_readwrite("socket", &CameraProperties::socket)
-        .def_readwrite("sensorName", &CameraProperties::sensorName)
-        .def_readwrite("width", &CameraProperties::width)
-        .def_readwrite("height", &CameraProperties::height)
-        .def_readwrite("orientation", &CameraProperties::orientation)
-        .def_readwrite("supportedTypes", &CameraProperties::supportedTypes)
-        .def_readwrite("hasAutofocus", &CameraProperties::hasAutofocus)
+        .def_readwrite("socket", &CameraFeatures::socket)
+        .def_readwrite("sensorName", &CameraFeatures::sensorName)
+        .def_readwrite("width", &CameraFeatures::width)
+        .def_readwrite("height", &CameraFeatures::height)
+        .def_readwrite("orientation", &CameraFeatures::orientation)
+        .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
+        .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
     ;
 
     // MemoryInfo

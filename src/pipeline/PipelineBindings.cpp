@@ -9,6 +9,7 @@
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
+#include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
@@ -115,6 +116,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
         .def("createToF", &Pipeline::create<node::ToF>)      
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
