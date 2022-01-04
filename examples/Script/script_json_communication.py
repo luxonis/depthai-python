@@ -10,22 +10,20 @@ xin.setStreamName('in')
 script = pipeline.create(dai.node.Script)
 xin.out.link(script.inputs['in'])
 script.setScript("""
-import json
+    import json
 
-# Recieve bytes from the host
-data = node.io['in'].get().getData()
-jsonStr = str(data, 'utf-8')
-dict = json.loads(jsonStr)
+    # Recieve bytes from the host
+    data = node.io['in'].get().getData()
+    jsonStr = str(data, 'utf-8')
+    dict = json.loads(jsonStr)
 
-# Change initial dictionary a bit
-node.warn('Original: ' + str(dict))
-dict['one'] += 1
-dict['foo'] = "baz"
-node.warn('Changed: ' + str(dict))
+    # Change initial dictionary a bit
+    dict['one'] += 1
+    dict['foo'] = "baz"
 
-b = Buffer(30)
-b.setData(json.dumps(dict).encode('utf-8'))
-node.io['out'].send(b)
+    b = Buffer(30)
+    b.setData(json.dumps(dict).encode('utf-8'))
+    node.io['out'].send(b)
 """)
 
 xout = pipeline.create(dai.node.XLinkOut)
