@@ -135,16 +135,15 @@ xout = {}
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
-    if cam_type_color[c] or cam_type_tof[c]:
+    if cam_type_tof[c]:
+        cam[c] = pipeline.createCamera()
+        cam[c].raw.link(xout[c].input)
+    elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
         #cam[c].setIspScale(1, 2)
         #cam[c].initialControl.setManualFocus(85) # TODO
-        if cam_type_tof[c]:
-            cam[c].setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-            cam[c].raw.link(xout[c].input)
-        else:
-            cam[c].isp.link(xout[c].input)
+        cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -171,7 +170,7 @@ if 0:
 with dai.Device(pipeline) as device:
     #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
     print('Connected cameras:')
-    for p in device.getConnectedCameraProperties():
+    for p in device.getConnectedCameraFeatures():
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
