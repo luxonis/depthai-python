@@ -167,8 +167,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DeviceBase> deviceBase(m, "DeviceBase", DOC(dai, DeviceBase));
     py::class_<Device, DeviceBase> device(m, "Device", DOC(dai, Device));
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
-    py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
-    py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
+    py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
+    py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
     struct PyClock{};
     py::class_<PyClock> clock(m, "Clock");
 
@@ -186,29 +186,29 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
 
-    // Bind PrebootConfig::USB
-    prebootConfigUsb
+    // Bind BoardConfig::USB
+    boardConfigUsb
         .def(py::init<>())
-        .def_readwrite("vid", &PrebootConfig::USB::vid)
-        .def_readwrite("pid", &PrebootConfig::USB::pid)
-        .def_readwrite("flashBootedVid", &PrebootConfig::USB::flashBootedVid)
-        .def_readwrite("flashBootedPid", &PrebootConfig::USB::flashBootedPid)
-        .def_readwrite("maxSpeed", &PrebootConfig::USB::maxSpeed)
+        .def_readwrite("vid", &BoardConfig::USB::vid)
+        .def_readwrite("pid", &BoardConfig::USB::pid)
+        .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
+        .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
+        .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
     ;
 
-    // Bind PrebootConfig
-    prebootConfig
+    // Bind BoardConfig
+    boardConfig
         .def(py::init<>())
-        .def_readwrite("usb", &PrebootConfig::usb)
-        .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
-        .def_readwrite("watchdogInitialDelayMs", &PrebootConfig::watchdogInitialDelayMs)
+        .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
+        .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
     ;
 
     // Bind Device::Config
     deviceConfig
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
-        .def_readwrite("preboot", &Device::Config::preboot)
+        .def_readwrite("board", &Device::Config::board)
     ;
 
     // Bind constructors
