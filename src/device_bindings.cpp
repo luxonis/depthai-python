@@ -70,6 +70,11 @@ void init_binding_device(pybind11::module& m){
             &Device::send_disparity_confidence_threshold,
             "Function to send disparity confidence threshold for SGBM"
         )
+        .def(
+            "send_ir_write_command",
+            &Device::send_ir_write_command,
+            "Function to send IR projector register write command"
+        )
 
         .def(
             "send_camera_control",
@@ -195,6 +200,13 @@ void init_binding_device(pybind11::module& m){
             &Device::is_right_connected,
             "Returns true if right stereo camera is connected."
         )
+
+        .def(
+            "is_projector_connected",
+            &Device::is_projector_connected,
+            "Returns true if the IR projector is connected."
+        )
+
         .def(
             "override_device_changed",
             &Device::override_device_changed,
