@@ -11,7 +11,11 @@
 #include <pybind11/detail/common.h>
 // hedley
 #include <hedley/hedley.h>
+// STL Bind
+#include <pybind11/stl_bind.h>
 
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>);
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
@@ -167,10 +171,16 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DeviceBase> deviceBase(m, "DeviceBase", DOC(dai, DeviceBase));
     py::class_<Device, DeviceBase> device(m, "Device", DOC(dai, Device));
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
-    py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
-    py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
+    py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
+    py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
+    py::class_<BoardConfig::UART> boardConfigUart(boardConfig, "UART", DOC(dai, BoardConfig, UART));
     struct PyClock{};
     py::class_<PyClock> clock(m, "Clock");
+
+
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -186,29 +196,48 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
 
-    // Bind PrebootConfig::USB
-    prebootConfigUsb
+    // Bind BoardConfig::USB
+    boardConfigUsb
         .def(py::init<>())
-        .def_readwrite("vid", &PrebootConfig::USB::vid)
-        .def_readwrite("pid", &PrebootConfig::USB::pid)
-        .def_readwrite("flashBootedVid", &PrebootConfig::USB::flashBootedVid)
-        .def_readwrite("flashBootedPid", &PrebootConfig::USB::flashBootedPid)
-        .def_readwrite("maxSpeed", &PrebootConfig::USB::maxSpeed)
+        .def_readwrite("vid", &BoardConfig::USB::vid)
+        .def_readwrite("pid", &BoardConfig::USB::pid)
+        .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
+        .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
+        .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+    ;
+    // Bind BoardConfig::GPIO
+    boardConfigGpio
+        .def(py::init<>())
+        .def_readwrite("mode", &BoardConfig::GPIO::mode)
+        .def_readwrite("output", &BoardConfig::GPIO::output)
+        .def_readwrite("level", &BoardConfig::GPIO::level)
+        .def_readwrite("pull", &BoardConfig::GPIO::pull)
+        .def_readwrite("drive", &BoardConfig::GPIO::drive)
+        .def_readwrite("schmitt", &BoardConfig::GPIO::schmitt)
+        .def_readwrite("slewFast", &BoardConfig::GPIO::slewFast)
     ;
 
-    // Bind PrebootConfig
-    prebootConfig
+    // Bind BoardConfig::UART
+    boardConfigUart
         .def(py::init<>())
-        .def_readwrite("usb", &PrebootConfig::usb)
-        .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
-        .def_readwrite("watchdogInitialDelayMs", &PrebootConfig::watchdogInitialDelayMs)
+        .def_readwrite("tmp", &BoardConfig::UART::tmp)
+    ;
+
+    // Bind BoardConfig
+    boardConfig
+        .def(py::init<>())
+        .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
+        .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
+        .def_readwrite("gpio", &BoardConfig::gpio)
+        .def_readwrite("uart", &BoardConfig::uart)
     ;
 
     // Bind Device::Config
     deviceConfig
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
-        .def_readwrite("preboot", &Device::Config::preboot)
+        .def_readwrite("board", &Device::Config::board)
     ;
 
     // Bind constructors
