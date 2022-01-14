@@ -11,7 +11,7 @@ Please check out :ref:`ColorCamera` node to get a better view.
 
 If you want to get higher resolution RGB frames sample please visit :ref:`RGB video`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Video` (higher resolution)
 - :ref:`Mono Preview`

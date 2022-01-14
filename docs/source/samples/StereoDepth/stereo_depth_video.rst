@@ -11,7 +11,7 @@ inside the code:
 #. `extended`: suitable for short range objects. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity-depth-mode>`__
 #. `subpixel`: suitable for long range. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#subpixel-disparity-depth-mode>`__
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Depth Preview`
 - :ref:`Stereo Depth from host`

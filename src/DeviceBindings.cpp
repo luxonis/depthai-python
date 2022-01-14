@@ -201,6 +201,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("usb", &PrebootConfig::usb)
         .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
+        .def_readwrite("watchdogInitialDelayMs", &PrebootConfig::watchdogInitialDelayMs)
     ;
 
     // Bind Device::Config

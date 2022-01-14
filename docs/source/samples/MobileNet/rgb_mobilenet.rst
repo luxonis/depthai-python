@@ -4,7 +4,7 @@ RGB & MobilenetSSD
 This example shows how to run MobileNetv2SSD on the RGB input frame, and how to display both the RGB
 preview and the metadata results from the MobileNetv2SSD on the preview.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB & MobilenetSSD @ 4K`
 - :ref:`Mono & MobilenetSSD`
