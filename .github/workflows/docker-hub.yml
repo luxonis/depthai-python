@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, luxonis-armhf, ARM64]
-        arch: []
         include:
           - os: ubuntu-latest
             arch: amd64
@@ -40,22 +39,21 @@ jobs:
       - name: Set Image Name (development)
         id: name
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo ::set-output name=image_tag::${{ github.sha }}-${{ matrix.arch }}
+        run: echo "LUXONIS_IMAGE_TAG=${{ github.sha }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Set Image Name (release)
-        id: name
         if: startsWith(github.ref, 'refs/tags/v') == true
-        run: echo ::set-output name=image_tag::${GITHUB_REF#refs/*/}-${{ matrix.arch }}
+        run: echo "LUXONIS_IMAGE_TAG=${GITHUB_REF#refs/*/}-${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.name.outputs.image_tag }}
+          tags: luxonis/depthai-library:${{ env.LUXONIS_IMAGE_TAG }}
 
       - name: Cleanup the created image
-        run: docker image rm luxonis/depthai-library:${{ steps.name.outputs.image_tag }}
+        run: docker image rm luxonis/depthai-library:${{ env.LUXONIS_IMAGE_TAG }}
 
   upload:
     needs: [build]
