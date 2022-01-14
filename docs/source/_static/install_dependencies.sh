@@ -124,8 +124,9 @@ elif [ -f /etc/os-release ]; then
             python3 -m pip install --upgrade pip
         fi
 
-        UVC_DYN_INSTALLED=$(dpkg-query -W --showformat='${Status}\n' uvcdynctrl|grep "install ok installed")
-        if [ "" != "$UVC_DYN_INSTALLED" ]; then
+        dpkg -s uvcdynctrl > /dev/null 2>&1
+        # is uvcdynctrl installed
+        if [ $? -eq 0 ]; then
           echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
           echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
           echo -e "\033[33mYou can do so by running the following commands:\033[0m"

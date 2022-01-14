@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+# /home/sachin/Desktop/luxonis/depthai-python/examples/calibration
 
 from pathlib import Path
 import cv2
 import depthai as dai
 import argparse
 
-calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
+calibJsonFile = str((Path(__file__).parent / Path('./calib_14442C10C1F5E3D200.json')).resolve().absolute())
 calibBackUpFile = str((Path(__file__).parent / Path('depthai_calib_backup.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()

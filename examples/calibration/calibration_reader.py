@@ -13,7 +13,7 @@ with dai.Device() as device:
 
     calibData = device.readCalibration()
     calibData.eepromToJsonFile(calibFile)
-
+    print(calibData.getEepromData().boardRev)
     M_rgb, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB)
     print("RGB Camera Default intrinsics...")
     print(M_rgb)
