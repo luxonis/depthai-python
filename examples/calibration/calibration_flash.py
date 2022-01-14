@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# /home/sachin/Desktop/luxonis/depthai-python/examples/calibration
 
 from pathlib import Path
 import cv2
