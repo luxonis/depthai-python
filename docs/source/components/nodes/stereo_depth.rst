@@ -73,7 +73,7 @@ Inputs and Outputs
 Internal block diagram of StereoDepth node
 ##########################################
 
-.. image:: /_static/images/components/depth_diagram.jpeg
+.. image:: /_static/images/components/depth_diagram.png
    :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
 
 On the diagram, red rectangle are firmware settings that are configurable via the API. Gray rectangles are settings that that are not yet
@@ -126,6 +126,39 @@ Currently configurable blocks
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
+  .. tab:: Filtering
+
+    .. tabs::
+
+      .. tab:: Median filter
+
+      This is a non-edge preserving `Median filter <https://en.wikipedia.org/wiki/Median_filter>`__, which can be used
+      to reduce noise and smoothen the depth map.
+
+      .. tab:: Speckle filter
+
+      Speckle filter is used to reduce the speckle noise. Compared to median filter, it's not applied through the
+      whole depth map, it only reduces noise.
+
+      .. tab:: Temporal filter
+
+      Temporal filter will take into account valid depth pixel from previous depth maps, so it preserves
+      the depth pixels through time.
+
+      .. tab:: Spatial filter
+
+      Spatial hole-filling filter will fill invalid depth pixels with valid neighboring depth pixels.
+      Radius of neighboring pixels is configurable and so is number of iteration.
+
+      .. tab:: Threshold filter
+
+      This is a simple filter that will remove all depth pixels outside the min/max threshold values.
+
+      .. tab:: Decimation filter
+
+      This filter will downscale the depth map, which means it reduces the depth scene complexity and allows
+      other filters to run faster. Setting :code:`decimationFactor` to 2 will downscale 1280x800 depth map to 640x400.
+
   .. tab:: Mesh file / Homography matrix
 
     Mesh files are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
@@ -148,7 +181,7 @@ Currently configurable blocks
 
   .. tab:: Confidence Threshold
 
-    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
+    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and chooses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
     - **LR check threshold**: Disparity is considered for the output when the difference between LR and RL disparities is smaller than the LR check threshold.
 
     .. doxygenfunction:: dai::StereoDepthConfig::setConfidenceThreshold
@@ -159,8 +192,8 @@ Currently configurable blocks
         :project: depthai-core
         :no-link:
 
-Current limitations
-###################
+Limitations
+###########
 
 - Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 
