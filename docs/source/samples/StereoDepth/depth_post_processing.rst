@@ -4,6 +4,12 @@ Depth Post-Processing
 This example shows how you can run depth post-processing filters on the device itself to reduce noise,
 smooth the depth map and overall improve the depth map quality. Post-processing can be added to :ref:`StereoDepth` node.
 
+
+Demo
+####
+
+.. image:: /_static/images/examples/depth_comparison.png
+
 Depth filters
 #############
 
