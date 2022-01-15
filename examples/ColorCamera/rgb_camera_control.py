@@ -24,7 +24,7 @@ STEP_SIZE = 8
 EXP_STEP = 500  # us
 ISO_STEP = 50
 LENS_STEP = 3
-WB_STEP = 200
+WB_STEP = 10
 
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
@@ -50,8 +50,10 @@ stillMjpegOut.setStreamName('still')
 previewOut.setStreamName('preview')
 
 # Properties
-camRgb.setVideoSize(640, 360)
-camRgb.setPreviewSize(300, 300)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+camRgb.setIspScale(1, 2)
+camRgb.setVideoSize(1920, 1080)
+camRgb.setPreviewSize(640, 360)
 videoEncoder.setDefaultProfilePreset(camRgb.getVideoSize(), camRgb.getFps(), dai.VideoEncoderProperties.Profile.MJPEG)
 stillEncoder.setDefaultProfilePreset(camRgb.getStillSize(), 1, dai.VideoEncoderProperties.Profile.MJPEG)
 
@@ -103,7 +105,9 @@ with dai.Device(pipeline) as device:
     while True:
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
-            cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
+            wb = previewFrame.getWhiteBalanceGains()
+            print(f'WB R:{wb.gainR:.3f} Gr:{wb.gainGr:.3f} Gb:{wb.gainGb:.3f} B:{wb.gainB:.3f}')
+            cv2.imshow('preview', previewFrame.getCvFrame())
 
         videoFrames = videoQueue.tryGetAll()
         for videoFrame in videoFrames:

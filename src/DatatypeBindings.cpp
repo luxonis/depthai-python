@@ -56,6 +56,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     py::enum_<RawImgFrame::Type> rawImgFrameType(rawImgFrame, "Type");
     py::class_<RawImgFrame::Specs> rawImgFrameSpecs(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs));
+    py::class_<RawImgFrame::WhiteBalance> rawImgFrameWhiteBalance(rawImgFrame, "WhiteBalance", DOC(dai, RawImgFrame, WhiteBalance));
     py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo", DOC(dai, TensorInfo));
     py::enum_<TensorInfo::DataType>tensorInfoDataType(tensorInfo, "DataType");
@@ -239,6 +240,14 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("p1Offset", &RawImgFrame::Specs::p1Offset)
         .def_readwrite("p2Offset", &RawImgFrame::Specs::p2Offset)
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
+        ;
+
+    rawImgFrameWhiteBalance
+        .def(py::init<>())
+        .def_readwrite("gainR", &RawImgFrame::WhiteBalance::gainR)
+        .def_readwrite("gainGr", &RawImgFrame::WhiteBalance::gainGr)
+        .def_readwrite("gainGb", &RawImgFrame::WhiteBalance::gainGb)
+        .def_readwrite("gainB", &RawImgFrame::WhiteBalance::gainB)
         ;
 
         // TODO add RawImgFrame::CameraSettings
@@ -633,6 +642,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
         .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
         .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
+        .def("getWhiteBalanceGains", &ImgFrame::getWhiteBalanceGains, DOC(dai, ImgFrame, getWhiteBalanceGains))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
@@ -831,6 +841,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
+    m.attr("ImgFrame").attr("WhiteBalance") = m.attr("RawImgFrame").attr("WhiteBalance");
 
     rotatedRect
         .def(py::init<>())
@@ -938,6 +949,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setManualExposure", &CameraControl::setManualExposure, py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
         .def("setAutoWhiteBalanceMode", &CameraControl::setAutoWhiteBalanceMode, py::arg("mode"), DOC(dai, CameraControl, setAutoWhiteBalanceMode))
         .def("setAutoWhiteBalanceLock", &CameraControl::setAutoWhiteBalanceLock, py::arg("lock"), DOC(dai, CameraControl, setAutoWhiteBalanceLock))
+        .def("setManualWhiteBalance", &CameraControl::setManualWhiteBalance, py::arg("colorTemperatureK"), DOC(dai, CameraControl, setManualWhiteBalance))
         .def("setBrightness", &CameraControl::setBrightness, py::arg("value"), DOC(dai, CameraControl, setBrightness))
         .def("setContrast", &CameraControl::setContrast, py::arg("value"), DOC(dai, CameraControl, setContrast))
         .def("setSaturation", &CameraControl::setSaturation, py::arg("value"), DOC(dai, CameraControl, setSaturation))
