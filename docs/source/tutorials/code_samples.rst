@@ -122,6 +122,7 @@ are presented with code.
 .. rubric:: StereoDepth
 
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
+- :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**

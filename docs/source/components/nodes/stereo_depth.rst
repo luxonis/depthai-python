@@ -126,42 +126,15 @@ Currently configurable blocks
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
-  .. tab:: Filtering
+  .. tab:: Depth Filters
 
-    .. tabs::
+    **Depth Filtering** / **Depth Post-Processing** is performed at the end of the depth pipeline. It helps with noise reduction and overall depth quality.
 
-      .. tab:: Median filter
+    .. include::  ../../includes/depth-filters.rst
 
-      This is a non-edge preserving `Median filter <https://en.wikipedia.org/wiki/Median_filter>`__, which can be used
-      to reduce noise and smoothen the depth map.
+  .. tab:: Mesh files
 
-      .. tab:: Speckle filter
-
-      Speckle filter is used to reduce the speckle noise. Compared to median filter, it's not applied through the
-      whole depth map, it only reduces noise.
-
-      .. tab:: Temporal filter
-
-      Temporal filter will take into account valid depth pixel from previous depth maps, so it preserves
-      the depth pixels through time.
-
-      .. tab:: Spatial filter
-
-      Spatial hole-filling filter will fill invalid depth pixels with valid neighboring depth pixels.
-      Radius of neighboring pixels is configurable and so is number of iteration.
-
-      .. tab:: Threshold filter
-
-      This is a simple filter that will remove all depth pixels outside the min/max threshold values.
-
-      .. tab:: Decimation filter
-
-      This filter will downscale the depth map, which means it reduces the depth scene complexity and allows
-      other filters to run faster. Setting :code:`decimationFactor` to 2 will downscale 1280x800 depth map to 640x400.
-
-  .. tab:: Mesh file / Homography matrix
-
-    Mesh files are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
+    Mesh files (homography matrix) are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
     These files helps in overcoming the distortions in the camera increasing the accuracy and also help in when `wide FOV <https://docs.luxonis.com/projects/hardware/en/latest/pages/arducam.html#arducam-compatible-cameras>`__ lens are used.
 
     .. note::
