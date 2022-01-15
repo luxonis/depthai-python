@@ -33,7 +33,7 @@ with dai.Device(pipeline) as device:
     qRight = device.getOutputQueue(name="right", maxSize=4, blocking=False)
 
     while True:
-        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
         inLeft = qLeft.tryGet()
         inRight = qRight.tryGet()
 

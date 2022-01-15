@@ -12,7 +12,7 @@ xin.out.link(script.inputs['in'])
 script.setScript("""
     import json
 
-    # Recieve bytes from the host
+    # Receive bytes from the host
     data = node.io['in'].get().getData()
     jsonStr = str(data, 'utf-8')
     dict = json.loads(jsonStr)

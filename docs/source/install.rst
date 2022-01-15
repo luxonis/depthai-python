@@ -241,7 +241,7 @@ Kernel Virtual Machine
 To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__, there is a need to attach and detach USB 
 devices on the fly when the host machine detects changes in the USB bus.
 
-OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively.
+OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in background when the camera is used natively.
 But when the camera is used in a virtual environment the situation is different.
 
 On your host machine, use the following code:
@@ -292,7 +292,7 @@ Note that when the device is disconnected from the USB bus, some udev environmen
 that is why you need to use :code:`PRODUCT` environmental variable to identify which device has been disconnected.
 
 The virtual machine where DepthAI API application is running should have defined a udev rules that identify the OAK-D camera.
-The udev rule is decribed `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
+The udev rule is described `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
 
 Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
 
