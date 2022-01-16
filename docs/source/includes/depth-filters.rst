@@ -3,7 +3,7 @@
     .. tab:: Median
 
         This is a non-edge preserving `Median filter <https://en.wikipedia.org/wiki/Median_filter>`__, which can be used
-        to reduce noise and smoothen the depth map.
+        to reduce noise and smoothen the depth map. Median filter is implemented in hardware, so it's the fastest filter.
 
         .. doxygenenum:: dai::MedianFilter
             :project: depthai-core
@@ -12,7 +12,7 @@
     .. tab:: Speckle
 
         **Speckle Filter** is used to reduce the speckle noise. Speckle noise is a region with huge
-        variance between neighboring depth pixels, and speckle filter tries to filter this region.
+        variance between neighboring disparity/depth pixels, and speckle filter tries to filter this region.
 
         .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::SpeckleFilter
             :project: depthai-core
@@ -46,7 +46,7 @@
 
     .. tab:: Threshold
 
-        **Threshold Filter** filters out all depth pixels outside the configured min/max
+        **Threshold Filter** filters out all disparity/depth pixels outside the configured min/max
         threshold values.
 
         .. autoclass:: depthai.RawStereoDepthConfig.PostProcessing.ThresholdFilter
