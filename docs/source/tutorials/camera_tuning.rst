@@ -20,4 +20,6 @@ To tune your own camera sensors, one would need special Intel's software, which 
 
 **Currently available tuning blobs:**
 
-- Color tuning for low-light environments `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_color_low_light.bin>`__
+- Color tuning for low-light environments `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_color_low_light.bin>`__. Comparison below.
+
+.. image:: /_static/images/tutorials/tuning-comparison.jpeg
