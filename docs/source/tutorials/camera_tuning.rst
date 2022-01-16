@@ -15,8 +15,8 @@ tuning blob is not needed for most cases.
 Available tuning blobs
 ######################
 
-To tune your own camera sensors, one would need special Intel's software, which is under their IP (license needed)
-- which means that the majority of people will only be able to use pre-tuned blobs.
+To tune your own camera sensors, one would need Intel's software, for which a license is needed
+- so the majority of people will only be able to use pre-tuned blobs.
 
 **Currently available tuning blobs:**
 
