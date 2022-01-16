@@ -11,8 +11,8 @@
 
     .. tab:: Speckle
 
-        **Speckle Filter** is used to reduce the speckle noise. Compared to median filter, it's not applied through the
-        whole depth map, it only reduces noise.
+        **Speckle Filter** is used to reduce the speckle noise. Speckle noise is a region with huge
+        variance between neighboring depth pixels, and speckle filter tries to filter this region.
 
         .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::SpeckleFilter
             :project: depthai-core
@@ -20,8 +20,8 @@
 
     .. tab:: Temporal
 
-        **Temporal Filter** will take into account valid depth pixel from previous depth maps, so it preserves
-        the depth pixels through time.
+        **Temporal Filter** will take into account valid depth pixels from previous depth maps, so it does
+        time averaging to improve depth map.
 
         .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::TemporalFilter
             :project: depthai-core
@@ -38,7 +38,8 @@
 
     .. tab:: Threshold
 
-        **Threshold Filter** filters out all depth pixels outside the min/max threshold values.
+        **Threshold Filter** filters out all depth pixels outside the configured min/max
+        threshold values.
 
         .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::ThresholdFilter
             :project: depthai-core
