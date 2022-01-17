@@ -230,14 +230,14 @@ class StereoConfigHandler:
             StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
         if key == ord('a'):
             StereoConfigHandler.newConfig = True
-            aligmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
+            alignmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
             dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT,
             dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER,
             ]
-            currentAligment = StereoConfigHandler.config.algorithmControl.depthAlign
-            nextAligment = aligmentSettings[(aligmentSettings.index(currentAligment)+1) % len(aligmentSettings)]
-            print(f"Changing aligment mode to {nextAligment.name} from {currentAligment.name}")
-            StereoConfigHandler.config.algorithmControl.depthAlign = nextAligment
+            currentAlignment = StereoConfigHandler.config.algorithmControl.depthAlign
+            nextAlignment = alignmentSettings[(alignmentSettings.index(currentAlignment)+1) % len(alignmentSettings)]
+            print(f"Changing alignment mode to {nextAlignment.name} from {currentAlignment.name}")
+            StereoConfigHandler.config.algorithmControl.depthAlign = nextAlignment
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
             censusSettings = [dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
@@ -318,7 +318,7 @@ class StereoConfigHandler:
         print("Control disparity search range using the 'd' key.")
         print("Control disparity companding using the 'f' key.")
         print("Control census transform mean mode using the 'v' key.")
-        print("Control depth aligment using the 'a' key.")
+        print("Control depth alignment using the 'a' key.")
         print("Control decimation algorithm using the 'a' key.")
         print("Control temporal persistency mode using the 'r' key.")
         print("Control spatial filter using the 'w' key.")
