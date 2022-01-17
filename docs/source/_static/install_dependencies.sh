@@ -49,8 +49,6 @@ readonly ubuntu_arm_pkgs=(
     # https://stackoverflow.com/a/53402396/5494277
     libhdf5-dev
     libhdf5-dev
-    python3-pyqt5
-    python3-pyqt5.qtquick
     libatlas-base-dev
     libjasper-dev
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
@@ -122,6 +120,15 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get update
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
+        fi
+        if [[ -d /opt/ros ]]; then
+          echo "ROS detected - skipping \"python3-pyqt5\" and \"python3-pyqt5.qtquick\" installation. These packages can break ROS installation so please install them manually if needed"
+        else
+          if python3 -c "import PyQt5"; then
+              echo "PyQt5 already installed, skipping dependence"
+          else
+            sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtquick
+          fi
         fi
     elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y
