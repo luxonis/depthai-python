@@ -125,7 +125,7 @@ elif [ -f /etc/os-release ]; then
           echo "ROS detected - skipping \"python3-pyqt5\" and \"python3-pyqt5.qtquick\" installation. These packages can break ROS installation so please install them manually if needed"
         else
           if python3 -c "import PyQt5"; then
-              echo "PyQt5 already installed, skipping dependence"
+              echo "PyQt5 already installed, skipping..."
           else
             sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtquick
           fi
