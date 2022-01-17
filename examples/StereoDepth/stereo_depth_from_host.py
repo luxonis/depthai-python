@@ -21,6 +21,7 @@ if not Path(datasetDefault).exists():
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 
+
 class StereoConfigHandler:
 
     class Trackbar:
@@ -52,6 +53,16 @@ class StereoConfigHandler:
     trLineqThreshold = list()
     trCostAggregationP1 = list()
     trCostAggregationP2 = list()
+    trTemporalAlpha = list()
+    trTemporalDelta = list()
+    trThresholdMinRange = list()
+    trThresholdMaxRange = list()
+    trSpeckleRange = list()
+    trSpatialAlpha = list()
+    trSpatialDelta = list()
+    trSpatialHoleFilling = list()
+    trSpatialNumIterations = list()
+    trDecimationFactor = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -108,6 +119,66 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trCostAggregationP2:
             tr.set(value)
 
+    def trackbarTemporalFilterAlpha(value):
+        StereoConfigHandler.config.postProcessing.temporalFilter.alpha = value / 100.
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trTemporalAlpha:
+            tr.set(value)
+
+    def trackbarTemporalFilterDelta(value):
+        StereoConfigHandler.config.postProcessing.temporalFilter.delta = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trTemporalDelta:
+            tr.set(value)
+
+    def trackbarSpatialFilterAlpha(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.alpha = value / 100.
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialAlpha:
+            tr.set(value)
+
+    def trackbarSpatialFilterDelta(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.delta = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialDelta:
+            tr.set(value)
+
+    def trackbarSpatialFilterHoleFillingRadius(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.holeFillingRadius = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialHoleFilling:
+            tr.set(value)
+
+    def trackbarSpatialFilterNumIterations(value):
+        StereoConfigHandler.config.postProcessing.spatialFilter.numIterations = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpatialNumIterations:
+            tr.set(value)
+
+    def trackbarThresholdMinRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.minRange = value * 1000
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMinRange:
+            tr.set(value)
+
+    def trackbarThresholdMaxRange(value):
+        StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange = value * 1000
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trThresholdMaxRange:
+            tr.set(value)
+
+    def trackbarSpeckleRange(value):
+        StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trSpeckleRange:
+            tr.set(value)
+
+    def trackbarDecimationFactor(value):
+        StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trDecimationFactor:
+            tr.set(value)
+
     def handleKeypress(key, stereoDepthConfigInQueue):
         if key == ord('m'):
             StereoConfigHandler.newConfig = True
@@ -116,16 +187,67 @@ class StereoConfigHandler:
             nextMedian = medianSettings[(medianSettings.index(currentMedian)+1) % len(medianSettings)]
             print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
             StereoConfigHandler.config.postProcessing.median = nextMedian
+        if key == ord('w'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.spatialFilter.enable = not StereoConfigHandler.config.postProcessing.spatialFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.spatialFilter.enable else "off"
+            print(f"Spatial filter {state}")
+        if key == ord('t'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.temporalFilter.enable = not StereoConfigHandler.config.postProcessing.temporalFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.temporalFilter.enable else "off"
+            print(f"Temporal filter {state}")
+        if key == ord('s'):
+            StereoConfigHandler.newConfig = True
+            StereoConfigHandler.config.postProcessing.speckleFilter.enable = not StereoConfigHandler.config.postProcessing.speckleFilter.enable
+            state = "on" if StereoConfigHandler.config.postProcessing.speckleFilter.enable else "off"
+            print(f"Speckle filter {state}")
+        if key == ord('r'):
+            StereoConfigHandler.newConfig = True
+            temporalSettings = [dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_OFF,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_8_OUT_OF_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_3,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_IN_LAST_4,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_2_OUT_OF_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_2,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_5,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.VALID_1_IN_LAST_8,
+            dai.StereoDepthConfig.PostProcessing.TemporalFilter.PersistencyMode.PERSISTENCY_INDEFINITELY,
+            ]
+            currentTemporal = StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode
+            nextTemporal = temporalSettings[(temporalSettings.index(currentTemporal)+1) % len(temporalSettings)]
+            print(f"Changing temporal persistency to {nextTemporal.name} from {currentTemporal.name}")
+            StereoConfigHandler.config.postProcessing.temporalFilter.persistencyMode = nextTemporal
+        if key == ord('n'):
+            StereoConfigHandler.newConfig = True
+            decimationSettings = [dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.PIXEL_SKIPPING,
+            dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEDIAN,
+            dai.StereoDepthConfig.PostProcessing.DecimationFilter.DecimationMode.NON_ZERO_MEAN,
+            ]
+            currentDecimation = StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode
+            nextDecimation = decimationSettings[(decimationSettings.index(currentDecimation)+1) % len(decimationSettings)]
+            print(f"Changing decimation mode to {nextDecimation.name} from {currentDecimation.name}")
+            StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
+        if key == ord('a'):
+            StereoConfigHandler.newConfig = True
+            alignmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
+            dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT,
+            dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER,
+            ]
+            currentAlignment = StereoConfigHandler.config.algorithmControl.depthAlign
+            nextAlignment = alignmentSettings[(alignmentSettings.index(currentAlignment)+1) % len(alignmentSettings)]
+            print(f"Changing alignment mode to {nextAlignment.name} from {currentAlignment.name}")
+            StereoConfigHandler.config.algorithmControl.depthAlign = nextAlignment
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
-            censusSettings = [dai.RawStereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.RawStereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
+            censusSettings = [dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
             currentCensus = StereoConfigHandler.config.censusTransform.kernelSize
             nextCensus = censusSettings[(censusSettings.index(currentCensus)+1) % len(censusSettings)]
             print(f"Changing census transform to {nextCensus.name} from {currentCensus.name}")
             StereoConfigHandler.config.censusTransform.kernelSize = nextCensus
         elif key == ord('d'):
             StereoConfigHandler.newConfig = True
-            dispRangeSettings = [dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_64, dai.RawStereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_96]
+            dispRangeSettings = [dai.StereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_64, dai.StereoDepthConfig.CostMatching.DisparityWidth.DISPARITY_96]
             currentDispRange = StereoConfigHandler.config.costMatching.disparityWidth
             nextDispRange = dispRangeSettings[(dispRangeSettings.index(currentDispRange)+1) % len(dispRangeSettings)]
             print(f"Changing disparity range to {nextDispRange.name} from {currentDispRange.name}")
@@ -165,6 +287,9 @@ class StereoConfigHandler:
             configMessage.set(StereoConfigHandler.config)
             stereoDepthConfigInQueue.send(configMessage)
 
+    def updateDefaultConfig(config):
+        StereoConfigHandler.config = config
+
     def registerWindow(stream):
         cv2.namedWindow(stream)
         StereoConfigHandler.trConfidence.append(StereoConfigHandler.Trackbar('Disparity confidence', stream, 0, 255, StereoConfigHandler.config.costMatching.confidenceThreshold, StereoConfigHandler.trackbarConfidence))
@@ -176,6 +301,16 @@ class StereoConfigHandler:
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
         StereoConfigHandler.trCostAggregationP1.append(StereoConfigHandler.Trackbar('Cost aggregation P1', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP1, StereoConfigHandler.trackbarCostAggregationP1))
         StereoConfigHandler.trCostAggregationP2.append(StereoConfigHandler.Trackbar('Cost aggregation P2', stream, 0, 500, StereoConfigHandler.config.costAggregation.horizontalPenaltyCostP2, StereoConfigHandler.trackbarCostAggregationP2))
+        StereoConfigHandler.trTemporalAlpha.append(StereoConfigHandler.Trackbar('Temporal filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.temporalFilter.alpha*100), StereoConfigHandler.trackbarTemporalFilterAlpha))
+        StereoConfigHandler.trTemporalDelta.append(StereoConfigHandler.Trackbar('Temporal filter delta', stream, 0, 100, StereoConfigHandler.config.postProcessing.temporalFilter.delta, StereoConfigHandler.trackbarTemporalFilterDelta))
+        StereoConfigHandler.trSpatialAlpha.append(StereoConfigHandler.Trackbar('Spatial filter alpha', stream, 0, 100, int(StereoConfigHandler.config.postProcessing.spatialFilter.alpha*100), StereoConfigHandler.trackbarSpatialFilterAlpha))
+        StereoConfigHandler.trSpatialDelta.append(StereoConfigHandler.Trackbar('Spatial filter delta', stream, 0, 100, StereoConfigHandler.config.postProcessing.spatialFilter.delta, StereoConfigHandler.trackbarSpatialFilterDelta))
+        StereoConfigHandler.trSpatialHoleFilling.append(StereoConfigHandler.Trackbar('Spatial filter hole filling radius', stream, 0, 16, StereoConfigHandler.config.postProcessing.spatialFilter.holeFillingRadius, StereoConfigHandler.trackbarSpatialFilterHoleFillingRadius))
+        StereoConfigHandler.trSpatialNumIterations.append(StereoConfigHandler.Trackbar('Spatial filter number of iterations', stream, 0, 4, StereoConfigHandler.config.postProcessing.spatialFilter.numIterations, StereoConfigHandler.trackbarSpatialFilterNumIterations))
+        StereoConfigHandler.trThresholdMinRange.append(StereoConfigHandler.Trackbar('Threshold filter min range', stream, 0, 65, StereoConfigHandler.config.postProcessing.thresholdFilter.minRange, StereoConfigHandler.trackbarThresholdMinRange))
+        StereoConfigHandler.trThresholdMaxRange.append(StereoConfigHandler.Trackbar('Threshold filter max range', stream, 0, 65, StereoConfigHandler.config.postProcessing.thresholdFilter.maxRange, StereoConfigHandler.trackbarThresholdMaxRange))
+        StereoConfigHandler.trSpeckleRange.append(StereoConfigHandler.Trackbar('Speckle filter range', stream, 0, 240, StereoConfigHandler.config.postProcessing.speckleFilter.speckleRange, StereoConfigHandler.trackbarSpeckleRange))
+        StereoConfigHandler.trDecimationFactor.append(StereoConfigHandler.Trackbar('Decimation factor', stream, 1, 4, StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor, StereoConfigHandler.trackbarDecimationFactor))
 
     def __init__(self, config):
         print("Control median filter using the 'm' key.")
@@ -183,12 +318,17 @@ class StereoConfigHandler:
         print("Control disparity search range using the 'd' key.")
         print("Control disparity companding using the 'f' key.")
         print("Control census transform mean mode using the 'v' key.")
+        print("Control depth alignment using the 'a' key.")
+        print("Control decimation algorithm using the 'a' key.")
+        print("Control temporal persistency mode using the 'r' key.")
+        print("Control spatial filter using the 'w' key.")
+        print("Control temporal filter using the 't' key.")
+        print("Control speckle filter using the 's' key.")
         print("Control left-right check mode using the '1' key.")
         print("Control subpixel mode using the '2' key.")
         print("Control extended mode using the '3' key.")
 
         StereoConfigHandler.config = config
-
 
 # StereoDepth initial config options.
 outDepth = True  # Disparity by default
@@ -250,7 +390,7 @@ if args.dumpdisparitycostvalues:
     xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
 # Properties
-stereo.initialConfig.setConfidenceThreshold(245)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setRectifyEdgeFillColor(0) # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)
@@ -286,6 +426,8 @@ StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow('disparity')
 if outDepth:
     StereoConfigHandler.registerWindow('depth')
+
+# stereo.setPostProcessingHardwareResources(3, 3)
 
 stereo.setInputResolution(width, height)
 stereo.setRectification(False)
@@ -335,8 +477,8 @@ def convertToCv2Frame(name, image, config):
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
 
-        if 1: # Optionally, apply a color map
-            frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
+        # if 1: # Optionally, apply a color map
+        #     frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
     return frame
 

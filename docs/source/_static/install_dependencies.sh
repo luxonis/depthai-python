@@ -121,6 +121,7 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
         fi
+
         if python3 -c "import PyQt5"; then
             echo "PyQt5 already installed, skipping..."
         else
@@ -129,6 +130,26 @@ elif [ -f /etc/os-release ]; then
           else
             sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtquick
           fi
+        fi
+
+        dpkg -s uvcdynctrl > /dev/null 2>&1
+        # is uvcdynctrl installed
+        if [ $? -eq 0 ]; then
+          echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
+          echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
+          echo -e "\033[33mYou can do so by running the following commands:\033[0m"
+          echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
+          echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
+          echo ""
+        fi
+
+        OS_VERSION=$(lsb_release -r |cut -f2)
+        if [ "$OS_VERSION" == "21.04" ]; then
+            echo -e "\033[33mThere are known issues with running our demo script on Ubuntu 21.04, due to package \"python3-pyqt5.sip\" not being in a correct version (>=12.9)\033[0m"
+            echo -e "\033[33mWe recommend installing the updated version manually using the following commands\033[0m"
+            echo -e "\033[33m$ wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pyqt5-sip/python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
+            echo -e "\033[33m$ sudo dpkg -i python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
+            echo ""
         fi
     elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y

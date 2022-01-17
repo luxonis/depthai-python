@@ -36,6 +36,18 @@ depth.setLeftRightCheck(lr_check)
 depth.setExtendedDisparity(extended_disparity)
 depth.setSubpixel(subpixel)
 
+config = depth.initialConfig.get()
+config.postProcessing.speckleFilter.enable = False
+config.postProcessing.speckleFilter.speckleRange = 50
+config.postProcessing.temporalFilter.enable = True
+config.postProcessing.spatialFilter.enable = True
+config.postProcessing.spatialFilter.holeFillingRadius = 2
+config.postProcessing.spatialFilter.numIterations = 1
+config.postProcessing.thresholdFilter.minRange = 400
+config.postProcessing.thresholdFilter.maxRange = 15000
+config.postProcessing.decimationFilter.decimationFactor = 1
+depth.initialConfig.set(config)
+
 # Linking
 monoLeft.out.link(depth.left)
 monoRight.out.link(depth.right)

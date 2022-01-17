@@ -4,6 +4,23 @@ import cv2
 import numpy as np
 import depthai as dai
 
+# Weights to use when blending depth/rgb image (should equal 1.0)
+rgbWeight = 0.6
+depthWeight = 0.4
+
+
+def updateBlendWeights(percent_rgb):
+    """
+    Update the rgb and depth weights used to blend depth/rgb image
+
+    @param[in] percent_rgb The rgb weight expressed as a percentage (0..100)
+    """
+    global depthWeight
+    global rgbWeight
+    rgbWeight = float(percent_rgb)/100.0
+    depthWeight = 1.0 - rgbWeight
+
+
 # Optional. If set (True), the ColorCamera is downscaled from 1080p to 720p.
 # Otherwise (False), the aligned depth is automatically upscaled to 1080p
 downscaleColor = True
@@ -45,7 +62,7 @@ right.setResolution(monoResolution)
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 right.setFps(fps)
 
-stereo.initialConfig.setConfidenceThreshold(245)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
@@ -65,6 +82,15 @@ with dai.Device(pipeline) as device:
     frameRgb = None
     frameDepth = None
 
+    # Configure windows; trackbar adjusts blending ratio of rgb/depth
+    rgbWindowName = "rgb"
+    depthWindowName = "depth"
+    blendedWindowName = "rgb-depth"
+    cv2.namedWindow(rgbWindowName)
+    cv2.namedWindow(depthWindowName)
+    cv2.namedWindow(blendedWindowName)
+    cv2.createTrackbar('RGB Weight %', blendedWindowName, int(rgbWeight*100), 100, updateBlendWeights)
+
     while True:
         latestPacket = {}
         latestPacket["rgb"] = None
@@ -78,7 +104,7 @@ with dai.Device(pipeline) as device:
 
         if latestPacket["rgb"] is not None:
             frameRgb = latestPacket["rgb"].getCvFrame()
-            cv2.imshow("rgb", frameRgb)
+            cv2.imshow(rgbWindowName, frameRgb)
 
         if latestPacket["depth"] is not None:
             frameDepth = latestPacket["depth"].getFrame()
@@ -88,16 +114,15 @@ with dai.Device(pipeline) as device:
             # Optional, apply false colorization
             if 1: frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_HOT)
             frameDepth = np.ascontiguousarray(frameDepth)
-            cv2.imshow("depth", frameDepth)
+            cv2.imshow(depthWindowName, frameDepth)
 
         # Blend when both received
         if frameRgb is not None and frameDepth is not None:
             # Need to have both frames in BGR format before blending
             if len(frameDepth.shape) < 3:
                 frameDepth = cv2.cvtColor(frameDepth, cv2.COLOR_GRAY2BGR)
-            # TODO add a slider to adjust blending ratio
-            blended = cv2.addWeighted(frameRgb, 0.6, frameDepth, 0.4 ,0)
-            cv2.imshow("rgb-depth", blended)
+            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth, depthWeight, 0)
+            cv2.imshow(blendedWindowName, blended)
             frameRgb = None
             frameDepth = None
 
