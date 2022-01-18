@@ -16,6 +16,7 @@ Code Samples
    ../samples/mixed/*
    ../samples/MobileNet/*
    ../samples/MonoCamera/*
+   ../samples/NeuralNetwork/*
    ../samples/ObjectTracker/*
    ../samples/Script/*
    ../samples/SpatialDetection/*
@@ -94,6 +95,11 @@ are presented with code.
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
+
+.. rubric:: NeuralNetwork
+
+- :ref:`Multi-Input Frame Concat <Multi-Input Frame Concationation>` - Concat mono/rgb streams on the device with a custom model
+- :ref:`Frame Normalization` - Normalize the frame on the device with a custom model
 
 .. rubric:: ObjectTracker
 

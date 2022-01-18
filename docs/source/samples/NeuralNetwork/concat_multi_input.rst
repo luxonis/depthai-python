@@ -1,8 +1,9 @@
 Multi-Input Frame Concationation
 ================================
 
-Example concatenates all 3 inputs with a simple custom NN created with PyTorch (`link here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-custom-models/generate_model/pytorch_concat.py>`__, `tutorial here <https://docs.luxonis.com/en/latest/pages/tutorials/creating-custom-nn-models/>`__).
-It uses multiple input :ref:`NeuralNetwork` feature and links all 3 camera streams directly to the NN node.
+Example concatenates all 3 inputs with a simple custom model created with PyTorch (`link here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-custom-models/generate_model/pytorch_concat.py>`__,
+`tutorial here <https://docs.luxonis.com/en/latest/pages/tutorials/creating-custom-nn-models/>`__).
+It uses :ref:`NeuralNetwork`'s multiple input feature and links all 3 camera streams directly to the NeuralNetwork node.
 
 Demo
 ####
@@ -31,7 +32,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/concat_multiple_input.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/src/concat_multi_input.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/NeuralNetwork/concat_multi_input.cpp
            :language: cpp
            :linenos:
 

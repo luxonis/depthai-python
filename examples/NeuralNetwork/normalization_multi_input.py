@@ -31,7 +31,7 @@ nn.setNumInferenceThreads(2)
 
 script = p.create(dai.node.Script)
 script.setScript("""
-# Run script only once
+# Run script only once. We could also send these values from host.
 # Model formula:
 # output = (input - mean) / scale
 
@@ -68,10 +68,11 @@ with dai.Device(p) as device:
     shape = (3, SHAPE, SHAPE)
     while True:
         inNn = np.array(qNn.get().getData())
-        # Get back the frame. It's currently normalized to -1.0 - 1.0
+        # Get back the frame. It's currently normalized to -0.5 - 0.5
         frame = inNn.view(np.float16).reshape(shape).transpose(1, 2, 0)
-        # To get original frame back (0-255), we add multiply all frame values (pixels) by 255 and then add 127.5 to them.
+        # To get original frame back (0-255), we add multiply all frame values (pixels) by 255 and then add 127.5 to them
         frame = (frame * 255.0 + 127.5).astype(np.uint8)
+        # Show the initial frame
         cv2.imshow("Original frame", frame)
 
         if cv2.waitKey(1) == ord('q'):

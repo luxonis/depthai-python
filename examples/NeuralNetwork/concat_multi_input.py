@@ -24,34 +24,26 @@ camRgb.setPreviewSize(SHAPE, SHAPE)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
-left = p.create(dai.node.MonoCamera)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+def create_mono(p, socket):
+    mono = p.create(dai.node.MonoCamera)
+    mono.setBoardSocket(socket)
+    mono.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
-# ImageManip for cropping (face detection NN requires input image of 300x300) and to change frame type
-manipLeft = p.create(dai.node.ImageManip)
-manipLeft.initialConfig.setResize(300, 300)
-manipLeft.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-left.out.link(manipLeft.inputImage)
-
-right = p.create(dai.node.MonoCamera)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-
-# ImageManip for cropping (face detection NN requires input image of 300x300) and to change frame type
-manipRight = p.create(dai.node.ImageManip)
-manipRight.initialConfig.setResize(300, 300)
-manipRight.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
-right.out.link(manipRight.inputImage)
+    # ImageManip for cropping (face detection NN requires input image of 300x300) and to change frame type
+    manip = p.create(dai.node.ImageManip)
+    manip.initialConfig.setResize(300, 300)
+    manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    mono.out.link(manip.inputImage)
+    return manip.out
 
 # NN that detects faces in the image
 nn = p.createNeuralNetwork()
 nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 
-manipLeft.out.link(nn.inputs['img1'])
 camRgb.preview.link(nn.inputs['img2'])
-manipRight.out.link(nn.inputs['img3'])
+create_mono(p, dai.CameraBoardSocket.LEFT).link(nn.inputs['img1'])
+create_mono(p, dai.CameraBoardSocket.RIGHT).link(nn.inputs['img3'])
 
 # Send bouding box from the NN to the host via XLink
 nn_xout = p.createXLinkOut()
