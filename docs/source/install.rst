@@ -233,6 +233,8 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
+**Note: If you are using OAK POE** device on Linux host machine, you should add :code:`--network=host` argument to your docker command, so depthai inside docker will be able to communicate with the OAK POE.
+
 Kernel Virtual Machine
 **********************
 
@@ -397,7 +399,7 @@ Now, run the :code:`rgb_preview.py` script from within :code:`examples` director
 
 .. code-block:: bash
 
-  python3 rgb_preview.py
+  python3 ColorCamera/rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 
