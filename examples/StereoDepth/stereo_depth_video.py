@@ -205,7 +205,6 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
-# FIXME: RuntimeError: StereoDepth(2) - StereoDepth | ExtendedDisparity is not implemented yet.
 stereo.setExtendedDisparity(extended)
 stereo.setSubpixel(subpixel)
 
