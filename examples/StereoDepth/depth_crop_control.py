@@ -59,7 +59,8 @@ with dai.Device(pipeline) as device:
 
     while True:
         inDepth = q.get()
-        depthFrame = inDepth.getFrame()
+        depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
+
         # Frame is transformed, the color map will be applied to highlight the depth info
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
