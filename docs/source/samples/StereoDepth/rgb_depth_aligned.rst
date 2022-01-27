@@ -7,6 +7,7 @@ you can align depth map to the color frame on top of that to get RGB depth.
 Demo
 ####
 
+.. image:: https://user-images.githubusercontent.com/18037362/151351377-a5752fbe-3b8b-4985-b8d1-d5f8a7d5a868.png
 
 Setup
 #####
