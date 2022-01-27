@@ -922,6 +922,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
         .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
         .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
+        .def("setFocalLengthFromCalibration", &StereoDepth::setFocalLengthFromCalibration, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
