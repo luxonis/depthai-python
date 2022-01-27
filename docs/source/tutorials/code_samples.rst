@@ -132,7 +132,7 @@ are presented with code.
 - :ref:`Depth Preview` - Displays colorized stereo disparity
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
-- :ref:`RGB Depth` - Displays RGB depth frames
+- :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
 
 .. rubric:: SystemLogger
 

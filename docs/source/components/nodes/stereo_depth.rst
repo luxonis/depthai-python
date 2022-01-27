@@ -31,7 +31,7 @@ Inputs and Outputs
                  │                   ├─────────────►
   left           │                   │   syncedLeft
   ──────────────►│-------------------├─────────────►
-                 │                   │        depth
+                 │                   │   depth [mm]
                  │                   ├─────────────►
                  │    StereoDepth    │    disparity
                  │                   ├─────────────►
@@ -56,8 +56,8 @@ Inputs and Outputs
     - :code:`confidenceMap` - :ref:`ImgFrame`
     - :code:`rectifiedLeft` - :ref:`ImgFrame`
     - :code:`syncedLeft` - :ref:`ImgFrame`
-    - :code:`depth` - :ref:`ImgFrame`
-    - :code:`disparity` - :ref:`ImgFrame`
+    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in millimeters
+    - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
     - :code:`rectifiedRight` - :ref:`ImgFrame`
     - :code:`syncedRight` - :ref:`ImgFrame`
     - :code:`outConfig` - :ref:`StereoDepthConfig`
@@ -233,6 +233,7 @@ Examples of functionality
 #########################
 
 - :ref:`Depth Preview`
+- :ref:`RGB Depth alignment`
 - :ref:`Mono & MobilenetSSD & Depth`
 - :ref:`RGB & MobilenetSSD with spatial data`
 
