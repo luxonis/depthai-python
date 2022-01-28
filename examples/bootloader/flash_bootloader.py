@@ -25,9 +25,7 @@ else:
             with dai.DeviceBootloader(di) as bl:
                 print(f' current bootloader: {bl.getVersion()}', end='')
         print()
-    selected = 0
-    if i > 0:
-        selected = input(f'Which DepthAI device to flash bootloader for [0..{i}]: ')
+    selected = input(f'Which DepthAI device to flash bootloader for [0..{len(deviceInfos)-1}]: ')
     info = deviceInfos[int(selected)]
 
 hasBootloader = (info.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER)
