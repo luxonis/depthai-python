@@ -106,7 +106,7 @@ In the script node you can interface with GPIOs of the VPU using module GPIO. Cu
 
   # Interrupts
   GPIO.waitInterruptEvent(gpio = -1) # blocks until any interrupt or interrupt by specified gpio is fired. Interrupts with callbacks are ignored here
-  GPIO.hasInterruptEvent(gpio = -1) # returns whether interrupt happened on any or specfied gpio. Interrupts with callbacks are ignored here
+  GPIO.hasInterruptEvent(gpio = -1) # returns whether interrupt happened on any or specified gpio. Interrupts with callbacks are ignored here
   GPIO.setInterrupt(gpio, edge, priority, callback = None) # adds interrupt to specified pin
   GPIO.clearInterrupt(gpio) # clears interrupt of specified pin
 

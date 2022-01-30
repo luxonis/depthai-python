@@ -930,6 +930,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
         .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
         .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
+        .def("setFocalLengthFromCalibration", &StereoDepth::setFocalLengthFromCalibration, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -1073,6 +1074,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("boundingBoxMapping", &SpatialDetectionNetwork::boundingBoxMapping, DOC(dai, node, SpatialDetectionNetwork, boundingBoxMapping))
         .def_readonly("passthrough", &SpatialDetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
         .def_readonly("passthroughDepth", &SpatialDetectionNetwork::passthroughDepth, DOC(dai, node, SpatialDetectionNetwork, passthroughDepth))
+        .def_readonly("spatialLocationCalculatorOutput", &SpatialDetectionNetwork::spatialLocationCalculatorOutput, DOC(dai, node, SpatialDetectionNetwork, spatialLocationCalculatorOutput))
 
         .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
