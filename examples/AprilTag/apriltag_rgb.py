@@ -8,15 +8,15 @@ import time
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-camRgb = pipeline.createColorCamera()
-aprilTag = pipeline.createAprilTag()
-manip = pipeline.createImageManip()
+camRgb = pipeline.create(dai.node.ColorCamera)
+aprilTag = pipeline.create(dai.node.AprilTag)
+manip = pipeline.create(dai.node.ImageManip)
 
-xoutAprilTag = pipeline.createXLinkOut()
-manipOut = pipeline.createXLinkOut()
+xoutAprilTag = pipeline.create(dai.node.XLinkOut)
+xoutAprilTagImage = pipeline.create(dai.node.XLinkOut)
 
 xoutAprilTag.setStreamName("aprilTagData")
-manipOut.setStreamName("manip")
+xoutAprilTagImage.setStreamName("aprilTagImage")
 
 # Properties
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
@@ -25,19 +25,22 @@ camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 manip.initialConfig.setResize(480, 270)
 manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)
 
-aprilTag.initialConfig.setType(dai.AprilTagType.Type.TAG_36H11)
+aprilTag.initialConfig.setFamily(dai.AprilTagConfig.Family.TAG_36H11)
 
 # Linking
-aprilTag.passthroughInputImage.link(manipOut.input)
+aprilTag.passthroughInputImage.link(xoutAprilTagImage.input)
 camRgb.video.link(manip.inputImage)
 manip.out.link(aprilTag.inputImage)
 aprilTag.out.link(xoutAprilTag.input)
+# always take the latest frame as apriltag detections are slow
+aprilTag.inputImage.setBlocking(False)
+aprilTag.inputImage.setQueueSize(1)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
     # Output queue will be used to get the mono frames from the outputs defined above
-    manipQueue = device.getOutputQueue("manip", 8, False)
+    manipQueue = device.getOutputQueue("aprilTagImage", 8, False)
     aprilTagQueue = device.getOutputQueue("aprilTagData", 8, False)
 
     color = (0, 255, 0)
@@ -73,7 +76,7 @@ with dai.Device(pipeline) as device:
 
         cv2.putText(frame, "Fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255,255,255))
 
-        cv2.imshow("manip", frame)
+        cv2.imshow("April tag frame", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

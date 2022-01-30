@@ -8,11 +8,11 @@ import time
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.createMonoCamera()
-aprilTag = pipeline.createAprilTag()
+monoLeft = pipeline.create(dai.node.MonoCamera)
+aprilTag = pipeline.create(dai.node.AprilTag)
 
-xoutMono = pipeline.createXLinkOut()
-xoutAprilTag = pipeline.createXLinkOut()
+xoutMono = pipeline.create(dai.node.XLinkOut)
+xoutAprilTag = pipeline.create(dai.node.XLinkOut)
 
 xoutMono.setStreamName("mono")
 xoutAprilTag.setStreamName("aprilTagData")
@@ -21,13 +21,15 @@ xoutAprilTag.setStreamName("aprilTagData")
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 
-aprilTag.initialConfig.setType(dai.AprilTagType.Type.TAG_36H11)
+aprilTag.initialConfig.setFamily(dai.AprilTagConfig.Family.TAG_36H11)
 
 # Linking
 aprilTag.passthroughInputImage.link(xoutMono.input)
 monoLeft.out.link(aprilTag.inputImage)
-
 aprilTag.out.link(xoutAprilTag.input)
+# always take the latest frame as apriltag detections are slow
+aprilTag.inputImage.setBlocking(False)
+aprilTag.inputImage.setQueueSize(1)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:

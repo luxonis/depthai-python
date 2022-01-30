@@ -145,13 +145,13 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawFeatureTrackerConfig::MotionEstimator> motionEstimator(rawFeatureTrackerConfig, "MotionEstimator", DOC(dai, RawFeatureTrackerConfig, MotionEstimator));
     py::enum_<RawFeatureTrackerConfig::MotionEstimator::Type> motionEstimatorType(motionEstimator, "Type", DOC(dai, RawFeatureTrackerConfig, MotionEstimator, Type));
     py::class_<RawFeatureTrackerConfig::MotionEstimator::OpticalFlow> motionEstimatorOpticalFlow(motionEstimator, "OpticalFlow", DOC(dai, RawFeatureTrackerConfig, MotionEstimator, OpticalFlow));
-
     py::class_<RawFeatureTrackerConfig::FeatureMaintainer> featureMaintainer(rawFeatureTrackerConfig, "FeatureMaintainer", DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer));
     py::class_<FeatureTrackerConfig, Buffer, std::shared_ptr<FeatureTrackerConfig>> featureTrackerConfig(m, "FeatureTrackerConfig", DOC(dai, FeatureTrackerConfig));
+    // April tags
     py::class_<AprilTags> aprilTags(m, "AprilTags", DOC(dai, AprilTags));
-    py::class_<AprilTagType> aprilTagType(m, "AprilTagType", DOC(dai, AprilTagType));
-    py::enum_<AprilTagType::Type>aprilTagTypes(aprilTagType, "Type");
     py::class_<RawAprilTagConfig, RawBuffer, std::shared_ptr<RawAprilTagConfig>> rawAprilTagConfig(m, "RawAprilTagConfig", DOC(dai, RawAprilTagConfig));
+    py::enum_<RawAprilTagConfig::Family> aprilTagFamily(rawAprilTagConfig, "Family", DOC(dai, RawAprilTagConfig, Family));
+    py::class_<RawAprilTagConfig::QuadThresholds> quadThresholds(rawAprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
     py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>> aprilTagConfig(m, "AprilTagConfig", DOC(dai, AprilTagConfig));
     py::class_<AprilTagData, Buffer, std::shared_ptr<AprilTagData>> aprilTagData(m, "AprilTagData", DOC(dai, AprilTagData));
 
@@ -1441,39 +1441,51 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("decisionMargin", &AprilTags::decisionMargin, DOC(dai, AprilTags, decisionMargin))
         .def_readwrite("center", &AprilTags::center, DOC(dai, AprilTags, center))
         .def_readwrite("points", &AprilTags::points, DOC(dai, AprilTags, points))
-        .def_readwrite("config", &AprilTags::config, DOC(dai, AprilTags, config))
         ;
 
 
-    aprilTagType
+    aprilTagFamily
+        .value("TAG_36H11", RawAprilTagConfig::Family::TAG_36H11)
+        .value("TAG_36H10", RawAprilTagConfig::Family::TAG_36H10)
+        .value("TAG_25H9", RawAprilTagConfig::Family::TAG_25H9)
+        .value("TAG_16H5", RawAprilTagConfig::Family::TAG_16H5)
+        .value("TAG_CIR21H7", RawAprilTagConfig::Family::TAG_CIR21H7)
+        .value("TAG_CIR49H12", RawAprilTagConfig::Family::TAG_CIR49H12)
+        .value("TAG_CUST48H12", RawAprilTagConfig::Family::TAG_CUST48H12)
+        .value("TAG_STAND41H12", RawAprilTagConfig::Family::TAG_STAND41H12)
+        .value("TAG_STAND52H13", RawAprilTagConfig::Family::TAG_STAND52H13)
+        ;
+
+    quadThresholds
         .def(py::init<>())
-        .def_readwrite("type", &AprilTagType::t)
-        ;
-
-
-    aprilTagTypes
-        .value("TAG_36H11", AprilTagType::Type::TAG_36H11)
-        .value("TAG_25H9", AprilTagType::Type::TAG_25H9)
-        .value("TAG_16H5", AprilTagType::Type::TAG_16H5)
-        .value("TAG_CIR21H7", AprilTagType::Type::TAG_CIR21H7)
-        .value("TAG_CIR49H12", AprilTagType::Type::TAG_CIR49H12)
-        .value("TAG_CUST48H12", AprilTagType::Type::TAG_CUST48H12)
-        .value("TAG_STAND41H12", AprilTagType::Type::TAG_STAND41H12)
-        .value("TAG_STAND52H13", AprilTagType::Type::TAG_STAND52H13)
+        .def_readwrite("minClusterPixels", &RawAprilTagConfig::QuadThresholds::minClusterPixels, DOC(dai, RawAprilTagConfig, QuadThresholds, minClusterPixels))
+        .def_readwrite("maxNmaxima", &RawAprilTagConfig::QuadThresholds::maxNmaxima, DOC(dai, RawAprilTagConfig, QuadThresholds, maxNmaxima))
+        .def_readwrite("criticalDegree", &RawAprilTagConfig::QuadThresholds::criticalDegree, DOC(dai, RawAprilTagConfig, QuadThresholds, criticalDegree))
+        .def_readwrite("maxLineFitMse", &RawAprilTagConfig::QuadThresholds::maxLineFitMse, DOC(dai, RawAprilTagConfig, QuadThresholds, maxLineFitMse))
+        .def_readwrite("minWhiteBlackDiff", &RawAprilTagConfig::QuadThresholds::minWhiteBlackDiff, DOC(dai, RawAprilTagConfig, QuadThresholds, minWhiteBlackDiff))
+        .def_readwrite("deglitch", &RawAprilTagConfig::QuadThresholds::deglitch, DOC(dai, RawAprilTagConfig, QuadThresholds, deglitch))
         ;
 
 
     rawAprilTagConfig
         .def(py::init<>())
-        .def_readwrite("config", &RawAprilTagConfig::config)
+        .def_readwrite("family", &RawAprilTagConfig::family, DOC(dai, RawAprilTagConfig, family))
+        .def_readwrite("quadDecimate", &RawAprilTagConfig::quadDecimate, DOC(dai, RawAprilTagConfig, quadDecimate))
+        .def_readwrite("quadSigma", &RawAprilTagConfig::quadSigma, DOC(dai, RawAprilTagConfig, quadSigma))
+        .def_readwrite("refineEdges", &RawAprilTagConfig::refineEdges, DOC(dai, RawAprilTagConfig, refineEdges))
+        .def_readwrite("decodeSharpening", &RawAprilTagConfig::decodeSharpening, DOC(dai, RawAprilTagConfig, decodeSharpening))
+        .def_readwrite("maxHammingDistance", &RawAprilTagConfig::maxHammingDistance, DOC(dai, RawAprilTagConfig, maxHammingDistance))
+        .def_readwrite("quadThresholds", &RawAprilTagConfig::quadThresholds, DOC(dai, RawAprilTagConfig, quadThresholds))
         ;
 
 
     aprilTagConfig
         .def(py::init<>())
-        .def("setType", &AprilTagConfig::setType, py::arg("type"), DOC(dai, AprilTagConfig, setType))
-        .def("getConfigData", &AprilTagConfig::getConfigData, DOC(dai, AprilTagConfig, getConfigData))
+        .def("setFamily", &AprilTagConfig::setFamily, py::arg("family"), DOC(dai, AprilTagConfig, setFamily))
+        .def("set", &AprilTagConfig::set, DOC(dai, AprilTagConfig, set))
+        .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
         ;
+    m.attr("AprilTagConfig").attr("Family") = m.attr("RawAprilTagConfig").attr("Family");
 
 
     aprilTagData
