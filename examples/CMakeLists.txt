@@ -183,3 +183,7 @@ add_python_example(rgb_mono_encoding VideoEncoder/rgb_mono_encoding.py)
 ## Yolo
 add_python_example(tiny_yolo_v3_device_side_decoding Yolo/tiny_yolo.py yolo3)
 add_python_example(tiny_yolo_v4_device_side_decoding Yolo/tiny_yolo.py yolo4)
+
+## AprilTag
+add_python_example(apriltag AprilTag/apriltag.py)
+add_python_example(apriltag_rgb AprilTag/apriltag_rgb.py)
