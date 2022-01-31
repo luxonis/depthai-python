@@ -22,7 +22,7 @@
 #include "depthai/pipeline/datatype/EdgeDetectorConfig.hpp"
 #include "depthai/pipeline/datatype/TrackedFeatures.hpp"
 #include "depthai/pipeline/datatype/FeatureTrackerConfig.hpp"
-#include "depthai/pipeline/datatype/AprilTagData.hpp"
+#include "depthai/pipeline/datatype/AprilTags.hpp"
 #include "depthai/pipeline/datatype/AprilTagConfig.hpp"
 
 // depthai-shared
@@ -148,12 +148,12 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawFeatureTrackerConfig::FeatureMaintainer> featureMaintainer(rawFeatureTrackerConfig, "FeatureMaintainer", DOC(dai, RawFeatureTrackerConfig, FeatureMaintainer));
     py::class_<FeatureTrackerConfig, Buffer, std::shared_ptr<FeatureTrackerConfig>> featureTrackerConfig(m, "FeatureTrackerConfig", DOC(dai, FeatureTrackerConfig));
     // April tags
-    py::class_<AprilTags> aprilTags(m, "AprilTags", DOC(dai, AprilTags));
+    py::class_<AprilTag> aprilTags(m, "AprilTag", DOC(dai, AprilTag));
     py::class_<RawAprilTagConfig, RawBuffer, std::shared_ptr<RawAprilTagConfig>> rawAprilTagConfig(m, "RawAprilTagConfig", DOC(dai, RawAprilTagConfig));
     py::enum_<RawAprilTagConfig::Family> aprilTagFamily(rawAprilTagConfig, "Family", DOC(dai, RawAprilTagConfig, Family));
     py::class_<RawAprilTagConfig::QuadThresholds> quadThresholds(rawAprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
     py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>> aprilTagConfig(m, "AprilTagConfig", DOC(dai, AprilTagConfig));
-    py::class_<AprilTagData, Buffer, std::shared_ptr<AprilTagData>> aprilTagData(m, "AprilTagData", DOC(dai, AprilTagData));
+    py::class_<AprilTags, Buffer, std::shared_ptr<AprilTags>> aprilTagData(m, "AprilTags", DOC(dai, AprilTags));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -1436,13 +1436,13 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     aprilTags
         .def(py::init<>())
-        .def_readwrite("id", &AprilTags::id, DOC(dai, AprilTags, id))
-        .def_readwrite("hamming", &AprilTags::hamming, DOC(dai, AprilTags, hamming))
-        .def_readwrite("decisionMargin", &AprilTags::decisionMargin, DOC(dai, AprilTags, decisionMargin))
-        .def_readwrite("topLeft", &AprilTags::topLeft, DOC(dai, AprilTags, topLeft))
-        .def_readwrite("topRight", &AprilTags::topRight, DOC(dai, AprilTags, topRight))
-        .def_readwrite("bottomRight", &AprilTags::bottomRight, DOC(dai, AprilTags, bottomRight))
-        .def_readwrite("bottomLeft", &AprilTags::bottomLeft, DOC(dai, AprilTags, bottomLeft))
+        .def_readwrite("id", &AprilTag::id, DOC(dai, AprilTag, id))
+        .def_readwrite("hamming", &AprilTag::hamming, DOC(dai, AprilTag, hamming))
+        .def_readwrite("decisionMargin", &AprilTag::decisionMargin, DOC(dai, AprilTag, decisionMargin))
+        .def_readwrite("topLeft", &AprilTag::topLeft, DOC(dai, AprilTag, topLeft))
+        .def_readwrite("topRight", &AprilTag::topRight, DOC(dai, AprilTag, topRight))
+        .def_readwrite("bottomRight", &AprilTag::bottomRight, DOC(dai, AprilTag, bottomRight))
+        .def_readwrite("bottomLeft", &AprilTag::bottomLeft, DOC(dai, AprilTag, bottomLeft))
         ;
 
 
@@ -1493,7 +1493,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     aprilTagData
         .def(py::init<>())
-        .def_property("aprilTags", [](AprilTagData& det) { return &det.aprilTags; }, [](AprilTagData& det, std::vector<AprilTags> val) { det.aprilTags = val; })
+        .def_property("aprilTags", [](AprilTags& det) { return &det.aprilTags; }, [](AprilTags& det, std::vector<AprilTag> val) { det.aprilTags = val; })
         ;
 
 }
