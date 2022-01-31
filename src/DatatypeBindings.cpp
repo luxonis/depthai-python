@@ -1439,8 +1439,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("id", &AprilTags::id, DOC(dai, AprilTags, id))
         .def_readwrite("hamming", &AprilTags::hamming, DOC(dai, AprilTags, hamming))
         .def_readwrite("decisionMargin", &AprilTags::decisionMargin, DOC(dai, AprilTags, decisionMargin))
-        .def_readwrite("center", &AprilTags::center, DOC(dai, AprilTags, center))
-        .def_readwrite("points", &AprilTags::points, DOC(dai, AprilTags, points))
+        .def_readwrite("topLeft", &AprilTags::topLeft, DOC(dai, AprilTags, topLeft))
+        .def_readwrite("topRight", &AprilTags::topRight, DOC(dai, AprilTags, topRight))
+        .def_readwrite("bottomRight", &AprilTags::bottomRight, DOC(dai, AprilTags, bottomRight))
+        .def_readwrite("bottomLeft", &AprilTags::bottomLeft, DOC(dai, AprilTags, bottomLeft))
         ;
 
 

@@ -59,20 +59,25 @@ with dai.Device(pipeline) as device:
             counter = 0
             startTime = current_time
 
-        frame = inFrame.getCvFrame()
+        monoFrame = inFrame.getFrame()
+        frame = cv2.cvtColor(monoFrame, cv2.COLOR_GRAY2BGR)
 
         aprilTagData = aprilTagQueue.get().aprilTags
         for aprilTag in aprilTagData:
-            xmin = int(aprilTag.points.x)
-            ymin = int(aprilTag.points.y)
-            xmax = xmin + int(aprilTag.points.width)
-            ymax = ymin + int(aprilTag.points.height)
+            topLeft = aprilTag.topLeft
+            topRight = aprilTag.topRight
+            bottomRight = aprilTag.bottomRight
+            bottomLeft = aprilTag.bottomLeft
+
+            center = (int((topLeft.x + bottomRight.x) / 2), int((topLeft.y + bottomRight.y) / 2))
+
+            cv2.line(frame, (int(topLeft.x), int(topLeft.y)), (int(topRight.x), int(topRight.y)), color, 2, cv2.LINE_AA, 0)
+            cv2.line(frame, (int(topRight.x), int(topRight.y)), (int(bottomRight.x), int(bottomRight.y)), color, 2, cv2.LINE_AA, 0)
+            cv2.line(frame, (int(bottomRight.x), int(bottomRight.y)), (int(bottomLeft.x), int(bottomLeft.y)), color, 2, cv2.LINE_AA, 0)
+            cv2.line(frame, (int(bottomLeft.x), int(bottomLeft.y)), (int(topLeft.x), int(topLeft.y)), color, 2, cv2.LINE_AA, 0)
 
             idStr = "ID: " + str(aprilTag.id)
-            cv2.putText(frame, idStr, (xmin + 10, ymin + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
-
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SIMPLEX)
-
+            cv2.putText(frame, idStr, center, cv2.FONT_HERSHEY_TRIPLEX, 0.5, color)
 
         cv2.putText(frame, "Fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255,255,255))
 
