@@ -31,6 +31,21 @@ aprilTag.out.link(xoutAprilTag.input)
 aprilTag.inputImage.setBlocking(False)
 aprilTag.inputImage.setQueueSize(1)
 
+# advanced settings, configurable at runtime
+aprilTagConfig = aprilTag.initialConfig.get()
+aprilTagConfig.quadDecimate = 4
+aprilTagConfig.quadSigma = 0
+aprilTagConfig.refineEdges = True
+aprilTagConfig.decodeSharpening = 0.25
+aprilTagConfig.maxHammingDistance = 1
+aprilTagConfig.quadThresholds.minClusterPixels = 5
+aprilTagConfig.quadThresholds.maxNmaxima = 10
+aprilTagConfig.quadThresholds.criticalDegree = 10
+aprilTagConfig.quadThresholds.maxLineFitMse = 10
+aprilTagConfig.quadThresholds.minWhiteBlackDiff = 5
+aprilTagConfig.quadThresholds.deglitch = False
+aprilTag.initialConfig.set(aprilTagConfig)
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 

@@ -1488,6 +1488,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
         ;
     m.attr("AprilTagConfig").attr("Family") = m.attr("RawAprilTagConfig").attr("Family");
+    m.attr("AprilTagConfig").attr("QuadThresholds") = m.attr("RawAprilTagConfig").attr("QuadThresholds");
 
 
     aprilTagData
