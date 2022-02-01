@@ -26,7 +26,7 @@ def updateBlendWeights(percent_rgb):
 downscaleColor = True
 fps = 30
 # The disparity is computed at this resolution, then upscaled to RGB resolution
-monoResolution = dai.MonoCameraProperties.SensorResolution.THE_400_P
+monoResolution = dai.MonoCameraProperties.SensorResolution.THE_720_P
 
 # Create pipeline
 pipeline = dai.Pipeline()
