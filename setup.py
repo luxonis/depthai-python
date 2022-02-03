@@ -154,7 +154,7 @@ class CMakeBuild(build_ext):
 
             # Specify how many threads to use when building, depending on available memory
             max_threads = multiprocessing.cpu_count()
-            num_threads = (freeMemory // 1000)
+            num_threads = (freeMemory // 2000)
             num_threads = min(num_threads, max_threads)
             if num_threads <= 0:
                 num_threads = 1
