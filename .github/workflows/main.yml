@@ -21,6 +21,9 @@ on:
 ###################################
 ###################################
 
+env:
+  CMAKE_WINDOWS_SDK_VERSION: '10.0.18362.0'
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
@@ -50,7 +53,7 @@ jobs:
       - name: Configure project
         run: cmake -S . -B build -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
-        run: cmake --build build --target pybind11_mkdoc --parallel 8
+        run: cmake --build build --target pybind11_mkdoc --parallel 4
       - name: Upload docstring artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -61,12 +64,10 @@ jobs:
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
     needs: build-docstrings
-    runs-on: luxonis-armhf
-    container:
-      image: registry.gitlab.com/luxonis/depthai-crosscompile/debian-buster
-      # Mount local hunter cache directory, instead of transfering to Github and back
-      volumes:
-        - /.hunter:/github/home/.hunter
+    strategy:
+      matrix:
+        rpi-os: [rpi-buster, rpi-bullseye]
+    runs-on: ${{ matrix.rpi-os }}
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
@@ -126,6 +127,9 @@ jobs:
           path: docstrings
       - name: Specify docstring to use while building the wheel
         run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Select Windows SDK
+        run: echo "CMAKE_ARGS=-DCMAKE_SYSTEM_VERSION=${{ env.CMAKE_WINDOWS_SDK_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -216,7 +220,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux2014_x86_64
+      image: quay.io/pypa/manylinux2014_x86_64:2021-11-15-a808c18
       env:
         PLAT: manylinux2014_x86_64
     steps:
@@ -247,7 +251,7 @@ jobs:
       - name: Build and install depthai-core
         run: |
           cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 8
+          cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
@@ -280,7 +284,7 @@ jobs:
     needs: build-docstrings
     runs-on: [self-hosted, linux, ARM64]
     container:
-      image: quay.io/pypa/manylinux2014_aarch64
+      image: quay.io/pypa/manylinux2014_aarch64:2021-11-15-a808c18
       env:
         PLAT: manylinux2014_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
@@ -309,7 +313,7 @@ jobs:
       - name: Build and install depthai-core
         run: |
           cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 8
+          cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit

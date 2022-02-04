@@ -6,7 +6,7 @@ and not from the RGB camera, and how to display both the RGB
 frame and the metadata results from the MobileNetv2SSD on the frame.
 DepthAI is used here only as a processing unit
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB & MobilenetSSD`
 - :ref:`RGB & MobilenetSSD @ 4K`

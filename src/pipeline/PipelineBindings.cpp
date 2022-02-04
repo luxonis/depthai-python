@@ -27,6 +27,7 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 #include "depthai/pipeline/node/UAC.hpp"
+#include "depthai/pipeline/node/AprilTag.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -135,7 +136,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createUAC", &Pipeline::create<node::UAC>)
-
+        .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         ;
 
 

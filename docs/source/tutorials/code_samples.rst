@@ -16,6 +16,7 @@ Code Samples
    ../samples/mixed/*
    ../samples/MobileNet/*
    ../samples/MonoCamera/*
+   ../samples/NeuralNetwork/*
    ../samples/ObjectTracker/*
    ../samples/Script/*
    ../samples/SpatialDetection/*
@@ -24,13 +25,15 @@ Code Samples
    ../samples/VideoEncoder/*
    ../samples/Yolo/*
 
-Code samples are used for automated testing. They are also a great starting point for the gen2 API.
+Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
+are presented with code.
 
 .. rubric:: Bootloader
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
 - :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
 
@@ -93,6 +96,11 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
+.. rubric:: NeuralNetwork
+
+- :ref:`Multi-Input Frame Concat <Multi-Input Frame Concationation>` - Concat mono/rgb streams on the device with a custom model
+- :ref:`Frame Normalization` - Normalize the frame on the device with a custom model
+
 .. rubric:: ObjectTracker
 
 - :ref:`Object tracker on video` - Performs object tracking from the video
@@ -105,6 +113,7 @@ Code samples are used for automated testing. They are also a great starting poin
 - :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
+- :ref:`Script JSON communication` - 2-way JSON communication between Script <-> Host
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
@@ -119,10 +128,11 @@ Code samples are used for automated testing. They are also a great starting poin
 .. rubric:: StereoDepth
 
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
+- :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
-- :ref:`RGB Depth` - Displays RGB depth frames
+- :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
 
 .. rubric:: SystemLogger
 

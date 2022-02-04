@@ -41,7 +41,7 @@ camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setPreviewSize(300, 300)
 camRgb.setInterleaved(False)
 
-videoEncoder.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
+videoEncoder.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
 nn.setConfidenceThreshold(0.5)
 nn.setBlobPath(nnPath)
