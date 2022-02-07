@@ -57,6 +57,8 @@ parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
+parser.add_argument('-fps', '--fps', type=float, default=30,
+                    help="FPS to set for all cameras")
 args = parser.parse_args()
 
 cam_list = []
@@ -151,7 +153,7 @@ for c in cam_list:
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
-    #cam[c].setFps(10)
+    cam[c].setFps(args.fps)
 
 if 0:
     print("=== Using custom camera tuning, and limiting RGB FPS to 10")
