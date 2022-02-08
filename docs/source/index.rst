@@ -52,6 +52,14 @@ node functionalities are presented with code.
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Code:
+
+   tutorials/code_samples.rst
+   Experiments (GitHub) <https://github.com/luxonis/depthai-experiments>
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
    :caption: Tutorials:
 
    tutorials/hello_world.rst
@@ -60,14 +68,7 @@ node functionalities are presented with code.
    tutorials/debugging.rst
    tutorials/ram_usage.rst
    tutorials/dispaying_detections.rst
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Code:
-
-   tutorials/code_samples.rst
-   Experiments (GitHub) <https://github.com/luxonis/depthai-experiments>
+   tutorials/camera_tuning.rst
 
 .. toctree::
    :maxdepth: 1

@@ -84,7 +84,7 @@ with dai.Device(pipeline) as device:
     print("Resize video window with mouse drag!")
 
     while True:
-        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
         inVideo = qVideo.tryGet()
         inPreview = qPreview.tryGet()
         inDet = qDet.tryGet()
