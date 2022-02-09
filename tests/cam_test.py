@@ -59,6 +59,12 @@ parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
+parser.add_argument('-tofraw', '--tof-raw', action='store_true',
+                    help="Show ToF raw output instead of post-processed depth")
+parser.add_argument('-tofcm', '--tof-cm', action='store_true',
+                    help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
+                    help="Show RGB `preview` stream instead of full size `isp`")
 args = parser.parse_args()
 
 cam_list = []
@@ -132,18 +138,27 @@ control.setStreamName('control')
 
 cam = {}
 xout = {}
+tof = {}
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
     if cam_type_tof[c]:
         cam[c] = pipeline.createCamera()
-        cam[c].raw.link(xout[c].input)
+        if args.tof_raw:
+            cam[c].raw.link(xout[c].input)
+        else:
+            tof[c] = pipeline.createToF()
+            cam[c].raw.link(tof[c].inputImage)
+            tof[c].out.link(xout[c].input)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
         #cam[c].setIspScale(1, 2)
         #cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if args.rgb_preview:
+            cam[c].preview.link(xout[c].input)
+        else:
+            cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -255,6 +270,9 @@ with dai.Device(pipeline) as device:
     chroma_denoise = 0
     control = 'none'
 
+    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom[0] = [0, 0, 0]
+
     print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
 
     while True:
@@ -266,8 +284,16 @@ with dai.Device(pipeline) as device:
                 if cam_type_tof[c]:
                     frame = pkt.getFrame()
                     shape = (pkt.getHeight(), pkt.getWidth())
-                    # Left-justify for better visualization
-                    frame = (frame.view(np.uint16) * 16).reshape(shape)
+                    if args.tof_cm:
+                        # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
+                        frame = (frame // 10).clip(0, 255).astype(np.uint8)
+                    elif args.tof_raw:
+                        # 12-bit RAW left-justified (16-bit) for a better visualization
+                        frame = (frame.view(np.uint16) * 16).reshape(shape)
+                    else:
+                        frame = (frame.view(np.int16).astype(np.float)).reshape(shape)
+                        frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        frame = cv2.applyColorMap(frame, jet_custom)
                 else:
                     frame = pkt.getCvFrame()
                 cv2.imshow(c, frame)
