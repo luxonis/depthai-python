@@ -1413,11 +1413,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("position", &TrackedFeature::position, DOC(dai, TrackedFeature, position))
         .def_readwrite("id", &TrackedFeature::id, DOC(dai, TrackedFeature, id))
-#if 0
         .def_readwrite("age", &TrackedFeature::age, DOC(dai, TrackedFeature, age))
         .def_readwrite("harrisScore", &TrackedFeature::harrisScore, DOC(dai, TrackedFeature, harrisScore))
         .def_readwrite("trackingError", &TrackedFeature::trackingError, DOC(dai, TrackedFeature, trackingError))
-#endif
         ;
 
 
