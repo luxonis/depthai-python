@@ -42,7 +42,7 @@ static auto deviceSearchHelper(Args&&... args){
         // reacquires python GIL for PyErr_CheckSignals call
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(std::chrono::steady_clock::now() - startTime < DEVICE::DEFAULT_SEARCH_TIME);
+    } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
 
     // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
     if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
