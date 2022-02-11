@@ -264,6 +264,27 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("tensors", &RawNNData::tensors)
         .def_readwrite("batchSize", &RawNNData::batchSize)
+        .def_property("ts",
+            [](const RawNNData& o){
+                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawNNData& o, double ts){
+                o.ts.sec = ts;
+                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+            }
+        )
+        .def_property("tsDevice",
+            [](const RawNNData& o){
+                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawNNData& o, double ts){
+                o.tsDevice.sec = ts;
+                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+            }
+        )
+        .def_readwrite("sequenceNum", &RawNNData::sequenceNum)
         ;
 
     tensorInfo
@@ -321,11 +342,53 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     rawImgDetections
         .def(py::init<>())
         .def_readwrite("detections", &RawImgDetections::detections)
+        .def_property("ts",
+            [](const RawImgDetections& o){
+                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawImgDetections& o, double ts){
+                o.ts.sec = ts;
+                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+            }
+        )
+        .def_property("tsDevice",
+            [](const RawImgDetections& o){
+                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawImgDetections& o, double ts){
+                o.tsDevice.sec = ts;
+                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+            }
+        )
+        .def_readwrite("sequenceNum", &RawImgDetections::sequenceNum)
         ;
 
     rawSpatialImgDetections
         .def(py::init<>())
         .def_readwrite("detections", &RawSpatialImgDetections::detections)
+        .def_property("ts",
+            [](const RawSpatialImgDetections& o){
+                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawSpatialImgDetections& o, double ts){
+                o.ts.sec = ts;
+                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+            }
+        )
+        .def_property("tsDevice",
+            [](const RawSpatialImgDetections& o){
+                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+                return ts;
+            },
+            [](RawSpatialImgDetections& o, double ts){
+                o.tsDevice.sec = ts;
+                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+            }
+        )
+        .def_readwrite("sequenceNum", &RawSpatialImgDetections::sequenceNum)
         ;
 
     // Bind RawImageManipConfig
@@ -934,6 +997,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getFirstLayerUInt8", &NNData::getFirstLayerUInt8, DOC(dai, NNData, getFirstLayerUInt8))
         .def("getFirstLayerFp16", &NNData::getFirstLayerFp16, DOC(dai, NNData, getFirstLayerFp16))
         .def("getFirstLayerInt32", &NNData::getFirstLayerInt32, DOC(dai, NNData, getFirstLayerInt32))
+        .def("getTimestamp", &NNData::getTimestamp, DOC(dai, NNData, getTimestamp))
+        .def("getTimestampDevice", &NNData::getTimestampDevice, DOC(dai, NNData, getTimestampDevice))
+        .def("getSequenceNum", &NNData::getSequenceNum, DOC(dai, NNData, getSequenceNum))
         ;
 
     // Bind ImgDetections
@@ -941,6 +1007,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     imgDetections
         .def(py::init<>(), DOC(dai, ImgDetections, ImgDetections))
         .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
+        .def("getTimestamp", &ImgDetections::getTimestamp, DOC(dai, ImgDetections, getTimestamp))
+        .def("getTimestampDevice", &ImgDetections::getTimestampDevice, DOC(dai, ImgDetections, getTimestampDevice))
+        .def("getSequenceNum", &ImgDetections::getSequenceNum, DOC(dai, ImgDetections, getSequenceNum))
         ;
 
     // Bind SpatialImgDetections
@@ -948,6 +1017,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     spatialImgDetections
         .def(py::init<>())
         .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
+        .def("getTimestamp", &SpatialImgDetections::getTimestamp, DOC(dai, SpatialImgDetections, getTimestamp))
+        .def("getTimestampDevice", &SpatialImgDetections::getTimestampDevice, DOC(dai, SpatialImgDetections, getTimestampDevice))
+        .def("getSequenceNum", &SpatialImgDetections::getSequenceNum, DOC(dai, SpatialImgDetections, getSequenceNum))
         ;
 
      // Bind ImageManipConfig
