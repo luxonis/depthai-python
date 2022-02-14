@@ -92,4 +92,9 @@ jobs:
           --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
           # Push
           docker manifest push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          docker manifest create \
+          luxonis/depthai-library:latest \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
           docker manifest push luxonis/depthai-library:latest

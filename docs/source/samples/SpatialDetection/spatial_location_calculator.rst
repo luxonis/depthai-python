@@ -4,7 +4,7 @@ Spatial location calculator
 This example shows how to retrieve spatial location data (X,Y,Z) on a runtime configurable ROI. You can move the ROI using WASD keys.
 X,Y,Z coordinates are relative to the center of depth map.
 
-setConfidenceThreshold - confidence threshold above which objects are detected
+You can also calculate spatial coordiantes on host side, `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-calc-spatials-on-host>`__.
 
 .. rubric:: Similar samples:
 
@@ -16,11 +16,7 @@ setConfidenceThreshold - confidence threshold above which objects are detected
 Demo
 ####
 
-.. raw:: html
-
-    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/mbZViuS4WEQ" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-    </div>
+.. image:: https://user-images.githubusercontent.com/18037362/146296930-9e7071f5-33b9-45f9-af21-cace7ffffc0f.gif
 
 Setup
 #####
