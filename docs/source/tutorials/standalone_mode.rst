@@ -75,23 +75,54 @@ can start with flashing the pipeline. You can flash the pipeline with the follow
 After successfully flashing the pipeline, it will get started automatically when you power up the device.
 If you would like to change the flashed pipeline, simply re-flash it again.
 
-..
-    Clear flash
-    ###########
+Clear flash
+###########
 
-    Since pipeline will start when powering the device, this can lead to unnecesary heating. If you would like to clear
-    the flashed pipeline, use the code snippet below.
+Since pipeline will start when powering the device, this can lead to unnecesary heating. If you would like to clear
+the flashed pipeline, use the code snippet below.
 
-    .. code-block:: python
+.. warning::
+    Code below doesn't work yet. We will be adding "flashClear" helper function to the library.
 
-        import depthai as dai
-        (ok, info) = dai.DeviceBootloader.getFirstAvailableDevice()
-        if ok:
-            print(f'Clearing flash of the OAK: {info.desc.name}');
-            with dai.DeviceBootloader(info) as bl:
-                (success, error) = bl.flashConfigClear()
-                if error: print("Error:", error)
-                else: print("Successfully cleared flash")
-        else: print("No device found")
+.. code-block:: python
+
+    import depthai as dai
+    (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+    if not f:
+        print('No devices found, exiting...')
+        exit(-1)
+
+    with dai.DeviceBootloader(bl) as bootloader:
+        bootloader.flashClear()
+
+Factory reset
+#############
+
+In case you have soft-bricked your device, or just want to clear everything (flashed pipeline/assets and bootloader config),
+we recommend running the factory reset script below. It will also flash the latest bootloader version.
+
+.. code-block:: python
+
+    import depthai as dai
+    import tempfile
+
+    blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
+    blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
+
+    with tempfile.NamedTemporaryFile() as tmpBlFw:
+        tmpBlFw.write(bytes(blBinary))
+        (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+        if not f:
+            print('No devices found, exiting...')
+            exit(-1)
+
+        with dai.DeviceBootloader(bl, allowFlashingBootloader=True) as bootloader:
+            progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+            # Override SBR table, to prevent booting flashed application
+            [success, msg] = bootloader.flashBootloader(progress, tmpBlFw.name)
+            if success:
+                print('Successfully overwritten SBR table. Device should be reacheable through PoE after switching the boot switches back to previous (0x3) value')
+            else:
+                print(f"Couldn't overwrite SBR table to unbrick the device. Error: {msg}")
 
 .. include::  ../includes/footer-short.rst
