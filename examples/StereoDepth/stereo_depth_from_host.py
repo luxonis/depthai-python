@@ -442,10 +442,12 @@ class StereoConfigHandler:
         StereoConfigHandler.config = config
 
         if StereoConfigHandler.config.censusTransform.kernelSize != dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO:
+            censusMask = StereoConfigHandler.config.censusTransform.kernelMask
             censusGridSize = [(5,5), (7,7), (7,9)]
-            censusDefaultMask = [np.uint64(0xA82415), np.uint64(0xAA02A8154055), np.uint64(0x2AA00AA805540155)]
             censusGrid = censusGridSize[StereoConfigHandler.config.censusTransform.kernelSize]
-            censusMask = censusDefaultMask[StereoConfigHandler.config.censusTransform.kernelSize]
+            if StereoConfigHandler.config.censusTransform.kernelMask == 0:
+                censusDefaultMask = [np.uint64(0xA82415), np.uint64(0xAA02A8154055), np.uint64(0x2AA00AA805540155)]
+                censusMask = censusDefaultMask[StereoConfigHandler.config.censusTransform.kernelSize]
             StereoConfigHandler.censusMaskHandler = StereoConfigHandler.CensusMaskHandler("Census mask", censusGrid)
             StereoConfigHandler.censusMaskHandler.setMask(censusMask)
         else:
@@ -592,6 +594,10 @@ def convertToCv2Frame(name, image, config):
         pass
     elif name == 'disparity_cost_dump':
         # frame.tofile(name+'.raw')
+        pass
+    elif name.startswith('disparity_'):
+        if 1: # Optionally, extend disparity range to better visualize it
+            frame = (frame * 255. / dispIntegerLevels).astype(np.uint8)
         pass
     elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
