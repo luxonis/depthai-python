@@ -595,10 +595,6 @@ def convertToCv2Frame(name, image, config):
     elif name == 'disparity_cost_dump':
         # frame.tofile(name+'.raw')
         pass
-    elif name.startswith('disparity_'):
-        if 1: # Optionally, extend disparity range to better visualize it
-            frame = (frame * 255. / dispIntegerLevels).astype(np.uint8)
-        pass
     elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
