@@ -566,8 +566,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // ToF node
     tof
-      .def_readonly("inputImage", &ToF::inputImage, DOC(dai, node, ToF, input))
-      .def_readonly("out", &ToF::out, DOC(dai, node, ToF, out));
+        .def_readonly("inputImage", &ToF::inputImage, DOC(dai, node, ToF, inputImage))
+        .def_readonly("out", &ToF::out, DOC(dai, node, ToF, out))
+        .def_readonly("amp_out", &ToF::amp_out, DOC(dai, node, ToF, amp_out))
+        .def_readonly("err_out", &ToF::err_out, DOC(dai, node, ToF, err_out))
+        ;
 
     // XLinkIn node
     xlinkIn
