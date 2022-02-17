@@ -111,18 +111,47 @@ we recommend running the factory reset script below. It will also flash the late
 
     with tempfile.NamedTemporaryFile() as tmpBlFw:
         tmpBlFw.write(bytes(blBinary))
-        (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+
+        (f, device_info) = dai.DeviceBootloader.getFirstAvailableDevice()
         if not f:
             print('No devices found, exiting...')
             exit(-1)
 
-        with dai.DeviceBootloader(bl, allowFlashingBootloader=True) as bootloader:
-            progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+        with dai.DeviceBootloader(device_info, allowFlashingBootloader=True) as bootloader:
+            progress = lambda p : print(f'Factory reset progress: {p*100:.1f}%')
             # Override SBR table, to prevent booting flashed application
             [success, msg] = bootloader.flashBootloader(progress, tmpBlFw.name)
             if success:
-                print('Successfully overwritten SBR table. Device should be reacheable through PoE after switching the boot switches back to previous (0x3) value')
+                print('Successfully overwritten SBR table. Device should now be reacheable through PoE')
             else:
                 print(f"Couldn't overwrite SBR table to unbrick the device. Error: {msg}")
+
+You can also **factory reset OAK POE at specific IP** if it's not reachable (not in same LAN).
+
+.. code-block:: python
+
+    import depthai as dai
+    import tempfile
+
+    blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
+    blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
+
+    with tempfile.NamedTemporaryFile() as tmpBlFw:
+        tmpBlFw.write(bytes(blBinary))
+
+        device_info = dai.DeviceInfo()
+        device_info.state = dai.XLinkDeviceState.X_LINK_BOOTLOADER
+        device_info.desc.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
+        device_info.desc.name = "192.168.34.110" # Set IP here
+
+        with dai.DeviceBootloader(device_info, allowFlashingBootloader=True) as bootloader:
+            progress = lambda p : print(f'Factory reset progress: {p*100:.1f}%')
+            # Override SBR table, to prevent booting flashed application
+            [success, msg] = bootloader.flashBootloader(progress, tmpBlFw.name)
+            if success:
+                print('Successfully overwritten SBR table. Device should now be reacheable through PoE')
+            else:
+                print(f"Couldn't overwrite SBR table to unbrick the device. Error: {msg}")
+
 
 .. include::  ../includes/footer-short.rst
