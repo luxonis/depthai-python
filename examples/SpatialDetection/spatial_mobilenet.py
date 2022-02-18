@@ -59,7 +59,7 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Setting node configs
-stereo.initialConfig.setConfidenceThreshold(255)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -110,7 +110,8 @@ with dai.Device(pipeline) as device:
             startTime = current_time
 
         frame = inPreview.getCvFrame()
-        depthFrame = depth.getFrame()
+
+        depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
