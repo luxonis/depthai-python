@@ -176,7 +176,7 @@ with dai.Device(pipeline) as device:
     while True:
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
-            cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getWidth(), previewFrame.getHeight(), 3))
+            cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getHeight(), previewFrame.getWidth(), 3))
             #print(previewFrame.getLensPosition(), previewFrame.getExposureTime())
 
         videoFrames = videoQueue.tryGetAll()
