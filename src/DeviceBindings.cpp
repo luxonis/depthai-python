@@ -4,6 +4,7 @@
 #include "depthai/device/Device.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
+#include "depthai/xlink/XLinkConnection.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -24,13 +25,22 @@ template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
     auto startTime = std::chrono::steady_clock::now();
-    bool found;
+    bool found = false;
+    bool invalidDeviceFound = false;
     dai::DeviceInfo deviceInfo = {};
+    dai::DeviceInfo invalidDeviceInfo = {};
     do {
         {
             // releases python GIL
             py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice();
+            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
+
+            if(strcmp("<error>", deviceInfo.desc.name) == 0){
+                invalidDeviceFound = true;
+                invalidDeviceInfo = deviceInfo;
+                found = false;
+            }
+
             // Check if found
             if(found){
                 break;
@@ -43,6 +53,14 @@ static auto deviceSearchHelper(Args&&... args){
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
     } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
+
+    // Check if its an invalid device
+    if(invalidDeviceFound){
+        // Warn
+        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
+        // TODO(themarpe) - move device search into C++ and expose a callback
+        DEVICE::getFirstAvailableDevice(true);
+    }
 
     // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
     if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
@@ -313,7 +331,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         //static
         .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
-        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, DOC(dai, DeviceBase, getFirstAvailableDevice))
+        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
