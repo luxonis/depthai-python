@@ -117,7 +117,9 @@ Usage
 Examples of functionality
 #########################
 
-- `DeeplabV3 experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-deeplabv3_person/deeplabv3_person_256.py>`__
+- :ref:`Multi-Input Frame Concationation`
+- :ref:`Frame Normalization`
+- `DeeplabV3 experiment <https://github.com/luxonis/depthai-experiments/tree/master/gen2-deeplabv3_depth>`__
 - `Age/gender experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-age-gender/main.py>`__
 - `EfficientDet demo <https://github.com/luxonis/depthai-experiments/blob/master/gen2-efficientDet/main.py>`__
 

@@ -2,7 +2,6 @@
 
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
-#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
@@ -22,6 +21,7 @@
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
 #include "depthai/pipeline/node/FeatureTracker.hpp"
+#include "depthai/pipeline/node/AprilTag.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -171,6 +171,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>> imuSensorConfig(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig));
     py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
+    py::class_<AprilTagProperties> aprilTagProperties(m, "AprilTagProperties", DOC(dai, AprilTagProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
@@ -214,7 +215,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
-
+    auto aprilTag = ADD_NODE(AprilTag);
+	
     py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
 
 
@@ -431,6 +433,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
         .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
         .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
+    ;
+
+    // AprilTag properties
+    aprilTagProperties
+        .def_readwrite("initialConfig", &AprilTagProperties::initialConfig, DOC(dai, AprilTagProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &AprilTagProperties::inputConfigSync, DOC(dai, AprilTagProperties, inputConfigSync))
     ;
 
     // SPIOut properties
@@ -922,6 +930,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
         .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
         .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
+        .def("setFocalLengthFromCalibration", &StereoDepth::setFocalLengthFromCalibration, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -1065,6 +1074,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("boundingBoxMapping", &SpatialDetectionNetwork::boundingBoxMapping, DOC(dai, node, SpatialDetectionNetwork, boundingBoxMapping))
         .def_readonly("passthrough", &SpatialDetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
         .def_readonly("passthroughDepth", &SpatialDetectionNetwork::passthroughDepth, DOC(dai, node, SpatialDetectionNetwork, passthroughDepth))
+        .def_readonly("spatialLocationCalculatorOutput", &SpatialDetectionNetwork::spatialLocationCalculatorOutput, DOC(dai, node, SpatialDetectionNetwork, spatialLocationCalculatorOutput))
 
         .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
@@ -1176,7 +1186,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     daiNodeModule.attr("IMU").attr("Properties") = imuProperties;
 
     // EdgeDetector node
-
     edgeDetector
         .def_readonly("initialConfig", &EdgeDetector::initialConfig, DOC(dai, node, EdgeDetector, initialConfig))
         .def_readonly("inputConfig", &EdgeDetector::inputConfig, DOC(dai, node, EdgeDetector, inputConfig))
@@ -1206,7 +1215,17 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         ;
     daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
 
-
+    // AprilTag node
+    aprilTag
+        .def_readonly("inputConfig", &AprilTag::inputConfig, DOC(dai, node, AprilTag, inputConfig))
+        .def_readonly("inputImage", &AprilTag::inputImage, DOC(dai, node, AprilTag, inputImage))
+        .def_readonly("out", &AprilTag::out, DOC(dai, node, AprilTag, out))
+        .def_readonly("passthroughInputImage", &AprilTag::passthroughInputImage, DOC(dai, node, AprilTag, passthroughInputImage))
+        .def_readonly("initialConfig", &AprilTag::initialConfig, DOC(dai, node, AprilTag, initialConfig))
+        .def("setWaitForConfigInput", &AprilTag::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, AprilTag, setWaitForConfigInput))
+        ;
+	daiNodeModule.attr("AprilTag").attr("Properties") = aprilTagProperties;	
+		
     // FeatureTracker node
     featureTracker
         .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))

@@ -15,7 +15,7 @@ and when it's noon, it would send a simple message to the Script node which woul
 
 **What it does:**
 
-Host creates a dictionary, serializes it, sends it to the Script node. Script node recieves the Buffer message, deserializes the dictionary,
+Host creates a dictionary, serializes it, sends it to the Script node. Script node receives the Buffer message, deserializes the dictionary,
 changes values a bit, serializes the dictionary again and sends it to the host, which deserializes the changed dictionary and prints the new values.
 
 Demo

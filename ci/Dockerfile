@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM python:3.9-bullseye
 
 RUN apt-get update && apt-get install -y wget build-essential cmake pkg-config libjpeg-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libgtk-3-dev libatlas-base-dev gfortran git
 
@@ -14,9 +14,4 @@ RUN cd libusb-1.0.24 && \
 RUN pip install --extra-index-url https://www.piwheels.org/simple/ opencv-python
 
 COPY . /depthai-python
-RUN mkdir -p depthai-python/build
-RUN cd /depthai-python && \
-    cd build && \
-    cmake .. && \
-    make
-ENV PYTHONPATH=/depthai-python/build
+RUN cd /depthai-python && python3 -m pip install .
