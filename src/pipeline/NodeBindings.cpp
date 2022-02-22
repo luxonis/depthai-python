@@ -426,6 +426,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
         .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
         .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
+        .def_readwrite("doFirmwareUpdate", &IMUProperties::doFirmwareUpdate, DOC(dai, IMUProperties, doFirmwareUpdate))
     ;
 
     // EdgeDetector node properties
@@ -1182,6 +1183,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getBatchReportThreshold", &IMU::getBatchReportThreshold, DOC(dai, node, IMU, getBatchReportThreshold))
         .def("setMaxBatchReports", &IMU::setMaxBatchReports, py::arg("maxBatchReports"), DOC(dai, node, IMU, setMaxBatchReports))
         .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
+        .def("doFirmwareUpdate", &IMU::doFirmwareUpdate, DOC(dai, node, IMU, doFirmwareUpdate))
         ;
     daiNodeModule.attr("IMU").attr("Properties") = imuProperties;
 
