@@ -4,7 +4,7 @@ import tempfile
 import PySimpleGUI as sg
 
 
-def check_ip(s: str, window):
+def check_ip(s: str):
     spl = s.split(".")
     if len(spl) != 4:
         sg.Popup("Wrong IP format.\nValue should be similar to 255.255.255.255")
@@ -16,7 +16,7 @@ def check_ip(s: str, window):
     return True
 
 
-def check_mac(s, window):
+def check_mac(s):
     if s.count(":") != 5:
         sg.Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF")
         return False
@@ -174,13 +174,13 @@ def flashConfig(values, window, device, devType, ipType):
     bl = dai.DeviceBootloader(device, True)
     conf = dai.DeviceBootloader.Config()
     if devType == "Poe":
-        if not(check_ip(values['staticIp'], window) and check_ip(values['staticMask'], window)
-               and check_ip(values['staticGateway'], window)):
+        if not(check_ip(values['staticIp']) and check_ip(values['staticMask'])
+               and check_ip(values['staticGateway'])):
             return
-        if not check_mac(values['mac'], window):
+        if not check_mac(values['mac']):
             return
         if int(values['networkTimeout']) <= 0:
-            window.Element('success').update("Values can not be negative!")
+            sg.Popup("Values can not be negative!")
             return
         if ipType:
             conf.setStaticIPv4(values['staticIp'], values['staticIp'], values['staticIp'])
@@ -191,7 +191,7 @@ def flashConfig(values, window, device, devType, ipType):
         conf.setMacAddress(values['mac'])
     else:
         if int(values['usbTimeout']) <= 0:
-            window.Element('success').update("Values can not be negative!")
+            sg.Popup("Values can not be negative!")
             return
         conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
         conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
