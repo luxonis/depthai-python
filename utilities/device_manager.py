@@ -255,7 +255,7 @@ aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
+        sg.Button("Device select", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="configReal")
     ],
     [sg.HSeparator()],
@@ -303,7 +303,7 @@ deviceConfigLayout = [
     [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
+        sg.Button("Device select", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake")
     ],
     [sg.HSeparator()],
@@ -360,11 +360,8 @@ deviceConfigLayout = [
 
 layout = [
     [
-        # sg.VSeparator(),
         sg.Column(aboutDeviceLayout, key='-COL1-'),
-        # sg.VSeparator(),
         sg.Column(deviceConfigLayout, visible=False, key='-COL2-'),
-        # sg.VSeparator()
     ]
 ]
 
