@@ -248,7 +248,6 @@ def flashFromFile(file, device):
 
 
 usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
-menu = [["About"], ["Config"]]
 
 sg.theme('DarkGrey4')
 
@@ -256,7 +255,7 @@ aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="aboutFake"),
+        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="configReal")
     ],
     [sg.HSeparator()],
@@ -305,7 +304,7 @@ deviceConfigLayout = [
     [sg.HSeparator()],
     [
         sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
-        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="configFake")
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake")
     ],
     [sg.HSeparator()],
     [
