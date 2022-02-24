@@ -248,11 +248,17 @@ def flashFromFile(file, device):
 
 
 usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
+menu = [["About"], ["Config"]]
 
 sg.theme('DarkGrey4')
 
 aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="aboutFake"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="configReal")
+    ],
     [sg.HSeparator()],
     [
         sg.Text("Select device: ", size=(15, 1), font=('Arial', 10, 'bold'), text_color="black"),
@@ -287,16 +293,20 @@ aboutDeviceLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("", size=(5, 2)),
+        sg.Text("", size=(13, 2)),
         sg.Button("Flash newest version", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
-        sg.Button("Config",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=False, button_color='#FFEA00')
     ]
 ]
 
 deviceConfigLayout = [
     [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Button("About", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="configFake")
+    ],
     [sg.HSeparator()],
     [
         sg.Text("IPv4 type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
@@ -339,14 +349,12 @@ deviceConfigLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("", size=(1, 2)),
+        sg.Text("", size=(10, 2)),
         sg.Button("Flash configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Clear flash", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Flash DAP", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFEA00'),
-        sg.Button("Back", size=(15, 2), font=('Arial', 10, 'bold'), disabled=False,
                   button_color='#FFEA00')
     ],
 ]
@@ -363,7 +371,7 @@ layout = [
 
 devices = dict()
 devType = ""
-window = sg.Window(title="Bootloader GUI", layout=layout, size=(620, 350))
+window = sg.Window(title="Bootloader GUI", layout=layout, size=(620, 370))
 
 while True:
     event, values = window.read()
@@ -395,10 +403,10 @@ while True:
     if event == "Flash DAP":
         file = sg.popup_get_file("Select .dap file")
         flashFromFile(file, devices[values['devices']])
-    if event == "Config":
+    if event == "configReal":
         window['-COL1-'].update(visible=False)
         window['-COL2-'].update(visible=True)
-    if event == "Back":
+    if event == "aboutReal":
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
 window.close()
