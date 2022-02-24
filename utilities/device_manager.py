@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from datetime import timedelta
 import depthai as dai
 import tempfile
@@ -83,6 +85,7 @@ def unlockConfig(window, devType):
     window['Flash configuration'].update(disabled=False)
     window['Factory reset'].update(disabled=False)
     # window['Reset configuration'].update(disabled=False)
+    window['Flash DAP'].update(disabled=False)
 
 
 def lockConfig(window):
@@ -101,6 +104,7 @@ def lockConfig(window):
     window['Flash configuration'].update(disabled=True)
     window['Factory reset'].update(disabled=True)
     window['Reset configuration'].update(disabled=True)
+    window['Flash DAP'].update(disabled=True)
 
     window.Element('staticIp').update("")
     window.Element('staticMask').update("")
@@ -114,17 +118,21 @@ def lockConfig(window):
     window.Element('devName').update("-name-")
     window.Element('newBoot').update("-version-")
     window.Element('currBoot').update("-version-")
+    window.Element('version').update("-version-")
+    window.Element('commit').update("-commit-")
+    window.Element('devState').update("-state-")
 
 
 def getDevices(window, devices):
     listedDevices = []
     devices.clear()
-    deviceInfos = dai.Device.getAllAvailableDevices()
+    deviceInfos = dai.XLinkConnection.getAllConnectedDevices()
     if not deviceInfos:
         window.Element('devices').update("No devices")
         sg.Popup("No devices found.")
     else:
         for deviceInfo in deviceInfos:
+            # print(deviceInfo.state)
             listedDevices.append(deviceInfo.desc.name)
             devices[deviceInfo.desc.name] = deviceInfo
         sg.Popup("Found devices.")
@@ -160,6 +168,9 @@ def getConfigs(window, device, devType):
     window.Element('devName').update(device.desc.name)
     window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
     window.Element('currBoot').update(bl.getVersion())
+    window.Element('version').update(dai.__version__)
+    window.Element('commit').update(dai.__commit__)
+    window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
 
 
 def flashBootloader(window, device):
@@ -170,7 +181,7 @@ def flashBootloader(window, device):
     sg.Popup("Flashed newest bootloader version.")
 
 
-def flashConfig(values, window, device, devType, ipType):
+def flashConfig(values, device, devType, ipType):
     bl = dai.DeviceBootloader(device, True)
     conf = dai.DeviceBootloader.Config()
     if devType == "Poe":
@@ -226,3 +237,168 @@ def getDeviceType(device):
         return "Poe"
     else:
         return "NonPoe"
+
+
+def flashFromFile(file, device):
+    bl = dai.DeviceBootloader(device)
+    if str(file)[-3:] == "dap":
+        bl.flashDepthaiApplicationPackage(file)
+    else:
+        sg.Popup("Selected file is not .dap!")
+
+
+usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
+
+sg.theme('DarkGrey4')
+
+aboutDeviceLayout = [
+    [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Text("Select device: ", size=(15, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Combo([], "Search for devices", size=(30, 5), key="devices", enable_events=True),
+        sg.Button("Select"), sg.Button("Search")
+    ],
+    [
+        sg.Text("Name of connected device:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.VSeparator(),
+        sg.Text("Device state:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black")
+    ],
+    [sg.Text("-name-", key="devName", size=(30, 1)), sg.VSeparator(), sg.Text("-state-", key="devState", size=(30, 1))],
+    [
+        sg.Text("Version of newest bootloader:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.VSeparator(),
+        sg.Text("Current bootloader version:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black")
+    ],
+    [
+        sg.Text("-version-", key="newBoot", size=(30, 1)),
+        sg.VSeparator(),
+        sg.Text("-version-", key="currBoot", size=(30, 1))
+    ],
+    [
+        sg.Text("Current __version__:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.VSeparator(),
+        sg.Text("Current commit:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+    ],
+    [
+        sg.Text("-version-", key="version", size=(30, 1)),
+        sg.VSeparator(),
+        sg.Text("-version-", key="commit", size=(31, 1))
+    ],
+    [sg.HSeparator()],
+    [
+        sg.Text("", size=(5, 2)),
+        sg.Button("Flash newest version", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFEA00'),
+        sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
+        sg.Button("Config",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=False, button_color='#FFEA00')
+    ]
+]
+
+deviceConfigLayout = [
+    [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Text("IPv4 type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Radio('Static', "ipType", default=True, font=('Arial', 10, 'bold'), text_color="black",
+                 key="staticBut", enable_events=True, disabled=True),
+        sg.Radio('Dynamic', "ipType", default=False, font=('Arial', 10, 'bold'), text_color="black",
+                 key="dynamicBut", enable_events=True, disabled=True)
+    ],
+    [
+        sg.Text("IPv4:", size=(12, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="staticIp", size=(16, 2), disabled=True),
+        sg.Text("Mask:", size=(5, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="staticMask", size=(16, 2), disabled=True),
+        sg.Text("Gateway:", size=(8, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="staticGateway", size=(16, 2), disabled=True)
+    ],
+    [
+        sg.Text("DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="dns", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("Alt DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="dnsAlt", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("USB timeout:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="usbTimeout", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("Network timeout:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="networkTimeout", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("MAC address:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.InputText(key="mac", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("USB max speed:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Combo(usbSpeeds, "Select speed", key="usbSpeed", size=(30, 6), disabled=True)
+    ],
+    [sg.HSeparator()],
+    [
+        sg.Text("", size=(1, 2)),
+        sg.Button("Flash configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFEA00'),
+        sg.Button("Clear flash", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFEA00'),
+        sg.Button("Flash DAP", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFEA00'),
+        sg.Button("Back", size=(15, 2), font=('Arial', 10, 'bold'), disabled=False,
+                  button_color='#FFEA00')
+    ],
+]
+
+layout = [
+    [
+        # sg.VSeparator(),
+        sg.Column(aboutDeviceLayout, key='-COL1-'),
+        # sg.VSeparator(),
+        sg.Column(deviceConfigLayout, visible=False, key='-COL2-'),
+        # sg.VSeparator()
+    ]
+]
+
+devices = dict()
+devType = ""
+window = sg.Window(title="Bootloader GUI", layout=layout, size=(620, 350))
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED:
+        break
+    dev = values['devices']
+    if event == "Select":
+        if dev != "Select device":
+            devType = getDeviceType(devices[values['devices']])
+            getConfigs(window, devices[values['devices']], devType)
+            unlockConfig(window, devType)
+        else:
+            window.Element('progress').update("No device selected.")
+    if event == "Search":
+        getDevices(window, devices)
+    if event == "Flash newest version":
+        flashBootloader(window, devices[values['devices']])
+    if event == "Flash configuration":
+        flashConfig(values, devices[values['devices']], devType, values['StaticBut'])
+        getConfigs(window, devices[values['devices']], devType)
+        lockConfig(window)
+        if devType != "Poe":
+            unlockConfig(window, devType)
+        else:
+            devices.clear()
+            window.Element('devices').update("Search for devices", values=[])
+    if event == "Factory reset":
+        factoryReset(devices[values['devices']])
+    if event == "Flash DAP":
+        file = sg.popup_get_file("Select .dap file")
+        flashFromFile(file, devices[values['devices']])
+    if event == "Config":
+        window['-COL1-'].update(visible=False)
+        window['-COL2-'].update(visible=True)
+    if event == "Back":
+        window['-COL2-'].update(visible=False)
+        window['-COL1-'].update(visible=True)
+window.close()
