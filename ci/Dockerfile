@@ -11,7 +11,7 @@ RUN cd libusb-1.0.24 && \
     make -j && make install
 
 
-RUN pip install --extra-index-url https://www.piwheels.org/simple/ opencv-python
+RUN pip install -U pip && pip install --extra-index-url https://www.piwheels.org/simple/ --prefer-binary opencv-python
 
 COPY . /depthai-python
 RUN cd /depthai-python && python3 -m pip install .

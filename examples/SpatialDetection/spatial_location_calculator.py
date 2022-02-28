@@ -74,7 +74,8 @@ with dai.Device(pipeline) as device:
     while True:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
 
-        depthFrame = inDepth.getFrame()
+        depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
+
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)

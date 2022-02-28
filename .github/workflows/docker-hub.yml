@@ -8,43 +8,19 @@ on:
     tags:
     - 'v*'
 jobs:
-  build_amd64:
-    name: Build amd64 docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 240
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_PASS }}
-      - name: Get Version
-        id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - name: Build and push (development)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{github.sha}}-amd64
-      - name: Build and push (release)
-        if: startsWith(github.ref, 'refs/tags/v') == true
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64
-
-  build_armv7:
-    name: Build armv7 docker image
-    runs-on: luxonis-armhf
-    timeout-minutes: 240
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ARM, ARM64]
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+          - os: ARM
+            arch: armv7
+          - os: ARM64
+            arch: armv8
     steps:
       - name: Clean the workspace
         uses: docker://alpine
@@ -59,64 +35,28 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASS }}
-      - name: Get Version
-        id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - name: Build and push (development)
+      - name: Set Image Name (development)
+        id: name
         if: startsWith(github.ref, 'refs/tags/v') != true
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{github.sha}}-armv7
-      - name: Build and push (release)
-        if: startsWith(github.ref, 'refs/tags/v') == true
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7
+        run: echo "LUXONIS_IMAGE_TAG=${{ github.sha }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
-  build_armv8:
-    name: Build armv8 docker image
-    runs-on: ARM64
-    timeout-minutes: 240
-    steps:
-      - name: Clean the workspace
-        uses: docker://alpine
-        with:
-          args: /bin/sh -c "rm -rf /github/workspace/.* || rm -rf /github/workspace/*"
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_PASS }}
-      - name: Get Version
-        id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-
-      - name: Build and push (development)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{github.sha}}-armv8
-      - name: Build and push (release)
+      - name: Set Image Name (release)
         if: startsWith(github.ref, 'refs/tags/v') == true
+        run: echo "LUXONIS_IMAGE_TAG=${GITHUB_REF#refs/*/}-${{ matrix.arch }}" >> $GITHUB_ENV
+
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
           push: true
           file: ci/Dockerfile
-          tags: luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
+          tags: luxonis/depthai-library:${{ env.LUXONIS_IMAGE_TAG }}
+
+      - name: Cleanup the created image
+        run: docker image rm luxonis/depthai-library:${{ env.LUXONIS_IMAGE_TAG }}
 
   upload:
-    needs: [build_amd64, build_armv7, build_armv8]
+    needs: [build]
     name: Combine into a single multi-arch image and upload tags
     runs-on: ubuntu-latest
     steps:
@@ -152,4 +92,9 @@ jobs:
           --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
           # Push
           docker manifest push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
+          docker manifest create \
+          luxonis/depthai-library:latest \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7 \
+          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
           docker manifest push luxonis/depthai-library:latest

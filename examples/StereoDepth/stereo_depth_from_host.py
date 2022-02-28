@@ -42,6 +42,98 @@ class StereoConfigHandler:
                 print(f'{self.trackbarName} max value is {self.max}')
             cv2.setTrackbarPos(self.trackbarName, self.windowName, value)
 
+    class CensusMaskHandler:
+
+        stateColor = [(0, 0, 0), (255, 255, 255)]
+        gridHeight = 50
+        gridWidth = 50
+
+        def fillRectangle(self, row, col):
+            src = self.gridList[row][col]["topLeft"]
+            dst = self.gridList[row][col]["bottomRight"]
+
+            stateColor = self.stateColor[1] if self.gridList[row][col]["state"] else self.stateColor[0]
+            self.changed = True
+
+            cv2.rectangle(self.gridImage, src, dst, stateColor, -1)
+            cv2.imshow(self.windowName, self.gridImage)
+
+
+        def clickCallback(self, event, x, y, flags, param):
+            if event == cv2.EVENT_LBUTTONDOWN:
+                col = x * (self.gridSize[1]) // self.width
+                row = y * (self.gridSize[0]) // self.height
+                self.gridList[row][col]["state"] = not self.gridList[row][col]["state"]
+                self.fillRectangle(row, col)
+
+
+        def __init__(self, windowName, gridSize):
+            self.gridSize = gridSize
+            self.windowName = windowName
+            self.changed = False
+
+            cv2.namedWindow(self.windowName)
+
+            self.width = StereoConfigHandler.CensusMaskHandler.gridWidth * self.gridSize[1]
+            self.height = StereoConfigHandler.CensusMaskHandler.gridHeight * self.gridSize[0]
+
+            self.gridImage = np.zeros((self.height + 50, self.width, 3), np.uint8)
+
+            cv2.putText(self.gridImage, "Click on grid to change mask!", (0, self.height+20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+            cv2.putText(self.gridImage, "White: ON   |   Black: OFF", (0, self.height+40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255))
+
+            self.gridList = [[dict() for _ in range(self.gridSize[1])] for _ in range(self.gridSize[0])]
+
+            for row in range(self.gridSize[0]):
+                rowFactor = self.height // self.gridSize[0]
+                srcY = row*rowFactor + 1
+                dstY = (row+1)*rowFactor - 1
+                for col in range(self.gridSize[1]):
+                    colFactor = self.width // self.gridSize[1]
+                    srcX = col*colFactor + 1
+                    dstX = (col+1)*colFactor - 1
+                    src = (srcX, srcY)
+                    dst = (dstX, dstY)
+                    self.gridList[row][col]["topLeft"] = src
+                    self.gridList[row][col]["bottomRight"] = dst
+                    self.gridList[row][col]["state"] = False
+                    self.fillRectangle(row, col)
+
+            cv2.setMouseCallback(self.windowName, self.clickCallback)
+            cv2.imshow(self.windowName, self.gridImage)
+
+        def getMask(self) -> np.uint64:
+            mask = np.uint64(0)
+            for row in range(self.gridSize[0]):
+                for col in range(self.gridSize[1]):
+                    if self.gridList[row][col]["state"]:
+                        pos = row*self.gridSize[1] + col
+                        mask = np.bitwise_or(mask, np.uint64(1) << np.uint64(pos))
+
+            return mask
+
+        def setMask(self, _mask: np.uint64):
+            mask = np.uint64(_mask)
+            for row in range(self.gridSize[0]):
+                for col in range(self.gridSize[1]):
+                    pos = row*self.gridSize[1] + col
+                    if np.bitwise_and(mask, np.uint64(1) << np.uint64(pos)):
+                        self.gridList[row][col]["state"] = True
+                    else:
+                        self.gridList[row][col]["state"] = False
+
+                    self.fillRectangle(row, col)
+
+        def isChanged(self):
+            changed = self.changed
+            self.changed = False
+            return changed
+
+        def destroyWindow(self):
+            cv2.destroyWindow(self.windowName)
+
+
+    censusMaskHandler = None
     newConfig = False
     config = None
     trSigma = list()
@@ -230,19 +322,30 @@ class StereoConfigHandler:
             StereoConfigHandler.config.postProcessing.decimationFilter.decimationMode = nextDecimation
         if key == ord('a'):
             StereoConfigHandler.newConfig = True
-            aligmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
+            alignmentSettings = [dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT,
             dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT,
             dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER,
             ]
-            currentAligment = StereoConfigHandler.config.algorithmControl.depthAlign
-            nextAligment = aligmentSettings[(aligmentSettings.index(currentAligment)+1) % len(aligmentSettings)]
-            print(f"Changing aligment mode to {nextAligment.name} from {currentAligment.name}")
-            StereoConfigHandler.config.algorithmControl.depthAlign = nextAligment
+            currentAlignment = StereoConfigHandler.config.algorithmControl.depthAlign
+            nextAlignment = alignmentSettings[(alignmentSettings.index(currentAlignment)+1) % len(alignmentSettings)]
+            print(f"Changing alignment mode to {nextAlignment.name} from {currentAlignment.name}")
+            StereoConfigHandler.config.algorithmControl.depthAlign = nextAlignment
         elif key == ord('c'):
             StereoConfigHandler.newConfig = True
             censusSettings = [dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_5x5, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x7, dai.StereoDepthConfig.CensusTransform.KernelSize.KERNEL_7x9]
             currentCensus = StereoConfigHandler.config.censusTransform.kernelSize
             nextCensus = censusSettings[(censusSettings.index(currentCensus)+1) % len(censusSettings)]
+            if nextCensus != dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO:
+                censusGridSize = [(5,5), (7,7), (7,9)]
+                censusDefaultMask = [np.uint64(0XA82415), np.uint64(0XAA02A8154055), np.uint64(0X2AA00AA805540155)]
+                censusGrid = censusGridSize[nextCensus]
+                censusMask = censusDefaultMask[nextCensus]
+                StereoConfigHandler.censusMaskHandler = StereoConfigHandler.CensusMaskHandler("Census mask", censusGrid)
+                StereoConfigHandler.censusMaskHandler.setMask(censusMask)
+            else:
+                print("Census mask config is not available in AUTO census kernel mode. Change using the 'c' key")
+                StereoConfigHandler.config.censusTransform.kernelMask = 0
+                StereoConfigHandler.censusMaskHandler.destroyWindow()
             print(f"Changing census transform to {nextCensus.name} from {currentCensus.name}")
             StereoConfigHandler.config.censusTransform.kernelSize = nextCensus
         elif key == ord('d'):
@@ -278,6 +381,13 @@ class StereoConfigHandler:
             state = "on" if StereoConfigHandler.config.algorithmControl.enableExtended else "off"
             print(f"Extended {state}")
 
+        censusMaskChanged = False
+        if StereoConfigHandler.censusMaskHandler is not None:
+            censusMaskChanged = StereoConfigHandler.censusMaskHandler.isChanged()
+        if censusMaskChanged:
+            StereoConfigHandler.config.censusTransform.kernelMask = StereoConfigHandler.censusMaskHandler.getMask()
+            StereoConfigHandler.newConfig = True
+
         StereoConfigHandler.sendConfig(stereoDepthConfigInQueue)
 
     def sendConfig(stereoDepthConfigInQueue):
@@ -291,7 +401,8 @@ class StereoConfigHandler:
         StereoConfigHandler.config = config
 
     def registerWindow(stream):
-        cv2.namedWindow(stream)
+        cv2.namedWindow(stream, cv2.WINDOW_NORMAL)
+
         StereoConfigHandler.trConfidence.append(StereoConfigHandler.Trackbar('Disparity confidence', stream, 0, 255, StereoConfigHandler.config.costMatching.confidenceThreshold, StereoConfigHandler.trackbarConfidence))
         StereoConfigHandler.trSigma.append(StereoConfigHandler.Trackbar('Bilateral sigma', stream, 0, 100, StereoConfigHandler.config.postProcessing.bilateralSigmaValue, StereoConfigHandler.trackbarSigma))
         StereoConfigHandler.trLrCheck.append(StereoConfigHandler.Trackbar('LR-check threshold', stream, 0, 16, StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold, StereoConfigHandler.trackbarLrCheckThreshold))
@@ -318,7 +429,7 @@ class StereoConfigHandler:
         print("Control disparity search range using the 'd' key.")
         print("Control disparity companding using the 'f' key.")
         print("Control census transform mean mode using the 'v' key.")
-        print("Control depth aligment using the 'a' key.")
+        print("Control depth alignment using the 'a' key.")
         print("Control decimation algorithm using the 'a' key.")
         print("Control temporal persistency mode using the 'r' key.")
         print("Control spatial filter using the 'w' key.")
@@ -329,6 +440,19 @@ class StereoConfigHandler:
         print("Control extended mode using the '3' key.")
 
         StereoConfigHandler.config = config
+
+        if StereoConfigHandler.config.censusTransform.kernelSize != dai.StereoDepthConfig.CensusTransform.KernelSize.AUTO:
+            censusMask = StereoConfigHandler.config.censusTransform.kernelMask
+            censusGridSize = [(5,5), (7,7), (7,9)]
+            censusGrid = censusGridSize[StereoConfigHandler.config.censusTransform.kernelSize]
+            if StereoConfigHandler.config.censusTransform.kernelMask == 0:
+                censusDefaultMask = [np.uint64(0xA82415), np.uint64(0xAA02A8154055), np.uint64(0x2AA00AA805540155)]
+                censusMask = censusDefaultMask[StereoConfigHandler.config.censusTransform.kernelSize]
+            StereoConfigHandler.censusMaskHandler = StereoConfigHandler.CensusMaskHandler("Census mask", censusGrid)
+            StereoConfigHandler.censusMaskHandler.setMask(censusMask)
+        else:
+            print("Census mask config is not available in AUTO Census kernel mode. Change using the 'c' key")
+
 
 # StereoDepth initial config options.
 outDepth = True  # Disparity by default
@@ -423,9 +547,7 @@ if args.dumpdisparitycostvalues:
     stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
 StereoConfigHandler(stereo.initialConfig.get())
-StereoConfigHandler.registerWindow('disparity')
-if outDepth:
-    StereoConfigHandler.registerWindow('depth')
+StereoConfigHandler.registerWindow('Stereo control panel')
 
 # stereo.setPostProcessingHardwareResources(3, 3)
 
