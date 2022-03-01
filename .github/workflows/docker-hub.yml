@@ -13,11 +13,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, luxonis-armhf, ARM64]
+        os: [ubuntu-latest, ARM, ARM64]
         include:
           - os: ubuntu-latest
             arch: amd64
-          - os: luxonis-armhf
+          - os: ARM
             arch: armv7
           - os: ARM64
             arch: armv8
