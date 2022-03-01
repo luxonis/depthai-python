@@ -135,39 +135,45 @@ def getDevices(window, devices):
             # print(deviceInfo.state)
             listedDevices.append(deviceInfo.desc.name)
             devices[deviceInfo.desc.name] = deviceInfo
-        sg.Popup("Found devices.")
+        # TODO - this action drags down user on correct path, no need for it
+        # sg.Popup("Found devices.")
         window.Element('devices').update("Select device", values=listedDevices)
 
 
 def getConfigs(window, device, devType):
     bl = dai.DeviceBootloader(device)
+    # TODO - might be better to readConfig instead of readConfigData
     conf = bl.readConfigData()
-    if devType == "Poe":
-        window.Element('staticIp').update(conf['network']['ipv4'] if conf['network']['ipv4'] != 0 else "0.0.0.0")
-        window.Element('staticMask').update(conf['network']['ipv4Mask'] if conf['network']['ipv4Mask'] != 0
+    if conf is not None:
+        if devType == "Poe":
+            window.Element('staticIp').update(conf['network']['ipv4'] if conf['network']['ipv4'] != 0 else "0.0.0.0")
+            window.Element('staticMask').update(conf['network']['ipv4Mask'] if conf['network']['ipv4Mask'] != 0
+                                                else "0.0.0.0")
+            window.Element('staticGateway').update(conf['network']['ipv4Gateway'] if conf['network']['ipv4Gateway'] != 0
+                                                else "0.0.0.0")
+            window.Element('dns').update(conf['network']['ipv4Dns'] if conf['network']['ipv4Dns'] != 0 else "0.0.0.0")
+            window.Element('dnsAlt').update(conf['network']['ipv4DnsAlt'] if conf['network']['ipv4DnsAlt'] != 0
                                             else "0.0.0.0")
-        window.Element('staticGateway').update(conf['network']['ipv4Gateway'] if conf['network']['ipv4Gateway'] != 0
-                                               else "0.0.0.0")
-        window.Element('dns').update(conf['network']['ipv4Dns'] if conf['network']['ipv4Dns'] != 0 else "0.0.0.0")
-        window.Element('dnsAlt').update(conf['network']['ipv4DnsAlt'] if conf['network']['ipv4DnsAlt'] != 0
-                                        else "0.0.0.0")
-        window.Element('networkTimeout').update(conf['network']['timeoutMs'])
-        window.Element('mac').update(macCorrectFormat(conf['network']['mac']))
-        window.Element('usbTimeout').update("")
-        window.Element('usbSpeed').update("")
-    else:
-        window.Element('staticIp').update("")
-        window.Element('staticMask').update("")
-        window.Element('staticGateway').update("")
-        window.Element('dns').update("")
-        window.Element('dnsAlt').update("")
-        window.Element('networkTimeout').update("")
-        window.Element('mac').update("")
-        window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
-        window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
+            window.Element('networkTimeout').update(conf['network']['timeoutMs'])
+            window.Element('mac').update(macCorrectFormat(conf['network']['mac']))
+            window.Element('usbTimeout').update("")
+            window.Element('usbSpeed').update("")
+        else:
+            window.Element('staticIp').update("")
+            window.Element('staticMask').update("")
+            window.Element('staticGateway').update("")
+            window.Element('dns').update("")
+            window.Element('dnsAlt').update("")
+            window.Element('networkTimeout').update("")
+            window.Element('mac').update("")
+            window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
+            window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
     window.Element('devName').update(device.desc.name)
     window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
-    window.Element('currBoot').update(bl.getVersion())
+    if bl.isEmbeddedVersion() is True:
+        window.Element('currBoot').update('None')
+    else:
+        window.Element('currBoot').update(bl.getVersion())
     window.Element('version').update(dai.__version__)
     window.Element('commit').update(dai.__commit__)
     window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
@@ -231,8 +237,9 @@ def factoryReset(device):
 def getDeviceType(device):
     bl = dai.DeviceBootloader(device)
     conf = bl.readConfigData()
-    if conf is None:
-        success, error = bl.flashConfig(dai.DeviceBootloader.Config())
+    # TODO - Don't modify the device without explicit action
+    # if conf is None:
+    #     success, error = bl.flashConfig(dai.DeviceBootloader.Config())
     if str(bl.getType()) == "Type.NETWORK":
         return "Poe"
     else:
@@ -293,7 +300,7 @@ aboutDeviceLayout = [
     [sg.HSeparator()],
     [
         sg.Text("", size=(13, 2)),
-        sg.Button("Flash newest version", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
+        sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
     ]
@@ -367,7 +374,7 @@ layout = [
 
 devices = dict()
 devType = ""
-window = sg.Window(title="Bootloader GUI", layout=layout, size=(620, 370))
+window = sg.Window(title="Device Manager", layout=layout, size=(620, 370))
 
 while True:
     event, values = window.read()
