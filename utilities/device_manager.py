@@ -81,11 +81,12 @@ def unlockConfig(window, devType):
     else:
         window['usbTimeout'].update(disabled=False)
         window['usbSpeed'].update(disabled=False)
-    window['Flash newest version'].update(disabled=False)
+    window['Flash newest Bootloader'].update(disabled=False)
     window['Flash configuration'].update(disabled=False)
     window['Factory reset'].update(disabled=False)
     # window['Reset configuration'].update(disabled=False)
     window['Flash DAP'].update(disabled=False)
+    window['Boot from USB'].update(disabled=False)
 
 
 def lockConfig(window):
@@ -100,11 +101,12 @@ def lockConfig(window):
     window['dynamicBut'].update(disabled=True)
     window['usbTimeout'].update(disabled=True)
     window['usbSpeed'].update(disabled=True)
-    window['Flash newest version'].update(disabled=True)
+    window['Flash newest Bootloader'].update(disabled=True)
     window['Flash configuration'].update(disabled=True)
     window['Factory reset'].update(disabled=True)
     window['Reset configuration'].update(disabled=True)
     window['Flash DAP'].update(disabled=True)
+    window['Boot from USB'].update(disabled=True)
 
     window.Element('staticIp').update("")
     window.Element('staticMask').update("")
@@ -254,10 +256,16 @@ def flashFromFile(file, device):
         sg.Popup("Selected file is not .dap!")
 
 
+def flashFromUsb(device):
+    bl = dai.DeviceBootloader(device)
+    bl.bootUsbRomBootloader()
+
+
 usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
 
 sg.theme('DarkGrey4')
 
+# layout for device tab
 aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
@@ -299,13 +307,15 @@ aboutDeviceLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("", size=(13, 2)),
+        sg.Text("", size=(7, 2)),
         sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
+        sg.Button("Boot from USB", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00')
     ]
 ]
 
+# layout for config tab
 deviceConfigLayout = [
     [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
@@ -365,6 +375,7 @@ deviceConfigLayout = [
     ],
 ]
 
+# layout of whole GUI with closed tabs set to false
 layout = [
     [
         sg.Column(aboutDeviceLayout, key='-COL1-'),
@@ -390,7 +401,7 @@ while True:
             window.Element('progress').update("No device selected.")
     if event == "Search":
         getDevices(window, devices)
-    if event == "Flash newest version":
+    if event == "Flash newest Bootloader":
         flashBootloader(window, devices[values['devices']])
     if event == "Flash configuration":
         flashConfig(values, devices[values['devices']], devType, values['StaticBut'])
@@ -412,4 +423,6 @@ while True:
     if event == "aboutReal":
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
+    if event == "Boot from USB":
+        flashFromUsb(devices[values['devices']])
 window.close()
