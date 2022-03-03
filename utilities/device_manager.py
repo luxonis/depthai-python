@@ -84,9 +84,9 @@ def unlockConfig(window, devType):
     window['Flash newest Bootloader'].update(disabled=False)
     window['Flash configuration'].update(disabled=False)
     window['Factory reset'].update(disabled=False)
-    # window['Reset configuration'].update(disabled=False)
+    # window['Clear flash'].update(disabled=False)
     window['Flash DAP'].update(disabled=False)
-    window['Boot from USB'].update(disabled=False)
+    window['Boot into USB Recovery mode'].update(disabled=False)
 
 
 def lockConfig(window):
@@ -104,9 +104,9 @@ def lockConfig(window):
     window['Flash newest Bootloader'].update(disabled=True)
     window['Flash configuration'].update(disabled=True)
     window['Factory reset'].update(disabled=True)
-    window['Reset configuration'].update(disabled=True)
+    window['Clear flash'].update(disabled=True)
     window['Flash DAP'].update(disabled=True)
-    window['Boot from USB'].update(disabled=True)
+    window['Boot into USB Recovery mode'].update(disabled=True)
 
     window.Element('staticIp').update("")
     window.Element('staticMask').update("")
@@ -137,13 +137,11 @@ def getDevices(window, devices):
             # print(deviceInfo.state)
             listedDevices.append(deviceInfo.desc.name)
             devices[deviceInfo.desc.name] = deviceInfo
-        # TODO - this action drags down user on correct path, no need for it
-        # sg.Popup("Found devices.")
         window.Element('devices').update("Select device", values=listedDevices)
 
 
-def getConfigs(window, device, devType):
-    bl = dai.DeviceBootloader(device)
+def getConfigs(window, bl, devType, device):
+    # bl = dai.DeviceBootloader(device)
     # TODO - might be better to readConfig instead of readConfigData
     conf = bl.readConfigData()
     if conf is not None:
@@ -181,16 +179,16 @@ def getConfigs(window, device, devType):
     window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
 
 
-def flashBootloader(window, device):
-    bl = dai.DeviceBootloader(device, True)
+def flashBootloader(window, bl):
+    # bl = dai.DeviceBootloader(device, True)
     progress = lambda p: p * 100
     bl.flashBootloader(progress)
     window.Element('currBoot').update(bl.getVersion())
     sg.Popup("Flashed newest bootloader version.")
 
 
-def flashConfig(values, device, devType, ipType):
-    bl = dai.DeviceBootloader(device, True)
+def flashConfig(values, bl, devType, ipType):
+    # bl = dai.DeviceBootloader(device, True)
     conf = dai.DeviceBootloader.Config()
     if devType == "Poe":
         if not(check_ip(values['staticIp']) and check_ip(values['staticMask'])
@@ -205,7 +203,7 @@ def flashConfig(values, device, devType, ipType):
             conf.setStaticIPv4(values['staticIp'], values['staticIp'], values['staticIp'])
         else:
             conf.setDynamicIPv4(values['staticIp'], values['staticIp'], values['staticIp'])
-        conf.setDnsIPv4(values['dns'], "")
+        conf.setDnsIPv4(values['dns'], values['dnsAlt'])
         conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
         conf.setMacAddress(values['mac'])
     else:
@@ -221,10 +219,10 @@ def flashConfig(values, device, devType, ipType):
         sg.Popup("Flashing successful.")
 
 
-def factoryReset(device):
+def factoryReset(bl):
     blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
     blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
-    bl = dai.DeviceBootloader(device, True)
+    # bl = dai.DeviceBootloader(device, True)
     tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
     tmpBlFw.write(bytes(blBinary))
     progress = lambda p: p * 100
@@ -236,8 +234,8 @@ def factoryReset(device):
     tmpBlFw.close()
 
 
-def getDeviceType(device):
-    bl = dai.DeviceBootloader(device)
+def getDeviceType(bl):
+    # bl = dai.DeviceBootloader(device)
     conf = bl.readConfigData()
     # TODO - Don't modify the device without explicit action
     # if conf is None:
@@ -248,16 +246,16 @@ def getDeviceType(device):
         return "NonPoe"
 
 
-def flashFromFile(file, device):
-    bl = dai.DeviceBootloader(device)
+def flashFromFile(file, bl):
+    # bl = dai.DeviceBootloader(device)
     if str(file)[-3:] == "dap":
         bl.flashDepthaiApplicationPackage(file)
     else:
         sg.Popup("Selected file is not .dap!")
 
 
-def flashFromUsb(device):
-    bl = dai.DeviceBootloader(device)
+def flashFromUsb(bl):
+    # bl = dai.DeviceBootloader(device)
     bl.bootUsbRomBootloader()
 
 
@@ -311,7 +309,7 @@ aboutDeviceLayout = [
         sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFEA00'),
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
-        sg.Button("Boot from USB", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00')
+        sg.Button("Boot into USB Recovery mode", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00')
     ]
 ]
 
@@ -385,6 +383,7 @@ layout = [
 
 devices = dict()
 devType = ""
+bl = None
 window = sg.Window(title="Device Manager", layout=layout, size=(620, 370))
 
 while True:
@@ -394,18 +393,19 @@ while True:
     dev = values['devices']
     if event == "Select":
         if dev != "Select device":
-            devType = getDeviceType(devices[values['devices']])
-            getConfigs(window, devices[values['devices']], devType)
+            bl = dai.DeviceBootloader(devices[values['devices']])
+            devType = getDeviceType(bl)
+            getConfigs(window, bl, devType, devices[values['devices']])
             unlockConfig(window, devType)
         else:
             window.Element('progress').update("No device selected.")
     if event == "Search":
         getDevices(window, devices)
     if event == "Flash newest Bootloader":
-        flashBootloader(window, devices[values['devices']])
+        flashBootloader(window, bl)
     if event == "Flash configuration":
-        flashConfig(values, devices[values['devices']], devType, values['StaticBut'])
-        getConfigs(window, devices[values['devices']], devType)
+        flashConfig(values, bl, devType, values['staticBut'])
+        getConfigs(window, bl, devType, devices[values['devices']])
         lockConfig(window)
         if devType != "Poe":
             unlockConfig(window, devType)
@@ -413,16 +413,16 @@ while True:
             devices.clear()
             window.Element('devices').update("Search for devices", values=[])
     if event == "Factory reset":
-        factoryReset(devices[values['devices']])
+        factoryReset(bl)
     if event == "Flash DAP":
         file = sg.popup_get_file("Select .dap file")
-        flashFromFile(file, devices[values['devices']])
+        flashFromFile(file, bl)
     if event == "configReal":
         window['-COL1-'].update(visible=False)
         window['-COL2-'].update(visible=True)
     if event == "aboutReal":
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
-    if event == "Boot from USB":
-        flashFromUsb(devices[values['devices']])
+    if event == "Boot into USB Recovery mode":
+        flashFromUsb(bl)
 window.close()
