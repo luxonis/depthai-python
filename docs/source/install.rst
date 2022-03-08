@@ -90,7 +90,7 @@ This tutorial was provided by whab and tested on a MacBookPro M1 Pro running mac
   git clone --recursive  https://github.com/luxonis/depthai-python.git
   cd depthai-python
   mkdir build && cd build
-  # Build deptha-python
+  # Build depthai-python
   cmake ..
   cmake --build . --parallel
   cd ..
