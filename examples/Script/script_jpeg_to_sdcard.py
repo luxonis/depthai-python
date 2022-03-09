@@ -45,12 +45,17 @@ while True:
 
 scriptServer.setProcessor(dai.ProcessorType.LEON_CSS)
 scriptServer.setScript("""
+import os
+# To avoid a crash on non-PoE devices, stop here
+if not os.path.exists('/etc/resolve.conf'):
+    import time
+    while True: time.sleep(1)
+
 import http.server
 import socketserver
 import socket
 import fcntl
 import struct
-import os
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
