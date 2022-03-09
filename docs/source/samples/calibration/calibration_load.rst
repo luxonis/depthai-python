@@ -3,7 +3,7 @@ Calibration Load
 
 This example shows how to load and use calibration data of version6 (gen2 calibration data) in a pipeline.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Calibration Flash v5`
 - :ref:`Calibration Flash`

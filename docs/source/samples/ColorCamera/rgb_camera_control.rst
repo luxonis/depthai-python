@@ -16,7 +16,7 @@ An output is a displayed RGB cropped frame, that can be manipulated using the fo
 #. `k` and `l` will decrease/increase the sensitivity iso
 #. `,` and `.` will decrease/increase the focus range
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Mono Camera Control`
 - :ref:`Depth Crop Control`

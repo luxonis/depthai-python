@@ -166,6 +166,7 @@ add_python_example(spatial_location_calculator SpatialDetection/spatial_location
 ## StereoDepth
 add_python_example(depth_crop_control StereoDepth/depth_crop_control.py)
 add_python_example(depth_preview StereoDepth/depth_preview.py)
+add_python_example(depth_post_processing StereoDepth/depth_post_processing.py)
 add_python_example(rgb_depth_aligned StereoDepth/rgb_depth_aligned.py)
 add_python_example(stereo_depth_from_host StereoDepth/stereo_depth_from_host.py)
 add_python_example(stereo_depth_video StereoDepth/stereo_depth_video.py)
@@ -182,3 +183,7 @@ add_python_example(rgb_mono_encoding VideoEncoder/rgb_mono_encoding.py)
 ## Yolo
 add_python_example(tiny_yolo_v3_device_side_decoding Yolo/tiny_yolo.py yolo3)
 add_python_example(tiny_yolo_v4_device_side_decoding Yolo/tiny_yolo.py yolo4)
+
+## AprilTag
+add_python_example(apriltag AprilTag/apriltag.py)
+add_python_example(apriltag_rgb AprilTag/apriltag_rgb.py)
