@@ -27,13 +27,12 @@ scriptSave.setProcessor(dai.ProcessorType.LEON_CSS)
 scriptSave.setScript("""
 import os
 
-os.chdir('/media/mmcsd-0-0')
 index = 1000
 
 while True:
     # Find an unused file name first
     while True:
-        path = str(index) + '.jpg'
+        path = '/media/mmcsd-0-0/' + str(index) + '.jpg'
         if not os.path.exists(path):
             break
         index += 1
@@ -61,6 +60,7 @@ def get_ip_address(ifname):
         struct.pack('256s', ifname[:15].encode())
     )[20:24])
 
+# Note: `chdir` here will prevent unmount, this should be improved!
 os.chdir('/media/mmcsd-0-0')
 
 PORT = 80
