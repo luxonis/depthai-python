@@ -4,22 +4,42 @@ import cv2
 import numpy as np
 import depthai as dai
 
-# Weights to use when blending depth/rgb image (should equal 1.0)
-rgbWeight = 0.4
-depthWeight = 0.6
+# Weights to use when blending rgb/depth/confidence image
+rgbWeight = 0.3
+depthWeight = 0.3
+confWeight = 0.3
+# Normalized weights to use when blending rgb/depth/confidence image (should equal 1.0)
+rgbWeightNorm = 0.3
+depthWeightNorm = 0.3
+confWeightNorm = 0.3
 
 
-def updateBlendWeights(percent_rgb):
+def updateRgbBlendWeights(percent):
     """
-    Update the rgb and depth weights used to blend depth/rgb image
+    Update the rgb weight used to blend rgb/depth/confidence image
 
-    @param[in] percent_rgb The rgb weight expressed as a percentage (0..100)
+    @param[in] percent The rgb weight expressed as a percentage (0..100)
+    """
+    global rgbWeight
+    rgbWeight = float(percent)/100.0
+
+def updateDepthBlendWeights(percent):
+    """
+    Update the depth weight used to blend rgb/depth/confidence image
+
+    @param[in] percent The depth weight expressed as a percentage (0..100)
     """
     global depthWeight
-    global rgbWeight
-    rgbWeight = float(percent_rgb)/100.0
-    depthWeight = 1.0 - rgbWeight
+    depthWeight = float(percent)/100.0
 
+def updateConfBlendWeights(percent):
+    """
+    Update the confidence weight used to blend rgb/depth/confidence image
+
+    @param[in] percent The confidence weight expressed as a percentage (0..100)
+    """
+    global confWeight
+    confWeight = float(percent)/100.0
 
 # Optional. If set (True), the ColorCamera is downscaled from 1080p to 720p.
 # Otherwise (False), the aligned depth is automatically upscaled to 1080p
@@ -83,16 +103,20 @@ with dai.Device(pipeline) as device:
 
     frameRgb = None
     frameDisp = None
+    frameC = None
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
     rgbWindowName = "rgb"
     depthWindowName = "depth"
-    blendedWindowName = "rgb-depth"
+    confWindowName = "conf"
+    blendedWindowName = "rgb-depth-conf"
     cv2.namedWindow(rgbWindowName)
     cv2.namedWindow(depthWindowName)
+    cv2.namedWindow(confWindowName)
     cv2.namedWindow(blendedWindowName)
-    cv2.createTrackbar('RGB Weight %', blendedWindowName, int(rgbWeight*100), 100, updateBlendWeights)
-
+    cv2.createTrackbar('RGB Weight %', blendedWindowName, int(rgbWeight*100), 100, updateRgbBlendWeights)
+    cv2.createTrackbar('Depth Weight %', blendedWindowName, int(depthWeight*100), 100, updateDepthBlendWeights)
+    cv2.createTrackbar('Confidence Weight %', blendedWindowName, int(confWeight*100), 100, updateConfBlendWeights)
     while True:
         latestPacket = {}
         latestPacket["rgb"] = None
@@ -111,7 +135,7 @@ with dai.Device(pipeline) as device:
 
         if latestPacket["confidence_map"] is not None:
             frameC = latestPacket["confidence_map"].getCvFrame()
-            cv2.imshow("conf", frameC)
+            cv2.imshow(confWindowName, frameC)
 
         if latestPacket["disp"] is not None:
             frameDisp = latestPacket["disp"].getFrame()
@@ -123,15 +147,29 @@ with dai.Device(pipeline) as device:
             frameDisp = np.ascontiguousarray(frameDisp)
             cv2.imshow(depthWindowName, frameDisp)
 
-        # Blend when both received
-        if frameRgb is not None and frameDisp is not None:
-            # Need to have both frames in BGR format before blending
+        # Blend when all three frames received
+        if frameRgb is not None and frameDisp is not None and frameC is not None:
+            # Need to have all three frames in BGR format before blending
             if len(frameDisp.shape) < 3:
                 frameDisp = cv2.cvtColor(frameDisp, cv2.COLOR_GRAY2BGR)
-            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDisp, depthWeight, 0)
-            cv2.imshow(blendedWindowName, blended)
+            if len(frameC.shape) < 3:
+                frameC = cv2.cvtColor(frameC, cv2.COLOR_GRAY2BGR)
+            sumWeight = rgbWeight + depthWeight + confWeight
+            # Normalize the weights so their sum to be <= 1.0
+            if sumWeight <= 1.0:
+                rgbWeightNorm = rgbWeight
+                depthWeightNorm = depthWeight
+                confWeightNorm = confWeight
+            else :
+                rgbWeightNorm = rgbWeight / sumWeight
+                depthWeightNorm = depthWeight / sumWeight
+                confWeightNorm = confWeight / sumWeight
+            blended1 = cv2.addWeighted(frameRgb, rgbWeightNorm, frameDisp, depthWeightNorm, 0)
+            blended2 = cv2.addWeighted(blended1, rgbWeightNorm + depthWeightNorm, frameC, confWeightNorm, 0)
+            cv2.imshow(blendedWindowName, blended2)
             frameRgb = None
             frameDisp = None
+            frameC = None
 
         if cv2.waitKey(1) == ord('q'):
             break
