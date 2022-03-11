@@ -7,6 +7,8 @@ import PySimpleGUI as sg
 
 
 def check_ip(s: str):
+    if str == "":
+        return True
     spl = s.split(".")
     if len(spl) != 4:
         sg.Popup("Wrong IP format.\nValue should be similar to 255.255.255.255")
@@ -19,6 +21,8 @@ def check_ip(s: str):
 
 
 def check_mac(s):
+    if s == "":
+        return True
     if s.count(":") != 5:
         sg.Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF")
         return False
@@ -170,10 +174,11 @@ def getConfigs(window, bl, devType, device):
             window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
     window.Element('devName').update(device.desc.name)
     window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
-    if bl.isEmbeddedVersion() is True:
-        window.Element('currBoot').update('None')
-    else:
-        window.Element('currBoot').update(bl.getVersion())
+    # if bl.isEmbeddedVersion() is True:
+    #     window.Element('currBoot').update('None')
+    # else:
+    #     window.Element('currBoot').update(bl.getVersion())
+    window.Element('currBoot').update(bl.getVersion())
     window.Element('version').update(dai.__version__)
     window.Element('commit').update(dai.__commit__)
     window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
@@ -200,18 +205,25 @@ def flashConfig(values, bl, devType, ipType):
             sg.Popup("Values can not be negative!")
             return
         if ipType:
-            conf.setStaticIPv4(values['staticIp'], values['staticIp'], values['staticIp'])
+            if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
+                conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
         else:
-            conf.setDynamicIPv4(values['staticIp'], values['staticIp'], values['staticIp'])
-        conf.setDnsIPv4(values['dns'], values['dnsAlt'])
-        conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
-        conf.setMacAddress(values['mac'])
+            if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
+                conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+        if values['dns'] != "" and values['dnsAlt'] != "":
+            conf.setDnsIPv4(values['dns'], values['dnsAlt'])
+        if values['networkTimeout'] != "":
+            conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
+        if values['mac'] != "":
+            conf.setMacAddress(values['mac'])
     else:
         if int(values['usbTimeout']) <= 0:
             sg.Popup("Values can not be negative!")
             return
-        conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
-        conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
+        if values['usbTimeout'] != "":
+            conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
+        if values['usbSpeed'] != "":
+            conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
     success, error = bl.flashConfig(conf)
     if not success:
         sg.Popup(f"Flashing failed: {error}")
@@ -236,7 +248,7 @@ def factoryReset(bl):
 
 def getDeviceType(bl):
     # bl = dai.DeviceBootloader(device)
-    conf = bl.readConfigData()
+    # conf = bl.readConfigData()
     # TODO - Don't modify the device without explicit action
     # if conf is None:
     #     success, error = bl.flashConfig(dai.DeviceBootloader.Config())
@@ -261,7 +273,7 @@ def flashFromUsb(bl):
 
 usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
 
-sg.theme('DarkGrey4')
+sg.theme('LightGrey2')
 
 # layout for device tab
 aboutDeviceLayout = [
@@ -294,7 +306,7 @@ aboutDeviceLayout = [
         sg.Text("-version-", key="currBoot", size=(30, 1))
     ],
     [
-        sg.Text("Current __version__:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("Current Depthai version:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.VSeparator(),
         sg.Text("Current commit:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
     ],
@@ -307,9 +319,10 @@ aboutDeviceLayout = [
     [
         sg.Text("", size=(7, 2)),
         sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFEA00'),
-        sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00'),
-        sg.Button("Boot into USB Recovery mode", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFEA00')
+                  button_color='#FFA500'),
+        sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFA500'),
+        sg.Button("Boot into USB Recovery mode", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500')
     ]
 ]
 
@@ -365,11 +378,11 @@ deviceConfigLayout = [
     [
         sg.Text("", size=(10, 2)),
         sg.Button("Flash configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFEA00'),
+                  button_color='#FFA500'),
         sg.Button("Clear flash", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFEA00'),
+                  button_color='#FFA500'),
         sg.Button("Flash DAP", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFEA00')
+                  button_color='#FFA500')
     ],
 ]
 
@@ -393,7 +406,7 @@ while True:
     dev = values['devices']
     if event == "Select":
         if dev != "Select device":
-            bl = dai.DeviceBootloader(devices[values['devices']])
+            bl = dai.DeviceBootloader(devices[values['devices']], True)
             devType = getDeviceType(bl)
             getConfigs(window, bl, devType, devices[values['devices']])
             unlockConfig(window, devType)
