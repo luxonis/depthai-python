@@ -122,6 +122,7 @@ def lockConfig(window):
     window.Element('usbTimeout').update("")
     window.Element('usbSpeed').update("")
     window.Element('devName').update("-name-")
+    window.Element('devNameConf').update("")
     window.Element('newBoot').update("-version-")
     window.Element('currBoot').update("-version-")
     window.Element('version').update("-version-")
@@ -173,6 +174,7 @@ def getConfigs(window, bl, devType, device):
             window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
             window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
     window.Element('devName').update(device.desc.name)
+    window.Element('devNameConf').update(device.desc.name)
     window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
     # if bl.isEmbeddedVersion() is True:
     #     window.Element('currBoot').update('None')
@@ -332,7 +334,11 @@ deviceConfigLayout = [
     [sg.HSeparator()],
     [
         sg.Button("Device select", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
-        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake")
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake"),
+        # TODO create library tab
+        # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
+        sg.Text("", key="devNameConf", size=(30, 1))
+
     ],
     [sg.HSeparator()],
     [
@@ -397,7 +403,7 @@ layout = [
 devices = dict()
 devType = ""
 bl = None
-window = sg.Window(title="Device Manager", layout=layout, size=(620, 370))
+window = sg.Window(title="Device Manager", layout=layout, size=(645, 370))
 
 while True:
     event, values = window.read()
