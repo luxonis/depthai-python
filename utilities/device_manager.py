@@ -287,7 +287,7 @@ aboutDeviceLayout = [
     [
         sg.Text("Select device: ", size=(15, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.Combo([], "Search for devices", size=(30, 5), key="devices", enable_events=True),
-        sg.Button("Select"), sg.Button("Search")
+        sg.Button("Search")
     ],
     [
         sg.Text("Name of connected device:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
@@ -404,7 +404,7 @@ while True:
     if event == sg.WIN_CLOSED:
         break
     dev = values['devices']
-    if event == "Select":
+    if event == "devices":
         if dev != "Select device":
             bl = dai.DeviceBootloader(devices[values['devices']], True)
             devType = getDeviceType(bl)
