@@ -198,32 +198,32 @@ def flashConfig(values, bl, devType, ipType):
     # bl = dai.DeviceBootloader(device, True)
     conf = dai.DeviceBootloader.Config()
     if devType == "Poe":
-        if not(check_ip(values['staticIp']) and check_ip(values['staticMask'])
-               and check_ip(values['staticGateway'])):
-            return
-        if not check_mac(values['mac']):
-            return
-        if int(values['networkTimeout']) <= 0:
-            sg.Popup("Values can not be negative!")
-            return
         if ipType:
             if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
+                        values['staticGateway']):
+                    conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
         else:
             if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
+                        values['staticGateway']):
+                    conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
         if values['dns'] != "" and values['dnsAlt'] != "":
             conf.setDnsIPv4(values['dns'], values['dnsAlt'])
         if values['networkTimeout'] != "":
-            conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
+            if int(values['networkTimeout']) >= 0:
+                conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
+            else:
+                sg.Popup("Values can not be negative!")
         if values['mac'] != "":
-            conf.setMacAddress(values['mac'])
+            if check_mac(values['mac']):
+                conf.setMacAddress(values['mac'])
     else:
-        if int(values['usbTimeout']) <= 0:
-            sg.Popup("Values can not be negative!")
-            return
         if values['usbTimeout'] != "":
-            conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
+            if int(values['usbTimeout']) >= 0:
+                conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
+            else:
+                sg.Popup("Values can not be negative!")
         if values['usbSpeed'] != "":
             conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
     success, error = bl.flashConfig(conf)
