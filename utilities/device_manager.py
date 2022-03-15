@@ -148,31 +148,39 @@ def getDevices(window, devices):
 def getConfigs(window, bl, devType, device):
     # bl = dai.DeviceBootloader(device)
     # TODO - might be better to readConfig instead of readConfigData
-    conf = bl.readConfigData()
-    if conf is not None:
-        if devType == "Poe":
-            window.Element('staticIp').update(conf['network']['ipv4'] if conf['network']['ipv4'] != 0 else "0.0.0.0")
-            window.Element('staticMask').update(conf['network']['ipv4Mask'] if conf['network']['ipv4Mask'] != 0
+
+    # TODO - apply to other functions as well, most of them may throw, catch such cases and present the user with an appropriate message
+    # Most of time the version difference is the culprit
+    try:
+        conf = bl.readConfigData()
+        if conf is not None:
+            if devType == "Poe":
+                window.Element('staticIp').update(conf['network']['ipv4'] if conf['network']['ipv4'] != 0 else "0.0.0.0")
+                window.Element('staticMask').update(conf['network']['ipv4Mask'] if conf['network']['ipv4Mask'] != 0
+                                                    else "0.0.0.0")
+                window.Element('staticGateway').update(conf['network']['ipv4Gateway'] if conf['network']['ipv4Gateway'] != 0
+                                                    else "0.0.0.0")
+                window.Element('dns').update(conf['network']['ipv4Dns'] if conf['network']['ipv4Dns'] != 0 else "0.0.0.0")
+                window.Element('dnsAlt').update(conf['network']['ipv4DnsAlt'] if conf['network']['ipv4DnsAlt'] != 0
                                                 else "0.0.0.0")
-            window.Element('staticGateway').update(conf['network']['ipv4Gateway'] if conf['network']['ipv4Gateway'] != 0
-                                                else "0.0.0.0")
-            window.Element('dns').update(conf['network']['ipv4Dns'] if conf['network']['ipv4Dns'] != 0 else "0.0.0.0")
-            window.Element('dnsAlt').update(conf['network']['ipv4DnsAlt'] if conf['network']['ipv4DnsAlt'] != 0
-                                            else "0.0.0.0")
-            window.Element('networkTimeout').update(conf['network']['timeoutMs'])
-            window.Element('mac').update(macCorrectFormat(conf['network']['mac']))
-            window.Element('usbTimeout').update("")
-            window.Element('usbSpeed').update("")
-        else:
-            window.Element('staticIp').update("")
-            window.Element('staticMask').update("")
-            window.Element('staticGateway').update("")
-            window.Element('dns').update("")
-            window.Element('dnsAlt').update("")
-            window.Element('networkTimeout').update("")
-            window.Element('mac').update("")
-            window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
-            window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
+                window.Element('networkTimeout').update(conf['network']['timeoutMs'])
+                window.Element('mac').update(macCorrectFormat(conf['network']['mac']))
+                window.Element('usbTimeout').update("")
+                window.Element('usbSpeed').update("")
+            else:
+                window.Element('staticIp').update("")
+                window.Element('staticMask').update("")
+                window.Element('staticGateway').update("")
+                window.Element('dns').update("")
+                window.Element('dnsAlt').update("")
+                window.Element('networkTimeout').update("")
+                window.Element('mac').update("")
+                window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
+                window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
+
     window.Element('devName').update(device.desc.name)
     window.Element('devNameConf').update(device.desc.name)
     window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
@@ -187,6 +195,8 @@ def getConfigs(window, bl, devType, device):
 
 
 def flashBootloader(window, bl):
+    # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
+    # FIXME 2 - Allow selection of bootloader type explicitly (eg network type when flashing a fresh PoE device which doesn't have an Ethernet bootloader on it yet)
     # bl = dai.DeviceBootloader(device, True)
     progress = lambda p: p * 100
     bl.flashBootloader(progress)
@@ -412,7 +422,10 @@ while True:
     dev = values['devices']
     if event == "devices":
         if dev != "Select device":
-            bl = dai.DeviceBootloader(devices[values['devices']], True)
+            # "allow flashing bootloader" boots latest bootloader first
+            # which makes the information of current bootloader, etc.. not correct (can be checked by "isEmbeddedVersion")
+            # So leave it to false, uncomment the isEmbeddedVersion below and only boot into latest bootlaoder upon the request to flash new bootloader
+            bl = dai.DeviceBootloader(devices[values['devices']], False)
             devType = getDeviceType(bl)
             getConfigs(window, bl, devType, devices[values['devices']])
             unlockConfig(window, devType)
