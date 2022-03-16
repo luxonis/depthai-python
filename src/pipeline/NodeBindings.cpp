@@ -1272,8 +1272,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     uac
         .def_readonly("out", &UAC::out, DOC(dai, node, UAC, out))
         .def("setStreamBackMic", &UAC::setStreamBackMic, py::arg("enable"), DOC(dai, node, UAC, setStreamBackMic))
-        .def("setMicGainDecibels", &UAC::setMicGainDecibels, py::arg("dB"), DOC(dai, node, UAC, setMicGainDecibels))
-        .def("setMicGainTimes", &UAC::setMicGainTimes, py::arg("times"), DOC(dai, node, UAC, setMicGainTimes))
+        //.def("setMicGainDecibels", &UAC::setMicGainDecibels, py::arg("dB"), DOC(dai, node, UAC, setMicGainDecibels))
+        //.def("setMicGainTimes", &UAC::setMicGainTimes, py::arg("times"), DOC(dai, node, UAC, setMicGainTimes))
         .def("setMicAutoGain", &UAC::setMicAutoGain, py::arg("enable"), DOC(dai, node, UAC, setMicAutoGain))
         .def("setXlinkApplyMicGain", &UAC::setXlinkApplyMicGain, py::arg("enable"), DOC(dai, node, UAC, setXlinkApplyMicGain))
         .def("setXlinkSampleSizeBytes", &UAC::setXlinkSampleSizeBytes, py::arg("size"), DOC(dai, node, UAC, setXlinkSampleSizeBytes))
