@@ -14,10 +14,19 @@ if len(sys.argv) > 1:
         print("Specify either 'usb' or 'network' bootloader type")
         exit()
 
-(found, info) = dai.DeviceBootloader.getFirstAvailableDevice()
-if not found:
+deviceInfos = dai.DeviceBootloader.getAllAvailableDevices()
+if len(deviceInfos) == 0:
     print("No device found to flash. Exiting.")
     exit(-1)
+else:
+    for i, di in enumerate(deviceInfos):
+        print(f'[{i}] {di.getMxId()} [{di.desc.protocol.name}]', end='')
+        if di.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER:
+            with dai.DeviceBootloader(di) as bl:
+                print(f' current bootloader: {bl.getVersion()}', end='')
+        print()
+    selected = input(f'Which DepthAI device to flash bootloader for [0..{len(deviceInfos)-1}]: ')
+    info = deviceInfos[int(selected)]
 
 hasBootloader = (info.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER)
 if hasBootloader:
@@ -31,6 +40,7 @@ if hasBootloader:
 # Open DeviceBootloader and allow flashing bootloader
 print(f"Booting latest bootloader first, will take a tad longer...")
 with dai.DeviceBootloader(info, allowFlashingBootloader=True) as bl:
+    print("Bootloader version to flash:", bl.getVersion())
     currentBlType = bl.getType()
 
     if blType == dai.DeviceBootloader.Type.AUTO:

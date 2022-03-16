@@ -5,8 +5,8 @@ import numpy as np
 import depthai as dai
 
 # Weights to use when blending depth/rgb image (should equal 1.0)
-rgbWeight = 0.6
-depthWeight = 0.4
+rgbWeight = 0.4
+depthWeight = 0.6
 
 
 def updateBlendWeights(percent_rgb):
@@ -26,7 +26,7 @@ def updateBlendWeights(percent_rgb):
 downscaleColor = True
 fps = 30
 # The disparity is computed at this resolution, then upscaled to RGB resolution
-monoResolution = dai.MonoCameraProperties.SensorResolution.THE_400_P
+monoResolution = dai.MonoCameraProperties.SensorResolution.THE_720_P
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -39,12 +39,12 @@ right = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 
 rgbOut = pipeline.create(dai.node.XLinkOut)
-depthOut = pipeline.create(dai.node.XLinkOut)
+disparityOut = pipeline.create(dai.node.XLinkOut)
 
 rgbOut.setStreamName("rgb")
 queueNames.append("rgb")
-depthOut.setStreamName("depth")
-queueNames.append("depth")
+disparityOut.setStreamName("disp")
+queueNames.append("disp")
 
 #Properties
 camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
@@ -71,16 +71,13 @@ stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 camRgb.isp.link(rgbOut.input)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
-stereo.disparity.link(depthOut.input)
+stereo.disparity.link(disparityOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    device.getOutputQueue(name="rgb",   maxSize=4, blocking=False)
-    device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-
     frameRgb = None
-    frameDepth = None
+    frameDisp = None
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
     rgbWindowName = "rgb"
@@ -94,9 +91,9 @@ with dai.Device(pipeline) as device:
     while True:
         latestPacket = {}
         latestPacket["rgb"] = None
-        latestPacket["depth"] = None
+        latestPacket["disp"] = None
 
-        queueEvents = device.getQueueEvents(("rgb", "depth"))
+        queueEvents = device.getQueueEvents(("rgb", "disp"))
         for queueName in queueEvents:
             packets = device.getOutputQueue(queueName).tryGetAll()
             if len(packets) > 0:
@@ -106,25 +103,25 @@ with dai.Device(pipeline) as device:
             frameRgb = latestPacket["rgb"].getCvFrame()
             cv2.imshow(rgbWindowName, frameRgb)
 
-        if latestPacket["depth"] is not None:
-            frameDepth = latestPacket["depth"].getFrame()
+        if latestPacket["disp"] is not None:
+            frameDisp = latestPacket["disp"].getFrame()
             maxDisparity = stereo.initialConfig.getMaxDisparity()
             # Optional, extend range 0..95 -> 0..255, for a better visualisation
-            if 1: frameDepth = (frameDepth * 255. / maxDisparity).astype(np.uint8)
+            if 1: frameDisp = (frameDisp * 255. / maxDisparity).astype(np.uint8)
             # Optional, apply false colorization
-            if 1: frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_HOT)
-            frameDepth = np.ascontiguousarray(frameDepth)
-            cv2.imshow(depthWindowName, frameDepth)
+            if 1: frameDisp = cv2.applyColorMap(frameDisp, cv2.COLORMAP_HOT)
+            frameDisp = np.ascontiguousarray(frameDisp)
+            cv2.imshow(depthWindowName, frameDisp)
 
         # Blend when both received
-        if frameRgb is not None and frameDepth is not None:
+        if frameRgb is not None and frameDisp is not None:
             # Need to have both frames in BGR format before blending
-            if len(frameDepth.shape) < 3:
-                frameDepth = cv2.cvtColor(frameDepth, cv2.COLOR_GRAY2BGR)
-            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth, depthWeight, 0)
+            if len(frameDisp.shape) < 3:
+                frameDisp = cv2.cvtColor(frameDisp, cv2.COLOR_GRAY2BGR)
+            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDisp, depthWeight, 0)
             cv2.imshow(blendedWindowName, blended)
             frameRgb = None
-            frameDepth = None
+            frameDisp = None
 
         if cv2.waitKey(1) == ord('q'):
             break

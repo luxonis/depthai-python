@@ -4,6 +4,7 @@
 #include "depthai/device/Device.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
+#include "depthai/xlink/XLinkConnection.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -11,7 +12,11 @@
 #include <pybind11/detail/common.h>
 // hedley
 #include <hedley/hedley.h>
+// STL Bind
+#include <pybind11/stl_bind.h>
 
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>);
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
@@ -20,13 +25,22 @@ template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
     auto startTime = std::chrono::steady_clock::now();
-    bool found;
+    bool found = false;
+    bool invalidDeviceFound = false;
     dai::DeviceInfo deviceInfo = {};
+    dai::DeviceInfo invalidDeviceInfo = {};
     do {
         {
             // releases python GIL
             py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice();
+            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
+
+            if(strcmp("<error>", deviceInfo.desc.name) == 0){
+                invalidDeviceFound = true;
+                invalidDeviceInfo = deviceInfo;
+                found = false;
+            }
+
             // Check if found
             if(found){
                 break;
@@ -38,7 +52,15 @@ static auto deviceSearchHelper(Args&&... args){
         // reacquires python GIL for PyErr_CheckSignals call
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(std::chrono::steady_clock::now() - startTime < DEVICE::DEFAULT_SEARCH_TIME);
+    } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
+
+    // Check if its an invalid device
+    if(invalidDeviceFound){
+        // Warn
+        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
+        // TODO(themarpe) - move device search into C++ and expose a callback
+        DEVICE::getFirstAvailableDevice(true);
+    }
 
     // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
     if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
@@ -167,10 +189,21 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DeviceBase> deviceBase(m, "DeviceBase", DOC(dai, DeviceBase));
     py::class_<Device, DeviceBase> device(m, "Device", DOC(dai, Device));
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
-    py::class_<PrebootConfig> prebootConfig(m, "PrebootConfig", DOC(dai, PrebootConfig));
-    py::class_<PrebootConfig::USB> prebootConfigUsb(prebootConfig, "USB", DOC(dai, PrebootConfig, USB));
+    py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
+    py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
+    py::enum_<BoardConfig::GPIO::Mode> boardConfigGpioMode(boardConfigGpio, "Mode", DOC(dai, BoardConfig, GPIO, Mode));
+    py::enum_<BoardConfig::GPIO::Direction> boardConfigGpioDirection(boardConfigGpio, "Direction", DOC(dai, BoardConfig, GPIO, Direction));
+    py::enum_<BoardConfig::GPIO::Level> boardConfigGpioLevel(boardConfigGpio, "Level", DOC(dai, BoardConfig, GPIO, Level));
+    py::enum_<BoardConfig::GPIO::Pull> boardConfigGpioPull(boardConfigGpio, "Pull", DOC(dai, BoardConfig, GPIO, Pull));
+    py::enum_<BoardConfig::GPIO::Drive> boardConfigGpioDrive(boardConfigGpio, "Drive", DOC(dai, BoardConfig, GPIO, Drive));
+    py::class_<BoardConfig::UART> boardConfigUart(boardConfig, "UART", DOC(dai, BoardConfig, UART));
     struct PyClock{};
     py::class_<PyClock> clock(m, "Clock");
+
+
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -186,28 +219,99 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
 
-    // Bind PrebootConfig::USB
-    prebootConfigUsb
+    // Bind BoardConfig::USB
+    boardConfigUsb
         .def(py::init<>())
-        .def_readwrite("vid", &PrebootConfig::USB::vid)
-        .def_readwrite("pid", &PrebootConfig::USB::pid)
-        .def_readwrite("flashBootedVid", &PrebootConfig::USB::flashBootedVid)
-        .def_readwrite("flashBootedPid", &PrebootConfig::USB::flashBootedPid)
-        .def_readwrite("maxSpeed", &PrebootConfig::USB::maxSpeed)
+        .def_readwrite("vid", &BoardConfig::USB::vid)
+        .def_readwrite("pid", &BoardConfig::USB::pid)
+        .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
+        .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
+        .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
     ;
 
-    // Bind PrebootConfig
-    prebootConfig
+    // GPIO Mode
+    boardConfigGpioMode
+        .value("ALT_MODE_0", BoardConfig::GPIO::ALT_MODE_0, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_0))
+        .value("ALT_MODE_1", BoardConfig::GPIO::ALT_MODE_1, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_1))
+        .value("ALT_MODE_2", BoardConfig::GPIO::ALT_MODE_2, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_2))
+        .value("ALT_MODE_3", BoardConfig::GPIO::ALT_MODE_3, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_3))
+        .value("ALT_MODE_4", BoardConfig::GPIO::ALT_MODE_4, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_4))
+        .value("ALT_MODE_5", BoardConfig::GPIO::ALT_MODE_5, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_5))
+        .value("ALT_MODE_6", BoardConfig::GPIO::ALT_MODE_6, DOC(dai, BoardConfig, GPIO, Mode, ALT_MODE_6))
+        .value("DIRECT", BoardConfig::GPIO::DIRECT, DOC(dai, BoardConfig, GPIO, Mode, DIRECT))
+        .export_values()
+        ;
+
+    // GPIO Direction
+    boardConfigGpioDirection
+        .value("INPUT", BoardConfig::GPIO::INPUT, DOC(dai, BoardConfig, GPIO, Direction, INPUT))
+        .value("OUTPUT", BoardConfig::GPIO::OUTPUT, DOC(dai, BoardConfig, GPIO, Direction, OUTPUT))
+        .export_values()
+        ;
+
+    // GPIO Level
+    boardConfigGpioLevel
+        .value("LOW", BoardConfig::GPIO::LOW, DOC(dai, BoardConfig, GPIO, Level, LOW))
+        .value("HIGH", BoardConfig::GPIO::HIGH, DOC(dai, BoardConfig, GPIO, Level, HIGH))
+        .export_values()
+        ;
+
+    // GPIO Pull
+    boardConfigGpioPull
+        .value("NO_PULL", BoardConfig::GPIO::NO_PULL, DOC(dai, BoardConfig, GPIO, Pull, NO_PULL))
+        .value("PULL_UP", BoardConfig::GPIO::PULL_UP, DOC(dai, BoardConfig, GPIO, Pull, PULL_UP))
+        .value("PULL_DOWN", BoardConfig::GPIO::PULL_DOWN, DOC(dai, BoardConfig, GPIO, Pull, PULL_DOWN))
+        .value("BUS_KEEPER", BoardConfig::GPIO::BUS_KEEPER, DOC(dai, BoardConfig, GPIO, Pull, BUS_KEEPER))
+        .export_values()
+        ;
+
+    // GPIO Drive
+    boardConfigGpioDrive
+        .value("MA_2", BoardConfig::GPIO::MA_2, DOC(dai, BoardConfig, GPIO, Drive, MA_2))
+        .value("MA_4", BoardConfig::GPIO::MA_4, DOC(dai, BoardConfig, GPIO, Drive, MA_4))
+        .value("MA_8", BoardConfig::GPIO::MA_8, DOC(dai, BoardConfig, GPIO, Drive, MA_8))
+        .value("MA_12", BoardConfig::GPIO::MA_12, DOC(dai, BoardConfig, GPIO, Drive, MA_12))
+        .export_values()
+        ;
+
+    // Bind BoardConfig::GPIO
+    boardConfigGpio
         .def(py::init<>())
-        .def_readwrite("usb", &PrebootConfig::usb)
-        .def_readwrite("watchdogTimeoutMs", &PrebootConfig::watchdogTimeoutMs)
+        .def(py::init<BoardConfig::GPIO::Direction>())
+        .def(py::init<BoardConfig::GPIO::Direction, BoardConfig::GPIO::Level>())
+        .def(py::init<BoardConfig::GPIO::Direction, BoardConfig::GPIO::Level, BoardConfig::GPIO::Pull>())
+        .def(py::init<BoardConfig::GPIO::Direction, BoardConfig::GPIO::Mode>())
+        .def(py::init<BoardConfig::GPIO::Direction, BoardConfig::GPIO::Mode, BoardConfig::GPIO::Pull>())
+        .def_readwrite("mode", &BoardConfig::GPIO::mode)
+        .def_readwrite("direction", &BoardConfig::GPIO::direction)
+        .def_readwrite("level", &BoardConfig::GPIO::level)
+        .def_readwrite("pull", &BoardConfig::GPIO::pull)
+        .def_readwrite("drive", &BoardConfig::GPIO::drive)
+        .def_readwrite("schmitt", &BoardConfig::GPIO::schmitt)
+        .def_readwrite("slewFast", &BoardConfig::GPIO::slewFast)
+    ;
+
+    // Bind BoardConfig::UART
+    boardConfigUart
+        .def(py::init<>())
+        .def_readwrite("tmp", &BoardConfig::UART::tmp)
+    ;
+
+    // Bind BoardConfig
+    boardConfig
+        .def(py::init<>())
+        .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
+        .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
+        .def_readwrite("gpio", &BoardConfig::gpio)
+        .def_readwrite("uart", &BoardConfig::uart)
     ;
 
     // Bind Device::Config
     deviceConfig
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
-        .def_readwrite("preboot", &Device::Config::preboot)
+        .def_readwrite("board", &Device::Config::board)
     ;
 
     // Bind constructors
@@ -227,7 +331,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         //static
         .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
-        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, DOC(dai, DeviceBase, getFirstAvailableDevice))
+        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
@@ -273,6 +377,9 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
+        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
+        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
     ;
 
 

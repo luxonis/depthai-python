@@ -1,13 +1,13 @@
-RGB Depth
-=========
+RGB Depth alignment
+===================
 
-This example shows usage of RGB depth. Since our boards has 1 color and 2 mono cameres, therefore
-you need 2 mono cameras for the depth map, then you need to align the image from the
-color camera on top of that to get RGB depth.
+This example shows usage of RGB depth alignment. Since OAK-D has a color and a pair of stereo cameras,
+you can align depth map to the color frame on top of that to get RGB depth.
 
 Demo
 ####
 
+.. image:: https://user-images.githubusercontent.com/18037362/151351377-a5752fbe-3b8b-4985-b8d1-d5f8a7d5a868.png
 
 Setup
 #####
