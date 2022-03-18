@@ -191,6 +191,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
     py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::Network> boardConfigNetwork(boardConfig, "Network", DOC(dai, BoardConfig, Network));
     py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
     py::enum_<BoardConfig::GPIO::Mode> boardConfigGpioMode(boardConfigGpio, "Mode", DOC(dai, BoardConfig, GPIO, Mode));
     py::enum_<BoardConfig::GPIO::Direction> boardConfigGpioDirection(boardConfigGpio, "Direction", DOC(dai, BoardConfig, GPIO, Direction));
@@ -227,6 +228,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+    ;
+
+    // Bind BoardConfig::Network
+    boardConfigNetwork
+        .def(py::init<>())
+        .def_readwrite("mtu", &BoardConfig::Network::mtu)
     ;
 
     // GPIO Mode
@@ -301,6 +308,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfig
         .def(py::init<>())
         .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("network", &BoardConfig::network)
+        .def_readwrite("sysctl", &BoardConfig::sysctl)
         .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
