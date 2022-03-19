@@ -177,6 +177,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
     py::class_<AprilTagProperties> aprilTagProperties(m, "AprilTagProperties", DOC(dai, AprilTagProperties));
+    py::class_<ToFProperties> tofProperties(m, "ToFProperties", DOC(dai, ToFProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
@@ -688,8 +689,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getSensorCrop", &Camera::getSensorCrop, DOC(dai, node, Camera, getSensorCrop))
         .def("getSensorCropX", &Camera::getSensorCropX, DOC(dai, node, Camera, getSensorCropX))
         .def("getSensorCropY", &Camera::getSensorCropY, DOC(dai, node, Camera, getSensorCropY))
-        .def("setWaitForConfigInput", &Camera::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, Camera, setWaitForConfigInput))
-        .def("getWaitForConfigInput", &Camera::getWaitForConfigInput, DOC(dai, node, Camera, getWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](Camera& cam, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            cam.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, Camera, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](Camera& cam){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return cam.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, Camera, getWaitForConfigInput))
+
         .def("setPreviewKeepAspectRatio", &Camera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, Camera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &Camera::getPreviewKeepAspectRatio, DOC(dai, node, Camera, getPreviewKeepAspectRatio))
         .def("setIspScale", static_cast<void(Camera::*)(int,int)>(&Camera::setIspScale), py::arg("numerator"), py::arg("denominator"), DOC(dai, node, Camera, setIspScale))
