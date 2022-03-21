@@ -20,8 +20,6 @@ with dai.Device() as device:
     print(width)
     print(height)
 
-    M_rgb, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB)
-
     M_left = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, 1280, 720))
     print("LEFT Camera resized intrinsics...")
     print(M_left)
