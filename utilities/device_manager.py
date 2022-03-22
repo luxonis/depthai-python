@@ -126,7 +126,7 @@ def lockConfig(window):
     window.Element('newBoot').update("-version-")
     window.Element('currBoot').update("-version-")
     window.Element('version').update("-version-")
-    window.Element('commit').update("-commit-")
+    window.Element('commit').update("-version-")
     window.Element('devState').update("-state-")
 
 
@@ -185,11 +185,14 @@ def getConfigs(window, bl, devType, device):
         window.Element('devName').update(device.desc.name)
         window.Element('devNameConf').update(device.desc.name)
         window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
-        # if bl.isEmbeddedVersion() is True:
-        #     window.Element('currBoot').update('None')
-        # else:
-        #     window.Element('currBoot').update(bl.getVersion())
-        window.Element('currBoot').update(bl.getVersion())
+
+        # The "isEmbeddedVersion" tells you whether BL had to be booted,
+        # or we connected to an already flashed Bootloader.
+        if bl.isEmbeddedVersion() is True:
+            window.Element('currBoot').update('None')
+        else:
+            window.Element('currBoot').update(bl.getVersion())
+        # window.Element('currBoot').update(bl.getVersion())
         window.Element('version').update(dai.__version__)
         window.Element('commit').update(dai.__commit__)
         window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
@@ -202,10 +205,16 @@ def flashBootloader(window, device, values):
     # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
     # FIXME 2 - Allow selection of bootloader type explicitly (eg network type when flashing a fresh PoE device which doesn't have an Ethernet bootloader on it yet)
     try:
-        type = dai.DeviceBootloader.Type.USB
+        bl = dai.DeviceBootloader(device, True)
         if values['bootType'] == "NETWORK":
             type = dai.DeviceBootloader.Type.NETWORK
-        bl = dai.DeviceBootloader(device, True)
+        elif values['bootType'] == "USB":
+            type = dai.DeviceBootloader.Type.USB
+        else:
+            if str(bl.getType()) == "Type.NETWORK":
+                type = dai.DeviceBootloader.Type.NETWORK
+            else:
+                type = dai.DeviceBootloader.Type.USB
         progress = lambda p: p * 100
         bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
         window.Element('currBoot').update(bl.getVersion())
@@ -383,7 +392,7 @@ aboutDeviceLayout = [
     [
         sg.Text("Bootloader type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.VSeparator(),
-        sg.Combo(["USB", "NETWORK"], "Select bootloader type", size=(30, 2), key="bootType"),
+        sg.Combo(["DEFAULT", "USB", "NETWORK"], "DEFAULT", size=(30, 2), key="bootType"),
     ],
     [sg.HSeparator()],
     [
@@ -495,6 +504,7 @@ while True:
             window.Element('progress').update("No device selected.")
     if event == "Search":
         getDevices(window, devices)
+        lockConfig(window)
     if event == "Flash newest Bootloader":
         bl.close()
         flashBootloader(window, devices[values['devices']], values)
