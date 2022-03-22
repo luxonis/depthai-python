@@ -131,18 +131,22 @@ def lockConfig(window):
 
 
 def getDevices(window, devices):
-    listedDevices = []
-    devices.clear()
-    deviceInfos = dai.XLinkConnection.getAllConnectedDevices()
-    if not deviceInfos:
-        window.Element('devices').update("No devices")
-        sg.Popup("No devices found.")
-    else:
-        for deviceInfo in deviceInfos:
-            # print(deviceInfo.state)
-            listedDevices.append(deviceInfo.desc.name)
-            devices[deviceInfo.desc.name] = deviceInfo
-        window.Element('devices').update("Select device", values=listedDevices)
+    try:
+        listedDevices = []
+        devices.clear()
+        deviceInfos = dai.XLinkConnection.getAllConnectedDevices()
+        if not deviceInfos:
+            window.Element('devices').update("No devices")
+            sg.Popup("No devices found.")
+        else:
+            for deviceInfo in deviceInfos:
+                # print(deviceInfo.state)
+                listedDevices.append(deviceInfo.desc.name)
+                devices[deviceInfo.desc.name] = deviceInfo
+            window.Element('devices').update("Select device", values=listedDevices)
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
 def getConfigs(window, bl, devType, device):
@@ -177,85 +181,100 @@ def getConfigs(window, bl, devType, device):
                 window.Element('mac').update("")
                 window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
                 window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
+
+        window.Element('devName').update(device.desc.name)
+        window.Element('devNameConf').update(device.desc.name)
+        window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
+        # if bl.isEmbeddedVersion() is True:
+        #     window.Element('currBoot').update('None')
+        # else:
+        #     window.Element('currBoot').update(bl.getVersion())
+        window.Element('currBoot').update(bl.getVersion())
+        window.Element('version').update(dai.__version__)
+        window.Element('commit').update(dai.__commit__)
+        window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
     except Exception as ex:
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
 
-    window.Element('devName').update(device.desc.name)
-    window.Element('devNameConf').update(device.desc.name)
-    window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
-    # if bl.isEmbeddedVersion() is True:
-    #     window.Element('currBoot').update('None')
-    # else:
-    #     window.Element('currBoot').update(bl.getVersion())
-    window.Element('currBoot').update(bl.getVersion())
-    window.Element('version').update(dai.__version__)
-    window.Element('commit').update(dai.__commit__)
-    window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
 
-
-def flashBootloader(window, bl):
+def flashBootloader(window, device, values):
     # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
     # FIXME 2 - Allow selection of bootloader type explicitly (eg network type when flashing a fresh PoE device which doesn't have an Ethernet bootloader on it yet)
-    # bl = dai.DeviceBootloader(device, True)
-    progress = lambda p: p * 100
-    bl.flashBootloader(progress)
-    window.Element('currBoot').update(bl.getVersion())
-    sg.Popup("Flashed newest bootloader version.")
+    try:
+        type = dai.DeviceBootloader.Type.USB
+        if values['bootType'] == "NETWORK":
+            type = dai.DeviceBootloader.Type.NETWORK
+        bl = dai.DeviceBootloader(device, True)
+        progress = lambda p: p * 100
+        bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
+        window.Element('currBoot').update(bl.getVersion())
+        sg.Popup("Flashed newest bootloader version.")
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
-def flashConfig(values, bl, devType, ipType):
-    # bl = dai.DeviceBootloader(device, True)
-    conf = dai.DeviceBootloader.Config()
-    if devType == "Poe":
-        if ipType:
-            if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
-                        values['staticGateway']):
-                    conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+def flashConfig(values, device, devType, ipType):
+    try:
+        bl = dai.DeviceBootloader(device, True)
+        conf = dai.DeviceBootloader.Config()
+        if devType == "Poe":
+            if ipType:
+                if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
+                    if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
+                            values['staticGateway']):
+                        conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+            else:
+                if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
+                    if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
+                            values['staticGateway']):
+                        conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+            if values['dns'] != "" and values['dnsAlt'] != "":
+                conf.setDnsIPv4(values['dns'], values['dnsAlt'])
+            if values['networkTimeout'] != "":
+                if int(values['networkTimeout']) >= 0:
+                    conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
+                else:
+                    sg.Popup("Values can not be negative!")
+            if values['mac'] != "":
+                if check_mac(values['mac']):
+                    conf.setMacAddress(values['mac'])
         else:
-            if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
-                        values['staticGateway']):
-                    conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
-        if values['dns'] != "" and values['dnsAlt'] != "":
-            conf.setDnsIPv4(values['dns'], values['dnsAlt'])
-        if values['networkTimeout'] != "":
-            if int(values['networkTimeout']) >= 0:
-                conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
-            else:
-                sg.Popup("Values can not be negative!")
-        if values['mac'] != "":
-            if check_mac(values['mac']):
-                conf.setMacAddress(values['mac'])
-    else:
-        if values['usbTimeout'] != "":
-            if int(values['usbTimeout']) >= 0:
-                conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
-            else:
-                sg.Popup("Values can not be negative!")
-        if values['usbSpeed'] != "":
-            conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
-    success, error = bl.flashConfig(conf)
-    if not success:
-        sg.Popup(f"Flashing failed: {error}")
-    else:
-        sg.Popup("Flashing successful.")
+            if values['usbTimeout'] != "":
+                if int(values['usbTimeout']) >= 0:
+                    conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
+                else:
+                    sg.Popup("Values can not be negative!")
+            if values['usbSpeed'] != "":
+                conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
+        success, error = bl.flashConfig(conf)
+        if not success:
+            sg.Popup(f"Flashing failed: {error}")
+        else:
+            sg.Popup("Flashing successful.")
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
-def factoryReset(bl):
-    blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
-    blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
-    # bl = dai.DeviceBootloader(device, True)
-    tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
-    tmpBlFw.write(bytes(blBinary))
-    progress = lambda p: p * 100
-    success, msg = bl.flashBootloader(progress, tmpBlFw.name)
-    if success:
-        sg.Popup("Factory reset was successful.")
-    else:
-       sg.Popup(f"Factory reset failed. Error: {msg}")
-    tmpBlFw.close()
+def factoryReset(device):
+    try:
+        blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
+        blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
+        bl = dai.DeviceBootloader(device, True)
+        tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
+        tmpBlFw.write(bytes(blBinary))
+        progress = lambda p: p * 100
+        success, msg = bl.flashBootloader(progress, tmpBlFw.name)
+        if success:
+            sg.Popup("Factory reset was successful.")
+        else:
+           sg.Popup(f"Factory reset failed. Error: {msg}")
+        tmpBlFw.close()
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
 def getDeviceType(bl):
@@ -264,28 +283,61 @@ def getDeviceType(bl):
     # TODO - Don't modify the device without explicit action
     # if conf is None:
     #     success, error = bl.flashConfig(dai.DeviceBootloader.Config())
-    if str(bl.getType()) == "Type.NETWORK":
-        return "Poe"
-    else:
-        return "NonPoe"
+    try:
+        if str(bl.getType()) == "Type.NETWORK":
+            return "Poe"
+        else:
+            return "NonPoe"
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
-def flashFromFile(file, bl):
-    # bl = dai.DeviceBootloader(device)
-    if str(file)[-3:] == "dap":
-        bl.flashDepthaiApplicationPackage(file)
-    else:
-        sg.Popup("Selected file is not .dap!")
+def flashFromFile(file, device):
+    try:
+        bl = dai.DeviceBootloader(device, True)
+        if str(file)[-3:] == "dap":
+            bl.flashDepthaiApplicationPackage(file)
+        else:
+            sg.Popup("Selected file is not .dap!")
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
-def flashFromUsb(bl):
-    # bl = dai.DeviceBootloader(device)
-    bl.bootUsbRomBootloader()
+def flashFromUsb(device):
+    try:
+        bl = dai.DeviceBootloader(device, True)
+        bl.bootUsbRomBootloader()
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
+
+
+def connectToDevice(device):
+    try:
+        bl = dai.DeviceBootloader(device, False)
+        return bl
+    except Exception as ex:
+        print(f'Exception: {ex}')
+        sg.Popup(f'{ex}')
 
 
 usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
 
 sg.theme('LightGrey2')
+
+# first device search
+allDevices = []
+devices = dict()
+tmp = "Search for devices"
+deviceInfos = dai.XLinkConnection.getAllConnectedDevices()
+
+if deviceInfos:
+    tmp = "Select device"
+    for deviceInfo in deviceInfos:
+        allDevices.append(deviceInfo.desc.name)
+        devices[deviceInfo.desc.name] = deviceInfo
 
 # layout for device tab
 aboutDeviceLayout = [
@@ -298,7 +350,7 @@ aboutDeviceLayout = [
     [sg.HSeparator()],
     [
         sg.Text("Select device: ", size=(15, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.Combo([], "Search for devices", size=(30, 5), key="devices", enable_events=True),
+        sg.Combo(allDevices, tmp, size=(30, 5), key="devices", enable_events=True),
         sg.Button("Search")
     ],
     [
@@ -326,6 +378,12 @@ aboutDeviceLayout = [
         sg.Text("-version-", key="version", size=(30, 1)),
         sg.VSeparator(),
         sg.Text("-version-", key="commit", size=(31, 1))
+    ],
+    [sg.HSeparator()],
+    [
+        sg.Text("Bootloader type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.VSeparator(),
+        sg.Combo(["USB", "NETWORK"], "Select bootloader type", size=(30, 2), key="bootType"),
     ],
     [sg.HSeparator()],
     [
@@ -410,10 +468,9 @@ layout = [
     ]
 ]
 
-devices = dict()
 devType = ""
 bl = None
-window = sg.Window(title="Device Manager", layout=layout, size=(645, 370))
+window = sg.Window(title="Device Manager", layout=layout, size=(645, 410))
 
 while True:
     event, values = window.read()
@@ -425,18 +482,26 @@ while True:
             # "allow flashing bootloader" boots latest bootloader first
             # which makes the information of current bootloader, etc.. not correct (can be checked by "isEmbeddedVersion")
             # So leave it to false, uncomment the isEmbeddedVersion below and only boot into latest bootlaoder upon the request to flash new bootloader
-            bl = dai.DeviceBootloader(devices[values['devices']], False)
-            devType = getDeviceType(bl)
-            getConfigs(window, bl, devType, devices[values['devices']])
-            unlockConfig(window, devType)
+            # bl = dai.DeviceBootloader(devices[values['devices']], False)
+            if str(devices[values['devices']].state).replace("XLinkDeviceState.X_LINK_", "") == "BOOTED":
+                # device is already booted somewhere else
+                sg.Popup("Device is already booted somewhere else!")
+            else:
+                bl = connectToDevice(devices[values['devices']])
+                devType = getDeviceType(bl)
+                getConfigs(window, bl, devType, devices[values['devices']])
+                unlockConfig(window, devType)
         else:
             window.Element('progress').update("No device selected.")
     if event == "Search":
         getDevices(window, devices)
     if event == "Flash newest Bootloader":
-        flashBootloader(window, bl)
+        bl.close()
+        flashBootloader(window, devices[values['devices']], values)
     if event == "Flash configuration":
-        flashConfig(values, bl, devType, values['staticBut'])
+        bl.close()
+        flashConfig(values, devices[values['devices']], devType, values['staticBut'])
+        bl = connectToDevice(devices[values['devices']])
         getConfigs(window, bl, devType, devices[values['devices']])
         lockConfig(window)
         if devType != "Poe":
@@ -445,10 +510,12 @@ while True:
             devices.clear()
             window.Element('devices').update("Search for devices", values=[])
     if event == "Factory reset":
-        factoryReset(bl)
+        bl.close()
+        factoryReset(devices[values['devices']])
     if event == "Flash DAP":
         file = sg.popup_get_file("Select .dap file")
-        flashFromFile(file, bl)
+        bl = None
+        flashFromFile(file, devices[values['devices']])
     if event == "configReal":
         window['-COL1-'].update(visible=False)
         window['-COL2-'].update(visible=True)
@@ -456,5 +523,6 @@ while True:
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
     if event == "Boot into USB Recovery mode":
-        flashFromUsb(bl)
+        bl = None
+        flashFromUsb(devices[values['devices']])
 window.close()
