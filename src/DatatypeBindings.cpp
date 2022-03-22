@@ -1227,9 +1227,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
 
     depthUnit
-        .value("METRE", RawStereoDepthConfig::AlgorithmControl::DepthUnit::METRE, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, METRE))
-        .value("CENTIMETRE", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETRE, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETRE))
-        .value("MILLIMETRE", RawStereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETRE, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETRE))
+        .value("METER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, METER))
+        .value("CENTIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETER))
+        .value("MILLIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETER))
         .value("INCH", RawStereoDepthConfig::AlgorithmControl::DepthUnit::INCH, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, INCH))
         .value("FOOT", RawStereoDepthConfig::AlgorithmControl::DepthUnit::FOOT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, FOOT))
         .value("CUSTOM", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CUSTOM, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CUSTOM))
