@@ -128,6 +128,7 @@ def lockConfig(window):
     window.Element('version').update("-version-")
     window.Element('commit').update("-version-")
     window.Element('devState').update("-state-")
+    window.Element('bootType').update("DEFAULT")
 
 
 def getDevices(window, devices):
@@ -392,7 +393,7 @@ aboutDeviceLayout = [
     [
         sg.Text("Bootloader type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.VSeparator(),
-        sg.Combo(["DEFAULT", "USB", "NETWORK"], "DEFAULT", size=(30, 2), key="bootType"),
+        sg.Combo(["DEFAULT", "USB", "NETWORK"], "DEFAULT", size=(30, 3), key="bootType"),
     ],
     [sg.HSeparator()],
     [
