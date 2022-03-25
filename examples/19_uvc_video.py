@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
 parser.add_argument('-ub', '--usb-boot',         default=False, action="store_true")
+parser.add_argument('-ublp','--usb-boot-low-pwr',default=False, action="store_true")
 parser.add_argument('-r',  '--rotate-cam',       default=False, action="store_true")
 parser.add_argument('-b',  '--back-mic',         default=False, action="store_true")
 parser.add_argument('-xm', '--xlink-mic',        default=False, action="store_true")
@@ -49,10 +50,15 @@ try_reset_booted_device()
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
-if args.usb_boot:
-    print('Switching to USB-boot mode')
+if args.usb_boot or args.usb_boot_low_pwr:
+    fw = "examples/usbboot.bin"
+    print('Switching to USB-boot mode', end='')
+    if args.usb_boot_low_pwr:
+        print(' - low-power mode!')
+        fw = "examples/usbboot_lp.bin"
+    print()
     try:
-        dai.Device(dai.Pipeline(), "examples/usbboot.bin")
+        dai.Device(dai.Pipeline(), fw)
     except:
         pass
     time.sleep(1)
