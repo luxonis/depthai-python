@@ -9,6 +9,7 @@ import cv2
 parser = argparse.ArgumentParser()
 parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
+parser.add_argument('-ub', '--usb-boot',         default=False, action="store_true")
 parser.add_argument('-r',  '--rotate-cam',       default=False, action="store_true")
 parser.add_argument('-b',  '--back-mic',         default=False, action="store_true")
 parser.add_argument('-xm', '--xlink-mic',        default=False, action="store_true")
@@ -47,6 +48,21 @@ try_reset_booted_device()
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
+
+if args.usb_boot:
+    print('Switching to USB-boot mode')
+    try:
+        dai.Device(dai.Pipeline(), "examples/usbboot.bin")
+    except:
+        pass
+    time.sleep(1)
+    import usb.core
+    dev = usb.core.find(idVendor=0x03e7, idProduct=0x2485)
+    if dev is not None:
+        print("Success!")
+    else:
+        print("FAILED! Please retry")
+    exit()
 
 if not args.no_camera:
     # Define a source - color camera
