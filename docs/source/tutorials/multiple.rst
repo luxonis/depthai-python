@@ -69,8 +69,7 @@ on different DepthAI/uAI models.
 Specifying POE device to be used
 ********************************
 
-You can specify the POE device to be used by the IP address as well. Here's the `code snippet <https://docs.luxonis.com/en/latest/pages/tutorials/getting-started-with-poe/#manually-specify-device-ip>`__.
-
+You can specify the POE device to be used by the IP address as well. Here's the `code snippet <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#manually-specify-device-ip>`__.
 
 Now use as many DepthAI devices as you need!
 
