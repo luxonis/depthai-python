@@ -20,8 +20,19 @@ with dai.Device() as device:
     print(width)
     print(height)
 
-    if "OAK-1" in calibData.getEepromData().boardName:
+    if "OAK-1" in calibData.getEepromData().boardName or "BW1093OAK" in calibData.getEepromData().boardName:
+        M_rgb = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RGB, 1280, 720))
+        print("RGB Camera resized intrinsics...")
+        print(M_rgb)
+
+        D_rgb = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RGB))
+        print("RGB Distortion Coefficients...")
+        [print(name + ": " + value) for (name, value) in
+         zip(["k1", "k2", "p1", "p2", "k3", "k4", "k5", "k6", "s1", "s2", "s3", "s4", "τx", "τy"],
+             [str(data) for data in D_rgb])]
+
         print(f'RGB FOV {calibData.getFov(dai.CameraBoardSocket.RGB)}')
+
     else:
         M_left = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, 1280, 720))
         print("LEFT Camera resized intrinsics...")
