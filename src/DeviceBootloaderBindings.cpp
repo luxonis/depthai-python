@@ -16,6 +16,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DeviceBootloader::UsbConfig> deviceBootlaoderUsbConfig(deviceBootloader, "UsbConfig");
     py::class_<DeviceBootloader::NetworkConfig> deviceBootlaoderNetworkConfig(deviceBootloader, "NetworkConfig");
     py::class_<DeviceBootloader::Config> deviceBootloderConfig(deviceBootloader, "Config");
+    py::class_<DeviceBootloader::ApplicationInfo> deviceBootloderApplicationInfo(deviceBootloader, "ApplicationInfo");
+    py::class_<DeviceBootloader::MemoryInfo> deviceBootloderMemoryInfo(deviceBootloader, "MemoryInfo");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -39,6 +41,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("__eq__", &DeviceBootloader::Version::operator==)
         .def("__lt__", &DeviceBootloader::Version::operator<)
         .def("__gt__", &DeviceBootloader::Version::operator>)
+        .def("toStringSemver", &DeviceBootloader::Version::toStringSemver)
+        .def("getBuildInfo", &DeviceBootloader::Version::getBuildInfo)
         ;
 
     deviceBootloaderType
@@ -108,6 +112,19 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getUsbMaxSpeed", &DeviceBootloader::Config::getUsbMaxSpeed)
     ;
 
+    deviceBootloderApplicationInfo
+        .def(py::init<>())
+        .def_readwrite("hasApplication", &DeviceBootloader::ApplicationInfo::hasApplication)
+        .def_readwrite("firmwareVersion", &DeviceBootloader::ApplicationInfo::firmwareVersion)
+        .def_readwrite("applicationName", &DeviceBootloader::ApplicationInfo::applicationName)
+    ;
+
+    deviceBootloderMemoryInfo
+        .def(py::init<>())
+        .def_readwrite("size", &DeviceBootloader::MemoryInfo::size)
+        .def_readwrite("info", &DeviceBootloader::MemoryInfo::info)
+    ;
+
     deviceBootloader
       // Python only methods
         .def("__enter__", [](DeviceBootloader& d) -> DeviceBootloader& { return d; })
@@ -116,17 +133,21 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def_static("getFirstAvailableDevice", &DeviceBootloader::getFirstAvailableDevice, DOC(dai, DeviceBootloader, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBootloader::getAllAvailableDevices, DOC(dai, DeviceBootloader, getAllAvailableDevices))
-        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, std::string, bool>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage))
-        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, bool>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("compress"), DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage, 2))
-        .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, std::string, bool>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, DOC(dai, DeviceBootloader, createDepthaiApplicationPackage))
-        .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, bool>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("compress"), DOC(dai, DeviceBootloader, createDepthaiApplicationPackage, 2))
+        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, std::string, bool, std::string>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, py::arg("applicationName") = "", DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage))
+        .def_static("saveDepthaiApplicationPackage", py::overload_cast<std::string, const Pipeline&, bool, std::string>(&DeviceBootloader::saveDepthaiApplicationPackage), py::arg("path"), py::arg("pipeline"), py::arg("compress"), py::arg("applicationName") = "", DOC(dai, DeviceBootloader, saveDepthaiApplicationPackage, 2))
+        .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, std::string, bool, std::string>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("pathToCmd") = "", py::arg("compress") = false, py::arg("applicationName") = "", DOC(dai, DeviceBootloader, createDepthaiApplicationPackage))
+        .def_static("createDepthaiApplicationPackage", py::overload_cast<const Pipeline&, bool, std::string>(&DeviceBootloader::createDepthaiApplicationPackage), py::arg("pipeline"), py::arg("compress"), py::arg("applicationName") = "", DOC(dai, DeviceBootloader, createDepthaiApplicationPackage, 2))
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion, DOC(dai, DeviceBootloader, getEmbeddedBootloaderVersion))
         .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary, DOC(dai, DeviceBootloader, getEmbeddedBootloaderBinary))
 
         .def(py::init<const DeviceInfo&, bool>(), py::arg("devInfo"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader))
         .def(py::init<const DeviceInfo&, std::string, bool>(), py::arg("devInfo"), py::arg("pathToCmd"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 2))
-        .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, const Pipeline& pipeline, bool compress) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline, compress); }, py::arg("progressCallback"), py::arg("pipeline"), py::arg("compress") = false, DOC(dai, DeviceBootloader, flash))
-        .def("flash", [](DeviceBootloader& db, const Pipeline& pipeline, bool compress) { py::gil_scoped_release release; return db.flash(pipeline, compress); }, py::arg("pipeline"), py::arg("compress") = false, DOC(dai, DeviceBootloader, flash, 2))
+        .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, const Pipeline& pipeline, bool compress, std::string applicationName) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline, compress, applicationName); }, py::arg("progressCallback"), py::arg("pipeline"), py::arg("compress") = false, py::arg("applicationName") = "", DOC(dai, DeviceBootloader, flash))
+        .def("flash", [](DeviceBootloader& db, const Pipeline& pipeline, bool compress, std::string applicationName) { py::gil_scoped_release release; return db.flash(pipeline, compress, applicationName); }, py::arg("pipeline"), py::arg("compress") = false, py::arg("applicationName") = "", DOC(dai, DeviceBootloader, flash, 2))
+
+        .def("readApplicationInfo", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.readApplicationInfo(); }, DOC(dai, DeviceBootloader, readApplicationInfo))
+        .def("getMemoryInfo", [](DeviceBootloader& db, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.getMemoryInfo(memory); }, DOC(dai, DeviceBootloader, getMemoryInfo))
+
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::vector<uint8_t> package) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(package); }, py::arg("package"), DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage, 2))
         .def("flashBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::string path) { py::gil_scoped_release release; return db.flashBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
@@ -149,7 +170,7 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getType", &DeviceBootloader::getType, DOC(dai, DeviceBootloader, getType))
         .def("isAllowedFlashingBootloader", &DeviceBootloader::isAllowedFlashingBootloader, DOC(dai, DeviceBootloader, isAllowedFlashingBootloader))
 
-        .def("flashClear", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.flashClear(); }, DOC(dai, DeviceBootloader, flashClear))
+        .def("flashClear", [](DeviceBootloader& db, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashClear(memory); }, py::arg("memory") = DeviceBootloader::Memory::AUTO, DOC(dai, DeviceBootloader, flashClear))
         .def("flashGpioModeBootHeader", [](DeviceBootloader& db, DeviceBootloader::Memory memory, int mode) { py::gil_scoped_release release; return db.flashGpioModeBootHeader(memory, mode); }, py::arg("memory"), py::arg("mode"), DOC(dai, DeviceBootloader, flashGpioModeBootHeader))
         .def("flashUsbRecoveryBootHeader", [](DeviceBootloader& db, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashUsbRecoveryBootHeader(memory); }, py::arg("memory"), DOC(dai, DeviceBootloader, flashUsbRecoveryBootHeader))
         .def("flashBootHeader", [](DeviceBootloader& db, DeviceBootloader::Memory memory, int64_t offset, int64_t location, int32_t dummyCycles, int32_t frequency) { py::gil_scoped_release release; return db.flashBootHeader(memory, offset, location, dummyCycles, frequency); }, py::arg("memory"), py::arg("offset") = -1, py::arg("location") = -1, py::arg("dummyCycles") = -1, py::arg("frequency") = -1, DOC(dai, DeviceBootloader, flashBootHeader))
