@@ -30,7 +30,7 @@ void AssetManagerBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind Asset
     asset
         .def(py::init<>())
-        .def(py::init<dai::Path>())
+        .def(py::init<std::string>())
         .def_readonly("key", &Asset::key)
         // numpy array access - zero copy on access
         .def_property("data", [](py::object &obj){
