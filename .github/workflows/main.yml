@@ -61,6 +61,42 @@ jobs:
           path: docstrings/
           retention-days: 1
 
+
+  # Build wheel tests
+  pytest:
+    needs: build-docstrings
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Print home directory
+        run: echo Home directory inside container $HOME
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Compile
+        run: |
+          cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp -D DEPTHAI_PYTHON_BUILD_TESTS=ON
+          cmake --build build --parallel 4
+      - name: Test
+        run: |
+          cmake --build build --target pytest
+
+
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
     needs: build-docstrings
@@ -338,7 +374,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64, build-linux-arm64]
+    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
 
     steps:
