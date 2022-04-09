@@ -25,8 +25,8 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
     // Bindings
     calibrationHandler
         .def(py::init<>(), DOC(dai, CalibrationHandler, CalibrationHandler))
-        .def(py::init<std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
-        .def(py::init<std::string, std::string>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
+        .def(py::init<dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
+        .def(py::init<dai::Path, dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
         .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
 
         .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, CalibrationHandler, getEepromData))
