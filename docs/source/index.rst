@@ -72,6 +72,7 @@ node functionalities are presented with code.
    tutorials/ram_usage.rst
    tutorials/dispaying_detections.rst
    tutorials/camera_tuning.rst
+   tutorials/low-latency.rst
 
 .. toctree::
    :maxdepth: 1
