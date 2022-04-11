@@ -19,7 +19,10 @@ pybind11_add_module(${TARGET_TEST_MODULE} THIN_LTO ${TARGET_TEST_MODULE}.cpp ${P
 
 # A single command to compile and run the tests
 add_custom_target(
-    pytest COMMAND
+    pytest 
+    COMMAND
+        ${CMAKE_COMMAND} -E echo "Setting PYTHONPATH env var to: $<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$<TARGET_FILE_DIR:${TARGET_TEST_MODULE}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
+    COMMAND
         ${CMAKE_COMMAND} -E env
         # Python path (to find compiled modules)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$<TARGET_FILE_DIR:${TARGET_TEST_MODULE}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
