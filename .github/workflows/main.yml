@@ -102,7 +102,7 @@ jobs:
 
       - name: Install pytest
         run: |
-          python -m pip install pytest
+          python -m pip install pytest numpy
 
       - name: Compile
         run: |
