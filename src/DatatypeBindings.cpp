@@ -116,6 +116,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
     py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
     py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign));
+    py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthUnit> depthUnit(algorithmControl, "DepthUnit", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
     py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
@@ -1225,9 +1226,20 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
 
+    depthUnit
+        .value("METER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, METER))
+        .value("CENTIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETER))
+        .value("MILLIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETER))
+        .value("INCH", RawStereoDepthConfig::AlgorithmControl::DepthUnit::INCH, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, INCH))
+        .value("FOOT", RawStereoDepthConfig::AlgorithmControl::DepthUnit::FOOT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, FOOT))
+        .value("CUSTOM", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CUSTOM, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CUSTOM))
+        ;
+
     algorithmControl
         .def(py::init<>())
         .def_readwrite("depthAlign", &RawStereoDepthConfig::AlgorithmControl::depthAlign, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthAlign))
+        .def_readwrite("depthUnit", &RawStereoDepthConfig::AlgorithmControl::depthUnit, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthUnit))
+        .def_readwrite("customDepthUnitMultiplier", &RawStereoDepthConfig::AlgorithmControl::customDepthUnitMultiplier, DOC(dai, RawStereoDepthConfig, AlgorithmControl, customDepthUnitMultiplier))
         .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
         .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
@@ -1374,6 +1386,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setExtendedDisparity",    &StereoDepthConfig::setExtendedDisparity, py::arg("enable"), DOC(dai, StereoDepthConfig, setExtendedDisparity))
         .def("setSubpixel",             &StereoDepthConfig::setSubpixel, py::arg("enable"), DOC(dai, StereoDepthConfig, setSubpixel))
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
+        .def("setDepthUnit",            &StereoDepthConfig::setDepthUnit, DOC(dai, StereoDepthConfig, setDepthUnit))
+        .def("getDepthUnit",            &StereoDepthConfig::getDepthUnit, DOC(dai, StereoDepthConfig, getDepthUnit))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
