@@ -583,6 +583,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
         .def_readonly("isp", &ColorCamera::isp, DOC(dai, node, ColorCamera, isp))
         .def_readonly("raw", &ColorCamera::raw, DOC(dai, node, ColorCamera, raw))
+        .def_readonly("frameEvent",  &ColorCamera::frameEvent, DOC(dai, node, ColorCamera, frameEvent))
         .def("setCamId", [](ColorCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
@@ -782,6 +783,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("inputControl", &MonoCamera::inputControl, DOC(dai, node, MonoCamera, inputControl))
         .def_readonly("out",  &MonoCamera::out, DOC(dai, node, MonoCamera, out))
         .def_readonly("raw",  &MonoCamera::raw, DOC(dai, node, MonoCamera, raw))
+        .def_readonly("frameEvent",  &MonoCamera::frameEvent, DOC(dai, node, MonoCamera, frameEvent))
         .def_readonly("initialControl",  &MonoCamera::initialControl, DOC(dai, node, MonoCamera, initialControl))
         .def("setCamId", [](MonoCamera& c, int64_t id) {
             // Issue an deprecation warning
@@ -1146,7 +1148,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     script
         .def_readonly("inputs", &Script::inputs)
         .def_readonly("outputs", &Script::outputs)
-        .def("setScriptPath", &Script::setScriptPath, DOC(dai, node, Script, setScriptPath))
+        .def("setScriptPath", &Script::setScriptPath, py::arg("path"), py::arg("name") = "", DOC(dai, node, Script, setScriptPath))
         .def("setScript", py::overload_cast<const std::string&, const std::string&>(&Script::setScript), py::arg("script"), py::arg("name") = "", DOC(dai, node, Script, setScript))
         .def("setScript", py::overload_cast<const std::vector<std::uint8_t>&, const std::string&>(&Script::setScript), py::arg("data"), py::arg("name") = "", DOC(dai, node, Script, setScript, 2))
         .def("getScriptPath", &Script::getScriptPath, DOC(dai, node, Script, getScriptPath))
