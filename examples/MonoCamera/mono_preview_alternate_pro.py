@@ -51,7 +51,7 @@ script.setScript("""
 
         # Route the frames to their respective outputs
         node.io['dotL' if flagDot else 'floodL'].send(frameL)
-        node.io['dotR' if flagDot else 'floodR'].send(frameL)
+        node.io['dotR' if flagDot else 'floodR'].send(frameR)
 
         flagDot = not flagDot
 """)
