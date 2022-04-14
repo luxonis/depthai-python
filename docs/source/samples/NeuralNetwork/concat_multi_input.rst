@@ -22,7 +22,7 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/NeuralNetwork/concat_multiple_input.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/NeuralNetwork/concat_multi_input.py>`__
 
         .. literalinclude:: ../../../../examples/NeuralNetwork/concat_multi_input.py
            :language: python
@@ -30,7 +30,7 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/concat_multiple_input.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/tree/main/examples/NeuralNetwork/concat_multiple_input.cpp>`__
 
         .. literalinclude:: ../../../../depthai-core/examples/NeuralNetwork/concat_multi_input.cpp
            :language: cpp
