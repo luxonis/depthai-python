@@ -40,9 +40,15 @@ namespace pybind11 { namespace detail {
         // indicates whether implicit conversions should be applied.
         bool load(handle src, bool) {
             try {
-                // Make sure only strings are cast to Paths
+                // Make sure only strings and paths are cast to dai::Path
                 // Instead of anything that can be represented as string
-                if(!src.is(str{})) {
+                bool isPath = false;
+                try{
+                    isPath = isinstance(src, module::import("pathlib").attr("PurePath"));
+                } catch (const std::exception& ex) {
+                    //ignore
+                }
+                if(!isinstance<str>(src) && !isPath) {
                     return false;
                 }
                 str pystr = static_cast<str>(src);
