@@ -56,7 +56,8 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("eepromToJsonFile", &CalibrationHandler::eepromToJsonFile, py::arg("destPath"), DOC(dai, CalibrationHandler, eepromToJsonFile))
 
-        .def("setBoardInfo", &CalibrationHandler::setBoardInfo, py::arg("boardName"), py::arg("boardRev"), DOC(dai, CalibrationHandler, setBoardInfo))
+        .def("setBoardInfo", py::overload_cast<std::string, std::string>(&CalibrationHandler::setBoardInfo), py::arg("boardName"), py::arg("boardRev"), DOC(dai, CalibrationHandler, setBoardInfo))
+        .def("setBoardInfo", py::overload_cast<std::string, std::string, std::string, std::string, std::string, std::string, uint64_t, std::string>(&CalibrationHandler::setBoardInfo), py::arg("productName"), py::arg("boardName"), py::arg("boardRev"), py::arg("boardConf"), py::arg("hardwareConf"), py::arg("batchName"), py::arg("batchTime"), py::arg("boardCustom") = "", DOC(dai, CalibrationHandler, setBoardInfo, 2))
 
         .def("setCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::vector<std::vector<float>>, Size2f>(&CalibrationHandler::setCameraIntrinsics), py::arg("cameraId"), py::arg("intrinsics"), py::arg("frameSize"), DOC(dai, CalibrationHandler, setCameraIntrinsics))
         .def("setCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::vector<std::vector<float>>, int, int>(&CalibrationHandler::setCameraIntrinsics), py::arg("cameraId"), py::arg("intrinsics"), py::arg("width"), py::arg("height"), DOC(dai, CalibrationHandler, setCameraIntrinsics, 2))
