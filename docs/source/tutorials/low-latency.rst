@@ -1,7 +1,7 @@
 Low Latency
 ===========
 
-These tables show what performance you can expect from **USB 3** (5 Gbps) connection with an OAK camera. XLink chunking was
+These tables show what performance you can expect from **USB 3.2** Gen 1 (5 Gbps) connection with an OAK camera. XLink chunking was
 disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`).
 
 .. list-table::
