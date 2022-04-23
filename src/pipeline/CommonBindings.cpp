@@ -164,11 +164,19 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     eepromData
         .def(py::init<>())
         .def_readwrite("version", &EepromData::version)
+        .def_readwrite("boardCustom", &EepromData::boardCustom)
         .def_readwrite("boardName", &EepromData::boardName)
         .def_readwrite("boardRev", &EepromData::boardRev)
+        .def_readwrite("boardConf", &EepromData::boardConf)
+        .def_readwrite("hardwareConf", &EepromData::hardwareConf)
+        .def_readwrite("productName", &EepromData::productName)
+        .def_readwrite("batchName", &EepromData::batchName)
+        .def_readwrite("batchTime", &EepromData::batchTime)
+        .def_readwrite("boardOptions", &EepromData::boardOptions)
         .def_readwrite("cameraData", &EepromData::cameraData)
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
+        .def_readwrite("miscellaneousData", &EepromData::miscellaneousData)
         ;
     // UsbSpeed
     usbSpeed
