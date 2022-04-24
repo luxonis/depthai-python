@@ -28,6 +28,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
         .def(py::init<dai::Path, dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
         .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
+        .def(py::init<nlohmann::json>(), DOC(dai, CalibrationHandler, CalibrationHandler, 5))
 
         .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, CalibrationHandler, getEepromData))
 
@@ -55,6 +56,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getStereoRightCameraId", &CalibrationHandler::getStereoRightCameraId, DOC(dai, CalibrationHandler, getStereoRightCameraId))
 
         .def("eepromToJsonFile", &CalibrationHandler::eepromToJsonFile, py::arg("destPath"), DOC(dai, CalibrationHandler, eepromToJsonFile))
+        .def("eepromToJson", &CalibrationHandler::eepromToJson, DOC(dai, CalibrationHandler, eepromToJson))
 
         .def("setBoardInfo", py::overload_cast<std::string, std::string>(&CalibrationHandler::setBoardInfo), py::arg("boardName"), py::arg("boardRev"), DOC(dai, CalibrationHandler, setBoardInfo))
         .def("setBoardInfo", py::overload_cast<std::string, std::string, std::string, std::string, std::string, std::string, uint64_t, uint32_t, std::string>(&CalibrationHandler::setBoardInfo), py::arg("productName"), py::arg("boardName"), py::arg("boardRev"), py::arg("boardConf"), py::arg("hardwareConf"), py::arg("batchName"), py::arg("batchTime"), py::arg("boardOptions"), py::arg("boardCustom") = "", DOC(dai, CalibrationHandler, setBoardInfo, 2))
