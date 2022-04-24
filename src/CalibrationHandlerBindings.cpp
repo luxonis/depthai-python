@@ -28,7 +28,8 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 2))
         .def(py::init<dai::Path, dai::Path>(), DOC(dai, CalibrationHandler, CalibrationHandler, 3))
         .def(py::init<EepromData>(), DOC(dai, CalibrationHandler, CalibrationHandler, 4))
-        .def(py::init<nlohmann::json>(), DOC(dai, CalibrationHandler, CalibrationHandler, 5))
+
+        .def_static("fromJson", &CalibrationHandler::fromJson, DOC(dai, CalibrationHandler, fromJson))
 
         .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, CalibrationHandler, getEepromData))
 
