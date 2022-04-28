@@ -9,6 +9,12 @@ if(NOT WIN32)
     set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
 endif()
 
+# Specify path separator
+set(SYS_PATH_SEPARATOR ";")
+if(UNIX)
+    set(SYS_PATH_SEPARATOR ":")
+endif()
+
 # Generate combined Hunter config
 file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
 file(READ cmake/Hunter/config.cmake hunter_config)
@@ -108,6 +114,11 @@ else()
     endif()
     message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E env 
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
+        # Python path (to find compiled module)
+        "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "${bindings_directory}"
         DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
