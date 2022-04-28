@@ -24,6 +24,7 @@
 #include "depthai/pipeline/datatype/FeatureTrackerConfig.hpp"
 #include "depthai/pipeline/datatype/AprilTags.hpp"
 #include "depthai/pipeline/datatype/AprilTagConfig.hpp"
+#include "depthai/pipeline/datatype/AudioInConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -44,6 +45,7 @@
 #include "depthai-shared/datatype/RawTrackedFeatures.hpp"
 #include "depthai-shared/datatype/RawAprilTagConfig.hpp"
 #include "depthai-shared/datatype/RawAprilTags.hpp"
+#include "depthai-shared/datatype/RawAudioInConfig.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -156,6 +158,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawAprilTagConfig::QuadThresholds> quadThresholds(rawAprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
     py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>> aprilTagConfig(m, "AprilTagConfig", DOC(dai, AprilTagConfig));
     py::class_<AprilTags, Buffer, std::shared_ptr<AprilTags>> aprilTagData(m, "AprilTags", DOC(dai, AprilTags));
+    // Audio In
+    py::class_<RawAudioInConfig, RawBuffer, std::shared_ptr<RawAudioInConfig>> rawAudioInConfig(m, "RawAudioInConfig", DOC(dai, RawAudioInConfig));
+    py::class_<AudioInConfig, Buffer, std::shared_ptr<AudioInConfig>> audioInConfig(m, "AudioInConfig", DOC(dai, AudioInConfig));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -1603,6 +1608,25 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     aprilTagData
         .def(py::init<>())
         .def_property("aprilTags", [](AprilTags& det) { return &det.aprilTags; }, [](AprilTags& det, std::vector<AprilTag> val) { det.aprilTags = val; })
+        ;
+
+    aprilTagConfig
+        .def(py::init<>())
+        .def("setFamily", &AprilTagConfig::setFamily, py::arg("family"), DOC(dai, AprilTagConfig, setFamily))
+        .def("set", &AprilTagConfig::set, DOC(dai, AprilTagConfig, set))
+        .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
+        ;
+
+    rawAudioInConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawAudioInConfig::config, DOC(dai, RawAudioInConfig, config))
+        ;
+
+    audioInConfig
+        .def(py::init<>())
+        .def("setMicGainTimes", &AudioInConfig::setMicGainTimes, py::arg("times"), DOC(dai, AudioInConfig, setMicGainTimes))
+        .def("setMicGainDecibels", &AudioInConfig::setMicGainDecibels, py::arg("dB"), DOC(dai, AudioInConfig, setMicGainDecibels))
+        .def("getConfigData", &AudioInConfig::getConfigData, DOC(dai, AudioInConfig, getConfigData))
         ;
 
 }

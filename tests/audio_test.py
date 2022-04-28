@@ -96,7 +96,7 @@ if not args.no_camera:
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
-uac.setMicGainDecibels(args.mic_gain_db)
+uac.initialConfig.setMicGainDecibels(args.mic_gain_db)
 uac.setEnableSpeaker(args.enable_speaker)
 if args.enable_speaker:
     uac.setSpeakerVolume(args.enable_speaker)
