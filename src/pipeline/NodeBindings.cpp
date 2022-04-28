@@ -4,6 +4,7 @@
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
+#include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/MonoCamera.hpp"
 #include "depthai/pipeline/node/StereoDepth.hpp"
@@ -23,6 +24,7 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 #include "depthai/pipeline/node/UAC.hpp"
+#include "depthai/pipeline/node/ToF.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 
 // Libraries
@@ -151,6 +153,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     daiNodeModule = m.def_submodule("node");
 
     // Properties
+    py::class_<CameraProperties> cameraProperties(m, "CameraProperties", DOC(dai, CameraProperties));
+    py::enum_<CameraProperties::SensorResolution> cameraPropertiesSensorResolution(cameraProperties, "SensorResolution", DOC(dai, CameraProperties, SensorResolution));
+    py::enum_<CameraProperties::ColorOrder> cameraPropertiesColorOrder(cameraProperties, "ColorOrder", DOC(dai, CameraProperties, ColorOrder));
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
     py::enum_<ColorCameraProperties::SensorResolution> colorCameraPropertiesSensorResolution(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution));
     py::enum_<ColorCameraProperties::ColorOrder> colorCameraPropertiesColorOrder(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder));
@@ -174,6 +179,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
     py::class_<AprilTagProperties> aprilTagProperties(m, "AprilTagProperties", DOC(dai, AprilTagProperties));
+    py::class_<ToFProperties> tofProperties(m, "ToFProperties", DOC(dai, ToFProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
@@ -196,6 +202,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     bindNodeMap<Node::OutputMap>(pyNode, "OutputMap");
     auto xlinkIn = ADD_NODE(XLinkIn);
     auto xlinkOut = ADD_NODE(XLinkOut);
+    auto camera = ADD_NODE(Camera);
     auto colorCamera = ADD_NODE(ColorCamera);
     auto neuralNetwork = ADD_NODE(NeuralNetwork);
     auto imageManip = ADD_NODE(ImageManip);
@@ -219,6 +226,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto featureTracker = ADD_NODE(FeatureTracker);
     auto uvc = ADD_NODE(UVC);
     auto uac = ADD_NODE(UAC);
+    auto tof = ADD_NODE(ToF);
     auto aprilTag = ADD_NODE(AprilTag);
 	
     py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
@@ -239,12 +247,50 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
 
+    cameraPropertiesSensorResolution
+        .value("THE_1080_P", CameraProperties::SensorResolution::THE_1080_P)
+        .value("THE_1200_P", CameraProperties::SensorResolution::THE_1200_P)
+        .value("THE_4_K", CameraProperties::SensorResolution::THE_4_K)
+        .value("THE_5_MP", CameraProperties::SensorResolution::THE_5_MP)
+        .value("THE_12_MP", CameraProperties::SensorResolution::THE_12_MP)
+        .value("THE_13_MP", CameraProperties::SensorResolution::THE_13_MP)
+        .value("THE_720_P", CameraProperties::SensorResolution::THE_720_P)
+        .value("THE_800_P", CameraProperties::SensorResolution::THE_800_P)
+        .value("THE_400_P", CameraProperties::SensorResolution::THE_400_P)
+        .value("THE_480_P", CameraProperties::SensorResolution::THE_480_P)
+        ;
+
+    cameraPropertiesColorOrder
+        .value("BGR", CameraProperties::ColorOrder::BGR)
+        .value("RGB", CameraProperties::ColorOrder::RGB)
+        ;
+
+    cameraProperties
+        .def_readwrite("initialControl", &CameraProperties::initialControl)
+        .def_readwrite("boardSocket", &CameraProperties::boardSocket)
+        .def_readwrite("colorOrder", &CameraProperties::colorOrder)
+        .def_readwrite("interleaved", &CameraProperties::interleaved)
+        .def_readwrite("previewHeight", &CameraProperties::previewHeight)
+        .def_readwrite("previewWidth", &CameraProperties::previewWidth)
+        .def_readwrite("videoHeight", &CameraProperties::videoHeight)
+        .def_readwrite("videoWidth", &CameraProperties::videoWidth)
+        .def_readwrite("stillHeight", &CameraProperties::stillHeight)
+        .def_readwrite("stillWidth", &CameraProperties::stillWidth)
+        .def_readwrite("resolution", &CameraProperties::resolution)
+        .def_readwrite("fps", &CameraProperties::fps)
+        .def_readwrite("sensorCropX", &CameraProperties::sensorCropX)
+        .def_readwrite("sensorCropY", &CameraProperties::sensorCropY)
+    ;
 
     colorCameraPropertiesSensorResolution
         .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
+        .value("THE_1200_P", ColorCameraProperties::SensorResolution::THE_1200_P)
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
+        .value("THE_5_MP", ColorCameraProperties::SensorResolution::THE_5_MP)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
         .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
+        .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
+        .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         ;
 
     colorCameraPropertiesColorOrder
@@ -554,6 +600,13 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
     // ;
 
+    // ToF node
+    tof
+        .def_readonly("inputImage", &ToF::inputImage, DOC(dai, node, ToF, inputImage))
+        .def_readonly("out", &ToF::out, DOC(dai, node, ToF, out))
+        .def_readonly("amp_out", &ToF::amp_out, DOC(dai, node, ToF, amp_out))
+        .def_readonly("err_out", &ToF::err_out, DOC(dai, node, ToF, err_out))
+        ;
 
     // XLinkIn node
     xlinkIn
@@ -576,6 +629,101 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMetadataOnly", &XLinkOut::setMetadataOnly, DOC(dai, node, XLinkOut, setMetadataOnly))
         .def("getMetadataOnly", &XLinkOut::getMetadataOnly, DOC(dai, node, XLinkOut, getMetadataOnly))
         ;
+    
+    // Camera node
+    camera
+        .def_readonly("inputConfig", &Camera::inputConfig, DOC(dai, node, Camera, inputConfig))
+        .def_readonly("inputControl", &Camera::inputControl, DOC(dai, node, Camera, inputControl))
+        .def_readonly("initialControl", &Camera::initialControl, DOC(dai, node, Camera, initialControl))
+        .def_readonly("video", &Camera::video, DOC(dai, node, Camera, video))
+        .def_readonly("preview", &Camera::preview, DOC(dai, node, Camera, preview))
+        .def_readonly("still", &Camera::still, DOC(dai, node, Camera, still))
+        .def_readonly("isp", &Camera::isp, DOC(dai, node, Camera, isp))
+        .def_readonly("raw", &Camera::raw, DOC(dai, node, Camera, raw))
+        .def("setCamId", [](Camera& c, int64_t id) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            c.setCamId(id);
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("getCamId", [](Camera& c) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "getCamId() is deprecated, use getBoardSocket() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return c.getCamId();
+            HEDLEY_DIAGNOSTIC_POP
+        })
+        .def("setBoardSocket", &Camera::setBoardSocket, py::arg("boardSocket"), DOC(dai, node, Camera, setBoardSocket))
+        .def("getBoardSocket", &Camera::getBoardSocket, DOC(dai, node, Camera, getBoardSocket))
+        .def("setImageOrientation", &Camera::setImageOrientation, py::arg("imageOrientation"), DOC(dai, node, Camera, setImageOrientation))
+        .def("getImageOrientation", &Camera::getImageOrientation, DOC(dai, node, Camera, getImageOrientation))
+        .def("setColorOrder", &Camera::setColorOrder, py::arg("colorOrder"), DOC(dai, node, Camera, setColorOrder))
+        .def("getColorOrder", &Camera::getColorOrder, DOC(dai, node, Camera, getColorOrder))
+        .def("setInterleaved", &Camera::setInterleaved, py::arg("interleaved"), DOC(dai, node, Camera, setInterleaved))
+        .def("getInterleaved", &Camera::getInterleaved, DOC(dai, node, Camera, getInterleaved))
+        .def("setFp16", &Camera::setFp16, py::arg("fp16"), DOC(dai, node, Camera, setFp16))
+        .def("getFp16", &Camera::getFp16, DOC(dai, node, Camera, getFp16))
+        .def("setPreviewSize", static_cast<void(Camera::*)(int,int)>(&Camera::setPreviewSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setPreviewSize))
+        .def("setPreviewSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setPreviewSize), py::arg("size"), DOC(dai, node, Camera, setPreviewSize, 2))
+        .def("setVideoSize", static_cast<void(Camera::*)(int,int)>(&Camera::setVideoSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setVideoSize))
+        .def("setVideoSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setVideoSize), py::arg("size"), DOC(dai, node, Camera, setVideoSize, 2))
+        .def("setStillSize", static_cast<void(Camera::*)(int,int)>(&Camera::setStillSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setStillSize))
+        .def("setStillSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setStillSize), py::arg("size"), DOC(dai, node, Camera, setStillSize, 2))
+        .def("setResolution", &Camera::setResolution, py::arg("resolution"), DOC(dai, node, Camera, setResolution))
+        .def("getResolution", &Camera::getResolution, DOC(dai, node, Camera, getResolution))
+        .def("setFps", &Camera::setFps, py::arg("fps"), DOC(dai, node, Camera, setFps))
+        .def("getFps", &Camera::getFps, DOC(dai, node, Camera, getFps))
+        .def("getPreviewSize", &Camera::getPreviewSize, DOC(dai, node, Camera, getPreviewSize))
+        .def("getPreviewWidth", &Camera::getPreviewWidth, DOC(dai, node, Camera, getPreviewWidth))
+        .def("getPreviewHeight", &Camera::getPreviewHeight, DOC(dai, node, Camera, getPreviewHeight))
+        .def("getVideoSize", &Camera::getVideoSize, DOC(dai, node, Camera, getVideoSize))
+        .def("getVideoWidth", &Camera::getVideoWidth, DOC(dai, node, Camera, getVideoWidth))
+        .def("getVideoHeight", &Camera::getVideoHeight, DOC(dai, node, Camera, getVideoHeight))
+        .def("getStillSize", &Camera::getStillSize, DOC(dai, node, Camera, getStillSize))
+        .def("getStillWidth", &Camera::getStillWidth, DOC(dai, node, Camera, getStillWidth))
+        .def("getStillHeight", &Camera::getStillHeight, DOC(dai, node, Camera, getStillHeight))
+        .def("getResolutionSize", &Camera::getResolutionSize, DOC(dai, node, Camera, getResolutionSize))
+        .def("getResolutionWidth", &Camera::getResolutionWidth, DOC(dai, node, Camera, getResolutionWidth))
+        .def("getResolutionHeight", &Camera::getResolutionHeight, DOC(dai, node, Camera, getResolutionHeight))
+        .def("sensorCenterCrop", &Camera::sensorCenterCrop, DOC(dai, node, Camera, sensorCenterCrop))
+        .def("setSensorCrop", &Camera::setSensorCrop, py::arg("x"), py::arg("y"), DOC(dai, node, Camera, setSensorCrop))
+        .def("getSensorCrop", &Camera::getSensorCrop, DOC(dai, node, Camera, getSensorCrop))
+        .def("getSensorCropX", &Camera::getSensorCropX, DOC(dai, node, Camera, getSensorCropX))
+        .def("getSensorCropY", &Camera::getSensorCropY, DOC(dai, node, Camera, getSensorCropY))
+
+        .def("setWaitForConfigInput", [](Camera& cam, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            cam.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, Camera, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](Camera& cam){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return cam.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, Camera, getWaitForConfigInput))
+
+        .def("setPreviewKeepAspectRatio", &Camera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, Camera, setPreviewKeepAspectRatio))
+        .def("getPreviewKeepAspectRatio", &Camera::getPreviewKeepAspectRatio, DOC(dai, node, Camera, getPreviewKeepAspectRatio))
+        .def("setIspScale", static_cast<void(Camera::*)(int,int)>(&Camera::setIspScale), py::arg("numerator"), py::arg("denominator"), DOC(dai, node, Camera, setIspScale))
+        .def("setIspScale", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setIspScale), py::arg("scale"), DOC(dai, node, Camera, setIspScale, 2))
+        .def("setIspScale", static_cast<void(Camera::*)(int,int,int,int)>(&Camera::setIspScale), py::arg("horizNum"), py::arg("horizDenom"), py::arg("vertNum"), py::arg("vertDenom"), DOC(dai, node, Camera, setIspScale, 3))
+        .def("setIspScale", static_cast<void(Camera::*)(std::tuple<int,int>,std::tuple<int,int>)>(&Camera::setIspScale), py::arg("horizScale"), py::arg("vertScale"), DOC(dai, node, Camera, setIspScale, 4))
+        .def("getIspSize", &Camera::getIspSize, DOC(dai, node, Camera, getIspSize))
+        .def("getIspWidth", &Camera::getIspWidth, DOC(dai, node, Camera, getIspWidth))
+        .def("getIspHeight", &Camera::getIspHeight, DOC(dai, node, Camera, getIspHeight))
+        ;
+    // ALIAS
+    daiNodeModule.attr("Camera").attr("Properties") = cameraProperties;
 
     // ColorCamera node
     colorCamera

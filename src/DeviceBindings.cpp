@@ -4,6 +4,7 @@
 #include "depthai/device/Device.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
+#include "depthai/xlink/XLinkConnection.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -24,13 +25,22 @@ template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
     auto startTime = std::chrono::steady_clock::now();
-    bool found;
+    bool found = false;
+    bool invalidDeviceFound = false;
     dai::DeviceInfo deviceInfo = {};
+    dai::DeviceInfo invalidDeviceInfo = {};
     do {
         {
             // releases python GIL
             py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice();
+            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
+
+            if(strcmp("<error>", deviceInfo.desc.name) == 0){
+                invalidDeviceFound = true;
+                invalidDeviceInfo = deviceInfo;
+                found = false;
+            }
+
             // Check if found
             if(found){
                 break;
@@ -43,6 +53,14 @@ static auto deviceSearchHelper(Args&&... args){
         // check if interrupt triggered in between
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
     } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
+
+    // Check if its an invalid device
+    if(invalidDeviceFound){
+        // Warn
+        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
+        // TODO(themarpe) - move device search into C++ and expose a callback
+        DEVICE::getFirstAvailableDevice(true);
+    }
 
     // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
     if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
@@ -173,6 +191,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
     py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::Network> boardConfigNetwork(boardConfig, "Network", DOC(dai, BoardConfig, Network));
     py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
     py::enum_<BoardConfig::GPIO::Mode> boardConfigGpioMode(boardConfigGpio, "Mode", DOC(dai, BoardConfig, GPIO, Mode));
     py::enum_<BoardConfig::GPIO::Direction> boardConfigGpioDirection(boardConfigGpio, "Direction", DOC(dai, BoardConfig, GPIO, Direction));
@@ -209,6 +228,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+    ;
+
+    // Bind BoardConfig::Network
+    boardConfigNetwork
+        .def(py::init<>())
+        .def_readwrite("mtu", &BoardConfig::Network::mtu)
     ;
 
     // GPIO Mode
@@ -283,6 +308,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfig
         .def(py::init<>())
         .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("network", &BoardConfig::network)
+        .def_readwrite("sysctl", &BoardConfig::sysctl)
         .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
@@ -313,7 +340,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         //static
         .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
-        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, DOC(dai, DeviceBase, getFirstAvailableDevice))
+        .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
@@ -342,6 +369,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
+        .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, DeviceBase, getCmxMemoryUsage))
@@ -359,6 +387,9 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
+        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
+        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
     ;
 
 

@@ -9,7 +9,7 @@ void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
 
     py::class_<OpenVINO> openvino(m, "OpenVINO", DOC(dai, OpenVINO));
     py::enum_<OpenVINO::Version> openvinoVersion(openvino, "Version", DOC(dai, OpenVINO, Version));
-
+    py::class_<OpenVINO::Blob> openvinoBlob(openvino, "Blob", DOC(dai, OpenVINO, Blob));
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -52,6 +52,19 @@ void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
         .value("VERSION_2021_3", OpenVINO::Version::VERSION_2021_3)
         .value("VERSION_2021_4", OpenVINO::Version::VERSION_2021_4)
         .export_values()
+    ;
+
+    // Bind OpenVINO::Blob
+    openvinoBlob
+        .def(py::init<std::vector<uint8_t>>(), DOC(dai, OpenVINO, Blob, Blob))
+        .def(py::init<std::string>(), DOC(dai, OpenVINO, Blob, Blob, 2))
+        .def_readwrite("version", &OpenVINO::Blob::version, DOC(dai, OpenVINO, Blob, version))
+        .def_readwrite("networkInputs", &OpenVINO::Blob::networkInputs, DOC(dai, OpenVINO, Blob, networkInputs))
+        .def_readwrite("networkOutputs", &OpenVINO::Blob::networkOutputs, DOC(dai, OpenVINO, Blob, networkOutputs))
+        .def_readwrite("stageCount", &OpenVINO::Blob::stageCount, DOC(dai, OpenVINO, Blob, stageCount))
+        .def_readwrite("numShaves", &OpenVINO::Blob::numShaves, DOC(dai, OpenVINO, Blob, numShaves))
+        .def_readwrite("numSlices", &OpenVINO::Blob::numSlices, DOC(dai, OpenVINO, Blob, numSlices))
+        .def_readwrite("data", &OpenVINO::Blob::data, DOC(dai, OpenVINO, Blob, data))
     ;
 
 }

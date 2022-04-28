@@ -13,6 +13,24 @@ To go back to auto controls:
   'E' - autoexposure
   'F' - autofocus (continuous)
   'B' - auto white-balance
+
+Other controls:
+'1' - AWB lock (true / false)
+'2' - AE lock (true / false)
+'3' - Select control: AWB mode
+'4' - Select control: AE compensation
+'5' - Select control: anti-banding/flicker mode
+'6' - Select control: effect mode
+'7' - Select control: brightness
+'8' - Select control: contrast
+'9' - Select control: saturation
+'0' - Select control: sharpness
+'[' - Select control: luma denoise
+']' - Select control: chroma denoise
+
+For the 'Select control: ...' options, use these keys to modify the value:
+  '-' or '_' to decrease
+  '+' or '=' to increase
 """
 
 import depthai as dai
@@ -26,6 +44,9 @@ ISO_STEP = 50
 LENS_STEP = 3
 WB_STEP = 200
 
+# On some host systems it's faster to display uncompressed video
+videoMjpeg = False
+
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
@@ -36,6 +57,8 @@ pipeline = dai.Pipeline()
 camRgb = pipeline.create(dai.node.ColorCamera)
 videoEncoder = pipeline.create(dai.node.VideoEncoder)
 stillEncoder = pipeline.create(dai.node.VideoEncoder)
+
+#camRgb.initialControl.setAutoFocusLensRange(90, 204)
 
 controlIn = pipeline.create(dai.node.XLinkIn)
 configIn = pipeline.create(dai.node.XLinkIn)
@@ -58,13 +81,17 @@ videoEncoder.setDefaultProfilePreset(camRgb.getFps(), dai.VideoEncoderProperties
 stillEncoder.setDefaultProfilePreset(1, dai.VideoEncoderProperties.Profile.MJPEG)
 
 # Linking
-camRgb.video.link(videoEncoder.input)
 camRgb.still.link(stillEncoder.input)
 camRgb.preview.link(previewOut.input)
 controlIn.out.link(camRgb.inputControl)
 configIn.out.link(camRgb.inputConfig)
 videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
+if videoMjpeg:
+    camRgb.video.link(videoEncoder.input)
+    videoEncoder.bitstream.link(videoMjpegOut.input)
+else:
+    camRgb.video.link(videoMjpegOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -102,15 +129,65 @@ with dai.Device(pipeline) as device:
     wbMin = 1000
     wbMax = 12000
 
+    # TODO make auto-iterable
+    awb_mode_idx = -1
+    awb_mode_list = [
+        dai.CameraControl.AutoWhiteBalanceMode.OFF,
+        dai.CameraControl.AutoWhiteBalanceMode.AUTO,
+        dai.CameraControl.AutoWhiteBalanceMode.INCANDESCENT,
+        dai.CameraControl.AutoWhiteBalanceMode.FLUORESCENT,
+        dai.CameraControl.AutoWhiteBalanceMode.WARM_FLUORESCENT,
+        dai.CameraControl.AutoWhiteBalanceMode.DAYLIGHT,
+        dai.CameraControl.AutoWhiteBalanceMode.CLOUDY_DAYLIGHT,
+        dai.CameraControl.AutoWhiteBalanceMode.TWILIGHT,
+        dai.CameraControl.AutoWhiteBalanceMode.SHADE,
+    ]
+
+    anti_banding_mode_idx = -1
+    anti_banding_mode_list = [
+        dai.CameraControl.AntiBandingMode.OFF,
+        dai.CameraControl.AntiBandingMode.MAINS_50_HZ,
+        dai.CameraControl.AntiBandingMode.MAINS_60_HZ,
+        dai.CameraControl.AntiBandingMode.AUTO,
+    ]
+
+    effect_mode_idx = -1
+    effect_mode_list = [
+        dai.CameraControl.EffectMode.OFF,
+        dai.CameraControl.EffectMode.MONO,
+        dai.CameraControl.EffectMode.NEGATIVE,
+        dai.CameraControl.EffectMode.SOLARIZE,
+        dai.CameraControl.EffectMode.SEPIA,
+        dai.CameraControl.EffectMode.POSTERIZE,
+        dai.CameraControl.EffectMode.WHITEBOARD,
+        dai.CameraControl.EffectMode.BLACKBOARD,
+        dai.CameraControl.EffectMode.AQUA,
+    ]
+
+    ae_comp = 0
+    ae_lock = False
+    awb_lock = False
+    saturation = 0
+    contrast = 0
+    brightness = 0
+    sharpness = 0
+    luma_denoise = 0
+    chroma_denoise = 0
+    control = 'none'
+
     while True:
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
             cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getHeight(), previewFrame.getWidth(), 3))
+            #print(previewFrame.getLensPosition(), previewFrame.getExposureTime())
 
         videoFrames = videoQueue.tryGetAll()
         for videoFrame in videoFrames:
             # Decode JPEG
-            frame = cv2.imdecode(videoFrame.getData(), cv2.IMREAD_UNCHANGED)
+            if videoMjpeg:
+                frame = cv2.imdecode(videoFrame.getData(), cv2.IMREAD_UNCHANGED)
+            else:
+                frame = videoFrame.getCvFrame()
             # Display
             cv2.imshow('video', frame)
 
@@ -199,3 +276,81 @@ with dai.Device(pipeline) as device:
                 cropY = cropY + (maxCropY / camRgb.getResolutionHeight()) * STEP_SIZE
                 if cropY > maxCropY: cropY = 0
             sendCamConfig = True
+        elif key == ord('1'):
+            awb_lock = not awb_lock
+            print("Auto white balance lock:", awb_lock)
+            ctrl = dai.CameraControl()
+            ctrl.setAutoWhiteBalanceLock(awb_lock)
+            controlQueue.send(ctrl)
+        elif key == ord('2'):
+            ae_lock = not ae_lock
+            print("Auto exposure lock:", ae_lock)
+            ctrl = dai.CameraControl()
+            ctrl.setAutoExposureLock(ae_lock)
+            controlQueue.send(ctrl)
+        elif key >= 0 and chr(key) in '34567890[]':
+            if   key == ord('3'): control = 'awb_mode'
+            elif key == ord('4'): control = 'ae_comp'
+            elif key == ord('5'): control = 'anti_banding_mode'
+            elif key == ord('6'): control = 'effect_mode'
+            elif key == ord('7'): control = 'brightness'
+            elif key == ord('8'): control = 'contrast'
+            elif key == ord('9'): control = 'saturation'
+            elif key == ord('0'): control = 'sharpness'
+            elif key == ord('['): control = 'luma_denoise'
+            elif key == ord(']'): control = 'chroma_denoise'
+            print("Selected control:", control)
+        elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
+            change = 0
+            if key in [ord('-'), ord('_')]: change = -1
+            if key in [ord('+'), ord('=')]: change = 1
+            ctrl = dai.CameraControl()
+            if control == 'none':
+                print("Please select a control first using keys 3..9 0 [ ]")
+            elif control == 'ae_comp':
+                ae_comp = clamp(ae_comp + change, -9, 9)
+                print("Auto exposure compensation:", ae_comp)
+                ctrl.setAutoExposureCompensation(ae_comp)
+            elif control == 'anti_banding_mode':
+                cnt = len(anti_banding_mode_list)
+                anti_banding_mode_idx = (anti_banding_mode_idx + cnt + change) % cnt
+                anti_banding_mode = anti_banding_mode_list[anti_banding_mode_idx]
+                print("Anti-banding mode:", anti_banding_mode)
+                ctrl.setAntiBandingMode(anti_banding_mode)
+            elif control == 'awb_mode':
+                cnt = len(awb_mode_list)
+                awb_mode_idx = (awb_mode_idx + cnt + change) % cnt
+                awb_mode = awb_mode_list[awb_mode_idx]
+                print("Auto white balance mode:", awb_mode)
+                ctrl.setAutoWhiteBalanceMode(awb_mode)
+            elif control == 'effect_mode':
+                cnt = len(effect_mode_list)
+                effect_mode_idx = (effect_mode_idx + cnt + change) % cnt
+                effect_mode = effect_mode_list[effect_mode_idx]
+                print("Effect mode:", effect_mode)
+                ctrl.setEffectMode(effect_mode)
+            elif control == 'brightness':
+                brightness = clamp(brightness + change, -10, 10)
+                print("Brightness:", brightness)
+                ctrl.setBrightness(brightness)
+            elif control == 'contrast':
+                contrast = clamp(contrast + change, -10, 10)
+                print("Contrast:", contrast)
+                ctrl.setContrast(contrast)
+            elif control == 'saturation':
+                saturation = clamp(saturation + change, -10, 10)
+                print("Saturation:", saturation)
+                ctrl.setSaturation(saturation)
+            elif control == 'sharpness':
+                sharpness = clamp(sharpness + change, 0, 4)
+                print("Sharpness:", sharpness)
+                ctrl.setSharpness(sharpness)
+            elif control == 'luma_denoise':
+                luma_denoise = clamp(luma_denoise + change, 0, 4)
+                print("Luma denoise:", luma_denoise)
+                ctrl.setLumaDenoise(luma_denoise)
+            elif control == 'chroma_denoise':
+                chroma_denoise = clamp(chroma_denoise + change, 0, 4)
+                print("Chroma denoise:", chroma_denoise)
+                ctrl.setChromaDenoise(chroma_denoise)
+            controlQueue.send(ctrl)
