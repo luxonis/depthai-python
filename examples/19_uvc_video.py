@@ -93,7 +93,7 @@ if not args.no_camera:
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
-uac.setMicGainDecibels(args.mic_gain_db)
+uac.initialConfig.setMicGainDecibels(args.mic_gain_db)
 print("UAC using:", "Back mic," if args.back_mic else "Front mics,",
       "Gain {} dB".format(args.mic_gain_db))
 
@@ -155,7 +155,6 @@ if args.flash_bootloader or args.flash_app or args.create_dap or args.flash_dap:
 with dai.Device(pipeline) as device, open(filename, "wb") as f:
     # Start pipeline
     tstart = time.monotonic()
-    device.startPipeline()
 
     print("\nDevice started, please keep this process running")
     print("and open an UVC viewer. Example on Linux:")
