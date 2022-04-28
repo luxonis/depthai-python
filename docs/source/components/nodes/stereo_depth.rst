@@ -56,7 +56,7 @@ Inputs and Outputs
     - :code:`confidenceMap` - :ref:`ImgFrame`
     - :code:`rectifiedLeft` - :ref:`ImgFrame`
     - :code:`syncedLeft` - :ref:`ImgFrame`
-    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in millimeters
+    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
     - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
     - :code:`rectifiedRight` - :ref:`ImgFrame`
     - :code:`syncedRight` - :ref:`ImgFrame`
@@ -177,20 +177,29 @@ Stereo depth FPS
    :header-rows: 1
 
    * - Stereo depth mode
-     - FPS for 720P
+     - FPS for 1280x720
+     - FPS for 640x400
    * - Standard mode
-     - 150
+     - 60
+     - 110
    * - Left-Right Check
-     - 60
+     - 55
+     - 105
    * - Subpixel Disparity
-     - 30
+     - 45
+     - 105
    * - Extended Disparity
-     - 60
+     - 54
+     - 105
    * - Subpixel + LR check
-     - 15
+     - 34
+     - 96
    * - Extended + LR check
-     - 30
+     - 26
+     - 62
 
+All stereo modes were measured for :code:`depth` output with **5x5 median filter** enabled. For 720P, mono cameras were set
+to **60 FPS** and for 400P mono cameras were set to **110 FPS**.
 
 Usage
 #####

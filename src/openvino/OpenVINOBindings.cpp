@@ -57,7 +57,7 @@ void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind OpenVINO::Blob
     openvinoBlob
         .def(py::init<std::vector<uint8_t>>(), DOC(dai, OpenVINO, Blob, Blob))
-        .def(py::init<std::string>(), DOC(dai, OpenVINO, Blob, Blob, 2))
+        .def(py::init<dai::Path>(), DOC(dai, OpenVINO, Blob, Blob, 2))
         .def_readwrite("version", &OpenVINO::Blob::version, DOC(dai, OpenVINO, Blob, version))
         .def_readwrite("networkInputs", &OpenVINO::Blob::networkInputs, DOC(dai, OpenVINO, Blob, networkInputs))
         .def_readwrite("networkOutputs", &OpenVINO::Blob::networkOutputs, DOC(dai, OpenVINO, Blob, networkOutputs))
