@@ -1,9 +1,8 @@
 Installation
 ============
 
-Please :ref:`install the necessary dependencies <Supported Platforms>` for your
-platform by referring to the table below. Once installed you can :ref:`install
-the DepthAI library <Install from PyPI>`.
+Please install the necessary dependencies for your platform by :ref:`referring to the table below <Supported Platforms>`.
+Once installed, you can :ref:`install the DepthAI library <Install from PyPI>`.
 
 We are constantly striving to improve how we release our software to keep up
 with countless platforms and the numerous ways to package it.  If you do not
@@ -13,8 +12,6 @@ or on `Github <https://github.com/luxonis/depthai>`__.
 
 Supported Platforms
 ###################
-
-We keep up-to-date, pre-compiled, libraries for the following platforms.  Note that a new change is that for Ubuntu now also work unchanged for the Jetson/Xavier series:
 
 ======================== ============================================== ================================================================================
 Platform                 Instructions                                   Support
@@ -26,30 +23,32 @@ Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord
 Jestson Nano/Xavier      :ref:`Platform dependencies <Jetson>`          `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
 ======================== ============================================== ================================================================================
 
-And the following platforms are also supported by a combination of the community and Luxonis.
+The following platforms are also supported by a combination of the community and Luxonis:
 
-====================== ===================================================== ================================================================================
-Platform               Instructions                                          Support
-====================== ===================================================== ================================================================================
-Fedora                                                                       `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
-Robot Operating System                                                       `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
-Windows 7              :ref:`WinUSB driver <Windows 7>`                      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-Docker                 :ref:`Pull and run official images <Docker>`          `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
-Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`            `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-VMware                 :ref:`Run on VMware <vmware>`                         `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-====================== ===================================================== ================================================================================
+====================== =========================================================================== ================================================================================
+Platform               Instructions                                                                Support
+====================== =========================================================================== ================================================================================
+Fedora                                                                                             `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
+Robot Operating System Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__ `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
+Windows 7              :ref:`WinUSB driver <Windows 7>`                                            `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
+Docker                 :ref:`Pull and run official images <Docker>`                                `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
+Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`                                  `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+VMware                 :ref:`Run on VMware <vmware>`                                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`                                     `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+====================== =========================================================================== ================================================================================
 
 macOS
 *****
 
 .. code-block:: bash
 
-  bash -c "$(curl -fL http://docs.luxonis.com/_static/install_dependencies.sh)"
+  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
 Close and re-open the terminal window after this command.
 
-The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1 support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__ for some additional troubleshooting steps.
+The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1
+support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__
+for some additional troubleshooting steps.
 
 Note that if the video streaming window does not appear consider running the
 following:
@@ -60,12 +59,58 @@ following:
 
 See the `Video preview window fails to appear on macOS <https://discuss.luxonis.com/d/95-video-preview-window-fails-to-appear-on-macos>`_ thread on our forum for more information.
 
+M1 Mac build wheels natively
+----------------------------
+
+In order to run DepthAI natively on M1 Mac, you currently need to build the wheels locally. We will add pre-building M1 wheels
+in Q2 of 2022, so this won't be needed anymore.
+
+This tutorial was provided by whab and tested on a MacBookPro M1 Pro running macOS Monterey 12.1 with a OAK-D-Lite.
+
+.. code-block:: bash
+
+  # Install native M1 version of brew
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+  # Install conda to create virtual environments for Python
+  brew install --cask miniconda
+  conda init zsh
+
+  # Close and re-open a Terminal window
+
+  # Install DepthAI by building a M1 wheel (inside ~/DepthAI/)
+  conda create --name DepthAIEnv39 python=3.9
+  conda activate DepthAIEnv39
+  python3 -m pip install -U pip
+  brew update
+  brew install cmake libusb
+  cd ~; mkdir DepthAI; cd DepthAI
+  git clone --recursive  https://github.com/luxonis/depthai-python.git
+  cd depthai-python
+  mkdir build && cd build
+  # Build depthai-python
+  cmake ..
+  cmake --build . --parallel
+  cd ..
+  python3 -m pip wheel . -w wheelhouse
+  pip install wheelhouse/depthai-*
+
+  # Test DepthAI with a OAK plugged to your new M1 Mac
+  cd examples
+  nano install_requirements.py
+  #   Remove code of block (3 lines) starting with: if thisPlatform == "arm64" and platform.system() == "Darwin":
+  #   Remove code of block (48 lines) starting with: if not args.skip_depthai:
+  python3 install_requirements.py
+  python3 ColorCamera/rgb_preview.py
+
 Ubuntu
 ******
 
 .. code-block:: bash
 
-  sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+  sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Note! If opencv fails with illegal instruction after installing from PyPi, add:
@@ -81,7 +126,7 @@ Raspberry Pi OS
   
   .. code-block:: bash
   
-    sudo curl -fL http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
 
 Jetson
@@ -157,7 +202,7 @@ Save and reload the script by running the command :code:`source ~/.bashrc`. Then
   .. code-block:: bash
 
     #Download and install the dependency package
-    sudo wget -qO- http://docs.luxonis.com/_static/install_dependencies.sh | bash
+    sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
     #Clone github repository
     git clone https://github.com/luxonis/depthai-python.git
@@ -236,13 +281,15 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
+**Note: If you are using OAK POE** device on Linux host machine, you should add :code:`--network=host` argument to your docker command, so depthai inside docker will be able to communicate with the OAK POE.
+
 Kernel Virtual Machine
 **********************
 
 To access the OAK-D camera in the `Kernel Virtual Machine <https://www.linux-kvm.org/page/Main_Page>`__, there is a need to attach and detach USB 
 devices on the fly when the host machine detects changes in the USB bus.
 
-OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in backgound when the camera is used natively.
+OAK-D camera changes the USB device type when it is used by DepthAI API. This happens in background when the camera is used natively.
 But when the camera is used in a virtual environment the situation is different.
 
 On your host machine, use the following code:
@@ -293,7 +340,7 @@ Note that when the device is disconnected from the USB bus, some udev environmen
 that is why you need to use :code:`PRODUCT` environmental variable to identify which device has been disconnected.
 
 The virtual machine where DepthAI API application is running should have defined a udev rules that identify the OAK-D camera.
-The udev rule is decribed `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
+The udev rule is described `here <https://docs.luxonis.com/en/latest/pages/faq/#does-depthai-work-on-the-nvidia-jetson-series>`__
 
 Solution provided by `Manuel Segarra-Abad <https://github.com/maseabunikie>`__
 
@@ -400,7 +447,7 @@ Now, run the :code:`rgb_preview.py` script from within :code:`examples` director
 
 .. code-block:: bash
 
-  python3 rgb_preview.py
+  python3 ColorCamera/rgb_preview.py
 
 If all goes well a small window video display should appear.  And example is shown below:
 

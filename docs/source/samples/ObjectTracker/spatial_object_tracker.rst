@@ -5,7 +5,7 @@ This example shows how to run MobileNetv2SSD on the RGB input frame, and perform
 
 setConfidenceThreshold - confidence threshold above which objects are detected
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Object tracker on video`
 - :ref:`Object tracker on RGB`

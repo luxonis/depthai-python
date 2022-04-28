@@ -9,6 +9,7 @@
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
+#include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
@@ -27,6 +28,8 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 #include "depthai/pipeline/node/UAC.hpp"
+#include "depthai/pipeline/node/ToF.hpp"
+#include "depthai/pipeline/node/AprilTag.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -116,7 +119,9 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
+        .def("createToF", &Pipeline::create<node::ToF>)      
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
         .def("createSPIIn", &Pipeline::create<node::SPIIn>)
@@ -135,7 +140,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createUAC", &Pipeline::create<node::UAC>)
-
+        .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         ;
 
 

@@ -26,9 +26,9 @@ camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 # Create encoders, one for each camera, consuming the frames and encoding them using H.264 / H.265 encoding
-ve1.setDefaultProfilePreset(1280, 720, 30, dai.VideoEncoderProperties.Profile.H264_MAIN)
-ve2.setDefaultProfilePreset(1920, 1080, 30, dai.VideoEncoderProperties.Profile.H265_MAIN)
-ve3.setDefaultProfilePreset(1280, 720, 30, dai.VideoEncoderProperties.Profile.H264_MAIN)
+ve1.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H264_MAIN)
+ve2.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H265_MAIN)
+ve3.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H264_MAIN)
 
 # Linking
 monoLeft.out.link(ve1.input)

@@ -3,8 +3,8 @@ Script
 
 Script node allows users to run **custom Python scripts on the device**. Due to the computational resource constraints,
 script node shouldn't be used for heavy computing (eg. image manipulation/CV), but for managing the flow
-of the pipeline. Example use cases would be controlling nodes like :ref:`ImageManip`, :ref:`ColorCamera`, :ref:`SpatialLocationCalculator`,
-decoding :ref:`NeuralNetwork` results, or interfacing with GPIOs.
+of the pipeline (business logic). Example use cases would be controlling nodes like :ref:`ImageManip`, :ref:`ColorCamera`, :ref:`SpatialLocationCalculator`,
+decoding :ref:`NeuralNetwork` results, or interfacing with GPIOs. For **debugging scripts**, we suggest :ref:`Script node logging <script_logging>`.
 
 How to place it
 ###############
@@ -55,7 +55,7 @@ Usage
           b = Buffer(len(x_serial))
           while True:
               time.sleep(1)
-              b.getData()[:] = x_serial
+              b.setData(x_serial)
               node.io['out'].send(b)
       """)
       script.outputs['out'].link(xout.input)
@@ -78,7 +78,7 @@ Usage
           b = Buffer(len(x_serial))
           while True:
               time.sleep(1)
-              b.getData()[:] = x_serial
+              b.setData(x_serial)
               node.io['out'].send(b)
       )");
       script->outputs["out"].link(xout->input);
@@ -106,7 +106,7 @@ In the script node you can interface with GPIOs of the VPU using module GPIO. Cu
 
   # Interrupts
   GPIO.waitInterruptEvent(gpio = -1) # blocks until any interrupt or interrupt by specified gpio is fired. Interrupts with callbacks are ignored here
-  GPIO.hasInterruptEvent(gpio = -1) # returns whether interrupt happened on any or specfied gpio. Interrupts with callbacks are ignored here
+  GPIO.hasInterruptEvent(gpio = -1) # returns whether interrupt happened on any or specified gpio. Interrupts with callbacks are ignored here
   GPIO.setInterrupt(gpio, edge, priority, callback = None) # adds interrupt to specified pin
   GPIO.clearInterrupt(gpio) # clears interrupt of specified pin
 

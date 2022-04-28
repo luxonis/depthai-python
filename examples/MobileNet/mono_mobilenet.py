@@ -79,7 +79,7 @@ with dai.Device(pipeline) as device:
         cv2.imshow(name, frame)
 
     while True:
-        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
+        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
         inRight = qRight.tryGet()
         inDet = qDet.tryGet()
 
