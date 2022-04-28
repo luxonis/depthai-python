@@ -35,7 +35,7 @@ static auto deviceSearchHelper(Args&&... args){
             py::gil_scoped_release release;
             std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
 
-            if(strcmp("<error>", deviceInfo.desc.name) == 0){
+            if(deviceInfo.status != X_LINK_SUCCESS) {
                 invalidDeviceFound = true;
                 invalidDeviceInfo = deviceInfo;
                 found = false;
