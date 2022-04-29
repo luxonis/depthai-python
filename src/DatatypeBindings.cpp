@@ -24,6 +24,7 @@
 #include "depthai/pipeline/datatype/FeatureTrackerConfig.hpp"
 #include "depthai/pipeline/datatype/AprilTags.hpp"
 #include "depthai/pipeline/datatype/AprilTagConfig.hpp"
+#include "depthai/pipeline/datatype/AudioInConfig.hpp"
 
 // depthai-shared
 #include "depthai-shared/datatype/RawBuffer.hpp"
@@ -44,6 +45,7 @@
 #include "depthai-shared/datatype/RawTrackedFeatures.hpp"
 #include "depthai-shared/datatype/RawAprilTagConfig.hpp"
 #include "depthai-shared/datatype/RawAprilTags.hpp"
+#include "depthai-shared/datatype/RawAudioInConfig.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -60,6 +62,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     py::enum_<RawImgFrame::Type> rawImgFrameType(rawImgFrame, "Type");
     py::class_<RawImgFrame::Specs> rawImgFrameSpecs(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs));
+    py::class_<RawImgFrame::WhiteBalance> rawImgFrameWhiteBalance(rawImgFrame, "WhiteBalance", DOC(dai, RawImgFrame, WhiteBalance));
     py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo", DOC(dai, TensorInfo));
     py::enum_<TensorInfo::DataType>tensorInfoDataType(tensorInfo, "DataType");
@@ -91,6 +94,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<RawCameraControl::SceneMode> rawCameraControlSceneMode(rawCameraControl, "SceneMode", DOC(dai, RawCameraControl, SceneMode));
     py::enum_<RawCameraControl::AntiBandingMode> rawCameraControlAntiBandingMode(rawCameraControl, "AntiBandingMode", DOC(dai, RawCameraControl, AntiBandingMode));
     py::enum_<RawCameraControl::EffectMode> rawCameraControlEffectMode(rawCameraControl, "EffectMode", DOC(dai, RawCameraControl, EffectMode));
+    py::enum_<RawCameraControl::FrameSyncMode> rawCameraControlFrameSyncMode(rawCameraControl, "FrameSyncMode", DOC(dai, RawCameraControl, FrameSyncMode));
     py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation", DOC(dai, RawSystemInformation));
     py::class_<ADatatype, std::shared_ptr<ADatatype>> adatatype(m, "ADatatype", DOC(dai, ADatatype));
     py::class_<Buffer, ADatatype, std::shared_ptr<Buffer>> buffer(m, "Buffer", DOC(dai, Buffer));
@@ -116,6 +120,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
     py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
     py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign));
+    py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthUnit> depthUnit(algorithmControl, "DepthUnit", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
     py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
@@ -154,6 +159,9 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<RawAprilTagConfig::QuadThresholds> quadThresholds(rawAprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
     py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>> aprilTagConfig(m, "AprilTagConfig", DOC(dai, AprilTagConfig));
     py::class_<AprilTags, Buffer, std::shared_ptr<AprilTags>> aprilTagData(m, "AprilTags", DOC(dai, AprilTags));
+    // Audio In
+    py::class_<RawAudioInConfig, RawBuffer, std::shared_ptr<RawAudioInConfig>> rawAudioInConfig(m, "RawAudioInConfig", DOC(dai, RawAudioInConfig));
+    py::class_<AudioInConfig, Buffer, std::shared_ptr<AudioInConfig>> audioInConfig(m, "AudioInConfig", DOC(dai, AudioInConfig));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -259,6 +267,15 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
         ;
 
+    rawImgFrameWhiteBalance
+        .def(py::init<>())
+        .def_readwrite("gainR", &RawImgFrame::WhiteBalance::gainR)
+        .def_readwrite("gainGr", &RawImgFrame::WhiteBalance::gainGr)
+        .def_readwrite("gainGb", &RawImgFrame::WhiteBalance::gainGb)
+        .def_readwrite("gainB", &RawImgFrame::WhiteBalance::gainB)
+        ;
+
+        // TODO add RawImgFrame::CameraSettings
 
     rawNnData
         .def(py::init<>())
@@ -723,6 +740,13 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("AQUA", RawCameraControl::EffectMode::AQUA)
     ;
 
+    camCtrlAttr.push_back("FrameSyncMode");
+    rawCameraControlFrameSyncMode
+        .value("OFF", RawCameraControl::FrameSyncMode::OFF)
+        .value("OUTPUT", RawCameraControl::FrameSyncMode::OUTPUT)
+        .value("INPUT", RawCameraControl::FrameSyncMode::INPUT)
+    ;
+
     // Bind RawSystemInformation
     rawSystemInformation
         .def(py::init<>())
@@ -769,6 +793,10 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
+        .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
+        .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
+        .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
+        .def("getWhiteBalanceGains", &ImgFrame::getWhiteBalanceGains, DOC(dai, ImgFrame, getWhiteBalanceGains))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
@@ -968,6 +996,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
+    m.attr("ImgFrame").attr("WhiteBalance") = m.attr("RawImgFrame").attr("WhiteBalance");
 
     rotatedRect
         .def(py::init<>())
@@ -1079,9 +1108,14 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setCaptureStill", &CameraControl::setCaptureStill, py::arg("capture"), DOC(dai, CameraControl, setCaptureStill))
         .def("setStartStreaming", &CameraControl::setStartStreaming, DOC(dai, CameraControl, setStartStreaming))
         .def("setStopStreaming", &CameraControl::setStopStreaming, DOC(dai, CameraControl, setStopStreaming))
+        .def("setExternalTrigger", &CameraControl::setExternalTrigger, py::arg("numFramesBurst"), py::arg("numFramesDiscard"), DOC(dai, CameraControl, setExternalTrigger))
+        .def("setFrameSyncMode", &CameraControl::setFrameSyncMode, py::arg("mode"), DOC(dai, CameraControl, setFrameSyncMode))
         .def("setAutoFocusMode", &CameraControl::setAutoFocusMode, py::arg("mode"), DOC(dai, CameraControl, setAutoFocusMode))
         .def("setAutoFocusTrigger", &CameraControl::setAutoFocusTrigger, DOC(dai, CameraControl, setAutoFocusTrigger))
+        .def("setAutoFocusLensRange", &CameraControl::setAutoFocusLensRange, py::arg("infinityPosition"), py::arg("macroPosition"), DOC(dai, CameraControl, setAutoFocusLensRange))
         .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoFocusRegion))
+        .def("setAutoFocusLensRange", &CameraControl::setAutoFocusLensRange, py::arg("infinityPosition"), py::arg("macroPosition"), DOC(dai, CameraControl, setAutoFocusLensRange))
+        .def("setAutoFocusLensLimit", &CameraControl::setAutoFocusLensLimit, py::arg("minPosition"), py::arg("maxPosition"), DOC(dai, CameraControl, setAutoFocusLensLimit))
         .def("setManualFocus", &CameraControl::setManualFocus, py::arg("lensPosition"), DOC(dai, CameraControl, setManualFocus))
         .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable, DOC(dai, CameraControl, setAutoExposureEnable))
         .def("setAutoExposureLock", &CameraControl::setAutoExposureLock, py::arg("lock"), DOC(dai, CameraControl, setAutoExposureLock))
@@ -1225,9 +1259,20 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
 
     m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
 
+    depthUnit
+        .value("METER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, METER))
+        .value("CENTIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETER))
+        .value("MILLIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETER))
+        .value("INCH", RawStereoDepthConfig::AlgorithmControl::DepthUnit::INCH, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, INCH))
+        .value("FOOT", RawStereoDepthConfig::AlgorithmControl::DepthUnit::FOOT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, FOOT))
+        .value("CUSTOM", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CUSTOM, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CUSTOM))
+        ;
+
     algorithmControl
         .def(py::init<>())
         .def_readwrite("depthAlign", &RawStereoDepthConfig::AlgorithmControl::depthAlign, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthAlign))
+        .def_readwrite("depthUnit", &RawStereoDepthConfig::AlgorithmControl::depthUnit, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthUnit))
+        .def_readwrite("customDepthUnitMultiplier", &RawStereoDepthConfig::AlgorithmControl::customDepthUnitMultiplier, DOC(dai, RawStereoDepthConfig, AlgorithmControl, customDepthUnitMultiplier))
         .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
         .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
@@ -1374,6 +1419,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setExtendedDisparity",    &StereoDepthConfig::setExtendedDisparity, py::arg("enable"), DOC(dai, StereoDepthConfig, setExtendedDisparity))
         .def("setSubpixel",             &StereoDepthConfig::setSubpixel, py::arg("enable"), DOC(dai, StereoDepthConfig, setSubpixel))
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
+        .def("setDepthUnit",            &StereoDepthConfig::setDepthUnit, DOC(dai, StereoDepthConfig, setDepthUnit))
+        .def("getDepthUnit",            &StereoDepthConfig::getDepthUnit, DOC(dai, StereoDepthConfig, getDepthUnit))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
@@ -1575,6 +1622,25 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
     aprilTagData
         .def(py::init<>())
         .def_property("aprilTags", [](AprilTags& det) { return &det.aprilTags; }, [](AprilTags& det, std::vector<AprilTag> val) { det.aprilTags = val; })
+        ;
+
+    aprilTagConfig
+        .def(py::init<>())
+        .def("setFamily", &AprilTagConfig::setFamily, py::arg("family"), DOC(dai, AprilTagConfig, setFamily))
+        .def("set", &AprilTagConfig::set, DOC(dai, AprilTagConfig, set))
+        .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
+        ;
+
+    rawAudioInConfig
+        .def(py::init<>())
+        .def_readwrite("config", &RawAudioInConfig::config, DOC(dai, RawAudioInConfig, config))
+        ;
+
+    audioInConfig
+        .def(py::init<>())
+        .def("setMicGainTimes", &AudioInConfig::setMicGainTimes, py::arg("times"), DOC(dai, AudioInConfig, setMicGainTimes))
+        .def("setMicGainDecibels", &AudioInConfig::setMicGainDecibels, py::arg("dB"), DOC(dai, AudioInConfig, setMicGainDecibels))
+        .def("getConfigData", &AudioInConfig::getConfigData, DOC(dai, AudioInConfig, getConfigData))
         ;
 
 }

@@ -115,7 +115,7 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, dev, maxUsbSpeed);
     }), py::arg("pipeline"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 3))
-    .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
+    .def(py::init([](const Pipeline& pipeline, const dai::Path& pathToCmd){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, dev, pathToCmd);
@@ -123,58 +123,58 @@ static void bindConstructors(ARG& arg){
     .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, usb2Mode);
-    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 7))
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 6))
     .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, maxUsbSpeed);
-    }), py::arg("pipeline"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 8))
-    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, std::string pathToCmd){
+    }), py::arg("pipeline"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 7))
+    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, dai::Path pathToCmd){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, pathToCmd);
-    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 9))
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 8))
 
     // DeviceBase constructor - OpenVINO version
     .def(py::init([](OpenVINO::Version version){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev);
-    }), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, DeviceBase, 11))
+    }), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, DeviceBase, 10))
     .def(py::init([](OpenVINO::Version version, bool usb2Mode){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, usb2Mode);
-    }), py::arg("version"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 13))
+    }), py::arg("version"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 11))
     .def(py::init([](OpenVINO::Version version, UsbSpeed maxUsbSpeed){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, maxUsbSpeed);
-    }), py::arg("version"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 14))
-    .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
+    }), py::arg("version"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 12))
+    .def(py::init([](OpenVINO::Version version, const dai::Path& pathToCmd){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, pathToCmd);
-    }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 15))
+    }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 13))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 18))
+    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
-    }), py::arg("version"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 19))
-    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 16))
+    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, dai::Path pathToCmd){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, pathToCmd);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 20))
+    }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 17))
     .def(py::init([](typename D::Config config){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(config, dev);
-    }), py::arg("config"), DOC(dai, DeviceBase, DeviceBase, 22))
+    }), py::arg("config"), DOC(dai, DeviceBase, DeviceBase, 18))
     .def(py::init([](typename D::Config config, const DeviceInfo& deviceInfo){
         py::gil_scoped_release release;
         return std::make_unique<D>(config, deviceInfo);
-    }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 23))
+    }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
     ;
 
 }
@@ -191,6 +191,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
     py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::Network> boardConfigNetwork(boardConfig, "Network", DOC(dai, BoardConfig, Network));
     py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
     py::enum_<BoardConfig::GPIO::Mode> boardConfigGpioMode(boardConfigGpio, "Mode", DOC(dai, BoardConfig, GPIO, Mode));
     py::enum_<BoardConfig::GPIO::Direction> boardConfigGpioDirection(boardConfigGpio, "Direction", DOC(dai, BoardConfig, GPIO, Direction));
@@ -227,6 +228,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+    ;
+
+    // Bind BoardConfig::Network
+    boardConfigNetwork
+        .def(py::init<>())
+        .def_readwrite("mtu", &BoardConfig::Network::mtu)
     ;
 
     // GPIO Mode
@@ -301,6 +308,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfig
         .def(py::init<>())
         .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("network", &BoardConfig::network)
+        .def_readwrite("sysctl", &BoardConfig::sysctl)
         .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
@@ -361,6 +370,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
+        .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, DeviceBase, getCmxMemoryUsage))

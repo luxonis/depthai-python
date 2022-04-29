@@ -9,6 +9,7 @@
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
+#include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
@@ -25,6 +26,9 @@
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
 #include "depthai/pipeline/node/FeatureTracker.hpp"
+#include "depthai/pipeline/node/UVC.hpp"
+#include "depthai/pipeline/node/UAC.hpp"
+#include "depthai/pipeline/node/ToF.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 
 // depthai-shared
@@ -102,6 +106,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
         .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
         .def("getDeviceConfig", &Pipeline::getDeviceConfig, DOC(dai, Pipeline, getDeviceConfig))
+        .def("serializeToJson", &Pipeline::serializeToJson, DOC(dai, Pipeline, serializeToJson))
         // 'Template' create function
         .def("create", [](dai::Pipeline& p, py::object class_) {
             auto node = createNode(p, class_);
@@ -115,7 +120,9 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
         .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
+        .def("createToF", &Pipeline::create<node::ToF>)      
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
         .def("createSPIIn", &Pipeline::create<node::SPIIn>)
@@ -132,6 +139,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createIMU", &Pipeline::create<node::IMU>)
         .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
         .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
+        .def("createUVC", &Pipeline::create<node::UVC>)
+        .def("createUAC", &Pipeline::create<node::UAC>)
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         ;
 

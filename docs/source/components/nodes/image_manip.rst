@@ -79,7 +79,8 @@ Limitations
 
 Besides limitations mentioned above (unsupported frame formats), there are other limitations:
 
-- Due to HW warp constraint, rotating/warping can be done only on frames whose width values are multiples of 16. 
+- Due to HW warp constraint, rotating/warping can be done only on frames whose width values are multiples of 16
+- Maximum output width of a frame is 1920 pixels
 
 Examples of functionality
 #########################
