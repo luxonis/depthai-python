@@ -228,7 +228,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto uac = ADD_NODE(UAC);
     auto tof = ADD_NODE(ToF);
     auto aprilTag = ADD_NODE(AprilTag);
-	
+
     py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
 
 
@@ -829,7 +829,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("passthrough", &NeuralNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
         .def("setBlobPath", [](NeuralNetwork& nn, py::object obj){
             // Allows to call this function with paths as well as strings
-            nn.setBlobPath(py::str(obj));
+            nn.setBlobPath(dai::Path(py::str(obj)));
         }, py::arg("path"), DOC(dai, node, NeuralNetwork, setBlobPath))
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames, py::arg("numFrames"), DOC(dai, node, NeuralNetwork, setNumPoolFrames))
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads, py::arg("numThreads"), DOC(dai, node, NeuralNetwork, setNumInferenceThreads))
@@ -1050,20 +1050,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             s.setOutputDepth(enable);
             HEDLEY_DIAGNOSTIC_POP
         })
-        .def("loadCalibrationFile", [](StereoDepth& s, std::string path){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationFile() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
-            HEDLEY_DIAGNOSTIC_PUSH
-            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.loadCalibrationFile(path);
-            HEDLEY_DIAGNOSTIC_POP
-        })
-        .def("loadCalibrationData", [](StereoDepth& s, std::vector<std::uint8_t> data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationData() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
-            HEDLEY_DIAGNOSTIC_PUSH
-            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.loadCalibrationData(data);
-            HEDLEY_DIAGNOSTIC_POP
-        })
         .def("setEmptyCalibration", [](StereoDepth& s){
             PyErr_WarnEx(PyExc_DeprecationWarning, "setEmptyCalibration() is deprecated, Use 'setRectification(False)' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
@@ -1083,6 +1069,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
         .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
         .def("setFocalLengthFromCalibration", &StereoDepth::setFocalLengthFromCalibration, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
+        .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -1376,8 +1363,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("initialConfig", &AprilTag::initialConfig, DOC(dai, node, AprilTag, initialConfig))
         .def("setWaitForConfigInput", &AprilTag::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, AprilTag, setWaitForConfigInput))
         ;
-	daiNodeModule.attr("AprilTag").attr("Properties") = aprilTagProperties;	
-		
+	daiNodeModule.attr("AprilTag").attr("Properties") = aprilTagProperties;
+
     // FeatureTracker node
     featureTracker
         .def_readonly("inputConfig", &FeatureTracker::inputConfig, DOC(dai, node, FeatureTracker, inputConfig))
