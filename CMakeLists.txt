@@ -103,6 +103,20 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
+# Copy dlls to target directory - Windows only
+if(WIN32)
+    # TARGET_RUNTIME_DLLS generator expression available since CMake 3.21
+    if(CMAKE_VERSION VERSION_LESS "3.21")
+        file(GLOB depthai_dll_libraries "${HUNTER_INSTALL_PREFIX}/bin/*.dll")
+    else()
+        set(depthai_dll_libraries "$<TARGET_RUNTIME_DLLS:${TARGET_NAME}>")
+    endif()
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E copy ${depthai_dll_libraries} $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMAND_EXPAND_LISTS
+    )
+endif()
+
 # Add stubs (pyi) generation step after building bindings
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
 if(error)
