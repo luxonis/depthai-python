@@ -41,7 +41,7 @@ else()
         ${CMAKE_COMMAND} -E env
         # Environment variables
         # PATH (dlls)
-        "PATH=${HUNTER_INSTALL_PREFIX}${SYS_PATH_SEPARATOR}$ENV{PATH}"            
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"            
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers

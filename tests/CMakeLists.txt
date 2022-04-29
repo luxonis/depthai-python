@@ -22,7 +22,7 @@ add_custom_target(
     pytest COMMAND
         ${CMAKE_COMMAND} -E env
         # PATH (dlls)
-        "PATH=${HUNTER_INSTALL_PREFIX}${SYS_PATH_SEPARATOR}$ENV{PATH}"
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled modules)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$<TARGET_FILE_DIR:${TARGET_TEST_MODULE}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
