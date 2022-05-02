@@ -34,8 +34,8 @@ After you remove all host-side code, you would only be left with the :ref:`Pipel
 Since device no longer communicates with the host, you need to "route" your program's output through either SPI
 or script node, as mentioned above.
 
-Flash bootloader
-################
+Flash the bootloader
+####################
 
 Execute the code below to flash the :ref:`Bootloader` to the device. The bootloader is packaged together with the
 depthai, so if you have the latest depthai version, you will flash the latest bootloader version. This step
@@ -49,8 +49,8 @@ is required only once.
     progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
     bootloader.flashBootloader(progress)
 
-Flash pipeline
-##############
+Flash the pipeline
+##################
 
 After you have standalone :ref:`Pipeline` definition and :ref:`Bootloader` already flashed on the device, you
 can start with flashing the pipeline. You can flash the pipeline with the following snippet:
