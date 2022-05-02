@@ -24,46 +24,14 @@ PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
-    auto startTime = std::chrono::steady_clock::now();
-    bool found = false;
-    bool invalidDeviceFound = false;
-    dai::DeviceInfo deviceInfo = {};
-    dai::DeviceInfo invalidDeviceInfo = {};
-    do {
-        {
-            // releases python GIL
-            py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
-
-            if(deviceInfo.status != X_LINK_SUCCESS) {
-                invalidDeviceFound = true;
-                invalidDeviceInfo = deviceInfo;
-                found = false;
-            }
-
-            // Check if found
-            if(found){
-                break;
-            } else {
-                // block for 100ms
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-        }
-        // reacquires python GIL for PyErr_CheckSignals call
-        // check if interrupt triggered in between
+    bool found;
+    dai::DeviceInfo deviceInfo;
+    // releases python GIL
+    py::gil_scoped_release release;
+    std::tie(found, deviceInfo) = DEVICE::getAnyAvailableDevice(DEVICE::getDefaultSearchTime(), [](){
+        py::gil_scoped_acquire acquire;
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
-
-    // Check if its an invalid device
-    if(invalidDeviceFound){
-        // Warn
-        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
-        // TODO(themarpe) - move device search into C++ and expose a callback
-        DEVICE::getFirstAvailableDevice(true);
-    }
-
-    // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
-    if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
+    });
 
     // if no devices found, then throw
     if(!found) throw std::runtime_error("No available devices");
@@ -329,7 +297,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
 
         //dai::Device methods
         //static
-        .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
+        .def_static("getAnyAvailableDevice", [](std::chrono::milliseconds ms){ return DeviceBase::getAnyAvailableDevice(ms); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
