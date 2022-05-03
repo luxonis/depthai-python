@@ -380,6 +380,14 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
         .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
         .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
+        .def("isEepromAvailable", [](DeviceBase& d) { py::gil_scoped_release release; return d.isEepromAvailable(); }, DOC(dai, DeviceBase, isEepromAvailable))
+        .def("flashCalibration2", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashCalibration2(ch); }, DOC(dai, DeviceBase, flashCalibration2))
+        .def("readCalibration2", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibration2(); }, DOC(dai, DeviceBase, readCalibration2))
+        .def("readCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationOrDefault(); }, DOC(dai, DeviceBase, readCalibrationOrDefault))
+        .def("factoryResetCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.factoryResetCalibration(); }, DOC(dai, DeviceBase, factoryResetCalibration))
+        .def("flashFactoryCalibration", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashFactoryCalibration(ch); }, DOC(dai, DeviceBase, flashFactoryCalibration))
+        .def("readFactoryCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibration(); }, DOC(dai, DeviceBase, readFactoryCalibration))
+        .def("readFactoryCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationOrDefault(); }, DOC(dai, DeviceBase, readFactoryCalibrationOrDefault))
     ;
 
 
