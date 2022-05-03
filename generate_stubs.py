@@ -12,7 +12,7 @@ if len(sys.argv) < 3:
 MODULE_NAME = sys.argv[1]
 DIRECTORY = sys.argv[2]
 
-print(f'Generating stubs for module: {MODULE_NAME} in directory: {DIRECTORY}')
+print(f'Generating stubs for module: "{MODULE_NAME}" in directory: "{DIRECTORY}"')
 
 try:
 

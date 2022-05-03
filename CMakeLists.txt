@@ -103,8 +103,8 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
-# Copy dlls to target directory - Windows only
 if(WIN32)
+    # Copy dlls to target directory - Windows only
     # TARGET_RUNTIME_DLLS generator expression available since CMake 3.21
     if(CMAKE_VERSION VERSION_LESS "3.21")
         file(GLOB depthai_dll_libraries "${HUNTER_INSTALL_PREFIX}/bin/*.dll")
@@ -115,6 +115,9 @@ if(WIN32)
         ${CMAKE_COMMAND} -E copy ${depthai_dll_libraries} $<TARGET_FILE_DIR:${TARGET_NAME}>
         COMMAND_EXPAND_LISTS
     )
+
+    # Disable "d" postfix, so python can import the library as is
+    set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "")
 endif()
 
 # Add stubs (pyi) generation step after building bindings
@@ -133,7 +136,7 @@ else()
         "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
-        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "${bindings_directory}"
+        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "$<TARGET_FILE_DIR:${TARGET_NAME}>"
         DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
