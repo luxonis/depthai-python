@@ -2,7 +2,7 @@ Standalone mode
 ===============
 
 **Standalone / Hostless / On-The-Edge mode** means that the OAK camera isn't connected to a host computer. This can
-be achieved by first :ref:`flashing the bootloader <Flash bootloader>` and then :ref:`flashing the pipeline <Flash pipeline>`
+be achieved by first :ref:`flashing the bootloader <Flash bootloader>` and then :ref:`flashing the pipeline <Flash the pipeline>`
 and assets (NN models) to the OAK's flash memory.
 
 Standalone mode is **only possible on OAKs that have on-board flash** memory, which are currently `OAK IOT <https://docs.luxonis.com/projects/hardware/en/latest/#iot-designs>`__
