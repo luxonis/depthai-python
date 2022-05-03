@@ -86,6 +86,14 @@ Usage
       cam->setInterleaved(false);
       cam->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
 
+Limitations
+###########
+
+Here are known camera limitations for the Myriad X:
+
+- **ISP can process about 600 MP/s**, and about **500 MP/s** when the pipeline is also running NNs and video encoder in parallel
+- **3A algorithms** can process about **200..250 FPS overall** (for all camera streams). This is a current limitation of our implementation, and we have plans for a workaround to run 3A algorithms on every Xth frame, no ETA yet
+
 Examples of functionality
 #########################
 
