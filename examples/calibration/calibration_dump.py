@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import depthai as dai
+import json
 
 # Connect device
 with dai.Device(dai.OpenVINO.VERSION_2021_4, dai.UsbSpeed.HIGH) as device:
@@ -9,12 +10,12 @@ with dai.Device(dai.OpenVINO.VERSION_2021_4, dai.UsbSpeed.HIGH) as device:
 
     # User calibration
     try:
-        print(f'User calibration: {device.readCalibration2().eepromToJson()}')
+        print(f'User calibration: {json.dumps(device.readCalibration2().eepromToJson(), indent=2)}')
     except Exception as ex:
-        print('No user calibration: {ex}')
+        print(f'No user calibration: {ex}')
 
     # Factory calibration
     try:
-        print(f'Factory calibration: {device.readFactoryCalibration().eepromToJson()}')
+        print(f'Factory calibration: {json.dumps(device.readFactoryCalibration().eepromToJson(), indent=2)}')
     except Exception as ex:
-        print('No factory calibration: {ex}')
+        print(f'No factory calibration: {ex}')
