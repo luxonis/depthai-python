@@ -234,6 +234,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfigNetwork
         .def(py::init<>())
         .def_readwrite("mtu", &BoardConfig::Network::mtu)
+        .def_readwrite("xlinkTcpNoDelay", &BoardConfig::Network::xlinkTcpNoDelay)
     ;
 
     // GPIO Mode
