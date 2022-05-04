@@ -56,7 +56,7 @@ Inputs and Outputs
     - :code:`confidenceMap` - :ref:`ImgFrame`
     - :code:`rectifiedLeft` - :ref:`ImgFrame`
     - :code:`syncedLeft` - :ref:`ImgFrame`
-    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in millimeters
+    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
     - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
     - :code:`rectifiedRight` - :ref:`ImgFrame`
     - :code:`syncedRight` - :ref:`ImgFrame`
