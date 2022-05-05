@@ -139,10 +139,9 @@ You can also **factory reset OAK POE at specific IP** if it's not reachable (not
     with tempfile.NamedTemporaryFile() as tmpBlFw:
         tmpBlFw.write(bytes(blBinary))
 
-        device_info = dai.DeviceInfo()
+        device_info = dai.DeviceInfo("192.168.34.110") # Set IP here
         device_info.state = dai.XLinkDeviceState.X_LINK_BOOTLOADER
-        device_info.desc.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
-        device_info.desc.name = "192.168.34.110" # Set IP here
+        device_info.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
 
         with dai.DeviceBootloader(device_info, allowFlashingBootloader=True) as bootloader:
             progress = lambda p : print(f'Factory reset progress: {p*100:.1f}%')
