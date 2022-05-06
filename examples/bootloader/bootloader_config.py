@@ -31,7 +31,7 @@ if usage:
 (res, info) = dai.DeviceBootloader.getFirstAvailableDevice()
 
 if res:
-    print(f'Found device with name: {info.desc.name}');
+    print(f'Found device with name: {info.name}');
     with dai.DeviceBootloader(info) as bl:
         if read:
             print('Current flashed configuration')
