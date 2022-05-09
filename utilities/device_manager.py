@@ -29,6 +29,20 @@ def check_mac(s):
                 return False
     return True
 
+class Progress:
+    def __init__(self):
+        layout = [
+            [sg.Text('Flashing progress: 0.0%', key='txt')],
+            [sg.ProgressBar(1.0, orientation='h', size=(20,20), key='progress')],
+        ]
+        self.window = sg.Window("Progress", layout, modal=True, finalize=True)
+    def update(self, val):
+        self.window['progress'].update(val)
+        self.window['txt'].update(f'Flashing progress: {val*100:.1f}%')
+    def finish(self, msg):
+        self.window.close()
+        sg.Popup(msg)
+
 def unlockConfig(window, devType):
     if devType == "POE":
         window['staticIp'].update(disabled=False)
@@ -168,10 +182,11 @@ def flashBootloader(window, device, values):
         else: # AUTO
             type = dai.DeviceBootloader.Type.AUTO
 
-        progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+        pr = Progress()
+        progress = lambda p : pr.update(p)
         bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
         window.Element('currBoot').update(bl.getVersion())
-        sg.Popup("Flashed newest bootloader version.")
+        pr.finish("Flashed newest bootloader version.")
     except Exception as ex:
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
@@ -228,12 +243,12 @@ def factoryReset(device):
         bl = dai.DeviceBootloader(device, True)
         tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
         tmpBlFw.write(bytes(blBinary))
-        progress = lambda p: p * 100
+
+        pr = Progress()
+        progress = lambda p : pr.update(p)
         success, msg = bl.flashBootloader(progress, tmpBlFw.name)
-        if success:
-            sg.Popup("Factory reset was successful.")
-        else:
-           sg.Popup(f"Factory reset failed. Error: {msg}")
+        msg = "Factory reset was successful." if success else f"Factory reset failed. Error: {msg}"
+        pr.finish(msg)
         tmpBlFw.close()
     except Exception as ex:
         print(f'Exception: {ex}')
