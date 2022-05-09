@@ -1,7 +1,7 @@
 ObjectTracker
 =============
 
-Object tracker tracks detected objects from the :ref:`ImgDetections` using Kalman filter and hungarian algorithm.
+Object tracker tracks detected objects from the :ref:`ImgDetections`.
 
 How to place it
 ###############
