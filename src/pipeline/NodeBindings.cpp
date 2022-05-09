@@ -817,8 +817,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // StereoDepth node
     stereoDepthPresetMode
-        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY)
-        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY)
+        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY, DOC(dai, node, StereoDepth, PresetMode, HIGH_ACCURACY))
+        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY, DOC(dai, node, StereoDepth, PresetMode, HIGH_DENSITY))
         ;
 
     stereoDepth
