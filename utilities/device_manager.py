@@ -19,8 +19,6 @@ def check_ip(s: str):
     return True
 
 def check_mac(s):
-    if s == "":
-        return True
     if s.count(":") != 5:
         sg.Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF")
         return False
@@ -32,7 +30,7 @@ def check_mac(s):
     return True
 
 def unlockConfig(window, devType):
-    if devType == "Poe":
+    if devType == "POE":
         window['staticIp'].update(disabled=False)
         window['staticMask'].update(disabled=False)
         window['staticGateway'].update(disabled=False)
@@ -119,7 +117,7 @@ def getConfigs(window, bl, devType, device):
     try:
         conf = bl.readConfig()
         if conf is not None:
-            if devType == "Poe":
+            if devType == "POE":
                 window.Element('staticIp').update(conf.getIPv4() if conf.getIPv4() is not None else "0.0.0.0")
                 window.Element('staticMask').update(conf.getIPv4Mask() if conf.getIPv4Mask() is not None else "0.0.0.0")
                 window.Element('staticGateway').update(conf.getIPv4Gateway() if conf.getIPv4Gateway() is not None else "0.0.0.0")
@@ -170,7 +168,7 @@ def flashBootloader(window, device, values):
         else: # AUTO
             type = dai.DeviceBootloader.Type.AUTO
 
-        progress = lambda p: p * 100
+        progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
         bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
         window.Element('currBoot').update(bl.getVersion())
         sg.Popup("Flashed newest bootloader version.")
@@ -183,7 +181,7 @@ def flashConfig(values, device, devType, ipType):
     try:
         bl = dai.DeviceBootloader(device, True)
         conf = dai.DeviceBootloader.Config()
-        if devType == "Poe":
+        if devType == "POE":
             if ipType:
                 if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
                     if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
@@ -212,6 +210,7 @@ def flashConfig(values, device, devType, ipType):
                     sg.Popup("Values can not be negative!")
             if values['usbSpeed'] != "":
                 conf.setUsbMaxSpeed(getattr(dai.UsbSpeed, values['usbSpeed']))
+
         success, error = bl.flashConfig(conf)
         if not success:
             sg.Popup(f"Flashing failed: {error}")
@@ -242,16 +241,11 @@ def factoryReset(device):
 
 
 def getDeviceType(bl):
-    # bl = dai.DeviceBootloader(device)
-    # conf = bl.readConfigData()
-    # TODO - Don't modify the device without explicit action
-    # if conf is None:
-    #     success, error = bl.flashConfig(dai.DeviceBootloader.Config())
     try:
-        if str(bl.getType()) == "Type.NETWORK":
-            return "Poe"
+        if bl.getType() == dai.DeviceBootloader.Type.NETWORK:
+            return "POE"
         else:
-            return "NonPoe"
+            return "USB"
     except Exception as ex:
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
@@ -469,7 +463,7 @@ while True:
         bl = connectToDevice(devices[values['devices']])
         getConfigs(window, bl, devType, devices[values['devices']])
         lockConfig(window)
-        if devType != "Poe":
+        if devType != "POE":
             unlockConfig(window, devType)
         else:
             devices.clear()
