@@ -1,7 +1,7 @@
 NeuralNetwork
 =============
 
-This node runs neural inference on input data. Any OpenVINO neural networks can be run using this node, as long as the VPU `supports all layers <https://docs.luxonis.com/en/latest/pages/model_conversion/#unsupported-layer-type-layer-type>`__.
+This node runs neural inference on input data. Any OpenVINO neural networks can be run using this node, as long as the VPU `supports all layers <https://docs.luxonis.com/en/latest/pages/model_conversion/#supported-layers>`__.
 This allows you to pick from **200+ pre-trained model** from `Open Model Zoo <https://github.com/openvinotoolkit/open_model_zoo>`__ and `DepthAI Model Zoo <https://github.com/luxonis/depthai-model-zoo>`__
 and directly run it on the OAK device.
 
