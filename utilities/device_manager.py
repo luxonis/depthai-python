@@ -31,44 +31,6 @@ def check_mac(s):
                 return False
     return True
 
-
-def usbSpeed(s):
-    if s == "UNKNOWN":
-        return dai.UsbSpeed.UNKNOWN
-    elif s == "LOW":
-        return dai.UsbSpeed.LOW
-    elif s == "FULL":
-        return dai.UsbSpeed.FULL
-    elif s == "HIGH":
-        return dai.UsbSpeed.HIGH
-    elif s == "SUPER":
-        return dai.UsbSpeed.SUPER
-    else:
-        return dai.UsbSpeed.SUPER_PLUS
-
-
-def usbSpeedCorrection(s):
-    if s == 0:
-        return "UNKNOWN"
-    elif s == 1:
-        return "LOW"
-    elif s == 2:
-        return "FULL"
-    elif s == 3:
-        return "HIGH"
-    elif s == 4:
-        return "SUPER"
-    else:
-        return "SUPER_PLUS"
-
-
-def macCorrectFormat(s):
-    ret = ""
-    for x in s:
-        ret += str(hex(x)).strip("0x").upper() + ":"
-    return ret[:-1]
-
-
 def unlockConfig(window, devType):
     if devType == "Poe":
         window['staticIp'].update(disabled=False)
@@ -155,19 +117,16 @@ def getConfigs(window, bl, devType, device):
     # TODO - apply to other functions as well, most of them may throw, catch such cases and present the user with an appropriate message
     # Most of time the version difference is the culprit
     try:
-        conf = bl.readConfigData()
+        conf = bl.readConfig()
         if conf is not None:
             if devType == "Poe":
-                window.Element('staticIp').update(conf['network']['ipv4'] if conf['network']['ipv4'] != 0 else "0.0.0.0")
-                window.Element('staticMask').update(conf['network']['ipv4Mask'] if conf['network']['ipv4Mask'] != 0
-                                                    else "0.0.0.0")
-                window.Element('staticGateway').update(conf['network']['ipv4Gateway'] if conf['network']['ipv4Gateway'] != 0
-                                                    else "0.0.0.0")
-                window.Element('dns').update(conf['network']['ipv4Dns'] if conf['network']['ipv4Dns'] != 0 else "0.0.0.0")
-                window.Element('dnsAlt').update(conf['network']['ipv4DnsAlt'] if conf['network']['ipv4DnsAlt'] != 0
-                                                else "0.0.0.0")
-                window.Element('networkTimeout').update(conf['network']['timeoutMs'])
-                window.Element('mac').update(macCorrectFormat(conf['network']['mac']))
+                window.Element('staticIp').update(conf.getIPv4() if conf.getIPv4() is not None else "0.0.0.0")
+                window.Element('staticMask').update(conf.getIPv4Mask() if conf.getIPv4Mask() is not None else "0.0.0.0")
+                window.Element('staticGateway').update(conf.getIPv4Gateway() if conf.getIPv4Gateway() is not None else "0.0.0.0")
+                window.Element('dns').update(conf.getDnsIPv4() if conf.getDnsIPv4() is not None else "0.0.0.0")
+                window.Element('dnsAlt').update(conf.getDnsAltIPv4() if conf.getDnsAltIPv4() is not None else "0.0.0.0")
+                window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
+                window.Element('mac').update(conf.getMacAddress())
                 window.Element('usbTimeout').update("")
                 window.Element('usbSpeed').update("")
             else:
@@ -178,8 +137,8 @@ def getConfigs(window, bl, devType, device):
                 window.Element('dnsAlt').update("")
                 window.Element('networkTimeout').update("")
                 window.Element('mac').update("")
-                window.Element('usbTimeout').update(conf['usb']['timeoutMs'])
-                window.Element('usbSpeed').update(usbSpeedCorrection(conf['usb']['maxUsbSpeed']))
+                window.Element('usbTimeout').update(int(conf.getUsbTimeout().total_seconds() * 1000))
+                window.Element('usbSpeed').update(str(conf.getUsbMaxSpeed()).split('.')[1])
 
         window.Element('devName').update(device.desc.name)
         window.Element('devNameConf').update(device.desc.name)
@@ -252,7 +211,7 @@ def flashConfig(values, device, devType, ipType):
                 else:
                     sg.Popup("Values can not be negative!")
             if values['usbSpeed'] != "":
-                conf.setUsbMaxSpeed(usbSpeed(values['usbSpeed']))
+                conf.setUsbMaxSpeed(getattr(dai.UsbSpeed, values['usbSpeed']))
         success, error = bl.flashConfig(conf)
         if not success:
             sg.Popup(f"Flashing failed: {error}")
@@ -438,11 +397,11 @@ deviceConfigLayout = [
         sg.InputText(key="dnsAlt", size=(30, 2), disabled=True)
     ],
     [
-        sg.Text("USB timeout:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("USB timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.InputText(key="usbTimeout", size=(30, 2), disabled=True)
     ],
     [
-        sg.Text("Network timeout:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("Network timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.InputText(key="networkTimeout", size=(30, 2), disabled=True)
     ],
     [
