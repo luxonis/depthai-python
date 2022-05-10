@@ -6,8 +6,8 @@ import tempfile
 import PySimpleGUI as sg
 
 def check_ip(s: str):
-    if str == "":
-        return True
+    if s == "":
+        return False
     spl = s.split(".")
     if len(spl) != 4:
         sg.Popup("Wrong IP format.\nValue should be similar to 255.255.255.255")
@@ -205,21 +205,17 @@ def flashBootloader(window, device):
         sg.Popup(f'{ex}')
 
 
-def flashConfig(values, device, devType, ipType):
+def flashConfig(values, device, devType, staticIp):
     try:
         bl = dai.DeviceBootloader(device, True)
         conf = dai.DeviceBootloader.Config()
         if devType == "POE":
-            if ipType:
-                if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                    if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
-                            values['staticGateway']):
-                        conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+            if staticIp:
+                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(values['staticGateway']):
+                    conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
             else:
-                if values['staticIp'] != "" and values['staticMask'] != "" and values['staticGateway'] != "":
-                    if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(
-                            values['staticGateway']):
-                        conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(values['staticGateway']):
+                    conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
             if values['dns'] != "" and values['dnsAlt'] != "":
                 conf.setDnsIPv4(values['dns'], values['dnsAlt'])
             if values['networkTimeout'] != "":
