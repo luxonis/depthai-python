@@ -141,11 +141,6 @@ def getDevices(window, devices):
 
 
 def getConfigs(window, bl, devType, device):
-    # bl = dai.DeviceBootloader(device)
-    # TODO - might be better to readConfig instead of readConfigData
-
-    # TODO - apply to other functions as well, most of them may throw, catch such cases and present the user with an appropriate message
-    # Most of time the version difference is the culprit
     try:
         conf = bl.readConfig()
         if conf is not None:
@@ -176,10 +171,10 @@ def getConfigs(window, bl, devType, device):
 
         # The "isEmbeddedVersion" tells you whether BL had to be booted,
         # or we connected to an already flashed Bootloader.
-        if bl.isEmbeddedVersion() is True:
-            window.Element('currBoot').update(bl.getVersion())
+        if bl.isEmbeddedVersion():
+            window.Element('currBoot').update('Not Flashed')
         else:
-            window.Element('currBoot').update('None')
+            window.Element('currBoot').update(bl.getVersion())
 
         window.Element('version').update(dai.__version__)
         window.Element('commit').update(dai.__commit__)
@@ -189,13 +184,15 @@ def getConfigs(window, bl, devType, device):
         sg.Popup(f'{ex}')
 
 
-def flashBootloader(window, device, values):
+def flashBootloader(window, device):
     # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
     try:
         sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
         ok, type = sel.wait()
-        print("sel finished. ok:", ok, "selected:", type)
-        return
+        if not ok:
+            print("Flashing bootloader canceled.")
+            return
+
         bl = dai.DeviceBootloader(device, True)
 
         pr = Progress()
@@ -253,8 +250,14 @@ def flashConfig(values, device, devType, ipType):
 
 
 def factoryReset(device):
+    sel = SelectBootloader(['USB', 'NETWORK'], "Select bootloader type used for factory reset.")
+    ok, type = sel.wait()
+    if not ok:
+        print("Factory reset canceled.")
+        return
+
     try:
-        blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(dai.DeviceBootloader.Type.NETWORK)
+        blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(type)
         blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
         bl = dai.DeviceBootloader(device, True)
         tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
@@ -270,7 +273,6 @@ def factoryReset(device):
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
 
-
 def getDeviceType(bl):
     try:
         if bl.getType() == dai.DeviceBootloader.Type.NETWORK:
@@ -280,7 +282,6 @@ def getDeviceType(bl):
     except Exception as ex:
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
-
 
 def flashFromFile(file, device):
     try:
@@ -351,7 +352,7 @@ aboutDeviceLayout = [
     [
         sg.Text("Version of newest bootloader:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.VSeparator(),
-        sg.Text("Current bootloader version:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black")
+        sg.Text("Flashed bootloader version:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black")
     ],
     [
         sg.Text("-version-", key="newBoot", size=(30, 1)),
@@ -481,7 +482,7 @@ while True:
         lockConfig(window)
     if event == "Flash newest Bootloader":
         bl.close()
-        flashBootloader(window, devices[values['devices']], values)
+        flashBootloader(window, devices[values['devices']])
     if event == "Flash configuration":
         bl.close()
         flashConfig(values, devices[values['devices']], devType, values['staticBut'])
