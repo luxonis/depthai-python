@@ -65,12 +65,14 @@ node functionalities are presented with code.
    :caption: Tutorials:
 
    tutorials/hello_world.rst
+   tutorials/standalone_mode.rst
    tutorials/multiple.rst
    tutorials/maximize_fov.rst
    tutorials/debugging.rst
    tutorials/ram_usage.rst
    tutorials/dispaying_detections.rst
    tutorials/camera_tuning.rst
+   tutorials/low-latency.rst
 
 .. toctree::
    :maxdepth: 1

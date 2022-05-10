@@ -14,6 +14,8 @@ it running, you could fill up your storage on your host.
 
 - :ref:`Mono Full Resolution Saver`
 
+.. include::  /includes/container-encoding.rst
+
 Demo
 ####
 
