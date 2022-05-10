@@ -5,7 +5,6 @@ import depthai as dai
 import tempfile
 import PySimpleGUI as sg
 
-
 def check_ip(s: str):
     if str == "":
         return True
@@ -18,7 +17,6 @@ def check_ip(s: str):
             sg.Popup("Wrong IP format.\nValues can not be above 255!")
             return False
     return True
-
 
 def check_mac(s):
     if s == "":
@@ -128,7 +126,7 @@ def lockConfig(window):
     window.Element('version').update("-version-")
     window.Element('commit').update("-version-")
     window.Element('devState').update("-state-")
-    window.Element('bootType').update("DEFAULT")
+    window.Element('bootType').update("AUTO")
 
 
 def getDevices(window, devices):
@@ -190,10 +188,10 @@ def getConfigs(window, bl, devType, device):
         # The "isEmbeddedVersion" tells you whether BL had to be booted,
         # or we connected to an already flashed Bootloader.
         if bl.isEmbeddedVersion() is True:
-            window.Element('currBoot').update('None')
-        else:
             window.Element('currBoot').update(bl.getVersion())
-        # window.Element('currBoot').update(bl.getVersion())
+        else:
+            window.Element('currBoot').update('None')
+
         window.Element('version').update(dai.__version__)
         window.Element('commit').update(dai.__commit__)
         window.Element('devState').update(str(devices[device.desc.name].state).split(".")[1])
@@ -204,18 +202,15 @@ def getConfigs(window, bl, devType, device):
 
 def flashBootloader(window, device, values):
     # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
-    # FIXME 2 - Allow selection of bootloader type explicitly (eg network type when flashing a fresh PoE device which doesn't have an Ethernet bootloader on it yet)
     try:
         bl = dai.DeviceBootloader(device, True)
         if values['bootType'] == "NETWORK":
             type = dai.DeviceBootloader.Type.NETWORK
         elif values['bootType'] == "USB":
             type = dai.DeviceBootloader.Type.USB
-        else:
-            if str(bl.getType()) == "Type.NETWORK":
-                type = dai.DeviceBootloader.Type.NETWORK
-            else:
-                type = dai.DeviceBootloader.Type.USB
+        else: # AUTO
+            type = dai.DeviceBootloader.Type.AUTO
+
         progress = lambda p: p * 100
         bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
         window.Element('currBoot').update(bl.getVersion())
@@ -393,7 +388,7 @@ aboutDeviceLayout = [
     [
         sg.Text("Bootloader type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.VSeparator(),
-        sg.Combo(["DEFAULT", "USB", "NETWORK"], "DEFAULT", size=(30, 3), key="bootType"),
+        sg.Combo(["AUTO", "USB", "NETWORK"], "AUTO", size=(30, 3), key="bootType"),
     ],
     [sg.HSeparator()],
     [
@@ -480,7 +475,7 @@ layout = [
 
 devType = ""
 bl = None
-window = sg.Window(title="Device Manager", layout=layout, size=(645, 410))
+window = sg.Window(title="Device Manager", icon="assets/icon.png", layout=layout, size=(645, 410))
 
 while True:
     event, values = window.read()
@@ -524,7 +519,7 @@ while True:
         bl.close()
         factoryReset(devices[values['devices']])
     if event == "Flash DAP":
-        file = sg.popup_get_file("Select .dap file")
+        file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
         bl = None
         flashFromFile(file, devices[values['devices']])
     if event == "configReal":
