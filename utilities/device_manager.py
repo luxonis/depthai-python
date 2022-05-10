@@ -43,6 +43,25 @@ class Progress:
         self.window.close()
         sg.Popup(msg)
 
+class SelectBootloader:
+    def __init__(self, options, text):
+        self.ok = False
+        layout = [
+            [sg.Text(text)],
+            [
+                sg.Text("Bootloader type:", font=('Arial', 10, 'bold'), text_color="black"),
+                sg.Combo(options, options[0], size=(30, 3), key="bootType"),
+            ],
+            [sg.Text("Warning! This may soft-brick your device,\nproceed if you are sure what you are doing!")],
+            [sg.Submit(), sg.Cancel()],
+        ]
+        self.window = sg.Window("Select bootloader", layout, size=(300,150), modal=True, finalize=True)
+    def wait(self):
+        event, values = self.window.Read()
+        self.window.close()
+        type = getattr(dai.DeviceBootloader.Type, values['bootType'])
+        return (str(event) == "Submit", type)
+
 def unlockConfig(window, devType):
     if devType == "POE":
         window['staticIp'].update(disabled=False)
@@ -100,7 +119,6 @@ def lockConfig(window):
     window.Element('version').update("-version-")
     window.Element('commit').update("-version-")
     window.Element('devState').update("-state-")
-    window.Element('bootType').update("AUTO")
 
 
 def getDevices(window, devices):
@@ -174,13 +192,11 @@ def getConfigs(window, bl, devType, device):
 def flashBootloader(window, device, values):
     # FIXME - to flash bootloader, boot the same device again (from saved device info) but with allowFlashingBootloader = True
     try:
+        sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
+        ok, type = sel.wait()
+        print("sel finished. ok:", ok, "selected:", type)
+        return
         bl = dai.DeviceBootloader(device, True)
-        if values['bootType'] == "NETWORK":
-            type = dai.DeviceBootloader.Type.NETWORK
-        elif values['bootType'] == "USB":
-            type = dai.DeviceBootloader.Type.USB
-        else: # AUTO
-            type = dai.DeviceBootloader.Type.AUTO
 
         pr = Progress()
         progress = lambda p : pr.update(p)
@@ -354,12 +370,6 @@ aboutDeviceLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("Bootloader type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.VSeparator(),
-        sg.Combo(["AUTO", "USB", "NETWORK"], "AUTO", size=(30, 3), key="bootType"),
-    ],
-    [sg.HSeparator()],
-    [
         sg.Text("", size=(7, 2)),
         sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
@@ -443,7 +453,7 @@ layout = [
 
 devType = ""
 bl = None
-window = sg.Window(title="Device Manager", icon="assets/icon.png", layout=layout, size=(645, 410))
+window = sg.Window(title="Device Manager", icon="assets/icon.png", layout=layout, size=(645, 380))
 
 while True:
     event, values = window.read()
