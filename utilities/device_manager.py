@@ -5,6 +5,13 @@ import depthai as dai
 import tempfile
 import PySimpleGUI as sg
 
+
+CONF_TEXT_POE = ['ipTypeText', 'ipText', 'maskText', 'gatewayText', 'dnsText', 'dnsAltText', 'networkTimeoutText', 'macText']
+CONF_INPUT_POE = ['staticBut', 'dynamicBut', 'ip', 'mask', 'gateway', 'dns', 'dnsAlt', 'networkTimeout', 'mac']
+CONF_TEXT_USB = ['usbTimeoutText', 'usbSpeedText']
+CONF_INPUT_USB = ['usbTimeout', 'usbSpeed']
+USB_SPEEDS = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
+
 def check_ip(s: str):
     if s == "":
         return False
@@ -64,18 +71,16 @@ class SelectBootloader:
 
 def unlockConfig(window, devType):
     if devType == "POE":
-        window['staticIp'].update(disabled=False)
-        window['staticMask'].update(disabled=False)
-        window['staticGateway'].update(disabled=False)
-        window['dns'].update(disabled=False)
-        window['dnsAlt'].update(disabled=False)
-        window['networkTimeout'].update(disabled=False)
-        window['mac'].update(disabled=False)
-        window['staticBut'].update(disabled=False)
-        window['dynamicBut'].update(disabled=False)
+        for el in CONF_INPUT_POE:
+            window[el].update(disabled=False)
+        for el in CONF_TEXT_POE:
+            window[el].update(text_color="black")
     else:
-        window['usbTimeout'].update(disabled=False)
-        window['usbSpeed'].update(disabled=False)
+        for el in CONF_INPUT_USB:
+            window[el].update(disabled=False)
+        for el in CONF_TEXT_USB:
+            window[el].update(text_color="black")
+
     window['Flash newest Bootloader'].update(disabled=False)
     window['Flash configuration'].update(disabled=False)
     window['Factory reset'].update(disabled=False)
@@ -85,17 +90,14 @@ def unlockConfig(window, devType):
 
 
 def lockConfig(window):
-    window['staticIp'].update(disabled=True)
-    window['staticMask'].update(disabled=True)
-    window['staticGateway'].update(disabled=True)
-    window['dns'].update(disabled=True)
-    window['dnsAlt'].update(disabled=True)
-    window['networkTimeout'].update(disabled=True)
-    window['mac'].update(disabled=True)
-    window['staticBut'].update(disabled=True)
-    window['dynamicBut'].update(disabled=True)
-    window['usbTimeout'].update(disabled=True)
-    window['usbSpeed'].update(disabled=True)
+    for conf in [CONF_INPUT_POE, CONF_INPUT_USB]:
+        for el in conf:
+            window[el].update(disabled=True)
+            window[el].update("")
+    for conf in [CONF_TEXT_POE, CONF_TEXT_USB]:
+        for el in conf:
+            window[el].update(text_color="gray")
+
     window['Flash newest Bootloader'].update(disabled=True)
     window['Flash configuration'].update(disabled=True)
     window['Factory reset'].update(disabled=True)
@@ -103,15 +105,6 @@ def lockConfig(window):
     window['Flash DAP'].update(disabled=True)
     window['Boot into USB Recovery mode'].update(disabled=True)
 
-    window.Element('staticIp').update("")
-    window.Element('staticMask').update("")
-    window.Element('staticGateway').update("")
-    window.Element('dns').update("")
-    window.Element('dnsAlt').update("")
-    window.Element('networkTimeout').update("")
-    window.Element('mac').update("")
-    window.Element('usbTimeout').update("")
-    window.Element('usbSpeed').update("")
     window.Element('devName').update("-name-")
     window.Element('devNameConf').update("")
     window.Element('newBoot').update("-version-")
@@ -145,23 +138,18 @@ def getConfigs(window, bl, devType, device):
         conf = bl.readConfig()
         if conf is not None:
             if devType == "POE":
-                window.Element('staticIp').update(conf.getIPv4() if conf.getIPv4() is not None else "0.0.0.0")
-                window.Element('staticMask').update(conf.getIPv4Mask() if conf.getIPv4Mask() is not None else "0.0.0.0")
-                window.Element('staticGateway').update(conf.getIPv4Gateway() if conf.getIPv4Gateway() is not None else "0.0.0.0")
+                window.Element('ip').update(conf.getIPv4() if conf.getIPv4() is not None else "0.0.0.0")
+                window.Element('mask').update(conf.getIPv4Mask() if conf.getIPv4Mask() is not None else "0.0.0.0")
+                window.Element('gateway').update(conf.getIPv4Gateway() if conf.getIPv4Gateway() is not None else "0.0.0.0")
                 window.Element('dns').update(conf.getDnsIPv4() if conf.getDnsIPv4() is not None else "0.0.0.0")
                 window.Element('dnsAlt').update(conf.getDnsAltIPv4() if conf.getDnsAltIPv4() is not None else "0.0.0.0")
                 window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
                 window.Element('mac').update(conf.getMacAddress())
-                window.Element('usbTimeout').update("")
-                window.Element('usbSpeed').update("")
+                for el in CONF_INPUT_USB:
+                    window[el].update("")
             else:
-                window.Element('staticIp').update("")
-                window.Element('staticMask').update("")
-                window.Element('staticGateway').update("")
-                window.Element('dns').update("")
-                window.Element('dnsAlt').update("")
-                window.Element('networkTimeout').update("")
-                window.Element('mac').update("")
+                for el in CONF_INPUT_POE:
+                    window[el].update("")
                 window.Element('usbTimeout').update(int(conf.getUsbTimeout().total_seconds() * 1000))
                 window.Element('usbSpeed').update(str(conf.getUsbMaxSpeed()).split('.')[1])
 
@@ -211,11 +199,11 @@ def flashConfig(values, device, devType, staticIp):
         conf = dai.DeviceBootloader.Config()
         if devType == "POE":
             if staticIp:
-                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(values['staticGateway']):
-                    conf.setStaticIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+                if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
+                    conf.setStaticIPv4(values['ip'], values['mask'], values['gateway'])
             else:
-                if check_ip(values['staticIp']) and check_ip(values['staticMask']) and check_ip(values['staticGateway']):
-                    conf.setDynamicIPv4(values['staticIp'], values['staticMask'], values['staticGateway'])
+                if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
+                    conf.setDynamicIPv4(values['ip'], values['mask'], values['gateway'])
             if values['dns'] != "" and values['dnsAlt'] != "":
                 conf.setDnsIPv4(values['dns'], values['dnsAlt'])
             if values['networkTimeout'] != "":
@@ -308,9 +296,6 @@ def connectToDevice(device):
         print(f'Exception: {ex}')
         sg.Popup(f'{ex}')
 
-
-usbSpeeds = ["UNKNOWN", "LOW", "FULL", "HIGH", "SUPER", "SUPER_PLUS"]
-
 sg.theme('LightGrey2')
 
 # first device search
@@ -390,43 +375,44 @@ deviceConfigLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("IPv4 type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("IPv4 type:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="ipTypeText"),
         sg.Radio('Static', "ipType", default=True, font=('Arial', 10, 'bold'), text_color="black",
                  key="staticBut", enable_events=True, disabled=True),
         sg.Radio('Dynamic', "ipType", default=False, font=('Arial', 10, 'bold'), text_color="black",
                  key="dynamicBut", enable_events=True, disabled=True)
     ],
     [
-        sg.Text("IPv4:", size=(12, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.InputText(key="staticIp", size=(16, 2), disabled=True),
-        sg.Text("Mask:", size=(5, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.InputText(key="staticMask", size=(16, 2), disabled=True),
-        sg.Text("Gateway:", size=(8, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.InputText(key="staticGateway", size=(16, 2), disabled=True)
+        sg.Text("IPv4:", size=(12, 1), font=('Arial', 10, 'bold'), text_color="gray", key="ipText"),
+        sg.InputText(key="ip", size=(16, 2), disabled=True),
+        sg.Text("Mask:", size=(5, 1), font=('Arial', 10, 'bold'), text_color="gray", key="maskText"),
+        sg.InputText(key="mask", size=(16, 2), disabled=True),
+        sg.Text("Gateway:", size=(8, 1), font=('Arial', 10, 'bold'), text_color="gray", key="gatewayText"),
+        sg.InputText(key="gateway", size=(16, 2), disabled=True)
     ],
     [
-        sg.Text("DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="dnsText"),
         sg.InputText(key="dns", size=(30, 2), disabled=True)
     ],
     [
-        sg.Text("Alt DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("Alt DNS name:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="dnsAltText"),
         sg.InputText(key="dnsAlt", size=(30, 2), disabled=True)
     ],
     [
-        sg.Text("USB timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.InputText(key="usbTimeout", size=(30, 2), disabled=True)
-    ],
-    [
-        sg.Text("Network timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("Network timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="networkTimeoutText"),
         sg.InputText(key="networkTimeout", size=(30, 2), disabled=True)
     ],
     [
-        sg.Text("MAC address:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
+        sg.Text("MAC address:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="macText"),
         sg.InputText(key="mac", size=(30, 2), disabled=True)
     ],
+    [sg.HSeparator()],
     [
-        sg.Text("USB max speed:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
-        sg.Combo(usbSpeeds, "Select speed", key="usbSpeed", size=(30, 6), disabled=True)
+        sg.Text("USB timeout [ms]:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="usbTimeoutText"),
+        sg.InputText(key="usbTimeout", size=(30, 2), disabled=True)
+    ],
+    [
+        sg.Text("USB max speed:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="gray", key="usbSpeedText"),
+        sg.Combo(USB_SPEEDS, "Select speed", key="usbSpeed", size=(30, 6), disabled=True)
     ],
     [sg.HSeparator()],
     [
