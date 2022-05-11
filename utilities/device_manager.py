@@ -86,7 +86,7 @@ def unlockConfig(window, devType):
     window['Factory reset'].update(disabled=False)
     # window['Clear flash'].update(disabled=False)
     window['Flash DAP'].update(disabled=False)
-    window['Boot into USB Recovery mode'].update(disabled=False)
+    window['recoveryMode'].update(disabled=False)
 
 
 def lockConfig(window):
@@ -103,7 +103,7 @@ def lockConfig(window):
     window['Factory reset'].update(disabled=True)
     window['Clear flash'].update(disabled=True)
     window['Flash DAP'].update(disabled=True)
-    window['Boot into USB Recovery mode'].update(disabled=True)
+    window['recoveryMode'].update(disabled=True)
 
     window.Element('devName').update("-name-")
     window.Element('devNameConf').update("")
@@ -353,11 +353,11 @@ aboutDeviceLayout = [
     [sg.HSeparator()],
     [
         sg.Text("", size=(7, 2)),
-        sg.Button("Flash newest Bootloader", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
+        sg.Button("Flash newest Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFA500'),
-        sg.Button("Boot into USB Recovery mode", size=(17, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFA500')
+        sg.Button("Boot into USB\nRecovery mode", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  key='recoveryMode', button_color='#FFA500')
     ]
 ]
 
@@ -489,7 +489,7 @@ while True:
     if event == "aboutReal":
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
-    if event == "Boot into USB Recovery mode":
+    if event == "recoveryMode":
         bl = None
         flashFromUsb(devices[values['devices']])
 window.close()
