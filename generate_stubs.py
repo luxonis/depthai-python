@@ -12,7 +12,7 @@ if len(sys.argv) < 3:
 MODULE_NAME = sys.argv[1]
 DIRECTORY = sys.argv[2]
 
-print(f'Generating stubs for module: {MODULE_NAME} in directory: {DIRECTORY}')
+print(f'Generating stubs for module: "{MODULE_NAME}" in directory: "{DIRECTORY}"')
 
 try:
 
@@ -33,13 +33,17 @@ try:
 
         # Add imports
         stubs_import = 'import depthai.node as node\nimport typing\nimport json\n' + contents
+
         # Create 'create' overloads
         nodes = re.findall('def \S*\(self\) -> node.(\S*):', stubs_import)
         overloads = ''
         for node in nodes:
             overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
-        #print(f'{overloads}')
         final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
+
+        # Modify "*View" naming
+        nodes = re.findall('View\\[(\S*)\\]', final_stubs)
+        final_stubs = re.sub(r"View\[(\S*)\]", f'View_\\1', final_stubs)
 
         # Writeout changes
         file.seek(0)

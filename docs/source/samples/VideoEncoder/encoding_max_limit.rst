@@ -22,6 +22,8 @@ It's a variation of :ref:`RGB Encoding` and :ref:`RGB & Mono Encoding`.
 - :ref:`RGB Encoding & Mono & MobilenetSSD`
 - :ref:`RGB Encoding & Mono with MobilenetSSD & Depth`
 
+.. include::  /includes/container-encoding.rst
+
 Demo
 ####
 
