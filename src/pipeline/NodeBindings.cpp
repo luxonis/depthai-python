@@ -859,6 +859,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRectification",        &StereoDepth::setRectification, py::arg("enable"), DOC(dai, node, StereoDepth, setRectification))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
+        .def("setSubpixelFractionalBits", &StereoDepth::setSubpixelFractionalBits, py::arg("subpixelFractionalBits"), DOC(dai, node, StereoDepth, setSubpixelFractionalBits))
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
         .def("setRectifyMirrorFrame", [](StereoDepth& s, bool enable) {
