@@ -1549,10 +1549,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("TAG_25H9", RawAprilTagConfig::Family::TAG_25H9)
         .value("TAG_16H5", RawAprilTagConfig::Family::TAG_16H5)
         .value("TAG_CIR21H7", RawAprilTagConfig::Family::TAG_CIR21H7)
-        .value("TAG_CIR49H12", RawAprilTagConfig::Family::TAG_CIR49H12)
-        .value("TAG_CUST48H12", RawAprilTagConfig::Family::TAG_CUST48H12)
         .value("TAG_STAND41H12", RawAprilTagConfig::Family::TAG_STAND41H12)
-        .value("TAG_STAND52H13", RawAprilTagConfig::Family::TAG_STAND52H13)
         ;
 
     quadThresholds

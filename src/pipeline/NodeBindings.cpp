@@ -820,8 +820,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // StereoDepth node
     stereoDepthPresetMode
-        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY)
-        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY)
+        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY, DOC(dai, node, StereoDepth, PresetMode, HIGH_ACCURACY))
+        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY, DOC(dai, node, StereoDepth, PresetMode, HIGH_DENSITY))
         ;
 
     stereoDepth
@@ -919,7 +919,14 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
         .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
         .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
-        .def("setFocalLengthFromCalibration", &StereoDepth::setFocalLengthFromCalibration, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
+        .def("setFocalLengthFromCalibration", [](StereoDepth& s, bool focalLengthFromCalibration){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setFocalLengthFromCalibration is deprecated. Default value is true.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return s.setFocalLengthFromCalibration(focalLengthFromCalibration);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
+        .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;

@@ -16,4 +16,4 @@ execute_process(COMMAND ${CMAKE_COMMAND}
 )
 
 # Build
-execute_process(COMMAND ${CMAKE_COMMAND} --build build --parallel 3 WORKING_DIRECTORY ${project_root} COMMAND_ECHO STDOUT)
+execute_process(COMMAND ${CMAKE_COMMAND} --build build --parallel 2 WORKING_DIRECTORY ${project_root} COMMAND_ECHO STDOUT)
