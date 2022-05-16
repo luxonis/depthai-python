@@ -3,6 +3,8 @@ VideoEncoder
 
 VideoEncoder node is used to encode :ref:`image frames <ImgFrame>` into H264/H265/JPEG.
 
+.. include::  /includes/container-encoding.rst
+
 How to place it
 ###############
 
