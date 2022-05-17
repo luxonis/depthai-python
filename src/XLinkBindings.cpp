@@ -47,22 +47,45 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
 
     // Bindings
     deviceInfo
-        .def(py::init<>())
-        .def_readwrite("desc", &DeviceInfo::desc)
-        .def_readwrite("state", &DeviceInfo::state)
+        .def(py::init<>(), DOC(dai, DeviceInfo, DeviceInfo))
+        .def(py::init<std::string, std::string, XLinkDeviceState_t, XLinkProtocol_t, XLinkPlatform_t, XLinkError_t>(), py::arg("name"), py::arg("mxid"), py::arg("state"), py::arg("protocol"), py::arg("platform"), py::arg("status"), DOC(dai, DeviceInfo, DeviceInfo, 2))
+        .def(py::init<std::string>(), py::arg("mxidOrName"), DOC(dai, DeviceInfo, DeviceInfo, 3))
+        .def(py::init<const deviceDesc_t&>(), DOC(dai, DeviceInfo, DeviceInfo, 4))
         .def("getMxId", &DeviceInfo::getMxId)
+        .def("getXLinkDeviceDesc", &DeviceInfo::getXLinkDeviceDesc)
+        .def_readwrite("name", &DeviceInfo::name)
+        .def_readwrite("mxid", &DeviceInfo::mxid)
+        .def_readwrite("state", &DeviceInfo::state)
+        .def_readwrite("protocol", &DeviceInfo::protocol)
+        .def_readwrite("platform", &DeviceInfo::platform)
+        .def_readwrite("status", &DeviceInfo::status)
+        .def("__repr__", &DeviceInfo::toString)
         ;
 
     deviceDesc
         .def(py::init<>())
         .def_readwrite("protocol", &deviceDesc_t::protocol)
         .def_readwrite("platform", &deviceDesc_t::platform)
+        .def_readwrite("state", &deviceDesc_t::state)
+        .def_readwrite("status", &deviceDesc_t::status)
         .def_property(
             "name",
             [](deviceDesc_t &o)
             { return std::string(o.name); },
             [](deviceDesc_t &o, std::string n)
-            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); })
+            {
+                memset(o.name, 0, sizeof(o.name));
+                std::strncpy(o.name, n.c_str(), sizeof(o.name));
+            })
+        .def_property(
+            "mxid",
+            [](deviceDesc_t &o)
+            { return std::string(o.mxid); },
+            [](deviceDesc_t &o, std::string n)
+            {
+                memset(o.mxid, 0, sizeof(o.mxid));
+                std::strncpy(o.mxid, n.c_str(), sizeof(o.mxid));
+            })
         ;
 
     xLinkDeviceState
