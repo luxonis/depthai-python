@@ -277,7 +277,7 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        luxonis/depthai-library:latest \
-       python3 /depthai-python/examples/rgb_preview.py
+       python3 /depthai-python/examples/ColorCamera/rgb_preview.py
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
