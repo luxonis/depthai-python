@@ -2,7 +2,7 @@ Standalone mode
 ===============
 
 **Standalone / Hostless / On-The-Edge mode** means that the OAK camera isn't connected to a host computer. This can
-be achieved by first :ref:`flashing the bootloader <Flash bootloader>` and then :ref:`flashing the pipeline <Flash pipeline>`
+be achieved by first :ref:`flashing the bootloader <Flash bootloader>` and then :ref:`flashing the pipeline <Flash the pipeline>`
 and assets (NN models) to the OAK's flash memory.
 
 Standalone mode is **only possible on OAKs that have on-board flash** memory, which are currently `OAK IOT <https://docs.luxonis.com/projects/hardware/en/latest/#iot-designs>`__
@@ -34,8 +34,8 @@ After you remove all host-side code, you would only be left with the :ref:`Pipel
 Since device no longer communicates with the host, you need to "route" your program's output through either SPI
 or script node, as mentioned above.
 
-Flash bootloader
-################
+Flash the bootloader
+####################
 
 Execute the code below to flash the :ref:`Bootloader` to the device. The bootloader is packaged together with the
 depthai, so if you have the latest depthai version, you will flash the latest bootloader version. This step
@@ -49,8 +49,8 @@ is required only once.
     progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
     bootloader.flashBootloader(progress)
 
-Flash pipeline
-##############
+Flash the pipeline
+##################
 
 After you have standalone :ref:`Pipeline` definition and :ref:`Bootloader` already flashed on the device, you
 can start with flashing the pipeline. You can flash the pipeline with the following snippet:
@@ -139,10 +139,9 @@ You can also **factory reset OAK POE at specific IP** if it's not reachable (not
     with tempfile.NamedTemporaryFile() as tmpBlFw:
         tmpBlFw.write(bytes(blBinary))
 
-        device_info = dai.DeviceInfo()
+        device_info = dai.DeviceInfo("192.168.34.110") # Set IP here
         device_info.state = dai.XLinkDeviceState.X_LINK_BOOTLOADER
-        device_info.desc.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
-        device_info.desc.name = "192.168.34.110" # Set IP here
+        device_info.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
 
         with dai.DeviceBootloader(device_info, allowFlashingBootloader=True) as bootloader:
             progress = lambda p : print(f'Factory reset progress: {p*100:.1f}%')

@@ -53,6 +53,8 @@ void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
         .value("VERSION_2021_4", OpenVINO::Version::VERSION_2021_4)
         .export_values()
     ;
+    // DEFAULT_VERSION binding
+    openvino.attr("DEFAULT_VERSION") = dai::OpenVINO::DEFAULT_VERSION;
 
     // Bind OpenVINO::Blob
     openvinoBlob

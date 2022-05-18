@@ -39,6 +39,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("__eq__", &DeviceBootloader::Version::operator==)
         .def("__lt__", &DeviceBootloader::Version::operator<)
         .def("__gt__", &DeviceBootloader::Version::operator>)
+        .def("toStringSemver", &DeviceBootloader::Version::toStringSemver)
+        .def("getBuildInfo", &DeviceBootloader::Version::getBuildInfo)
         ;
 
     deviceBootloaderType
