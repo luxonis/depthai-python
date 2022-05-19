@@ -51,6 +51,7 @@ void OpenVINOBindings::bind(pybind11::module& m, void* pCallstack){
         .value("VERSION_2021_2", OpenVINO::Version::VERSION_2021_2)
         .value("VERSION_2021_3", OpenVINO::Version::VERSION_2021_3)
         .value("VERSION_2021_4", OpenVINO::Version::VERSION_2021_4)
+        .value("VERSION_2022_1", OpenVINO::Version::VERSION_2022_1)
         .export_values()
     ;
     // DEFAULT_VERSION binding
