@@ -84,6 +84,13 @@ cam_socket_opts = {
     'camd' : dai.CameraBoardSocket.CAM_D,
 }
 
+cam_socket_to_name = {
+    'RGB'  : 'rgb',
+    'LEFT' : 'left',
+    'RIGHT': 'right',
+    'CAM_D': 'camd',
+}
+
 rotate = {
     'rgb'  : args.rotate in ['all', 'rgb'],
     'left' : args.rotate in ['all', 'mono'],
@@ -175,10 +182,12 @@ if 0:
 with dai.Device(pipeline) as device:
     #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
     print('Connected cameras:')
+    cam_name = {}
     for p in device.getConnectedCameraFeatures():
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
+        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -231,6 +240,7 @@ with dai.Device(pipeline) as device:
 
     print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
 
+    capture_list = []
     while True:
         for c in cam_list:
             pkt = q[c].tryGet()
@@ -238,6 +248,21 @@ with dai.Device(pipeline) as device:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 frame = pkt.getCvFrame()
+                if c in capture_list:
+                    width, height = pkt.getWidth(), pkt.getHeight()
+                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
+                                     + '_' + str(width) + 'x' + str(height)
+                                     + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                                     + '_iso_' + str(pkt.getSensitivity())
+                                     + '_lens_' + str(pkt.getLensPosition())
+                                     + '_' + capture_time
+                                     + '_' + str(pkt.getSequenceNum())
+                                     + ".png"
+                                    )
+                    print("\nSaving:", capture_file_name)
+                    cv2.imwrite(capture_file_name, frame)
+                    capture_list.remove(c)
+
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
@@ -246,10 +271,9 @@ with dai.Device(pipeline) as device:
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
-        elif False:  # key == ord('c'):
-            ctrl = dai.CameraControl()
-            ctrl.setCaptureStill(True)
-            controlQueue.send(ctrl)
+        elif key == ord('c'):
+            capture_list = cam_list.copy()
+            capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
