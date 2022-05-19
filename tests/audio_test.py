@@ -98,6 +98,8 @@ uac = pipeline.createUAC()
 uac.setStreamBackMic(args.back_mic)
 uac.initialConfig.setMicGainDecibels(args.mic_gain_db)
 uac.setEnableSpeaker(args.enable_speaker)
+#uac.setNumFramesPool(300)  # one frame: 33.3ms, default 10 frames
+#uac.setMicMask(1)  # default all 6 mics: 63 / 0x3F / 0b111111
 if args.enable_speaker:
     uac.setSpeakerVolume(args.enable_speaker)
     print("UAC speaker with volume:", args.enable_speaker)
