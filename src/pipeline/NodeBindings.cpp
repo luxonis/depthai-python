@@ -22,6 +22,7 @@
 #include "depthai/pipeline/node/EdgeDetector.hpp"
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
+#include "depthai/pipeline/node/DetectionParser.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -182,6 +183,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
     py::class_<ScriptProperties> scriptProperties(m, "ScriptProperties", DOC(dai, ScriptProperties));
     py::class_<Properties, std::shared_ptr<Properties>> pyProperties(m, "Properties", DOC(dai, Properties));
+    py::class_<DetectionParserProperties> detectionParserProperties(m, "DetectionParserProperties", DOC(dai, DetectionParserProperties));
 
 
     // Node::Id bindings
@@ -216,6 +218,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
     auto aprilTag = ADD_NODE(AprilTag);
+    auto detectionParser = ADD_NODE(DetectionParser);
 
     py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
 
@@ -335,6 +338,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("profile", &VideoEncoderProperties::profile)
         .def_readwrite("quality", &VideoEncoderProperties::quality)
         .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
+        .def_readwrite("outputFrameSize", &VideoEncoderProperties::outputFrameSize)
         ;
 
 
@@ -353,13 +357,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     detectionNetworkProperties
-        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
-        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
-        .def_readwrite("classes", &DetectionNetworkProperties::classes)
-        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
-        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
-        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
-        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
+        .def_readwrite("parser", &DetectionNetworkProperties::parser)
         ;
 
 
@@ -470,6 +468,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("numShaves", &FeatureTrackerProperties::numShaves, DOC(dai, FeatureTrackerProperties, numShaves))
         .def_readwrite("numMemorySlices", &FeatureTrackerProperties::numMemorySlices, DOC(dai, FeatureTrackerProperties, numMemorySlices))
         ;
+
+    // DetectionParser node properties
+    detectionParserProperties
+        .def_readwrite("parser", &DetectionParserProperties::parser, DOC(dai, DetectionParserProperties, parser))
+    ;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -685,6 +688,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, NeuralNetwork, setNumNCEPerInferenceThread))
         .def("getNumInferenceThreads", &NeuralNetwork::getNumInferenceThreads, DOC(dai, node, NeuralNetwork, getNumInferenceThreads))
 
+        .def("setBlob", &NeuralNetwork::setBlob, DOC(dai, node, NeuralNetwork, setBlob))
+
         .def_readonly("inputs", &NeuralNetwork::inputs, DOC(dai, node, NeuralNetwork, inputs))
         .def_readonly("passthroughs", &NeuralNetwork::passthroughs, DOC(dai, node, NeuralNetwork, passthroughs))
 
@@ -856,6 +861,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRectification",        &StereoDepth::setRectification, py::arg("enable"), DOC(dai, node, StereoDepth, setRectification))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
+        .def("setSubpixelFractionalBits", &StereoDepth::setSubpixelFractionalBits, py::arg("subpixelFractionalBits"), DOC(dai, node, StereoDepth, setSubpixelFractionalBits))
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
         .def("setRectifyMirrorFrame", [](StereoDepth& s, bool enable) {
@@ -969,6 +975,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrate"), DOC(dai, node, VideoEncoder, setBitrate))
         .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
+        .def("setMaxOutputFrameSize", &VideoEncoder::setMaxOutputFrameSize, py::arg("maxFrameSize"), DOC(dai, node, VideoEncoder, setMaxOutputFrameSize))
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
         .def("setNumBFrames", &VideoEncoder::setNumBFrames, py::arg("numBFrames"), DOC(dai, node, VideoEncoder, setNumBFrames))
         .def("setQuality", &VideoEncoder::setQuality, py::arg("quality"), DOC(dai, node, VideoEncoder, setQuality))
@@ -1005,6 +1012,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, VideoEncoder, getSize))
         .def("getFrameRate", &VideoEncoder::getFrameRate, DOC(dai, node, VideoEncoder, getFrameRate))
         .def("getLossless", &VideoEncoder::getLossless, DOC(dai, node, VideoEncoder, getLossless))
+        .def("getMaxOutputFrameSize", &VideoEncoder::getMaxOutputFrameSize, DOC(dai, node, VideoEncoder, getMaxOutputFrameSize))
     ;
     // ALIAS
     daiNodeModule.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
@@ -1038,6 +1046,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     detectionNetwork
         .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, NeuralNetwork, input))
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
+        .def_readonly("outNetwork", &DetectionNetwork::outNetwork, DOC(dai, node, DetectionNetwork, outNetwork))
         .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
         .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold))
@@ -1250,6 +1259,31 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setHardwareResources", &FeatureTracker::setHardwareResources, py::arg("numShaves"), py::arg("numMemorySlices"), DOC(dai, node, FeatureTracker, setHardwareResources))
         ;
     daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
+
+    // FeatureTracker node
+    detectionParser
+        .def_readonly("input", &DetectionParser::input, DOC(dai, node, DetectionParser, input))
+        .def_readonly("out", &DetectionParser::out, DOC(dai, node, DetectionParser, out))
+        .def("setNumFramesPool", &DetectionParser::setNumFramesPool, py::arg("numFramesPool"), DOC(dai, node, DetectionParser, setNumFramesPool))
+        .def("getNumFramesPool", &DetectionParser::getNumFramesPool, DOC(dai, node, DetectionParser, getNumFramesPool))
+        .def("setBlob", &DetectionParser::setBlob, py::arg("blob"), DOC(dai, node, DetectionParser, setBlob))
+        .def("setNNFamily", &DetectionParser::setNNFamily, py::arg("type"), DOC(dai, node, DetectionParser, setNNFamily))
+        .def("getNNFamily", &DetectionParser::getNNFamily, DOC(dai, node, DetectionParser, getNNFamily))
+        .def("setConfidenceThreshold", &DetectionParser::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionParser, setConfidenceThreshold))
+        .def("getConfidenceThreshold", &DetectionParser::getConfidenceThreshold, DOC(dai, node, DetectionParser, getConfidenceThreshold))
+        .def("setNumClasses", &DetectionParser::setNumClasses, py::arg("numClasses"), DOC(dai, node, DetectionParser, setNumClasses))
+        .def("setCoordinateSize", &DetectionParser::setCoordinateSize, py::arg("coordinates"), DOC(dai, node, DetectionParser, setCoordinateSize))
+        .def("setAnchors", &DetectionParser::setAnchors, py::arg("anchors"), DOC(dai, node, DetectionParser, setAnchors))
+        .def("setAnchorMasks", &DetectionParser::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, DetectionParser, setAnchorMasks))
+        .def("setIouThreshold", &DetectionParser::setIouThreshold, py::arg("thresh"), DOC(dai, node, DetectionParser, setIouThreshold))
+        .def("getNumClasses", &DetectionParser::getNumClasses, DOC(dai, node, DetectionParser, getNumClasses))
+        .def("getCoordinateSize", &DetectionParser::getCoordinateSize, DOC(dai, node, DetectionParser, getCoordinateSize))
+        .def("getAnchors", &DetectionParser::getAnchors, DOC(dai, node, DetectionParser, getAnchors))
+        .def("getAnchorMasks", &DetectionParser::getAnchorMasks, DOC(dai, node, DetectionParser, getAnchorMasks))
+        .def("getIouThreshold", &DetectionParser::getIouThreshold, DOC(dai, node, DetectionParser, getIouThreshold))
+
+        ;
+    daiNodeModule.attr("DetectionParser").attr("Properties") = detectionParserProperties;
 
 
 }
