@@ -1385,6 +1385,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setLeftRightCheck",       &StereoDepthConfig::setLeftRightCheck, py::arg("enable"), DOC(dai, StereoDepthConfig, setLeftRightCheck))
         .def("setExtendedDisparity",    &StereoDepthConfig::setExtendedDisparity, py::arg("enable"), DOC(dai, StereoDepthConfig, setExtendedDisparity))
         .def("setSubpixel",             &StereoDepthConfig::setSubpixel, py::arg("enable"), DOC(dai, StereoDepthConfig, setSubpixel))
+        .def("setSubpixelFractionalBits", &StereoDepthConfig::setSubpixelFractionalBits, py::arg("subpixelFractionalBits"), DOC(dai, StereoDepthConfig, setSubpixelFractionalBits))
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
         .def("setDepthUnit",            &StereoDepthConfig::setDepthUnit, DOC(dai, StereoDepthConfig, setDepthUnit))
         .def("getDepthUnit",            &StereoDepthConfig::getDepthUnit, DOC(dai, StereoDepthConfig, getDepthUnit))
@@ -1547,10 +1548,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("TAG_25H9", RawAprilTagConfig::Family::TAG_25H9)
         .value("TAG_16H5", RawAprilTagConfig::Family::TAG_16H5)
         .value("TAG_CIR21H7", RawAprilTagConfig::Family::TAG_CIR21H7)
-        .value("TAG_CIR49H12", RawAprilTagConfig::Family::TAG_CIR49H12)
-        .value("TAG_CUST48H12", RawAprilTagConfig::Family::TAG_CUST48H12)
         .value("TAG_STAND41H12", RawAprilTagConfig::Family::TAG_STAND41H12)
-        .value("TAG_STAND52H13", RawAprilTagConfig::Family::TAG_STAND52H13)
         ;
 
     quadThresholds

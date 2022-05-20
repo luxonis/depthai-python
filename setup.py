@@ -10,6 +10,7 @@ import multiprocessing
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+from pathlib import Path
 
 ### NAME
 MODULE_NAME = 'depthai'
@@ -95,9 +96,16 @@ class CMakeBuild(build_ext):
         # initialize cmake_args and build_args
         cmake_args = []
         build_args = []
+        env = os.environ.copy()
 
         # Specify output directory and python executable
         cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
+        # Specify dir of python executable (pybind11)
+        if platform.system() == "Windows":
+            # Windows - remove case insensitive variants
+            env = {key:env[key] for key in env if key.upper() != 'pythonLocation'.upper()}
+        env['pythonLocation'] = str(Path(sys.executable).parent.absolute())
+        
 
         # Pass a commit hash
         if buildCommitHash != None :
@@ -127,8 +135,6 @@ class CMakeBuild(build_ext):
                 raise
             except:
                 freeMemory = 4000
-        # Memcheck (guard if it fails)
-
 
         # Configure and build
         # Windows
@@ -149,8 +155,8 @@ class CMakeBuild(build_ext):
             # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
-                os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
-                os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
+                env['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
+                env['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
             max_threads = multiprocessing.cpu_count()
@@ -161,7 +167,6 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j' + str(num_threads)]
             cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
 
-        env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
 
         # Add additional cmake args from environment
@@ -170,8 +175,10 @@ class CMakeBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+
+        # Configure and build
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp, env=env)
 
 setup(
     name=MODULE_NAME,

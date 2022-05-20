@@ -14,6 +14,7 @@
 #include "depthai-shared/common/Size2f.hpp"
 #include "depthai-shared/common/UsbSpeed.hpp"
 #include "depthai-shared/common/DetectionNetworkType.hpp"
+#include "depthai-shared/common/DetectionParserOptions.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -37,6 +38,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<ProcessorType> processorType(m, "ProcessorType");
     py::enum_<DetectionNetworkType> detectionNetworkType(m, "DetectionNetworkType");
     py::enum_<SerializationType> serializationType(m, "SerializationType");
+    py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -204,5 +206,15 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("JSON", SerializationType::JSON)
         .value("JSON_MSGPACK", SerializationType::JSON_MSGPACK)
     ;
+
+    detectionParserOptions
+        .def_readwrite("nnFamily", &DetectionParserOptions::nnFamily)
+        .def_readwrite("confidenceThreshold", &DetectionParserOptions::confidenceThreshold)
+        .def_readwrite("classes", &DetectionParserOptions::classes)
+        .def_readwrite("coordinates", &DetectionParserOptions::coordinates)
+        .def_readwrite("anchors", &DetectionParserOptions::anchors)
+        .def_readwrite("anchorMasks", &DetectionParserOptions::anchorMasks)
+        .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
+        ;
 
 }

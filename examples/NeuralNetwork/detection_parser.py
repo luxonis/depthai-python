@@ -26,24 +26,27 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
-nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
+nn = pipeline.create(dai.node.NeuralNetwork)
+det = pipeline.create(dai.node.DetectionParser)
 xoutRgb = pipeline.create(dai.node.XLinkOut)
 nnOut = pipeline.create(dai.node.XLinkOut)
-nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 nnOut.setStreamName("nn")
-nnNetworkOut.setStreamName("nnNetwork");
 
 # Properties
 camRgb.setPreviewSize(300, 300)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 # Define a neural network that will make predictions based on the source frames
-nn.setConfidenceThreshold(0.5)
-nn.setBlobPath(args.nnPath)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
+
+blob = dai.OpenVINO.Blob(args.nnPath);
+nn.setBlob(blob);
+det.setBlob(blob);
+det.setNNFamily(dai.DetectionNetworkType.MOBILENET);
+det.setConfidenceThreshold(0.5);
 
 # Linking
 if args.sync:
@@ -52,8 +55,8 @@ else:
     camRgb.preview.link(xoutRgb.input)
 
 camRgb.preview.link(nn.input)
-nn.out.link(nnOut.input)
-nn.outNetwork.link(nnNetworkOut.input);
+nn.out.link(det.input)
+det.out.link(nnOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -61,7 +64,6 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     qDet = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
-    qNN = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
     frame = None
     detections = []
@@ -85,19 +87,15 @@ with dai.Device(pipeline) as device:
         # Show the frame
         cv2.imshow(name, frame)
 
-    printOutputLayersOnce = True
-
     while True:
         if args.sync:
             # Use blocking get() call to catch frame and inference result synced
             inRgb = qRgb.get()
             inDet = qDet.get()
-            inNN = qNN.get()
         else:
             # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
             inRgb = qRgb.tryGet()
             inDet = qDet.tryGet()
-            inNN = qNN.tryGet()
 
         if inRgb is not None:
             frame = inRgb.getCvFrame()
@@ -107,13 +105,6 @@ with dai.Device(pipeline) as device:
         if inDet is not None:
             detections = inDet.detections
             counter += 1
-
-        if printOutputLayersOnce and inNN is not None:
-            toPrint = 'Output layer names:'
-            for ten in inNN.getAllLayerNames():
-                toPrint = f'{toPrint} {ten},'
-            print(toPrint)
-            printOutputLayersOnce = False;
 
         # If the frame is available, draw bounding boxes on it and show the frame
         if frame is not None:
