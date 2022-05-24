@@ -14,8 +14,10 @@ xlinkOut = pipeline.create(dai.node.XLinkOut)
 
 xlinkOut.setStreamName("imu")
 
-# enable ROTATION_VECTOR at 400 hz rate
-imu.enableIMUSensor(dai.IMUSensor.ROTATION_VECTOR, 400)
+# enable ACCELEROMETER_RAW at 500 hz rate
+imu.enableIMUSensor(dai.IMUSensor.ACCELEROMETER_RAW, 500)
+# enable GYROSCOPE_RAW at 400 hz rate
+imu.enableIMUSensor(dai.IMUSensor.GYROSCOPE_RAW, 400)
 # it's recommended to set both setBatchReportThreshold and setMaxBatchReports to 20 when integrating in a pipeline with a lot of input/output connections
 # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
 imu.setBatchReportThreshold(1)
@@ -26,6 +28,8 @@ imu.setMaxBatchReports(10)
 
 # Link plugins IMU -> XLINK
 imu.out.link(xlinkOut.input)
+
+imu.enableFirmwareUpdate(True)
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
@@ -41,21 +45,23 @@ with dai.Device(pipeline) as device:
 
         imuPackets = imuData.packets
         for imuPacket in imuPackets:
-            rVvalues = imuPacket.rotationVector
+            acceleroValues = imuPacket.acceleroMeter
+            gyroValues = imuPacket.gyroscope
 
-            rvTs = rVvalues.timestamp.get()
+            acceleroTs = acceleroValues.timestamp.get()
+            gyroTs = gyroValues.timestamp.get()
             if baseTs is None:
-                baseTs = rvTs
-            rvTs = rvTs - baseTs
+                baseTs = acceleroTs if acceleroTs < gyroTs else gyroTs
+            acceleroTs = timeDeltaToMilliS(acceleroTs - baseTs)
+            gyroTs = timeDeltaToMilliS(gyroTs - baseTs)
 
             imuF = "{:.06f}"
             tsF  = "{:.03f}"
 
-            print(f"Rotation vector timestamp: {tsF.format(timeDeltaToMilliS(rvTs))} ms")
-            print(f"Quaternion: i: {imuF.format(rVvalues.i)} j: {imuF.format(rVvalues.j)} "
-                f"k: {imuF.format(rVvalues.k)} real: {imuF.format(rVvalues.real)}")
-            print(f"Accuracy (rad): {imuF.format(rVvalues.rotationVectorAccuracy)}")
-
+            print(f"Accelerometer timestamp: {tsF.format(acceleroTs)} ms")
+            print(f"Accelerometer [m/s^2]: x: {imuF.format(acceleroValues.x)} y: {imuF.format(acceleroValues.y)} z: {imuF.format(acceleroValues.z)}")
+            print(f"Gyroscope timestamp: {tsF.format(gyroTs)} ms")
+            print(f"Gyroscope [rad/s]: x: {imuF.format(gyroValues.x)} y: {imuF.format(gyroValues.y)} z: {imuF.format(gyroValues.z)} ")
 
         if cv2.waitKey(1) == ord('q'):
             break
