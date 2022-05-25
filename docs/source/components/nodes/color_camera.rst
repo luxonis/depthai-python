@@ -93,6 +93,7 @@ Here are known camera limitations for the Myriad X:
 
 - **ISP can process about 600 MP/s**, and about **500 MP/s** when the pipeline is also running NNs and video encoder in parallel
 - **3A algorithms** can process about **200..250 FPS overall** (for all camera streams). This is a current limitation of our implementation, and we have plans for a workaround to run 3A algorithms on every Xth frame, no ETA yet
+- **ISP Scaling** numerator value can be 1..16 and denominator value 1..32 for both vertical and horizontal scaling. So you can downscale eg. 12MP (4056x3040) only to resolutions `calculated here <https://docs.google.com/spreadsheets/d/153yTstShkJqsPbkPOQjsVRmM8ZO3A6sCqm7uayGF-EE/edit#gid=0>`__
 
 Examples of functionality
 #########################
