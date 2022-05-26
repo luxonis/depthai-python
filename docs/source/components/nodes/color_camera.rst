@@ -59,7 +59,15 @@ Click `here <https://en.wikipedia.org/wiki/Image_processor>`__ for more informat
 
 **Image Post-Processing** converts YUV420 planar frames from the **ISP** into :code:`video`/:code:`preview`/:code:`still` frames.
 
-When setting sensor resolution to 12MP and using :code:`video`, you will get 4K video output. 4K frames are cropped from 12MP frames (not downsampled).
+``still`` (when a capture is triggered) and ``isp`` work at the max camera resolution, while ``video`` and ``preview`` are
+limited to max 4K (3840 x 2160) resolution, which is cropped from ``isp``.
+For IMX378 (12MPP), the **post-processing** works like this:
+
+.. code-block::
+
+    ┌─────┐   Cropping to   ┌─────────┐  Downscaling   ┌──────────┐
+    │ ISP ├────────────────►│  video  ├───────────────►│ preview  │
+    └─────┘  max 3840x2160  └─────────┘  and cropping  └──────────┘
 
 Usage
 #####
