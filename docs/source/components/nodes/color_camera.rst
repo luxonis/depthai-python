@@ -61,7 +61,7 @@ Click `here <https://en.wikipedia.org/wiki/Image_processor>`__ for more informat
 
 ``still`` (when a capture is triggered) and ``isp`` work at the max camera resolution, while ``video`` and ``preview`` are
 limited to max 4K (3840 x 2160) resolution, which is cropped from ``isp``.
-For IMX378 (12MPP), the **post-processing** works like this:
+For IMX378 (12MP), the **post-processing** works like this:
 
 .. code-block::
 
