@@ -3,13 +3,14 @@
 Bootloader
 ==========
 
-Depthai bootloader is a small program which aids in booting and updating bootloader or depthai application packages.
+DepthAI bootloader is a small program which handles the booting process, either by booting the flashed application,
+or by initializing the PoE cameras so DepthAI API can connect to them.
 
-To be able to run standalone (:ref:`documentation here <Standalone mode>`), the Depthai bootloader must be first
-flashed to the devices flash. This step is required only once.
+To be able to run in :ref:`Standalone mode`, the Depthai bootloader must be first flashed to the devices flash.
+This step is required only once.
 
 Once the device has the bootloader flashed, it will perform the same as before. Running pipelines with a host
-connected doesn’t require any changes.
+connected doesn't require any changes.
 
 Suggested workflow is to perform as much of development as possible with the host connected as the
 iteration cycle is greatly improved.
@@ -38,10 +39,10 @@ You can also check the version of the current bootloader by using the :ref:`Boot
 DepthAI Application Package (.dap)
 ##################################
 
-Depthai application package is a binary file format which stores sections of data. The purpose of this format is to be able to extract
+**DepthAI application package** is a binary file format which stores sections of data. The purpose of this format is to be able to extract
 individual sections and do OTA updates without requiring to update all data. Example: Between update 1 and 2 of users application,
 Depthai firmware, Asset storage (50MiB neural network) and asset structure remained the same, but some additional processing nodes were added
-to the pipeline. Instead of transferring the whole package only Pipeline description can be sent and updated.
+to the pipeline. Instead of transferring the whole package, only Pipeline description can be sent and updated.
 
 Depthai application package (**.dap**) consists of:
 
