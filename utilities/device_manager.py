@@ -69,6 +69,25 @@ class SelectBootloader:
         type = getattr(dai.DeviceBootloader.Type, values['bootType'])
         return (str(event) == "Submit", type)
 
+class SelectIP:
+    def __init__(self):
+        self.ok = False
+        layout = [
+            [sg.Text("Specify the custom IP of the OAK PoE\ncamera you want to connect to")],
+            [
+                sg.Text("IPv4:", font=('Arial', 10, 'bold'), text_color="black"),
+                sg.InputText(key="ip", size=(16, 2)),
+            ],
+            [sg.Submit(), sg.Cancel()],
+        ]
+        self.window = sg.Window("Specify IP", layout, size=(300,110), modal=True, finalize=True)
+    def wait(self):
+        event, values = self.window.Read()
+        self.window.close()
+        if str(event) == "Cancel" or values is None or not check_ip(values["ip"]):
+            return False, ""
+        return True, values["ip"]
+
 def unlockConfig(window, devType):
     if devType == "POE":
         for el in CONF_INPUT_POE:
@@ -322,7 +341,8 @@ aboutDeviceLayout = [
     [
         sg.Text("Select device: ", size=(15, 1), font=('Arial', 10, 'bold'), text_color="black"),
         sg.Combo(allDevices, tmp, size=(30, 5), key="devices", enable_events=True),
-        sg.Button("Search")
+        sg.Button("Search", font=('Arial', 10, 'bold')),
+        sg.Button("Specify IP")
     ],
     [
         sg.Text("Name of connected device:", size=(30, 1), font=('Arial', 10, 'bold'), text_color="black"),
@@ -443,6 +463,7 @@ while True:
     if event == sg.WIN_CLOSED:
         break
     dev = values['devices']
+
     if event == "devices":
         if dev != "Select device":
             # "allow flashing bootloader" boots latest bootloader first
@@ -459,13 +480,26 @@ while True:
                 unlockConfig(window, devType)
         else:
             window.Element('progress').update("No device selected.")
-    if event == "Search":
+    elif event == "Search":
         getDevices(window, devices)
         lockConfig(window)
-    if event == "Flash newest Bootloader":
+    elif event == "Specify IP":
+        select = SelectIP()
+        ok, ip = select.wait()
+        if ok:
+            di = dai.DeviceInfo(ip)
+            di.state = dai.XLinkDeviceState.X_LINK_BOOTLOADER
+            di.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
+            devices[ip] = di # Add to devices dict
+            window.Element('devices').update(ip) # Show to user
+            bl = connectToDevice(di)
+            devType = getDeviceType(bl)
+            getConfigs(window, bl, devType, di)
+            unlockConfig(window, devType)
+    elif event == "Flash newest Bootloader":
         bl.close()
         flashBootloader(window, devices[values['devices']])
-    if event == "Flash configuration":
+    elif event == "Flash configuration":
         bl.close()
         flashConfig(values, devices[values['devices']], devType, values['staticBut'])
         bl = connectToDevice(devices[values['devices']])
@@ -476,20 +510,20 @@ while True:
         else:
             devices.clear()
             window.Element('devices').update("Search for devices", values=[])
-    if event == "Factory reset":
+    elif event == "Factory reset":
         bl.close()
         factoryReset(devices[values['devices']])
-    if event == "Flash DAP":
+    elif event == "Flash DAP":
         file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
         bl = None
         flashFromFile(file, devices[values['devices']])
-    if event == "configReal":
+    elif event == "configReal":
         window['-COL1-'].update(visible=False)
         window['-COL2-'].update(visible=True)
-    if event == "aboutReal":
+    elif event == "aboutReal":
         window['-COL2-'].update(visible=False)
         window['-COL1-'].update(visible=True)
-    if event == "recoveryMode":
+    elif event == "recoveryMode":
         bl = None
         flashFromUsb(devices[values['devices']])
 window.close()
