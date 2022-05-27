@@ -8,6 +8,9 @@ This script allows you to set static or dynamic IP, or clear bootloader config o
     device (you won't be able to access it), and will have to `factory reset <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#factory-reset>`__
     your OAK PoE.
 
+.. note::
+    We suggest using :ref:`Device Manager`, a GUI tool for interfacing with the bootloader and its configurations.
+
 Demo
 ####
 
