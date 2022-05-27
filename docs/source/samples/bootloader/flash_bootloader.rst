@@ -6,6 +6,9 @@ have flash on-board.
 
 Click on :ref:`Bootloader` for more information.
 
+.. note::
+    We suggest using :ref:`Device Manager`, a GUI tool for interfacing with the bootloader and its configurations.
+
 Demo
 ####
 
