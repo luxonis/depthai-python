@@ -5,6 +5,13 @@ import depthai as dai
 import time
 import math
 
+print("Warning! Flashing IMU firmware can potentially soft brick your device and should be done with caution.")
+print("Do not unplug your device while the IMU firmware is flashing.")
+print("Type 'y' and press enter to proceed, otherwise exits: ")
+if input() != 'y':
+    print("Prompt declined, exiting...")
+    exit(-1)
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
