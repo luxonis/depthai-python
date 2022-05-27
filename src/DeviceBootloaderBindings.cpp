@@ -121,6 +121,7 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     deviceBootloderMemoryInfo
         .def(py::init<>())
+        .def_readwrite("available", &DeviceBootloader::MemoryInfo::available)
         .def_readwrite("size", &DeviceBootloader::MemoryInfo::size)
         .def_readwrite("info", &DeviceBootloader::MemoryInfo::info)
     ;
