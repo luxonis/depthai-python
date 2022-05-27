@@ -54,6 +54,7 @@ Boot switches
 - **Recovery mode for USB** - DIP switch: 0x16 (switches 2,4,5 ON) - to boot directly into USB mode, so camera waits for the host to connect to it via USB.
 
 .. image:: https://user-images.githubusercontent.com/18037362/154956812-c3fcc961-af46-4dfd-8080-e15c8c6b43f0.png
+
 OAK-D-PoE with switches 2,4,5 ON, for the purpose of connecting to the device via USB.
 
 API
