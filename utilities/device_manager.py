@@ -242,7 +242,9 @@ def factoryReset(device):
 
     try:
         blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(type)
-        blBinary = blBinary + ([0xFF] * ((8 * 1024 * 1024 + 512) - len(blBinary)))
+        # Clear 1 MiB for USB BL and 8 MiB for NETWORK BL
+        mib = 1 if type == dai.DeviceBootloader.Type.USB else 8
+        blBinary = blBinary + ([0xFF] * ((mib * 1024 * 1024 + 512) - len(blBinary)))
         bl = dai.DeviceBootloader(device, True)
         tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
         tmpBlFw.write(bytes(blBinary))
