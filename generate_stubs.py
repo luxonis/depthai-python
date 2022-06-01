@@ -3,6 +3,7 @@ import subprocess
 import re
 import tempfile
 import os
+import textwrap
 
 # Usage
 if len(sys.argv) < 3:
@@ -32,7 +33,15 @@ try:
         contents = file.read()
 
         # Add imports
-        stubs_import = 'import depthai.node as node\nimport typing\nimport json\n' + contents
+        stubs_import = textwrap.dedent('''
+            # Ensures that the stubs are picked up - thanks, numpy project
+            from depthai import (
+                node as node,
+            )
+
+            import typing
+            import json
+        ''') + contents
 
         # Create 'create' overloads
         nodes = re.findall('def \S*\(self\) -> node.(\S*):', stubs_import)
