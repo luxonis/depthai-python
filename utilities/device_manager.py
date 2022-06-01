@@ -315,7 +315,7 @@ aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("Device select", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="configReal")
     ],
     [sg.HSeparator()],
@@ -366,7 +366,7 @@ deviceConfigLayout = [
     [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("Device select", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake"),
         # TODO create library tab
         # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
