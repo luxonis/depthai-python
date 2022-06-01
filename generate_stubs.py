@@ -50,10 +50,6 @@ try:
             overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
         final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
 
-        # Modify "*View" naming
-        nodes = re.findall('View\\[(\S*)\\]', final_stubs)
-        final_stubs = re.sub(r"View\[(\S*)\]", f'View_\\1', final_stubs)
-
         # Writeout changes
         file.seek(0)
         file.write(final_stubs)
