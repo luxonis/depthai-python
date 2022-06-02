@@ -28,13 +28,16 @@ Device Manager Usage
 
 **About device tab** - Select a camera to see its metadata - like MxID, flashed bootloader version, device state etc.
 
-* First, we need to select the device using the dropdown. You can click ``Search`` to search for all available cameras, either via USB port or on LAN (PoE OAKs). You can also **Specify IP** if your OAK PoE camera isn't in the same LAN.
+* First we have to select the device we want to connect (boot) to, you can select that using:
+
+  * **Dropdown** which contains found device MX Ids. Dropdown will only get updated when starting the app.
+  * **Specify IP** button if your OAK PoE camera isn't in the same LAN.
+  * **Search** feature - a new window will show that has a table with all available cameras (either via USB port or on LAN - OAK PoEs), their MxId, name, and status. Clicking on a table row will select that device and boot to it.
 * ``Flash newest Bootloader`` button will flash the ``newest bootloader`` to the device. You can select AUTO, USB or NETWORK bootloader.
 
   * **AUTO** will select the connection type of bootloader with which the camera is currently connected to. If you are connected via USB (doing factory reset) to an OAK PoE camera, you shouldn't select AUTO, as it will flash USB bootloader.
   * **USB** bootloader will try to boot the application that is stored on flash memory. If it can't find flashed application, it will just behave as normal USB OAK - so it will wait until a host computer initializes the application.
   * **NETWORK** bootloader is used by the OAK PoE cameras, and is flashed at the factory. It handles network initialization so the OAK PoE cameras can be booted through the LAN.
-
 * ``Factory reset`` will erase the whole flash content and re-flash it with only the USB or NETWORK bootloader. Flashed application (pipeline, assets) and bootloader configurations will be lost.
 * ``Boot into USB recovery mode`` will force eg. OAK PoE camera to be available through the USB connector, even if its boot pins are set to PoE booting. It is mostly used by our firmware developers.
 
