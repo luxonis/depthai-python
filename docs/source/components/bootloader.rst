@@ -21,14 +21,14 @@ Device Manager
 ``device_manager.py`` is a Python helper that interfaces with device :ref:`Bootloader` and bootloader configuration.
 It can be found at `depthai-python/utilities <https://github.com/luxonis/depthai-python/tree/main/utilities>`__.
 
-.. image:: https://user-images.githubusercontent.com/18037362/170479657-faacd06d-5f7e-4215-a821-005d58a5f379.png
+.. image:: https://user-images.githubusercontent.com/18037362/171629704-0f78f31a-1778-4338-8ac0-bdfb0d2d593f.png
 
 Device Manager Usage
 --------------------
 
 **About device tab** - Select a camera to see its metadata - like MxID, flashed bootloader version, device state etc.
 
-* First, we need to select the device using the dropdown. You can click ``Search`` to search for all available cameras, either via USB port or on LAN (PoE OAKs).
+* First, we need to select the device using the dropdown. You can click ``Search`` to search for all available cameras, either via USB port or on LAN (PoE OAKs). You can also **Specify IP** if your OAK PoE camera isn't in the same LAN.
 * ``Flash newest Bootloader`` button will flash the ``newest bootloader`` to the device. You can select AUTO, USB or NETWORK bootloader.
 
   * **AUTO** will select the connection type of bootloader with which the camera is currently connected to. If you are connected via USB (doing factory reset) to an OAK PoE camera, you shouldn't select AUTO, as it will flash USB bootloader.
