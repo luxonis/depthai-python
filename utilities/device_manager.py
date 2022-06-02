@@ -537,6 +537,7 @@ while True:
         else:
             window.Element('progress').update("No device selected.")
     elif event == "Search":
+        getDevices(window) # Re-search devices for dropdown
         lockConfig(window)
         selDev = SearchDevice()
         di = selDev.wait()
