@@ -150,8 +150,8 @@ for c in cam_list:
             cam[c].raw.link(xout[c].input)
         else:
             tof[c] = pipeline.createToF()
-            cam[c].raw.link(tof[c].inputImage)
-            tof[c].out.link(xout[c].input)
+            cam[c].raw.link(tof[c].input)
+            tof[c].depth.link(xout[c].input)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
