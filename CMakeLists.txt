@@ -35,7 +35,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
 
 # Set default build type depending on context
 set(default_build_type "Release")
