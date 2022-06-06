@@ -35,7 +35,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Set default build type depending on context
 set(default_build_type "Release")
@@ -131,7 +131,7 @@ else()
     endif()
     message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
-        ${CMAKE_COMMAND} -E env 
+        ${CMAKE_COMMAND} -E env
         # PATH (dlls)
         "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
