@@ -21,6 +21,13 @@ try:
     # CWD to to extdir where the built module can be found to extract the types
     env = os.environ
     env['PYTHONPATH'] = f'{DIRECTORY}{os.pathsep}{env.get("PYTHONPATH", "")}'
+
+    # Test importing depthai after PYTHONPATH is specified
+    try:
+        import depthai
+    except Exception as ex:
+        print(f'Could not import depthai: {ex}')
+
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
     subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
 

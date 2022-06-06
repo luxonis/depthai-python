@@ -45,7 +45,7 @@ namespace pybind11 { namespace detail {
                 bool isPath = false;
                 try{
                     isPath = isinstance(src, module::import("pathlib").attr("PurePath"));
-                } catch (const std::exception& ex) {
+                } catch (const std::exception&) {
                     //ignore
                 }
                 if(!isinstance<str>(src) && !isPath) {
