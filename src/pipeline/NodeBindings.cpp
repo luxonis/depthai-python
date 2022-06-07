@@ -24,6 +24,8 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 #include "depthai/pipeline/node/UAC.hpp"
+#include "depthai/pipeline/node/AudioMic.hpp"
+#include "depthai/pipeline/node/AudioProc.hpp"
 #include "depthai/pipeline/node/ToF.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 
@@ -226,6 +228,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto featureTracker = ADD_NODE(FeatureTracker);
     auto uvc = ADD_NODE(UVC);
     auto uac = ADD_NODE(UAC);
+    auto audioMic = ADD_NODE(AudioMic);
+    auto audioProc = ADD_NODE(AudioProc);
     auto tof = ADD_NODE(ToF);
     auto aprilTag = ADD_NODE(AprilTag);
 	
@@ -1418,13 +1422,29 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // UAC node
     uac
-        .def_readonly("out", &UAC::out, DOC(dai, node, UAC, out))
-        .def_readonly("initialConfig", &UAC::initialConfig, DOC(dai, node, UAC, initialConfig))
+        .def_readonly("input", &UAC::input, DOC(dai, node, UAC, input))
         .def_readonly("inputConfig", &UAC::inputConfig, DOC(dai, node, UAC, inputConfig))
-        .def("setStreamBackMic", &UAC::setStreamBackMic, py::arg("enable"), DOC(dai, node, UAC, setStreamBackMic))
-        .def("setMicAutoGain", &UAC::setMicAutoGain, py::arg("enable"), DOC(dai, node, UAC, setMicAutoGain))
-        .def("setXlinkApplyMicGain", &UAC::setXlinkApplyMicGain, py::arg("enable"), DOC(dai, node, UAC, setXlinkApplyMicGain))
-        .def("setXlinkSampleSizeBytes", &UAC::setXlinkSampleSizeBytes, py::arg("size"), DOC(dai, node, UAC, setXlinkSampleSizeBytes))
+        ;
+
+    // AudioMic node
+    audioMic
+        .def_readonly("out", &AudioMic::out, DOC(dai, node, AudioMic, out))
+        .def_readonly("outBack", &AudioMic::outBack, DOC(dai, node, AudioMic, outBack))
+        .def_readonly("inputConfig", &AudioMic::inputConfig, DOC(dai, node, AudioMic, inputConfig))
+        .def_readonly("initialConfig", &AudioMic::initialConfig, DOC(dai, node, AudioMic, initialConfig))
+        .def("setStreamBackMic", &AudioMic::setStreamBackMic, py::arg("enable"), DOC(dai, node, AudioMic, setStreamBackMic))
+        .def("setMicAutoGain", &AudioMic::setMicAutoGain, py::arg("enable"), DOC(dai, node, AudioMic, setMicAutoGain))
+        .def("setXlinkApplyMicGain", &AudioMic::setXlinkApplyMicGain, py::arg("enable"), DOC(dai, node, AudioMic, setXlinkApplyMicGain))
+        .def("setXlinkSampleSizeBytes", &AudioMic::setXlinkSampleSizeBytes, py::arg("size"), DOC(dai, node, AudioMic, setXlinkSampleSizeBytes))
+        ;
+
+    // AudioMic node
+    audioProc
+        .def_readonly("input", &AudioProc::input, DOC(dai, node, AudioProc, input))
+        .def_readonly("reference", &AudioProc::reference, DOC(dai, node, AudioProc, reference))
+        .def_readonly("out", &AudioProc::out, DOC(dai, node, AudioProc, out))
+        .def("setNumFramesPool", &AudioProc::setNumFramesPool, py::arg("frames"), DOC(dai, node, AudioProc, setNumFramesPool))
+        .def("getNumFramesPool", &AudioProc::getNumFramesPool, DOC(dai, node, AudioProc, getNumFramesPool))
         ;
 
 }

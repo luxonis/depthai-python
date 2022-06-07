@@ -92,22 +92,29 @@ if not args.no_camera:
 
 # Create an UAC (USB Audio Class) node
 uac = pipeline.createUAC()
-uac.setStreamBackMic(args.back_mic)
-uac.initialConfig.setMicGainDecibels(args.mic_gain_db)
+audioMic = pipeline.create(dai.node.AudioMic)
+audioMic.setStreamBackMic(args.back_mic)
+audioMic.initialConfig.setMicGainDecibels(args.mic_gain_db)
 print("UAC using:", "Back mic," if args.back_mic else "Front mics,",
       "Gain {} dB".format(args.mic_gain_db))
 
-uac.setXlinkApplyMicGain(True)
-uac.setXlinkSampleSizeBytes(3)
+audioMic.setXlinkApplyMicGain(True)
+audioMic.setXlinkSampleSizeBytes(3)
 
-#uac.setMicAutoGain(True) # Not yet implemented
+#audioMic.setMicAutoGain(True) # Not yet implemented
+
+audioMic.out.link(uac.input)
 
 filename = "audio.raw"
+filenameBack = "audioBack.raw"
 if args.xlink_mic:
     xout = pipeline.createXLinkOut()
     xout.setStreamName("mic")
-    uac.out.link(xout.input)
-    print("Writing XLink audio data to:", filename)
+    audioMic.out.link(xout.input)
+    xoutBack = pipeline.createXLinkOut()
+    xoutBack.setStreamName("micBack")
+    audioMic.outBack.link(xoutBack.input)
+    print("Writing XLink audio data to:", filename, filenameBack)
 
 if args.xlink_cam:
     xout = pipeline.createXLinkOut()
@@ -163,6 +170,7 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
 
     if args.xlink_mic:
         qmic = device.getOutputQueue(name="mic", maxSize=16, blocking=True)
+        qmicBack = device.getOutputQueue(name="micBack", maxSize=16, blocking=True)
     if args.xlink_cam:
         qcam = device.getOutputQueue(name="cam", maxSize=4, blocking=False)
 
@@ -171,7 +179,16 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
             if args.xlink_mic:
                 pkt = qmic.tryGet()
                 if pkt is not None:
-                    print('MIC seq:', pkt.getSequenceNum(),
+                    print('MIC      seq:', pkt.getSequenceNum(),
+                              'timestamp:{:.6f}'.format(
+                                  pkt.getTimestamp().total_seconds() - tstart),
+                              'samples:', pkt.getHeight(),
+                              'mics:', pkt.getWidth())
+                    data = pkt.getData()
+                    data.tofile(f)
+                pkt = qmicBack.tryGet()
+                if pkt is not None:
+                    print('MIC back seq:', pkt.getSequenceNum(),
                               'timestamp:{:.6f}'.format(
                                   pkt.getTimestamp().total_seconds() - tstart),
                               'samples:', pkt.getHeight(),
@@ -181,7 +198,7 @@ with dai.Device(pipeline) as device, open(filename, "wb") as f:
             if args.xlink_cam:
                 pkt = qcam.tryGet()
                 if pkt is not None:
-                    print('CAM seq:', pkt.getSequenceNum(),
+                    print('CAM      seq:', pkt.getSequenceNum(),
                               'timestamp:{:.6f}'.format(
                                   pkt.getTimestamp().total_seconds() - tstart),
                               'height:', pkt.getHeight(),
