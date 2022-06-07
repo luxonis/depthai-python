@@ -18,52 +18,156 @@
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>);
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 
+// Patch for bind_map naming
+// Remove if it gets mainlined in pybind11
+namespace pybind11 {
+
+template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+class_<Map, holder_type> bind_map_patched(handle scope, const std::string &name, Args &&...args) {
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+    using KeysView = detail::keys_view<Map>;
+    using ValuesView = detail::values_view<Map>;
+    using ItemsView = detail::items_view<Map>;
+    using Class_ = class_<Map, holder_type>;
+
+    // If either type is a non-module-local bound type then make the map binding non-local as well;
+    // otherwise (e.g. both types are either module-local or converting) the map will be
+    // module-local.
+    auto *tinfo = detail::get_type_info(typeid(MappedType));
+    bool local = !tinfo || tinfo->module_local;
+    if (local) {
+        tinfo = detail::get_type_info(typeid(KeyType));
+        local = !tinfo || tinfo->module_local;
+    }
+
+    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
+    class_<KeysView> keys_view(
+        scope, ("KeysView_" + name).c_str(), pybind11::module_local(local));
+    class_<ValuesView> values_view(
+        scope, ("ValuesView_" + name).c_str(), pybind11::module_local(local));
+    class_<ItemsView> items_view(
+        scope, ("ItemsView_" + name).c_str(), pybind11::module_local(local));
+
+    cl.def(init<>());
+
+    // Register stream insertion operator (if possible)
+    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+
+    cl.def(
+        "__bool__",
+        [](const Map &m) -> bool { return !m.empty(); },
+        "Check whether the map is nonempty");
+
+    cl.def(
+        "__iter__",
+        [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+        keep_alive<0, 1>() /* Essential: keep map alive while iterator exists */
+    );
+
+    cl.def(
+        "keys",
+        [](Map &m) { return KeysView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "values",
+        [](Map &m) { return ValuesView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "items",
+        [](Map &m) { return ItemsView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            auto it = m.find(k);
+            if (it == m.end()) {
+                throw key_error();
+            }
+            return it->second;
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    cl.def("__contains__", [](Map &m, const KeyType &k) -> bool {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            return false;
+        }
+        return true;
+    });
+    // Fallback for when the object is not of the key type
+    cl.def("__contains__", [](Map &, const object &) -> bool { return false; });
+
+    // Assignment provided only if the type is copyable
+    detail::map_assignment<Map, Class_>(cl);
+
+    cl.def("__delitem__", [](Map &m, const KeyType &k) {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            throw key_error();
+        }
+        m.erase(it);
+    });
+
+    cl.def("__len__", &Map::size);
+
+    keys_view.def("__len__", [](KeysView &view) { return view.map.size(); });
+    keys_view.def(
+        "__iter__",
+        [](KeysView &view) { return make_key_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+    keys_view.def("__contains__", [](KeysView &view, const KeyType &k) -> bool {
+        auto it = view.map.find(k);
+        if (it == view.map.end()) {
+            return false;
+        }
+        return true;
+    });
+    // Fallback for when the object is not of the key type
+    keys_view.def("__contains__", [](KeysView &, const object &) -> bool { return false; });
+
+    values_view.def("__len__", [](ValuesView &view) { return view.map.size(); });
+    values_view.def(
+        "__iter__",
+        [](ValuesView &view) { return make_value_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+
+    items_view.def("__len__", [](ItemsView &view) { return view.map.size(); });
+    items_view.def(
+        "__iter__",
+        [](ItemsView &view) { return make_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+
+    return cl;
+}
+
+} // namespace pybind11
+
+
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
 
 template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
-    auto startTime = std::chrono::steady_clock::now();
-    bool found = false;
-    bool invalidDeviceFound = false;
-    dai::DeviceInfo deviceInfo = {};
-    dai::DeviceInfo invalidDeviceInfo = {};
-    do {
-        {
-            // releases python GIL
-            py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
-
-            if(strcmp("<error>", deviceInfo.desc.name) == 0){
-                invalidDeviceFound = true;
-                invalidDeviceInfo = deviceInfo;
-                found = false;
-            }
-
-            // Check if found
-            if(found){
-                break;
-            } else {
-                // block for 100ms
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-        }
-        // reacquires python GIL for PyErr_CheckSignals call
-        // check if interrupt triggered in between
+    bool found;
+    dai::DeviceInfo deviceInfo;
+    // releases python GIL
+    py::gil_scoped_release release;
+    std::tie(found, deviceInfo) = DEVICE::getAnyAvailableDevice(DEVICE::getDefaultSearchTime(), [](){
+        py::gil_scoped_acquire acquire;
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
-
-    // Check if its an invalid device
-    if(invalidDeviceFound){
-        // Warn
-        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
-        // TODO(themarpe) - move device search into C++ and expose a callback
-        DEVICE::getFirstAvailableDevice(true);
-    }
-
-    // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
-    if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
+    });
 
     // if no devices found, then throw
     if(!found) throw std::runtime_error("No available devices");
@@ -191,6 +295,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
     py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
     py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
+    py::class_<BoardConfig::Network> boardConfigNetwork(boardConfig, "Network", DOC(dai, BoardConfig, Network));
     py::class_<BoardConfig::GPIO> boardConfigGpio(boardConfig, "GPIO", DOC(dai, BoardConfig, GPIO));
     py::enum_<BoardConfig::GPIO::Mode> boardConfigGpioMode(boardConfigGpio, "Mode", DOC(dai, BoardConfig, GPIO, Mode));
     py::enum_<BoardConfig::GPIO::Direction> boardConfigGpioDirection(boardConfigGpio, "Direction", DOC(dai, BoardConfig, GPIO, Direction));
@@ -202,8 +307,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<PyClock> clock(m, "Clock");
 
 
-    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
-    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
+    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -227,6 +332,13 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+    ;
+
+    // Bind BoardConfig::Network
+    boardConfigNetwork
+        .def(py::init<>())
+        .def_readwrite("mtu", &BoardConfig::Network::mtu)
+        .def_readwrite("xlinkTcpNoDelay", &BoardConfig::Network::xlinkTcpNoDelay)
     ;
 
     // GPIO Mode
@@ -301,6 +413,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfig
         .def(py::init<>())
         .def_readwrite("usb", &BoardConfig::usb)
+        .def_readwrite("network", &BoardConfig::network)
+        .def_readwrite("sysctl", &BoardConfig::sysctl)
         .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
@@ -329,7 +443,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
 
         //dai::Device methods
         //static
-        .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
+        .def_static("getAnyAvailableDevice", [](std::chrono::milliseconds ms){ return DeviceBase::getAnyAvailableDevice(ms); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
