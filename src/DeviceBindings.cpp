@@ -419,6 +419,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
         .def_readwrite("uart", &BoardConfig::uart)
+        .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock)
+        .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock)
+        .def_readwrite("emmc", &BoardConfig::emmc)
+        .def_readwrite("logPath", &BoardConfig::logPath)
+        .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
+        .def_readwrite("logVerbosity", &BoardConfig::logVerbosity)
     ;
 
     // Bind Device::Config
