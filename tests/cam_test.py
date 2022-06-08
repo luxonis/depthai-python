@@ -153,6 +153,8 @@ for c in cam_list:
     cam[c].setBoardSocket(cam_socket_opts[c])
     # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
     #cam[c].initialControl.setExternalTrigger(2, 1)
+    #cam[c].initialControl.setStrobeExternal(48, 1)
+    #cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
