@@ -1,10 +1,13 @@
 #include "XLinkBindings.hpp"
 
+// std
+#include <cmath>
+#include <cstring>
+
+// depthai
 #include "depthai/xlink/XLinkConnection.hpp"
 #include "depthai/xlink/XLinkStream.hpp"
 
-#include <cmath>
-#include <cstring>
 
 void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
 {
@@ -60,6 +63,16 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def_readwrite("platform", &DeviceInfo::platform)
         .def_readwrite("status", &DeviceInfo::status)
         .def("__repr__", &DeviceInfo::toString)
+        // deprecated
+        .def_property("desc", [](py::object& self) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "desc field is deprecated, use name/mxid and others instead.", 1);
+            return self;
+        },[](DeviceInfo& i, DeviceInfo di){
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "desc field is deprecated, use name/mxid and others instead.", 1);
+            i = di;
+        })
         ;
 
     deviceDesc
