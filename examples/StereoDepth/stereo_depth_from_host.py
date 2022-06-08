@@ -176,6 +176,7 @@ class StereoConfigHandler:
 
     def trackbarFractionalBits(value):
         StereoConfigHandler.config.algorithmControl.subpixelFractionalBits = value
+        StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trFractionalBits:
             tr.set(value)
 
