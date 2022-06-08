@@ -30,6 +30,7 @@ monoResolution = dai.MonoCameraProperties.SensorResolution.THE_720_P
 
 # Create pipeline
 pipeline = dai.Pipeline()
+device = dai.Device()
 queueNames = []
 
 # Define sources and outputs
@@ -53,8 +54,13 @@ camRgb.setFps(fps)
 if downscaleColor: camRgb.setIspScale(2, 3)
 # For now, RGB needs fixed focus to properly align with depth.
 # This value was used during calibration
-camRgb.initialControl.setManualFocus(130)
-
+try:
+    calibData = device.readCalibration()
+    lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.RGB)
+    if lensPosition:
+        camRgb.initialControl.setManualFocus(lensPosition)
+except:
+    raise
 left.setResolution(monoResolution)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
 left.setFps(fps)
@@ -74,7 +80,8 @@ right.out.link(stereo.right)
 stereo.disparity.link(disparityOut.input)
 
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
 
     frameRgb = None
     frameDisp = None
