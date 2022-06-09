@@ -2,6 +2,7 @@
 
 // depthai
 #include "depthai-shared/log/LogLevel.hpp"
+#include "depthai-shared/log/LogMessage.hpp"
 
 void LogBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -9,6 +10,7 @@ void LogBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Bind LogLevel
     py::enum_<LogLevel> logLevel(m, "LogLevel");
+    py::class_<LogMessage> logMessage(m, "LogMessage", DOC(dai, LogMessage));
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -33,6 +35,15 @@ void LogBindings::bind(pybind11::module& m, void* pCallstack){
         .value("ERR", LogLevel::ERR)
         .value("CRITICAL", LogLevel::CRITICAL)
         .value("OFF", LogLevel::OFF)
+    ;
+
+    logMessage
+        .def_readwrite("nodeIdName", &LogMessage::nodeIdName)
+        .def_readwrite("level", &LogMessage::level)
+        .def_readwrite("time", &LogMessage::time)
+        .def_readwrite("colorRangeStart", &LogMessage::colorRangeStart)
+        .def_readwrite("colorRangeEnd", &LogMessage::colorRangeEnd)
+        .def_readwrite("payload", &LogMessage::payload)
     ;
 
 }

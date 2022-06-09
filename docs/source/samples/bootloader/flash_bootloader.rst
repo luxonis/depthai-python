@@ -1,10 +1,13 @@
 Flash Bootloader
 ================
 
-This script will flash bootloader to the connected DepthAI device. Bootloader can
-only be flashed to devices that have flash on-board.
+This script will flash bootloader to the connected OAK camera. Bootloader can only be flashed to devices that
+have flash on-board.
 
 Click on :ref:`Bootloader` for more information.
+
+.. note::
+    We suggest using :ref:`Device Manager`, a GUI tool for interfacing with the bootloader and its configurations.
 
 Demo
 ####

@@ -40,6 +40,20 @@ When you create the device in the code, firmware is uploaded together with the p
         cfg = depthai.ImageManipConfig()
         input_q.send(cfg)
 
+Connect to specified device
+###########################
+
+If you have multiple devices and only want to connect to a specific one, or if your OAK PoE camera is outside of your
+subnet, you can specify the device (either with MxID, IP, or USB port name) you want to connect to.
+
+.. code-block:: python
+
+  # Specify MXID, IP Address or USB path
+  device_info = depthai.DeviceInfo("14442C108144F1D000") # MXID
+  #device_info = depthai.DeviceInfo("192.168.1.44") # IP Address
+  #device_info = depthai.DeviceInfo("3.3.3") # USB port name
+  with depthai.Device(pipeline, device_info) as device:
+      # ...
 
 Multiple devices
 ################

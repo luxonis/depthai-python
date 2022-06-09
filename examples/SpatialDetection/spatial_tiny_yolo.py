@@ -57,6 +57,7 @@ spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
+nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutNN = pipeline.create(dai.node.XLinkOut)
@@ -67,6 +68,7 @@ xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
+nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
 camRgb.setPreviewSize(416, 416)
@@ -81,6 +83,9 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+# Align depth map to the perspective of RGB camera, on which inference is done
+stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -92,8 +97,8 @@ spatialDetectionNetwork.setDepthUpperThreshold(5000)
 # Yolo specific parameters
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
-spatialDetectionNetwork.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
-spatialDetectionNetwork.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Linking
@@ -111,6 +116,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
+spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input);
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -120,16 +126,26 @@ with dai.Device(pipeline) as device:
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+    networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
     startTime = time.monotonic()
     counter = 0
     fps = 0
     color = (255, 255, 255)
+    printOutputLayersOnce = True
 
     while True:
         inPreview = previewQueue.get()
         inDet = detectionNNQueue.get()
         depth = depthQueue.get()
+        inNN = networkQueue.get()
+
+        if printOutputLayersOnce:
+            toPrint = 'Output layer names:'
+            for ten in inNN.getAllLayerNames():
+                toPrint = f'{toPrint} {ten},'
+            print(toPrint)
+            printOutputLayersOnce = False;
 
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame() # depthFrame values are in millimeters

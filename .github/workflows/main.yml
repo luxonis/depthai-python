@@ -61,6 +61,72 @@ jobs:
           path: docstrings/
           retention-days: 1
 
+
+  # Build and test bindings
+  pytest:
+    needs: build-docstrings
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2019, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Print home directory
+        run: echo Home directory inside container $HOME
+
+      - name: Cache .hunter folder
+        if: matrix.os != 'windows-latest'
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter/
+          key: hunter-pytest-${{ matrix.os }}
+      - name: Cache .hunter folder
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v2
+        with:
+          path: C:/.hunter/
+          key: hunter-pytest-${{ matrix.os }}
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python -m pip install --upgrade pip
+          sudo apt install libusb-1.0-0-dev
+
+      - name: Install dependencies (MacOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          python -m pip install --upgrade pip
+          brew install libusb
+
+      - name: Install pytest
+        run: |
+          python -m pip install pytest numpy
+
+      - name: Compile
+        run: |
+          cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp -D DEPTHAI_PYTHON_ENABLE_TESTS=ON
+          cmake --build build --parallel 4
+      - name: Test
+        run: |
+          cmake --build build --target pytest --config Release
+
+
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
     needs: build-docstrings
@@ -111,6 +177,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
         python-architecture: [x64, x86]
+      fail-fast: false
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v2
@@ -164,6 +231,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
+      fail-fast: false
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v2
@@ -338,7 +406,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64, build-linux-arm64]
+    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
 
     steps:

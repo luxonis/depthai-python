@@ -79,6 +79,10 @@ PYBIND11_MODULE(depthai, m)
     }
 
     // Call dai::initialize on 'import depthai' to initialize asap with additional information to print
-    dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME, installSignalHandler);
+    try {
+        dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME, installSignalHandler);
+    } catch (const std::exception&) {
+        // ignore, will be initialized later on if possible
+    }
 
 }
