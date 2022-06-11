@@ -38,6 +38,7 @@ import argparse
 import depthai as dai
 import collections
 import time
+from itertools import cycle
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -204,40 +205,9 @@ with dai.Device(pipeline) as device:
     sensMin = 100
     sensMax = 1600
 
-    # TODO make auto-iterable
-    awb_mode_idx = -1
-    awb_mode_list = [
-        dai.CameraControl.AutoWhiteBalanceMode.OFF,
-        dai.CameraControl.AutoWhiteBalanceMode.AUTO,
-        dai.CameraControl.AutoWhiteBalanceMode.INCANDESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.FLUORESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.WARM_FLUORESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.DAYLIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.CLOUDY_DAYLIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.TWILIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.SHADE,
-    ]
-
-    anti_banding_mode_idx = -1
-    anti_banding_mode_list = [
-        dai.CameraControl.AntiBandingMode.OFF,
-        dai.CameraControl.AntiBandingMode.MAINS_50_HZ,
-        dai.CameraControl.AntiBandingMode.MAINS_60_HZ,
-        dai.CameraControl.AntiBandingMode.AUTO,
-    ]
-
-    effect_mode_idx = -1
-    effect_mode_list = [
-        dai.CameraControl.EffectMode.OFF,
-        dai.CameraControl.EffectMode.MONO,
-        dai.CameraControl.EffectMode.NEGATIVE,
-        dai.CameraControl.EffectMode.SOLARIZE,
-        dai.CameraControl.EffectMode.SEPIA,
-        dai.CameraControl.EffectMode.POSTERIZE,
-        dai.CameraControl.EffectMode.WHITEBOARD,
-        dai.CameraControl.EffectMode.BLACKBOARD,
-        dai.CameraControl.EffectMode.AQUA,
-    ]
+    awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
+    anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
+    effect_mode = cycle([item for name, item in vars(dai.CameraControl.EffectMode).items() if name.isupper()])
 
     ae_comp = 0
     ae_lock = False
@@ -342,23 +312,17 @@ with dai.Device(pipeline) as device:
                 print("Auto exposure compensation:", ae_comp)
                 ctrl.setAutoExposureCompensation(ae_comp)
             elif control == 'anti_banding_mode':
-                cnt = len(anti_banding_mode_list)
-                anti_banding_mode_idx = (anti_banding_mode_idx + cnt + change) % cnt
-                anti_banding_mode = anti_banding_mode_list[anti_banding_mode_idx]
-                print("Anti-banding mode:", anti_banding_mode)
-                ctrl.setAntiBandingMode(anti_banding_mode)
+                abm = next(anti_banding_mode)
+                print("Anti-banding mode:", abm)
+                ctrl.setAntiBandingMode(abm)
             elif control == 'awb_mode':
-                cnt = len(awb_mode_list)
-                awb_mode_idx = (awb_mode_idx + cnt + change) % cnt
-                awb_mode = awb_mode_list[awb_mode_idx]
-                print("Auto white balance mode:", awb_mode)
-                ctrl.setAutoWhiteBalanceMode(awb_mode)
+                awb = next(awb_mode)
+                print("Auto white balance mode:", awb)
+                ctrl.setAutoWhiteBalanceMode(awb)
             elif control == 'effect_mode':
-                cnt = len(effect_mode_list)
-                effect_mode_idx = (effect_mode_idx + cnt + change) % cnt
-                effect_mode = effect_mode_list[effect_mode_idx]
-                print("Effect mode:", effect_mode)
-                ctrl.setEffectMode(effect_mode)
+                eff = next(effect_mode)
+                print("Effect mode:", eff)
+                ctrl.setEffectMode(eff)
             elif control == 'brightness':
                 brightness = clamp(brightness + change, -10, 10)
                 print("Brightness:", brightness)
