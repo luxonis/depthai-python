@@ -5,7 +5,12 @@ import numpy as np
 import depthai as dai
 import argparse
 from pathlib import Path
-curr_path = Path(__file__).parent.resolve()
+
+try:
+    from projector_3d import PointCloudVisualizer
+except ImportError as e:
+    raise ImportError(
+        f"\033[1;5;31mError occured when importing PCL projector: {e}")
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -294,8 +299,12 @@ if meshDirectory is not None:
 print("Creating DepthAI device")
 with dai.Device(pipeline) as device:
     # Create a receive queue for each stream
+    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1])
+
+    pcl_converter = PointCloudVisualizer(intrinsics, resolution[0], resolution[1])
     qList = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
     depthFrame = None
+    rectifiedRight = None
     count = 0
     while True:
         key = cv2.waitKey(1)
@@ -313,6 +322,8 @@ with dai.Device(pipeline) as device:
                 depthFrame = frame.copy()
             elif name == "disparity":
                 frame = getDisparityFrame(frame)
+            elif name == "rectifiedRight":
+                rectifiedRight = frame.copy()
             # print(points)
             if points is not None and (name in ["disparity"]) and depthFrame is not None:
                 text = "{:.3f}mm".format(depthFrame[points[1]][points[0]]) 
@@ -327,4 +338,9 @@ with dai.Device(pipeline) as device:
                 cv2.imwrite(image_dir + name + str(count) + '.png', frame)
     
             cv2.imshow(name, frame)
+        
+        if depthFrame is not None and rectifiedRight is not None:
+            pcl_converter.rgbd_to_projection(depthFrame, rectifiedRight, False)
+            pcl_converter.visualize_pcd()
+
             
