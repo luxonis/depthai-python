@@ -45,7 +45,7 @@ LENS_STEP = 3
 WB_STEP = 200
 
 # On some host systems it's faster to display uncompressed video
-videoMjpeg = False
+videoMjpeg = True
 
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
@@ -85,7 +85,6 @@ camRgb.still.link(stillEncoder.input)
 camRgb.preview.link(previewOut.input)
 controlIn.out.link(camRgb.inputControl)
 configIn.out.link(camRgb.inputConfig)
-videoEncoder.bitstream.link(videoMjpegOut.input)
 stillEncoder.bitstream.link(stillMjpegOut.input)
 if videoMjpeg:
     camRgb.video.link(videoEncoder.input)
@@ -179,10 +178,11 @@ with dai.Device(pipeline) as device:
         previewFrames = previewQueue.tryGetAll()
         for previewFrame in previewFrames:
             cv2.imshow('preview', previewFrame.getData().reshape(previewFrame.getHeight(), previewFrame.getWidth(), 3))
-            #print(previewFrame.getLensPosition(), previewFrame.getExposureTime())
+            #print('prv', previewFrame.getLensPosition(), previewFrame.getExposureTime(), previewFrame.getSensitivity())
 
         videoFrames = videoQueue.tryGetAll()
         for videoFrame in videoFrames:
+            #print('vdo', videoFrame.getLensPosition(), videoFrame.getExposureTime(), videoFrame.getSensitivity())
             # Decode JPEG
             if videoMjpeg:
                 frame = cv2.imdecode(videoFrame.getData(), cv2.IMREAD_UNCHANGED)
@@ -201,6 +201,7 @@ with dai.Device(pipeline) as device:
 
         stillFrames = stillQueue.tryGetAll()
         for stillFrame in stillFrames:
+            #print('STL', stillFrame.getLensPosition(), stillFrame.getExposureTime(), stillFrame.getSensitivity())
             # Decode JPEG
             frame = cv2.imdecode(stillFrame.getData(), cv2.IMREAD_UNCHANGED)
             # Display
