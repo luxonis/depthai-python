@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import depthai as dai
 import argparse
+from pathlib import Path
+curr_path = Path(__file__).parent.resolve()
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -105,6 +107,19 @@ print("    Median filtering:  ", median)
 print("    Generating mesh files:  ", generateMesh)
 print("    Outputting mesh files to:  ", meshDirectory)
 
+points = None
+def cb(event, x, y, flags, param):
+    global points
+    if event == cv2.EVENT_LBUTTONUP:
+        if points == (x, y):
+            points = None # Clear
+        else:
+            points = (x, y)
+
+cv2.namedWindow("disparity")
+cv2.setMouseCallback("disparity", cb)
+# cv2.setMouseCallback("depth", cb)
+colormap = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
 
 def getMesh(calibData):
     M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
@@ -113,8 +128,33 @@ def getMesh(calibData):
     M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
     d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
     R2 = np.array(calibData.getStereoRightRectificationRotation())
-    mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
-    mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
+    tranformation = np.array(calibData.getCameraExtrinsics(dai.CameraBoardSocket.LEFT, dai.CameraBoardSocket.RIGHT))
+    R = tranformation[:3, :3]
+    T = tranformation[:3, 3]
+    print(resolution)
+    print(T)
+    print(R)
+    # R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv2.stereoRectify(
+    #                                                             M1,
+    #                                                             d1,
+    #                                                             M2,
+    #                                                             d2,
+    #                                                             resolution, R, T)
+    # print(M1)
+    # print(P1)
+    # print(M2)
+    # print(P2)
+
+    P1 = np.array([[328.514646,   0.0      ,  306.177917,   0.0      ],
+                   [  0.0     ,  328.514646,  251.244843,   0.0      ],
+                   [  0.0     ,    0.0     ,     1.0,       0.0      ]])
+    P2 = np.array([[328.514646,   0.0      ,  306.177917,   -1503.753379],
+                   [  0.0     ,  328.514646,  251.244843,   0.0      ],
+                   [  0.0     ,    0.0     ,     1.0,       0.0      ]])
+
+
+    mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, P1, resolution, cv2.CV_32FC1)
+    mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, P2, resolution, cv2.CV_32FC1)
 
     meshCellSize = 16
     meshLeft = []
@@ -170,7 +210,7 @@ def saveMeshFiles(meshLeft, meshRight, outputPath):
 def getDisparityFrame(frame):
     maxDisp = stereo.initialConfig.getMaxDisparity()
     disp = (frame * (255.0 / maxDisp)).astype(np.uint8)
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+    disp = cv2.applyColorMap(disp, colormap)
 
     return disp
 
@@ -178,8 +218,8 @@ def getDisparityFrame(frame):
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
 
-camLeft = pipeline.create(dai.node.MonoCamera)
-camRight = pipeline.create(dai.node.MonoCamera)
+camLeft = pipeline.create(dai.node.ColorCamera)
+camRight = pipeline.create(dai.node.ColorCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
@@ -198,7 +238,11 @@ res = (
     else dai.MonoCameraProperties.SensorResolution.THE_400_P
 )
 for monoCam in (camLeft, camRight):  # Common config
-    monoCam.setResolution(res)
+    monoCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
+    monoCam.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+    monoCam.setIspScale(1, 3)
+
+# monoRight.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     # monoCam.setFps(20.0)
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
@@ -215,10 +259,13 @@ xoutDepth.setStreamName("depth")
 xoutRectifLeft.setStreamName("rectifiedLeft")
 xoutRectifRight.setStreamName("rectifiedRight")
 
-camLeft.out.link(stereo.left)
-camRight.out.link(stereo.right)
-stereo.syncedLeft.link(xoutLeft.input)
-stereo.syncedRight.link(xoutRight.input)
+camLeft.isp.link(stereo.left)
+camRight.isp.link(stereo.right)
+# stereo.syncedLeft.link(xoutLeft.input)
+# stereo.syncedRight.link(xoutRight.input)
+
+camLeft.isp.link(xoutLeft.input)
+camRight.isp.link(xoutRight.input)
 stereo.disparity.link(xoutDisparity.input)
 if depth:
     stereo.depth.link(xoutDepth.input)
@@ -248,16 +295,36 @@ print("Creating DepthAI device")
 with dai.Device(pipeline) as device:
     # Create a receive queue for each stream
     qList = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
-
+    depthFrame = None
+    count = 0
     while True:
+        key = cv2.waitKey(1)
+        if key == ord("q"):
+            break
+        if key == ord('c'):
+            count += 1
+
         for q in qList:
             name = q.getName()
             frame = q.get().getCvFrame()
+
             if name == "depth":
                 frame = frame.astype(np.uint16)
+                depthFrame = frame.copy()
             elif name == "disparity":
                 frame = getDisparityFrame(frame)
+            # print(points)
+            if points is not None and (name in ["disparity"]) and depthFrame is not None:
+                text = "{:.3f}mm".format(depthFrame[points[1]][points[0]]) 
+                cv2.circle(frame, points, 3, (255, 255, 255), -1)
+                cv2.circle(frame, points, 1, (0, 0, 0), -1)
+                cv2.putText(frame, text, (points[0] + 5, points[1] + 5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 3, cv2.LINE_AA)
+                cv2.putText(frame, text, (points[0] + 5, points[1] + 5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0,0,0), 1, cv2.LINE_AA)
 
+            if key == ord('c') and name not in ['disparity', 'depth']:
+                image_dir =  'wide_data/' + name + '/'
+                Path(image_dir).mkdir(parents=True, exist_ok=True)
+                cv2.imwrite(image_dir + name + str(count) + '.png', frame)
+    
             cv2.imshow(name, frame)
-        if cv2.waitKey(1) == ord("q"):
-            break
+            

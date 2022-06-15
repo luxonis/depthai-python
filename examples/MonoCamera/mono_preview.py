@@ -7,8 +7,8 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-monoLeft = pipeline.create(dai.node.MonoCamera)
-monoRight = pipeline.create(dai.node.MonoCamera)
+monoLeft = pipeline.create(dai.node.ColorCamera)
+monoRight = pipeline.create(dai.node.ColorCamera)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
 
@@ -17,13 +17,15 @@ xoutRight.setStreamName('right')
 
 # Properties
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoLeft.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+# monoLeft.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+# monoRight.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
 # Linking
-monoRight.out.link(xoutRight.input)
-monoLeft.out.link(xoutLeft.input)
+monoRight.video.link(xoutRight.input)
+monoLeft.video.link(xoutLeft.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
