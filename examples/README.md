@@ -11,3 +11,12 @@ More details about examples can be found at [Luxonis DepthAI API - Code Samples]
 ```
 python3 install_requirements.py
 ```
+
+## Run with docker-compose
+
+With depthai-python/examples as your working directory, run:
+
+```
+docker-compose pull
+docker-compose up
+```
