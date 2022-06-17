@@ -33,6 +33,8 @@ function(add_python_example example_name python_script_path)
     add_custom_target(${example_name}
         ${CMAKE_COMMAND} -E env
         # Environment variables
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
@@ -49,6 +51,8 @@ function(add_python_example example_name python_script_path)
         # Adds test with 5 seconds timeout and bumps all python warnings to errors
         add_test(NAME ${example_name} COMMAND
             ${CMAKE_COMMAND} -E env
+            # PATH (dlls)
+            "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
             # Python path (to find compiled module)
             "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
             # ASAN in case of sanitizers
@@ -70,6 +74,8 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     # Adds install requirements test with 5 minute timeout
     add_test(NAME install_requirements COMMAND
         ${CMAKE_COMMAND} -E env
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
