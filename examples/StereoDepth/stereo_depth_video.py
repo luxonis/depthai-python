@@ -76,6 +76,29 @@ parser.add_argument(
     action="store_true",
     help="Display depth frames",
 )
+
+parser.add_argument('-lrt', '--leftRightThreshold',
+                    default=2,
+                    help='Left right check threshold'
+                    )
+
+parser.add_argument("-pc",
+                    "--hostSGBM",
+                    default=False,
+                    action="store_true",
+                    help="Display depth frames",
+                    )
+
+parser.add_argument('-bs', '--blockSize',
+                    default=5,
+                    help='Block size'
+                    )
+
+parser.add_argument('-k', '--paramK',
+                    default=32,
+                    help='K parameter for P2'
+                    )
+
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -301,11 +324,25 @@ with dai.Device(pipeline) as device:
     # Create a receive queue for each stream
     intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1])
 
-    pcl_converter = PointCloudVisualizer(intrinsics, resolution[0], resolution[1])
+    # pcl_converter = PointCloudVisualizer(intrinsics, resolution[0], resolution[1])
     qList = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
     depthFrame = None
     rectifiedRight = None
+    rectifiedLeft = None
+    padImg = None
     count = 0
+    stereoProcessor = None
+    if args.hostSGBM:
+        maxDisparity = 190
+        stereoProcessor = cv2.StereoSGBM_create(
+                                minDisparity=1,
+                                numDisparities=maxDisparity,
+                                blockSize= args.blockSize,
+                                P1 = 2 * (args.blockSize ** 2),
+                                P2 = args.paramK * (args.blockSize ** 2),
+                                disp12MaxDiff=args.leftRightThreshold,
+                                mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY
+                            )
     while True:
         key = cv2.waitKey(1)
         if key == ord("q"):
@@ -324,6 +361,8 @@ with dai.Device(pipeline) as device:
                 frame = getDisparityFrame(frame)
             elif name == "rectifiedRight":
                 rectifiedRight = frame.copy()
+            elif name == "rectifiedLeft":
+                rectifiedLeft = frame.copy()
             # print(points)
             if points is not None and (name in ["disparity"]) and depthFrame is not None:
                 text = "{:.3f}mm".format(depthFrame[points[1]][points[0]]) 
@@ -336,11 +375,25 @@ with dai.Device(pipeline) as device:
                 image_dir =  'wide_data/' + name + '/'
                 Path(image_dir).mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(image_dir + name + str(count) + '.png', frame)
-    
-            cv2.imshow(name, frame)
+
+            if name in ["disparity"]:
+                cv2.imshow(name, frame)
         
-        if depthFrame is not None and rectifiedRight is not None:
-            pcl_converter.rgbd_to_projection(depthFrame, rectifiedRight, False)
-            pcl_converter.visualize_pcd()
+        if args.hostSGBM and rectifiedLeft is not None and rectifiedRight is not None:
+            if padImg is None:
+                padImg = np.zeros(shape=[rectifiedLeft.shape[0], maxDisparity], dtype=np.uint8)
+            leftImgPadded = cv2.hconcat([padImg,  rectifiedLeft])
+            rightImgPadded = cv2.hconcat([padImg, rectifiedRight])
+            
+            disparity = stereoProcessor.compute(leftImgPadded, rightImgPadded)
+            disparity = disparity[0:disparity.shape[0], maxDisparity:disparity.shape[1]]
+            subpixelBits = 16.
+            disparity = (disparity / subpixelBits).astype(np.uint8)
+            cv2.imshow("CV-Disp", cv2.applyColorMap(disparity, colormap))
+            
+
+        # if depthFrame is not None and rectifiedRight is not None:
+        #     pcl_converter.rgbd_to_projection(depthFrame, rectifiedRight, False)
+        #     pcl_converter.visualize_pcd()
 
             
