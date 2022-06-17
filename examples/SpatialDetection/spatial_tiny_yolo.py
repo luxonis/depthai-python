@@ -116,7 +116,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input);
+spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
