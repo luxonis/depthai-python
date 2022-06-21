@@ -35,6 +35,7 @@ Docker                 :ref:`Pull and run official images <Docker>`             
 Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`                                  `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 VMware                 :ref:`Run on VMware <vmware>`                                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
 Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`                                     `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
+WSL2                   :ref:`Run on WSL2 <WSL 2>`                                                   /
 ====================== =========================================================================== ================================================================================
 
 macOS
@@ -255,6 +256,37 @@ had success <https://discuss.luxonis.com/d/105-run-on-win7-sp1-x64-manual-instal
 <https://zadig.akeo.ie/>`__. After connecting your DepthAI device look for a
 device with :code:`USB ID: 03E7 2485` and install the WinUSB driver by
 selecting `WinUSB(v6.1.7600.16385)` and then `Install WCID Driver`.
+
+WSL 2
+*****
+
+Steps below were performed on WSL 2 running Ubuntu 20.04, while host machine was running Win10 20H2 (OS build 19042.1586).
+Original tutorial `written here <https://discuss.luxonis.com/d/693-i-got-depthai-demo-to-run-in-wsl>`__ by SputTheBot.
+
+To get OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (2.3.0)
+for that. Inside WSL 2 you also need to install :ref:`depthai dependencies <Ubuntu>` and `USB/IP client tool <https://github.com/dorssel/usbipd-win/wiki/WSL-support#usbip-client-tools>`__ (2 commands).
+
+To attach the OAK camera to WSL 2, we have prepared a Python script below that you need to execute on host computer (in Admin mode).
+
+.. code-block:: python
+
+  import time
+  import os
+  while True:
+      output = os.popen('usbipd wsl list').read() # List all USB devices
+      rows = output.split('\n')
+      for row in rows:
+          if ('Movidius MyriadX' in row or 'Luxonis Device' in row) and 'Not attached' in row: # Check for OAK cameras that aren't attached
+              busid = row.split(' ')[0]
+              out = os.popen(f'usbipd wsl attach --busid {busid}').read() # Attach an OAK camera
+              print(out)
+              print(f'Usbipd attached Myriad X on bus {busid}') # Log
+      time.sleep(.5)
+
+After that, you can check ``lsusb`` command inside the WLS 2 and you should be able to see ``Movidius MyriadX``.
+
+.. note::
+  Examples that don't show any frames (eg. IMU example) should work. We haven't spent enough time to get OpenCV display frames inside WSL 2, but you could try it out yourself, some ideas `here <https://stackoverflow.com/questions/65453763/python3-9-on-wsl2-ubuntu-20-04-how-to-display-image-using-cv2-opencv-python-4>`.
 
 Docker
 ******
