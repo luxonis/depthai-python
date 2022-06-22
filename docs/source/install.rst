@@ -263,10 +263,10 @@ WSL 2
 Steps below were performed on WSL 2 running Ubuntu 20.04, while host machine was running Win10 20H2 (OS build 19042.1586).
 Original tutorial `written here <https://discuss.luxonis.com/d/693-i-got-depthai-demo-to-run-in-wsl>`__ by SputTheBot.
 
-To get OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (2.3.0)
+To get an OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (2.3.0)
 for that. Inside WSL 2 you also need to install :ref:`depthai dependencies <Ubuntu>` and `USB/IP client tool <https://github.com/dorssel/usbipd-win/wiki/WSL-support#usbip-client-tools>`__ (2 commands).
 
-To attach the OAK camera to WSL 2, we have prepared a Python script below that you need to execute on host computer (in Admin mode).
+To attach the OAK camera to WSL 2, we have prepared a Python script below that you need to execute on the host computer (in Admin mode).
 
 .. code-block:: python
 
@@ -286,7 +286,7 @@ To attach the OAK camera to WSL 2, we have prepared a Python script below that y
 After that, you can check ``lsusb`` command inside the WLS 2 and you should be able to see ``Movidius MyriadX``.
 
 .. note::
-  Examples that don't show any frames (eg. IMU example) should work. We haven't spent enough time to get OpenCV display frames inside WSL 2, but you could try it out yourself, some ideas `here <https://stackoverflow.com/questions/65453763/python3-9-on-wsl2-ubuntu-20-04-how-to-display-image-using-cv2-opencv-python-4>`.
+  Examples that don't show any frames (eg. IMU example) should work. We haven't spent enough time to get OpenCV display frames inside WSL 2, but you could try it out yourself, some ideas `here <https://stackoverflow.com/questions/65453763/python3-9-on-wsl2-ubuntu-20-04-how-to-display-image-using-cv2-opencv-python-4>`__.
 
 Docker
 ******
