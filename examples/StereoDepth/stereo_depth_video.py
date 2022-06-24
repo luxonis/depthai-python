@@ -333,7 +333,7 @@ with dai.Device(pipeline) as device:
     count = 0
     stereoProcessor = None
     if args.hostSGBM:
-        maxDisparity = 190
+        maxDisparity = 96
         stereoProcessor = cv2.StereoSGBM_create(
                                 minDisparity=1,
                                 numDisparities=maxDisparity,
@@ -388,7 +388,9 @@ with dai.Device(pipeline) as device:
             disparity = stereoProcessor.compute(leftImgPadded, rightImgPadded)
             disparity = disparity[0:disparity.shape[0], maxDisparity:disparity.shape[1]]
             subpixelBits = 16.
-            disparity = (disparity / subpixelBits).astype(np.uint8)
+            disparity = (disparity / subpixelBits)
+            disparity = (disparity * (255.0 / maxDisparity)).astype(np.uint8)
+
             cv2.imshow("CV-Disp", cv2.applyColorMap(disparity, colormap))
             
 
