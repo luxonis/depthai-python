@@ -155,6 +155,7 @@ class StereoConfigHandler:
     trSpatialHoleFilling = list()
     trSpatialNumIterations = list()
     trDecimationFactor = list()
+    trDisparityShift = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -270,6 +271,12 @@ class StereoConfigHandler:
         StereoConfigHandler.config.postProcessing.decimationFilter.decimationFactor = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trDecimationFactor:
+            tr.set(value)
+
+    def trackbarDisparityShift(value):
+        StereoConfigHandler.config.algorithmControl.disparityShift = value
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trDisparityShift:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -408,6 +415,7 @@ class StereoConfigHandler:
         StereoConfigHandler.trSigma.append(StereoConfigHandler.Trackbar('Bilateral sigma', stream, 0, 100, StereoConfigHandler.config.postProcessing.bilateralSigmaValue, StereoConfigHandler.trackbarSigma))
         StereoConfigHandler.trLrCheck.append(StereoConfigHandler.Trackbar('LR-check threshold', stream, 0, 16, StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold, StereoConfigHandler.trackbarLrCheckThreshold))
         StereoConfigHandler.trFractionalBits.append(StereoConfigHandler.Trackbar('Subpixel fractional bits', stream, 3, 5, StereoConfigHandler.config.algorithmControl.subpixelFractionalBits, StereoConfigHandler.trackbarFractionalBits))
+        StereoConfigHandler.trDisparityShift.append(StereoConfigHandler.Trackbar('Disparity shift', stream, 0, 100, StereoConfigHandler.config.algorithmControl.disparityShift, StereoConfigHandler.trackbarDisparityShift))
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
