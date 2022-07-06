@@ -928,6 +928,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
         .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
+        .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;

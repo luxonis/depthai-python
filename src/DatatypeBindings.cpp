@@ -1245,7 +1245,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
-        .def_readwrite("pixelShift", &RawStereoDepthConfig::AlgorithmControl::pixelShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, pixelShift))
+        .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
         ;
 
     spatialFilter
@@ -1390,6 +1390,7 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMaxDisparity",         &StereoDepthConfig::getMaxDisparity, DOC(dai, StereoDepthConfig, getMaxDisparity))
         .def("setDepthUnit",            &StereoDepthConfig::setDepthUnit, DOC(dai, StereoDepthConfig, setDepthUnit))
         .def("getDepthUnit",            &StereoDepthConfig::getDepthUnit, DOC(dai, StereoDepthConfig, getDepthUnit))
+        .def("setDisparityShift",       &StereoDepthConfig::setDisparityShift, DOC(dai, StereoDepthConfig, setDisparityShift))
         .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
         .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
