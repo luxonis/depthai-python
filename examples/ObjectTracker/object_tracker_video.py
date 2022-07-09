@@ -81,9 +81,6 @@ with dai.Device(pipeline) as device:
     qManip = device.getOutputQueue(name="manip", maxSize=4)
     qDet = device.getOutputQueue(name="nn", maxSize=4)
 
-    startTime = time.monotonic()
-    counter = 0
-    fps = 0
     detections = []
     frame = None
 
@@ -105,8 +102,6 @@ with dai.Device(pipeline) as device:
         cv2.imshow(name, frame)
 
     cap = cv2.VideoCapture(args.videoPath)
-    baseTs = time.monotonic()
-    simulatedFps = 30
     inputFrameShape = (1280, 720)
 
     while cap.isOpened():
@@ -117,9 +112,6 @@ with dai.Device(pipeline) as device:
         img = dai.ImgFrame()
         img.setType(dai.ImgFrame.Type.BGR888p)
         img.setData(to_planar(frame, inputFrameShape))
-        img.setTimestamp(baseTs)
-        baseTs += 1/simulatedFps
-
         img.setWidth(inputFrameShape[0])
         img.setHeight(inputFrameShape[1])
         qIn.send(img)
@@ -131,13 +123,6 @@ with dai.Device(pipeline) as device:
         track = tracklets.get()
         manip = qManip.get()
         inDet = qDet.get()
-
-        counter+=1
-        current_time = time.monotonic()
-        if (current_time - startTime) > 1 :
-            fps = counter / (current_time - startTime)
-            counter = 0
-            startTime = current_time
 
         detections = inDet.detections
         manipFrame = manip.getCvFrame()
@@ -162,8 +147,6 @@ with dai.Device(pipeline) as device:
             cv2.putText(trackerFrame, f"ID: {[t.id]}", (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(trackerFrame, t.status.name, (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.rectangle(trackerFrame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
-
-        cv2.putText(trackerFrame, "Fps: {:.2f}".format(fps), (2, trackerFrame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", trackerFrame)
 
