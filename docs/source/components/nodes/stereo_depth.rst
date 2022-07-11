@@ -460,4 +460,11 @@ forum post.
    the IR laser dot projector is only relevant at night. For more information see the development progress
    `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
 
+Measuring real-world object dimensions
+######################################
+
+Because the depth map contains the Z distance, objects in parallel with the camera are measured accurately standard. For objects not in parallel, the Euclidean distance calculation can be used. Please refer to the below:
+
+.. image:: \_static\images\components\Euclidian_distance_fig.png
+
 .. include::  ../../includes/footer-short.rst
