@@ -465,11 +465,13 @@ Measuring real-world object dimensions
 
 Because the depth map contains the Z distance, objects in parallel with the camera are measured accurately standard. For objects not in parallel, the Euclidean distance calculation can be used. Please refer to the below:
 
+.. image:: \_static\images\components\Euclidian_distance_fig.png
+
 When running eg. the :ref:`RGB & MobilenetSSD with spatial data` example, you could calculate the distance to the detected object from XYZ coordinates (:ref:`SpatialImgDetections`) using the code below (after code line ``143`` of the example):
 
 .. code-block:: python
 
     distance = math.sqrt(detection.spatialCoordinates.x ** 2 + detection.spatialCoordinates.y ** 2 + detection.spatialCoordinates.z ** 2) # mm
-.. image:: \_static\images\components\Euclidian_distance_fig.png
+
 
 .. include::  ../../includes/footer-short.rst
