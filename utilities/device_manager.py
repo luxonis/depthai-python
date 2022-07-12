@@ -145,9 +145,10 @@ class SearchDevice:
             elif len(event) == 3 and event[0] == "table" and event[1] == "+CLICKED+":
                 # User selected a device
                 deviceIndex = event[2][0]
-                deviceSelected = self.infos[deviceIndex]
-                self.window.close()
-                return deviceSelected
+                if deviceIndex is not None:
+                    deviceSelected = self.infos[deviceIndex]
+                    self.window.close()
+                    return deviceSelected
 
 def unlockConfig(window, devType):
     if devType == "POE":
@@ -264,6 +265,8 @@ def flashBootloader(window, device: dai.DeviceInfo):
 
         pr = Progress()
         progress = lambda p : pr.update(p)
+        if type == dai.DeviceBootloader.Type.AUTO:
+            type = bl.getType()
         bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
         window.Element('currBoot').update(bl.getVersion())
         pr.finish("Flashed newest bootloader version.")
