@@ -256,8 +256,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
+        .def_readwrite("imageOrientation", &ColorCameraProperties::imageOrientation)
         .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
         .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
+        .def_readwrite("fp16", &ColorCameraProperties::fp16)
         .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
         .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
         .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
@@ -268,6 +270,13 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("fps", &ColorCameraProperties::fps)
         .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
+        .def_readwrite("previewKeepAspectRatio", &ColorCameraProperties::previewKeepAspectRatio)
+        .def_readwrite("ispScale", &ColorCameraProperties::ispScale)
+        .def_readwrite("numFramesPoolRaw", &ColorCameraProperties::numFramesPoolRaw)
+        .def_readwrite("numFramesPoolIsp", &ColorCameraProperties::numFramesPoolIsp)
+        .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
+        .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
+        .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
     ;
 
 
@@ -670,6 +679,19 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getIspSize", &ColorCamera::getIspSize, DOC(dai, node, ColorCamera, getIspSize))
         .def("getIspWidth", &ColorCamera::getIspWidth, DOC(dai, node, ColorCamera, getIspWidth))
         .def("getIspHeight", &ColorCamera::getIspHeight, DOC(dai, node, ColorCamera, getIspHeight))
+
+        .def("setPreviewNumFramesPool", &ColorCamera::setPreviewNumFramesPool, DOC(dai, node, ColorCamera, setPreviewNumFramesPool))
+        .def("setVideoNumFramesPool", &ColorCamera::setVideoNumFramesPool, DOC(dai, node, ColorCamera, setVideoNumFramesPool))
+        .def("setStillNumFramesPool", &ColorCamera::setStillNumFramesPool, DOC(dai, node, ColorCamera, setStillNumFramesPool))
+        .def("setRawNumFramesPool", &ColorCamera::setRawNumFramesPool, DOC(dai, node, ColorCamera, setRawNumFramesPool))
+        .def("setIspNumFramesPool", &ColorCamera::setIspNumFramesPool, DOC(dai, node, ColorCamera, setIspNumFramesPool))
+        .def("setNumFramesPool", &ColorCamera::setNumFramesPool, py::arg("raw"), py::arg("isp"), py::arg("preview"), py::arg("video"), py::arg("still"), DOC(dai, node, ColorCamera, setNumFramesPool))
+
+        .def("getPreviewNumFramesPool", &ColorCamera::getPreviewNumFramesPool, DOC(dai, node, ColorCamera, getPreviewNumFramesPool))
+        .def("getVideoNumFramesPool", &ColorCamera::getVideoNumFramesPool, DOC(dai, node, ColorCamera, getVideoNumFramesPool))
+        .def("getStillNumFramesPool", &ColorCamera::getStillNumFramesPool, DOC(dai, node, ColorCamera, getStillNumFramesPool))
+        .def("getRawNumFramesPool", &ColorCamera::getRawNumFramesPool, DOC(dai, node, ColorCamera, getRawNumFramesPool))
+        .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
