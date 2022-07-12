@@ -1318,6 +1318,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // UVC node
     uvc
         .def_readonly("input", &UVC::input, DOC(dai, node, UVC, input))
+        .def("setGpiosOnInit", &UVC::setGpiosOnInit, py::arg("list"), DOC(dai, node, UVC, setGpiosOnInit))
+        .def("setGpiosOnStreamOn", &UVC::setGpiosOnStreamOn, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOn))
+        .def("setGpiosOnStreamOff", &UVC::setGpiosOnStreamOff, py::arg("list"), DOC(dai, node, UVC, setGpiosOnStreamOff))
         ;
 
 
