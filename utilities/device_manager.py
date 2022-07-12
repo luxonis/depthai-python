@@ -213,22 +213,25 @@ def getDevices(window):
 def getConfigs(window, bl: dai.DeviceBootloader, devType, device: dai.DeviceInfo):
     try:
         conf = bl.readConfig()
-        if conf is not None:
-            if devType == "POE":
-                window.Element('ip').update(conf.getIPv4() if conf.getIPv4() is not None else "0.0.0.0")
-                window.Element('mask').update(conf.getIPv4Mask() if conf.getIPv4Mask() is not None else "0.0.0.0")
-                window.Element('gateway').update(conf.getIPv4Gateway() if conf.getIPv4Gateway() is not None else "0.0.0.0")
-                window.Element('dns').update(conf.getDnsIPv4() if conf.getDnsIPv4() is not None else "0.0.0.0")
-                window.Element('dnsAlt').update(conf.getDnsAltIPv4() if conf.getDnsAltIPv4() is not None else "0.0.0.0")
-                window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
-                window.Element('mac').update(conf.getMacAddress())
-                for el in CONF_INPUT_USB:
-                    window[el].update("")
-            else:
-                for el in CONF_INPUT_POE:
-                    window[el].update("")
-                window.Element('usbTimeout').update(int(conf.getUsbTimeout().total_seconds() * 1000))
-                window.Element('usbSpeed').update(str(conf.getUsbMaxSpeed()).split('.')[1])
+    except:
+        conf = dai.DeviceBootloader.Config()
+
+    try:
+        if devType == "POE":
+            window.Element('ip').update(conf.getIPv4())
+            window.Element('mask').update(conf.getIPv4Mask())
+            window.Element('gateway').update(conf.getIPv4Gateway())
+            window.Element('dns').update(conf.getDnsIPv4())
+            window.Element('dnsAlt').update(conf.getDnsAltIPv4())
+            window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
+            window.Element('mac').update(conf.getMacAddress())
+            for el in CONF_INPUT_USB:
+                window[el].update("")
+        else:
+            for el in CONF_INPUT_POE:
+                window[el].update("")
+            window.Element('usbTimeout').update(int(conf.getUsbTimeout().total_seconds() * 1000))
+            window.Element('usbSpeed').update(str(conf.getUsbMaxSpeed()).split('.')[1])
 
         window.Element('devName').update(device.name)
         window.Element('devNameConf').update(device.getMxId())
