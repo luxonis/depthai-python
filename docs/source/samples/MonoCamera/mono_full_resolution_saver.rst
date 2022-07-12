@@ -7,7 +7,7 @@ Mono sensor. It serves as an example of recording mono pictures to disk.
 Be careful, this example saves pictures to your host storage. So if you leave
 it running, you could fill up your storage on your host.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Full Resolution Saver`
 

@@ -2,7 +2,6 @@
 
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
-#include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
@@ -22,6 +21,8 @@
 #include "depthai/pipeline/node/IMU.hpp"
 #include "depthai/pipeline/node/EdgeDetector.hpp"
 #include "depthai/pipeline/node/FeatureTracker.hpp"
+#include "depthai/pipeline/node/AprilTag.hpp"
+#include "depthai/pipeline/node/DetectionParser.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 
 // Libraries
@@ -156,6 +157,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<MonoCameraProperties> monoCameraProperties(m, "MonoCameraProperties", DOC(dai, MonoCameraProperties));
     py::enum_<MonoCameraProperties::SensorResolution> monoCameraPropertiesSensorResolution(monoCameraProperties, "SensorResolution", DOC(dai, MonoCameraProperties, SensorResolution));
     py::class_<StereoDepthProperties> stereoDepthProperties(m, "StereoDepthProperties", DOC(dai, StereoDepthProperties));
+    py::class_<StereoDepthProperties::RectificationMesh> rectificationMesh(stereoDepthProperties, "RectificationMesh", DOC(dai, StereoDepthProperties, RectificationMesh));
     py::class_<VideoEncoderProperties> videoEncoderProperties(m, "VideoEncoderProperties", DOC(dai, VideoEncoderProperties));
     py::enum_<VideoEncoderProperties::Profile> videoEncoderPropertiesProfile(videoEncoderProperties, "Profile", DOC(dai, VideoEncoderProperties, Profile));
     py::enum_<VideoEncoderProperties::RateControlMode> videoEncoderPropertiesProfileRateControlMode(videoEncoderProperties, "RateControlMode", DOC(dai, VideoEncoderProperties, RateControlMode));
@@ -165,12 +167,13 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<SpatialDetectionNetworkProperties, DetectionNetworkProperties, std::shared_ptr<SpatialDetectionNetworkProperties>> spatialDetectionNetworkProperties(m, "SpatialDetectionNetworkProperties", DOC(dai, SpatialDetectionNetworkProperties));
     py::class_<SpatialLocationCalculatorProperties> spatialLocationCalculatorProperties(m, "SpatialLocationCalculatorProperties", DOC(dai, SpatialLocationCalculatorProperties));
     py::enum_<TrackerType> trackerType(m, "TrackerType");
-    py::enum_<TrackerIdAssigmentPolicy> trackerIdAssigmentPolicy(m, "TrackerIdAssigmentPolicy");
+    py::enum_<TrackerIdAssignmentPolicy> trackerIdAssignmentPolicy(m, "TrackerIdAssignmentPolicy");
     py::class_<ObjectTrackerProperties, std::shared_ptr<ObjectTrackerProperties>> objectTrackerProperties(m, "ObjectTrackerProperties", DOC(dai, ObjectTrackerProperties));
     py::enum_<IMUSensor> imuSensor(m, "IMUSensor", DOC(dai, IMUSensor));
     py::class_<IMUSensorConfig, std::shared_ptr<IMUSensorConfig>> imuSensorConfig(m, "IMUSensorConfig", DOC(dai, IMUSensorConfig));
     py::class_<IMUProperties> imuProperties(m, "IMUProperties", DOC(dai, IMUProperties));
     py::class_<EdgeDetectorProperties> edgeDetectorProperties(m, "EdgeDetectorProperties", DOC(dai, EdgeDetectorProperties));
+    py::class_<AprilTagProperties> aprilTagProperties(m, "AprilTagProperties", DOC(dai, AprilTagProperties));
     py::class_<SPIOutProperties> spiOutProperties(m, "SPIOutProperties", DOC(dai, SPIOutProperties));
     py::class_<SPIInProperties> spiInProperties(m, "SPIInProperties", DOC(dai, SPIInProperties));
     py::class_<FeatureTrackerProperties> featureTrackerProperties(m, "FeatureTrackerProperties", DOC(dai, FeatureTrackerProperties));
@@ -180,6 +183,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
     py::class_<ScriptProperties> scriptProperties(m, "ScriptProperties", DOC(dai, ScriptProperties));
+    py::class_<Properties, std::shared_ptr<Properties>> pyProperties(m, "Properties", DOC(dai, Properties));
+    py::class_<DetectionParserProperties> detectionParserProperties(m, "DetectionParserProperties", DOC(dai, DetectionParserProperties));
 
 
     // Node::Id bindings
@@ -213,7 +218,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     auto imu = ADD_NODE(IMU);
     auto edgeDetector = ADD_NODE(EdgeDetector);
     auto featureTracker = ADD_NODE(FeatureTracker);
+    auto aprilTag = ADD_NODE(AprilTag);
+    auto detectionParser = ADD_NODE(DetectionParser);
     auto uvc = ADD_NODE(UVC);
+
+    py::enum_<StereoDepth::PresetMode> stereoDepthPresetMode(stereoDepth, "PresetMode", DOC(dai, node, StereoDepth, PresetMode));
 
 
 
@@ -239,6 +248,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("THE_5_MP", ColorCameraProperties::SensorResolution::THE_5_MP)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
         .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
+        .value("THE_48_MP", ColorCameraProperties::SensorResolution::THE_48_MP)
         .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         ;
@@ -251,8 +261,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
+        .def_readwrite("imageOrientation", &ColorCameraProperties::imageOrientation)
         .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
         .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
+        .def_readwrite("fp16", &ColorCameraProperties::fp16)
         .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
         .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
         .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
@@ -263,6 +275,13 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("fps", &ColorCameraProperties::fps)
         .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
+        .def_readwrite("previewKeepAspectRatio", &ColorCameraProperties::previewKeepAspectRatio)
+        .def_readwrite("ispScale", &ColorCameraProperties::ispScale)
+        .def_readwrite("numFramesPoolRaw", &ColorCameraProperties::numFramesPoolRaw)
+        .def_readwrite("numFramesPoolIsp", &ColorCameraProperties::numFramesPoolIsp)
+        .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
+        .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
+        .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
     ;
 
 
@@ -280,24 +299,34 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("initialControl", &MonoCameraProperties::initialControl)
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
-        .def_readwrite("fps",  &MonoCameraProperties::fps)
-    ;
-
+        .def_readwrite("fps", &MonoCameraProperties::fps)
+        ;
 
     // StereoDepth props
 
+    rectificationMesh
+        .def_readwrite("meshLeftUri", &StereoDepthProperties::RectificationMesh::meshLeftUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshLeftUri))
+        .def_readwrite("meshRightUri", &StereoDepthProperties::RectificationMesh::meshRightUri, DOC(dai, StereoDepthProperties, RectificationMesh, meshRightUri))
+        .def_readwrite("meshSize", &StereoDepthProperties::RectificationMesh::meshSize, DOC(dai, StereoDepthProperties, RectificationMesh, meshSize))
+        .def_readwrite("stepWidth", &StereoDepthProperties::RectificationMesh::stepWidth, DOC(dai, StereoDepthProperties, RectificationMesh, stepWidth))
+        .def_readwrite("stepHeight", &StereoDepthProperties::RectificationMesh::stepHeight, DOC(dai, StereoDepthProperties, RectificationMesh, stepHeight));
+
+
     stereoDepthProperties
-        .def_readwrite("initialConfig",           &StereoDepthProperties::initialConfig)
-        .def_readwrite("inputConfigSync",         &StereoDepthProperties::inputConfigSync)
-        .def_readwrite("depthAlign",              &StereoDepthProperties::depthAlign)
-        .def_readwrite("depthAlignCamera",        &StereoDepthProperties::depthAlignCamera)
-        .def_readwrite("rectifyEdgeFillColor",    &StereoDepthProperties::rectifyEdgeFillColor)
-        .def_readwrite("width",                   &StereoDepthProperties::width)
-        .def_readwrite("height",                  &StereoDepthProperties::height)
-        .def_readwrite("outWidth",                &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
-        .def_readwrite("outHeight",               &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
-        .def_readwrite("outKeepAspectRatio",      &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
-        .def_readwrite("mesh",                    &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("initialConfig", &StereoDepthProperties::initialConfig, DOC(dai, StereoDepthProperties, initialConfig))
+        .def_readwrite("depthAlignCamera", &StereoDepthProperties::depthAlignCamera, DOC(dai, StereoDepthProperties, depthAlignCamera))
+        .def_readwrite("enableRectification", &StereoDepthProperties::enableRectification, DOC(dai, StereoDepthProperties, enableRectification))
+        .def_readwrite("rectifyEdgeFillColor", &StereoDepthProperties::rectifyEdgeFillColor, DOC(dai, StereoDepthProperties, rectifyEdgeFillColor))
+        .def_readwrite("width", &StereoDepthProperties::width, DOC(dai, StereoDepthProperties, width))
+        .def_readwrite("height", &StereoDepthProperties::height, DOC(dai, StereoDepthProperties, height))
+        .def_readwrite("outWidth", &StereoDepthProperties::outWidth, DOC(dai, StereoDepthProperties, outWidth))
+        .def_readwrite("outHeight", &StereoDepthProperties::outHeight, DOC(dai, StereoDepthProperties, outHeight))
+        .def_readwrite("outKeepAspectRatio", &StereoDepthProperties::outKeepAspectRatio, DOC(dai, StereoDepthProperties, outKeepAspectRatio))
+        .def_readwrite("mesh", &StereoDepthProperties::mesh, DOC(dai, StereoDepthProperties, mesh))
+        .def_readwrite("enableRuntimeStereoModeSwitch", &StereoDepthProperties::enableRuntimeStereoModeSwitch, DOC(dai, StereoDepthProperties, enableRuntimeStereoModeSwitch))
+        .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
+        .def_readwrite("numPostProcessingShaves", &StereoDepthProperties::numPostProcessingShaves, DOC(dai, StereoDepthProperties, numPostProcessingShaves))
+        .def_readwrite("numPostProcessingMemorySlices", &StereoDepthProperties::numPostProcessingMemorySlices, DOC(dai, StereoDepthProperties, numPostProcessingMemorySlices))
         ;
 
 
@@ -325,6 +354,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("profile", &VideoEncoderProperties::profile)
         .def_readwrite("quality", &VideoEncoderProperties::quality)
         .def_readwrite("rateCtrlMode", &VideoEncoderProperties::rateCtrlMode)
+        .def_readwrite("outputFrameSize", &VideoEncoderProperties::outputFrameSize)
         ;
 
 
@@ -343,13 +373,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     detectionNetworkProperties
-        .def_readwrite("nnFamily", &DetectionNetworkProperties::nnFamily)
-        .def_readwrite("confidenceThreshold", &DetectionNetworkProperties::confidenceThreshold)
-        .def_readwrite("classes", &DetectionNetworkProperties::classes)
-        .def_readwrite("coordinates", &DetectionNetworkProperties::coordinates)
-        .def_readwrite("anchors", &DetectionNetworkProperties::anchors)
-        .def_readwrite("anchorMasks", &DetectionNetworkProperties::anchorMasks)
-        .def_readwrite("iouThreshold", &DetectionNetworkProperties::iouThreshold)
+        .def_readwrite("parser", &DetectionNetworkProperties::parser)
         ;
 
 
@@ -360,7 +384,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     spatialLocationCalculatorProperties
         .def_readwrite("roiConfig", &SpatialLocationCalculatorProperties::roiConfig)
-        .def_readwrite("inputConfigSync", &SpatialLocationCalculatorProperties::inputConfigSync)
         ;
 
 
@@ -371,17 +394,17 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("ZERO_TERM_COLOR_HISTOGRAM", TrackerType::ZERO_TERM_COLOR_HISTOGRAM, DOC(dai, TrackerType, ZERO_TERM_COLOR_HISTOGRAM))
     ;
 
-    trackerIdAssigmentPolicy
-        .value("UNIQUE_ID", TrackerIdAssigmentPolicy::UNIQUE_ID)
-        .value("SMALLEST_ID", TrackerIdAssigmentPolicy::SMALLEST_ID)
+    trackerIdAssignmentPolicy
+        .value("UNIQUE_ID", TrackerIdAssignmentPolicy::UNIQUE_ID)
+        .value("SMALLEST_ID", TrackerIdAssignmentPolicy::SMALLEST_ID)
     ;
 
     objectTrackerProperties
-        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold)
-        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack)
-        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack)
-        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType)
-        .def_readwrite("trackerIdAssigmentPolicy", &ObjectTrackerProperties::trackerIdAssigmentPolicy)
+        .def_readwrite("trackerThreshold", &ObjectTrackerProperties::trackerThreshold, DOC(dai, ObjectTrackerProperties, trackerThreshold))
+        .def_readwrite("maxObjectsToTrack", &ObjectTrackerProperties::maxObjectsToTrack, DOC(dai, ObjectTrackerProperties, maxObjectsToTrack))
+        .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack, DOC(dai, ObjectTrackerProperties, detectionLabelsToTrack))
+        .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType, DOC(dai, ObjectTrackerProperties, trackerType))
+        .def_readwrite("trackerIdAssignmentPolicy", &ObjectTrackerProperties::trackerIdAssignmentPolicy, DOC(dai, ObjectTrackerProperties, trackerIdAssignmentPolicy))
         ;
 
     // IMU node properties
@@ -417,14 +440,20 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("imuSensors", &IMUProperties::imuSensors, DOC(dai, IMUProperties, imuSensors))
         .def_readwrite("batchReportThreshold", &IMUProperties::batchReportThreshold, DOC(dai, IMUProperties, batchReportThreshold))
         .def_readwrite("maxBatchReports", &IMUProperties::maxBatchReports, DOC(dai, IMUProperties, maxBatchReports))
+        .def_readwrite("enableFirmwareUpdate", &IMUProperties::enableFirmwareUpdate, DOC(dai, IMUProperties, enableFirmwareUpdate))
     ;
 
     // EdgeDetector node properties
     edgeDetectorProperties
         .def_readwrite("initialConfig", &EdgeDetectorProperties::initialConfig, DOC(dai, EdgeDetectorProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &EdgeDetectorProperties::inputConfigSync, DOC(dai, EdgeDetectorProperties, inputConfigSync))
         .def_readwrite("outputFrameSize", &EdgeDetectorProperties::outputFrameSize, DOC(dai, EdgeDetectorProperties, outputFrameSize))
         .def_readwrite("numFramesPool", &EdgeDetectorProperties::numFramesPool, DOC(dai, EdgeDetectorProperties, numFramesPool))
+    ;
+
+    // AprilTag properties
+    aprilTagProperties
+        .def_readwrite("initialConfig", &AprilTagProperties::initialConfig, DOC(dai, AprilTagProperties, initialConfig))
+        .def_readwrite("inputConfigSync", &AprilTagProperties::inputConfigSync, DOC(dai, AprilTagProperties, inputConfigSync))
     ;
 
     // SPIOut properties
@@ -452,10 +481,14 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // FeatureTracker properties
     featureTrackerProperties
         .def_readwrite("initialConfig", &FeatureTrackerProperties::initialConfig, DOC(dai, FeatureTrackerProperties, initialConfig))
-        .def_readwrite("inputConfigSync", &FeatureTrackerProperties::inputConfigSync, DOC(dai, FeatureTrackerProperties, inputConfigSync))
         .def_readwrite("numShaves", &FeatureTrackerProperties::numShaves, DOC(dai, FeatureTrackerProperties, numShaves))
         .def_readwrite("numMemorySlices", &FeatureTrackerProperties::numMemorySlices, DOC(dai, FeatureTrackerProperties, numMemorySlices))
         ;
+
+    // DetectionParser node properties
+    detectionParserProperties
+        .def_readwrite("parser", &DetectionParserProperties::parser, DOC(dai, DetectionParserProperties, parser))
+    ;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -472,12 +505,18 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
     pyInput
-        .def_property_readonly("name", [](const Node::Input& input){ return input.name; })
-        .def_property_readonly("type", [](const Node::Input& input){ return input.type; })
+        .def_property("group", [](Node::Input& obj) { return obj.group; }, [](Node::Input& obj, std::string group) { obj.group = group; })
+        .def_property("name", [](Node::Input& obj) { return obj.name; }, [](Node::Input& obj, std::string name) { obj.name = name; })
+        .def_property("type", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, Node::Input::Type type) { obj.type = type; })
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
+        .def_property("waitForMessage", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, bool waitForMessage) { obj.waitForMessage = waitForMessage; })
+        .def("setWaitForMessage", &Node::Input::setWaitForMessage, py::arg("waitForMessage"), DOC(dai, Node, Input, setWaitForMessage))
+        .def("getWaitForMessage", &Node::Input::getWaitForMessage, DOC(dai, Node, Input, getWaitForMessage))
+        .def("setReusePreviousMessage", &Node::Input::setReusePreviousMessage, py::arg("reusePreviousMessage"), DOC(dai, Node, Input, setReusePreviousMessage))
+        .def("getReusePreviousMessage", &Node::Input::getReusePreviousMessage, DOC(dai, Node, Input, getReusePreviousMessage))
     ;
 
     // Node::Output bindings
@@ -486,6 +525,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
+        .def_property("group", [](Node::Output& obj) -> std::string& { return obj.group; }, [](Node::Output& obj, std::string group) { obj.group = group; })
+        .def_property("name", [](Node::Output& obj) -> std::string& { return obj.name; }, [](Node::Output& obj, std::string name) { obj.name = name; })
+        .def_property("type", [](Node::Output& obj) -> Node::Output::Type& { return obj.type; }, [](Node::Output& obj, Node::Output::Type type) { obj.type = type; })
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
@@ -496,8 +538,10 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     nodeConnection
         .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
         .def_property("outputName", [](Node::Connection& conn) -> std::string& { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
+        .def_property("outputGroup", [](Node::Connection& conn) -> std::string& { return conn.outputGroup; }, [](Node::Connection& conn, std::string group) {conn.outputGroup = group; }, DOC(dai, Node, Connection, outputGroup))
         .def_property("inputId", [](Node::Connection& conn) -> Node::Id& { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
         .def_property("inputName", [](Node::Connection& conn) -> std::string& { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
+        .def_property("inputGroup", [](Node::Connection& conn) -> std::string& { return conn.inputGroup; }, [](Node::Connection& conn, std::string group) {conn.inputGroup = group; }, DOC(dai, Node, Connection, inputGroup))
     ;
 
     pyNode
@@ -513,6 +557,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
+        .def_property("properties", [](Node& n) -> const Properties& { return n.properties; }, [](Node& n, const Properties& p) { n.properties = p; }, DOC(dai, Node, properties), py::return_value_policy::reference_internal)
     ;
 
     // MSVC errors out with:
@@ -611,8 +656,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getSensorCrop", &ColorCamera::getSensorCrop, DOC(dai, node, ColorCamera, getSensorCrop))
         .def("getSensorCropX", &ColorCamera::getSensorCropX, DOC(dai, node, ColorCamera, getSensorCropX))
         .def("getSensorCropY", &ColorCamera::getSensorCropY, DOC(dai, node, ColorCamera, getSensorCropY))
-        .def("setWaitForConfigInput", &ColorCamera::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, ColorCamera, setWaitForConfigInput))
-        .def("getWaitForConfigInput", &ColorCamera::getWaitForConfigInput, DOC(dai, node, ColorCamera, getWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](ColorCamera& cam, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            cam.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, ColorCamera, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](ColorCamera& cam){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return cam.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, ColorCamera, getWaitForConfigInput))
+
         .def("setPreviewKeepAspectRatio", &ColorCamera::setPreviewKeepAspectRatio, py::arg("keep"), DOC(dai, node, ColorCamera, setPreviewKeepAspectRatio))
         .def("getPreviewKeepAspectRatio", &ColorCamera::getPreviewKeepAspectRatio, DOC(dai, node, ColorCamera, getPreviewKeepAspectRatio))
         .def("setIspScale", static_cast<void(ColorCamera::*)(int,int)>(&ColorCamera::setIspScale), py::arg("numerator"), py::arg("denominator"), DOC(dai, node, ColorCamera, setIspScale))
@@ -622,6 +684,19 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getIspSize", &ColorCamera::getIspSize, DOC(dai, node, ColorCamera, getIspSize))
         .def("getIspWidth", &ColorCamera::getIspWidth, DOC(dai, node, ColorCamera, getIspWidth))
         .def("getIspHeight", &ColorCamera::getIspHeight, DOC(dai, node, ColorCamera, getIspHeight))
+
+        .def("setPreviewNumFramesPool", &ColorCamera::setPreviewNumFramesPool, DOC(dai, node, ColorCamera, setPreviewNumFramesPool))
+        .def("setVideoNumFramesPool", &ColorCamera::setVideoNumFramesPool, DOC(dai, node, ColorCamera, setVideoNumFramesPool))
+        .def("setStillNumFramesPool", &ColorCamera::setStillNumFramesPool, DOC(dai, node, ColorCamera, setStillNumFramesPool))
+        .def("setRawNumFramesPool", &ColorCamera::setRawNumFramesPool, DOC(dai, node, ColorCamera, setRawNumFramesPool))
+        .def("setIspNumFramesPool", &ColorCamera::setIspNumFramesPool, DOC(dai, node, ColorCamera, setIspNumFramesPool))
+        .def("setNumFramesPool", &ColorCamera::setNumFramesPool, py::arg("raw"), py::arg("isp"), py::arg("preview"), py::arg("video"), py::arg("still"), DOC(dai, node, ColorCamera, setNumFramesPool))
+
+        .def("getPreviewNumFramesPool", &ColorCamera::getPreviewNumFramesPool, DOC(dai, node, ColorCamera, getPreviewNumFramesPool))
+        .def("getVideoNumFramesPool", &ColorCamera::getVideoNumFramesPool, DOC(dai, node, ColorCamera, getVideoNumFramesPool))
+        .def("getStillNumFramesPool", &ColorCamera::getStillNumFramesPool, DOC(dai, node, ColorCamera, getStillNumFramesPool))
+        .def("getRawNumFramesPool", &ColorCamera::getRawNumFramesPool, DOC(dai, node, ColorCamera, getRawNumFramesPool))
+        .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
@@ -633,14 +708,17 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("input", &NeuralNetwork::input, DOC(dai, node, NeuralNetwork, input))
         .def_readonly("out", &NeuralNetwork::out, DOC(dai, node, NeuralNetwork, out))
         .def_readonly("passthrough", &NeuralNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
-        .def("setBlobPath", [](NeuralNetwork& nn, py::object obj){
-            // Allows to call this function with paths as well as strings
-            nn.setBlobPath(py::str(obj));
-        }, py::arg("path"), DOC(dai, node, NeuralNetwork, setBlobPath))
+        .def("setBlobPath", &NeuralNetwork::setBlobPath, py::arg("path"), DOC(dai, node, NeuralNetwork, setBlobPath))
         .def("setNumPoolFrames", &NeuralNetwork::setNumPoolFrames, py::arg("numFrames"), DOC(dai, node, NeuralNetwork, setNumPoolFrames))
         .def("setNumInferenceThreads", &NeuralNetwork::setNumInferenceThreads, py::arg("numThreads"), DOC(dai, node, NeuralNetwork, setNumInferenceThreads))
         .def("setNumNCEPerInferenceThread", &NeuralNetwork::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, NeuralNetwork, setNumNCEPerInferenceThread))
         .def("getNumInferenceThreads", &NeuralNetwork::getNumInferenceThreads, DOC(dai, node, NeuralNetwork, getNumInferenceThreads))
+        .def("setBlob", py::overload_cast<dai::OpenVINO::Blob>(&NeuralNetwork::setBlob), py::arg("blob"), DOC(dai, node, NeuralNetwork, setBlob))
+        .def("setBlob", py::overload_cast<const dai::Path&>(&NeuralNetwork::setBlob), py::arg("path"), DOC(dai, node, NeuralNetwork, setBlob, 2))
+
+        .def_readonly("inputs", &NeuralNetwork::inputs, DOC(dai, node, NeuralNetwork, inputs))
+        .def_readonly("passthroughs", &NeuralNetwork::passthroughs, DOC(dai, node, NeuralNetwork, passthroughs))
+
         ;
     // Properties alias
     daiNodeModule.attr("NeuralNetwork").attr("Properties") = neuralNetworkProperties;
@@ -709,9 +787,29 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setKeepAspectRatio", &ImageManip::setKeepAspectRatio, DOC(dai, node, ImageManip, setKeepAspectRatio))
 
-        .def("setWaitForConfigInput", &ImageManip::setWaitForConfigInput, DOC(dai, node, ImageManip, setWaitForConfigInput))
+        .def("setWaitForConfigInput", [](ImageManip& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, ImageManip, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](ImageManip& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, ImageManip, getWaitForConfigInput))
+
         .def("setNumFramesPool", &ImageManip::setNumFramesPool, DOC(dai, node, ImageManip, setNumFramesPool))
         .def("setMaxOutputFrameSize", &ImageManip::setMaxOutputFrameSize, DOC(dai, node, ImageManip, setMaxOutputFrameSize))
+
+        .def("setWarpMesh", py::overload_cast<const std::vector<Point2f>&, int, int>(&ImageManip::setWarpMesh), DOC(dai, node, ImageManip, setWarpMesh))
+        .def("setWarpMesh", py::overload_cast<const std::vector<std::pair<float,float>>&, int, int>(&ImageManip::setWarpMesh), DOC(dai, node, ImageManip, setWarpMesh))
         ;
 
      // MonoCamera node
@@ -753,6 +851,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     // StereoDepth node
+    stereoDepthPresetMode
+        .value("HIGH_ACCURACY", StereoDepth::PresetMode::HIGH_ACCURACY, DOC(dai, node, StereoDepth, PresetMode, HIGH_ACCURACY))
+        .value("HIGH_DENSITY", StereoDepth::PresetMode::HIGH_DENSITY, DOC(dai, node, StereoDepth, PresetMode, HIGH_DENSITY))
+        ;
+
     stereoDepth
         .def_readonly("initialConfig",  &StereoDepth::initialConfig, DOC(dai, node, StereoDepth, initialConfig))
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
@@ -771,7 +874,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("debugExtDispLrCheckIt2", &StereoDepth::debugExtDispLrCheckIt2, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
-#if 0 //will be enabled when confidence map RGB aligment/LR-check support will be added
+#if 0 //will be enabled when confidence map RGB alignment/LR-check support will be added
         .def_readonly("debugConfMapLrCheckIt1", &StereoDepth::debugConfMapLrCheckIt1, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt1))
         .def_readonly("debugConfMapLrCheckIt2", &StereoDepth::debugConfMapLrCheckIt2, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt2))
 #endif
@@ -787,6 +890,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setRectification",        &StereoDepth::setRectification, py::arg("enable"), DOC(dai, node, StereoDepth, setRectification))
         .def("setLeftRightCheck",       &StereoDepth::setLeftRightCheck, py::arg("enable"), DOC(dai, node, StereoDepth, setLeftRightCheck))
         .def("setSubpixel",             &StereoDepth::setSubpixel, py::arg("enable"), DOC(dai, node, StereoDepth, setSubpixel))
+        .def("setSubpixelFractionalBits", &StereoDepth::setSubpixelFractionalBits, py::arg("subpixelFractionalBits"), DOC(dai, node, StereoDepth, setSubpixelFractionalBits))
         .def("setExtendedDisparity",    &StereoDepth::setExtendedDisparity, py::arg("enable"), DOC(dai, node, StereoDepth, setExtendedDisparity))
         .def("setRectifyEdgeFillColor", &StereoDepth::setRectifyEdgeFillColor, py::arg("color"), DOC(dai, node, StereoDepth, setRectifyEdgeFillColor))
         .def("setRectifyMirrorFrame", [](StereoDepth& s, bool enable) {
@@ -830,20 +934,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             s.setOutputDepth(enable);
             HEDLEY_DIAGNOSTIC_POP
         })
-        .def("loadCalibrationFile", [](StereoDepth& s, std::string path){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationFile() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
-            HEDLEY_DIAGNOSTIC_PUSH
-            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.loadCalibrationFile(path);
-            HEDLEY_DIAGNOSTIC_POP
-        })
-        .def("loadCalibrationData", [](StereoDepth& s, std::vector<std::uint8_t> data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "loadCalibrationData() is deprecated, Use 'Pipeline.setCalibrationData()' instead", 1);
-            HEDLEY_DIAGNOSTIC_PUSH
-            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
-            s.loadCalibrationData(data);
-            HEDLEY_DIAGNOSTIC_POP
-        })
         .def("setEmptyCalibration", [](StereoDepth& s){
             PyErr_WarnEx(PyExc_DeprecationWarning, "setEmptyCalibration() is deprecated, Use 'setRectification(False)' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH
@@ -860,6 +950,17 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             return s.getMaxDisparity();
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, getMaxDisparity))
+        .def("setPostProcessingHardwareResources", &StereoDepth::setPostProcessingHardwareResources, DOC(dai, node, StereoDepth, setPostProcessingHardwareResources))
+        .def("setDefaultProfilePreset", &StereoDepth::setDefaultProfilePreset, DOC(dai, node, StereoDepth, setDefaultProfilePreset))
+        .def("setFocalLengthFromCalibration", [](StereoDepth& s, bool focalLengthFromCalibration){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setFocalLengthFromCalibration is deprecated. Default value is true.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return s.setFocalLengthFromCalibration(focalLengthFromCalibration);
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
+        .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
+        .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
@@ -904,6 +1005,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBitrate", &VideoEncoder::setBitrate, py::arg("bitrate"), DOC(dai, node, VideoEncoder, setBitrate))
         .def("setBitrateKbps", &VideoEncoder::setBitrateKbps, py::arg("bitrateKbps"), DOC(dai, node, VideoEncoder, setBitrateKbps))
         .def("setKeyframeFrequency", &VideoEncoder::setKeyframeFrequency, py::arg("freq"), DOC(dai, node, VideoEncoder, setKeyframeFrequency))
+        .def("setMaxOutputFrameSize", &VideoEncoder::setMaxOutputFrameSize, py::arg("maxFrameSize"), DOC(dai, node, VideoEncoder, setMaxOutputFrameSize))
         //.def("setMaxBitrate", &VideoEncoder::setMaxBitrate)
         .def("setNumBFrames", &VideoEncoder::setNumBFrames, py::arg("numBFrames"), DOC(dai, node, VideoEncoder, setNumBFrames))
         .def("setQuality", &VideoEncoder::setQuality, py::arg("quality"), DOC(dai, node, VideoEncoder, setQuality))
@@ -940,6 +1042,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, VideoEncoder, getSize))
         .def("getFrameRate", &VideoEncoder::getFrameRate, DOC(dai, node, VideoEncoder, getFrameRate))
         .def("getLossless", &VideoEncoder::getLossless, DOC(dai, node, VideoEncoder, getLossless))
+        .def("getMaxOutputFrameSize", &VideoEncoder::getMaxOutputFrameSize, DOC(dai, node, VideoEncoder, getMaxOutputFrameSize))
     ;
     // ALIAS
     daiNodeModule.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
@@ -971,10 +1074,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // DetectionNetwork node
     detectionNetwork
-        .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, DetectionNetwork, input))
+        .def_readonly("input", &DetectionNetwork::input, DOC(dai, node, NeuralNetwork, input))
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
-        .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, DetectionNetwork, passthrough))
+        .def_readonly("outNetwork", &DetectionNetwork::outNetwork, DOC(dai, node, DetectionNetwork, outNetwork))
+        .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
+        .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold))
         ;
     // ALIAS
     daiNodeModule.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
@@ -988,7 +1093,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setAnchors", &YoloDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors))
         .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloDetectionNetwork, setAnchorMasks))
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
-        ;
+        .def("getNumClasses", &YoloDetectionNetwork::getNumClasses, DOC(dai, node, YoloDetectionNetwork, getNumClasses))
+        .def("getCoordinateSize", &YoloDetectionNetwork::getCoordinateSize, DOC(dai, node, YoloDetectionNetwork, getCoordinateSize))
+        .def("getAnchors", &YoloDetectionNetwork::getAnchors, DOC(dai, node, YoloDetectionNetwork, getAnchors))
+        .def("getAnchorMasks", &YoloDetectionNetwork::getAnchorMasks, DOC(dai, node, YoloDetectionNetwork, getAnchorMasks))
+        .def("getIouThreshold", &YoloDetectionNetwork::getIouThreshold, DOC(dai, node, YoloDetectionNetwork, getIouThreshold))
+    ;
 
     spatialDetectionNetwork
         .def_readonly("input", &SpatialDetectionNetwork::input, DOC(dai, node, SpatialDetectionNetwork, input))
@@ -997,6 +1107,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("boundingBoxMapping", &SpatialDetectionNetwork::boundingBoxMapping, DOC(dai, node, SpatialDetectionNetwork, boundingBoxMapping))
         .def_readonly("passthrough", &SpatialDetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
         .def_readonly("passthroughDepth", &SpatialDetectionNetwork::passthroughDepth, DOC(dai, node, SpatialDetectionNetwork, passthroughDepth))
+        .def_readonly("spatialLocationCalculatorOutput", &SpatialDetectionNetwork::spatialLocationCalculatorOutput, DOC(dai, node, SpatialDetectionNetwork, spatialLocationCalculatorOutput))
 
         .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
@@ -1015,6 +1126,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setAnchors", &YoloSpatialDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchors))
         .def("setAnchorMasks", &YoloSpatialDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloSpatialDetectionNetwork, setAnchorMasks))
         .def("setIouThreshold", &YoloSpatialDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloSpatialDetectionNetwork, setIouThreshold))
+        .def("getNumClasses", &YoloSpatialDetectionNetwork::getNumClasses, DOC(dai, node, YoloSpatialDetectionNetwork, getNumClasses))
+        .def("getCoordinateSize", &YoloSpatialDetectionNetwork::getCoordinateSize, DOC(dai, node, YoloSpatialDetectionNetwork, getCoordinateSize))
+        .def("getAnchors", &YoloSpatialDetectionNetwork::getAnchors, DOC(dai, node, YoloSpatialDetectionNetwork, getAnchors))
+        .def("getAnchorMasks", &YoloSpatialDetectionNetwork::getAnchorMasks, DOC(dai, node, YoloSpatialDetectionNetwork, getAnchorMasks))
+        .def("getIouThreshold", &YoloSpatialDetectionNetwork::getIouThreshold, DOC(dai, node, YoloSpatialDetectionNetwork, getIouThreshold))
         ;
 
     // SpatialLocationCalculator node
@@ -1025,7 +1141,25 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("out", &SpatialLocationCalculator::out, DOC(dai, node, SpatialLocationCalculator, out))
         .def_readonly("passthroughDepth", &SpatialLocationCalculator::passthroughDepth, DOC(dai, node, SpatialLocationCalculator, passthroughDepth))
         .def_readonly("initialConfig", &SpatialLocationCalculator::initialConfig, DOC(dai, node, SpatialLocationCalculator, initialConfig))
-        .def("setWaitForConfigInput", &SpatialLocationCalculator::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](SpatialLocationCalculator& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, SpatialLocationCalculator, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](SpatialLocationCalculator& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, SpatialLocationCalculator, getWaitForConfigInput))
+
         ;
     // ALIAS
     daiNodeModule.attr("SpatialLocationCalculator").attr("Properties") = spatialLocationCalculatorProperties;
@@ -1034,6 +1168,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     systemLogger
         .def_readonly("out", &SystemLogger::out, DOC(dai, node, SystemLogger, out))
         .def("setRate", &SystemLogger::setRate, py::arg("hz"), DOC(dai, node, SystemLogger, setRate))
+        .def("getRate", &SystemLogger::getRate, DOC(dai, node, SystemLogger, getRate))
         ;
 
     // NeuralNetwork node
@@ -1050,7 +1185,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setMaxObjectsToTrack", &ObjectTracker::setMaxObjectsToTrack, py::arg("maxObjectsToTrack"), DOC(dai, node, ObjectTracker, setMaxObjectsToTrack))
         .def("setDetectionLabelsToTrack", &ObjectTracker::setDetectionLabelsToTrack, py::arg("labels"), DOC(dai, node, ObjectTracker, setDetectionLabelsToTrack))
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
-        .def("setTrackerIdAssigmentPolicy", &ObjectTracker::setTrackerIdAssigmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssigmentPolicy))
+        .def("setTrackerIdAssignmentPolicy", &ObjectTracker::setTrackerIdAssignmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssignmentPolicy))
         ;
     daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
@@ -1080,22 +1215,50 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getBatchReportThreshold", &IMU::getBatchReportThreshold, DOC(dai, node, IMU, getBatchReportThreshold))
         .def("setMaxBatchReports", &IMU::setMaxBatchReports, py::arg("maxBatchReports"), DOC(dai, node, IMU, setMaxBatchReports))
         .def("getMaxBatchReports", &IMU::getMaxBatchReports, DOC(dai, node, IMU, getMaxBatchReports))
+        .def("enableFirmwareUpdate", &IMU::enableFirmwareUpdate, DOC(dai, node, IMU, enableFirmwareUpdate))
         ;
     daiNodeModule.attr("IMU").attr("Properties") = imuProperties;
 
     // EdgeDetector node
-
     edgeDetector
         .def_readonly("initialConfig", &EdgeDetector::initialConfig, DOC(dai, node, EdgeDetector, initialConfig))
         .def_readonly("inputConfig", &EdgeDetector::inputConfig, DOC(dai, node, EdgeDetector, inputConfig))
         .def_readonly("inputImage", &EdgeDetector::inputImage, DOC(dai, node, EdgeDetector, inputImage))
         .def_readonly("outputImage", &EdgeDetector::outputImage, DOC(dai, node, EdgeDetector, outputImage))
-        .def("setWaitForConfigInput", &EdgeDetector::setWaitForConfigInput, DOC(dai, node, EdgeDetector, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](EdgeDetector& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, EdgeDetector, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](EdgeDetector& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, EdgeDetector, getWaitForConfigInput))
+
         .def("setNumFramesPool", &EdgeDetector::setNumFramesPool, DOC(dai, node, EdgeDetector, setNumFramesPool))
         .def("setMaxOutputFrameSize", &EdgeDetector::setMaxOutputFrameSize, DOC(dai, node, EdgeDetector, setMaxOutputFrameSize))
         ;
     daiNodeModule.attr("EdgeDetector").attr("Properties") = edgeDetectorProperties;
 
+    // AprilTag node
+    aprilTag
+        .def_readonly("inputConfig", &AprilTag::inputConfig, DOC(dai, node, AprilTag, inputConfig))
+        .def_readonly("inputImage", &AprilTag::inputImage, DOC(dai, node, AprilTag, inputImage))
+        .def_readonly("out", &AprilTag::out, DOC(dai, node, AprilTag, out))
+        .def_readonly("passthroughInputImage", &AprilTag::passthroughInputImage, DOC(dai, node, AprilTag, passthroughInputImage))
+        .def_readonly("initialConfig", &AprilTag::initialConfig, DOC(dai, node, AprilTag, initialConfig))
+        .def("setWaitForConfigInput", &AprilTag::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, AprilTag, setWaitForConfigInput))
+        ;
+	daiNodeModule.attr("AprilTag").attr("Properties") = aprilTagProperties;
 
     // FeatureTracker node
     featureTracker
@@ -1104,10 +1267,53 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readonly("outputFeatures", &FeatureTracker::outputFeatures, DOC(dai, node, FeatureTracker, outputFeatures))
         .def_readonly("passthroughInputImage", &FeatureTracker::passthroughInputImage, DOC(dai, node, FeatureTracker, passthroughInputImage))
         .def_readonly("initialConfig", &FeatureTracker::initialConfig, DOC(dai, node, FeatureTracker, initialConfig))
-        .def("setWaitForConfigInput", &FeatureTracker::setWaitForConfigInput, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+
+        .def("setWaitForConfigInput", [](FeatureTracker& obj, bool wait){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            obj.setWaitForConfigInput(wait);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("wait"), DOC(dai, node, FeatureTracker, setWaitForConfigInput))
+
+        .def("getWaitForConfigInput", [](FeatureTracker& obj){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'inputConfig.setWaitForMessage()' instead", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            return obj.getWaitForConfigInput();
+            HEDLEY_DIAGNOSTIC_POP
+        }, DOC(dai, node, FeatureTracker, getWaitForConfigInput))
+
         .def("setHardwareResources", &FeatureTracker::setHardwareResources, py::arg("numShaves"), py::arg("numMemorySlices"), DOC(dai, node, FeatureTracker, setHardwareResources))
         ;
     daiNodeModule.attr("FeatureTracker").attr("Properties") = featureTrackerProperties;
+
+    // FeatureTracker node
+    detectionParser
+        .def_readonly("input", &DetectionParser::input, DOC(dai, node, DetectionParser, input))
+        .def_readonly("out", &DetectionParser::out, DOC(dai, node, DetectionParser, out))
+        .def("setNumFramesPool", &DetectionParser::setNumFramesPool, py::arg("numFramesPool"), DOC(dai, node, DetectionParser, setNumFramesPool))
+        .def("getNumFramesPool", &DetectionParser::getNumFramesPool, DOC(dai, node, DetectionParser, getNumFramesPool))
+        .def("setBlob", &DetectionParser::setBlob, py::arg("blob"), DOC(dai, node, DetectionParser, setBlob))
+        .def("setNNFamily", &DetectionParser::setNNFamily, py::arg("type"), DOC(dai, node, DetectionParser, setNNFamily))
+        .def("getNNFamily", &DetectionParser::getNNFamily, DOC(dai, node, DetectionParser, getNNFamily))
+        .def("setConfidenceThreshold", &DetectionParser::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionParser, setConfidenceThreshold))
+        .def("getConfidenceThreshold", &DetectionParser::getConfidenceThreshold, DOC(dai, node, DetectionParser, getConfidenceThreshold))
+        .def("setNumClasses", &DetectionParser::setNumClasses, py::arg("numClasses"), DOC(dai, node, DetectionParser, setNumClasses))
+        .def("setCoordinateSize", &DetectionParser::setCoordinateSize, py::arg("coordinates"), DOC(dai, node, DetectionParser, setCoordinateSize))
+        .def("setAnchors", &DetectionParser::setAnchors, py::arg("anchors"), DOC(dai, node, DetectionParser, setAnchors))
+        .def("setAnchorMasks", &DetectionParser::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, DetectionParser, setAnchorMasks))
+        .def("setIouThreshold", &DetectionParser::setIouThreshold, py::arg("thresh"), DOC(dai, node, DetectionParser, setIouThreshold))
+        .def("getNumClasses", &DetectionParser::getNumClasses, DOC(dai, node, DetectionParser, getNumClasses))
+        .def("getCoordinateSize", &DetectionParser::getCoordinateSize, DOC(dai, node, DetectionParser, getCoordinateSize))
+        .def("getAnchors", &DetectionParser::getAnchors, DOC(dai, node, DetectionParser, getAnchors))
+        .def("getAnchorMasks", &DetectionParser::getAnchorMasks, DOC(dai, node, DetectionParser, getAnchorMasks))
+        .def("getIouThreshold", &DetectionParser::getIouThreshold, DOC(dai, node, DetectionParser, getIouThreshold))
+
+        ;
+    daiNodeModule.attr("DetectionParser").attr("Properties") = detectionParserProperties;
 
     // UVC node
     uvc

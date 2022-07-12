@@ -3,7 +3,7 @@ Object tracker on RGB
 
 This example shows how to run MobileNetv2SSD on the RGB input frame, and perform object tracking on persons.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Object tracker on video`
 - :ref:`Spatial object tracker on RGB`
@@ -24,8 +24,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

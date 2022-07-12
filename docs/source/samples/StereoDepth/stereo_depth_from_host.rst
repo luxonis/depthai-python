@@ -9,7 +9,7 @@ This example shows depth map from host using stereo images. There are 3 depth mo
 
 Otherwise a median with kernel_7x7 is activated.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Stereo Depth Video`
 

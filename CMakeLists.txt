@@ -9,6 +9,12 @@ if(NOT WIN32)
     set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
 endif()
 
+# Specify path separator
+set(SYS_PATH_SEPARATOR ";")
+if(UNIX)
+    set(SYS_PATH_SEPARATOR ":")
+endif()
+
 # Generate combined Hunter config
 file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
 file(READ cmake/Hunter/config.cmake hunter_config)
@@ -17,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.258.tar.gz"
-    SHA1 "062a19ab13ce8dffa9a882b6ce3e43bdabdf75d3"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
+    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -97,6 +103,42 @@ pybind11_add_module(${TARGET_NAME}
     src/log/LogBindings.cpp
 )
 
+if(WIN32)
+    # Copy dlls to target directory - Windows only
+    # TARGET_RUNTIME_DLLS generator expression available since CMake 3.21
+    if(CMAKE_VERSION VERSION_LESS "3.21")
+        file(GLOB depthai_dll_libraries "${HUNTER_INSTALL_PREFIX}/bin/*.dll")
+    else()
+        set(depthai_dll_libraries "$<TARGET_RUNTIME_DLLS:${TARGET_NAME}>")
+    endif()
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E copy ${depthai_dll_libraries} $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMAND_EXPAND_LISTS
+    )
+
+    # Disable "d" postfix, so python can import the library as is
+    set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "")
+endif()
+
+# Add stubs (pyi) generation step after building bindings
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
+if(error)
+    message(WARNING "Mypy not available - stubs won't be generated or checked")
+else()
+    get_target_property(bindings_directory ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
+    if(NOT bindings_directory)
+        set(bindings_directory ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
+    message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E env
+        # Python path (to find compiled module)
+        "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
+        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "$<TARGET_FILE_DIR:${TARGET_NAME}>"
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+endif()
 
 # Docstring options
 if(DEPTHAI_PYTHON_DOCSTRINGS_INPUT AND DEPTHAI_PYTHON_DOCSTRINGS_OUTPUT)

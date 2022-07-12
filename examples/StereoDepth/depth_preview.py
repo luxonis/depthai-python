@@ -9,7 +9,7 @@ extended_disparity = False
 # Better accuracy for longer distance, fractional disparity 32-levels:
 subpixel = False
 # Better handling for occlusions:
-lr_check = False
+lr_check = True
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -29,7 +29,7 @@ monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
-depth.initialConfig.setConfidenceThreshold(245)
+depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
 depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(lr_check)
@@ -48,8 +48,8 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
 
     while True:
-        inDepth = q.get()  # blocking call, will wait until a new data has arrived
-        frame = inDepth.getFrame()
+        inDisparity = q.get()  # blocking call, will wait until a new data has arrived
+        frame = inDisparity.getFrame()
         # Normalization for better visualization
         frame = (frame * (255 / depth.initialConfig.getMaxDisparity())).astype(np.uint8)
 

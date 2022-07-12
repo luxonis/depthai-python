@@ -1,8 +1,12 @@
 NeuralNetwork
 =============
 
-Runs a neural inference on input data. Neural network has to be a :code:`.blob` type. Instructions on how to compile your neural network (NN) to :code:`.blob`
-can be found `here <https://docs.luxonis.com/en/latest/pages/model_conversion/>`__.
+This node runs neural inference on input data. Any OpenVINO neural networks can be run using this node, as long as the VPU `supports all layers <https://docs.luxonis.com/en/latest/pages/model_conversion/#supported-layers>`__.
+This allows you to pick from **200+ pre-trained model** from `Open Model Zoo <https://github.com/openvinotoolkit/open_model_zoo>`__ and `DepthAI Model Zoo <https://github.com/luxonis/depthai-model-zoo>`__
+and directly run it on the OAK device.
+
+Neural network has to be in :code:`.blob` format to be compatible with the VPU. Instructions on how to compile
+your neural network (NN) to :code:`.blob` can be found `here <https://docs.luxonis.com/en/latest/pages/model_conversion/>`__.
 
 
 How to place it
@@ -113,7 +117,9 @@ Usage
 Examples of functionality
 #########################
 
-- `DeeplabV3 experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-deeplabv3_person/deeplabv3_person_256.py>`__
+- :ref:`Multi-Input Frame Concationation`
+- :ref:`Frame Normalization`
+- `DeeplabV3 experiment <https://github.com/luxonis/depthai-experiments/tree/master/gen2-deeplabv3_depth>`__
 - `Age/gender experiment <https://github.com/luxonis/depthai-experiments/blob/master/gen2-age-gender/main.py>`__
 - `EfficientDet demo <https://github.com/luxonis/depthai-experiments/blob/master/gen2-efficientDet/main.py>`__
 

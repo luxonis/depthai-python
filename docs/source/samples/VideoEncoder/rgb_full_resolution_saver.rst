@@ -10,9 +10,11 @@ uncompressed frames, processed by ISP, and raw - BayerRG (R_Gr_Gb_B), as read fr
 Be careful, this example saves pictures to your host storage. So if you leave
 it running, you could fill up your storage on your host.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Mono Full Resolution Saver`
+
+.. include::  /includes/container-encoding.rst
 
 Demo
 ####

@@ -14,7 +14,7 @@ you could fill up your storage on your host.
 
 It's a combination of :ref:`RGB Encoding` and :ref:`Mono & MobilenetSSD`.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB Encoding`
 - :ref:`RGB & Mono Encoding`
@@ -37,8 +37,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_6shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

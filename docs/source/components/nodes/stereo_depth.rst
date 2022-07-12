@@ -31,7 +31,7 @@ Inputs and Outputs
                  │                   ├─────────────►
   left           │                   │   syncedLeft
   ──────────────►│-------------------├─────────────►
-                 │                   │        depth
+                 │                   │   depth [mm]
                  │                   ├─────────────►
                  │    StereoDepth    │    disparity
                  │                   ├─────────────►
@@ -56,8 +56,8 @@ Inputs and Outputs
     - :code:`confidenceMap` - :ref:`ImgFrame`
     - :code:`rectifiedLeft` - :ref:`ImgFrame`
     - :code:`syncedLeft` - :ref:`ImgFrame`
-    - :code:`depth` - :ref:`ImgFrame`
-    - :code:`disparity` - :ref:`ImgFrame`
+    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
+    - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
     - :code:`rectifiedRight` - :ref:`ImgFrame`
     - :code:`syncedRight` - :ref:`ImgFrame`
     - :code:`outConfig` - :ref:`StereoDepthConfig`
@@ -73,7 +73,7 @@ Inputs and Outputs
 Internal block diagram of StereoDepth node
 ##########################################
 
-.. image:: /_static/images/components/depth_diagram.jpeg
+.. image:: /_static/images/components/depth_diagram.png
    :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
 
 On the diagram, red rectangle are firmware settings that are configurable via the API. Gray rectangles are settings that that are not yet
@@ -126,9 +126,15 @@ Currently configurable blocks
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
-  .. tab:: Mesh file / Homography matrix
+  .. tab:: Depth Filters
 
-    Mesh files are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
+    **Depth Filtering** / **Depth Post-Processing** is performed at the end of the depth pipeline. It helps with noise reduction and overall depth quality.
+
+    .. include::  ../../includes/depth-filters.rst
+
+  .. tab:: Mesh files
+
+    Mesh files (homography matrix) are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
     These files helps in overcoming the distortions in the camera increasing the accuracy and also help in when `wide FOV <https://docs.luxonis.com/projects/hardware/en/latest/pages/arducam.html#arducam-compatible-cameras>`__ lens are used.
 
     .. note::
@@ -148,7 +154,7 @@ Currently configurable blocks
 
   .. tab:: Confidence Threshold
 
-    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
+    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and chooses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy).
     - **LR check threshold**: Disparity is considered for the output when the difference between LR and RL disparities is smaller than the LR check threshold.
 
     .. doxygenfunction:: dai::StereoDepthConfig::setConfidenceThreshold
@@ -159,8 +165,8 @@ Currently configurable blocks
         :project: depthai-core
         :no-link:
 
-Current limitations
-###################
+Limitations
+###########
 
 - Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 
@@ -171,20 +177,29 @@ Stereo depth FPS
    :header-rows: 1
 
    * - Stereo depth mode
-     - FPS for 720P
+     - FPS for 1280x720
+     - FPS for 640x400
    * - Standard mode
-     - 150
+     - 60
+     - 110
    * - Left-Right Check
-     - 60
+     - 55
+     - 105
    * - Subpixel Disparity
-     - 30
+     - 45
+     - 105
    * - Extended Disparity
-     - 60
+     - 54
+     - 105
    * - Subpixel + LR check
-     - 15
+     - 34
+     - 96
    * - Extended + LR check
-     - 30
+     - 26
+     - 62
 
+All stereo modes were measured for :code:`depth` output with **5x5 median filter** enabled. For 720P, mono cameras were set
+to **60 FPS** and for 400P mono cameras were set to **110 FPS**.
 
 Usage
 #####
@@ -227,6 +242,7 @@ Examples of functionality
 #########################
 
 - :ref:`Depth Preview`
+- :ref:`RGB Depth alignment`
 - :ref:`Mono & MobilenetSSD & Depth`
 - :ref:`RGB & MobilenetSSD with spatial data`
 
@@ -443,5 +459,19 @@ forum post.
    for accurate disparity matching - to have good quality depth maps on blank surfaces as well. For outdoors,
    the IR laser dot projector is only relevant at night. For more information see the development progress
    `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
+
+Measuring real-world object dimensions
+######################################
+
+Because the depth map contains the Z distance, objects in parallel with the camera are measured accurately standard. For objects not in parallel, the Euclidean distance calculation can be used. Please refer to the below:
+
+.. image:: /_static/images/components/Euclidian_distance_fig.png
+
+When running eg. the :ref:`RGB & MobilenetSSD with spatial data` example, you could calculate the distance to the detected object from XYZ coordinates (:ref:`SpatialImgDetections`) using the code below (after code line ``143`` of the example):
+
+.. code-block:: python
+
+    distance = math.sqrt(detection.spatialCoordinates.x ** 2 + detection.spatialCoordinates.y ** 2 + detection.spatialCoordinates.z ** 2) # mm
+
 
 .. include::  ../../includes/footer-short.rst

@@ -3,6 +3,8 @@ VideoEncoder
 
 VideoEncoder node is used to encode :ref:`image frames <ImgFrame>` into H264/H265/JPEG.
 
+.. include::  /includes/container-encoding.rst
+
 How to place it
 ###############
 
@@ -77,8 +79,16 @@ Usage
 Limitations
 ###########
 
-- HW limit for the encoder is: 3840x2160 pixels at 30FPS or :code:`248 million pixels/second`. The resolution and frame rate can be divided into multiple streams - but the sum of all the pixels/second needs to be below 248 million.
+For **H.264 / H.265 encoding**, we have the following limits:
+-  **248 million pixels/second** limit for the encoder or 3840x2160 pixels at 30FPS. The resolution and frame rate can be divided into multiple streams - but the sum of all the pixels/second needs to be below 248 million.
 - Due to a HW constraint, video encoding can be done only on frames whose width values are multiples of 32.
+- 4096 pixel max width for a frame.
+- Maximum of 3 parallel encoding streams.
+
+The **MJPEG encoder** is capable of 16384x8192 resolution at 500Mpixel/second. From our testing, we were able to encode
+4K at 30FPS and 2x 800P at 55FPS.
+
+Note the processing resources of the encoder **are shared** between H.26x and JPEG.
 
 Examples of functionality
 #########################
