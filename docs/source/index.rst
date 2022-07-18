@@ -22,6 +22,12 @@ We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ 
 - **XLink** is a middleware that is capable to exchange data between device and host. :ref:`XLinkIn` node allows sending the data from the host to a device, while :ref:`XLinkOut` does the opposite.
 - **Messages** are transferred between nodes, as defined by a connection. More :ref:`information here <components_messages>`.
 
+.. image:: https://user-images.githubusercontent.com/18037362/179389982-16711c75-42f1-4a96-9259-7113802d0104.png
+
+Above there's a graph representation of a (more complex) 2-stage pipeline of the `age-gender recognition demo <https://github.com/luxonis/depthai-experiments/tree/master/gen2-age-gender>`__.
+Graph contains different :ref:`Nodes` connected (linked) to each other. `DepthAI Pipeline Graph <https://github.com/geaxgx/depthai_pipeline_graph#depthai-pipeline-graph-experimental>`__
+tool was used to generate this image.
+
 Getting started
 ---------------
 

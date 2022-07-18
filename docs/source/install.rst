@@ -130,6 +130,9 @@ Raspberry Pi OS
     sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
 
+We have also prepared `pre-configured RPi images <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/raspberrypi.html>`__ so you can get up & running faster.
+
+
 Jetson
 ******
 
