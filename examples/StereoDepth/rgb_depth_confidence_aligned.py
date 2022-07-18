@@ -75,7 +75,7 @@ if downscaleColor: camRgb.setIspScale(2, 3)
 # For now, RGB needs fixed focus to properly align with depth.
 # This value was used during calibration
 try:
-    calibData = device.readCalibration()
+    calibData = device.readCalibration2()
     lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.RGB)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
