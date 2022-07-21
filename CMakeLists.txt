@@ -124,6 +124,27 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/FeatureTrackerBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
+
+    src/pipeline/datatype/ADatatypeBindings.cpp
+    src/pipeline/datatype/AprilTagConfigBindings.cpp
+    src/pipeline/datatype/AprilTagsBindings.cpp
+    src/pipeline/datatype/BufferBindings.cpp
+    src/pipeline/datatype/CameraControlBindings.cpp
+    src/pipeline/datatype/EdgeDetectorConfigBindings.cpp
+    src/pipeline/datatype/FeatureTrackerConfigBindings.cpp
+    src/pipeline/datatype/ImageManipConfigBindings.cpp
+    src/pipeline/datatype/ImgDetectionsBindings.cpp
+    src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/NNDataBindings.cpp
+    src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorDataBindings.cpp
+    src/pipeline/datatype/StereoDepthConfigBindings.cpp
+    src/pipeline/datatype/SystemInformationBindings.cpp
+    src/pipeline/datatype/TrackedFeaturesBindings.cpp
+    src/pipeline/datatype/TrackletsBindings.cpp
+
 )
 
 if(WIN32)

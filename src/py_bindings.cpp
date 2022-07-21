@@ -39,7 +39,7 @@ PYBIND11_MODULE(depthai, m)
 
     // Add bindings
     std::deque<StackFunction> callstack;
-    callstack.push_front(&DatatypeBindings::bind);
+    DatatypeBindings::addToCallstack(callstack);
     callstack.push_front(&LogBindings::bind);
     callstack.push_front(&DataQueueBindings::bind);
     callstack.push_front(&OpenVINOBindings::bind);
