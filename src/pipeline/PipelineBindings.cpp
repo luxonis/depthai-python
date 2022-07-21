@@ -1,6 +1,6 @@
 
 #include "PipelineBindings.hpp"
-#include "NodeBindings.hpp"
+#include "node/NodeBindings.hpp"
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"

@@ -18,7 +18,7 @@
 #include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
 #include "pipeline/CommonBindings.hpp"
-#include "pipeline/NodeBindings.hpp"
+#include "pipeline/node/NodeBindings.hpp"
 #include "XLinkBindings.hpp"
 #include "DeviceBindings.hpp"
 #include "CalibrationHandlerBindings.hpp"
@@ -43,8 +43,8 @@ PYBIND11_MODULE(depthai, m)
     callstack.push_front(&LogBindings::bind);
     callstack.push_front(&DataQueueBindings::bind);
     callstack.push_front(&OpenVINOBindings::bind);
+    NodeBindings::addToCallstack(callstack);
     callstack.push_front(&AssetManagerBindings::bind);
-    callstack.push_front(&NodeBindings::bind);
     callstack.push_front(&PipelineBindings::bind);
     callstack.push_front(&XLinkBindings::bind);
     callstack.push_front(&DeviceBindings::bind);
