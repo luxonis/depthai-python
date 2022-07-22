@@ -35,3 +35,11 @@ which can mean the NN accuracy could decrease.
 
 .. image:: /_static/images/tutorials/fov.jpeg
 
+12MP OAK FOV
+************
+
+Do you need to get full 12MP FOV for your OAK? We can help with that too.
+
+Check out the following `Full FOV NN Inferencing experiment <https://github.com/luxonis/depthai-experiments/tree/master/gen2-full-fov-nn>`__ to learn how.
+
+.. image:: /_static/images/tutorials/full_fov_demo.png
