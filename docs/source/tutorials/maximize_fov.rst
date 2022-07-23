@@ -1,45 +1,60 @@
 Maximizing FOV
 ==============
 
-Do you need to maximize the FOV of your OAK?
+In this tutorial we will look at how you can use the full FOV of the image sensor.
 
-By default, when you are using :code:`preview` output from :ref:`ColorCamera`, DepthAI will crop the
-frames to get the desired aspect ratio. For example, if you are using Mobilenet-SSD model, you need
-:code:`300x300` frames. DepthAI will crop 1080P frames to :code:`1080x1080` and then resize them to :code:`300x300`.
-This means you will lose some part of the image.
+When you are using ``preview`` output from :ref:`ColorCamera`, DepthAI will crop the
+frames by default to get the desired aspect ratio. ``preview`` stream derives from ``video`` stream, which is cropped (16:9 aspect ratio,
+max 4k resolution) from the ``isp`` stream, which has the full FOV.
 
-If you need to maximize the FOV of the image captured by an OAK-D or other OAK camera, you can either:
+.. image:: /_static/images/tutorials/isp.jpg
 
-#. Change the aspect ratio (stretch the image)
-#. Apply letterboxing to the image
+Image above is the ``isp`` output from the :ref:`ColorCamera` (12MP from IMX378). Blue rectangle represents the cropped 4K
+``video`` output, and yellow rectangle represents cropped ``preview`` output when preview size is set to 1:1 aspect ratio
+(eg. when using 300x300 MobileNet-SSD NN model).
+
+In other words, you **need to use ISP output** from the :ref:`ColorCamera` **to maximize the image FOV**. A challenge
+occures when your NN model expects different aspect ratio (eg. 1:1) compared to isp output (eg. 4:3). Let's say we have
+a MobileNet-SSD which requires 300x300 frames (1:1 aspect ratio) - we have a few options:
+
+#. :ref:`Stretch the ISP frame <Change aspect ratio>` to to the 1:1 aspect ratio of the NN
+#. :ref:`Apply letterboxing <Letterboxing>` to the ISP frame to get 1:1 aspect ratio frame
+#. :ref:`Crop the ISP frame <Cropping>` to 1:1 aspect ratio and lose some FOV
 
 Change aspect ratio
 *******************
 
-Use :code:`camRgb.setPreviewKeepAspectRatio(False)`. This means the aspect ratio will not be preserved and the image
-will be "stretched". This might be problematic for some off-the-shelf NN models, so some fine-tuning might be required.
-`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-lossless-zooming/main.py#L19>`__.
+**Pros: Preserves full FOV. Cons: Due to stretched frames, NNs accuracy might decrease.**
 
-.. image:: https://user-images.githubusercontent.com/18037362/144095838-d082040a-9716-4f8e-90e5-15bcb23115f9.gif
-    :target: https://youtu.be/8X0IcnkeIf8
+Changing aspect ratio (**stretching**) can be used Use :code:`camRgb.setPreviewKeepAspectRatio(False)`. This means the aspect
+ratio will not be preserved and the image will be "stretched". This might be problematic for some off-the-shelf NN models, so some fine-tuning might be required.
+`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-full-fov-nn/stretching.py>`__.
+
+.. image:: https://user-images.githubusercontent.com/18037362/180607962-e616cdc7-fcad-4bc8-a15f-617b89a2c047.jpg
 
 Letterboxing
 ************
 
-`Letterboxing <https://en.wikipedia.org/wiki/Letterboxing_%28filming%29>`__ the frames. This method of OAK FOV maximization will decrease
-the size of the image and apply "black bars" above and below the image, so the aspect ratio is preserved. You can
+**Pros: Preserves full FOV. Cons: Smaller "frame" means less features might decrease NN accuracy.**
+
+`Letterboxing <https://en.wikipedia.org/wiki/Letterboxing_%28filming%29>`__ approach will apply "black bars" above and below
+the image to the full FOV (isp) frames, so the aspect ratio will be preserved. You can
 achieve this by using :ref:`ImageManip` with :code:`manip.setResizeThumbnail(x,y)` (for Mobilenet :code:`x=300,y=300`).
 The downside of using this method is that your actual image will be smaller, so some features might not be preserved,
 which can mean the NN accuracy could decrease.
-`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-full-fov-nn/main.py#L28>`__.
+`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-full-fov-nn/letterboxing.py>`__.
 
-.. image:: /_static/images/tutorials/fov.jpeg
+.. image:: https://user-images.githubusercontent.com/18037362/180607958-0db7fb34-1221-42a1-b889-10d1f9793912.jpg
 
-12MP OAK FOV
-************
+Cropping
+********
 
-Do you need to get full 12MP FOV for your OAK? We can help with that too.
+**Pros: No NN accuracy decrease. Cons: Frame is cropped, so it's not full FOV.**
 
-Check out the following `Full FOV NN Inferencing experiment <https://github.com/luxonis/depthai-experiments/tree/master/gen2-full-fov-nn>`__ to learn how.
+Cropping the full FOV (isp) frames to match the NN aspect ratio can be used to get the best NN accuracy, but this
+decreases FOV.
+`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-full-fov-nn/cropping.py>`__.
 
-.. image:: /_static/images/tutorials/full_fov_demo.png
+.. image:: https://user-images.githubusercontent.com/18037362/180607873-6a476ea4-55e0-4557-a93e-a7cadcd80725.jpg
+
+.. include::  /includes/footer-short.rst
