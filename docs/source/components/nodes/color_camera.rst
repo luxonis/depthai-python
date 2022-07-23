@@ -69,6 +69,12 @@ For IMX378 (12MP), the **post-processing** works like this:
     │ ISP ├────────────────►│  video  ├───────────────►│ preview  │
     └─────┘  max 3840x2160  └─────────┘  and cropping  └──────────┘
 
+.. image:: /_static/images/tutorials/isp.jpg
+
+Image above is the ``isp`` output frame from the ColorCamera (12MP from IMX378). Blue rectangle represents the cropped 4K
+``video`` output, and yellow rectangle represents cropped ``preview`` output when preview size is set to 1:1 aspect ratio
+(eg. when using 300x300 MobileNet-SSD NN model).
+
 Usage
 #####
 
