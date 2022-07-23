@@ -17,9 +17,18 @@ xoutRight.setStreamName('right')
 
 # Properties
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoLeft.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+monoLeft.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoRight.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+monoRight.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
+
+monoRight.initialControl.setSharpness(0)
+monoRight.initialControl.setLumaDenoise(0)
+monoRight.initialControl.setChromaDenoise(4)
+
+monoLeft.initialControl.setSharpness(0)
+monoLeft.initialControl.setLumaDenoise(0)
+monoLeft.initialControl.setChromaDenoise(4)
+
 # monoLeft.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 # monoRight.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
