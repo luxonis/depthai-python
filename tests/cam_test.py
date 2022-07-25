@@ -60,6 +60,10 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 parser.add_argument('-fps', '--fps', type=float, default=30,
                     help="FPS to set for all cameras")
+parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
+                    help="Downscale the ISP output by this factor")
+parser.add_argument('-rs', '--resizable-windows', action='store_true',
+                    help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 args = parser.parse_args()
 
 cam_list = []
@@ -138,7 +142,7 @@ for c in cam_list:
     if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
-        #cam[c].setIspScale(1, 2)
+        cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].isp.link(xout[c].input)
     else:
@@ -180,7 +184,7 @@ with dai.Device(pipeline) as device:
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
-        if 0 and c == 'rgb':
+        if args.resizable_windows:
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
         fps_host[c] = FPS()
