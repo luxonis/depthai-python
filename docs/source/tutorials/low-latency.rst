@@ -2,7 +2,8 @@ Low Latency
 ===========
 
 These tables show what performance you can expect from **USB 3.2** Gen 1 (5 Gbps) connection with an OAK camera. XLink chunking was
-disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`).
+disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). Example code for testing low-latency of color stream at 1080P,
+MJPEG can `be found here <https://gist.github.com/Erol444/0210c8af650ce8d15276729dcc21ce81>`__.
 
 .. list-table::
    :header-rows: 1
