@@ -9,8 +9,8 @@ max 4k resolution) from the ``isp`` stream, which has the full FOV.
 
 .. image:: /_static/images/tutorials/isp.jpg
 
-Image above is the ``isp`` output from the :ref:`ColorCamera` (12MP from IMX378). Blue rectangle represents the cropped 4K
-``video`` output, and yellow rectangle represents cropped ``preview`` output when preview size is set to 1:1 aspect ratio
+The image above is the ``isp`` output from the :ref:`ColorCamera` (12MP from IMX378). The blue rectangle represents the cropped 4K
+``video`` output, and the yellow rectangle represents a cropped ``preview`` output when the preview size is set to 1:1 aspect ratio
 (eg. when using 300x300 MobileNet-SSD NN model).
 
 In other words, you **need to use ISP output** from the :ref:`ColorCamera` **to maximize the image FOV**. A challenge
