@@ -4,8 +4,10 @@ Improving Image Quality
 There are a few ways to improve Image Quality (IQ) on OAK cameras. A few examples:
 
 #. Changing :ref:`Color camera ISP configuration`
-#. :ref:`Camera tuning`
+#. Try keeping camera sensitivity low - :ref:`Low-light increased sensitivity`
+#. :ref:`Camera tuning` with custom tuning blobs
 
+Note that current OAK cameras don't have a temporal noise filter, but `Series 3 OAK cameras <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s3.html>`__) will have it.
 
 Color camera ISP configuration
 ##############################
@@ -20,17 +22,27 @@ can improve IQ. We have noticed that these values provide the best results:
     camRgb.initialControl.setLumaDenoise(0)   # range: 0..4, default: 1
     camRgb.initialControl.setChromaDenoise(4) # range: 0..4, default: 1
 
-When using 
+.. image:: https://user-images.githubusercontent.com/18037362/181258871-f0c47fd8-e12b-4d33-89e5-15b48ffd5a3d.png
 
-In general, the image quality of OV9782 can't be as good as say IMX378, as the resolution is much lower, and it's harder to
-deal with sharpness/noise at low resolutions (we also don't have a temporal noise filter on MyriadX, but KeemBay will have it). For high res, as the image will be downscaled in most cases, these issues would be less visible.
+The zoomed-in image above showcases the IQ difference between ISP configuration (`discussion here <https://discuss.luxonis.com/d/554-image-pipelines-compression-and-filtering/8>`__).
+Note that for best IQ, you would need to test and evaluate these values for your specific application.
+
+On Wide FOV `Series 2 cameras <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s2.html>`__,
+you can select between wide FOV IMX378 and OV9782. In general, the **IQ of
+OV9782 can't be as good as say IMX378**, as the resolution is much lower, and it's harder to deal with sharpness/noise at
+low resolutions. With high resolution the image can be downscaled and noise would be less visible.
 And even though OV9782 has quite large pixels, in general the noise levels of global shutters are more significant than for
 rolling shutter.
+
+Low-light increased sensitivity
+###############################
+
+
 
 Camera tuning
 #############
 
-Our library supports setting camera IQ (Image Quality) tuning blob, which would be used for all cameras.
+Our library supports setting camera IQ tuning blob, which would be used for all cameras.
 By default, cameras will use a *general* tuning blob, which works great in most cases - so changing the camera
 tuning blob is not needed for most cases.
 
