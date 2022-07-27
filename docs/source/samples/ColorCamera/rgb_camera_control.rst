@@ -10,8 +10,8 @@ An output is a full frame along with cropped frame (``video``) which can be move
 
 .. code-block::
 
-  Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to trigger autofocus, 'IOKL,.NM'
-  for manual exposure/focus/white-balance:
+  Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to
+  trigger autofocus, 'IOKL,.NM' for manual exposure/focus/white-balance:
     Control:      key[dec/inc]  min..max
     exposure time:     I   O      1..33000 [us]
     sensitivity iso:   K   L    100..1600

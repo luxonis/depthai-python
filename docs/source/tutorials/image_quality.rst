@@ -7,13 +7,17 @@ There are a few ways to improve Image Quality (IQ) on OAK cameras. A few example
 #. Try keeping camera sensitivity low - :ref:`Low-light increased sensitivity`
 #. :ref:`Camera tuning` with custom tuning blobs
 
-Note that current OAK cameras don't have a temporal noise filter, but `Series 3 OAK cameras <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s3.html>`__) will have it.
+Note that the `Series 3 OAK cameras <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s3.html>`__ will
+also have **temporal noise filter**, which will improve IQ.
+
+For best IQ, **we suggest testing it yourself for your specific application**. You can use :ref:`RGB Camera Control` to try out
+different ISP configurations and exposure/sensitivity values dynamically (live).
 
 Color camera ISP configuration
 ##############################
 
-You can **configure** :ref:`ColorCamera` **ISP values** such as ``sharpness``, ``luma denoise`` and ``chrome denoise``, which
-can improve IQ. We have noticed that these values provide the best results:
+You can **configure** :ref:`ColorCamera` **ISP values** such as ``sharpness``, ``luma denoise`` and ``chroma denoise``, which
+can improve IQ. We have noticed that sometimes these values provide better results:
 
 .. code-block:: python
 
@@ -37,7 +41,14 @@ rolling shutter.
 Low-light increased sensitivity
 ###############################
 
+On the image below you can see how different sensitivity values affect the IQ. Sensitivity will only add analog gain, which
+will increase the image noise. When in low-light environment, one should always increase exposure, not sensitivity. Note
+that by default, depthai will always do so - but when using 30FPS, max exposure is 33ms. For the right image below, we
+have set ColorCamera to 10 FPS, so we were able to increase exposure to 100ms.
 
+.. image:: https://user-images.githubusercontent.com/18037362/181298535-085d135e-5817-48fa-8392-f711ade69a77.png
+
+Zoomed-in image of a standard A4 camera tuning target at 420cm (40 lux). We have used 12MP IMX378 (on OAK-D) for this image.
 
 Camera tuning
 #############
@@ -53,13 +64,10 @@ tuning blob is not needed for most cases.
     pipeline = dai.Pipeline()
     pipeline.setCameraTuningBlobPath('/path/to/tuning.bin')
 
-Available tuning blobs
-^^^^^^^^^^^^^^^^^^^^^^
+**Available tuning blobs**
 
 To tune your own camera sensors, one would need Intel's software, for which a license is needed
-- so the majority of people will only be able to use pre-tuned blobs.
-
-**Currently available tuning blobs:**
+- so the majority of people will only be able to use pre-tuned blobs. Currently available tuning blobs:
 
 - **Mono tuning for low-light environments** `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_mono_low_light.bin>`__. This allows auto-exposure to go up to 200ms (otherwise limited with default tuning to 33ms). For 200ms auto-exposure, you also need to limit the FPS (:code:`monoRight.setFps(5)`)
 - **Color tuning for low-light environments** `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_color_low_light.bin>`__. Comparison below. This allows auto-exposure to go up to 100ms (otherwise limited with default tuning to 33ms). For 200ms auto-exposure, you also need to limit the FPS (:code:`rgbCam.setFps(10)`). *Known limitation*: flicker can be seen with auto-exposure over 33ms, it is caused by auto-focus working in continuous mode. A workaround is to change from CONTINUOUS_VIDEO (default) to AUTO (focusing only once at init, and on further focus trigger commands): :code:`camRgb.initialControl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.AUTO)`
