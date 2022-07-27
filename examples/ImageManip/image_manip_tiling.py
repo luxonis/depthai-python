@@ -9,7 +9,7 @@ pipeline = dai.Pipeline()
 camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setPreviewSize(1000, 500)
 camRgb.setInterleaved(False)
-maxFrameSize = camRgb.getPreviewHeight() * camRgb.getPreviewHeight() * 3
+maxFrameSize = camRgb.getPreviewHeight() * camRgb.getPreviewWidth() * 3
 
 # In this example we use 2 imageManips for splitting the original 1000x500
 # preview frame into 2 500x500 frames
