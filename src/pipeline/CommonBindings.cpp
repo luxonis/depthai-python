@@ -15,6 +15,8 @@
 #include "depthai-shared/common/UsbSpeed.hpp"
 #include "depthai-shared/common/DetectionNetworkType.hpp"
 #include "depthai-shared/common/DetectionParserOptions.hpp"
+#include "depthai-shared/common/RotatedRect.hpp"
+#include "depthai-shared/common/Rect.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -39,6 +41,8 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<DetectionNetworkType> detectionNetworkType(m, "DetectionNetworkType");
     py::enum_<SerializationType> serializationType(m, "SerializationType");
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
+    py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
+    py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -53,6 +57,33 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
+    rotatedRect
+        .def(py::init<>())
+        .def_readwrite("center", &RotatedRect::center)
+        .def_readwrite("size", &RotatedRect::size)
+        .def_readwrite("angle", &RotatedRect::angle)
+        ;
+
+    rect
+        .def(py::init<>())
+        .def(py::init<float, float, float, float>())
+        .def(py::init<Point2f, Point2f>())
+        .def(py::init<Point2f, Size2f>())
+
+        .def("topLeft", &Rect::topLeft, DOC(dai, Rect, topLeft))
+        .def("bottomRight", &Rect::bottomRight, DOC(dai, Rect, bottomRight))
+        .def("size", &Rect::size, DOC(dai, Rect, size))
+        .def("area", &Rect::area, DOC(dai, Rect, area))
+        .def("empty", &Rect::empty, DOC(dai, Rect, empty))
+        .def("contains", &Rect::contains, DOC(dai, Rect, contains))
+        .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
+        .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
+        .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
+        .def_readwrite("x", &Rect::x)
+        .def_readwrite("y", &Rect::y)
+        .def_readwrite("width", &Rect::width)
+        .def_readwrite("height", &Rect::height)
+        ;
 
     timestamp
         .def(py::init<>())
