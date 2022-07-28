@@ -1,7 +1,7 @@
 RGB Camera Control
 ==================
 
-This example shows how to control the :ref:`ColorCamera`, such as exposure, sensitivity, wb, luma/chroma denoise,
+This example shows how to control the :ref:`ColorCamera`, such as exposure, sensitivity, white balance, luma/chroma denoise,
 device-side crop, camera triggers, etc.
 
 An output is a full frame along with cropped frame (``video``) which can be moved with ``WASD`` keys.
