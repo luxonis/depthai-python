@@ -4,5 +4,5 @@
 #include "pybind11_common.hpp"
 
 struct DatatypeBindings {
-    static void bind(pybind11::module& m, void* pCallstack);
+    static void addToCallstack(std::deque<StackFunction>& callstack);
 };

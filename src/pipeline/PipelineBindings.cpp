@@ -1,6 +1,6 @@
 
 #include "PipelineBindings.hpp"
-#include "NodeBindings.hpp"
+#include "node/NodeBindings.hpp"
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"
@@ -30,8 +30,6 @@
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
-
-
 
 std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
     auto nodeCreateMap = NodeBindings::getNodeCreateMap();
