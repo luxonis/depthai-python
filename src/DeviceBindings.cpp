@@ -261,7 +261,7 @@ static void bindConstructors(ARG& arg){
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
