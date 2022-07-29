@@ -31,7 +31,7 @@ draw bounding boxes to it. For bounding boxes to match the frame, :code:`preview
 ####################
 
 A problem that we often encounter with models is that their aspect ratio is :code:`1:1`, not eg. :code:`16x9` as our camera resolution.
-This means that some of the FOV will be lost. In our :ref:`How to maximize FOV` tutorial we showcased that changing aspect ratio will
+This means that some of the FOV will be lost. In our :ref:`Maximizing FOV` tutorial we showcased that changing aspect ratio will
 preserve the whole aspect ratio of the camera, but it will "squeeze"/"stretch" the frame, as you can see below.
 `Demo code here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-display-detections/3-stretch_img.py>`__.
 

@@ -99,16 +99,15 @@ with dai.Device(pipeline) as device:
 
     while True:
         # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
-        inRight = qRight.tryGet()
-        inDet = qDet.tryGet()
-        inDisparity = qDisparity.tryGet()
+        if qDet.has():
+            detections = qDet.get().detections
 
-        if inRight is not None:
-            rightFrame = inRight.getCvFrame()
+        if qRight.has():
+            rightFrame = qRight.get().getCvFrame()
 
-        if inDisparity is not None:
+        if qDisparity.has():
             # Frame is transformed, normalized, and color map will be applied to highlight the depth info
-            disparityFrame = inDisparity.getFrame()
+            disparityFrame = qDisparity.get().getFrame()
             disparityFrame = (disparityFrame*disparityMultiplier).astype(np.uint8)
             # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
             disparityFrame = cv2.applyColorMap(disparityFrame, cv2.COLORMAP_JET)

@@ -40,11 +40,11 @@ Inputs and Outputs
 
 - :code:`out` - :ref:`IMUData`
 
-Maximum frequencies
-###################
+Limitations
+###########
 
-Maximum output frequencies are 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500 Hz combined (synced) output.
-You can obtain the combined (synced) 500 Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)`.
+- For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
+- **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)`.
 
 Usage
 #####
@@ -85,8 +85,6 @@ IMU devices
 List of devices that have an IMU sensor on-board:
 
 * `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__
-* `OAK-D-IoT-40 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1092.html>`__
-* `OAK-D-IoT-75 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1098OBC.html>`__
 * `OAK-D-PoE <https://docs.luxonis.com/projects/hardware/en/latest/pages/SJ2088POE.html>`__
 * `OAK-D CM4 PoE <https://docs.luxonis.com/projects/hardware/en/latest/pages/SJ2088POE.html>`__
 * `OAK-FFC-3P <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__

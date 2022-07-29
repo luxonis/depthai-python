@@ -4,12 +4,6 @@ RUN apt-get update && apt-get install -y wget build-essential cmake pkg-config l
 
 ADD ci/docker_dependencies.sh .
 RUN ./docker_dependencies.sh
-RUN wget https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.tar.bz2
-RUN tar xf libusb-1.0.24.tar.bz2
-RUN cd libusb-1.0.24 && \
-    ./configure --disable-udev && \
-    make -j && make install
-
 
 RUN pip install -U pip && pip install --extra-index-url https://www.piwheels.org/simple/ --prefer-binary opencv-python
 
