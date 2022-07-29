@@ -38,13 +38,11 @@ with dai.Device(pipeline) as device:
     q2 = device.getOutputQueue(name="out2", maxSize=4, blocking=False)
 
     while True:
-        in1 = q1.tryGet()
-        if in1 is not None:
-            cv2.imshow("Tile 1", in1.getCvFrame())
+        if q1.has():
+            cv2.imshow("Tile 1", q1.get().getCvFrame())
 
-        in2 = q2.tryGet()
-        if in2 is not None:
-            cv2.imshow("Tile 2", in2.getCvFrame())
+        if q2.has():
+            cv2.imshow("Tile 2", q2.get().getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
