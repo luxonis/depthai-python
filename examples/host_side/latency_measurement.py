@@ -1,9 +1,9 @@
-from datetime import timedelta
 import depthai as dai
 import numpy as np
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setXLinkChunkSize(0) # Improves reducing the latency
+# This might improve reducing the latency on some systems
+pipeline.setXLinkChunkSize(0)
 
 # Define source and output
 camRgb = pipeline.create(dai.node.ColorCamera)
@@ -24,7 +24,7 @@ with dai.Device(pipeline) as device:
         # Latency in miliseconds 
         latencyMs = (dai.Clock.now() - imgFrame.getTimestamp()).total_seconds() * 1000
         diffs = np.append(diffs, latencyMs)
-        print('Latency: {:.2f} ms, Average latency: {:.2f} ms'.format(latencyMs, np.average(diffs)))
+        print('Latency: {:.2f} ms, Average latency: {:.2f} ms, Std: {:.2f}'.format(latencyMs, np.average(diffs), np.std(diffs)))
         
         # Not relevant for this example
         # cv2.imshow('frame', imgFrame.getCvFrame())

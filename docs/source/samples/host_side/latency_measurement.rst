@@ -16,16 +16,12 @@ about 33ms, which is what was measured in :ref:`Low latency` docs page as well.
 .. code-block::
 
     UsbSpeed.SUPER
-    Latency: 34.16 ms, Average latency: 34.16 ms
-    Latency: 34.92 ms, Average latency: 34.54 ms
-    Latency: 32.36 ms, Average latency: 33.81 ms
-    Latency: 31.70 ms, Average latency: 33.28 ms
-    Latency: 32.95 ms, Average latency: 33.22 ms
-    Latency: 31.74 ms, Average latency: 32.97 ms
-    Latency: 32.83 ms, Average latency: 32.95 ms
-    Latency: 37.01 ms, Average latency: 33.46 ms
-    Latency: 32.93 ms, Average latency: 33.40 ms
-    Latency: 31.73 ms, Average latency: 33.23 ms
+    Latency: 33.49 ms, Average latency: 33.49 ms, Std: 0.00
+    Latency: 34.92 ms, Average latency: 34.21 ms, Std: 0.71
+    Latency: 33.23 ms, Average latency: 33.88 ms, Std: 0.74
+    Latency: 33.70 ms, Average latency: 33.84 ms, Std: 0.65
+    Latency: 33.94 ms, Average latency: 33.86 ms, Std: 0.58
+    Latency: 34.18 ms, Average latency: 33.91 ms, Std: 0.54
 
 
 Setup
