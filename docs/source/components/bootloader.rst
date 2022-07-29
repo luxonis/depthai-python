@@ -5,17 +5,14 @@ Bootloader
 
 Depthai bootloader is a small program which aids in booting and updating bootloader or depthai application packages.
 
-To be able to run hostless, the Depthai bootloader must be first flashed to the devices flash.
-This step is required only once.
+To be able to run standalone (:ref:`documentation here <Standalone mode>`), the Depthai bootloader must be first
+flashed to the devices flash. This step is required only once.
 
-Plug USB to the board
-Flash bootloader using DeviceBootloader::flashBootloader (Check Example at the bottom)
-Disconnect the board and switch the boot mode GPIO to the following settings: BOOT[4:0] : 01000 (see attached images for reference)
-Reassemble the board
+Once the device has the bootloader flashed, it will perform the same as before. Running pipelines with a host
+connected doesn’t require any changes.
 
-Once the device has the bootloader flashed, it will perform the same as before. Running pipelines with a host connected doesn’t require any changes.
-
-Suggested workflow is to perform as much of development as possible with the host connected as the iteration cycle is greatly improved.
+Suggested workflow is to perform as much of development as possible with the host connected as the
+iteration cycle is greatly improved.
 
 Once desired pipeline is created, use the following function to flash: :code:`DeviceBootloader::flash`
 
@@ -53,43 +50,5 @@ Depthai application package (**.dap**) consists of:
 - Pipeline description (section “pipeline”)
 - Assets structure (section “assets”)
 - Asset storage (section “asset_storage”)
-
-Example
-#######
-
-Following section will show an example of: Flashing bootloader (needed only once) and flashing a created Pipeline “myExamplePipeline” to the device
-(The example is written in Python, similar steps apply to C++)
-
-#. **Flashing bootloader**
-
-    .. code-block:: python
-
-        import depthai as dai
-        (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
-        bootloader = dai.DeviceBootloader(bl)
-        progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
-        bootloader.flashBootloader(progress)
-
-    .. note::
-        Make sure to switch GPIO BOOT mode settings (See image below for more details)
-
-#. **Flashing created pipeline**
-
-    .. code-block:: python
-
-        import depthai as dai
-        # ...
-        # Create Pipeline 'myExamplePipeline'
-        # ...
-        (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
-        bootloader = dai.DeviceBootloader(bl)
-        progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
-        bootloader.flash(progress, myExamplePipeline)
-
-
-GPIO boot settings. Boot settings must be set as following: BOOT[4:0] : 01000 and GPIO58 (WAKEUP): 0
-
-.. image:: /_static/images/components/boot-depthai.jpeg
-    :alt: boot-depthai
 
 .. include::  ../includes/footer-short.rst

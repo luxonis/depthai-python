@@ -16,7 +16,10 @@ Change aspect ratio
 
 Use :code:`camRgb.setPreviewKeepAspectRatio(False)`. This means the aspect ratio will not be preserved and the image
 will be "stretched". This might be problematic for some off-the-shelf NN models, so model fine-tuning it might be required.
-`Usage example here <https://github.com/luxonis/depthai-python/blob/main/examples/rgb_mobilenet_4k.py#L42>`__.
+`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-lossless-zooming/main.py#L19>`__.
+
+.. image:: https://user-images.githubusercontent.com/18037362/144095838-d082040a-9716-4f8e-90e5-15bcb23115f9.gif
+    :target: https://youtu.be/8X0IcnkeIf8
 
 Letterboxing
 ************
@@ -26,7 +29,7 @@ the size of the image and apply "black bars" above and below the image, so the a
 achieve this by using :ref:`ImageManip` with :code:`manip.setResizeThumbnail(x,y)` (for Mobilenet :code:`x=300,y=300`).
 The downside of using this method is that your actual image will be smaller, so some features might not be preserved,
 which can mean the NN accuracy could decrease.
-`Usage example here <https://github.com/luxonis/depthai-python/blob/main/examples/object_tracker_video.py#L44>`__.
+`Usage example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-full-fov-nn/main.py#L28>`__.
 
 .. image:: /_static/images/tutorials/fov.jpeg
 

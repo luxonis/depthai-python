@@ -29,7 +29,7 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/NeuralNetwork/normalization_multiple_input.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/NeuralNetwork/normalization_multi_input.py>`__
 
         .. literalinclude:: ../../../../examples/NeuralNetwork/normalization_multi_input.py
            :language: python
@@ -37,7 +37,7 @@ Source code
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/src/normalization_multiple_input.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/tree/main/examples/NeuralNetwork/normalization_multiple_input.cpp>`__
 
         .. literalinclude:: ../../../../depthai-core/examples/NeuralNetwork/normalization_multi_input.cpp
            :language: cpp
