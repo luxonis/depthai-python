@@ -61,6 +61,7 @@ are presented with code.
 
 .. rubric:: Host side
 
+- :ref:`Latency measurement` - Measure frame latency from capturing to the host
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
 - :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`Queue add callback` - Demonstrates how to use queue callbacks
