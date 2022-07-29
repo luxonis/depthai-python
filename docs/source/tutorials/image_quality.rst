@@ -48,7 +48,7 @@ have set ColorCamera to 10 FPS, so we were able to increase exposure to 100ms.
 
 .. image:: https://user-images.githubusercontent.com/18037362/181298535-085d135e-5817-48fa-8392-f711ade69a77.png
 
-Zoomed-in image of a standard A4 camera tuning target at 420cm (40 lux). We have used 12MP IMX378 (on OAK-D) for this image.
+About **15x digitally zoomed-in** image of a standard A4 camera tuning target at 420cm (40 lux). We have used 12MP IMX378 (on OAK-D) for this image.
 
 Camera tuning
 #############
