@@ -155,6 +155,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
     py::class_<Properties, std::shared_ptr<Properties>> pyProperties(m, "Properties", DOC(dai, Properties));
+    py::class_<Node::DatatypeHierarchy> nodeDatatypeHierarchy(pyNode, "DatatypeHierarchy", DOC(dai, Node, DatatypeHierarchy));
 
 
     // Node::Id bindings
@@ -189,6 +190,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Base 'Node' class binding
 
+    nodeDatatypeHierarchy
+        .def(py::init<DatatypeEnum, bool>())
+        .def_readwrite("datatype", &Node::DatatypeHierarchy::datatype)
+        .def_readwrite("descendants", &Node::DatatypeHierarchy::descendants)
+    ;
+
     // Node::Input bindings
     nodeInputType
         .value("SReceiver", Node::Input::Type::SReceiver)
@@ -218,12 +225,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_property("group", [](Node::Output& obj) -> std::string& { return obj.group; }, [](Node::Output& obj, std::string group) { obj.group = group; })
         .def_property("name", [](Node::Output& obj) -> std::string& { return obj.name; }, [](Node::Output& obj, std::string name) { obj.name = name; })
         .def_property("type", [](Node::Output& obj) -> Node::Output::Type& { return obj.type; }, [](Node::Output& obj, Node::Output::Type type) { obj.type = type; })
+        .def_property("possibleDatatypes", [](Node::Output& obj) -> std::vector<Node::DatatypeHierarchy>& { return obj.possibleDatatypes; }, [](Node::Output& obj, std::vector<Node::DatatypeHierarchy> possibleDatatypes) { obj.possibleDatatypes = possibleDatatypes; })
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
-
 
     nodeConnection
         .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
