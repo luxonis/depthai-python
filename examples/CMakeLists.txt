@@ -127,6 +127,8 @@ add_python_example(queue_add_callback host_side/queue_add_callback.py)
 add_python_example(image_manip_rotate ImageManip/image_manip_rotate.py)
 add_python_example(image_manip_tiling ImageManip/image_manip_tiling.py)
 add_python_example(rgb_rotate_warp ImageManip/rgb_rotate_warp.py)
+add_python_example(image_manip_warp_mesh ImageManip/image_manip_warp_mesh.py)
+add_python_example(crop_input_chunck_oom issue_solved/crop_input_chunck_oom.py)
 
 ## IMU
 add_python_example(imu_gyroscope_accelerometer IMU/imu_gyroscope_accelerometer.py)

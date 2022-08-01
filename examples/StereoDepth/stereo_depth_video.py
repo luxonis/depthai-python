@@ -308,7 +308,8 @@ streams.append("disparity")
 if depth:
     streams.append("depth")
 
-calibData = dai.Device().readCalibration()
+device = dai.Device()
+calibData = device.readCalibration()
 leftMesh, rightMesh = getMesh(calibData)
 if generateMesh:
     meshLeft = list(leftMesh.tobytes())
@@ -320,7 +321,9 @@ if meshDirectory is not None:
 
 
 print("Creating DepthAI device")
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
+
     # Create a receive queue for each stream
     intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1])
 

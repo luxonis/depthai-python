@@ -38,6 +38,7 @@ import argparse
 import depthai as dai
 import collections
 import time
+from itertools import cycle
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -53,12 +54,16 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '5mp', '12mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 parser.add_argument('-fps', '--fps', type=float, default=30,
                     help="FPS to set for all cameras")
+parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
+                    help="Downscale the ISP output by this factor")
+parser.add_argument('-rs', '--resizable-windows', action='store_true',
+                    help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 args = parser.parse_args()
 
 cam_list = []
@@ -97,9 +102,11 @@ color_res_opts = {
     '720':  dai.ColorCameraProperties.SensorResolution.THE_720_P,
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
+    '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
 }
 
 def clamp(num, v0, v1):
@@ -136,7 +143,7 @@ for c in cam_list:
     if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
-        #cam[c].setIspScale(1, 2)
+        cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].isp.link(xout[c].input)
     else:
@@ -146,6 +153,8 @@ for c in cam_list:
     cam[c].setBoardSocket(cam_socket_opts[c])
     # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
     #cam[c].initialControl.setExternalTrigger(2, 1)
+    #cam[c].initialControl.setStrobeExternal(48, 1)
+    #cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
@@ -178,7 +187,7 @@ with dai.Device(pipeline) as device:
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
-        if 0 and c == 'rgb':
+        if args.resizable_windows:
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
         fps_host[c] = FPS()
@@ -204,40 +213,9 @@ with dai.Device(pipeline) as device:
     sensMin = 100
     sensMax = 1600
 
-    # TODO make auto-iterable
-    awb_mode_idx = -1
-    awb_mode_list = [
-        dai.CameraControl.AutoWhiteBalanceMode.OFF,
-        dai.CameraControl.AutoWhiteBalanceMode.AUTO,
-        dai.CameraControl.AutoWhiteBalanceMode.INCANDESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.FLUORESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.WARM_FLUORESCENT,
-        dai.CameraControl.AutoWhiteBalanceMode.DAYLIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.CLOUDY_DAYLIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.TWILIGHT,
-        dai.CameraControl.AutoWhiteBalanceMode.SHADE,
-    ]
-
-    anti_banding_mode_idx = -1
-    anti_banding_mode_list = [
-        dai.CameraControl.AntiBandingMode.OFF,
-        dai.CameraControl.AntiBandingMode.MAINS_50_HZ,
-        dai.CameraControl.AntiBandingMode.MAINS_60_HZ,
-        dai.CameraControl.AntiBandingMode.AUTO,
-    ]
-
-    effect_mode_idx = -1
-    effect_mode_list = [
-        dai.CameraControl.EffectMode.OFF,
-        dai.CameraControl.EffectMode.MONO,
-        dai.CameraControl.EffectMode.NEGATIVE,
-        dai.CameraControl.EffectMode.SOLARIZE,
-        dai.CameraControl.EffectMode.SEPIA,
-        dai.CameraControl.EffectMode.POSTERIZE,
-        dai.CameraControl.EffectMode.WHITEBOARD,
-        dai.CameraControl.EffectMode.BLACKBOARD,
-        dai.CameraControl.EffectMode.AQUA,
-    ]
+    awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
+    anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
+    effect_mode = cycle([item for name, item in vars(dai.CameraControl.EffectMode).items() if name.isupper()])
 
     ae_comp = 0
     ae_lock = False
@@ -342,23 +320,17 @@ with dai.Device(pipeline) as device:
                 print("Auto exposure compensation:", ae_comp)
                 ctrl.setAutoExposureCompensation(ae_comp)
             elif control == 'anti_banding_mode':
-                cnt = len(anti_banding_mode_list)
-                anti_banding_mode_idx = (anti_banding_mode_idx + cnt + change) % cnt
-                anti_banding_mode = anti_banding_mode_list[anti_banding_mode_idx]
-                print("Anti-banding mode:", anti_banding_mode)
-                ctrl.setAntiBandingMode(anti_banding_mode)
+                abm = next(anti_banding_mode)
+                print("Anti-banding mode:", abm)
+                ctrl.setAntiBandingMode(abm)
             elif control == 'awb_mode':
-                cnt = len(awb_mode_list)
-                awb_mode_idx = (awb_mode_idx + cnt + change) % cnt
-                awb_mode = awb_mode_list[awb_mode_idx]
-                print("Auto white balance mode:", awb_mode)
-                ctrl.setAutoWhiteBalanceMode(awb_mode)
+                awb = next(awb_mode)
+                print("Auto white balance mode:", awb)
+                ctrl.setAutoWhiteBalanceMode(awb)
             elif control == 'effect_mode':
-                cnt = len(effect_mode_list)
-                effect_mode_idx = (effect_mode_idx + cnt + change) % cnt
-                effect_mode = effect_mode_list[effect_mode_idx]
-                print("Effect mode:", effect_mode)
-                ctrl.setEffectMode(effect_mode)
+                eff = next(effect_mode)
+                print("Effect mode:", eff)
+                ctrl.setEffectMode(eff)
             elif control == 'brightness':
                 brightness = clamp(brightness + change, -10, 10)
                 print("Brightness:", brightness)

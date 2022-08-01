@@ -5,6 +5,9 @@ This example shows basic bootloader interaction, retrieving the version of bootl
 
 Click on :ref:`Bootloader` for more information.
 
+.. note::
+    We suggest using :ref:`Device Manager`, a GUI tool for interfacing with the bootloader and its configurations.
+
 Demo
 ####
 
