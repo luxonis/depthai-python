@@ -116,7 +116,7 @@ so performance improvement would depend on the image sizes you are using.
 Reducing latency when running NN
 ################################
 
-In examples above we were only stremaing frames, without doing anything else on the OAK camera. This section will focus
+In the examples above we were only streaming frames, without doing anything else on the OAK camera. This section will focus
 on how to reduce latency when also running NN model on the OAK.
 
 Lowering camera FPS to match NN FPS
