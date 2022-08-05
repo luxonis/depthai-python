@@ -154,9 +154,10 @@ with device:
             pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
                 image=o3d.geometry.RGBDImage.create_from_color_and_depth(
                     o3d.geometry.Image(cv2.cvtColor(raw_rgb, cv2.COLOR_BGR2RGB)),
-                    o3d.geometry.Image(raw_depth)),
+                    o3d.geometry.Image(raw_depth),
+                    depth_scale=0.001),
                 intrinsic=o3d.camera.PinholeCameraIntrinsic(width=width, height=height, fx=M_rgb[0][0], fy=M_rgb[1][1],
-                                                            cx=M_rgb[0][2], cy=M_rgb[1, 2])
+                                                            cx=M_rgb[0][2], cy=M_rgb[1, 2]),
             )
             if o3d.io.write_point_cloud(f"{serial_number}.pcd", pcd):
                 print("wrote", f"{serial_number}.pcd")
