@@ -42,12 +42,12 @@ right = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 
 rgbOut = pipeline.create(dai.node.XLinkOut)
-disparityOut = pipeline.create(dai.node.XLinkOut)
+depthOut = pipeline.create(dai.node.XLinkOut)
 
 rgbOut.setStreamName("rgb")
 queueNames.append("rgb")
-disparityOut.setStreamName("disp")
-queueNames.append("disp")
+depthOut.setStreamName("depth")
+queueNames.append("depth")
 
 #Properties
 camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
@@ -79,7 +79,7 @@ stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 camRgb.isp.link(rgbOut.input)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
-stereo.disparity.link(disparityOut.input)
+stereo.depth.link(depthOut.input)
 
 # Connect to device and start pipeline
 with device:
@@ -98,7 +98,7 @@ with device:
     device.startPipeline(pipeline)
 
     frameRgb = None
-    frameDisp = None
+    frameDepth = None
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
     rgbWindowName = "rgb"
@@ -112,9 +112,9 @@ with device:
     while True:
         latestPacket = {}
         latestPacket["rgb"] = None
-        latestPacket["disp"] = None
+        latestPacket["depth"] = None
 
-        queueEvents = device.getQueueEvents(("rgb", "disp"))
+        queueEvents = device.getQueueEvents(("rgb", "depth"))
         for queueName in queueEvents:
             packets = device.getOutputQueue(queueName).tryGetAll()
             if len(packets) > 0:
@@ -125,26 +125,26 @@ with device:
             raw_rgb = frameRgb.copy()
             cv2.imshow(rgbWindowName, frameRgb)
 
-        if latestPacket["disp"] is not None:
-            frameDisp = latestPacket["disp"].getFrame()
-            raw_depth = frameDisp.copy().astype(np.uint16)
-            maxDisparity = stereo.initialConfig.getMaxDisparity()
+        if latestPacket["depth"] is not None:
+            frameDepth = latestPacket["depth"].getFrame()
+            raw_depth = frameDepth.copy().astype(np.uint16)
+            maxDepth = 4000.0  # 4 meters for visualisation
             # Optional, extend range 0..95 -> 0..255, for a better visualisation
-            if 1: frameDisp = (frameDisp * 255. / maxDisparity).astype(np.uint8)
+            if 1: frameDepth = (frameDepth * 255. / maxDepth).astype(np.uint8)
             # Optional, apply false colorization
-            if 1: frameDisp = cv2.applyColorMap(frameDisp, cv2.COLORMAP_HOT)
-            frameDisp = np.ascontiguousarray(frameDisp)
-            cv2.imshow(depthWindowName, frameDisp)
+            if 1: frameDepth = cv2.applyColorMap(frameDepth, cv2.COLORMAP_HOT)
+            frameDepth = np.ascontiguousarray(frameDepth)
+            cv2.imshow(depthWindowName, frameDepth)
 
         # Blend when both received
-        if frameRgb is not None and frameDisp is not None:
+        if frameRgb is not None and frameDepth is not None:
             # Need to have both frames in BGR format before blending
-            if len(frameDisp.shape) < 3:
-                frameDisp = cv2.cvtColor(frameDisp, cv2.COLOR_GRAY2BGR)
-            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDisp, depthWeight, 0)
+            if len(frameDepth.shape) < 3:
+                frameDepth = cv2.cvtColor(frameDepth, cv2.COLOR_GRAY2BGR)
+            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth, depthWeight, 0)
             cv2.imshow(blendedWindowName, blended)
             frameRgb = None
-            frameDisp = None
+            frameDepth = None
 
         if cv2.waitKey(1) == ord('q'):
             if cv2.imwrite(f"rgb_{serial_number}.png", raw_rgb):
