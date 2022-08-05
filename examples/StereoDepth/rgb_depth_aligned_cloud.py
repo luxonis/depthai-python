@@ -158,6 +158,6 @@ with device:
                 intrinsic=o3d.camera.PinholeCameraIntrinsic(width=width, height=height, fx=M_rgb[0][0], fy=M_rgb[1][1],
                                                             cx=M_rgb[0][2], cy=M_rgb[1, 2]),
             )
-            if o3d.io.write_point_cloud(f"{serial_number}.pcd", pcd):
+            if o3d.io.write_point_cloud(f"{serial_number}.pcd", pcd, compressed=True):
                 print("wrote", f"{serial_number}.pcd")
             break
