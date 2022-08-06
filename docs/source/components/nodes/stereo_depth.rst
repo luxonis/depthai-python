@@ -311,10 +311,10 @@ written in camera intrinsics (``intrinsics[0][0]``):
 
   with dai.Device() as device:
     calibData = device.readCalibration()
-    intrinsics, w, h = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RIGHT)
+    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT)
     print('Right mono camera focal length in pixels:', intrinsics[0][0])
 
-Here's theoretical calculation of the focal lenght in pixels:
+Here's theoretical calculation of the focal length in pixels:
 
 .. code-block:: python
 
