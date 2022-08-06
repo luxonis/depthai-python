@@ -122,7 +122,6 @@ Currently configurable blocks
         then software interpolation is done on Shave, resulting a final disparity with 3 fractional bits, resulting in significantly more granular depth
         steps (8 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
         is no longer limited by a feature being a full integer pixel-step apart, but rather 1/8 of a pixel. In this mode, stereo cameras perform: :code:`94 depth steps * 8 subpixel depth steps + 2 (min/max values) = 754 depth steps`
-        Note that Subpixel and Extended Disparity are not yet supported simultaneously.
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
@@ -301,9 +300,21 @@ By considering this fact, depth can be calculated using this formula:
 
   depth = focal_length_in_pixels * baseline / disparity_in_pixels
 
-where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
+Where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
 
-To get focal length in pixels, use this formula:
+To get focal length in pixels, you can :ref:`read camera calibration <Calibration Reader>`, as focal length in pixels is
+written in camera intrinsics (``intrinsics[0][0]``):
+
+.. code-block:: python
+
+  import depthai as dai
+
+  with dai.Device() as device:
+    calibData = device.readCalibration()
+    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT)
+    print('Right mono camera focal length in pixels:', intrinsics[0][0])
+
+Here's theoretical calculation of the focal length in pixels:
 
 .. code-block:: python
 
