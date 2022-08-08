@@ -13,7 +13,7 @@ parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file i
 args = parser.parse_args()
 
 # Connect device
-with dai.Device() as device:
+with dai.Device(dai.OpenVINO.VERSION_2021_4, dai.UsbSpeed.HIGH) as device:
 
     deviceCalib = device.readCalibration()
     deviceCalib.eepromToJsonFile(calibBackUpFile)

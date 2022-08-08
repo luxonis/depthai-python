@@ -34,17 +34,40 @@ with dai.Device() as device:
         print(f'RGB FOV {calibData.getFov(dai.CameraBoardSocket.RGB)}')
 
     else:
-        M_left = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, 1280, 720))
-        print("LEFT Camera resized intrinsics...")
+        M_rgb, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RGB)
+        print("RGB Camera Default intrinsics...")
+        print(M_rgb)
+        print(width)
+        print(height)
+
+        M_rgb = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RGB, 3840, 2160))
+        print("RGB Camera resized intrinsics... 3840 x 2160 ")
+        print(M_rgb)
+
+
+        M_rgb = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RGB, 4056, 3040 ))
+        print("RGB Camera resized intrinsics... 4056 x 3040 ")
+        print(M_rgb)
+
+
+        M_left, width, height = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.LEFT)
+        print("LEFT Camera Default intrinsics...")
         print(M_left)
+        print(width)
+        print(height)
+
+        M_left = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, 1280, 720))
+        print("LEFT Camera resized intrinsics...  1280 x 720")
+        print(M_left)
+
+
+        M_right = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, 1280, 720))
+        print("RIGHT Camera resized intrinsics... 1280 x 720")
+        print(M_right)
 
         D_left = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
         print("LEFT Distortion Coefficients...")
         [print(name+": "+value) for (name, value) in zip(["k1","k2","p1","p2","k3","k4","k5","k6","s1","s2","s3","s4","τx","τy"],[str(data) for data in D_left])]
-
-        M_right = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, 1280, 720))
-        print("RIGHT Camera resized intrinsics...")
-        print(M_right)
 
         D_right = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
         print("RIGHT Distortion Coefficients...")

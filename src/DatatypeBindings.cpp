@@ -1,6 +1,7 @@
 #include "DatatypeBindings.hpp"
 
 #include "pipeline/CommonBindings.hpp"
+#include "depthai-shared/datatype/DatatypeEnum.hpp"
 
 void bind_adatatype(pybind11::module& m, void* pCallstack);
 void bind_apriltagconfig(pybind11::module& m, void* pCallstack);
@@ -23,6 +24,9 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack);
 void bind_tracklets(pybind11::module& m, void* pCallstack);
 
 void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
+     // Bind common datatypebindings
+    callstack.push_front(DatatypeBindings::bind);
+
     // Bind all datatypes (order matters)
     callstack.push_front(bind_adatatype);
     callstack.push_front(bind_buffer);
@@ -43,4 +47,47 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_systeminformation);
     callstack.push_front(bind_trackedfeatures);
     callstack.push_front(bind_tracklets);
+}
+
+void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
+    using namespace dai;
+
+    py::enum_<DatatypeEnum> datatypeEnum(m, "DatatypeEnum", DOC(dai, DatatypeEnum));
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*) pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    m.def("isDatatypeSubclassOf", &isDatatypeSubclassOf);
+
+    datatypeEnum
+        .value("Buffer", DatatypeEnum::Buffer)
+        .value("ImgFrame", DatatypeEnum::ImgFrame)
+        .value("NNData", DatatypeEnum::NNData)
+        .value("ImageManipConfig", DatatypeEnum::ImageManipConfig)
+        .value("CameraControl", DatatypeEnum::CameraControl)
+        .value("ImgDetections", DatatypeEnum::ImgDetections)
+        .value("SpatialImgDetections", DatatypeEnum::SpatialImgDetections)
+        .value("SystemInformation", DatatypeEnum::SystemInformation)
+        .value("SpatialLocationCalculatorConfig", DatatypeEnum::SpatialLocationCalculatorConfig)
+        .value("SpatialLocationCalculatorData", DatatypeEnum::SpatialLocationCalculatorData)
+        .value("EdgeDetectorConfig", DatatypeEnum::EdgeDetectorConfig)
+        .value("AprilTagConfig", DatatypeEnum::AprilTagConfig)
+        .value("AprilTags", DatatypeEnum::AprilTags)
+        .value("Tracklets", DatatypeEnum::Tracklets)
+        .value("IMUData", DatatypeEnum::IMUData)
+        .value("StereoDepthConfig", DatatypeEnum::StereoDepthConfig)
+        .value("FeatureTrackerConfig", DatatypeEnum::FeatureTrackerConfig)
+        .value("TrackedFeatures", DatatypeEnum::TrackedFeatures)
+    ;
+
 }
