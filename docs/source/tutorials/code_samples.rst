@@ -61,6 +61,7 @@ are presented with code.
 
 .. rubric:: Host side
 
+- :ref:`Latency measurement` - Measure frame latency from capturing to the host
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
 - :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`Queue add callback` - Demonstrates how to use queue callbacks
@@ -82,6 +83,7 @@ are presented with code.
 - :ref:`RGB Encoding & MobilenetSSD` - Runs MobileNetSSD on RGB frames and encodes FUll-HD RGB into :code:`.h265` and saves it on the host
 - :ref:`RGB Encoding & Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame + encodes RGB to :code:`.h265`
 - :ref:`RGB Encoding & Mono with MobilenetSSD & Depth` - A combination of **RGB Encoding** and **Mono & MobilenetSSD & Depth** code samples
+- :ref:`Spatial detections on rotated OAK` - Spatail detections on upside down OAK camera
 
 .. rubric:: MobileNet
 

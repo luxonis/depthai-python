@@ -2,7 +2,7 @@ Low Latency
 ===========
 
 These tables show what performance you can expect from **USB 3.2** Gen 1 (5 Gbps) connection with an OAK camera. XLink chunking was
-disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`).
+disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example code, see :ref:`Latency measurement`.
 
 .. list-table::
    :header-rows: 1
@@ -109,6 +109,47 @@ Encoded frames
      - `link <https://user-images.githubusercontent.com/18037362/162675335-2e5a9581-972a-448c-b650-6b6d076a04b8.png>`__
 
 You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-python/tree/tmp_zero_copy>`__
-branch of the DepthAI.
+branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat instead of doing memcopy (as it currently does),
+so performance improvement would depend on the image sizes you are using.
+
+
+Reducing latency when running NN
+################################
+
+In the examples above we were only streaming frames, without doing anything else on the OAK camera. This section will focus
+on how to reduce latency when also running NN model on the OAK.
+
+Lowering camera FPS to match NN FPS
+-----------------------------------
+
+Lowering FPS to not exceed NN capabilities typically provides the best latency performance, since the NN is able to
+start the inference as soon as a new frame is available.
+
+For example, with 15 FPS we get a total of about 70 ms latency, measured from capture time (end of exposure and MIPI
+readout start).
+
+This time includes the following:
+
+- MIPI readout
+- ISP processing
+- Preview post-processing
+- NN processing
+- Streaming to host
+- And finally, eventual extra latency until it reaches the app
+
+Note: if the FPS is increased slightly more, towards 19..21 FPS, an extra latency of about 10ms appears, that we believe
+is related to firmware. We are activaly looking for improvements for lower latencies.
+
+
+NN input queue size and blocking behaviour
+------------------------------------------
+
+If the app has ``detNetwork.input.setBlocking(False)``, but the queue size doesn't change, the following adjustment
+may help improve latency performance:
+
+By adding ``detNetwork.input.setQueueSize(1)``, while setting back the camera FPS to 40, we get about 80.. 105ms latency.
+One of the causes of being non-deterministic is that the camera is producing at a different rate (25ms frame-time),
+vs. when NN has finished and can accept a new frame to process.
+
 
 .. include::  /includes/footer-short.rst

@@ -77,7 +77,7 @@ node functionalities are presented with code.
    tutorials/debugging.rst
    tutorials/ram_usage.rst
    tutorials/dispaying_detections.rst
-   tutorials/camera_tuning.rst
+   tutorials/image_quality.rst
    tutorials/low-latency.rst
 
 .. toctree::
