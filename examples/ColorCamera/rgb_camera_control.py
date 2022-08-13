@@ -28,6 +28,7 @@ Other controls:
     '0' - Select control: sharpness
     '[' - Select control: luma denoise
     ']' - Select control: chroma denoise
+    'H' - Select control: scene mode
 
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
@@ -121,6 +122,7 @@ with dai.Device(pipeline) as device:
     awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
     anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
     effect_mode = cycle([item for name, item in vars(dai.CameraControl.EffectMode).items() if name.isupper()])
+    scene_mode = cycle([item for name, item in vars(dai.CameraControl.SceneMode).items() if name.isupper()])
 
     while True:
         vidFrames = videoQueue.tryGetAll()
@@ -239,6 +241,7 @@ with dai.Device(pipeline) as device:
             elif key == ord('0'): control = 'sharpness'
             elif key == ord('['): control = 'luma_denoise'
             elif key == ord(']'): control = 'chroma_denoise'
+            elif key == ord('h'): control = 'scene_mode'
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -260,9 +263,13 @@ with dai.Device(pipeline) as device:
                 print("Auto white balance mode:", awb)
                 ctrl.setAutoWhiteBalanceMode(awb)
             elif control == 'effect_mode':
-                eff = next(effect_mode)
-                print("Effect mode:", eff)
-                ctrl.setEffectMode(eff)
+                scene = next(effect_mode)
+                print("Effect mode:", scene)
+                ctrl.setEffectMode(scene)
+            elif control == 'scene_mode':
+                scene = next(scene_mode)
+                print("Scene mode:", scene)
+                ctrl.setSceneMode(scene)
             elif control == 'brightness':
                 brightness = clamp(brightness + change, -10, 10)
                 print("Brightness:", brightness)
