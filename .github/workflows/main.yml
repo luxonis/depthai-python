@@ -309,12 +309,12 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: 'docstrings'
-          path: docstrings
-      - name: Specify docstring to use while building the wheel
-        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+      # - uses: actions/download-artifact@v2
+      #   with:
+      #     name: 'docstrings'
+      #     path: docstrings
+      # - name: Specify docstring to use while building the wheel
+      #   run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
 
       - name: Build and install depthai-core
         run: |
@@ -371,12 +371,12 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: 'docstrings'
-          path: docstrings
-      - name: Specify docstring to use while building the wheel
-        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+      # - uses: actions/download-artifact@v2
+      #   with:
+      #     name: 'docstrings'
+      #     path: docstrings
+      # - name: Specify docstring to use while building the wheel
+      #   run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
 
       - name: Build and install depthai-core
         run: |
