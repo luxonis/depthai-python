@@ -64,7 +64,7 @@ jobs:
 
   # Build and test bindings
   pytest:
-    needs: build-docstrings
+    # needs: build-docstrings
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-latest]
@@ -129,7 +129,7 @@ jobs:
 
   # This job builds wheels for armhf arch (RPi)
   build-linux-armhf:
-    needs: build-docstrings
+    # needs: build-docstrings
     strategy:
       matrix:
         rpi-os: [rpi-buster, rpi-bullseye]
@@ -171,7 +171,7 @@ jobs:
 
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
-    needs: build-docstrings
+    # needs: build-docstrings
     runs-on: windows-latest
     strategy:
       matrix:
@@ -226,7 +226,7 @@ jobs:
 
   # This job builds wheels for macOS x86_64 arch
   build-macos-x86_64:
-    needs: build-docstrings
+    # needs: build-docstrings
     runs-on: macos-latest
     strategy:
       matrix:
@@ -285,7 +285,7 @@ jobs:
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
-    needs: build-docstrings
+    # needs: build-docstrings
     runs-on: ubuntu-latest
     container:
       image: quay.io/pypa/manylinux2014_x86_64:2021-11-15-a808c18
@@ -349,7 +349,7 @@ jobs:
 
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
-    needs: build-docstrings
+    # needs: build-docstrings
     runs-on: [self-hosted, linux, ARM64]
     container:
       image: quay.io/pypa/manylinux2014_aarch64:2021-11-15-a808c18
