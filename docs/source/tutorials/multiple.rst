@@ -41,8 +41,8 @@ Example results for 2x DepthAI on a system:
 
 .. code-block::
 
-  14442C10D13EABCE00 XLinkDeviceState.X_LINK_UNBOOTED
-  14442C1071659ACD00 XLinkDeviceState.X_LINK_UNBOOTED
+  14442C10D13EABCE00 XLinkDeviceState.XLINK_UNBOOTED
+  14442C1071659ACD00 XLinkDeviceState.XLINK_UNBOOTED
 
 Selecting a Specific DepthAI device to be used
 ##############################################
