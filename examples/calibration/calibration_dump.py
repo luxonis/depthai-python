@@ -20,5 +20,5 @@ with dai.Device(dai.OpenVINO.VERSION_2021_4, dai.UsbSpeed.HIGH) as device:
     except Exception as ex:
         print(f'No factory calibration: {ex}')
 
-print(f'User calibration raw: {json.dumps(device.readCalibrationRaw())}')
-print(f'Factory calibration raw: {json.dumps(device.readFactoryCalibrationRaw())}')
+    print(f'User calibration raw: {json.dumps(device.readCalibrationRaw())}')
+    print(f'Factory calibration raw: {json.dumps(device.readFactoryCalibrationRaw())}')
