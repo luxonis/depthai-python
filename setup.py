@@ -63,6 +63,11 @@ if len(__version__.split("+")) > 1 :
 ## Read description (README.md)
 long_description = io.open("README.md", encoding="utf-8").read()
 
+## Early settings
+MACOS_ARM64_WHEEL_NAME_OVERRIDE = 'macosx-11.0-arm64'
+if sys.platform == 'darwin' and platform.machine() == 'arm64':
+    os.environ['_PYTHON_HOST_PLATFORM'] = MACOS_ARM64_WHEEL_NAME_OVERRIDE
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -105,7 +110,7 @@ class CMakeBuild(build_ext):
             # Windows - remove case insensitive variants
             env = {key:env[key] for key in env if key.upper() != 'pythonLocation'.upper()}
         env['pythonLocation'] = str(Path(sys.executable).parent.absolute())
-        
+
 
         # Pass a commit hash
         if buildCommitHash != None :
@@ -155,8 +160,13 @@ class CMakeBuild(build_ext):
             # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
-                env['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
-                env['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
+                if platform.machine() == 'arm64':
+                    # Build ARM64 wheels explicitly instead of universal2
+                    env['MACOSX_DEPLOYMENT_TARGET'] = '11.0'
+                    env['_PYTHON_HOST_PLATFORM'] = MACOS_ARM64_WHEEL_NAME_OVERRIDE
+                else:
+                    env['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
+                    env['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
             max_threads = multiprocessing.cpu_count()
