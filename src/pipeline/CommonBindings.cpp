@@ -120,6 +120,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("RGB", CameraBoardSocket::RGB)
         .value("LEFT", CameraBoardSocket::LEFT)
         .value("RIGHT", CameraBoardSocket::RIGHT)
+        .value("VERTICAL", CameraBoardSocket::VERTICAL)
     ;
 
     // CameraImageOrientation enum bindings
