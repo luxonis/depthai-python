@@ -1,62 +1,95 @@
 #!/usr/bin/env python3
+# from turtle import shape
 import cv2
 import depthai as dai
 import numpy as np
 
+def getMesh(calibData, resolution):
+    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
+    d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+    R1 = np.array(calibData.getStereoLeftRectificationRotation())
+    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
+    d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+    R2 = np.array(calibData.getStereoRightRectificationRotation())
+    mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
+    mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
+
+    meshCellSize = 16
+    meshLeft = []
+    meshRight = []
+
+    for y in range(mapXL.shape[0] + 1):
+        if y % meshCellSize == 0:
+            # rowLeft = []
+            # rowRight = []
+            for x in range(mapXL.shape[1] + 1):
+                if x % meshCellSize == 0:
+                    if y == mapXL.shape[0] and x == mapXL.shape[1]:
+                        meshLeft.append((mapXL[y - 1, x - 1], mapYL[y - 1, x - 1]))
+                        meshRight.append((mapXR[y - 1, x - 1], mapYR[y - 1, x - 1]))
+                    elif y == mapXL.shape[0]:
+                        meshLeft.append((mapXL[y - 1,  x], mapYL[y - 1, x]))
+                        meshRight.append((mapXR[y - 1, x], mapYR[y - 1, x]))
+                    elif x == mapXL.shape[1]:
+                        meshLeft.append((mapXL[y, x - 1], mapYL[y, x - 1]))
+                        meshRight.append((mapXR[y, x - 1], mapYR[y, x - 1]))
+                    else:
+                        meshLeft.append(( mapXL[y, x - 1], mapYL[y,x]))
+                        meshRight.append((mapXR[y, x - 1], mapYR[y,x]))
+            if (mapXL.shape[1] % meshCellSize) % 2 != 0:
+                meshLeft.append((0, 0))
+                meshRight.append((0, 0))
+            # meshLeft.append(rowLeft)
+            # meshRight.append(rowRight)
+
+    # meshLeft = np.array(meshLeft)
+    # meshRight = np.array(meshRight)
+
+    return meshLeft, meshRight
+
+
+device = dai.Device()
+calibrationHandler = device.readCalibration()
 # Create pipeline
 pipeline = dai.Pipeline()
 
 camRgb = pipeline.create(dai.node.ColorCamera)
-camRgb.setPreviewSize(500, 500)
-camRgb.setInterleaved(False)
-maxFrameSize = camRgb.getPreviewWidth() * camRgb.getPreviewHeight() * 3
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
+camRgb.setBoardSocket(dai.CameraBoardSocket.LEFT)
+
+camRgb.setIspScale(1, 1);
+
+maxFrameSize = camRgb.getIspWidth() * camRgb.getIspHeight() * 3 / 2
 
 # Warp preview frame 1
 manip1 = pipeline.create(dai.node.ImageManip)
 # Create a custom warp mesh
-tl = dai.Point2f(20, 20)
-tr = dai.Point2f(460, 20)
-ml = dai.Point2f(100, 250)
-mr = dai.Point2f(400, 250)
-bl = dai.Point2f(20, 460)
-br = dai.Point2f(460, 460)
-manip1.setWarpMesh([tl,tr,ml,mr,bl,br], 2, 3)
-manip1.setMaxOutputFrameSize(maxFrameSize)
 
-camRgb.preview.link(manip1.inputImage)
+meshWidth = camRgb.getIspWidth() // 16;
+meshHeight = (camRgb.getIspHeight() // 16)
+mesh_left, mesh_right = getMesh(calibrationHandler, (camRgb.getIspWidth(), camRgb.getIspHeight()))
+print('mesh shapes...')
+print(meshWidth, meshHeight)
+print(maxFrameSize)
+
+manip1.setWarpMesh(mesh_left, meshWidth, meshHeight)
+manip1.setMaxOutputFrameSize(int(maxFrameSize))
+
+camRgb.isp.link(manip1.inputImage)
 xout1 = pipeline.create(dai.node.XLinkOut)
 xout1.setStreamName('out1')
 manip1.out.link(xout1.input)
 
-# Warp preview frame 2
-manip2 = pipeline.create(dai.node.ImageManip);
-# Create a custom warp mesh
-mesh2 = [
-    (20, 20), (250, 100), (460, 20),
-    (100, 250), (250, 250), (400, 250),
-    (20, 480), (250, 400), (460,480)
-]
-manip2.setWarpMesh(mesh2, 3, 3);
-manip2.setMaxOutputFrameSize(maxFrameSize);
-
-camRgb.preview.link(manip2.inputImage);
-xout2 = pipeline.create(dai.node.XLinkOut)
-xout2.setStreamName('out2')
-manip2.out.link(xout2.input)
+device.startPipeline(pipeline)
 
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+# with dai.Device(pipeline) as device:
     # Output queue will be used to get the rgb frames from the output defined above
-    q1 = device.getOutputQueue(name="out1", maxSize=8, blocking=False)
-    q2 = device.getOutputQueue(name="out2", maxSize=8, blocking=False)
+q1 = device.getOutputQueue(name="out1", maxSize=8, blocking=False)
 
-    while True:
-        in1 = q1.get()
-        if in1 is not None:
-            cv2.imshow("Warped preview 1", in1.getCvFrame())
-        in2 = q2.get()
-        if in2 is not None:
-            cv2.imshow("Warped preview 2", in2.getCvFrame())
-
-        if cv2.waitKey(1) == ord('q'):
-            break
+while True:
+    in1 = q1.get()
+    if in1 is not None:
+        cv2.imshow("Warped preview 1", in1.getCvFrame())
+    if cv2.waitKey(1) == ord('q'):
+        break
