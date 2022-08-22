@@ -85,6 +85,8 @@ q1 = device.getOutputQueue(name="out1", maxSize=8, blocking=False)
 while True:
     in1 = q1.get()
     if in1 is not None:
-        cv2.imshow("Warped preview 1", in1.getCvFrame())
+        imgFrame = in1.getCvFrame()
+        imgFrame = cv2.resize(imgFrame, (0, 0), fx=0.7, fy=0.7)
+        cv2.imshow("Warped preview 1", imgFrame)
     if cv2.waitKey(1) == ord('q'):
         break
