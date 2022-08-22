@@ -21,8 +21,6 @@ def getMesh(calibData, resolution):
 
     for y in range(mapXL.shape[0] + 1):
         if y % meshCellSize == 0:
-            # rowLeft = []
-            # rowRight = []
             for x in range(mapXL.shape[1]):
                 if x % meshCellSize == 0:
                     if y == mapXL.shape[0] and x == mapXL.shape[1]:
@@ -37,7 +35,6 @@ def getMesh(calibData, resolution):
                     else:
                         meshLeft.append(( mapXL[y, x - 1], mapYL[y,x]))
                         meshRight.append((mapXR[y, x - 1], mapYR[y,x]))
-                    print(x)
             if (mapXL.shape[1] % meshCellSize) % 2 != 0:
                 meshLeft.append((0, 0))
                 meshRight.append((0, 0))
