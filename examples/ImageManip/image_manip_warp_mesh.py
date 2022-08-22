@@ -5,6 +5,7 @@ import depthai as dai
 import numpy as np
 
 def getMesh(calibData, resolution):
+    print(resolution)
     M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
     d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
@@ -22,7 +23,7 @@ def getMesh(calibData, resolution):
         if y % meshCellSize == 0:
             # rowLeft = []
             # rowRight = []
-            for x in range(mapXL.shape[1] + 1):
+            for x in range(mapXL.shape[1]):
                 if x % meshCellSize == 0:
                     if y == mapXL.shape[0] and x == mapXL.shape[1]:
                         meshLeft.append((mapXL[y - 1, x - 1], mapYL[y - 1, x - 1]))
@@ -36,14 +37,10 @@ def getMesh(calibData, resolution):
                     else:
                         meshLeft.append(( mapXL[y, x - 1], mapYL[y,x]))
                         meshRight.append((mapXR[y, x - 1], mapYR[y,x]))
+                    print(x)
             if (mapXL.shape[1] % meshCellSize) % 2 != 0:
                 meshLeft.append((0, 0))
                 meshRight.append((0, 0))
-            # meshLeft.append(rowLeft)
-            # meshRight.append(rowRight)
-
-    # meshLeft = np.array(meshLeft)
-    # meshRight = np.array(meshRight)
 
     return meshLeft, meshRight
 
@@ -66,11 +63,12 @@ manip1 = pipeline.create(dai.node.ImageManip)
 # Create a custom warp mesh
 
 meshWidth = camRgb.getIspWidth() // 16;
-meshHeight = (camRgb.getIspHeight() // 16)
+meshHeight = (camRgb.getIspHeight() // 16) + 1
 mesh_left, mesh_right = getMesh(calibrationHandler, (camRgb.getIspWidth(), camRgb.getIspHeight()))
 print('mesh shapes...')
 print(meshWidth, meshHeight)
-print(maxFrameSize)
+print(len(mesh_left))
+print(meshWidth*meshHeight)
 
 manip1.setWarpMesh(mesh_left, meshWidth, meshHeight)
 manip1.setMaxOutputFrameSize(int(maxFrameSize))
@@ -84,7 +82,7 @@ device.startPipeline(pipeline)
 
 # Connect to device and start pipeline
 # with dai.Device(pipeline) as device:
-    # Output queue will be used to get the rgb frames from the output defined above
+# Output queue will be used to get the rgb frames from the output defined above
 q1 = device.getOutputQueue(name="out1", maxSize=8, blocking=False)
 
 while True:
