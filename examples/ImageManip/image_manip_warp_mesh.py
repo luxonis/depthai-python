@@ -12,8 +12,10 @@ def getMesh(calibData, resolution):
     M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
     d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
     R2 = np.array(calibData.getStereoRightRectificationRotation())
-    mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
-    mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
+    M1_new, roi_1 = cv2.getOptimalNewCameraMatrix(M1, d1, resolution, 1, resolution)
+    M2_new, roi_2 = cv2.getOptimalNewCameraMatrix(M2, d2, resolution, 1, resolution)
+    mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2_new, resolution, cv2.CV_32FC1)
+    mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2_new, resolution, cv2.CV_32FC1)
 
     meshCellSize = 16
     meshLeft = []
