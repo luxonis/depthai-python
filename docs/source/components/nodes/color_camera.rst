@@ -105,7 +105,7 @@ Usage
 Limitations
 ###########
 
-Here are known camera limitations for the Myriad X:
+Here are known camera limitations for the `RVC2 <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__:
 
 - **ISP can process about 600 MP/s**, and about **500 MP/s** when the pipeline is also running NNs and video encoder in parallel
 - **3A algorithms** can process about **200..250 FPS overall** (for all camera streams). This is a current limitation of our implementation, and we have plans for a workaround to run 3A algorithms on every Xth frame, no ETA yet
