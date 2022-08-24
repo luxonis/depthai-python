@@ -20,11 +20,11 @@ def getMesh(calibData):
 
     meshCellSize = 16
     mesh0 = []
-
-    for y in range(mapX.shape[0] + 1):
+    # Creates subsampled mesh which will be loaded on to device to undistort the image
+    for y in range(mapX.shape[0] + 1): # iterating over height of the image
         if y % meshCellSize == 0:
             rowLeft = []
-            for x in range(mapX.shape[1]):
+            for x in range(mapX.shape[1]): # iterating over width of the image
                 if x % meshCellSize == 0:
                     if y == mapX.shape[0] and x == mapX.shape[1]:
                         rowLeft.append(mapX[y - 1, x - 1])
@@ -92,7 +92,6 @@ with dai.Device() as device:
     cam_out = device.getOutputQueue("cam_out", 4, False)
 
     time.sleep(2)
-    print('Doing Imshow')
     try:
         while True:
             frame = cam_out.get().getCvFrame()
@@ -105,7 +104,6 @@ with dai.Device() as device:
                 print("frame not found")
 
     except:
-        print('Passoimg')
         pass
 
 cv2.destroyAllWindows()
