@@ -32,8 +32,6 @@ readonly ubuntu_pkgs=(
     libsm6
     libxext6
     libgl1-mesa-glx
-    python3-pyqt5
-    python3-pyqt5.qtquick
     qml-module-qtquick-controls2
     qml-module-qt-labs-platform
     qtdeclarative5-dev
@@ -122,6 +120,16 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get update
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
+        fi
+
+        if python3 -c "import PyQt5"; then
+            echo "PyQt5 already installed, skipping..."
+        else
+          if [[ -d /opt/ros ]]; then
+            echo "ROS detected - skipping \"python3-pyqt5\" and \"python3-pyqt5.qtquick\" installation. These packages can break ROS installation so please install them manually if needed"
+          else
+            sudo apt-get install -y python3-pyqt5 python3-pyqt5.qtquick
+          fi
         fi
 
         dpkg -s uvcdynctrl > /dev/null 2>&1
