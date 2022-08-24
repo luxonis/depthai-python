@@ -12,11 +12,12 @@ def getMesh(calibData, resolution):
     M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
     d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
     R2 = np.array(calibData.getStereoRightRectificationRotation())
-    M1_new, roi_1 = cv2.getOptimalNewCameraMatrix(M1, d1, resolution, 1, resolution)
+    # M1_new, roi_1 = cv2.getOptimalNewCameraMatrix(M1, d1, resolution, 1, resolution)
     M2_new, roi_2 = cv2.getOptimalNewCameraMatrix(M2, d2, resolution, 1, resolution)
     mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2_new, resolution, cv2.CV_32FC1)
     mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2_new, resolution, cv2.CV_32FC1)
-
+    print(M2_new)
+    print(M2)
     meshCellSize = 16
     meshLeft = []
     meshRight = []
@@ -63,6 +64,7 @@ manip1 = pipeline.create(dai.node.ImageManip)
 
 meshWidth = camRgb.getIspWidth() // 16;
 meshHeight = (camRgb.getIspHeight() // 16) + 1
+resolution = (camRgb.getIspWidth(), camRgb.getIspHeight())
 mesh_left, mesh_right = getMesh(calibrationHandler, (camRgb.getIspWidth(), camRgb.getIspHeight()))
 print('mesh shapes...')
 print(meshWidth, meshHeight)
@@ -75,7 +77,8 @@ manip1.setMaxOutputFrameSize(int(maxFrameSize))
 camRgb.isp.link(manip1.inputImage)
 xout1 = pipeline.create(dai.node.XLinkOut)
 xout1.setStreamName('out1')
-manip1.out.link(xout1.input)
+# manip1.out.link(xout1.input)
+camRgb.isp.link(xout1.input)
 
 device.startPipeline(pipeline)
 
@@ -88,6 +91,21 @@ while True:
     in1 = q1.get()
     if in1 is not None:
         imgFrame = in1.getCvFrame()
+        M1 = np.array(calibrationHandler.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
+        d1 = np.array(calibrationHandler.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+        R1 = np.array(calibrationHandler.getStereoLeftRectificationRotation())
+        M2 = np.array(calibrationHandler.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
+        d2 = np.array(calibrationHandler.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+        R2 = np.array(calibrationHandler.getStereoRightRectificationRotation())
+        # M1_new, roi_1 = cv2.getOptimalNewCameraMatrix(M1, d1, resolution, 1, resolution)
+        M2_new, roi_2 = cv2.getOptimalNewCameraMatrix(M2, d2, resolution, 1, resolution)
+        mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2_new, resolution, cv2.CV_32FC1)
+        mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2_new, resolution, cv2.CV_32FC1)
+        imgFrame = cv2.remap(imgFrame, mapXL, mapYL,
+                            interpolation=cv2.INTER_NEAREST,
+                            borderMode=cv2.BORDER_CONSTANT,
+                            borderValue=(0, 0, 0, 0))
+
         imgFrame = cv2.resize(imgFrame, (0, 0), fx=0.7, fy=0.7)
         cv2.imshow("Warped preview 1", imgFrame)
     if cv2.waitKey(1) == ord('q'):
