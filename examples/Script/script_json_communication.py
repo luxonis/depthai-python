@@ -20,8 +20,11 @@ script.setScript("""
     # Change initial dictionary a bit
     dict['one'] += 1
     dict['foo'] = "baz"
+    dict['fw_version'] = __version__
+    dict['device_id'] = __device_id__
 
-    b = Buffer(30)
+
+    b = Buffer(256)
     b.setData(json.dumps(dict).encode('utf-8'))
     node.io['out'].send(b)
 """)
