@@ -5,6 +5,15 @@ import depthai as dai
 import tempfile
 import PySimpleGUI as sg
 import sys
+import platform
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+if platform.system() == 'Windows':
+    sg.set_global_icon(f'{SCRIPT_DIR}/assets/icon.ico')
+else:
+    sg.set_global_icon(f'{SCRIPT_DIR}/assets/icon.png')
 
 CONF_TEXT_POE = ['ipTypeText', 'ipText', 'maskText', 'gatewayText', 'dnsText', 'dnsAltText', 'networkTimeoutText', 'macText']
 CONF_INPUT_POE = ['staticBut', 'dynamicBut', 'ip', 'mask', 'gateway', 'dns', 'dnsAlt', 'networkTimeout', 'mac']
@@ -512,7 +521,6 @@ devType = ""
 bl = None
 
 window = sg.Window(title="Device Manager",
-    icon="assets/icon.png",
     layout=layout,
     size=(645, 380),
     finalize=True # So we can do First search for devices
