@@ -178,7 +178,7 @@ def flashBootloader(device: dai.DeviceInfo):
         PrintException()
         sg.Popup(f'{ex}')
 
-def factoryReset(device: dai.DeviceInfo):
+def factoryReset(bl: dai.DeviceBootloader):
     sel = SelectBootloader(['USB', 'NETWORK'], "Select bootloader type used for factory reset.")
     ok, type = sel.wait()
     if not ok:
@@ -190,7 +190,6 @@ def factoryReset(device: dai.DeviceInfo):
         # Clear 1 MiB for USB BL and 8 MiB for NETWORK BL
         mib = 1 if type == dai.DeviceBootloader.Type.USB else 8
         blBinary = blBinary + ([0xFF] * ((mib * 1024 * 1024 + 512) - len(blBinary)))
-        bl = dai.DeviceBootloader(device, True)
         tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
         tmpBlFw.write(bytes(blBinary))
 
@@ -204,9 +203,8 @@ def factoryReset(device: dai.DeviceInfo):
         PrintException()
         sg.Popup(f'{ex}')
 
-def flashFromFile(file, device: dai.DeviceInfo):
+def flashFromFile(file, bl: dai.DeviceBootloader):
     try:
-        bl = dai.DeviceBootloader(device, True)
         if str(file)[-3:] == "dap":
             bl.flashDepthaiApplicationPackage(file)
         else:
@@ -215,9 +213,8 @@ def flashFromFile(file, device: dai.DeviceInfo):
         PrintException()
         sg.Popup(f'{ex}')
 
-def flashFromUsb(device: dai.DeviceInfo):
+def recoveryMode(bl: dai.DeviceBootloader):
     try:
-        bl = dai.DeviceBootloader(device, True)
         bl.bootUsbRomBootloader()
     except Exception as ex:
         PrintException()
@@ -459,12 +456,10 @@ class DeviceManager:
                     self.devices.clear()
                     self.window.Element('devices').update("Search for devices", values=[])
             elif event == "Factory reset":
-                self.closeDevice()  # TODO: is this needed?
-                factoryReset(self.device)
+                factoryReset(self.bl)
             elif event == "Flash DAP":
                 file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
-                self.closeDevice() # TODO: is this needed?
-                flashFromFile(file, self.device)
+                flashFromFile(file, self.bl)
             elif event == "configReal":
                 self.window['-COL1-'].update(visible=False)
                 self.window['-COL2-'].update(visible=True)
@@ -472,8 +467,7 @@ class DeviceManager:
                 self.window['-COL2-'].update(visible=False)
                 self.window['-COL1-'].update(visible=True)
             elif event == "recoveryMode":
-                self.closeDevice() # TODO: is this needed?
-                flashFromUsb(self.device)
+                recoveryMode(self.bl)
         self.window.close()
 
     @property
