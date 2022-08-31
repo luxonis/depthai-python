@@ -28,17 +28,17 @@ xin.out.link(script.inputs['toggle'])
 
 cam.preview.link(script.inputs['rgb'])
 script.setScript("""
-toggle = False
-while True:
-    msg = node.io['toggle'].tryGet()
-    if msg is not None:
-        toggle = msg.getData()[0]
-        node.warn('Toggle! Perform NN inferencing: ' + str(toggle))
+    toggle = False
+    while True:
+        msg = node.io['toggle'].tryGet()
+        if msg is not None:
+            toggle = msg.getData()[0]
+            node.warn('Toggle! Perform NN inferencing: ' + str(toggle))
 
-    frame = node.io['rgb'].get()
+        frame = node.io['rgb'].get()
 
-    if toggle:
-        node.io['nn'].send(frame)
+        if toggle:
+            node.io['nn'].send(frame)
 """)
 
 nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
