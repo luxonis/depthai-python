@@ -56,8 +56,9 @@ with dai.Device(p) as device:
     shape = (3, SHAPE, SHAPE * 3)
 
     while True:
-        inNn = np.array(qNn.get().getData())
-        frame = inNn.view(np.float16).reshape(shape).transpose(1, 2, 0).astype(np.uint8).copy()
+        inNn = np.array(qNn.get().getFirstLayerFp16())
+        # Planar INT8 frame
+        frame = inNn.reshape(shape).astype(np.uint8).transpose(1, 2, 0)
 
         cv2.imshow("Concat", frame)
 

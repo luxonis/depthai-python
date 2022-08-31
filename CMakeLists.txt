@@ -23,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.320.tar.gz"
-    SHA1 "9b4e732afd22f40482c11ad6342f7d336634226f"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
+    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -35,7 +35,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
 
 # Set default build type depending on context
 set(default_build_type "Release")
@@ -96,11 +96,55 @@ pybind11_add_module(${TARGET_NAME}
     src/DatatypeBindings.cpp
     src/DataQueueBindings.cpp
     src/pipeline/PipelineBindings.cpp
-    src/pipeline/NodeBindings.cpp
     src/pipeline/CommonBindings.cpp
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
     src/log/LogBindings.cpp
+
+    src/pipeline/node/NodeBindings.cpp
+
+    src/pipeline/node/XLinkInBindings.cpp
+    src/pipeline/node/XLinkOutBindings.cpp
+    src/pipeline/node/ColorCameraBindings.cpp
+    src/pipeline/node/MonoCameraBindings.cpp
+    src/pipeline/node/StereoDepthBindings.cpp
+    src/pipeline/node/NeuralNetworkBindings.cpp
+    src/pipeline/node/VideoEncoderBindings.cpp
+    src/pipeline/node/ImageManipBindings.cpp
+    src/pipeline/node/SPIOutBindings.cpp
+    src/pipeline/node/SPIInBindings.cpp
+    src/pipeline/node/DetectionNetworkBindings.cpp
+    src/pipeline/node/SystemLoggerBindings.cpp
+    src/pipeline/node/ScriptBindings.cpp
+    src/pipeline/node/SpatialLocationCalculatorBindings.cpp
+    src/pipeline/node/SpatialDetectionNetworkBindings.cpp
+    src/pipeline/node/ObjectTrackerBindings.cpp
+    src/pipeline/node/IMUBindings.cpp
+    src/pipeline/node/EdgeDetectorBindings.cpp
+    src/pipeline/node/FeatureTrackerBindings.cpp
+    src/pipeline/node/AprilTagBindings.cpp
+    src/pipeline/node/DetectionParserBindings.cpp
+
+    src/pipeline/datatype/ADatatypeBindings.cpp
+    src/pipeline/datatype/AprilTagConfigBindings.cpp
+    src/pipeline/datatype/AprilTagsBindings.cpp
+    src/pipeline/datatype/BufferBindings.cpp
+    src/pipeline/datatype/CameraControlBindings.cpp
+    src/pipeline/datatype/EdgeDetectorConfigBindings.cpp
+    src/pipeline/datatype/FeatureTrackerConfigBindings.cpp
+    src/pipeline/datatype/ImageManipConfigBindings.cpp
+    src/pipeline/datatype/ImgDetectionsBindings.cpp
+    src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/NNDataBindings.cpp
+    src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorDataBindings.cpp
+    src/pipeline/datatype/StereoDepthConfigBindings.cpp
+    src/pipeline/datatype/SystemInformationBindings.cpp
+    src/pipeline/datatype/TrackedFeaturesBindings.cpp
+    src/pipeline/datatype/TrackletsBindings.cpp
+
 )
 
 if(WIN32)
@@ -132,8 +176,6 @@ else()
     message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
         ${CMAKE_COMMAND} -E env
-        # PATH (dlls)
-        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "$<TARGET_FILE_DIR:${TARGET_NAME}>"

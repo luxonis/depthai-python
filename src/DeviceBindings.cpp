@@ -261,7 +261,7 @@ static void bindConstructors(ARG& arg){
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
@@ -421,6 +421,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("uart", &BoardConfig::uart)
         .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock)
         .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock)
+        .def_readwrite("mipi4LaneRgb", &BoardConfig::mipi4LaneRgb)
         .def_readwrite("emmc", &BoardConfig::emmc)
         .def_readwrite("logPath", &BoardConfig::logPath)
         .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
@@ -446,7 +447,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
             d.close();
         })
         .def("close", [](DeviceBase& d) { py::gil_scoped_release release; d.close(); }, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
-        .def("isClosed", &DeviceBase::isClosed, "Check if the device is still connected`")
+        .def("isClosed", [](DeviceBase& d) { py::gil_scoped_release release; return d.isClosed(); }, DOC(dai, DeviceBase, isClosed))
 
         //dai::Device methods
         //static
@@ -509,6 +510,10 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashFactoryCalibration", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashFactoryCalibration(ch); }, DOC(dai, DeviceBase, flashFactoryCalibration))
         .def("readFactoryCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibration(); }, DOC(dai, DeviceBase, readFactoryCalibration))
         .def("readFactoryCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationOrDefault(); }, DOC(dai, DeviceBase, readFactoryCalibrationOrDefault))
+        .def("readCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationRaw(); }, DOC(dai, DeviceBase, readCalibrationRaw))
+        .def("readFactoryCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationRaw(); }, DOC(dai, DeviceBase, readFactoryCalibrationRaw))
+        .def("flashEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashEepromClear(); }, DOC(dai, DeviceBase, flashEepromClear))
+        .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
     ;
 
 

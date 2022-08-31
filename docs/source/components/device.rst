@@ -3,9 +3,9 @@
 Device
 ======
 
-Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful vision processing unit
-(**VPU**), called `Myriad X <https://www.intel.com/content/www/us/en/products/details/processors/movidius-vpu.html>`__.
-The VPU is optimized for performing AI inference algorithms and for processing sensory inputs (eg. calculating stereo disparity from two cameras).
+Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful Robotics Vision Core
+(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference algorithms and
+for processing sensory inputs (eg. calculating stereo disparity from two cameras).
 
 Device API
 ##########
@@ -21,7 +21,7 @@ When you create the device in the code, firmware is uploaded together with the p
 
   # Upload the pipeline to the device
   with depthai.Device(pipeline) as device:
-    # Print Myriad X Id (MxID), USB speed, and available cameras on the device
+    # Print MxID, USB speed, and available cameras on the device
     print('MxId:',device.getDeviceInfo().getMxId())
     print('USB speed:',device.getUsbSpeed())
     print('Connected cameras:',device.getConnectedCameras())
