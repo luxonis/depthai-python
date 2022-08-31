@@ -167,6 +167,7 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         }, DOC(dai, node, StereoDepth, setFocalLengthFromCalibration))
         .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
         .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
+        .def("setVerticalStereo", &StereoDepth::setVerticalStereo, DOC(dai, node, StereoDepth, setVerticalStereo))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
