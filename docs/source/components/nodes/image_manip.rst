@@ -3,7 +3,7 @@ ImageManip
 
 ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
-For downscaling, ImageManip uses the hardware scaler which uses Lanczos-filtered resampling/interpolation of the input frame.
+For downscaling, ImageManip uses the bilinear/bicubic interpolation.
 
 How to place it
 ###############
