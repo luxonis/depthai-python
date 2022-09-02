@@ -4,6 +4,7 @@ import cv2
 import depthai as dai
 import numpy as np
 from pathlib import Path
+import argparse
 
 #run examples/install_requirements.py -sdai
 
@@ -15,8 +16,19 @@ if not Path(datasetDefault).exists():
 left = datasetDefault + '/' + '0' + '/' + 'in_left' + '.png'
 right = datasetDefault + '/' + '0' + '/' + 'in_right' + '.png'
 
+
+right= "in_right.png"
+left = "in_bottom.png"
+
+
+
 leftImg = cv2.imread(left, cv2.IMREAD_GRAYSCALE)
 rightImg = cv2.imread(right, cv2.IMREAD_GRAYSCALE)
+leftImg = cv2.rotate(leftImg, cv2.ROTATE_90_CLOCKWISE)
+rightImg = cv2.rotate(rightImg, cv2.ROTATE_90_CLOCKWISE)
+
+width = leftImg.shape[1]
+height = leftImg.shape[0]
 
 cv2.imshow("leftImg", leftImg)
 cv2.imshow("rightImg", rightImg)
@@ -39,17 +51,20 @@ xoutLeft.setStreamName("left")
 xoutRight.setStreamName("right")
 xoutDepth.setStreamName("depth")
 
-monoLeft.setMaxDataSize(1280 * 720)
-monoRight.setMaxDataSize(1280 * 720)
+
+monoLeft.setMaxDataSize(width * height)
+monoRight.setMaxDataSize(width * height)
 
 # Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
-stereo.syncedRight.link(xoutRight.input)
+stereo.rectifiedRight.link(xoutRight.input)
 stereo.depth.link(xoutDepth.input)
-stereo.setInputResolution(1280,720)
+stereo.setInputResolution(width,height) # set input resolution specifically
 
+stereo.setRectification(False) #disable rectification, frames are pre-rectified
+stereo.setVerticalStereo(True) #NOTE setVerticalStereo doesn't take effect if rectification is disabled
 
 
 # Connect to device and start pipeline
@@ -63,12 +78,10 @@ with dai.Device(pipeline) as device:
 
     cnt = 0
 
-    width = 1280
-    height = 720
-
     while True:
 
         data = cv2.resize(leftImg, (width, height), interpolation = cv2.INTER_AREA)
+
         data = data.reshape(height*width)
         img = dai.ImgFrame()
         img.setData(data)
@@ -76,6 +89,7 @@ with dai.Device(pipeline) as device:
         img.setType(dai.ImgFrame.Type.RAW8)
         img.setWidth(width)
         img.setHeight(height)
+        print("left send")
         qInLeft.send(img)
 
         data = cv2.resize(rightImg, (width, height), interpolation = cv2.INTER_AREA)
@@ -87,6 +101,7 @@ with dai.Device(pipeline) as device:
         img.setWidth(width)
         img.setHeight(height)
         qInRight.send(img)
+        print("right send")
 
         inLeft = qLeft.get()
         frameLeft = inLeft.getCvFrame()
