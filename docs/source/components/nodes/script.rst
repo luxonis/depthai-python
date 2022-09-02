@@ -123,7 +123,7 @@ In the script node you can interface with GPIOs of the VPU using module GPIO. Cu
 Here's **an example** of toggling GPIO pin 40 inside Script node from the host (via :ref:`XLinkIn`). On `OAK-SoM-Pro <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW2099.html>`__,
 GPIO 40 drives FSYNC signal for both 4-lane cameras, and we have used the code below for this exact reason.
 
-.. code-bloc:: python
+.. code-block:: python
 
   import GPIO
   MX_PIN = 40
