@@ -46,6 +46,7 @@ void AssetManagerBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind AssetManager
     assetManager
         .def(py::init<>())
+        .def(py::init<std::string>())
         .def("addExisting", &AssetManager::addExisting, py::arg("assets"), DOC(dai, AssetManager, addExisting))
         .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(Asset)>(&AssetManager::set), py::arg("asset"), DOC(dai, AssetManager, set))
         .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(const std::string&, Asset)>(&AssetManager::set), py::arg("key"), py::arg("asset"), DOC(dai, AssetManager, set, 2))
@@ -57,6 +58,7 @@ void AssetManagerBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getAll", static_cast<std::vector<std::shared_ptr<Asset>> (AssetManager::*)()>(&AssetManager::getAll), DOC(dai, AssetManager, getAll, 2))
         .def("size", &AssetManager::size, DOC(dai, AssetManager, size))
         .def("remove", &AssetManager::remove, py::arg("key"), DOC(dai, AssetManager, remove))
+        .def("getRootPath", &AssetManager::getRootPath, DOC(dai, AssetManager, getRootPath))
     ;
 
 }
