@@ -64,7 +64,7 @@ jobs:
 
   # Build and test bindings
   pytest:
-    # needs: build-docstrings
+    needs: build-docstrings
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2019, macos-latest]
@@ -77,6 +77,187 @@ jobs:
         if: matrix.os != 'windows-latest'
         uses: actions/cache@v2
         with:
+
+      - name: Compile
+        run: |
+          cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp -D DEPTHAI_PYTHON_ENABLE_TESTS=ON
+          cmake --build build --parallel 4
+      - name: Test
+        run: |
+          cmake --build build --target pytest --config Release
+
+
+  # This job builds wheels for armhf arch (RPi)
+  build-linux-armhf:
+    needs: build-docstrings
+    strategy:
+      matrix:
+        rpi-os: [rpi-buster, rpi-bullseye]
+    runs-on: ${{ matrix.rpi-os }}
+    steps:
+      - name: Print home directory
+        run: echo Home directory inside container $HOME
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - uses: actions/download-artifact@v2
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
+
+  # This job builds wheels for Windows x86_64 arch
+  build-windows-x86_64:
+    needs: build-docstrings
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
+        python-architecture: [x64, x86]
+      fail-fast: false
+    steps:
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: C:/.hunter
+          key: hunter-msvc
+          name: audited-wheels
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
+  # This job builds wheels for macOS x86_64 arch
+  build-macos-x86_64:
+    needs: build-docstrings
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
+      fail-fast: false
+    steps:
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter
+          key: hunter-macos-latest
+      - name: List .hunter cache directory
+          name: audited-wheels
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
+  # This job builds wheels for x86_64 arch
+  build-linux-x86_64:
+    needs: build-docstrings
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/pypa/manylinux2014_x86_64:2021-11-15-a808c18
+      env:
+        PLAT: manylinux2014_x86_64
+    steps:
+      - name: Cache .hunter folder
+        uses: actions/cache@v2
+        with:
+          path: ~/.hunter
+          key: hunter-x86_64
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Build and install depthai-core
+        run: |
+          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          cmake --build build_core --target install --parallel 4
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
+
+      - name: Append build hash if not a tagged commit
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
+
+      - name: Building source distribution
+          name: audited-wheels
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
+  # This job builds wheels for ARM64 arch
+  build-linux-arm64:
+    needs: build-docstrings
+    runs-on: [self-hosted, linux, ARM64]
+    container:
+      image: quay.io/pypa/manylinux2014_aarch64:2021-11-15-a808c18
+      env:
+        PLAT: manylinux2014_aarch64
+      # Mount local hunter cache directory, instead of transfering to Github and back
+      volumes:
+        - /.hunter:/github/home/.hunter
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Build and install depthai-core
+        run: |
+          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          cmake --build build_core --target install --parallel 4
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
+
+      - name: Append build hash if not a tagged commit
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
+      - name: Building wheels
+        run: for PYBIN in /opt/python/cp3{6..10}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
           path: ~/.hunter/
           key: hunter-pytest-${{ matrix.os }}
       - name: Cache .hunter folder
@@ -117,31 +298,6 @@ jobs:
       - name: Install pytest
         run: |
           python -m pip install pytest numpy
-
-      - name: Compile
-        run: |
-          cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -D DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp -D DEPTHAI_PYTHON_ENABLE_TESTS=ON
-          cmake --build build --parallel 4
-      - name: Test
-        run: |
-          cmake --build build --target pytest --config Release
-
-
-  # This job builds wheels for armhf arch (RPi)
-  build-linux-armhf:
-    # needs: build-docstrings
-    strategy:
-      matrix:
-        rpi-os: [rpi-buster, rpi-bullseye]
-    runs-on: ${{ matrix.rpi-os }}
-    steps:
-      - name: Print home directory
-        run: echo Home directory inside container $HOME
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/download-artifact@v2
         with:
           name: 'docstrings'
           path: docstrings
@@ -159,31 +315,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: audited-wheels
-          path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
-        env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
-
-
-  # This job builds wheels for Windows x86_64 arch
-  build-windows-x86_64:
-    # needs: build-docstrings
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
-        python-architecture: [x64, x86]
-      fail-fast: false
-    steps:
-      - name: Cache .hunter folder
-        uses: actions/cache@v2
-        with:
-          path: C:/.hunter
-          key: hunter-msvc
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
@@ -214,31 +345,6 @@ jobs:
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: audited-wheels
-          path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
-        env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
-
-  # This job builds wheels for macOS x86_64 arch
-  build-macos-x86_64:
-    # needs: build-docstrings
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10']
-      fail-fast: false
-    steps:
-      - name: Cache .hunter folder
-        uses: actions/cache@v2
-        with:
-          path: ~/.hunter
-          key: hunter-macos-latest
-      - name: List .hunter cache directory
         run: ls -a -l ~/.hunter/_Base/ || true
 
       - uses: actions/checkout@v2
@@ -273,60 +379,6 @@ jobs:
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: audited-wheels
-          path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
-        env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
-
-  # This job builds wheels for x86_64 arch
-  build-linux-x86_64:
-    # needs: build-docstrings
-    runs-on: ubuntu-latest
-    container:
-      image: quay.io/pypa/manylinux2014_x86_64:2021-11-15-a808c18
-      env:
-        PLAT: manylinux2014_x86_64
-    steps:
-      - name: Cache .hunter folder
-        uses: actions/cache@v2
-        with:
-          path: ~/.hunter
-          key: hunter-x86_64
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel
-      - name: Installing cmake dependency
-        run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
-          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
-      - name: Create folder structure
-        run: mkdir -p wheelhouse/audited/
-
-      # - uses: actions/download-artifact@v2
-      #   with:
-      #     name: 'docstrings'
-      #     path: docstrings
-      # - name: Specify docstring to use while building the wheel
-      #   run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
-
-      - name: Build and install depthai-core
-        run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 4
-          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
-
-      - name: Append build hash if not a tagged commit
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
-
-      - name: Building source distribution
         run: |
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar
           mv dist/* wheelhouse/audited/
@@ -337,58 +389,6 @@ jobs:
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: audited-wheels
-          path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
-        env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
-
-  # This job builds wheels for ARM64 arch
-  build-linux-arm64:
-    # needs: build-docstrings
-    runs-on: [self-hosted, linux, ARM64]
-    container:
-      image: quay.io/pypa/manylinux2014_aarch64:2021-11-15-a808c18
-      env:
-        PLAT: manylinux2014_aarch64
-      # Mount local hunter cache directory, instead of transfering to Github and back
-      volumes:
-        - /.hunter:/github/home/.hunter
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel
-      - name: Installing cmake dependency
-        run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
-          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
-      - name: Create folder structure
-        run: mkdir -p wheelhouse/audited/
-
-      # - uses: actions/download-artifact@v2
-      #   with:
-      #     name: 'docstrings'
-      #     path: docstrings
-      # - name: Specify docstring to use while building the wheel
-      #   run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
-
-      - name: Build and install depthai-core
-        run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 4
-          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
-
-      - name: Append build hash if not a tagged commit
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
-      - name: Building wheels
-        run: for PYBIN in /opt/python/cp3{6..10}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Auditing wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
