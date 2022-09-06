@@ -1,10 +1,10 @@
 StereoDepth
-===========
+###########
 
-Stereo depth node calculates the disparity/depth from two :ref:`mono cameras <MonoCamera>`.
+StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`).
 
 How to place it
-###############
+===============
 
 .. tabs::
 
@@ -20,7 +20,7 @@ How to place it
 
 
 Inputs and Outputs
-##################
+==================
 
 .. code-block::
 
@@ -71,7 +71,7 @@ Inputs and Outputs
     - :code:`debugDispCostDump` - :ref:`ImgFrame`
 
 Internal block diagram of StereoDepth node
-##########################################
+==========================================
 
 .. image:: /_static/images/components/depth_diagram.png
    :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
@@ -83,7 +83,7 @@ configurable sooner.
 If you click on the image, you will be redirected to the webapp. Some blocks have notes that provide additional technical information.
 
 Currently configurable blocks
-*****************************
+-----------------------------
 
 .. tabs::
 
@@ -165,12 +165,12 @@ Currently configurable blocks
         :no-link:
 
 Limitations
-###########
+===========
 
 - Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 
 Stereo depth FPS
-################
+================
 
 .. list-table::
    :header-rows: 1
@@ -201,7 +201,7 @@ All stereo modes were measured for :code:`depth` output with **5x5 median filter
 to **60 FPS** and for 400P mono cameras were set to **110 FPS**.
 
 Usage
-#####
+=====
 
 .. tabs::
 
@@ -238,7 +238,7 @@ Usage
     right->out.link(stereo->right);
 
 Examples of functionality
-#########################
+=========================
 
 - :ref:`Depth Preview`
 - :ref:`RGB Depth alignment`
@@ -246,7 +246,7 @@ Examples of functionality
 - :ref:`RGB & MobilenetSSD with spatial data`
 
 Reference
-#########
+=========
 
 .. tabs::
 
@@ -266,7 +266,7 @@ Reference
       :undoc-members:
 
 Disparity
-#########
+=========
 
 Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
 By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
@@ -290,7 +290,7 @@ For the final disparity map, a filtering is applied based on the confidence thre
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
 Calculate depth using disparity map
-###################################
+===================================
 
 Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
 
@@ -339,7 +339,7 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
 Note the value of disparity depth data is stored in :code:`uint16`, where 0 is a special value, meaning that distance is unknown.
 
 Min stereo depth distance
-#########################
+=========================
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
@@ -375,8 +375,18 @@ or roughly 35cm.
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
 
+Disparity shift to lower min depth perception
+---------------------------------------------
+
+Another option to perceive closer depth range is to use disparity shift. Disparity shift will shift the starting point
+of the disparity search, which will significantly decrease max depth perception, but it will also decrease min depth perception.
+
+.. doxygenfunction:: dai::StereoDepthConfig::setDisparityShift
+  :project: depthai-core
+  :no-link:
+
 Max stereo depth distance
-#########################
+=========================
 
 The maximum depth perception distance depends on the :ref:`accuracy of the depth perception <Depth perception accuracy>`. The formula used to calculate this distance is an approximation, but is as follows:
 
@@ -397,7 +407,7 @@ So using this formula for existing models the *theoretical* max distance is:
 If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this table <Currently configurable blocks>`.
 
 Depth perception accuracy
-#########################
+=========================
 
 Disparity depth works by matching features from one image to the other and its accuracy is based on multiple parameters:
 
@@ -415,7 +425,7 @@ Lower baseline enables us to detect the depth at a closer distance as long as th
 So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
 
 Limitation
-##########
+==========
 
 Since depth is calculated from disparity, which requires the pixels to overlap, there is inherently a vertical
 band on the left side of the left mono camera and on the right side of the right mono camera, where depth
@@ -472,7 +482,7 @@ forum post.
    `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
 
 Measuring real-world object dimensions
-######################################
+======================================
 
 Because the depth map contains the Z distance, objects in parallel with the camera are measured accurately standard. For objects not in parallel, the Euclidean distance calculation can be used. Please refer to the below:
 
