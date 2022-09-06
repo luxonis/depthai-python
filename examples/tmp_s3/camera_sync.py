@@ -15,6 +15,7 @@ monoVertical = pipeline.create(dai.node.MonoCamera)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutVertical = pipeline.create(dai.node.XLinkOut)
+syncNode = pipeline.create(dai.node.Sync)
 
 xoutLeft.setStreamName('left')
 xoutRight.setStreamName('right')
@@ -29,9 +30,17 @@ monoVertical.setBoardSocket(dai.CameraBoardSocket.VERTICAL)
 monoVertical.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking
-monoRight.out.link(xoutRight.input)
-monoLeft.out.link(xoutLeft.input)
-monoVertical.out.link(xoutVertical.input)
+# monoRight.out.link(xoutRight.input)
+# monoLeft.out.link(xoutLeft.input)
+# monoVertical.out.link(xoutVertical.input)
+
+monoRight.out.link(syncNode.input1)
+monoLeft.out.link(syncNode.input2)
+monoVertical.out.link(syncNode.input3)
+
+syncNode.output1.link(xoutRight.input)
+syncNode.output2.link(xoutLeft.input)
+syncNode.output3.link(xoutVertical.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -51,45 +60,11 @@ with dai.Device(pipeline) as device:
         inR = qRight.get()
         inV = qVertical.get()
 
-        while True:
-            tstampL = inL.getTimestamp().total_seconds()*1000
-            tstampR = inR.getTimestamp().total_seconds()*1000
-            tstampV = inV.getTimestamp().total_seconds()*1000
+        tstampL = inL.getTimestamp().total_seconds()*1000
+        tstampR = inR.getTimestamp().total_seconds()*1000
+        tstampV = inV.getTimestamp().total_seconds()*1000
 
-            diffLR = tstampL - tstampR
-            if debug:
-                print(f"diffLR {diffLR}")
-            if abs(diffLR) > tSyncThreshold:
-                if diffLR < 0:
-                    inL = qLeft.get()
-                elif diffLR > 0:
-                    inR = qRight.get()
-                continue
-
-            diffLV = tstampL - tstampV
-            if debug:
-                print(f"diffLV {diffLV}")
-            if abs(diffLV) > tSyncThreshold:
-                if diffLV < 0:
-                    inL = qLeft.get()
-                elif diffLV > 0:
-                    inV = qVertical.get()
-                continue
-
-            diffRV = tstampR - tstampV
-            if debug:
-                print(f"diffRV {diffRV}")
-            if abs(diffRV) > tSyncThreshold:
-                if diffRV < 0:
-                    inR = qRight.get()
-                elif diffRV > 0:
-                    inV = qVertical.get()
-                continue
-            
-            if debug:
-                print(f"synced! tstampL {tstampL}, tstampR {tstampR}, tstampV {tstampV} ")
-            break
-        
+        print(f"synced! tstampL {tstampL}, tstampR {tstampR}, tstampV {tstampV} ")
 
         frameL = inL.getCvFrame()
         frameR = inR.getCvFrame()
