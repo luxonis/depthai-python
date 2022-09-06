@@ -102,29 +102,29 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         ;
 
     xLinkDeviceState
-        .value("XLINK_ANY_STATE", XLINK_ANY_STATE)
-        .value("XLINK_BOOTED", XLINK_BOOTED)
-        .value("XLINK_UNBOOTED", XLINK_UNBOOTED)
-        .value("XLINK_BOOTLOADER", XLINK_BOOTLOADER)
-        .value("XLINK_FLASH_BOOTED", XLINK_FLASH_BOOTED)
+        .value("X_LINK_ANY_STATE", X_LINK_ANY_STATE)
+        .value("X_LINK_BOOTED", X_LINK_BOOTED)
+        .value("X_LINK_UNBOOTED", X_LINK_UNBOOTED)
+        .value("X_LINK_BOOTLOADER", X_LINK_BOOTLOADER)
+        .value("X_LINK_FLASH_BOOTED", X_LINK_FLASH_BOOTED)
         .export_values()
         ;
 
     xLinkProtocol
-        .value("XLINK_USB_VSC", XLINK_USB_VSC)
-        .value("XLINK_USB_CDC", XLINK_USB_CDC)
-        .value("XLINK_PCIE", XLINK_PCIE)
-        .value("XLINK_TCP_IP", XLINK_TCP_IP)
-        .value("XLINK_IPC", XLINK_IPC)
-        .value("XLINK_NMB_OF_PROTOCOLS", XLINK_NMB_OF_PROTOCOLS)
-        .value("XLINK_ANY_PROTOCOL", XLINK_ANY_PROTOCOL)
+        .value("X_LINK_USB_VSC", X_LINK_USB_VSC)
+        .value("X_LINK_USB_CDC", X_LINK_USB_CDC)
+        .value("X_LINK_PCIE", X_LINK_PCIE)
+        .value("X_LINK_TCP_IP", X_LINK_TCP_IP)
+        .value("X_LINK_IPC", X_LINK_IPC)
+        .value("X_LINK_NMB_OF_PROTOCOLS", X_LINK_NMB_OF_PROTOCOLS)
+        .value("X_LINK_ANY_PROTOCOL", X_LINK_ANY_PROTOCOL)
         .export_values()
         ;
 
     xLinkPlatform
-        .value("XLINK_ANY_PLATFORM", XLINK_ANY_PLATFORM)
-        .value("XLINK_MYRIAD_2", XLINK_MYRIAD_2)
-        .value("XLINK_MYRIAD_X", XLINK_MYRIAD_X)
+        .value("X_LINK_ANY_PLATFORM", X_LINK_ANY_PLATFORM)
+        .value("X_LINK_MYRIAD_2", X_LINK_MYRIAD_2)
+        .value("X_LINK_MYRIAD_X", X_LINK_MYRIAD_X)
         .export_values()
         ;
 
@@ -132,9 +132,9 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def(py::init<const DeviceInfo &, std::vector<std::uint8_t> >())
         .def(py::init<const DeviceInfo &, std::string>())
         .def(py::init<const DeviceInfo &>())
-        .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = XLINK_ANY_STATE, py::arg("skipInvalidDevices") = true)
-        .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = XLINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
-        .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = XLINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
+        .def_static("getAllConnectedDevices", &XLinkConnection::getAllConnectedDevices, py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevices") = true)
+        .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
+        .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
         .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
         ;
 

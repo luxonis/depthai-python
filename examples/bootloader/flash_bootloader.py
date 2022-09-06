@@ -21,14 +21,14 @@ if len(deviceInfos) == 0:
 else:
     for i, di in enumerate(deviceInfos):
         print(f'[{i}] {di.getMxId()} [{di.protocol.name}]', end='')
-        if di.state == dai.XLinkDeviceState.XLINK_BOOTLOADER:
+        if di.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER:
             with dai.DeviceBootloader(di) as bl:
                 print(f' current bootloader: {bl.getVersion()}', end='')
         print()
     selected = input(f'Which DepthAI device to flash bootloader for [0..{len(deviceInfos)-1}]: ')
     info = deviceInfos[int(selected)]
 
-hasBootloader = (info.state == dai.XLinkDeviceState.XLINK_BOOTLOADER)
+hasBootloader = (info.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER)
 if hasBootloader:
     print("Warning! Flashing bootloader can potentially soft brick your device and should be done with caution.")
     print("Do not unplug your device while the bootloader is flashing.")

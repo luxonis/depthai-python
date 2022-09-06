@@ -377,7 +377,7 @@ def connectToDevice(device: dai.DeviceInfo) -> dai.DeviceBootloader:
         sg.Popup(f'{ex}')
 
 def deviceStateTxt(state: dai.XLinkDeviceState) -> str:
-    return str(state).replace("XLinkDeviceState.XLINK_", "")
+    return str(state).replace("XLinkDeviceState.X_LINK_", "")
 
 # Start defying layout
 
@@ -560,8 +560,8 @@ while True:
         ok, ip = select.wait()
         if ok:
             di = dai.DeviceInfo(ip)
-            di.state = dai.XLinkDeviceState.XLINK_BOOTLOADER
-            di.protocol = dai.XLinkProtocol.XLINK_TCP_IP
+            di.state = dai.XLinkDeviceState.X_LINK_BOOTLOADER
+            di.protocol = dai.XLinkProtocol.X_LINK_TCP_IP
             devices[ip] = di # Add to devices dict
             window.Element('devices').update(ip) # Show to user
             bl = connectToDevice(di)
