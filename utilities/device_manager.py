@@ -54,12 +54,12 @@ def check_mac(s):
     return True
 
 class Progress:
-    def __init__(self):
+    def __init__(self, txt = 'Flashing progress: 0.0%'):
         layout = [
-            [sg.Text('Flashing progress: 0.0%', key='txt')],
+            [sg.Text(txt, key='txt')],
             [sg.ProgressBar(1.0, orientation='h', size=(20,20), key='progress')],
         ]
-        self.self.window = sg.Window("Progress", layout, modal=True, finalize=True)
+        self.window = sg.Window("Progress", layout, modal=True, finalize=True)
     def update(self, val):
         self.window['progress'].update(val)
         self.window['txt'].update(f'Flashing progress: {val*100:.1f}%')
@@ -166,9 +166,10 @@ def flashBootloader(device: dai.DeviceInfo):
             print("Flashing bootloader canceled.")
             return
 
+        pr = Progress('Connecting...')
+
         bl = dai.DeviceBootloader(device, True)
 
-        pr = Progress()
         progress = lambda p : pr.update(p)
         if type == dai.DeviceBootloader.Type.AUTO:
             type = bl.getType()
@@ -443,9 +444,13 @@ class DeviceManager:
                     self.getConfigs()
                 self.unlockConfig()
             elif event == "Flash newest Bootloader":
-                self.closeDevice()  # We will reconnect, as we need to set allowFlashingBootloader to True
+                # We will reconnect, as we need to set allowFlashingBootloader to True
+                self.closeDevice()
                 flashBootloader(self.device)
-                self.window.Element('currBoot').update(self.bl.getVersion())
+                # Device will reboot, close previous and reset GUI
+                self.closeDevice()
+                self.resetGui()
+                self.getDevices()
             elif event == "Flash configuration":
                 self.flashConfig()
                 self.getConfigs()
@@ -591,7 +596,9 @@ class DeviceManager:
                     deviceTxt = deviceInfo.getMxId()
                     listedDevices.append(deviceTxt)
                     self.devices[deviceTxt] = deviceInfo
-                self.window.Element('devices').update("Select device", values=listedDevices)
+
+            # Update the list regardless
+            self.window.Element('devices').update("Select device", values=listedDevices)
         except Exception as ex:
             PrintException()
             sg.Popup(f'{ex}')
