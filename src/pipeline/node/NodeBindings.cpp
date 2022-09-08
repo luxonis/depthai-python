@@ -245,6 +245,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getInputRefs", static_cast<std::vector<Node::Input*> (Node::*)()>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
         .def("getOutputRefs", static_cast<std::vector<const Node::Output*> (Node::*)() const>(&Node::getOutputRefs), DOC(dai, Node, getOutputRefs), py::return_value_policy::reference_internal)
         .def("getInputRefs", static_cast<std::vector<const Node::Input*> (Node::*)() const>(&Node::getInputRefs), DOC(dai, Node, getInputRefs), py::return_value_policy::reference_internal)
+        .def("getInputMapRefs", static_cast<std::vector<Node::InputMap*> (Node::*)()>(&Node::getInputMapRefs), DOC(dai, Node, getInputMapRefs), py::return_value_policy::reference_internal)
+        .def("getOutputMapRefs", static_cast<std::vector<Node::OutputMap*> (Node::*)()>(&Node::getOutputMapRefs), DOC(dai, Node, getOutputMapRefs), py::return_value_policy::reference_internal)
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline), DOC(dai, Node, getParentPipeline))
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
