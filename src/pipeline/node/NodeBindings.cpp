@@ -155,6 +155,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Node::Output> pyOutput(pyNode, "Output", DOC(dai, Node, Output));
     py::enum_<Node::Output::Type> nodeOutputType(pyOutput, "Type");
     py::class_<Properties, std::shared_ptr<Properties>> pyProperties(m, "Properties", DOC(dai, Properties));
+    py::class_<Node::DatatypeHierarchy> nodeDatatypeHierarchy(pyNode, "DatatypeHierarchy", DOC(dai, Node, DatatypeHierarchy));
 
 
     // Node::Id bindings
@@ -189,20 +190,26 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Base 'Node' class binding
 
+    nodeDatatypeHierarchy
+        .def(py::init<DatatypeEnum, bool>())
+        .def_readwrite("datatype", &Node::DatatypeHierarchy::datatype)
+        .def_readwrite("descendants", &Node::DatatypeHierarchy::descendants)
+    ;
+
     // Node::Input bindings
     nodeInputType
         .value("SReceiver", Node::Input::Type::SReceiver)
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
     pyInput
-        .def_property("group", [](Node::Input& obj) { return obj.group; }, [](Node::Input& obj, std::string group) { obj.group = group; })
-        .def_property("name", [](Node::Input& obj) { return obj.name; }, [](Node::Input& obj, std::string name) { obj.name = name; })
-        .def_property("type", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, Node::Input::Type type) { obj.type = type; })
+        .def_readwrite("group", &Node::Input::group, DOC(dai, Node, Input, group))
+        .def_readwrite("name", &Node::Input::name, DOC(dai, Node, Input, name))
+        .def_readwrite("type", &Node::Input::type, DOC(dai, Node, Input, type))
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
-        .def_property("waitForMessage", [](Node::Input& obj) { return obj.type; }, [](Node::Input& obj, bool waitForMessage) { obj.waitForMessage = waitForMessage; })
+        .def_readwrite("waitForMessage", &Node::Input::waitForMessage, DOC(dai, Node, Input, waitForMessage))
         .def("setWaitForMessage", &Node::Input::setWaitForMessage, py::arg("waitForMessage"), DOC(dai, Node, Input, setWaitForMessage))
         .def("getWaitForMessage", &Node::Input::getWaitForMessage, DOC(dai, Node, Input, getWaitForMessage))
         .def("setReusePreviousMessage", &Node::Input::setReusePreviousMessage, py::arg("reusePreviousMessage"), DOC(dai, Node, Input, setReusePreviousMessage))
@@ -215,23 +222,23 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
-        .def_property("group", [](Node::Output& obj) -> std::string& { return obj.group; }, [](Node::Output& obj, std::string group) { obj.group = group; })
-        .def_property("name", [](Node::Output& obj) -> std::string& { return obj.name; }, [](Node::Output& obj, std::string name) { obj.name = name; })
-        .def_property("type", [](Node::Output& obj) -> Node::Output::Type& { return obj.type; }, [](Node::Output& obj, Node::Output::Type type) { obj.type = type; })
+        .def_readwrite("group", &Node::Output::group, DOC(dai, Node, Output, group))
+        .def_readwrite("name", &Node::Output::name, DOC(dai, Node, Output, name))
+        .def_readwrite("type", &Node::Output::type, DOC(dai, Node, Output, type))
+        .def_readwrite("possibleDatatypes", &Node::Output::possibleDatatypes, DOC(dai, Node, Output, possibleDatatypes))
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
 
-
     nodeConnection
-        .def_property("outputId", [](Node::Connection& conn) -> Node::Id& { return conn.outputId; }, [](Node::Connection& conn, Node::Id id) {conn.outputId = id; }, DOC(dai, Node, Connection, outputId))
-        .def_property("outputName", [](Node::Connection& conn) -> std::string& { return conn.outputName; }, [](Node::Connection& conn, std::string name) {conn.outputName = name; }, DOC(dai, Node, Connection, outputName))
-        .def_property("outputGroup", [](Node::Connection& conn) -> std::string& { return conn.outputGroup; }, [](Node::Connection& conn, std::string group) {conn.outputGroup = group; }, DOC(dai, Node, Connection, outputGroup))
-        .def_property("inputId", [](Node::Connection& conn) -> Node::Id& { return conn.inputId; }, [](Node::Connection& conn, Node::Id id) {conn.inputId = id; }, DOC(dai, Node, Connection, inputId))
-        .def_property("inputName", [](Node::Connection& conn) -> std::string& { return conn.inputName; }, [](Node::Connection& conn, std::string name) {conn.inputName = name; }, DOC(dai, Node, Connection, inputName))
-        .def_property("inputGroup", [](Node::Connection& conn) -> std::string& { return conn.inputGroup; }, [](Node::Connection& conn, std::string group) {conn.inputGroup = group; }, DOC(dai, Node, Connection, inputGroup))
+        .def_readwrite("outputId", &Node::Connection::outputId, DOC(dai, Node, Connection, outputId))
+        .def_readwrite("outputName", &Node::Connection::outputName, DOC(dai, Node, Connection, outputName))
+        .def_readwrite("outputGroup", &Node::Connection::outputGroup, DOC(dai, Node, Connection, outputGroup))
+        .def_readwrite("inputId", &Node::Connection::inputId, DOC(dai, Node, Connection, inputId))
+        .def_readwrite("inputName", &Node::Connection::inputName, DOC(dai, Node, Connection, inputName))
+        .def_readwrite("inputGroup", &Node::Connection::inputGroup, DOC(dai, Node, Connection, inputGroup))
     ;
 
     pyNode
@@ -249,16 +256,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def_property("properties", [](Node& n) -> const Properties& { return n.properties; }, [](Node& n, const Properties& p) { n.properties = p; }, DOC(dai, Node, properties), py::return_value_policy::reference_internal)
     ;
-
-    // MSVC errors out with:
-    // Error C2326 'void NodeBindings::bind(pybind11::module &)': function cannot access 'dai::Node::Connection::outputId'
-    // ...
-    // py::class_<Node::Connection>(pyNode, "Connection")
-    //     .def_readwrite("outputId", &dai::Node::Connection::outputId)
-    //     .def_readwrite("outputName", &dai::Node::Connection::outputName)
-    //     .def_readwrite("inputId", &dai::Node::Connection::inputId)
-    //     .def_readwrite("inputName", &dai::Node::Connection::inputName)
-    // ;
 
 }
 

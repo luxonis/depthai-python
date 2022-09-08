@@ -54,8 +54,8 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
      // ALIAS
     daiNodeModule.attr("SpatialDetectionNetwork").attr("Properties") = spatialDetectionNetworkProperties;
 
-    // MobileNetSpatialDetectionNetwork
-    mobileNetSpatialDetectionNetwork;
+    // // MobileNetSpatialDetectionNetwork
+    // mobileNetSpatialDetectionNetwork;
     // YoloSpatialDetectionNetwork
     yoloSpatialDetectionNetwork
         .def("setNumClasses", &YoloSpatialDetectionNetwork::setNumClasses, py::arg("numClasses"), DOC(dai, node, YoloSpatialDetectionNetwork, setNumClasses))

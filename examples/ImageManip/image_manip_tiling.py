@@ -9,7 +9,7 @@ pipeline = dai.Pipeline()
 camRgb = pipeline.create(dai.node.ColorCamera)
 camRgb.setPreviewSize(1000, 500)
 camRgb.setInterleaved(False)
-maxFrameSize = camRgb.getPreviewHeight() * camRgb.getPreviewHeight() * 3
+maxFrameSize = camRgb.getPreviewHeight() * camRgb.getPreviewWidth() * 3
 
 # In this example we use 2 imageManips for splitting the original 1000x500
 # preview frame into 2 500x500 frames
@@ -38,13 +38,11 @@ with dai.Device(pipeline) as device:
     q2 = device.getOutputQueue(name="out2", maxSize=4, blocking=False)
 
     while True:
-        in1 = q1.tryGet()
-        if in1 is not None:
-            cv2.imshow("Tile 1", in1.getCvFrame())
+        if q1.has():
+            cv2.imshow("Tile 1", q1.get().getCvFrame())
 
-        in2 = q2.tryGet()
-        if in2 is not None:
-            cv2.imshow("Tile 2", in2.getCvFrame())
+        if q2.has():
+            cv2.imshow("Tile 2", q2.get().getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
