@@ -1,4 +1,3 @@
-import cv2
 import depthai as dai
 import time
 
@@ -84,7 +83,7 @@ script.setScript("""
                 if check_sync(frames, f.getTimestamp()): # Check if we have any synced frames
                     # Frames synced!
                     node.info(f"Synced frame!")
-                    node.warn(f"Queue size. Disp: {len(frames['disp'])}, rgb: {len(frames['rgb'])}")
+                    # node.warn(f"Queue size. Disp: {len(frames['disp'])}, rgb: {len(frames['rgb'])}")
                     for name, list in frames.items():
                         syncedF = list.pop(0) # We have removed older (excess) frames, so at positions 0 in dict we have synced frames
                         node.info(f"{name}, ts: {str(syncedF.getTimestamp())}, seq {str(syncedF.getSequenceNum())}")
@@ -108,8 +107,7 @@ with dai.Device(pipeline) as device:
     queues = [device.getOutputQueue(name) for name in names]
 
     while True:
-        print()
         for q in queues:
             img: dai.ImgFrame = q.get()
             # Display timestamp/sequence number of two synced frames
-            print(f"[{time.time()}] Stream {q.getName()}, timestamp: {img.getTimestamp()}, sequence number: {img.getSequenceNum()}")
+            print(f"Time: {time.time()}. Stream {q.getName()}, timestamp: {img.getTimestamp()}, sequence number: {img.getSequenceNum()}")
