@@ -54,12 +54,12 @@ def check_mac(s):
     return True
 
 class Progress:
-    def __init__(self):
+    def __init__(self, txt = 'Flashing progress: 0.0%'):
         layout = [
-            [sg.Text('Flashing progress: 0.0%', key='txt')],
+            [sg.Text(txt, key='txt')],
             [sg.ProgressBar(1.0, orientation='h', size=(20,20), key='progress')],
         ]
-        self.self.window = sg.Window("Progress", layout, modal=True, finalize=True)
+        self.window = sg.Window("Progress", layout, modal=True, finalize=True)
     def update(self, val):
         self.window['progress'].update(val)
         self.window['txt'].update(f'Flashing progress: {val*100:.1f}%')
@@ -83,8 +83,11 @@ class SelectBootloader:
     def wait(self):
         event, values = self.window.Read()
         self.window.close()
-        type = getattr(dai.DeviceBootloader.Type, values['bootType'])
-        return (str(event) == "Submit", type)
+        if values is not None:
+            type = getattr(dai.DeviceBootloader.Type, values['bootType'])
+            return (str(event) == "Submit", type)
+        else:
+            return (False, None)
 
 class SelectIP:
     def __init__(self):
@@ -158,17 +161,13 @@ class SearchDevice:
                     self.window.close()
                     return deviceSelected
 
-def flashBootloader(device: dai.DeviceInfo):
+def flashBootloader(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
     try:
-        sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
-        ok, type = sel.wait()
-        if not ok:
-            print("Flashing bootloader canceled.")
-            return
+
+        pr = Progress('Connecting...')
 
         bl = dai.DeviceBootloader(device, True)
 
-        pr = Progress()
         progress = lambda p : pr.update(p)
         if type == dai.DeviceBootloader.Type.AUTO:
             type = bl.getType()
@@ -178,14 +177,10 @@ def flashBootloader(device: dai.DeviceInfo):
         PrintException()
         sg.Popup(f'{ex}')
 
-def factoryReset(bl: dai.DeviceBootloader):
-    sel = SelectBootloader(['USB', 'NETWORK'], "Select bootloader type used for factory reset.")
-    ok, type = sel.wait()
-    if not ok:
-        print("Factory reset canceled.")
-        return
-
+def factoryReset(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
     try:
+        pr = Progress('Preparing and connecting...')
+
         blBinary = dai.DeviceBootloader.getEmbeddedBootloaderBinary(type)
         # Clear 1 MiB for USB BL and 8 MiB for NETWORK BL
         mib = 1 if type == dai.DeviceBootloader.Type.USB else 8
@@ -193,7 +188,8 @@ def factoryReset(bl: dai.DeviceBootloader):
         tmpBlFw = tempfile.NamedTemporaryFile(delete=False)
         tmpBlFw.write(bytes(blBinary))
 
-        pr = Progress()
+        bl = dai.DeviceBootloader(device, True)
+
         progress = lambda p : pr.update(p)
         success, msg = bl.flashBootloader(progress, tmpBlFw.name)
         msg = "Factory reset was successful." if success else f"Factory reset failed. Error: {msg}"
@@ -216,9 +212,11 @@ def flashFromFile(file, bl: dai.DeviceBootloader):
 def recoveryMode(bl: dai.DeviceBootloader):
     try:
         bl.bootUsbRomBootloader()
+        return True
     except Exception as ex:
         PrintException()
         sg.Popup(f'{ex}')
+    return False
 
 def connectToDevice(device: dai.DeviceInfo) -> dai.DeviceBootloader:
     try:
@@ -342,8 +340,10 @@ deviceConfigLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("", size=(10, 2)),
+        sg.Text("", size=(1, 2)),
         sg.Button("Flash configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500'),
+        sg.Button("Clear configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
         sg.Button("Clear flash", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
@@ -443,9 +443,33 @@ class DeviceManager:
                     self.getConfigs()
                 self.unlockConfig()
             elif event == "Flash newest Bootloader":
-                self.closeDevice()  # We will reconnect, as we need to set allowFlashingBootloader to True
-                flashBootloader(self.device)
-                self.window.Element('currBoot').update(self.bl.getVersion())
+                sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
+                ok, type = sel.wait()
+                if ok:
+                    # We will reconnect, as we need to set allowFlashingBootloader to True
+                    self.closeDevice()
+                    flashBootloader(self.device, type)
+                    # Device will reboot, close previous and reset GUI
+                    self.closeDevice()
+                    self.resetGui()
+                    self.getDevices()
+                else:
+                    print("Flashing bootloader cancelled.")
+
+            elif event == "Factory reset":
+                sel = SelectBootloader(['NETWORK', 'USB'], "Select bootloader type used for factory reset.")
+                ok, type = sel.wait()
+                if ok:
+                    # We will reconnect, as we need to set allowFlashingBootloader to True
+                    self.closeDevice()
+                    factoryReset(self.device, type)
+                    # Device will reboot, close previous and reset GUI
+                    self.closeDevice()
+                    self.resetGui()
+                    self.getDevices()
+                else:
+                    print("Factory reset cancelled.")
+
             elif event == "Flash configuration":
                 self.flashConfig()
                 self.getConfigs()
@@ -455,8 +479,16 @@ class DeviceManager:
                 else:
                     self.devices.clear()
                     self.window.Element('devices').update("Search for devices", values=[])
-            elif event == "Factory reset":
-                factoryReset(self.bl)
+            elif event == "Clear configuration":
+                self.clearConfig()
+                self.getConfigs()
+                self.resetGui()
+                if self.isUsb():
+                    self.unlockConfig()
+                else:
+                    self.devices.clear()
+                    self.window.Element('devices').update("Search for devices", values=[])
+
             elif event == "Flash DAP":
                 file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
                 flashFromFile(file, self.bl)
@@ -467,7 +499,12 @@ class DeviceManager:
                 self.window['-COL2-'].update(visible=False)
                 self.window['-COL1-'].update(visible=True)
             elif event == "recoveryMode":
-                recoveryMode(self.bl)
+                if recoveryMode(self.bl):
+                    sg.Popup(f'Device successfully put into USB recovery mode.')
+                # Device will reboot, close previous and reset GUI
+                self.closeDevice()
+                self.resetGui()
+                self.getDevices()
         self.window.close()
 
     @property
@@ -540,6 +577,7 @@ class DeviceManager:
 
         self.window['Flash newest Bootloader'].update(disabled=False)
         self.window['Flash configuration'].update(disabled=False)
+        self.window['Clear configuration'].update(disabled=False)
         self.window['Factory reset'].update(disabled=False)
         # self.window['Clear flash'].update(disabled=False)
         self.window['Flash DAP'].update(disabled=False)
@@ -559,6 +597,7 @@ class DeviceManager:
 
         self.window['Flash newest Bootloader'].update(disabled=True)
         self.window['Flash configuration'].update(disabled=True)
+        self.window['Clear configuration'].update(disabled=True)
         self.window['Factory reset'].update(disabled=True)
         self.window['Clear flash'].update(disabled=True)
         self.window['Flash DAP'].update(disabled=True)
@@ -591,7 +630,9 @@ class DeviceManager:
                     deviceTxt = deviceInfo.getMxId()
                     listedDevices.append(deviceTxt)
                     self.devices[deviceTxt] = deviceInfo
-                self.window.Element('devices').update("Select device", values=listedDevices)
+
+            # Update the list regardless
+            self.window.Element('devices').update("Select device", values=listedDevices)
         except Exception as ex:
             PrintException()
             sg.Popup(f'{ex}')
@@ -634,6 +675,17 @@ class DeviceManager:
         except Exception as ex:
             PrintException()
             sg.Popup(f'{ex}')
+    def clearConfig(self):
+        try:
+            success, error = self.bl.flashConfigClear()
+            if not success:
+                sg.Popup(f"Clearing configuration failed: {error}")
+            else:
+                sg.Popup("Successfully cleared configuration.")
+        except Exception as ex:
+            PrintException()
+            sg.Popup(f'{ex}')
+
 
 app = DeviceManager()
 app.run()
