@@ -381,6 +381,14 @@ Disparity shift to lower min depth perception
 Another option to perceive closer depth range is to use disparity shift. Disparity shift will shift the starting point
 of the disparity search, which will significantly decrease max depth perception, but it will also decrease min depth perception.
 
+.. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
+
+**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). Since hardware (stereo
+block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
+
+**Right graph** shows the same, but at disparity shift set to 30 pixels. This means that disparity search will be from 30 pixels (depth=2.2m) to 125 pixels (depth=50cm).
+This also means that depth will be very accurate at the short range (**theoretically** below 5mm depth error).
+
 .. doxygenfunction:: dai::StereoDepthConfig::setDisparityShift
   :project: depthai-core
   :no-link:
