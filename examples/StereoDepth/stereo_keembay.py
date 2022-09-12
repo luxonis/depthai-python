@@ -50,7 +50,8 @@ stereo.syncedRight.link(xoutRight.input)
 stereo.depth.link(xoutDepth.input)
 stereo.setInputResolution(1280,720)
 
-
+stereo.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT)
+# stereo.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
