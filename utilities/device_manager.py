@@ -505,6 +505,10 @@ class DeviceManager:
                 self.closeDevice()
                 self.resetGui()
                 self.getDevices()
+            elif event == "dynamicBut":
+                self.window.Element('ip').update('')
+                self.window.Element('mask').update('')
+                self.window.Element('gateway').update('')
         self.window.close()
 
     @property
@@ -528,13 +532,28 @@ class DeviceManager:
 
         try:
             if self.isPoE():
-                self.window.Element('ip').update(conf.getIPv4())
-                self.window.Element('mask').update(conf.getIPv4Mask())
-                self.window.Element('gateway').update(conf.getIPv4Gateway())
+                if conf.getIPv4() == '0.0.0.0':
+                    self.window.Element('ip').update('')
+                else:
+                    self.window.Element('ip').update(conf.getIPv4())
+
+                if conf.getIPv4Mask() == '0.0.0.0':
+                    self.window.Element('mask').update('')
+                else:
+                    self.window.Element('mask').update(conf.getIPv4Mask())
+
+                if conf.getIPv4Gateway() == '0.0.0.0':
+                    self.window.Element('gateway').update('')
+                else:
+                    self.window.Element('gateway').update(conf.getIPv4Gateway())
+
                 self.window.Element('dns').update(conf.getDnsIPv4())
                 self.window.Element('dnsAlt').update(conf.getDnsAltIPv4())
                 self.window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
-                self.window.Element('mac').update(conf.getMacAddress())
+                if conf.getMacAddress() == '00:00:00:00:00':
+                    self.window.Element('mac').update('')
+                else:
+                    self.window.Element('mac').update(conf.getMacAddress())
                 for el in CONF_INPUT_USB:
                     self.window[el].update("")
             else:
