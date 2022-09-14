@@ -379,15 +379,30 @@ Disparity shift to lower min depth perception
 ---------------------------------------------
 
 Another option to perceive closer depth range is to use disparity shift. Disparity shift will shift the starting point
-of the disparity search, which will significantly decrease max depth perception, but it will also decrease min depth perception.
+of the disparity search, which will significantly decrease max depth (MazZ) perception, but it will also decrease min depth (MinZ) perception.
+Disparity shift can be combined with extended/subpixel/LR-check modes.
 
 .. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
 
-**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). Since hardware (stereo
-block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
+**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Calculate depth using disparity map`.
+Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
 
 **Right graph** shows the same, but at disparity shift set to 30 pixels. This means that disparity search will be from 30 pixels (depth=2.2m) to 125 pixels (depth=50cm).
 This also means that depth will be very accurate at the short range (**theoretically** below 5mm depth error).
+
+**Limitations**:
+
+- Because of the inverse relationship between disparity and depth, MaxZ will decrease much faster than MinZ as the disparity shift is increased. Therefore, it is **advised not to use a larger than necessary disparity shift**.
+- Tradeoff in reducing the MinZ this way is that objects at **distances farther away than MaxZ will not be seen**.
+- Because of the point above, **we only recommend using disparity shift when MaxZ is known**, such as having a depth camera mounted above a table pointing down at the table surface.
+- Output disparity map is not expanded, only the depth map. So if disparity shift is set to 50, and disparity value obtained is 90, the real disparity is 140.
+
+**Compared to Extended disparity**, disparity shift:
+
+- **(+)** Is faster, as it doesn't require an extra computation, which means there's also no extra latency
+- **(-)** Reduces the MaxZ (significantly), while extended disparity only reduces MinZ.
+
+Disparity shift can be combined with extended disparity.
 
 .. doxygenfunction:: dai::StereoDepthConfig::setDisparityShift
   :project: depthai-core
