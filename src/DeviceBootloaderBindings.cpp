@@ -148,6 +148,7 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("readApplicationInfo", [](DeviceBootloader& db, DeviceBootloader::Memory mem) { py::gil_scoped_release release; return db.readApplicationInfo(mem); }, py::arg("memory"), DOC(dai, DeviceBootloader, readApplicationInfo))
         .def("getMemoryInfo", [](DeviceBootloader& db, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.getMemoryInfo(memory); }, DOC(dai, DeviceBootloader, getMemoryInfo))
+        .def("isUserBootloader", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.isUserBootloader(); }, DOC(dai, DeviceBootloader, isUserBootloader))
 
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), py::arg("memory") = DeviceBootloader::Memory::AUTO, DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::vector<uint8_t> package, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(package); }, py::arg("package"), py::arg("memory") = DeviceBootloader::Memory::AUTO, DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage, 2))
