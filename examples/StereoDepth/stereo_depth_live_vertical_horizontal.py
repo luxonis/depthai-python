@@ -8,7 +8,7 @@ import argparse
 
 #run examples/install_requirements.py -sdai
 
-calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
+calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
@@ -30,6 +30,7 @@ xoutDisparityVertical = pipeline.create(dai.node.XLinkOut)
 xoutDisparityHorizontal = pipeline.create(dai.node.XLinkOut)
 stereoVertical = pipeline.create(dai.node.StereoDepth)
 stereoHorizontal = pipeline.create(dai.node.StereoDepth)
+syncNode = pipeline.create(dai.node.Sync)
 
 xoutRectifiedVertical.setStreamName("rectified_vertical")
 xoutRectifiedRight.setStreamName("rectified_right")
@@ -47,19 +48,26 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking
-monoRight.out.link(stereoVertical.left)
-monoVertical.out.link(stereoVertical.right)
+monoRight.out.link(syncNode.input1)
+monoLeft.out.link(syncNode.input2)
+monoVertical.out.link(syncNode.input3)
+
+syncNode.output1.link(stereoVertical.left)
+syncNode.output3.link(stereoVertical.right)
 stereoVertical.disparity.link(xoutDisparityVertical.input)
 stereoVertical.rectifiedLeft.link(xoutRectifiedVertical.input)
 stereoVertical.rectifiedRight.link(xoutRectifiedRight.input)
 stereoVertical.setVerticalStereo(True)
 
-monoLeft.out.link(stereoHorizontal.left)
-monoRight.out.link(stereoHorizontal.right)
+syncNode.output2.link(stereoHorizontal.left)
+syncNode.output1.link(stereoHorizontal.right)
 stereoHorizontal.disparity.link(xoutDisparityHorizontal.input)
 stereoHorizontal.rectifiedLeft.link(xoutRectifiedLeft.input)
 # stereoHorizontal.rectifiedRight.link(xoutRectifiedRight.input)
 stereoHorizontal.setVerticalStereo(False)
+
+stereoHorizontal.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
+stereoVertical.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:

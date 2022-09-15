@@ -8,7 +8,7 @@ import argparse
 
 #run examples/install_requirements.py -sdai
 
-calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
+calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)

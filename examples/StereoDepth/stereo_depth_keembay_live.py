@@ -8,7 +8,7 @@ import argparse
 
 #run examples/install_requirements.py -sdai
 
-calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
+calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
@@ -41,7 +41,7 @@ xoutDepth.setStreamName("depth")
 # Define sources and outputs
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.VERTICAL)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking
