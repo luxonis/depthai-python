@@ -202,7 +202,13 @@ def factoryReset(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
 def flashFromFile(file, bl: dai.DeviceBootloader):
     try:
         if str(file)[-3:] == "dap":
-            bl.flashDepthaiApplicationPackage(file)
+            pr = Progress('Flashing application...')
+            progress = lambda p : pr.update(p)
+            with open(file, mode = 'rb') as f:
+                dap = list(f.read())
+                success, msg = bl.flashDepthaiApplicationPackage(progress, dap)
+                msg = "Flashing application was successful." if success else f"Flashing application failed. Error: {msg}"
+                pr.finish(msg)
         else:
             sg.Popup("Selected file is not .dap!")
     except Exception as ex:
@@ -238,8 +244,9 @@ aboutDeviceLayout = [
     [sg.Text("About device", size=(30, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="aboutFake"),
-        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="configReal")
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="_unique_aboutBtn"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_configBtn"),
+        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_appBtn")
     ],
     [sg.HSeparator()],
     [
@@ -290,8 +297,9 @@ deviceConfigLayout = [
     [sg.Text("Configuration settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
     [sg.HSeparator()],
     [
-        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="aboutReal"),
-        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configFake"),
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_aboutBtn"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="_unique_configBtn"),
+        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="_unique_appBtn"),
         # TODO create library tab
         # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
         sg.Text("", key="devNameConf", size=(30, 1))
@@ -340,23 +348,51 @@ deviceConfigLayout = [
     ],
     [sg.HSeparator()],
     [
-        sg.Text("", size=(1, 2)),
+        sg.Text("", size=(8, 2)),
         sg.Button("Flash configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
         sg.Button("Clear configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
-        sg.Button("Clear flash", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+        sg.Button("View configuration", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
-        sg.Button("Flash DAP", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFA500')
     ],
 ]
+
+# layout for app tab
+appLayout = [
+    [sg.Text("Application settings", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_aboutBtn"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_configBtn"),
+        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="_unique_appBtn"),
+        # TODO create library tab
+        # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
+        sg.Text("", key="devNameConf", size=(30, 1))
+
+    ],
+    # TODO - add bootloader_version information
+    # [sg.HSeparator()],
+    # [
+    #     sg.Text("", key="devNameConf", size=(30, 1))
+
+    # ],
+    [sg.HSeparator()],
+    [
+        sg.Button("Flash application", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500'),
+        sg.Button("Remove application", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                button_color='#FFA500'),
+    ],
+]
+
 
 # layout of whole GUI with closed tabs set to false
 layout = [
     [
         sg.Column(aboutDeviceLayout, key='-COL1-'),
         sg.Column(deviceConfigLayout, visible=False, key='-COL2-'),
+        sg.Column(appLayout, visible=False, key='-COL3-'),
     ]
 ]
 
@@ -488,16 +524,35 @@ class DeviceManager:
                 else:
                     self.devices.clear()
                     self.window.Element('devices').update("Search for devices", values=[])
+            elif event == "View configuration":
+                try:
+                    confJson = self.bl.readConfigData()
+                    sg.popup_scrolled(confJson, title='Configuration')
+                except Exception as ex:
+                    sg.popup(f'No existing config to view ({ex})')
 
-            elif event == "Flash DAP":
+            elif event == "Flash application":
                 file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
                 flashFromFile(file, self.bl)
-            elif event == "configReal":
+            elif event == "Remove application":
+                try:
+                    self.bl.flashClear()
+                    sg.popup(f'Successfully removed application')
+                except Exception as ex:
+                    sg.popup(f"Couldn't remove application ({ex})")
+
+            elif event.startswith("_unique_configBtn"):
                 self.window['-COL1-'].update(visible=False)
                 self.window['-COL2-'].update(visible=True)
-            elif event == "aboutReal":
+                self.window['-COL3-'].update(visible=False)
+            elif event.startswith("_unique_aboutBtn"):
                 self.window['-COL2-'].update(visible=False)
                 self.window['-COL1-'].update(visible=True)
+                self.window['-COL3-'].update(visible=False)
+            elif event.startswith("_unique_appBtn"):
+                self.window['-COL2-'].update(visible=False)
+                self.window['-COL1-'].update(visible=False)
+                self.window['-COL3-'].update(visible=True)
             elif event == "recoveryMode":
                 if recoveryMode(self.bl):
                     sg.Popup(f'Device successfully put into USB recovery mode.')
@@ -533,6 +588,11 @@ class DeviceManager:
 
         try:
             if self.isPoE():
+                if conf.isStaticIPV4():
+                    self.window.Element('staticBut').update(True)
+                else:
+                    self.window.Element('dynamicBut').update(True)
+
                 if conf.getIPv4() == '0.0.0.0':
                     self.window.Element('ip').update('')
                 else:
@@ -604,9 +664,12 @@ class DeviceManager:
         self.window['Flash newest Bootloader'].update(disabled=False)
         self.window['Flash configuration'].update(disabled=False)
         self.window['Clear configuration'].update(disabled=False)
+        self.window['View configuration'].update(disabled=False)
         self.window['Factory reset'].update(disabled=False)
-        # self.window['Clear flash'].update(disabled=False)
-        self.window['Flash DAP'].update(disabled=False)
+
+        self.window['Flash application'].update(disabled=False)
+        self.window['Remove application'].update(disabled=False)
+
         self.window['recoveryMode'].update(disabled=False)
 
     def resetGui(self):
@@ -624,9 +687,10 @@ class DeviceManager:
         self.window['Flash newest Bootloader'].update(disabled=True)
         self.window['Flash configuration'].update(disabled=True)
         self.window['Clear configuration'].update(disabled=True)
+        self.window['View configuration'].update(disabled=True)
         self.window['Factory reset'].update(disabled=True)
-        self.window['Clear flash'].update(disabled=True)
-        self.window['Flash DAP'].update(disabled=True)
+        self.window['Flash application'].update(disabled=True)
+        self.window['Remove application'].update(disabled=True)
         self.window['recoveryMode'].update(disabled=True)
 
         self.window.Element('devName').update("-name-")
@@ -665,8 +729,16 @@ class DeviceManager:
 
     def flashConfig(self):
         values = self.values
+
+        # Read modify write instead of flashing over
+        # clearConfig can be used to start from scratch
+        conf = dai.DeviceBootloader.Config()
         try:
-            conf = dai.DeviceBootloader.Config()
+            conf = self.bl.readConfig()
+        except:
+            pass
+
+        try:
             if self.isPoE:
                 if self.values['staticBut']:
                     if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
@@ -703,6 +775,7 @@ class DeviceManager:
         except Exception as ex:
             PrintException()
             sg.Popup(f'{ex}')
+
     def clearConfig(self):
         try:
             success, error = self.bl.flashConfigClear()
