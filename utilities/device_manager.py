@@ -29,9 +29,9 @@ def PrintException():
     filename = f.f_code.co_filename
     print('Exception in {}, line {}; {}'.format(filename, lineno, exc_obj))
 
-def check_ip(s: str):
+def check_ip(s: str, req = True):
     if s == "":
-        return False
+        return not req
     spl = s.split(".")
     if len(spl) != 4:
         sg.Popup("Wrong IP format.\nValue should be similar to 255.255.255.255")
@@ -505,6 +505,11 @@ class DeviceManager:
                 self.closeDevice()
                 self.resetGui()
                 self.getDevices()
+            elif event == "dynamicBut":
+                # Clear out IPv4 settings to default to
+                self.window.Element('ip').update('')
+                self.window.Element('mask').update('')
+                self.window.Element('gateway').update('')
         self.window.close()
 
     @property
@@ -528,13 +533,34 @@ class DeviceManager:
 
         try:
             if self.isPoE():
-                self.window.Element('ip').update(conf.getIPv4())
-                self.window.Element('mask').update(conf.getIPv4Mask())
-                self.window.Element('gateway').update(conf.getIPv4Gateway())
-                self.window.Element('dns').update(conf.getDnsIPv4())
-                self.window.Element('dnsAlt').update(conf.getDnsAltIPv4())
+                if conf.getIPv4() == '0.0.0.0':
+                    self.window.Element('ip').update('')
+                else:
+                    self.window.Element('ip').update(conf.getIPv4())
+
+                if conf.getIPv4Mask() == '0.0.0.0':
+                    self.window.Element('mask').update('')
+                else:
+                    self.window.Element('mask').update(conf.getIPv4Mask())
+
+                if conf.getIPv4Gateway() == '0.0.0.0':
+                    self.window.Element('gateway').update('')
+                else:
+                    self.window.Element('gateway').update(conf.getIPv4Gateway())
+
+                if conf.getDnsIPv4() == '0.0.0.0':
+                    self.window.Element('dns').update('')
+                else:
+                    self.window.Element('dns').update(conf.getDnsIPv4())
+                if conf.getDnsAltIPv4() == '0.0.0.0':
+                    self.window.Element('dnsAlt').update('')
+                else:
+                    self.window.Element('dnsAlt').update(conf.getDnsAltIPv4())
                 self.window.Element('networkTimeout').update(int(conf.getNetworkTimeout().total_seconds() * 1000))
-                self.window.Element('mac').update(conf.getMacAddress())
+                if conf.getMacAddress() == '00:00:00:00:00:00':
+                    self.window.Element('mac').update('')
+                else:
+                    self.window.Element('mac').update(conf.getMacAddress())
                 for el in CONF_INPUT_USB:
                     self.window[el].update("")
             else:
@@ -646,10 +672,10 @@ class DeviceManager:
                     if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
                         conf.setStaticIPv4(values['ip'], values['mask'], values['gateway'])
                 else:
-                    if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
+                    if check_ip(values['ip'], req=False) and check_ip(values['mask'], req=False) and check_ip(values['gateway'], req=False):
                         conf.setDynamicIPv4(values['ip'], values['mask'], values['gateway'])
-                if values['dns'] != "" and values['dnsAlt'] != "":
-                    conf.setDnsIPv4(values['dns'], values['dnsAlt'])
+
+                conf.setDnsIPv4(values['dns'], values['dnsAlt'])
                 if values['networkTimeout'] != "":
                     if int(values['networkTimeout']) >= 0:
                         conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
@@ -658,6 +684,8 @@ class DeviceManager:
                 if values['mac'] != "":
                     if check_mac(values['mac']):
                         conf.setMacAddress(values['mac'])
+                else:
+                    conf.setMacAddress('00:00:00:00:00:00')
             else:
                 if values['usbTimeout'] != "":
                     if int(values['usbTimeout']) >= 0:
