@@ -3,6 +3,7 @@ import subprocess
 import re
 import tempfile
 import os
+import textwrap
 
 # Usage
 if len(sys.argv) < 3:
@@ -12,7 +13,7 @@ if len(sys.argv) < 3:
 MODULE_NAME = sys.argv[1]
 DIRECTORY = sys.argv[2]
 
-print(f'Generating stubs for module: {MODULE_NAME} in directory: {DIRECTORY}')
+print(f'Generating stubs for module: "{MODULE_NAME}" in directory: "{DIRECTORY}"')
 
 try:
 
@@ -20,6 +21,13 @@ try:
     # CWD to to extdir where the built module can be found to extract the types
     env = os.environ
     env['PYTHONPATH'] = f'{DIRECTORY}{os.pathsep}{env.get("PYTHONPATH", "")}'
+
+    # Test importing depthai after PYTHONPATH is specified
+    try:
+        import depthai
+    except Exception as ex:
+        print(f'Could not import depthai: {ex}')
+
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
     subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
 
@@ -32,13 +40,21 @@ try:
         contents = file.read()
 
         # Add imports
-        stubs_import = 'import depthai.node as node\nimport typing\nimport json\n' + contents
+        stubs_import = textwrap.dedent('''
+            # Ensures that the stubs are picked up - thanks, numpy project
+            from depthai import (
+                node as node,
+            )
+
+            import typing
+            import json
+        ''') + contents
+
         # Create 'create' overloads
         nodes = re.findall('def \S*\(self\) -> node.(\S*):', stubs_import)
         overloads = ''
         for node in nodes:
             overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
-        #print(f'{overloads}')
         final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
 
         # Writeout changes

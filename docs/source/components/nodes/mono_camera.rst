@@ -25,20 +25,19 @@ Inputs and Outputs
 
 .. code-block::
 
-                 ┌───────────────────┐
-                 │                   │
-                 │                   │
-  inputControl   │                   │       out
-  ──────────────►│    MonoCamera     ├───────────►
-                 │                   │
-                 │                   │
-                 │                   │
-                 └───────────────────┘
+                 ┌─────────────────┐
+                 │                 │         out
+  inputControl   │                 ├───────────►
+  ──────────────►│    MonoCamera   |         raw
+                 │                 ├───────────►
+                 │                 │
+                 └─────────────────┘
 
 **Message types**
 
 - :code:`inputControl` - :ref:`CameraControl`
 - :code:`out` - :ref:`ImgFrame`
+- :code:`raw` - :ref:`ImgFrame` - RAW10 data. Demo code for unpacking `here <https://github.com/luxonis/depthai-experiments/blob/3f1b2b2/gen2-color-isp-raw/main.py#L13-L32>`__ (for ColorCamera)
 
 Usage
 #####

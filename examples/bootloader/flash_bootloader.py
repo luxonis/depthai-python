@@ -20,7 +20,7 @@ if len(deviceInfos) == 0:
     exit(-1)
 else:
     for i, di in enumerate(deviceInfos):
-        print(f'[{i}] {di.getMxId()} [{di.desc.protocol.name}]', end='')
+        print(f'[{i}] {di.getMxId()} [{di.protocol.name}]', end='')
         if di.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER:
             with dai.DeviceBootloader(di) as bl:
                 print(f' current bootloader: {bl.getVersion()}', end='')

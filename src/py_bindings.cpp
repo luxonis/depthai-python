@@ -18,7 +18,7 @@
 #include "pipeline/AssetManagerBindings.hpp"
 #include "pipeline/PipelineBindings.hpp"
 #include "pipeline/CommonBindings.hpp"
-#include "pipeline/NodeBindings.hpp"
+#include "pipeline/node/NodeBindings.hpp"
 #include "XLinkBindings.hpp"
 #include "DeviceBindings.hpp"
 #include "CalibrationHandlerBindings.hpp"
@@ -36,15 +36,17 @@ PYBIND11_MODULE(depthai, m)
     m.attr("__commit__") = DEPTHAI_PYTHON_COMMIT_HASH;
     m.attr("__commit_datetime__") = DEPTHAI_PYTHON_COMMIT_DATETIME;
     m.attr("__build_datetime__") = DEPTHAI_PYTHON_BUILD_DATETIME;
+    m.attr("__device_version__") = dai::build::DEVICE_VERSION;
+    m.attr("__bootloader_version__") = dai::build::BOOTLOADER_VERSION;
 
     // Add bindings
     std::deque<StackFunction> callstack;
-    callstack.push_front(&DatatypeBindings::bind);
+    DatatypeBindings::addToCallstack(callstack);
     callstack.push_front(&LogBindings::bind);
     callstack.push_front(&DataQueueBindings::bind);
     callstack.push_front(&OpenVINOBindings::bind);
+    NodeBindings::addToCallstack(callstack);
     callstack.push_front(&AssetManagerBindings::bind);
-    callstack.push_front(&NodeBindings::bind);
     callstack.push_front(&PipelineBindings::bind);
     callstack.push_front(&XLinkBindings::bind);
     callstack.push_front(&DeviceBindings::bind);
@@ -79,6 +81,10 @@ PYBIND11_MODULE(depthai, m)
     }
 
     // Call dai::initialize on 'import depthai' to initialize asap with additional information to print
-    dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME, installSignalHandler);
+    try {
+        dai::initialize(std::string("Python bindings - version: ") + DEPTHAI_PYTHON_VERSION + " from " + DEPTHAI_PYTHON_COMMIT_DATETIME + " build: " + DEPTHAI_PYTHON_BUILD_DATETIME, installSignalHandler);
+    } catch (const std::exception&) {
+        // ignore, will be initialized later on if possible
+    }
 
 }
