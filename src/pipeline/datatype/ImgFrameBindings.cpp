@@ -96,6 +96,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .value("NV21", RawImgFrame::Type::NV21)
         .value("BITSTREAM", RawImgFrame::Type::BITSTREAM)
         .value("HDR", RawImgFrame::Type::HDR)
+        .value("RAW32", RawImgFrame::Type::RAW32)
         .value("NONE", RawImgFrame::Type::NONE)
         ;
 
