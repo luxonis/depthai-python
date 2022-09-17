@@ -6,7 +6,8 @@ print('Searching for all available devices...\n')
 infos: List[dai.DeviceInfo] = dai.DeviceBootloader.getAllAvailableDevices()
 
 if len(infos) == 0:
-    raise Exception("DepthAI couldn't find any available OAK device!")
+    print("Couldn't find any available devices.")
+    exit(-1)
 
 
 for info in infos:
