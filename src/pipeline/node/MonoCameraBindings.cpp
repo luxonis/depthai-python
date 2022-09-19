@@ -42,6 +42,8 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("boardSocket", &MonoCameraProperties::boardSocket)
         .def_readwrite("resolution", &MonoCameraProperties::resolution)
         .def_readwrite("fps", &MonoCameraProperties::fps)
+        .def_readwrite("numFramesPool", &MonoCameraProperties::numFramesPool)
+        .def_readwrite("numFramesPoolRaw", &MonoCameraProperties::numFramesPoolRaw)
         ;
 
     // Node
@@ -78,6 +80,11 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def("getResolutionSize", &MonoCamera::getResolutionSize, DOC(dai, node, MonoCamera, getResolutionSize))
         .def("getResolutionWidth", &MonoCamera::getResolutionWidth, DOC(dai, node, MonoCamera, getResolutionWidth))
         .def("getResolutionHeight", &MonoCamera::getResolutionHeight, DOC(dai, node, MonoCamera, getResolutionHeight))
+        .def("setNumFramesPool", &MonoCamera::setNumFramesPool, DOC(dai, node, MonoCamera, setNumFramesPool))
+        .def("getNumFramesPool", &MonoCamera::getNumFramesPool, DOC(dai, node, MonoCamera, getNumFramesPool))
+        .def("setRawNumFramesPool", &MonoCamera::setRawNumFramesPool, DOC(dai, node, MonoCamera, setRawNumFramesPool))
+        .def("getRawNumFramesPool", &MonoCamera::getRawNumFramesPool, DOC(dai, node, MonoCamera, getRawNumFramesPool))
+
         ;
     // ALIAS
     daiNodeModule.attr("MonoCamera").attr("Properties") = monoCameraProperties;
