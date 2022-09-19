@@ -3,6 +3,10 @@
 import cv2
 import depthai as dai
 
+fps = 30
+res = dai.MonoCameraProperties.SensorResolution.THE_720_P
+poolSize = 8  # default 3, increased to prevent desync
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -11,9 +15,13 @@ monoL = pipeline.create(dai.node.MonoCamera)
 monoR = pipeline.create(dai.node.MonoCamera)
 
 monoL.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoL.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoL.setResolution(res)
+monoL.setFps(fps)
+monoL.setNumFramesPool(poolSize)
 monoR.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoR.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoR.setResolution(res)
+monoR.setFps(fps)
+monoR.setNumFramesPool(poolSize)
 
 xoutDotL = pipeline.create(dai.node.XLinkOut)
 xoutDotR = pipeline.create(dai.node.XLinkOut)
@@ -32,6 +40,7 @@ script.setProcessor(dai.ProcessorType.LEON_CSS)
 script.setScript("""
     dotBright = 500
     floodBright = 200
+    LOGGING = False  # Set `True` for latency/timings debugging
 
     node.warn(f'IR drivers detected: {str(Device.getIrDrivers())}')
 
@@ -39,15 +48,35 @@ script.setScript("""
     while True:
         # Wait first for a frame event, received at MIPI start-of-frame
         event = node.io['event'].get()
+        if LOGGING: tEvent = Clock.now()
 
         # Immediately reconfigure the IR driver.
         # Note the logic is inverted, as it applies for next frame
         Device.setIrLaserDotProjectorBrightness(0 if flagDot else dotBright)
         Device.setIrFloodLightBrightness(floodBright if flagDot else 0)
+        if LOGGING: tIrSet = Clock.now()
 
         # Wait for the actual frames (after MIPI capture and ISP proc is done)
         frameL = node.io['frameL'].get()
+        if LOGGING: tLeft = Clock.now()
         frameR = node.io['frameR'].get()
+        if LOGGING: tRight = Clock.now()
+
+        if LOGGING:
+            latIR      = (tIrSet - tEvent               ).total_seconds() * 1000
+            latEv      = (tEvent - event.getTimestamp() ).total_seconds() * 1000
+            latProcL   = (tLeft  - event.getTimestamp() ).total_seconds() * 1000
+            diffRecvRL = (tRight - tLeft                ).total_seconds() * 1000
+            node.warn(f'T[ms] latEv:{latEv:5.3f} latIR:{latIR:5.3f} latProcL:{latProcL:6.3f} '
+                    + f' diffRecvRL:{diffRecvRL:5.3f}')
+
+        # Sync checks
+        diffSeq = frameL.getSequenceNum() - event.getSequenceNum()
+        diffTsEv = (frameL.getTimestamp() - event.getTimestamp()).total_seconds() * 1000
+        diffTsRL = (frameR.getTimestamp() - frameL.getTimestamp()).total_seconds() * 1000
+        if diffSeq or diffTsEv or (abs(diffTsRL) > 0.8):
+            node.error(f'frame/event desync! Fr-Ev: {diffSeq} frames,'
+                    + f' {diffTsEv:.3f} ms; R-L: {diffTsRL:.3f} ms')
 
         # Route the frames to their respective outputs
         node.io['dotL' if flagDot else 'floodL'].send(frameL)
