@@ -110,6 +110,8 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getMacAddress", &DeviceBootloader::Config::getMacAddress)
         .def("setUsbMaxSpeed", &DeviceBootloader::Config::setUsbMaxSpeed)
         .def("getUsbMaxSpeed", &DeviceBootloader::Config::getUsbMaxSpeed)
+        .def("toJson", &DeviceBootloader::Config::toJson)
+        .def("fromJson", &DeviceBootloader::Config::fromJson)
     ;
 
     deviceBootloderApplicationInfo
