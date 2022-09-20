@@ -40,6 +40,7 @@ void bind_tracklets(pybind11::module& m, void* pCallstack){
         .def_readwrite("roi", &Tracklet::roi)
         .def_readwrite("id", &Tracklet::id)
         .def_readwrite("label", &Tracklet::label)
+        .def_readwrite("age", &Tracklet::age)
         .def_readwrite("status", &Tracklet::status)
         .def_readwrite("srcImgDetection", &Tracklet::srcImgDetection)
         .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
