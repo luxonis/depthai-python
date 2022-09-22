@@ -124,6 +124,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/FeatureTrackerBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
+    src/pipeline/node/WarpBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
