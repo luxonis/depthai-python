@@ -6,6 +6,39 @@ import numpy as np
 from pathlib import Path
 import argparse
 import yaml
+import time
+
+calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-si', action="store_true", help="Static input.")
+parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
+parser.add_argument('-left', type=str, default="left.png", help="left static input image")
+parser.add_argument('-right', type=str, default="right.png", help="right static input image")
+parser.add_argument('-bottom', type=str, default="bottom.png", help="bottom static input image")
+parser.add_argument('-debug', action="store_true", default=False, help="Debug code.")
+
+args = parser.parse_args()
+
+staticInput = args.si
+
+if staticInput:
+    left = args.left
+    right = args.right
+    bottom = args.bottom
+
+    leftImg = cv2.imread(left, cv2.IMREAD_GRAYSCALE)
+    rightImg = cv2.imread(right, cv2.IMREAD_GRAYSCALE)
+    bottomImg = cv2.imread(bottom, cv2.IMREAD_GRAYSCALE)
+
+    width = leftImg.shape[1]
+    height = leftImg.shape[0]
+
+    if args.debug:
+        cv2.imshow("leftImg", leftImg)
+        cv2.imshow("rightImg", rightImg)
+        cv2.imshow("bottomImg", bottomImg)
+        cv2.waitKey(1) 
 
 class Undistorter:
     def __init__(self, K_in, P_rectified, d, R_in):
@@ -102,13 +135,6 @@ def downSampleMesh(mapXL, mapYL, mapXR, mapYR):
     return meshLeft, meshRight
 
 
-#run examples/install_requirements.py -sdai
-
-calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
-
-parser = argparse.ArgumentParser()
-parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
-args = parser.parse_args()
 
 calibData = dai.CalibrationHandler(args.calibJsonFile)
 
@@ -116,9 +142,18 @@ calibData = dai.CalibrationHandler(args.calibJsonFile)
 pipeline = dai.Pipeline()
 pipeline.setCalibrationData(calibData)
 
-monoLeft = pipeline.create(dai.node.MonoCamera)
-monoVertical = pipeline.create(dai.node.MonoCamera)
-monoRight = pipeline.create(dai.node.MonoCamera)
+if staticInput:
+    monoLeft = pipeline.create(dai.node.XLinkIn)
+    monoRight = pipeline.create(dai.node.XLinkIn)
+    monoVertical = pipeline.create(dai.node.XLinkIn)
+    monoLeft.setStreamName("inLeft")
+    monoRight.setStreamName("inRight")
+    monoVertical.setStreamName("inVertical")
+else:
+    monoLeft = pipeline.create(dai.node.MonoCamera)
+    monoVertical = pipeline.create(dai.node.MonoCamera)
+    monoRight = pipeline.create(dai.node.MonoCamera)
+
 xoutRectifiedVertical = pipeline.create(dai.node.XLinkOut)
 xoutRectifiedRight = pipeline.create(dai.node.XLinkOut)
 xoutRectifiedLeft = pipeline.create(dai.node.XLinkOut)
@@ -134,25 +169,25 @@ xoutRectifiedLeft.setStreamName("rectified_left")
 xoutDisparityVertical.setStreamName("disparity_vertical")
 xoutDisparityHorizontal.setStreamName("disparity_horizontal")
 
-
 # Define sources and outputs
-monoVertical.setBoardSocket(dai.CameraBoardSocket.VERTICAL)
-monoVertical.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+if not staticInput:
+    monoVertical.setBoardSocket(dai.CameraBoardSocket.VERTICAL)
+    monoVertical.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+    monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+    monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking
 monoRight.out.link(syncNode.input1)
 monoLeft.out.link(syncNode.input2)
 monoVertical.out.link(syncNode.input3)
 
-syncNode.output1.link(stereoVertical.left)
-syncNode.output3.link(stereoVertical.right)
+syncNode.output3.link(stereoVertical.left) # left input is bottom camera
+syncNode.output1.link(stereoVertical.right) # right input is right camera
 stereoVertical.disparity.link(xoutDisparityVertical.input)
-stereoVertical.rectifiedLeft.link(xoutRectifiedRight.input)
-stereoVertical.rectifiedRight.link(xoutRectifiedVertical.input)
+stereoVertical.rectifiedLeft.link(xoutRectifiedVertical.input)
+stereoVertical.rectifiedRight.link(xoutRectifiedRight.input)
 stereoVertical.setVerticalStereo(True)
 
 syncNode.output2.link(stereoHorizontal.left)
@@ -163,7 +198,7 @@ stereoHorizontal.rectifiedLeft.link(xoutRectifiedLeft.input)
 stereoHorizontal.setVerticalStereo(False)
 
 stereoHorizontal.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
-stereoVertical.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_LEFT)
+stereoVertical.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
 
 if 1:
     # leftMesh, rightMesh = getMesh(calibData, resolution)
@@ -208,8 +243,9 @@ if 1:
     mapXV, mapYV = undis.undistort(img_shape)
 
     def rotate_mesh_90_cw(map_x, map_y):
-        map_x_rot = np.rot90(map_x, -1)
-        map_y_rot = np.rot90(map_y, -1)
+        direction = -1
+        map_x_rot = np.rot90(map_x, direction)
+        map_y_rot = np.rot90(map_y, direction)
         return map_x_rot, map_y_rot
 
     mapXV_rot, mapYV_rot = rotate_mesh_90_cw(mapXV, mapYV)
@@ -229,10 +265,25 @@ if 1:
     stereoHorizontal.setMeshStep(meshCellSize,meshCellSize)
 
     # for vertical stereo left input is right camera
-    meshLeftVertical = list(rightMeshRot.tobytes())
-    meshRightVertical = list(verticalMeshRot.tobytes())
+    meshLeftVertical = list(verticalMeshRot.tobytes())
+    meshRightVertical = list(rightMeshRot.tobytes())
     stereoVertical.loadMeshData(meshLeftVertical, meshRightVertical)
+
     stereoVertical.setMeshStep(meshCellSize,meshCellSize)
+
+    if args.debug and staticInput:
+        img_l_rectified = cv2.remap(leftImg, mapXL, mapYL, cv2.INTER_LINEAR)
+        cv2.imshow("img_l_rectified", img_l_rectified)
+
+        img_r_rectified = cv2.remap(rightImg, mapXR, mapYR, cv2.INTER_LINEAR)
+        cv2.imshow("img_r_rectified", img_r_rectified)
+
+        img_r_vertical = cv2.remap(rightImg, mapXR_rot, mapYR_rot, cv2.INTER_LINEAR)
+        cv2.imshow("img_r_vertical", img_r_vertical)
+
+        img_b_vertical = cv2.remap(bottomImg, mapXV_rot, mapYV_rot, cv2.INTER_LINEAR)
+        cv2.imshow("img_b_vertical", img_b_vertical)
+
 
     # stereoVertical.setOutputSize(720,1024)
 
@@ -245,7 +296,51 @@ with dai.Device(pipeline) as device:
     qRectifiedRight = device.getOutputQueue("rectified_right", 4, False)
     qRectifiedLeft = device.getOutputQueue("rectified_left", 4, False)
 
+    if staticInput:
+        qInLeft = device.getInputQueue("inLeft")
+        qInRight = device.getInputQueue("inRight")
+        qInVertical = device.getInputQueue("inVertical")
+
     while True:
+        if staticInput:
+            ts = dai.Clock.now()
+
+            data = cv2.resize(leftImg, (width, height), interpolation = cv2.INTER_AREA)
+            data = data.reshape(height*width)
+            img = dai.ImgFrame()
+            img.setData(data)
+            img.setInstanceNum(1)
+            img.setType(dai.ImgFrame.Type.RAW8)
+            img.setWidth(width)
+            img.setHeight(height)
+            img.setTimestamp(ts)
+            # print("left send")
+            qInLeft.send(img)
+
+            data = cv2.resize(rightImg, (width, height), interpolation = cv2.INTER_AREA)
+            data = data.reshape(height*width)
+            img = dai.ImgFrame()
+            img.setData(data)
+            img.setInstanceNum(2)
+            img.setType(dai.ImgFrame.Type.RAW8)
+            img.setWidth(width)
+            img.setHeight(height)
+            img.setTimestamp(ts)
+            qInRight.send(img)
+            # print("right send")
+
+            data = cv2.resize(bottomImg, (width, height), interpolation = cv2.INTER_AREA)
+            data = data.reshape(height*width)
+            img = dai.ImgFrame()
+            img.setData(data)
+            img.setInstanceNum(3)
+            img.setType(dai.ImgFrame.Type.RAW8)
+            img.setWidth(width)
+            img.setHeight(height)
+            img.setTimestamp(ts)
+            qInVertical.send(img)
+            # print("vertical send")
+
 
         inRectifiedVertical = qRectifiedVertical.get()
         frameRVertical = inRectifiedVertical.getCvFrame()
