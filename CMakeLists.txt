@@ -100,6 +100,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
     src/log/LogBindings.cpp
+    src/VersionBindings.cpp
 
     src/pipeline/node/NodeBindings.cpp
 

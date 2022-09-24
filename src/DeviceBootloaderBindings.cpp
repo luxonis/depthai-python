@@ -9,7 +9,6 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Type definitions
     py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
-    py::class_<DeviceBootloader::Version> deviceBootloaderVersion(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version));
     py::enum_<DeviceBootloader::Type> deviceBootloaderType(deviceBootloader, "Type");
     py::enum_<DeviceBootloader::Memory> deviceBootloaderMemory(deviceBootloader, "Memory");
     py::enum_<DeviceBootloader::Section> deviceBootloaderSection(deviceBootloader, "Section");
@@ -34,17 +33,6 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     // Bind DeviceBootloader
-    deviceBootloaderVersion
-        .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
-        .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
-        .def("__str__", &DeviceBootloader::Version::toString)
-        .def("__eq__", &DeviceBootloader::Version::operator==)
-        .def("__lt__", &DeviceBootloader::Version::operator<)
-        .def("__gt__", &DeviceBootloader::Version::operator>)
-        .def("toStringSemver", &DeviceBootloader::Version::toStringSemver)
-        .def("getBuildInfo", &DeviceBootloader::Version::getBuildInfo)
-        ;
-
     deviceBootloaderType
         .value("AUTO", DeviceBootloader::Type::AUTO)
         .value("USB", DeviceBootloader::Type::USB)
