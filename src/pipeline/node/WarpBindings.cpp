@@ -12,6 +12,8 @@ void bind_warp(pybind11::module& m, void* pCallstack){
 
     // Node and Properties declare upfront
     // TODO(themarpe) - properties
+    py::class_<Warp::Properties> warpProperties(m, "WarpProperties", DOC(dai, WarpProperties));
+    py::enum_<Warp::Properties::Interpolation> warpPropertiesInterpolation(warpProperties, "Interpolation", DOC(dai, WarpProperties, Interpolation));
     auto warp = ADD_NODE(Warp);
 
     ///////////////////////////////////////////////////////////////////////
@@ -25,6 +27,13 @@ void bind_warp(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
+
+    // properties
+    warpPropertiesInterpolation
+        .value("BILINEAR", Warp::Properties::Interpolation::BILINEAR)
+        .value("BICUBIC", Warp::Properties::Interpolation::BICUBIC)
+        .value("BYPASS", Warp::Properties::Interpolation::BYPASS)
+        ;
 
     // ImageManip Node
     warp
@@ -44,6 +53,13 @@ void bind_warp(pybind11::module& m, void* pCallstack){
 
         .def("setWarpMesh", py::overload_cast<const std::vector<Point2f>&, int, int>(&Warp::setWarpMesh), DOC(dai, node, Warp, setWarpMesh))
         .def("setWarpMesh", py::overload_cast<const std::vector<std::pair<float,float>>&, int, int>(&Warp::setWarpMesh), DOC(dai, node, Warp, setWarpMesh))
+
+        .def("setHwIds", &Warp::setHwIds, DOC(dai, node, Warp, setHwIds))
+        .def("getHwIds", &Warp::getHwIds, DOC(dai, node, Warp, getHwIds))
+        .def("setInterpolation", &Warp::setInterpolation, DOC(dai, node, Warp, setInterpolation))
+        .def("getInterpolation", &Warp::getInterpolation, DOC(dai, node, Warp, getInterpolation))
         ;
+
+    daiNodeModule.attr("Warp").attr("Properties") = warpProperties;
 
 }

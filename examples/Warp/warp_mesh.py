@@ -24,6 +24,8 @@ warp1.setWarpMesh([tl,tr,ml,mr,bl,br], 2, 3)
 WARP1_OUTPUT_FRAME_SIZE = (992,500)
 warp1.setOutputSize(WARP1_OUTPUT_FRAME_SIZE)
 warp1.setMaxOutputFrameSize(WARP1_OUTPUT_FRAME_SIZE[0] * WARP1_OUTPUT_FRAME_SIZE[1] * 3)
+warp1.setHwIds([1])
+warp1.setInterpolation(dai.node.Warp.Properties.Interpolation.BYPASS)
 
 camRgb.preview.link(warp1.inputImage)
 xout1 = pipeline.create(dai.node.XLinkOut)
@@ -31,15 +33,17 @@ xout1.setStreamName('out1')
 warp1.out.link(xout1.input)
 
 # Warp preview frame 2
-warp2 = pipeline.create(dai.node.Warp);
+warp2 = pipeline.create(dai.node.Warp)
 # Create a custom warp mesh
 mesh2 = [
     (20, 20), (250, 100), (460, 20),
     (100, 250), (250, 250), (400, 250),
     (20, 480), (250, 400), (460,480)
 ]
-warp2.setWarpMesh(mesh2, 3, 3);
-warp2.setMaxOutputFrameSize(maxFrameSize);
+warp2.setWarpMesh(mesh2, 3, 3)
+warp2.setMaxOutputFrameSize(maxFrameSize)
+warp1.setHwIds([2])
+warp2.setInterpolation(dai.node.Warp.Properties.Interpolation.BICUBIC)
 
 camRgb.preview.link(warp2.inputImage);
 xout2 = pipeline.create(dai.node.XLinkOut)
