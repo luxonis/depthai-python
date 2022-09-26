@@ -9,7 +9,6 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Type definitions
     py::class_<DeviceBootloader> deviceBootloader(m, "DeviceBootloader", DOC(dai, DeviceBootloader));
-    py::class_<DeviceBootloader::Version> deviceBootloaderVersion(deviceBootloader, "Version", DOC(dai, DeviceBootloader, Version));
     py::enum_<DeviceBootloader::Type> deviceBootloaderType(deviceBootloader, "Type");
     py::enum_<DeviceBootloader::Memory> deviceBootloaderMemory(deviceBootloader, "Memory");
     py::enum_<DeviceBootloader::Section> deviceBootloaderSection(deviceBootloader, "Section");
@@ -34,17 +33,6 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
 
     // Bind DeviceBootloader
-    deviceBootloaderVersion
-        .def(py::init<const std::string&>(), py::arg("v"), DOC(dai, DeviceBootloader, Version, Version))
-        .def(py::init<unsigned, unsigned, unsigned>(), py::arg("major"), py::arg("minor"), py::arg("patch"), DOC(dai, DeviceBootloader, Version, Version, 2))
-        .def("__str__", &DeviceBootloader::Version::toString)
-        .def("__eq__", &DeviceBootloader::Version::operator==)
-        .def("__lt__", &DeviceBootloader::Version::operator<)
-        .def("__gt__", &DeviceBootloader::Version::operator>)
-        .def("toStringSemver", &DeviceBootloader::Version::toStringSemver)
-        .def("getBuildInfo", &DeviceBootloader::Version::getBuildInfo)
-        ;
-
     deviceBootloaderType
         .value("AUTO", DeviceBootloader::Type::AUTO)
         .value("USB", DeviceBootloader::Type::USB)
@@ -150,11 +138,13 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("readApplicationInfo", [](DeviceBootloader& db, DeviceBootloader::Memory mem) { py::gil_scoped_release release; return db.readApplicationInfo(mem); }, py::arg("memory"), DOC(dai, DeviceBootloader, readApplicationInfo))
         .def("getMemoryInfo", [](DeviceBootloader& db, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.getMemoryInfo(memory); }, DOC(dai, DeviceBootloader, getMemoryInfo))
+        .def("isUserBootloader", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.isUserBootloader(); }, DOC(dai, DeviceBootloader, isUserBootloader))
 
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::function<void(float)> progressCallback, std::vector<uint8_t> package, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(progressCallback, package); }, py::arg("progressCallback"), py::arg("package"), py::arg("memory") = DeviceBootloader::Memory::AUTO, DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage))
         .def("flashDepthaiApplicationPackage", [](DeviceBootloader& db, std::vector<uint8_t> package, DeviceBootloader::Memory memory) { py::gil_scoped_release release; return db.flashDepthaiApplicationPackage(package); }, py::arg("package"), py::arg("memory") = DeviceBootloader::Memory::AUTO, DOC(dai, DeviceBootloader, flashDepthaiApplicationPackage, 2))
         .def("flashBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, const Path& path) { py::gil_scoped_release release; return db.flashBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader))
         .def("flashBootloader", [](DeviceBootloader& db, DeviceBootloader::Memory memory, DeviceBootloader::Type type, std::function<void(float)> progressCallback, dai::Path path) { py::gil_scoped_release release; return db.flashBootloader(memory, type, progressCallback, path); }, py::arg("memory"), py::arg("type"), py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashBootloader, 2))
+        .def("flashUserBootloader", [](DeviceBootloader& db, std::function<void(float)> progressCallback, const Path& path) { py::gil_scoped_release release; return db.flashUserBootloader(progressCallback, path); }, py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBootloader, flashUserBootloader))
 
         .def("readConfigData", [](DeviceBootloader& db, DeviceBootloader::Memory memory, DeviceBootloader::Type type) { py::gil_scoped_release release; return db.readConfigData(memory, type); }, py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("type") = DeviceBootloader::Type::AUTO, DOC(dai, DeviceBootloader, readConfigData))
         .def("flashConfigData", [](DeviceBootloader& db, nlohmann::json configData, DeviceBootloader::Memory memory, DeviceBootloader::Type type) { py::gil_scoped_release release; return db.flashConfigData(configData, memory, type); }, py::arg("configData"), py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("type") = DeviceBootloader::Type::AUTO, DOC(dai, DeviceBootloader, flashConfigData))
