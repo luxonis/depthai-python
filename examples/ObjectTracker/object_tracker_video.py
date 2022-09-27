@@ -56,10 +56,10 @@ objectTracker.inputTrackerFrame.setBlocking(True)
 objectTracker.inputDetectionFrame.setBlocking(True)
 objectTracker.inputDetections.setBlocking(True)
 objectTracker.setDetectionLabelsToTrack([1])  # track only person
-# possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS
+# possible tracking types: ZERO_TERM_COLOR_HISTOGRAM, ZERO_TERM_IMAGELESS, SHORT_TERM_IMAGELESS, SHORT_TERM_KCF
 objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
 # take the smallest ID when new object is tracked, possible options: SMALLEST_ID, UNIQUE_ID
-objectTracker.setTrackerIdAssigmentPolicy(dai.TrackerIdAssigmentPolicy.SMALLEST_ID)
+objectTracker.setTrackerIdAssignmentPolicy(dai.TrackerIdAssignmentPolicy.SMALLEST_ID)
 
 # Linking
 manip.out.link(manipOut.input)
@@ -107,7 +107,7 @@ with dai.Device(pipeline) as device:
     cap = cv2.VideoCapture(args.videoPath)
     baseTs = time.monotonic()
     simulatedFps = 30
-    inputFrameShape = (1280, 720)
+    inputFrameShape = (1920, 1080)
 
     while cap.isOpened():
         read_correctly, frame = cap.read()

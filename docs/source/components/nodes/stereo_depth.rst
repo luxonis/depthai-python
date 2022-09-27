@@ -1,10 +1,10 @@
 StereoDepth
-===========
+###########
 
-Stereo depth node calculates the disparity/depth from two :ref:`mono cameras <MonoCamera>`.
+StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`).
 
 How to place it
-###############
+===============
 
 .. tabs::
 
@@ -20,40 +20,60 @@ How to place it
 
 
 Inputs and Outputs
-##################
+==================
 
 .. code-block::
 
                  ┌───────────────────┐
+                 │                   │ confidenceMap
+                 │                   ├─────────────►
                  │                   │rectifiedLeft
                  │                   ├─────────────►
   left           │                   │   syncedLeft
-  ──────────────►│                   ├─────────────►
-                 │                   │        depth
+  ──────────────►│-------------------├─────────────►
+                 │                   │   depth [mm]
                  │                   ├─────────────►
                  │    StereoDepth    │    disparity
                  │                   ├─────────────►
-  right          │                   │rectifiedRight
-  ──────────────►│                   ├─────────────►
-                 │                   │   syncedRight
+  right          │                   │   syncedRight
+  ──────────────►│-------------------├─────────────►
+                 │                   │rectifiedRight
                  │                   ├─────────────►
+  inputConfig    │                   |     outConfig
+  ──────────────►│-------------------├─────────────►
                  └───────────────────┘
 
-**Message types**
+.. tabs::
 
-- :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
-- :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
-- :code:`rectifiedLeft` - :ref:`ImgFrame`
-- :code:`syncedLeft` - :ref:`ImgFrame`
-- :code:`depth` - :ref:`ImgFrame`
-- :code:`disparity` - :ref:`ImgFrame`
-- :code:`rectifiedRight` - :ref:`ImgFrame`
-- :code:`syncedRight` - :ref:`ImgFrame`
+  .. tab:: **Inputs**
+
+    - :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
+    - :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
+    - :code:`inputConfig` - :ref:`StereoDepthConfig`
+
+  .. tab:: **Outputs**
+
+    - :code:`confidenceMap` - :ref:`ImgFrame`
+    - :code:`rectifiedLeft` - :ref:`ImgFrame`
+    - :code:`syncedLeft` - :ref:`ImgFrame`
+    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
+    - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
+    - :code:`rectifiedRight` - :ref:`ImgFrame`
+    - :code:`syncedRight` - :ref:`ImgFrame`
+    - :code:`outConfig` - :ref:`StereoDepthConfig`
+
+  .. tab:: **Debug outputs**
+
+    - :code:`debugDispLrCheckIt1` - :ref:`ImgFrame`
+    - :code:`debugDispLrCheckIt2` - :ref:`ImgFrame`
+    - :code:`debugExtDispLrCheckIt1` - :ref:`ImgFrame`
+    - :code:`debugExtDispLrCheckIt2` - :ref:`ImgFrame`
+    - :code:`debugDispCostDump` - :ref:`ImgFrame`
 
 Internal block diagram of StereoDepth node
-##########################################
+==========================================
 
-.. image:: /_static/images/components/depth_diagram.jpeg
+.. image:: /_static/images/components/depth_diagram.png
    :target: https://whimsical.com/stereo-node-EKcfcXGjGpNL6cwRPV6NPv
 
 On the diagram, red rectangle are firmware settings that are configurable via the API. Gray rectangles are settings that that are not yet
@@ -63,7 +83,7 @@ configurable sooner.
 If you click on the image, you will be redirected to the webapp. Some blocks have notes that provide additional technical information.
 
 Currently configurable blocks
-*****************************
+-----------------------------
 
 .. tabs::
 
@@ -73,16 +93,18 @@ Currently configurable blocks
 
       .. tab:: Left-Right Check
 
-        Left-Right Check or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views
+        **Left-Right Check** or LR-Check is used to remove incorrectly calculated disparity pixels due to occlusions at object borders (Left and Right camera views
         are slightly different).
 
         #. Computes disparity by matching in R->L direction
         #. Computes disparity by matching in L->R direction
         #. Combines results from 1 and 2, running on Shave: each pixel d = disparity_LR(x,y) is compared with disparity_RL(x-d,y). If the difference is above a threshold, the pixel at (x,y) in the final disparity map is invalidated.
 
+        You can use :code:`debugDispLrCheckIt1` and :code:`debugDispLrCheckIt2` debug outputs for debugging/fine-tuning purposes.
+
       .. tab:: Extended Disparity
 
-        The :code:`extended disparity` allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191, meaning the range is now: **[0..190]**.
+        **Extended disparity mode** allows detecting closer distance objects for the given baseline. This increases the maximum disparity search from 96 to 191, meaning the range is now: **[0..190]**.
         So this cuts the minimum perceivable distance in half, given that the minimum distance is now :code:`focal_length * base_line_dist / 190` instead
         of :code:`focal_length * base_line_dist / 95`.
 
@@ -90,21 +112,28 @@ Currently configurable blocks
         #. Computes disparity on 2x downscaled images (e.g. 640x360)
         #. Combines the two level disparities on Shave, effectively covering a total disparity range of 191 pixels (in relation to the original resolution).
 
+        You can use :code:`debugExtDispLrCheckIt1` and :code:`debugExtDispLrCheckIt2` debug outputs for debugging/fine-tuning purposes.
+
       .. tab:: Subpixel Disparity
 
-        Subpixel improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals.
+        **Subpixel mode** improves the precision and is especially useful for long range measurements. It also helps for better estimating surface normals.
 
         Besides the integer disparity output, the Stereo engine is programmed to dump to memory the cost volume, that is 96 levels (disparities) per pixel,
-        then software interpolation is done on Shave, resulting a final disparity with 5 fractional bits, resulting in significantly more granular depth
-        steps (32 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
-        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/32 of a pixel. In this mode, stereo cameras perform: :code:`96 depth steps * 32 subpixel depth steps = 3,072 depth steps.`
-        Note that Subpixel and Extended Disparity are not yet supported simultaneously (which would result in :code:`191 * 32 = 6,112 depth steps`), but should be available in the near future (`Pull Request <https://github.com/luxonis/depthai-python/pull/347>`__).
+        then software interpolation is done on Shave, resulting a final disparity with 3 fractional bits, resulting in significantly more granular depth
+        steps (8 additional steps between the integer-pixel depth steps), and also theoretically, longer-distance depth viewing - as the maximum depth
+        is no longer limited by a feature being a full integer pixel-step apart, but rather 1/8 of a pixel. In this mode, stereo cameras perform: :code:`94 depth steps * 8 subpixel depth steps + 2 (min/max values) = 754 depth steps`
 
         For comparison of normal disparity vs. subpixel disparity images, click `here <https://github.com/luxonis/depthai/issues/184>`__.
 
-  .. tab:: Mesh file / Homography matrix
+  .. tab:: Depth Filters
 
-    Mesh files are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
+    **Depth Filtering** / **Depth Post-Processing** is performed at the end of the depth pipeline. It helps with noise reduction and overall depth quality.
+
+    .. include::  ../../includes/depth-filters.rst
+
+  .. tab:: Mesh files
+
+    Mesh files (homography matrix) are generated using the camera intrinsics, distortion coeffs, and rectification rotations.
     These files helps in overcoming the distortions in the camera increasing the accuracy and also help in when `wide FOV <https://docs.luxonis.com/projects/hardware/en/latest/pages/arducam.html#arducam-compatible-cameras>`__ lens are used.
 
     .. note::
@@ -124,7 +153,7 @@ Currently configurable blocks
 
   .. tab:: Confidence Threshold
 
-    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and choses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy). Note: This threshold only applies to Normal stereo mode as of now.
+    - **Confidence threshold**: Stereo depth algorithm searches for the matching feature from right camera point to the left image (along the 96 disparity levels). During this process it computes the cost for each disparity level and chooses the minimal cost between two disparities and uses it to compute the confidence at each pixel. Stereo node will output disparity/depth pixels only where depth confidence is below the **confidence threshold** (lower the confidence value means better depth accuracy).
     - **LR check threshold**: Disparity is considered for the output when the difference between LR and RL disparities is smaller than the LR check threshold.
 
     .. doxygenfunction:: dai::StereoDepthConfig::setConfidenceThreshold
@@ -135,40 +164,44 @@ Currently configurable blocks
         :project: depthai-core
         :no-link:
 
-Current limitations
-###################
+Limitations
+===========
 
-If one or more of the additional depth modes (:code:`lrcheck`, :code:`extended`, :code:`subpixel`) are enabled, then:
-
-- median filtering is disabled on device
-- with subpixel, if both :code:`depth` and :code:`disparity` are used, only :code:`depth` will have valid output
-
-Otherwise, :code:`depth` output is **U16** (in millimeters) and median is functional.
+- Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 
 Stereo depth FPS
-################
+================
 
 .. list-table::
    :header-rows: 1
 
    * - Stereo depth mode
-     - FPS for 720P
+     - FPS for 1280x720
+     - FPS for 640x400
    * - Standard mode
-     - 150
+     - 60
+     - 110
    * - Left-Right Check
-     - 60
+     - 55
+     - 105
    * - Subpixel Disparity
-     - 30
+     - 45
+     - 105
    * - Extended Disparity
-     - 60
+     - 54
+     - 105
    * - Subpixel + LR check
-     - 15
+     - 34
+     - 96
    * - Extended + LR check
-     - 30
+     - 26
+     - 62
 
+All stereo modes were measured for :code:`depth` output with **5x5 median filter** enabled. For 720P, mono cameras were set
+to **60 FPS** and for 400P mono cameras were set to **110 FPS**.
 
 Usage
-#####
+=====
 
 .. tabs::
 
@@ -205,14 +238,15 @@ Usage
     right->out.link(stereo->right);
 
 Examples of functionality
-#########################
+=========================
 
 - :ref:`Depth Preview`
+- :ref:`RGB Depth alignment`
 - :ref:`Mono & MobilenetSSD & Depth`
 - :ref:`RGB & MobilenetSSD with spatial data`
 
 Reference
-#########
+=========
 
 .. tabs::
 
@@ -232,7 +266,7 @@ Reference
       :undoc-members:
 
 Disparity
-#########
+=========
 
 Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
 By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
@@ -256,7 +290,7 @@ For the final disparity map, a filtering is applied based on the confidence thre
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
 Calculate depth using disparity map
-###################################
+===================================
 
 Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
 
@@ -266,9 +300,21 @@ By considering this fact, depth can be calculated using this formula:
 
   depth = focal_length_in_pixels * baseline / disparity_in_pixels
 
-where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
+Where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
 
-To get focal length in pixels, use this formula:
+To get focal length in pixels, you can :ref:`read camera calibration <Calibration Reader>`, as focal length in pixels is
+written in camera intrinsics (``intrinsics[0][0]``):
+
+.. code-block:: python
+
+  import depthai as dai
+
+  with dai.Device() as device:
+    calibData = device.readCalibration()
+    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT)
+    print('Right mono camera focal length in pixels:', intrinsics[0][0])
+
+Here's theoretical calculation of the focal length in pixels:
 
 .. code-block:: python
 
@@ -293,7 +339,7 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
 Note the value of disparity depth data is stored in :code:`uint16`, where 0 is a special value, meaning that distance is unknown.
 
 Min stereo depth distance
-#########################
+=========================
 
 If the depth results for close-in objects look weird, this is likely because they are below the minimum depth-perception distance of the device.
 
@@ -329,8 +375,41 @@ or roughly 35cm.
 
 See `these examples <https://github.com/luxonis/depthai-experiments/tree/master/gen2-camera-demo#real-time-depth-from-depthai-stereo-pair>`__ for how to enable Extended Disparity.
 
+Disparity shift to lower min depth perception
+---------------------------------------------
+
+Another option to perceive closer depth range is to use disparity shift. Disparity shift will shift the starting point
+of the disparity search, which will significantly decrease max depth (MazZ) perception, but it will also decrease min depth (MinZ) perception.
+Disparity shift can be combined with extended/subpixel/LR-check modes.
+
+.. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
+
+**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Calculate depth using disparity map`.
+Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
+
+**Right graph** shows the same, but at disparity shift set to 30 pixels. This means that disparity search will be from 30 pixels (depth=2.2m) to 125 pixels (depth=50cm).
+This also means that depth will be very accurate at the short range (**theoretically** below 5mm depth error).
+
+**Limitations**:
+
+- Because of the inverse relationship between disparity and depth, MaxZ will decrease much faster than MinZ as the disparity shift is increased. Therefore, it is **advised not to use a larger than necessary disparity shift**.
+- Tradeoff in reducing the MinZ this way is that objects at **distances farther away than MaxZ will not be seen**.
+- Because of the point above, **we only recommend using disparity shift when MaxZ is known**, such as having a depth camera mounted above a table pointing down at the table surface.
+- Output disparity map is not expanded, only the depth map. So if disparity shift is set to 50, and disparity value obtained is 90, the real disparity is 140.
+
+**Compared to Extended disparity**, disparity shift:
+
+- **(+)** Is faster, as it doesn't require an extra computation, which means there's also no extra latency
+- **(-)** Reduces the MaxZ (significantly), while extended disparity only reduces MinZ.
+
+Disparity shift can be combined with extended disparity.
+
+.. doxygenfunction:: dai::StereoDepthConfig::setDisparityShift
+  :project: depthai-core
+  :no-link:
+
 Max stereo depth distance
-#########################
+=========================
 
 The maximum depth perception distance depends on the :ref:`accuracy of the depth perception <Depth perception accuracy>`. The formula used to calculate this distance is an approximation, but is as follows:
 
@@ -351,7 +430,7 @@ So using this formula for existing models the *theoretical* max distance is:
 If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this table <Currently configurable blocks>`.
 
 Depth perception accuracy
-#########################
+=========================
 
 Disparity depth works by matching features from one image to the other and its accuracy is based on multiple parameters:
 
@@ -369,7 +448,7 @@ Lower baseline enables us to detect the depth at a closer distance as long as th
 So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
 
 Limitation
-##########
+==========
 
 Since depth is calculated from disparity, which requires the pixels to overlap, there is inherently a vertical
 band on the left side of the left mono camera and on the right side of the right mono camera, where depth
@@ -424,5 +503,19 @@ forum post.
    for accurate disparity matching - to have good quality depth maps on blank surfaces as well. For outdoors,
    the IR laser dot projector is only relevant at night. For more information see the development progress
    `here <https://github.com/luxonis/depthai-hardware/issues/114>`__.
+
+Measuring real-world object dimensions
+======================================
+
+Because the depth map contains the Z distance, objects in parallel with the camera are measured accurately standard. For objects not in parallel, the Euclidean distance calculation can be used. Please refer to the below:
+
+.. image:: /_static/images/components/Euclidian_distance_fig.png
+
+When running eg. the :ref:`RGB & MobilenetSSD with spatial data` example, you could calculate the distance to the detected object from XYZ coordinates (:ref:`SpatialImgDetections`) using the code below (after code line ``143`` of the example):
+
+.. code-block:: python
+
+    distance = math.sqrt(detection.spatialCoordinates.x ** 2 + detection.spatialCoordinates.y ** 2 + detection.spatialCoordinates.z ** 2) # mm
+
 
 .. include::  ../../includes/footer-short.rst

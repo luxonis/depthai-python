@@ -20,9 +20,9 @@ Dependencies
 
 Let's get your development environment setup first. This tutorial uses:
 
-- Python 3.6 (Ubuntu) or Python 3.7 (Raspbian).
-- The DepthAI :ref:`Python API <Installation>`
-- The :code:`cv2` and :code:`numpy` Python modules.
+- Python >=3.6
+- DepthAI :ref:`Python API <Installation>`
+- :code:`cv2`, :code:`blobconverter` and :code:`numpy` Python modules.
 
 
 Code Overview
@@ -58,7 +58,7 @@ Download and install the requirements for this tutorial:
 
 .. code-block:: bash
 
-  python3 -m pip install numpy opencv-python depthai --user
+  python3 -m pip install numpy opencv-python depthai blobconverter --user
 
 
 Test your environment
@@ -104,23 +104,26 @@ Let's start off with an empty :class:`Pipeline` object
   pipeline = depthai.Pipeline()
 
 Now, first node we will add is a :class:`ColorCamera`. We will use the :code:`preview` output, resized to 300x300 to fit the
-`mobilenet-ssd input size <https://docs.openvinotoolkit.org/latest/omz_models_public_mobilenet_ssd_mobilenet_ssd.html>`__ (which we will define later)
+`mobilenet-ssd input size <https://docs.openvino.ai/2021.4/omz_models_model_mobilenet_ssd.html>`__ (which we will define later)
 
 .. code-block:: python
 
-  cam_rgb = pipeline.create(dai.node.ColorCamera)
+  cam_rgb = pipeline.create(depthai.node.ColorCamera)
   cam_rgb.setPreviewSize(300, 300)
   cam_rgb.setInterleaved(False)
 
 Up next, let's define a :class:`MobileNetDetectionNetwork` node with `mobilenet-ssd network <https://docs.openvinotoolkit.org/latest/omz_models_public_mobilenet_ssd_moblenet_ssd.html>`__.
-The blob file for this example will be compiled automatically using `blobconverter tool <https://pypi.org/project/blobconverter/>`__, we'll be provided with a ready-to-use blob path.
+The blob file for this example will be compiled and downloaded automatically using `blobconverter tool <https://pypi.org/project/blobconverter/>`__.
+:code:`blobconverter.from_zoo()` function returns Path to the model, so we can directly put it inside the :code:`detection_nn.setBlobPath()` function.
 With this node, the output from nn will be parsed on device side and we'll receive a ready to use detection objects. For this to work properly, we need also to set the confidence threshold
 to filter out the incorrect results
 
 .. code-block:: python
 
-  detection_nn = pipeline.create(dai.node.NeuralNetwork)
-  detection_nn.setBlobPath("/path/to/mobilenet-ssd.blob")
+  detection_nn = pipeline.create(depthai.node.MobileNetDetectionNetwork)
+  # Set path of the blob (NN model). We will use blobconverter to convert&download the model
+  # detection_nn.setBlobPath("/path/to/model.blob")
+  detection_nn.setBlobPath(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
   detection_nn.setConfidenceThreshold(0.5)
 
 And now, let's connect a color camera :code:`preview` output to neural network input
@@ -135,11 +138,11 @@ and in our case, since we want to receive data from device to host, we will use 
 
 .. code-block:: python
 
-  xout_rgb = pipeline.create(dai.node.XLinkOut)
+  xout_rgb = pipeline.create(depthai.node.XLinkOut)
   xout_rgb.setStreamName("rgb")
   cam_rgb.preview.link(xout_rgb.input)
 
-  xout_nn = pipeline.create(dai.node.XLinkOut)
+  xout_nn = pipeline.create(depthai.node.XLinkOut)
   xout_nn.setStreamName("nn")
   detection_nn.out.link(xout_nn.input)
 
@@ -161,7 +164,7 @@ Having the pipeline defined, we can now initialize a device with pipeline and st
 
   .. code-block:: python
 
-    device = depthai.Device(pipeline, usb2mode=True)
+    device = depthai.Device(pipeline, usb2Mode=True)
 
 
 

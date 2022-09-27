@@ -44,7 +44,7 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 # Produce the depth map (using disparity output as it's easier to visualize depth this way)
-stereo.initialConfig.setConfidenceThreshold(255)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout from rectification (black stripe on the edges)
 # Convert the grayscale frame into the nn-acceptable form
 manip.initialConfig.setResize(300, 300)
@@ -98,17 +98,16 @@ with dai.Device(pipeline) as device:
     disparityMultiplier = 255 / stereo.initialConfig.getMaxDisparity()
 
     while True:
-        # Instead of get (blocking), we use tryGet (nonblocking) which will return the available data or None otherwise
-        inRight = qRight.tryGet()
-        inDet = qDet.tryGet()
-        inDisparity = qDisparity.tryGet()
+        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
+        if qDet.has():
+            detections = qDet.get().detections
 
-        if inRight is not None:
-            rightFrame = inRight.getCvFrame()
+        if qRight.has():
+            rightFrame = qRight.get().getCvFrame()
 
-        if inDisparity is not None:
+        if qDisparity.has():
             # Frame is transformed, normalized, and color map will be applied to highlight the depth info
-            disparityFrame = inDisparity.getFrame()
+            disparityFrame = qDisparity.get().getFrame()
             disparityFrame = (disparityFrame*disparityMultiplier).astype(np.uint8)
             # Available color maps: https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html
             disparityFrame = cv2.applyColorMap(disparityFrame, cv2.COLORMAP_JET)

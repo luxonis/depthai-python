@@ -4,7 +4,7 @@ RGB & MobilenetSSD
 This example shows how to run MobileNetv2SSD on the RGB input frame, and how to display both the RGB
 preview and the metadata results from the MobileNetv2SSD on the preview.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`RGB & MobilenetSSD @ 4K`
 - :ref:`Mono & MobilenetSSD`
@@ -25,8 +25,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_6shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

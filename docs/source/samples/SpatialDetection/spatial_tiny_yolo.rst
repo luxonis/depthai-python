@@ -14,7 +14,7 @@ setAnchorMasks - anchorMasks26, anchorMasks13 (anchorMasks52 - additionally for 
 setIouThreshold - intersection over union threshold
 setConfidenceThreshold - confidence threshold above which objects are detected
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Spatial location calculator`
 - :ref:`Spatial object tracker on RGB`
@@ -35,11 +35,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2_6shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob>`__
-
-YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) can be used too - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

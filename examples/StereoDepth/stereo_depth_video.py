@@ -201,11 +201,10 @@ for monoCam in (camLeft, camRight):  # Common config
     monoCam.setResolution(res)
     # monoCam.setFps(20.0)
 
-stereo.initialConfig.setConfidenceThreshold(245)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
-# FIXME: RuntimeError: StereoDepth(2) - StereoDepth | ExtendedDisparity is not implemented yet.
 stereo.setExtendedDisparity(extended)
 stereo.setSubpixel(subpixel)
 
@@ -234,7 +233,8 @@ streams.append("disparity")
 if depth:
     streams.append("depth")
 
-calibData = dai.Device().readCalibration()
+device = dai.Device()
+calibData = device.readCalibration()
 leftMesh, rightMesh = getMesh(calibData)
 if generateMesh:
     meshLeft = list(leftMesh.tobytes())
@@ -246,7 +246,9 @@ if meshDirectory is not None:
 
 
 print("Creating DepthAI device")
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
+
     # Create a receive queue for each stream
     qList = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
 

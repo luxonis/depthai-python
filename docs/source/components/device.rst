@@ -3,8 +3,15 @@
 Device
 ======
 
-Device is a DepthAI `module <https://docs.luxonis.com/en/latest/pages/products/>`__. After the :ref:`Pipeline` is defined, it can be uploaded to the device.
-When you create the device in the code, firmware is uploaded together with the pipeline.
+Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful Robotics Vision Core
+(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference algorithms and
+for processing sensory inputs (eg. calculating stereo disparity from two cameras).
+
+Device API
+##########
+
+:code:`Device` object represents an OAK device. When starting the device, you have to upload a :ref:`Pipeline` to it, which will get executed on the VPU.
+When you create the device in the code, firmware is uploaded together with the pipeline and other assets (such as NN blobs).
 
 .. code-block:: python
 
@@ -14,23 +21,39 @@ When you create the device in the code, firmware is uploaded together with the p
 
   # Upload the pipeline to the device
   with depthai.Device(pipeline) as device:
-    # Start the pipeline that is now on the device
-    device.startPipeline()
+    # Print MxID, USB speed, and available cameras on the device
+    print('MxId:',device.getDeviceInfo().getMxId())
+    print('USB speed:',device.getUsbSpeed())
+    print('Connected cameras:',device.getConnectedCameras())
 
-    # Input queue, to send message from the host to the device (you can recieve the message on the device with XLinkIn)
+    # Input queue, to send message from the host to the device (you can receive the message on the device with XLinkIn)
     input_q = device.getInputQueue("input_name", maxSize=4, blocking=False)
 
-    # Output queue, to recieve message on the host from the device (you can send the message on the device with XLinkOut)
+    # Output queue, to receive message on the host from the device (you can send the message on the device with XLinkOut)
     output_q = device.getOutputQueue("output_name", maxSize=4, blocking=False)
 
     while True:
-        # Get the message from the queue
+        # Get a message that came from the queue
         output_q.get() # Or output_q.tryGet() for non-blocking
 
         # Send a message to the device
         cfg = depthai.ImageManipConfig()
         input_q.send(cfg)
 
+Connect to specified device
+###########################
+
+If you have multiple devices and only want to connect to a specific one, or if your OAK PoE camera is outside of your
+subnet, you can specify the device (either with MxID, IP, or USB port name) you want to connect to.
+
+.. code-block:: python
+
+  # Specify MXID, IP Address or USB path
+  device_info = depthai.DeviceInfo("14442C108144F1D000") # MXID
+  #device_info = depthai.DeviceInfo("192.168.1.44") # IP Address
+  #device_info = depthai.DeviceInfo("3.3.3") # USB port name
+  with depthai.Device(pipeline, device_info) as device:
+      # ...
 
 Multiple devices
 ################
@@ -40,7 +63,7 @@ If you want to use multiple devices on a host, check :ref:`Multiple DepthAI per 
 Device queues
 #############
 
-After initializing the device, one has to initialize the input/output queues as well.
+After initializing the device, one has to initialize the input/output queues as well. These queues will be located on the host computer (in RAM).
 
 .. code-block:: python
 
@@ -61,6 +84,40 @@ flags determine the behavior of the queue in this case. You can set these flags 
   # Or afterwards
   queue.setMaxSize(10)
   queue.setBlocking(True)
+
+Specifying arguments for :code:`getOutputQueue` method
+######################################################
+
+When obtaining the output queue (example code below), the :code:`maxSize` and :code:`blocking` arguments should be set depending on how
+the messages are intended to be used, where :code:`name` is the name of the outputting stream.
+
+Since queues are on the host computer, memory (RAM) usually isn't that scarce. But if you are using a small SBC like RPI Zero, where there's only 0.5GB RAM,
+you might need to specify max queue size as well.
+
+.. code-block:: python
+
+  with dai.Device(pipeline) as device:
+    queueLeft = device.getOutputQueue(name="manip_left", maxSize=8, blocking=False)
+
+If only the latest results are relevant and previous do not matter, one can set :code:`maxSize = 1` and :code:`blocking = False`.
+That way only latest message will be kept (:code:`maxSize = 1`) and it might also be overwritten in order to avoid waiting for
+the host to process every frame, thus providing only the latest data (:code:`blocking = False`).
+However, if there are a lot of dropped/overwritten frames, because the host isn't able to process them fast enough
+(eg. one-threaded environment which does some heavy computing), the :code:`maxSize` could be set to a higher
+number, which would increase the queue size and reduce the number of dropped frames.
+Specifically, at 30 FPS, a new frame is received every ~33ms, so if your host is able to process a frame in that time, the :code:`maxSize`
+could be set to :code:`1`, otherwise to :code:`2` for processing times up to 66ms and so on.
+
+If, however, there is a need to have some intervals of wait between retrieving messages, one could specify that differently.
+An example would be checking the results of :code:`DetectionNetwork` for the last 1 second based on some other event,
+in which case one could set :code:`maxSize = 30` and :code:`blocking = False`
+(assuming :code:`DetectionNetwork` produces messages at ~30FPS).
+
+The :code:`blocking = True` option is mostly used when correct order of messages is needed.
+Two examples would be:
+
+- matching passthrough frames and their original frames (eg. full 4K frames and smaller preview frames that went into NN),
+- encoding (most prominently H264/H265 as frame drops can lead to artifacts).
 
 Blocking behaviour
 ******************

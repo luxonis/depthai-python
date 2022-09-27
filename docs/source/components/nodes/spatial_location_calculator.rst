@@ -1,8 +1,13 @@
 SpatialLocationCalculator
 =========================
 
-SpatialLocationCalculator will calculate the depth based on the :code:`depth` map from the :code:`inputDepth` and ROI (region-of-interest)
-provided from the :code:`inputConfig`. It will average the depth values in the ROI and remove the ones out of range.
+**SpatialLocationCalculator node** calculates the spatial coordinates of the ROI (region-of-interest) based on the
+:code:`depth` map from the :code:`inputDepth`. It will average the depth values in the ROI and remove the ones out of range.
+
+You can also calculate spatial coordiantes on host side, `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-calc-spatials-on-host>`__.
+The demo also has the same logic that's performed on the device (:code:`calc.py` file).
+
+.. image:: https://user-images.githubusercontent.com/18037362/146296930-9e7071f5-33b9-45f9-af21-cace7ffffc0f.gif
 
 How to place it
 ###############
@@ -12,7 +17,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatialCalc = pipeline.SpatialLocationCalculator()
+    spatialCalc = pipeline.create(dai.node.SpatialLocationCalculator)
 
   .. code-tab:: c++
 
@@ -50,7 +55,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatialCalc = pipeline.SpatialLocationCalculator()
+    spatialCalc = pipeline.create(dai.node.SpatialLocationCalculator)
     spatialCalc.setWaitForConfigInput(False)
 
     # Set initial config
@@ -64,7 +69,7 @@ Usage
 
     spatial_calc.initialConfig.addROI(config)
 
-    # You can later send configs from the host (XLinkIn) / scripting node to the InputConfig
+    # You can later send configs from the host (XLinkIn) / Script node to the InputConfig
 
 
   .. code-tab:: c++

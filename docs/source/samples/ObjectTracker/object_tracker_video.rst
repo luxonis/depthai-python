@@ -3,7 +3,7 @@ Object tracker on video
 
 This example shows how to run MobileNetv2SSD on video input frame, and perform object tracking on persons.
 
-.. rubric:: Similiar samples:
+.. rubric:: Similar samples:
 
 - :ref:`Object tracker on RGB`
 - :ref:`Spatial object tracker on RGB`
@@ -17,8 +17,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD based person-detection blob (:code:`person-detection-0201_openvino_2021.3_7shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/person-detection-0201_openvino_2021.3_7shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

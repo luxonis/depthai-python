@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
 
 readonly linux_pkgs=(
     python3
@@ -20,7 +20,7 @@ readonly ubuntu_pkgs=(
     libavcodec-dev
     libavformat-dev
     libswscale-dev
-    python-dev
+    python3-dev
     libtbb2
     libtbb-dev
     libjpeg-dev
@@ -32,6 +32,18 @@ readonly ubuntu_pkgs=(
     libsm6
     libxext6
     libgl1-mesa-glx
+    python3-pyqt5
+    python3-pyqt5.qtquick
+    qml-module-qtquick-controls2
+    qml-module-qt-labs-platform
+    qtdeclarative5-dev
+    qml-module-qtquick2
+    qtbase5-dev
+    qtchooser
+    qt5-qmake
+    qtbase5-dev-tools
+    qml-module-qtquick-layouts
+    qml-module-qtquick-window2
 )
 
 readonly ubuntu_arm_pkgs=(
@@ -41,8 +53,6 @@ readonly ubuntu_arm_pkgs=(
     libhdf5-dev
     libatlas-base-dev
     libjasper-dev
-    libqtgui4
-    libqt4-test
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
     libilmbase-dev
     libopenexr-dev
@@ -113,6 +123,28 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y "${ubuntu_arm_pkgs[@]}"
             python3 -m pip install --upgrade pip
         fi
+
+        # As set -e is set, retrieve the return value without exiting
+        RET=0
+        dpkg -s uvcdynctrl > /dev/null 2>&1 || RET=$? || true
+        # is uvcdynctrl installed
+        if [[ "$RET" == "0" ]]; then
+          echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
+          echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
+          echo -e "\033[33mYou can do so by running the following commands:\033[0m"
+          echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
+          echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
+          echo ""
+        fi
+
+        OS_VERSION=$(lsb_release -r |cut -f2)
+        if [ "$OS_VERSION" == "21.04" ]; then
+            echo -e "\033[33mThere are known issues with running our demo script on Ubuntu 21.04, due to package \"python3-pyqt5.sip\" not being in a correct version (>=12.9)\033[0m"
+            echo -e "\033[33mWe recommend installing the updated version manually using the following commands\033[0m"
+            echo -e "\033[33m$ wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pyqt5-sip/python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
+            echo -e "\033[33m$ sudo dpkg -i python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
+            echo ""
+        fi
     elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y
         sudo dnf install -y "${fedora_pkgs[@]}"
@@ -124,7 +156,8 @@ elif [ -f /etc/os-release ]; then
     fi
 
     # Allow all users to read and write to Myriad X devices
-    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+    echo "Installing udev rules..."
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules > /dev/null
     sudo udevadm control --reload-rules && sudo udevadm trigger
 else
     echo "ERROR: Host not supported"

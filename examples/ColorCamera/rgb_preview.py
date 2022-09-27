@@ -26,6 +26,9 @@ with dai.Device(pipeline) as device:
     print('Connected cameras: ', device.getConnectedCameras())
     # Print out usb speed
     print('Usb speed: ', device.getUsbSpeed().name)
+    # Bootloader version
+    if device.getBootloaderVersion() is not None:
+        print('Bootloader version: ', device.getBootloaderVersion())
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
