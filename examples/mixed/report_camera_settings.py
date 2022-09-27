@@ -32,7 +32,7 @@ with dai.Device(pipeline) as device:
         for q in [qRgb, qLeft]:
             imgFrame = q.get()
             name = q.getName()
-            txt += f"[{name}] Exposure: {imgFrame.getExposureTime()} us, "
+            txt += f"[{name}] Exposure: {imgFrame.getExposureTime().total_seconds()*1000:.3f} ms, "
             txt += f"ISO: {imgFrame.getSensitivity()},"
             txt += f" Lens position: {imgFrame.getLensPosition()},"
             txt += f" Color temp: {imgFrame.getColorTemperature()} K   "
