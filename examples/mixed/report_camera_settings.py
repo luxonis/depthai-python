@@ -32,8 +32,10 @@ with dai.Device(pipeline) as device:
         for q in [qRgb, qLeft]:
             imgFrame = q.get()
             name = q.getName()
-            # Reporting camera settings on MonoCamera isn't yet supported, so all values will be 0.
-            txt += f"[{name}] Expsoure: {imgFrame.getExposureTime()}, Sensitivity ISO: {imgFrame.getSensitivity()}, Lens position: {imgFrame.getLensPosition()} || "
+            txt += f"[{name}] Exposure: {imgFrame.getExposureTime()} us, "
+            txt += f"ISO: {imgFrame.getSensitivity()},"
+            txt += f" Lens position: {imgFrame.getLensPosition()},"
+            txt += f" Color temp: {imgFrame.getColorTemperature()} K   "
             cv2.imshow(name, imgFrame.getCvFrame())
         print(txt)
         if cv2.waitKey(1) == ord('q'):
