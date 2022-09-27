@@ -113,6 +113,7 @@ are presented with code.
 .. rubric:: Script
 
 - :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Script change pipeline flow` - Change the flow of data inside your pipeline in runtime with :ref:`Script` node
 - :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)

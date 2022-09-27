@@ -14,7 +14,7 @@ if res == True:
         print("USB Bootloader - supports only Flash memory")
         supportedMemTypes = [dai.DeviceBootloader.Memory.FLASH];
     else:
-        print("NETWORK Bootloader")
+        print(f"NETWORK Bootloader, is User Bootloader: {bl.isUserBootloader()}")
 
     try:
         for mem in supportedMemTypes:

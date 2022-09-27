@@ -32,6 +32,8 @@ Other controls:
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
   '+' or '=' to increase
+
+'/' to toggle showing camera settings: exposure, ISO, lens position, color temperature
 """
 
 import depthai as dai
@@ -117,6 +119,7 @@ with dai.Device(pipeline) as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
+    show = False
 
     awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
     anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
@@ -129,6 +132,13 @@ with dai.Device(pipeline) as device:
 
         ispFrames = ispQueue.tryGetAll()
         for ispFrame in ispFrames:
+            if show:
+                txt = f"[{ispFrame.getSequenceNum()}] "
+                txt += f"Exposure: {ispFrame.getExposureTime().total_seconds()*1000:.3f} ms, "
+                txt += f"ISO: {ispFrame.getSensitivity()}, "
+                txt += f"Lens position: {ispFrame.getLensPosition()}, "
+                txt += f"Color temp: {ispFrame.getColorTemperature()} K"
+                print(txt)
             cv2.imshow('isp', ispFrame.getCvFrame())
 
             # Send new cfg to camera
@@ -150,6 +160,9 @@ with dai.Device(pipeline) as device:
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('/'):
+            show = not show
+            if not show: print("Printing camera settings: OFF")
         elif key == ord('c'):
             ctrl = dai.CameraControl()
             ctrl.setCaptureStill(True)
