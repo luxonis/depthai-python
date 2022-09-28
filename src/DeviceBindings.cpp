@@ -261,7 +261,7 @@ static void bindConstructors(ARG& arg){
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
@@ -279,6 +279,16 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(config, deviceInfo);
     }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
+
+    // DeviceInfo version
+     .def(py::init([](const DeviceInfo& deviceInfo){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo);
+    }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
+     .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo, maxUsbSpeed);
+    }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
     ;
 
 }
@@ -421,6 +431,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("uart", &BoardConfig::uart)
         .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock)
         .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock)
+        .def_readwrite("mipi4LaneRgb", &BoardConfig::mipi4LaneRgb)
         .def_readwrite("emmc", &BoardConfig::emmc)
         .def_readwrite("logPath", &BoardConfig::logPath)
         .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
@@ -445,7 +456,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
             d.close();
         })
         .def("close", [](DeviceBase& d) { py::gil_scoped_release release; d.close(); }, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
-        .def("isClosed", &DeviceBase::isClosed, "Check if the device is still connected`")
+        .def("isClosed", [](DeviceBase& d) { py::gil_scoped_release release; return d.isClosed(); }, DOC(dai, DeviceBase, isClosed))
 
         //dai::Device methods
         //static
@@ -458,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
 
         // methods
+        .def("getBootloaderVersion", &DeviceBase::getBootloaderVersion, DOC(dai, DeviceBase, getBootloaderVersion))
         .def("isPipelineRunning", [](DeviceBase& d) { py::gil_scoped_release release; return d.isPipelineRunning(); }, DOC(dai, DeviceBase, isPipelineRunning))
         .def("startPipeline", [](DeviceBase& d){
             // Issue an deprecation warning
@@ -480,7 +492,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
-        .def("getConnectedCameraProperties", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraProperties(); }, DOC(dai, DeviceBase, getConnectedCameraProperties))
+        .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, DeviceBase, getCmxMemoryUsage))
@@ -498,8 +510,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
-        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
-        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
+        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
         .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
         .def("isEepromAvailable", [](DeviceBase& d) { py::gil_scoped_release release; return d.isEepromAvailable(); }, DOC(dai, DeviceBase, isEepromAvailable))
         .def("flashCalibration2", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashCalibration2(ch); }, DOC(dai, DeviceBase, flashCalibration2))
@@ -511,6 +523,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("readFactoryCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationOrDefault(); }, DOC(dai, DeviceBase, readFactoryCalibrationOrDefault))
         .def("readCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationRaw(); }, DOC(dai, DeviceBase, readCalibrationRaw))
         .def("readFactoryCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationRaw(); }, DOC(dai, DeviceBase, readFactoryCalibrationRaw))
+        .def("flashEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashEepromClear(); }, DOC(dai, DeviceBase, flashEepromClear))
+        .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
         .def("flashWrite", [](DeviceBase& d, std::vector<std::uint8_t> data, uint64_t o) { py::gil_scoped_release release; d.flashWrite(data, o); }, py::arg("data"), py::arg("offset") = 0, DOC(dai, DeviceBase, flashWrite))
         .def("flashRead", [](DeviceBase& d, uint32_t s, uint64_t o) { py::gil_scoped_release release; return d.flashRead(s, o); }, py::arg("size"), py::arg("offset") = 0, DOC(dai, DeviceBase, flashRead))
     ;
