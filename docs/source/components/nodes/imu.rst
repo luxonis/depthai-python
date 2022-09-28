@@ -48,7 +48,7 @@ Limitations
 ###########
 
 - For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
-- **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)`.
+- **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 500)`.
 
 Usage
 #####
@@ -60,8 +60,8 @@ Usage
     pipeline = dai.Pipeline()
     imu = pipeline.create(dai.node.IMU)
 
-    # enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 100)
+    # enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 100)
     # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu.setBatchReportThreshold(1)
     # maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
@@ -74,8 +74,8 @@ Usage
     dai::Pipeline pipeline;
     auto imu = pipeline.create<dai::node::IMU>();
 
-    // enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu->enableIMUSensor({dai::IMUSensor::RAW_ACCELEROMETER, dai::IMUSensor::RAW_GYROSCOPE}, 100);
+    // enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu->enableIMUSensor({dai::IMUSensor::ACCELEROMETER_RAW, dai::IMUSensor::GYROSCOPE_RAW}, 100);
     // above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu->setBatchReportThreshold(1);
     // maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
