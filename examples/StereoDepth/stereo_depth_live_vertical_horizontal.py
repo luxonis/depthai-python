@@ -17,10 +17,16 @@ parser.add_argument('-left', type=str, default="left.png", help="left static inp
 parser.add_argument('-right', type=str, default="right.png", help="right static input image")
 parser.add_argument('-bottom', type=str, default="bottom.png", help="bottom static input image")
 parser.add_argument('-debug', action="store_true", default=False, help="Debug code.")
+parser.add_argument('-rect', '--rectified', action="store_true", default=False, help="Generate and display rectified streams.")
+parser.add_argument('-fps', type=int, default=15, help="Set camera FPS.")
 
 args = parser.parse_args()
 
 staticInput = args.si
+
+enableRectified = args.rectified
+cameraFPS = args.fps
+blockingOutputs = True
 
 if staticInput:
     left = args.left
@@ -153,19 +159,24 @@ else:
     monoLeft = pipeline.create(dai.node.MonoCamera)
     monoVertical = pipeline.create(dai.node.MonoCamera)
     monoRight = pipeline.create(dai.node.MonoCamera)
+    monoLeft.setFps(cameraFPS)
+    monoVertical.setFps(cameraFPS)
+    monoRight.setFps(cameraFPS)
 
-xoutRectifiedVertical = pipeline.create(dai.node.XLinkOut)
-xoutRectifiedRight = pipeline.create(dai.node.XLinkOut)
-xoutRectifiedLeft = pipeline.create(dai.node.XLinkOut)
+if enableRectified:
+    xoutRectifiedVertical = pipeline.create(dai.node.XLinkOut)
+    xoutRectifiedRight = pipeline.create(dai.node.XLinkOut)
+    xoutRectifiedLeft = pipeline.create(dai.node.XLinkOut)
 xoutDisparityVertical = pipeline.create(dai.node.XLinkOut)
 xoutDisparityHorizontal = pipeline.create(dai.node.XLinkOut)
 stereoVertical = pipeline.create(dai.node.StereoDepth)
 stereoHorizontal = pipeline.create(dai.node.StereoDepth)
 syncNode = pipeline.create(dai.node.Sync)
 
-xoutRectifiedVertical.setStreamName("rectified_vertical")
-xoutRectifiedRight.setStreamName("rectified_right")
-xoutRectifiedLeft.setStreamName("rectified_left")
+if enableRectified:
+    xoutRectifiedVertical.setStreamName("rectified_vertical")
+    xoutRectifiedRight.setStreamName("rectified_right")
+    xoutRectifiedLeft.setStreamName("rectified_left")
 xoutDisparityVertical.setStreamName("disparity_vertical")
 xoutDisparityHorizontal.setStreamName("disparity_horizontal")
 
@@ -186,14 +197,16 @@ monoVertical.out.link(syncNode.input3)
 syncNode.output3.link(stereoVertical.left) # left input is bottom camera
 syncNode.output1.link(stereoVertical.right) # right input is right camera
 stereoVertical.disparity.link(xoutDisparityVertical.input)
-stereoVertical.rectifiedLeft.link(xoutRectifiedVertical.input)
-stereoVertical.rectifiedRight.link(xoutRectifiedRight.input)
+if enableRectified:
+    stereoVertical.rectifiedLeft.link(xoutRectifiedVertical.input)
+    stereoVertical.rectifiedRight.link(xoutRectifiedRight.input)
 stereoVertical.setVerticalStereo(True)
 
 syncNode.output2.link(stereoHorizontal.left)
 syncNode.output1.link(stereoHorizontal.right)
 stereoHorizontal.disparity.link(xoutDisparityHorizontal.input)
-stereoHorizontal.rectifiedLeft.link(xoutRectifiedLeft.input)
+if enableRectified:
+    stereoHorizontal.rectifiedLeft.link(xoutRectifiedLeft.input)
 # stereoHorizontal.rectifiedRight.link(xoutRectifiedRight.input)
 stereoHorizontal.setVerticalStereo(False)
 
@@ -290,11 +303,12 @@ if 1:
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    qDisparityHorizontal = device.getOutputQueue("disparity_horizontal", 4, False)
-    qDisparityVertical = device.getOutputQueue("disparity_vertical", 4, False)
-    qRectifiedVertical = device.getOutputQueue("rectified_vertical", 4, False)
-    qRectifiedRight = device.getOutputQueue("rectified_right", 4, False)
-    qRectifiedLeft = device.getOutputQueue("rectified_left", 4, False)
+    qDisparityHorizontal = device.getOutputQueue("disparity_horizontal", 4, blockingOutputs)
+    qDisparityVertical = device.getOutputQueue("disparity_vertical", 4, blockingOutputs)
+    if enableRectified:
+        qRectifiedVertical = device.getOutputQueue("rectified_vertical", 4, blockingOutputs)
+        qRectifiedRight = device.getOutputQueue("rectified_right", 4, blockingOutputs)
+        qRectifiedLeft = device.getOutputQueue("rectified_left", 4, blockingOutputs)
 
     if staticInput:
         qInLeft = device.getInputQueue("inLeft")
@@ -341,22 +355,24 @@ with dai.Device(pipeline) as device:
             qInVertical.send(img)
             # print("vertical send")
 
+        if enableRectified:
+            inRectifiedVertical = qRectifiedVertical.get()
+            frameRVertical = inRectifiedVertical.getCvFrame()
+            cv2.imshow("rectified_vertical", frameRVertical)
 
-        inRectifiedVertical = qRectifiedVertical.get()
-        frameRVertical = inRectifiedVertical.getCvFrame()
-        cv2.imshow("rectified_vertical", frameRVertical)
+            inRectifiedRight = qRectifiedRight.get()
+            frameRRight = inRectifiedRight.getCvFrame()
+            cv2.imshow("rectified_right", frameRRight)
 
-        inRectifiedRight = qRectifiedRight.get()
-        frameRRight = inRectifiedRight.getCvFrame()
-        cv2.imshow("rectified_right", frameRRight)
-
-        inRectifiedLeft = qRectifiedLeft.get()
-        frameRLeft = inRectifiedLeft.getCvFrame()
-        cv2.imshow("rectified_left", frameRLeft)
+            inRectifiedLeft = qRectifiedLeft.get()
+            frameRLeft = inRectifiedLeft.getCvFrame()
+            cv2.imshow("rectified_left", frameRLeft)
 
         inDisparityVertical = qDisparityVertical.get()
         frameDepth = inDisparityVertical.getCvFrame()
         # cv2.imshow("disparity", frameDepth)
+        tsV = inDisparityVertical.getTimestampDevice()
+        # print(tsV)
 
         disp = (frameDepth / 32).astype(np.uint8)
         cv2.imshow("disparity_vertical", disp)
@@ -364,6 +380,11 @@ with dai.Device(pipeline) as device:
         inDisparityHorizontal = qDisparityHorizontal.get()
         frameDepth = inDisparityHorizontal.getCvFrame()
         # cv2.imshow("disparity", frameDepth)
+        tsH = inDisparityHorizontal.getTimestampDevice()
+        # print(tsH)
+        disparityTsDiff = tsV-tsH
+        if disparityTsDiff:
+            print(disparityTsDiff)
 
         disp = (frameDepth / 32).astype(np.uint8)
         cv2.imshow("disparity_horizontal", disp)
