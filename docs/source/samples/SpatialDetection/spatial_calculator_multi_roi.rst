@@ -1,7 +1,7 @@
 Spatial Calculator Multi-ROI
 ============================
 
-This example shows how one can use multiple ROIs with a single :ref:`SpatailLocationCalculator` node. A similar logic could be used as a simple depth line
+This example shows how one can use multiple ROIs with a single :ref:`SpatialLocationCalculator` node. A similar logic could be used as a simple depth line
 scanning camera for mobile robots.
 
 .. rubric:: Similar samples:
