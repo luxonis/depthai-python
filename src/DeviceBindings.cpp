@@ -436,6 +436,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("logPath", &BoardConfig::logPath)
         .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
         .def_readwrite("logVerbosity", &BoardConfig::logVerbosity)
+        .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints)
     ;
 
     // Bind Device::Config
