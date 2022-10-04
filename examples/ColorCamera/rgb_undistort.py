@@ -59,7 +59,6 @@ def create_pipeline(calibData):
     mesh, meshWidth, meshHeight = getMesh(calibData, cam.getIspSize())
     manip.setWarpMesh(mesh, meshWidth, meshHeight)
     manip.setMaxOutputFrameSize(cam.getIspWidth() * cam.getIspHeight() * 3 // 2)
-    # TODO manip1.initialConfig.setWarpBorderFillColor(0, 0, 0)
     cam.isp.link(manip.inputImage)
 
     cam_xout = pipeline.create(dai.node.XLinkOut)
