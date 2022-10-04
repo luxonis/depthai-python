@@ -62,11 +62,11 @@ def create_pipeline(calibData):
     # TODO manip1.initialConfig.setWarpBorderFillColor(0, 0, 0)
     cam.isp.link(manip.inputImage)
 
-    cam_xout = pipeline.createXLinkOut()
+    cam_xout = pipeline.create(dai.node.XLinkOut)
     cam_xout.setStreamName("Undistorted")
     manip.out.link(cam_xout.input)
 
-    dist_xout = pipeline.createXLinkOut()
+    dist_xout = pipeline.create(dai.node.XLinkOut)
     dist_xout.setStreamName("Distorted")
     cam.isp.link(dist_xout.input)
 
