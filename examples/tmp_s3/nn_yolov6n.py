@@ -51,7 +51,7 @@ camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-camRgb.setFps(30)
+camRgb.setFps(15) # Limitation of the current preview source at 416x416 resolution
 
 # Network specific settings
 detectionNetwork.setConfidenceThreshold(0.5)
