@@ -85,6 +85,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
         .def_readonly("isp", &ColorCamera::isp, DOC(dai, node, ColorCamera, isp))
         .def_readonly("raw", &ColorCamera::raw, DOC(dai, node, ColorCamera, raw))
+        .def_readonly("frameEvent",  &ColorCamera::frameEvent, DOC(dai, node, ColorCamera, frameEvent))
         .def("setCamId", [](ColorCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
