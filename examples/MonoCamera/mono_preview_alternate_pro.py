@@ -3,9 +3,14 @@
 import cv2
 import depthai as dai
 
-fps = 30
-res = dai.MonoCameraProperties.SensorResolution.THE_720_P
-poolSize = 8  # default 3, increased to prevent desync
+if 1:  # PoE config
+    fps = 30
+    res = dai.MonoCameraProperties.SensorResolution.THE_400_P
+    poolSize = 24  # default 3, increased to prevent desync
+else:  # USB
+    fps = 30
+    res = dai.MonoCameraProperties.SensorResolution.THE_720_P
+    poolSize = 8  # default 3, increased to prevent desync
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -38,7 +43,7 @@ streams = ['dot-left', 'dot-right', 'flood-left', 'flood-right']
 script = pipeline.create(dai.node.Script)
 script.setProcessor(dai.ProcessorType.LEON_CSS)
 script.setScript("""
-    dotBright = 500
+    dotBright = 500  # Note: recommended to not exceed 765, for max duty cycle
     floodBright = 200
     LOGGING = False  # Set `True` for latency/timings debugging
 
