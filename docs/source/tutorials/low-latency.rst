@@ -108,9 +108,10 @@ Encoded frames
      - 7.5
      - `link <https://user-images.githubusercontent.com/18037362/162675335-2e5a9581-972a-448c-b650-6b6d076a04b8.png>`__
 
-You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-python/tree/tmp_zero_copy>`__
+You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-python/tree/message_zero_copy>`__
 branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat instead of doing memcopy (as it currently does),
 so performance improvement would depend on the image sizes you are using.
+(Note: API differs and not all functionality is available as is on the `message_zero_copy` branch)
 
 
 Reducing latency when running NN

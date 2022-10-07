@@ -279,6 +279,16 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(config, deviceInfo);
     }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
+
+    // DeviceInfo version
+     .def(py::init([](const DeviceInfo& deviceInfo){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo);
+    }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
+     .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo, maxUsbSpeed);
+    }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
     ;
 
 }
@@ -459,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
 
         // methods
+        .def("getBootloaderVersion", &DeviceBase::getBootloaderVersion, DOC(dai, DeviceBase, getBootloaderVersion))
         .def("isPipelineRunning", [](DeviceBase& d) { py::gil_scoped_release release; return d.isPipelineRunning(); }, DOC(dai, DeviceBase, isPipelineRunning))
         .def("startPipeline", [](DeviceBase& d){
             // Issue an deprecation warning

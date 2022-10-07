@@ -35,7 +35,7 @@ endif()
 
 # Pybindings project
 set(TARGET_NAME depthai)
-project(depthai VERSION "1") # revision of bindings [depthai-core].[rev]
+project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Set default build type depending on context
 set(default_build_type "Release")
@@ -100,6 +100,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
     src/log/LogBindings.cpp
+    src/VersionBindings.cpp
 
     src/pipeline/node/NodeBindings.cpp
 
@@ -124,6 +125,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/FeatureTrackerBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
+    src/pipeline/node/WarpBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
