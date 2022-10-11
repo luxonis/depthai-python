@@ -51,7 +51,7 @@ camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-camRgb.setFps(15) # Limitation of the current preview source at 416x416 resolution
+camRgb.setFps(30) # Limitation of the current preview source at 416x416 resolution
 
 # Network specific settings
 detectionNetwork.setConfidenceThreshold(0.5)
@@ -59,9 +59,12 @@ detectionNetwork.setNumClasses(80)
 detectionNetwork.setCoordinateSize(4)
 detectionNetwork.setIouThreshold(0.5)
 detectionNetwork.setBlobPath(nnPath)
-detectionNetwork.setNumInferenceThreads(8)
+detectionNetwork.setNumInferenceThreads(1)
 detectionNetwork.input.setBlocking(False)
 detectionNetwork.input.setQueueSize(1)
+# detectionNetwork.setBackend("native")
+detectionNetwork.setNumShavesPerInferenceThread(1)
+detectionNetwork.setNumNCEPerInferenceThread(1)
 
 # Linking
 camRgb.preview.link(detectionNetwork.input)
