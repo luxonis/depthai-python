@@ -3,7 +3,7 @@ Message syncing
 
 There are two ways to synchronize messages from different sensors (frames, IMU packet, ToF, etc.);
 
-- :ref:`Software syncing <Software "soft" sync>` (based on timestamp/sequence numbers)
+- :ref:`Software syncing <Software syncing>` (based on timestamp/sequence numbers)
 - `Hardware syncing <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/sync_frames.html>`__ (multi-sensor sub-ms accuracy, hardware trigger)
 
 Software syncing
@@ -27,7 +27,7 @@ Each frame from ColorCamera/MonoCamera will get assigned a sequence number, whic
 
 For sequence number syncing **FPS of all cameras need to be the same**. On host or inside script node you can get message's sequence number like this:
 
-.. code-block:: depthai-python
+.. code-block:: python
 
     # Get the message from the queue
     message = queue.get()
