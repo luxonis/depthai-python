@@ -96,6 +96,7 @@ mono_res_opts = {
     480: dai.MonoCameraProperties.SensorResolution.THE_480_P,
     720: dai.MonoCameraProperties.SensorResolution.THE_720_P,
     800: dai.MonoCameraProperties.SensorResolution.THE_800_P,
+    1200: dai.MonoCameraProperties.SensorResolution.THE_1200_P,
 }
 
 color_res_opts = {
