@@ -46,8 +46,8 @@ with dai.Device(pipeline) as device:
             acceleroValues = imuPacket.acceleroMeter
             gyroValues = imuPacket.gyroscope
 
-            acceleroTs = acceleroValues.timestamp.get()
-            gyroTs = gyroValues.timestamp.get()
+            acceleroTs = acceleroValues.getTimestampDevice()
+            gyroTs = gyroValues.getTimestampDevice()
             if baseTs is None:
                 baseTs = acceleroTs if acceleroTs < gyroTs else gyroTs
             acceleroTs = timeDeltaToMilliS(acceleroTs - baseTs)
