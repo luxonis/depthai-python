@@ -1,20 +1,45 @@
 RGB Camera Control
 ==================
 
-This example shows how to control the device-side crop and camera triggers.
-An output is a displayed RGB cropped frame, that can be manipulated using the following keys:
+This example shows how to control the :ref:`ColorCamera`, such as exposure, sensitivity, white balance, luma/chroma denoise,
+device-side crop, camera triggers, etc.
 
-#. `w` will move the crop up
-#. `a` will move the crop left
-#. `s` will move the crop down
-#. `d` will move the crop right
-#. `c` will trigger a `still` event, causing the current frame to be captured and sent over `still` output from camera node
-#. `t` will trigger autofocus
-#. `f` will trigger autofocus continuously
-#. `e` will trigger autoexposure
-#. `i` and `o` will decrease/increase the exposure time
-#. `k` and `l` will decrease/increase the sensitivity iso
-#. `,` and `.` will decrease/increase the focus range
+An output is a full frame along with cropped frame (``video``) which can be moved with ``WASD`` keys.
+
+**List of all controls**:
+
+.. code-block::
+
+  Uses 'WASD' controls to move the crop window, 'C' to capture a still image, 'T' to
+  trigger autofocus, 'IOKL,.NM' for manual exposure/focus/white-balance:
+    Control:      key[dec/inc]  min..max
+    exposure time:     I   O      1..33000 [us]
+    sensitivity iso:   K   L    100..1600
+    focus:             ,   .      0..255 [far..near]
+    white balance:     N   M   1000..12000 (light color temperature K)
+
+  To go back to auto controls:
+    'E' - autoexposure
+    'F' - autofocus (continuous)
+    'B' - auto white-balance
+
+  Other controls:
+    '1' - AWB lock (true / false)
+    '2' - AE lock (true / false)
+    '3' - Select control: AWB mode
+    '4' - Select control: AE compensation
+    '5' - Select control: anti-banding/flicker mode
+    '6' - Select control: effect mode
+    '7' - Select control: brightness
+    '8' - Select control: contrast
+    '9' - Select control: saturation
+    '0' - Select control: sharpness
+    '[' - Select control: luma denoise
+    ']' - Select control: chroma denoise
+
+  For the 'Select control: ...' options, use these keys to modify the value:
+    '-' or '_' to decrease
+    '+' or '=' to increase
 
 .. rubric:: Similar samples:
 

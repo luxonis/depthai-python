@@ -40,6 +40,7 @@ void bind_tracklets(pybind11::module& m, void* pCallstack){
         .def_readwrite("roi", &Tracklet::roi)
         .def_readwrite("id", &Tracklet::id)
         .def_readwrite("label", &Tracklet::label)
+        .def_readwrite("age", &Tracklet::age)
         .def_readwrite("status", &Tracklet::status)
         .def_readwrite("srcImgDetection", &Tracklet::srcImgDetection)
         .def_readwrite("spatialCoordinates", &Tracklet::spatialCoordinates)
@@ -61,6 +62,12 @@ void bind_tracklets(pybind11::module& m, void* pCallstack){
     tracklets
         .def(py::init<>())
         .def_property("tracklets", [](Tracklets& track) { return &track.tracklets; }, [](Tracklets& track, std::vector<Tracklet> val) { track.tracklets = val; }, DOC(dai, Tracklets, tracklets))
+        .def("getTimestamp", &Tracklets::getTimestamp, DOC(dai, Tracklets, getTimestamp))
+        .def("getTimestampDevice", &Tracklets::getTimestampDevice, DOC(dai, Tracklets, getTimestampDevice))
+        .def("getSequenceNum", &Tracklets::getSequenceNum, DOC(dai, Tracklets, getSequenceNum))
+        .def("setTimestamp", &Tracklets::setTimestamp, DOC(dai, Tracklets, setTimestamp))
+        .def("setTimestampDevice", &Tracklets::setTimestampDevice, DOC(dai, Tracklets, setTimestampDevice))
+        .def("setSequenceNum", &Tracklets::setSequenceNum, DOC(dai, Tracklets, setSequenceNum))
         ;
 
 }

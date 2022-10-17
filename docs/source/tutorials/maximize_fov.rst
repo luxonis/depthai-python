@@ -4,22 +4,30 @@ Maximizing FOV
 In this tutorial we will look at how you can use the full FOV of the image sensor.
 
 When you are using ``preview`` output from :ref:`ColorCamera`, DepthAI will crop the
-frames by default to get the desired aspect ratio. ``preview`` stream derives from ``video`` stream, which is cropped (16:9 aspect ratio,
-max 4k resolution) from the ``isp`` stream, which has the full FOV.
+frames by default to get the desired aspect ratio. ``preview`` stream derives from the ``video`` stream, which is cropped
+(16:9 aspect ratio, max 4k resolution) from the ``isp`` stream, which has the full FOV.
+
+**To get the full FOV** of a sensor you need to use its **max resolution** (or 1/N of it, if supported).
+So for `OV9282 <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/sensors/ov9282.html#ov9282>`__ (800P)
+you can use either 800P or 400P resolution to get full FOV. Meanwhile, for `IMX378 <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/sensors/imx378.html#imx378>`__,
+you need to set full 12MP resolution (as there's no eg. 6MP support). You can use :ref:`ColorCamera`'s' ``.setIspScale()``
+to downscale the 12MP if you don't need such large frames.
+
+A challenge occurs when your **NN model expects a different aspect ratio** (eg. 1:1) compared to the **sensors aspect ratio**
+(eg. 4:3), and we want to run NN inference on the full FOV of the sensor. Let's say we have a MobileNet-SSD that
+requires 300x300 frames (1:1 aspect ratio) - we have a few options:
+
+#. :ref:`Stretch the ISP frame <Change aspect ratio>` to 1:1 aspect ratio of the NN
+#. :ref:`Apply letterboxing <Letterboxing>` to the ISP frame to get 1:1 aspect ratio frame
+#. :ref:`Crop the ISP frame <Cropping>` to 1:1 aspect ratio and lose some FOV
 
 .. image:: /_static/images/tutorials/isp.jpg
 
-The image above is the ``isp`` output from the :ref:`ColorCamera` (12MP from IMX378). The blue rectangle represents the cropped 4K
-``video`` output, and the yellow rectangle represents a cropped ``preview`` output when the preview size is set to 1:1 aspect ratio
-(eg. when using 300x300 MobileNet-SSD NN model).
-
-In other words, you **need to use ISP output** from the :ref:`ColorCamera` **to maximize the image FOV**. A challenge
-occures when your NN model expects different aspect ratio (eg. 1:1) compared to isp output (eg. 4:3). Let's say we have
-a MobileNet-SSD which requires 300x300 frames (1:1 aspect ratio) - we have a few options:
-
-#. :ref:`Stretch the ISP frame <Change aspect ratio>` to to the 1:1 aspect ratio of the NN
-#. :ref:`Apply letterboxing <Letterboxing>` to the ISP frame to get 1:1 aspect ratio frame
-#. :ref:`Crop the ISP frame <Cropping>` to 1:1 aspect ratio and lose some FOV
+The image above is the ``isp`` output from the :ref:`ColorCamera` (12MP resolution from IMX378). If you aren't downscaling ISP,
+the ``video`` output is cropped to 4k (max 3840x2160 due to the limitation of the ``video`` output) as represented by
+the blue rectangle. The Yellow rectangle represents a cropped ``preview`` output when the preview size is set to a 1:1 aspect
+ratio (eg. when using a 300x300 preview size for the MobileNet-SSD NN model) because the ``preview`` output is derived from
+the ``video`` output (see :ref:`ColorCamera` for more information).
 
 Change aspect ratio
 *******************
