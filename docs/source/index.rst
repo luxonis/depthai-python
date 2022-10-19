@@ -15,7 +15,7 @@ We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ 
 .. image:: /_static/images/api_diagram.png
 
 - **Host side** is a computer, like PC or RPi, to which an OAK device is connected.
-- **Device side** is the OAK device itself. If something is happening on the device side, it means that it's running on the `Myriad X VPU <https://www.intel.com/content/www/us/en/products/details/processors/movidius-vpu/movidius-myriad-x.html>`__. More :ref:`information here <components_device>`.
+- **Device side** is the OAK device itself. If something is happening on the device side, it means that it's running on the Robotics Vision Core (`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). More :ref:`information here <components_device>`.
 - **Pipeline** is a complete workflow on the device side, consisting of :ref:`nodes <Nodes>` and connections between them. More :ref:`information here <components_device>`.
 - **Node** is a single functionality of the DepthAI. :ref:`Nodes` have inputs or outputs, and have configurable properties (like resolution on the camera node).
 - **Connection** is a link between one node's output and another one's input. In order to define the pipeline dataflow, the connections define where to send :ref:`messages <Messages>` in order to achieve an expected result
@@ -77,7 +77,7 @@ node functionalities are presented with code.
    tutorials/debugging.rst
    tutorials/ram_usage.rst
    tutorials/dispaying_detections.rst
-   tutorials/camera_tuning.rst
+   tutorials/image_quality.rst
    tutorials/low-latency.rst
 
 .. toctree::
