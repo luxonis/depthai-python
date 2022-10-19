@@ -26,7 +26,6 @@ readonly ubuntu_pkgs=(
     libjpeg-dev
     libpng-dev
     libtiff-dev
-    libdc1394-22-dev
     # https://stackoverflow.com/questions/55313610
     ffmpeg
     libsm6
@@ -46,8 +45,19 @@ readonly ubuntu_pkgs=(
     qml-module-qtquick-window2
 )
 
+readonly ubuntu_pkgs_pre22_04=(
+    "${ubuntu_pkgs[@]}"
+    libdc1394-22-dev
+)
+
+readonly ubuntu_pkgs_22_04=(
+    "${ubuntu_pkgs[@]}"
+    libdc1394-dev
+)
+
 readonly ubuntu_arm_pkgs=(
     "${ubuntu_pkgs[@]}"
+    libdc1394-22-dev
     # https://stackoverflow.com/a/53402396/5494277
     libhdf5-dev
     libhdf5-dev
@@ -116,7 +126,11 @@ elif [ -f /etc/os-release ]; then
     if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
-            sudo apt-get install -y "${ubuntu_pkgs[@]}"
+            if [[ "$VERSION_ID" == "22.04" ]]; then
+                sudo apt-get install -y "${ubuntu_pkgs_22_04[@]}"
+            else
+                sudo apt-get install -y "${ubuntu_pkgs_pre22_04[@]}"
+            fi
             python3 -m pip install --upgrade pip
         elif [[ $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
