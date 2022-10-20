@@ -43,7 +43,7 @@ with dai.Device(pipeline) as device:
         for imuPacket in imuPackets:
             rVvalues = imuPacket.rotationVector
 
-            rvTs = rVvalues.timestamp.get()
+            rvTs = rVvalues.getTimestampDevice()
             if baseTs is None:
                 baseTs = rvTs
             rvTs = rvTs - baseTs

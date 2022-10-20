@@ -41,12 +41,10 @@ imageManip = pipeline.create(dai.node.ImageManip)
 
 xoutManip = pipeline.create(dai.node.XLinkOut)
 nnOut = pipeline.create(dai.node.XLinkOut)
-depthRoiMap = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 
 xoutManip.setStreamName("right")
 nnOut.setStreamName("detections")
-depthRoiMap.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
 # Properties
@@ -81,7 +79,6 @@ else:
     imageManip.out.link(xoutManip.input)
 
 spatialDetectionNetwork.out.link(nnOut.input)
-spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
 stereo.rectifiedRight.link(imageManip.inputImage)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
@@ -93,7 +90,6 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    depthRoiMapQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     rectifiedRight = None
@@ -125,25 +121,22 @@ with dai.Device(pipeline) as device:
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         detections = inDet.detections
-        if len(detections) != 0:
-            boundingBoxMapping = depthRoiMapQueue.get()
-            roiDatas = boundingBoxMapping.getConfigData()
-
-            for roiData in roiDatas:
-                roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
-                topLeft = roi.topLeft()
-                bottomRight = roi.bottomRight()
-                xmin = int(topLeft.x)
-                ymin = int(topLeft.y)
-                xmax = int(bottomRight.x)
-                ymax = int(bottomRight.y)
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
         # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
         width = rectifiedRight.shape[1]
         for detection in detections:
+            roiData = detection.boundingBoxMapping
+            roi = roiData.roi
+            roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+            topLeft = roi.topLeft()
+            bottomRight = roi.bottomRight()
+            xmin = int(topLeft.x)
+            ymin = int(topLeft.y)
+            xmax = int(bottomRight.x)
+            ymax = int(bottomRight.y)
+            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+
             # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
