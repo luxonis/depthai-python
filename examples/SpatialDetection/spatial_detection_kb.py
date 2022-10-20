@@ -15,7 +15,7 @@ Spatial Tiny-yolo example
 
 # Get argument first
 parentDir = Path(__file__).parent
-nnBlobPath = str((parentDir / Path('../models/yolov4_tiny_coco_416x416_2022.1_vpux.blob')).resolve().absolute())
+nnBlobPath = str((parentDir / Path('../models/yolov6n_416x416_openvino2022.1_vpux.blob')).resolve().absolute())
 if not Path(nnBlobPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
@@ -39,7 +39,7 @@ labelMap = [
 syncNN = True
 
 
-
+FPS = 6
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -54,23 +54,29 @@ xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutNN = pipeline.create(dai.node.XLinkOut)
 xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutMonoL = pipeline.create(dai.node.XLinkOut)
+xoutMonoR = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
+xoutMonoL.setStreamName("monol")
+xoutMonoR.setStreamName("monor")
 
 # Properties
 camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-camRgb.setFps(5)
+camRgb.setFps(FPS)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setFps(FPS)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setFps(FPS)
 
 # setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
@@ -80,21 +86,18 @@ stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight
 
 spatialDetectionNetwork.setBlobPath(Path(nnBlobPath))
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
-spatialDetectionNetwork.input.setBlocking(False)
-spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
-spatialDetectionNetwork.setDepthLowerThreshold(100)
-spatialDetectionNetwork.setDepthUpperThreshold(5000)
-
-# Yolo specific parameters
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
-spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
+spatialDetectionNetwork.setNumInferenceThreads(3)
+spatialDetectionNetwork.input.setBlocking(False)
+spatialDetectionNetwork.input.setQueueSize(1)
 
 # Linking
 monoLeft.out.link(stereo.left)
+monoLeft.out.link(xoutMonoL.input)
 monoRight.out.link(stereo.right)
+monoRight.out.link(xoutMonoR.input)
 stereo.depth.link(xoutDepth.input)
 camRgb.preview.link(spatialDetectionNetwork.input)
 if syncNN:
@@ -115,6 +118,8 @@ with dai.Device(pipeline) as device:
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+    xoutMonoLQueue = device.getOutputQueue(name="monol")
+    xoutMonoRQueue = device.getOutputQueue(name="monor")
 
     startTime = time.monotonic()
     counter = 0
@@ -129,6 +134,9 @@ with dai.Device(pipeline) as device:
 
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame() # depthFrame values are in millimeters
+
+        monoL = xoutMonoLQueue.get().getCvFrame()
+        monoR = xoutMonoRQueue.get().getCvFrame()
 
         depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
         depthFrameColor = cv2.equalizeHist(depthFrameColor)
@@ -183,6 +191,8 @@ with dai.Device(pipeline) as device:
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
         cv2.imshow("depth", depthFrameColor)
         cv2.imshow("rgb", frame)
+        cv2.imshow("monol", monoL)
+        cv2.imshow("monor", monoR)
 
         if cv2.waitKey(1) == ord('q'):
             break
