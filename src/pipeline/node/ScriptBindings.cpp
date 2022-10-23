@@ -41,7 +41,7 @@ void bind_script(pybind11::module& m, void* pCallstack){
         .def("setScriptPath", &Script::setScriptPath, DOC(dai, node, Script, setScriptPath))
         .def("setScript", py::overload_cast<const std::string&, const std::string&>(&Script::setScript), py::arg("script"), py::arg("name") = "", DOC(dai, node, Script, setScript))
         .def("setScript", py::overload_cast<const std::vector<std::uint8_t>&, const std::string&>(&Script::setScript), py::arg("data"), py::arg("name") = "", DOC(dai, node, Script, setScript, 2))
-        .def("getScriptPath", &Script::getScriptPath, DOC(dai, node, Script, getScriptPath))
+        .def("setScriptPath", &Script::setScriptPath, py::arg("path"), py::arg("name") = "", DOC(dai, node, Script, setScriptPath))
         .def("getScriptName", &Script::getScriptName, DOC(dai, node, Script, getScriptName))
         .def("setProcessor", &Script::setProcessor, DOC(dai, node, Script, setProcessor))
         .def("getProcessor", &Script::getProcessor, DOC(dai, node, Script, getProcessor))

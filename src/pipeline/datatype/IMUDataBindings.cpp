@@ -46,6 +46,8 @@ void bind_imudata(pybind11::module& m, void* pCallstack){
         .def_readwrite("accuracy", &IMUReport::accuracy)
         .def_readwrite("timestamp", &IMUReport::timestamp)
         .def_readwrite("tsDevice", &IMUReport::tsDevice)
+        .def("getTimestamp", &IMUReport::getTimestamp, DOC(dai, IMUReport, getTimestamp))
+        .def("getTimestampDevice", &IMUReport::getTimestampDevice, DOC(dai, IMUReport, getTimestampDevice))
         ;
 
     imuReportAccuracy

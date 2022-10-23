@@ -20,6 +20,7 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
     py::enum_<XLinkDeviceState_t> xLinkDeviceState(m, "XLinkDeviceState");
     py::enum_<XLinkProtocol_t> xLinkProtocol(m, "XLinkProtocol");
     py::enum_<XLinkPlatform_t> xLinkPlatform(m, "XLinkPlatform");
+    py::enum_<XLinkError_t> xLinkError(m, "XLinkError_t");
     py::class_<XLinkConnection, std::shared_ptr<XLinkConnection> > xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
 
     // pybind11 limitation of having actual classes as exceptions
@@ -137,6 +138,26 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
         .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
         ;
+
+    xLinkError
+        .value("X_LINK_SUCCESS", X_LINK_SUCCESS)
+        .value("X_LINK_ALREADY_OPEN", X_LINK_ALREADY_OPEN)
+        .value("X_LINK_COMMUNICATION_NOT_OPEN", X_LINK_COMMUNICATION_NOT_OPEN)
+        .value("X_LINK_COMMUNICATION_FAIL", X_LINK_COMMUNICATION_FAIL)
+        .value("X_LINK_COMMUNICATION_UNKNOWN_ERROR", X_LINK_COMMUNICATION_UNKNOWN_ERROR)
+        .value("X_LINK_DEVICE_NOT_FOUND", X_LINK_DEVICE_NOT_FOUND)
+        .value("X_LINK_TIMEOUT", X_LINK_TIMEOUT)
+        .value("X_LINK_ERROR", X_LINK_ERROR)
+        .value("X_LINK_OUT_OF_MEMORY", X_LINK_OUT_OF_MEMORY)
+        .value("X_LINK_INSUFFICIENT_PERMISSIONS", X_LINK_INSUFFICIENT_PERMISSIONS)
+        .value("X_LINK_DEVICE_ALREADY_IN_USE", X_LINK_DEVICE_ALREADY_IN_USE)
+        .value("X_LINK_NOT_IMPLEMENTED", X_LINK_NOT_IMPLEMENTED)
+        .value("X_LINK_INIT_USB_ERROR", X_LINK_INIT_USB_ERROR)
+        .value("X_LINK_INIT_TCP_IP_ERROR", X_LINK_INIT_TCP_IP_ERROR)
+        .value("X_LINK_INIT_PCIE_ERROR", X_LINK_INIT_PCIE_ERROR)
+        .export_values()
+        ;
+
 
     //// Exceptions
 

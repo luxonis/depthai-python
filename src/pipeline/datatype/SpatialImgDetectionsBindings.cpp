@@ -37,6 +37,7 @@ void bind_spatialimgdetections(pybind11::module& m, void* pCallstack){
     spatialImgDetection
         .def(py::init<>())
         .def_readwrite("spatialCoordinates", &SpatialImgDetection::spatialCoordinates)
+        .def_readwrite("boundingBoxMapping", &SpatialImgDetection::boundingBoxMapping)
         ;
 
     rawSpatialImgDetections
