@@ -20,7 +20,7 @@ if not Path(nnBlobPath).exists():
     import sys
     raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
-# Tiny yolo v3/4 label texts
+# Yolo label texts
 labelMap = [
     "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
     "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -66,7 +66,7 @@ xoutMonoR.setStreamName("monor")
 
 # Properties
 camRgb.setPreviewSize(416, 416)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 camRgb.setFps(FPS)
@@ -80,12 +80,13 @@ monoRight.setFps(FPS)
 
 # setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-# Align depth map to the perspective of RGB camera, on which inference is done
-stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+# Align depth map to the perspective of right camera (works on boards that have the RGB close to the right mono)
+stereo.setDepthAlign(dai.CameraBoardSocket.RIGHT)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 spatialDetectionNetwork.setBlobPath(Path(nnBlobPath))
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
+# spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setIouThreshold(0.5)
