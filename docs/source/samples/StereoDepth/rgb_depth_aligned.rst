@@ -8,6 +8,11 @@ In this example, rgb and depth aren't perfectly in sync. For that, you would nee
 has been added to the `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-syncing#host-rgb-depth-sync>`__,
 where RGB and depth frames have sub-ms delay.
 
+By default, the depth map will get scaled to match the resolution of the camera sensor we want to align to. In other words, if
+depth is aligned to the 1080P color sensor, StereoDepth will upscale depth to 1080P as well.
+Depth scaling can be avoided by configuring :ref:`StereoDepth`'s ``stereo.setOutputSize(width, height)``.
+
+
 Demo
 ####
 
