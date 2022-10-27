@@ -51,7 +51,7 @@ Usage
     # Create ColorCamera beforehand
     # Set H265 encoding for the ColorCamera video output
     videoEncoder = pipeline.create(dai.node.VideoEncoder)
-    videoEncoder.setDefaultProfilePreset(cam.getVideoSize(), cam.getFps(), dai.VideoEncoderProperties.Profile.H265_MAIN)
+    videoEncoder.setDefaultProfilePreset(cam.getFps(), dai.VideoEncoderProperties.Profile.H265_MAIN)
 
     # Create MJPEG encoding for still images
     stillEncoder = pipeline.create(dai.node.VideoEncoder)
