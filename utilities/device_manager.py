@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+USE_OPENCV = False
+
 from datetime import timedelta
 import depthai as dai
 import tempfile
@@ -8,7 +10,13 @@ import sys
 from typing import Dict
 import platform
 import os
-import cv2
+
+if USE_OPENCV:
+    # import cv2
+    pass
+else:
+    import io
+    from PIL import Image
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -247,27 +255,70 @@ def factoryReset(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
 
 def connectAndStartStreaming(dev):
 
-    # Create pipeline
-    pipeline = dai.Pipeline()
+    # OpenCV
+    if USE_OPENCV:
+        # Create pipeline
+        pipeline = dai.Pipeline()
 
-    camRgb = pipeline.create(dai.node.ColorCamera)
-    camRgb.setIspScale(1,3)
-    videnc = pipeline.create(dai.node.VideoEncoder)
-    videnc.setDefaultProfilePreset(camRgb.getFps(), videnc.Properties.Profile.MJPEG)
-    xout = pipeline.create(dai.node.XLinkOut)
-    xout.setStreamName("mjpeg")
-    camRgb.video.link(videnc.input)
-    videnc.bitstream.link(xout.input)
+        camRgb = pipeline.create(dai.node.ColorCamera)
+        camRgb.setIspScale(1,3)
+        videnc = pipeline.create(dai.node.VideoEncoder)
+        videnc.setDefaultProfilePreset(camRgb.getFps(), videnc.Properties.Profile.MJPEG)
+        xout = pipeline.create(dai.node.XLinkOut)
+        xout.setStreamName("mjpeg")
+        camRgb.video.link(videnc.input)
+        videnc.bitstream.link(xout.input)
 
-    with dai.Device(pipeline, dev) as d:
-        while not d.isClosed():
-            mjpeg = d.getOutputQueue('mjpeg').get()
-            frame = cv2.imdecode(mjpeg.getData(), cv2.IMREAD_UNCHANGED)
-            cv2.imshow('Color Camera', frame)
-            if cv2.waitKey(1) == ord('q'):
-                cv2.destroyWindow('Color Camera')
-                break
+        with dai.Device(pipeline, dev) as d:
+            while not d.isClosed():
+                mjpeg = d.getOutputQueue('mjpeg').get()
+                frame = cv2.imdecode(mjpeg.getData(), cv2.IMREAD_UNCHANGED)
+                cv2.imshow('Color Camera', frame)
+                if cv2.waitKey(1) == ord('q'):
+                    cv2.destroyWindow('Color Camera')
+                    break
+    else:
+        # Create pipeline (no opencv)
+        pipeline = dai.Pipeline()
+        camRgb = pipeline.create(dai.node.ColorCamera)
+        camRgb.setIspScale(1,3)
+        camRgb.setPreviewSize(camRgb.getIspSize())
+        camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
 
+        xout = pipeline.create(dai.node.XLinkOut)
+        xout.input.setQueueSize(2)
+        xout.input.setBlocking(False)
+        xout.setStreamName("color")
+        camRgb.preview.link(xout.input)
+
+        with dai.Device(pipeline, dev) as d:
+            frame = d.getOutputQueue('color', 2, False).get()
+            width, height = frame.getWidth(), frame.getHeight()
+
+            layout = [[sg.Graph(
+                canvas_size=(width, height),
+                graph_bottom_left=(0, 0),
+                graph_top_right=(width, height),
+                key="-GRAPH-",
+                change_submits=True,  # mouse click events
+                background_color='lightblue',
+                drag_submits=True), ],]
+            window = sg.Window("Color Camera Stream", layout, finalize=True)
+            graph = window["-GRAPH-"]
+
+            while not d.isClosed():
+                frame = d.getOutputQueue('color').get()
+                with io.BytesIO() as output:
+                    rgb = frame.getFrame()
+                    image = Image.fromarray(rgb, "RGB")
+                    image.save(output, format="GIF")
+                    contents = output.getvalue()
+                    graph.draw_image(data=contents, location=(0, height))
+
+                event, values = window.read(timeout=1)
+                if event == sg.WIN_CLOSED:
+                    break
+            window.close()
 
 
 def flashFromFile(file, bl: dai.DeviceBootloader):
