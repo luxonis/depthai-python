@@ -170,7 +170,14 @@ static auto deviceSearchHelper(Args&&... args){
     });
 
     // if no devices found, then throw
-    if(!found) throw std::runtime_error("No available devices");
+    if(!found) {
+        auto numConnected = DEVICE::getAllAvailableDevices().size();
+        if(numConnected > 0) {
+            throw std::runtime_error("No available devices (" + std::to_string(numConnected) + " connected, but in use)");
+        } else {
+            throw std::runtime_error("No available devices");
+        }
+    }
 
     return deviceInfo;
 }
