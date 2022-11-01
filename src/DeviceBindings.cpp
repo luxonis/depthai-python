@@ -170,7 +170,14 @@ static auto deviceSearchHelper(Args&&... args){
     });
 
     // if no devices found, then throw
-    if(!found) throw std::runtime_error("No available devices");
+    if(!found) {
+        auto numConnected = DEVICE::getAllAvailableDevices().size();
+        if(numConnected > 0) {
+            throw std::runtime_error("No available devices (" + std::to_string(numConnected) + " connected, but in use)");
+        } else {
+            throw std::runtime_error("No available devices");
+        }
+    }
 
     return deviceInfo;
 }
@@ -468,6 +475,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
+        .def_static("getAllConnectedDevices", &DeviceBase::getAllConnectedDevices, DOC(dai, DeviceBase, getAllConnectedDevices))
 
         // methods
         .def("getBootloaderVersion", &DeviceBase::getBootloaderVersion, DOC(dai, DeviceBase, getBootloaderVersion))
@@ -527,6 +535,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashEepromClear(); }, DOC(dai, DeviceBase, flashEepromClear))
         .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
+        .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
     ;
 
 
