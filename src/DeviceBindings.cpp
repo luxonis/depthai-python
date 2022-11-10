@@ -536,6 +536,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
+        .def("getDeviceName", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDeviceName(); }, DOC(dai, DeviceBase, getDeviceName))
     ;
 
 
