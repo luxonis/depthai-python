@@ -41,7 +41,6 @@ else
    echo "Downloading demo app."
    git clone https://github.com/luxonis/depthai.git "$WORKING_DIR"
 fi
-cp macOS_installer.sh "$WORKING_DIR"
 cp install_python_dependencies.sh "$WORKING_DIR"
 cd "$WORKING_DIR"
 git checkout demo_app_installation
@@ -62,7 +61,7 @@ fi
 
 # Bash warning: There are some systems where the BASH_ENV variable is configured to point to .bashrc. On such systems, you should almost certainly put the eval "$(pyenv init -)" line into .bash_profile, and not into .bashrc
 if [ "$BASH_ENV" = "$HOME/.bashrc" ]; then
-   write_in_file >> "$BASH_PROFILE"
+   write_in_file "$BASH_PROFILE"
 else
    write_in_file "$HOME/.bashrc"
 fi
