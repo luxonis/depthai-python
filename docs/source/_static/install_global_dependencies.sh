@@ -172,11 +172,10 @@ export APP_NAME="depthai_demo_app"
 WORKING="$HOME/$APP_NAME"
 export WORKING_DIR="$WORKING"
 
-cp macOS_installer.sh "$WORKING_DIR"
-cp install_python_dependencies.sh "$WORKING_DIR"
-echo __________________________________
 # now only macos finished
-
+echo _____________________________
+echo "Calling macOS_installer.sh"
+echo _____________________________
 ./macOS_installer.sh
 # TODO: next script call is in the macOS_isntaller, otherwise I get [6]  + 87718 suspended (tty input)  ./install_global_dependencies.sh
 #./install_python_dependencies.sh

@@ -1,6 +1,8 @@
 #!/bin/bash -i
 
 cd "$HOME/depthai_demo_app"
+pwd
+echo _______
 export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
 export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
 if which pyenv ; then
@@ -18,6 +20,8 @@ if which pyenv ; then
    pyenv activate demo_app_venv
    which python
    which python3
+   echo __________
+   pwd
    python install_requirements.py
    python depthai_demo.py
 
