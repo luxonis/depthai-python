@@ -170,9 +170,8 @@ echo "$CURR_DIR"
 
 export APP_NAME="depthai_demo_app"
 WORKING="$HOME/$APP_NAME"
-
-mkdir "$WORKING"
 export WORKING_DIR="$WORKING"
+
 cp macOS_installer.sh "$WORKING_DIR"
 cp install_python_dependencies.sh "$WORKING_DIR"
 echo __________________________________

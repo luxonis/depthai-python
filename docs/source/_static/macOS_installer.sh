@@ -33,15 +33,17 @@ echo "Running macOS installer."
 echo "Upgrading brew."
 brew upgrade
 # clone depthai form git
-cd "$HOME"
-if [ -d "$APP_NAME" ]; then
+
+if [ -d "$WORKING_DIR" ]; then
    echo "Demo app already downloaded. Checking out main and updating."
 
 else
    echo "Downloading demo app."
-   git clone https://github.com/luxonis/depthai.git "$APP_NAME"
+   git clone https://github.com/luxonis/depthai.git "$WORKING_DIR"
 fi
-cd "$APP_NAME"
+cp macOS_installer.sh "$WORKING_DIR"
+cp install_python_dependencies.sh "$WORKING_DIR"
+cd "$WORKING_DIR"
 git checkout demo_app_installation
 git pull
 
