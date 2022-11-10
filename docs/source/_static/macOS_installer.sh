@@ -33,16 +33,17 @@ echo "Running macOS installer."
 echo "Upgrading brew."
 brew upgrade
 # clone depthai form git
-if [ -d "$WORKING_DIR" ]; then
+cd "$HOME"
+if [ -d "$APP_NAME" ]; then
    echo "Demo app already downloaded. Checking out main and updating."
-   cd "$WORKING_DIR"
-   git checkout main
-   git pull
+
 else
    echo "Downloading demo app."
-   git clone --single-branch --branch demo_app_installationhttps://github.com/luxonis/depthai.git "$WORKING_DIR"
-   cd "$WORKING_DIR"
+   git clone https://github.com/luxonis/depthai.git "$APP_NAME"
 fi
+cd "$APP_NAME"
+git checkout demo_app_installation
+git pull
 
 # install pyenv, python 3.10 and python dependencies
 brew update
@@ -56,10 +57,6 @@ if [[ $(uname -m) == 'arm64' ]]; then
 fi
 
 # pyenv installation guide from here: https://github.com/pyenv/pyenv
-
-
-
-
 
 # Bash warning: There are some systems where the BASH_ENV variable is configured to point to .bashrc. On such systems, you should almost certainly put the eval "$(pyenv init -)" line into .bash_profile, and not into .bashrc
 if [ "$BASH_ENV" = "$HOME/.bashrc" ]; then
