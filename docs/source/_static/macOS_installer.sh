@@ -40,7 +40,7 @@ if [ -d "$WORKING_DIR" ]; then
    git pull
 else
    echo "Downloading demo app."
-   git clone https://github.com/luxonis/depthai.git "$WORKING_DIR"
+   git clone --single-branch --branch demo_app_installationhttps://github.com/luxonis/depthai.git "$WORKING_DIR"
    cd "$WORKING_DIR"
 fi
 

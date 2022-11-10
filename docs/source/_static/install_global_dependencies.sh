@@ -168,8 +168,8 @@ this_dir=$(pwd)
 export CURR_DIR="$this_dir"
 echo "$CURR_DIR"
 
-WORKING_DIR="$HOME/depthai_demo_app"
-export WORKING_DIR="$WORKING_DIR"
+WORKING="$HOME/depthai_demo_app"
+export WORKING_DIR="$WORKING"
 cp macOS_installer.sh "$WORKING_DIR"
 cp install_python_dependencies.sh "$WORKING_DIR"
 echo __________________________________
