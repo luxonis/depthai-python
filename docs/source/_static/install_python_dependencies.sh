@@ -1,10 +1,25 @@
 #!/bin/bash -i
 
+echo $'\n\n:::::::::: RUNNING PYTHON DEPENDENCY INSTALLER ::::::::::\n'
+
 cd "$HOME/depthai_demo_app"
-pwd
-echo _______
-export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
-export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
+
+if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
+  echo "/opt/homebrew/lib/python3.10/site-packages already in PYTHONPATH"
+else
+  export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
+  echo "/opt/homebrew/lib/python3.10/site-packages added to PYTHONPATH"
+fi
+
+
+
+if [[ ":$PATH:" == *":$WORKING_DIR:"* ]]; then
+  echo "$WORKING_DIR is already in PATH"
+else
+  export PATH="$PATH:$WORKING_DIR"
+  echo "$WORKING_DIR added to PATH"
+fi
+
 if which pyenv ; then
   echo "installing python dependencies."
    # install python 3.10.8
@@ -15,14 +30,13 @@ if which pyenv ; then
    if [ ! -d "$HOME/.pyenv/versions/3.10.8/envs/demo_app_venv" ]; then
      pyenv virtualenv 3.10.8 demo_app_venv
   fi
-   which python
-   which python3
    pyenv activate demo_app_venv
-   which python
-   which python3
-   echo __________
-   pwd
    python install_requirements.py
+
+   echo $'\n\n:::::::::::::::: INSTALATION COMPLETED ::::::::::::::::\n'
+   echo $'\nTo run demo app write <run_demo> in terminal.'
+   read -rsp $'Press any key to finish and run the demo app...\n' -n1 key
+   echo "STARTING DEMO APP."
    python depthai_demo.py
 
 else
