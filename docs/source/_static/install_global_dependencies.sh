@@ -163,70 +163,18 @@ else
     exit 99
 fi
 
-# clone depthai form git
-git clone https://github.com/luxonis/depthai.git ~/depthai
-cd depthai
+echo "Finished installing global libraries."
+this_dir=$(pwd)
+export CURR_DIR="$this_dir"
+echo "$CURR_DIR"
 
-# install pyenv, python 3.10 and python dependencies
-brew update
-echo "installing pyenv, virtualenv and pyqt5"
-brew install pyenv, pyenv-virtualenv
+WORKING_DIR="$HOME/depthai_demo_app"
+export WORKING_DIR="$WORKING_DIR"
+cp macOS_installer.sh "$WORKING_DIR"
+cp install_python_dependencies.sh "$WORKING_DIR"
+echo __________________________________
+# now only macos finished
 
-# pip does not have pyqt5 for arm
-if [[ $(uname -m) == 'arm64' ]]; then
-  brew install pyqt@5
-fi
-
-# pyenv installation guide from here: https://github.com/pyenv/pyenv
-
-PROFILE=$"~/.profile"
-BASH_PROFILE=$"~/.bash_profile"
-BASH_LOGIN=$"~/.bash_login"
-BASH_PATHS=mypaths=( PROFILE BASH_PROFILE BASH_LOGIN )
-
-
-# Bash warning: There are some systems where the BASH_ENV variable is configured to point to .bashrc. On such systems, you should almost certainly put the eval "$(pyenv init -)" line into .bash_profile, and not into .bashrc
-if [ "$BASH_ENV" = "~/.bashrc" ]
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_PROFILE
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_PROFILE
-   echo 'eval "$(pyenv init -)"' >> $BASH_PROFILE
-else
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-   echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-fi
-
-#  if you have ~/.profile, ~/.bash_profile or ~/.bash_login, add the commands there as well. If you have none of these, add them to ~/.profile.
-# case none of them exist
-if [ ![-f "$PROFILE"] && ![-f $BASH_PROFILE] && ![-f $BASH_LOGIN] ]; then
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $PROFILE
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $PROFILE
-   echo 'eval "$(pyenv init -)"' >> $PROFILE
-elif [ -f "$PROFILE" ]
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $PROFILE
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $PROFILE
-   echo 'eval "$(pyenv init -)"' >> $PROFILE
-elif [ -f "$BASH_PROFILE" ]
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_PROFILE
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_PROFILE
-   echo 'eval "$(pyenv init -)"' >> $BASH_PROFILE
-elif [ -f "$BASH_LOGIN" ]
-   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_LOGIN
-   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_LOGIN
-   echo 'eval "$(pyenv init -)"' >> $BASH_LOGIN
-fi
-
-# reset shell
-exec "$SHELL"
-
-if [ which pyenv ]; then
-  echo "installing python dependencies."
-   # install latest python 3.10
-   pyenv install 3.10
-   pyenv virtualenv 3.10 demo_app_venv
-   pyenv activate demo_app_venv
-   python install_requirements.py
-
-else
-  echo "Pyenv command does not work, pyenv setup was not successful."
-  exit 99
+./macOS_installer.sh
+# TODO: next script call is in the macOS_isntaller, otherwise I get [6]  + 87718 suspended (tty input)  ./install_global_dependencies.sh
+#./install_python_dependencies.sh
