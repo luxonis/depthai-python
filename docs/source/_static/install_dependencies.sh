@@ -96,26 +96,11 @@ print_and_exec () {
 if [[ $(uname) == "Darwin" ]]; then
     echo "During Homebrew install, certain commands need 'sudo'. Requesting access..."
     sudo true
-    arch_cmd=
-    if [[ $(uname -m) == "arm64" ]]; then
-        arch_cmd="arch -x86_64"
-        echo "Running in native arm64 mode, will prefix commands with: $arch_cmd"
-        # Check if able to run with x86_64 emulation
-        retcode=0
-        $arch_cmd true || retcode=$?
-        if [[ $retcode -ne 0 ]]; then
-            print_action "=== Installing Rosetta 2 - Apple binary translator"
-            # Prompts the user to agree to license: <A> <Enter>
-            # Could be automated by adding: --agree-to-license
-            print_and_exec softwareupdate --install-rosetta
-        fi
-    fi
     homebrew_install_url="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
     print_action "Installing Homebrew from $homebrew_install_url"
     # CI=1 will skip some interactive prompts
-    CI=1 $arch_cmd /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
-    print_and_exec $arch_cmd brew install python3 git
-    print_and_exec python3 -m pip install -U pip
+    CI=1 /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
+    print_and_exec brew install git
     echo
     echo "=== Installed successfully!  IMPORTANT: For changes to take effect,"
     echo "please close and reopen the terminal window, or run:  exec \$SHELL"
@@ -177,3 +162,71 @@ else
     echo "ERROR: Host not supported"
     exit 99
 fi
+
+# clone depthai form git
+git clone https://github.com/luxonis/depthai.git ~/depthai
+cd depthai
+
+# install pyenv, python 3.10 and python dependencies
+brew update
+echo "installing pyenv, virtualenv and pyqt5"
+brew install pyenv, pyenv-virtualenv
+
+# pip does not have pyqt5 for arm
+if [[ $(uname -m) == 'arm64' ]]; then
+  brew install pyqt@5
+fi
+
+# pyenv installation guide from here: https://github.com/pyenv/pyenv
+
+PROFILE=$"~/.profile"
+BASH_PROFILE=$"~/.bash_profile"
+BASH_LOGIN=$"~/.bash_login"
+BASH_PATHS=mypaths=( PROFILE BASH_PROFILE BASH_LOGIN )
+
+
+# Bash warning: There are some systems where the BASH_ENV variable is configured to point to .bashrc. On such systems, you should almost certainly put the eval "$(pyenv init -)" line into .bash_profile, and not into .bashrc
+if [ "$BASH_ENV" = "~/.bashrc" ]
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_PROFILE
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_PROFILE
+   echo 'eval "$(pyenv init -)"' >> $BASH_PROFILE
+else
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+   echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+fi
+
+#  if you have ~/.profile, ~/.bash_profile or ~/.bash_login, add the commands there as well. If you have none of these, add them to ~/.profile.
+# case none of them exist
+if [ ![-f "$PROFILE"] && ![-f $BASH_PROFILE] && ![-f $BASH_LOGIN] ]; then
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $PROFILE
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $PROFILE
+   echo 'eval "$(pyenv init -)"' >> $PROFILE
+elif [ -f "$PROFILE" ]
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $PROFILE
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $PROFILE
+   echo 'eval "$(pyenv init -)"' >> $PROFILE
+elif [ -f "$BASH_PROFILE" ]
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_PROFILE
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_PROFILE
+   echo 'eval "$(pyenv init -)"' >> $BASH_PROFILE
+elif [ -f "$BASH_LOGIN" ]
+   echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $BASH_LOGIN
+   echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> $BASH_LOGIN
+   echo 'eval "$(pyenv init -)"' >> $BASH_LOGIN
+fi
+
+# reset shell
+exec "$SHELL"
+
+if [ which pyenv ]; then
+  echo "installing python dependencies."
+   # install latest python 3.10
+   pyenv install 3.10
+   pyenv virtualenv 3.10 demo_app_venv
+   pyenv activate demo_app_venv
+   python install_requirements.py
+
+else
+  echo "Pyenv command does not work, pyenv setup was not successful."
+  exit 99
