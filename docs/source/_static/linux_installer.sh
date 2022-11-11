@@ -23,7 +23,9 @@ git pull
 echo "installing python 3.10"
 
 sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt install python3.10
+sudo apt -y install python3.10
+sudo apt -y install python3.10-venv
+
 
 # create python virtual environment
 echo "Creating python virtual environment in $WORKING_DIR/venv"
@@ -34,5 +36,7 @@ source "$WORKING_DIR/venv/bin/activate"
 pip install --upgrade pip
 
 pip install packaging
+pip install pyqt5
 # run launcher
-python "$WORKING_DIR/launcher/launcher.py" -r "$WORKING_DIR"
+echo '\n>>>>>>>>>>>> RUNNING LAUNCHER <<<<<<<<<<<<<<<<<<<\n'
+python3.10 "$WORKING_DIR/launcher/launcher.py" -r "$WORKING_DIR"
