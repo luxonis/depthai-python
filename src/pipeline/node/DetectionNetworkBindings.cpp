@@ -40,6 +40,7 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack){
         .def_readonly("out", &DetectionNetwork::out, DOC(dai, node, DetectionNetwork, out))
         .def_readonly("outNetwork", &DetectionNetwork::outNetwork, DOC(dai, node, DetectionNetwork, outNetwork))
         .def_readonly("passthrough", &DetectionNetwork::passthrough, DOC(dai, node, NeuralNetwork, passthrough))
+        .def_readonly("outSegmentation", &DetectionNetwork::outSegmentation, DOC(dai, node, DetectionNetwork, outSegmentation))
         .def("setConfidenceThreshold", &DetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
         .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold))
         ;

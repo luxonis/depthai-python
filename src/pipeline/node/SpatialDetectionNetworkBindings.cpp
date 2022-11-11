@@ -45,6 +45,7 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
         .def_readonly("passthrough", &SpatialDetectionNetwork::passthrough, DOC(dai, node, SpatialDetectionNetwork, passthrough))
         .def_readonly("passthroughDepth", &SpatialDetectionNetwork::passthroughDepth, DOC(dai, node, SpatialDetectionNetwork, passthroughDepth))
         .def_readonly("spatialLocationCalculatorOutput", &SpatialDetectionNetwork::spatialLocationCalculatorOutput, DOC(dai, node, SpatialDetectionNetwork, spatialLocationCalculatorOutput))
+        .def_readonly("outSegmentation", &SpatialDetectionNetwork::outSegmentation, DOC(dai, node, SpatialDetectionNetwork, outSegmentation))
 
         .def("setDepthLowerThreshold", &SpatialDetectionNetwork::setDepthLowerThreshold, py::arg("lowerThreshold"), DOC(dai, node, SpatialDetectionNetwork, setDepthLowerThreshold))
         .def("setBoundingBoxScaleFactor", &SpatialDetectionNetwork::setBoundingBoxScaleFactor, py::arg("scaleFactor"), DOC(dai, node, SpatialDetectionNetwork, setBoundingBoxScaleFactor))
