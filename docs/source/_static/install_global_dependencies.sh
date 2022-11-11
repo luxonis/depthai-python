@@ -168,7 +168,7 @@ this_dir=$(pwd)
 # to be used in next script
 export CURR_DIR="$this_dir"
 
-export APP_NAME="depthai_demo_app"
+export APP_NAME="depthai"
 WORKING="$HOME/$APP_NAME"
 export WORKING_DIR="$WORKING"
 export PATH="$PATH":"$CURR_DIR"
@@ -189,5 +189,3 @@ else
   echo "Error: Host $(uname -s) not supported."
   exit 99
 fi
-# TODO: next script call is in the macOS_installer or in linux_installer, otherwise I get [6]  + 87718 suspended (tty input)  ./install_global_dependencies.sh
-#./install_python_dependencies.sh

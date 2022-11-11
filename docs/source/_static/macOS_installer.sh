@@ -1,34 +1,5 @@
 #!/bin/bash -i
 
-# global vars
-PROFILE="$HOME/.profile"
-BASH_PROFILE="$HOME/.bash_profile"
-BASH_LOGIN="$HOME/.bash_login"
-BASH_PATHS=( PROFILE BASH_PROFILE BASH_LOGIN )
-
-# shellcheck disable=SC2016
-PYENV_CMD1='export PYENV_ROOT="$HOME/.pyenv"'
-# shellcheck disable=SC2016
-PYENV_CMD2='command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-# shellcheck disable=SC2016
-PYENV_CMD3='eval "$(pyenv init -)"'
-
-write_in_file () {
-  # just make sure only strings are appended which are not in there yet
-  if ! grep -Fxq "$PYENV_CMD1" "$1"
-  then
-    echo "$PYENV_CMD1" >> "$1"
-  fi
-  if ! grep -Fxq "$PYENV_CMD2" "$1"
-  then
-    echo "$PYENV_CMD2" >> "$1"
-  fi
-  if ! grep -Fxq "$PYENV_CMD3" "$1"
-  then
-    echo "$PYENV_CMD3" >> "$1"
-  fi
-}
-
 echo "Running macOS installer."
 echo "Upgrading brew."
 brew upgrade
@@ -41,15 +12,14 @@ else
    echo "Downloading demo app."
    git clone https://github.com/luxonis/depthai.git "$WORKING_DIR"
 fi
-cp install_python_dependencies.sh "$WORKING_DIR"
 cd "$WORKING_DIR"
-git checkout demo_app_installation
+git checkout demo_app_installation_v2
 git pull
 
-# install pyenv, python 3.10 and python dependencies
+# install python 3.10 and python dependencies
 brew update
-echo "installing pyenv, virtualenv"
-brew install pyenv pyenv-virtualenv
+echo "installing python 3.10"
+brew install python@3.10
 
 # pip does not have pyqt5 for arm
 if [[ $(uname -m) == 'arm64' ]]; then
@@ -57,29 +27,30 @@ if [[ $(uname -m) == 'arm64' ]]; then
   brew install pyqt@5
 fi
 
-# pyenv installation guide from here: https://github.com/pyenv/pyenv
+# create python virtual environment
+echo "Creating python virtual environment in $WORKING_DIR/venv"
 
-# Bash warning: There are some systems where the BASH_ENV variable is configured to point to .bashrc. On such systems, you should almost certainly put the eval "$(pyenv init -)" line into .bash_profile, and not into .bashrc
-if [ "$BASH_ENV" = "$HOME/.bashrc" ]; then
-   write_in_file "$BASH_PROFILE"
+python3.10 -m venv "$WORKING_DIR/venv"
+# activate environment
+source "$WORKING_DIR/venv/bin/activate"
+pip install --upgrade pip
+
+# install launcher dependencies
+# only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqth5 with pip
+if [[ $(uname -m) == 'arm64' ]]; then
+  #if [[ $(uname -s) == "Darwin" ]]; then
+  if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
+    echo "/opt/homebrew/lib/python3.10/site-packages already in PYTHONPATH"
+  else
+    export PYTHONPATH=/opt/homebrew/lib/python3.10/site-packages:$PYTHONPATH
+    echo "/opt/homebrew/lib/python3.10/site-packages added to PYTHONPATH"
+  fi
+  #fi
 else
-   write_in_file "$HOME/.bashrc"
+  pip install pyqt5
 fi
 
-#  if you have ~/.profile, ~/.bash_profile or ~/.bash_login, add the commands there as well. If you have none of these, add them to ~/.profile.
-# case none of them exist
-if [ ! -f "$PROFILE" ] && [ ! -f "$BASH_PROFILE" ] && [ ! -f "$BASH_LOGIN" ] ; then
-   echo "exporting pyenv setup to $PROFILE"
-   write_in_file "$PROFILE"
-elif [ -f "$PROFILE" ]; then
-   echo "exporting pyenv setup to $PROFILE"
-   write_in_file "$PROFILE"
-elif [ -f "$BASH_PROFILE" ]; then
-   echo "exporting pyenv setup to $BASH_PROFILE"
-   write_in_file "$BASH_PROFILE"
-elif [ -f "$BASH_LOGIN" ]; then
-   echo "exporting pyenv setup to $BASH_LOGIN"
-   write_in_file "$BASH_LOGIN"
-fi
+pip install packaging
 
-./install_python_dependencies.sh
+# run launcher
+python "$WORKING_DIR/launcher/launcher.py" -r "$WORKING_DIR"
