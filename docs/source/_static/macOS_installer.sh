@@ -13,6 +13,7 @@ else
    git clone https://github.com/luxonis/depthai.git "$WORKING_DIR"
 fi
 cd "$WORKING_DIR"
+git fetch
 git checkout demo_app_installation_v2
 git pull
 

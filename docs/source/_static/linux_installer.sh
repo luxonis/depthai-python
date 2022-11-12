@@ -2,6 +2,7 @@
 
 echo '\nRunning Linux installer.'
 echo "Upgrading sudo-apt."
+echo "$WORKING_DIR"
 
 sudo apt-get update
 
@@ -16,16 +17,16 @@ else
 fi
 
 cd "$WORKING_DIR"
+git fetch
 git checkout demo_app_installation_v2
 git pull
 
 # install python 3.10
 echo "installing python 3.10"
 
-sudo add-apt-repository ppa:deadsnakes/ppa
+sudo yes "" | sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt -y install python3.10
 sudo apt -y install python3.10-venv
-
 
 # create python virtual environment
 echo "Creating python virtual environment in $WORKING_DIR/venv"
