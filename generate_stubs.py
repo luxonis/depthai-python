@@ -47,7 +47,9 @@ try:
             )
 
             import typing
-            import json
+            json = dict
+            from pathlib import Path
+            from typing import Set
         ''') + contents
 
         # Create 'create' overloads
@@ -59,20 +61,46 @@ try:
 
         # Writeout changes
         file.seek(0)
+        file.truncate(0)
+        file.write(final_stubs)
+
+    # node fixes
+    with open(f'{DIRECTORY}/depthai/node.pyi' ,'r+') as file:
+        # Read
+        contents = file.read()
+
+        # Add imports
+        stubs_import = textwrap.dedent('''
+            from pathlib import Path
+            from typing import Set
+        ''') + contents
+
+        # Remove import depthai.*
+        final_stubs = re.sub(r"import depthai\.\S*", "", stubs_import)
+
+        # Writeout changes
+        file.seek(0)
+        file.truncate(0)
         file.write(final_stubs)
 
     # Flush previous stdout
     sys.stdout.flush()
 
-    # Check syntax
+    # Check syntax (Mypy and later Pylance/Pyright)
     # Windows limitation - another process cannot normally read temporary file that is opened by this process
     # Close first and delete manually afterwards
-    config = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    config.write('[mypy]\nignore_errors = True\n')
-    config.close()
-    print(f'Mypy config file: {config.name}')
-    subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'], env=env)
-    os.unlink(config.name)
+    try:
+        config = tempfile.NamedTemporaryFile(mode='w', delete=False)
+        config.write('[mypy]\nignore_errors = True\n')
+        config.close()
+        print(f'Mypy config file: {config.name}')
+        # Mypy check
+        subprocess.check_call([sys.executable, '-m' 'mypy', f'{DIRECTORY}/{MODULE_NAME}', f'--config-file={config.name}'], env=env)
+    finally:
+        os.unlink(config.name)
+
+    # # TODO(thamarpe) - Pylance / Pyright check
+    # subprocess.check_call([sys.executable, '-m' 'pyright', f'{DIRECTORY}/{MODULE_NAME}'], env=env)
 
 except subprocess.CalledProcessError as err:
     exit(err.returncode)

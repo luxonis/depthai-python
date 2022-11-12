@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+USE_OPENCV = False
+
 from datetime import timedelta
 import depthai as dai
 import tempfile
@@ -8,6 +10,13 @@ import sys
 from typing import Dict
 import platform
 import os
+
+if USE_OPENCV:
+    # import cv2
+    pass
+else:
+    import io
+    from PIL import Image
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -89,6 +98,23 @@ class SelectBootloader:
         else:
             return (False, None)
 
+class AreYouSure:
+    def __init__(self, text):
+        self.ok = False
+        layout = [
+            [sg.Text(text)],
+            [sg.Submit(button_text="Yes"), sg.Cancel(button_text="No")],
+        ]
+        self.window = sg.Window("Are You Sure?", layout, size=(450,150), modal=True, finalize=True)
+    def wait(self):
+        event, values = self.window.Read()
+        self.window.close()
+        if values is not None:
+            return str(event) == "Submit"
+        else:
+            return False
+
+
 class SelectIP:
     def __init__(self):
         self.ok = False
@@ -161,13 +187,41 @@ class SearchDevice:
                     self.window.close()
                     return deviceSelected
 
-def flashBootloader(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
+def flashBootloader(bl: dai.DeviceBootloader, device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
+    factoryBlWarningMessage = """Main Bootloader type or version doesn't support User Bootloader flashing.
+Main (factory) bootloader will be updated instead.
+Proceed with caution
+    """
+
     try:
+        if bl.isUserBootloaderSupported():
+            pr = Progress('Flashing...')
+            progress = lambda p : pr.update(p)
+            bl.flashUserBootloader(progress)
+            pr.finish("Flashed newest User Bootloader version.")
+        elif AreYouSure(text=factoryBlWarningMessage).wait():
+            bl.close()
+            pr = Progress('Connecting...')
+            bl = dai.DeviceBootloader(device, True)
+            progress = lambda p : pr.update(p)
+            if type == dai.DeviceBootloader.Type.AUTO:
+                type = bl.getType()
+            bl.flashBootloader(memory=dai.DeviceBootloader.Memory.FLASH, type=type, progressCallback=progress)
+            pr.finish("Flashed newest Factory Bootloader version.")
+        else:
+            return False
+    except Exception as ex:
+        PrintException()
+        sg.Popup(f'{ex}')
 
+    return True
+
+
+# Danger
+def flashFactoryBootloader(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
+    try:
         pr = Progress('Connecting...')
-
         bl = dai.DeviceBootloader(device, True)
-
         progress = lambda p : pr.update(p)
         if type == dai.DeviceBootloader.Type.AUTO:
             type = bl.getType()
@@ -198,6 +252,74 @@ def factoryReset(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
     except Exception as ex:
         PrintException()
         sg.Popup(f'{ex}')
+
+def connectAndStartStreaming(dev):
+
+    # OpenCV
+    if USE_OPENCV:
+        # Create pipeline
+        pipeline = dai.Pipeline()
+
+        camRgb = pipeline.create(dai.node.ColorCamera)
+        camRgb.setIspScale(1,3)
+        videnc = pipeline.create(dai.node.VideoEncoder)
+        videnc.setDefaultProfilePreset(camRgb.getFps(), videnc.Properties.Profile.MJPEG)
+        xout = pipeline.create(dai.node.XLinkOut)
+        xout.setStreamName("mjpeg")
+        camRgb.video.link(videnc.input)
+        videnc.bitstream.link(xout.input)
+
+        with dai.Device(pipeline, dev) as d:
+            while not d.isClosed():
+                mjpeg = d.getOutputQueue('mjpeg').get()
+                frame = cv2.imdecode(mjpeg.getData(), cv2.IMREAD_UNCHANGED)
+                cv2.imshow('Color Camera', frame)
+                if cv2.waitKey(1) == ord('q'):
+                    cv2.destroyWindow('Color Camera')
+                    break
+    else:
+        # Create pipeline (no opencv)
+        pipeline = dai.Pipeline()
+        camRgb = pipeline.create(dai.node.ColorCamera)
+        camRgb.setIspScale(1,3)
+        camRgb.setPreviewSize(camRgb.getIspSize())
+        camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
+
+        xout = pipeline.create(dai.node.XLinkOut)
+        xout.input.setQueueSize(2)
+        xout.input.setBlocking(False)
+        xout.setStreamName("color")
+        camRgb.preview.link(xout.input)
+
+        with dai.Device(pipeline, dev) as d:
+            frame = d.getOutputQueue('color', 2, False).get()
+            width, height = frame.getWidth(), frame.getHeight()
+
+            layout = [[sg.Graph(
+                canvas_size=(width, height),
+                graph_bottom_left=(0, 0),
+                graph_top_right=(width, height),
+                key="-GRAPH-",
+                change_submits=True,  # mouse click events
+                background_color='lightblue',
+                drag_submits=True), ],]
+            window = sg.Window("Color Camera Stream", layout, finalize=True)
+            graph = window["-GRAPH-"]
+
+            while not d.isClosed():
+                frame = d.getOutputQueue('color').get()
+                with io.BytesIO() as output:
+                    rgb = frame.getFrame()
+                    image = Image.fromarray(rgb, "RGB")
+                    image.save(output, format="GIF")
+                    contents = output.getvalue()
+                    graph.draw_image(data=contents, location=(0, height))
+
+                event, values = window.read(timeout=1)
+                if event == sg.WIN_CLOSED:
+                    break
+            window.close()
+
 
 def flashFromFile(file, bl: dai.DeviceBootloader):
     try:
@@ -246,7 +368,8 @@ aboutDeviceLayout = [
     [
         sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="_unique_aboutBtn"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_configBtn"),
-        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_appBtn")
+        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_appBtn"),
+        sg.Button("Danger Zone", size=(15, 1), font=('Arial', 10, 'bold'), button_color='#FF0500', disabled=False,  key="_unique_dangerBtn"),
     ],
     [sg.HSeparator()],
     [
@@ -284,11 +407,8 @@ aboutDeviceLayout = [
     [sg.HSeparator()],
     [
         sg.Text("", size=(7, 2)),
-        sg.Button("Flash newest Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+        sg.Button("Flash Newest Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
-        sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFA500'),
-        sg.Button("Boot into USB\nRecovery mode", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  key='recoveryMode', button_color='#FFA500')
     ]
 ]
 
@@ -300,9 +420,7 @@ deviceConfigLayout = [
         sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_aboutBtn"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="_unique_configBtn"),
         sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="_unique_appBtn"),
-        # TODO create library tab
-        # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
-        sg.Text("", key="devNameConf", size=(30, 1))
+        sg.Button("Danger Zone", size=(15, 1), font=('Arial', 10, 'bold'), button_color='#FF0500', disabled=False,  key="_unique_dangerBtn"),
 
     ],
     [sg.HSeparator()],
@@ -366,23 +484,40 @@ appLayout = [
         sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_aboutBtn"),
         sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_configBtn"),
         sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True,  key="_unique_appBtn"),
-        # TODO create library tab
-        # sg.Button("Library", size=(15, 1), font=('Arial', 10, 'bold'), disabled=True, key="configLib"),
-        sg.Text("", key="devNameConf", size=(30, 1))
-
+        sg.Button("Danger Zone", size=(15, 1), font=('Arial', 10, 'bold'), button_color='#FF0500', disabled=False,  key="_unique_dangerBtn"),
     ],
-    # TODO - add bootloader_version information
-    # [sg.HSeparator()],
-    # [
-    #     sg.Text("", key="devNameConf", size=(30, 1))
-
-    # ],
     [sg.HSeparator()],
     [
         sg.Button("Flash application", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
         sg.Button("Remove application", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
                 button_color='#FFA500'),
+    ],
+    [sg.HSeparator()],
+    [
+        sg.Button("Open device streaming application", size=(15, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500', key="startStreamingApp"),
+    ],
+]
+
+
+# layout for app tab
+dangerLayout = [
+    [sg.Text("Danger Zone", size=(20, 1), font=('Arial', 30, 'bold'), text_color="black")],
+    [sg.HSeparator()],
+    [
+        sg.Button("About device", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_aboutBtn"),
+        sg.Button("Config", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False, key="_unique_configBtn"),
+        sg.Button("Application", size=(15, 1), font=('Arial', 10, 'bold'), disabled=False,  key="_unique_appBtn"),
+        sg.Button("Danger Zone", size=(15, 1), font=('Arial', 10, 'bold'), button_color='#FF0500', disabled=True,  key="_unique_dangerBtn"),
+    ],
+    [sg.HSeparator()],
+    [
+        sg.Button("Flash Factory Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500', key='flashFactoryBootloader'),
+        sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFA500'),
+        sg.Button("Boot into USB\nRecovery mode", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  key='recoveryMode', button_color='#FFA500')
     ],
 ]
 
@@ -393,6 +528,7 @@ layout = [
         sg.Column(aboutDeviceLayout, key='-COL1-'),
         sg.Column(deviceConfigLayout, visible=False, key='-COL2-'),
         sg.Column(appLayout, visible=False, key='-COL3-'),
+        sg.Column(dangerLayout, visible=False, key='-COL4-'),
     ]
 ]
 
@@ -478,19 +614,30 @@ class DeviceManager:
                     if self.bl is None: continue
                     self.getConfigs()
                 self.unlockConfig()
-            elif event == "Flash newest Bootloader":
-                sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
-                ok, type = sel.wait()
-                if ok:
-                    # We will reconnect, as we need to set allowFlashingBootloader to True
-                    self.closeDevice()
-                    flashBootloader(self.device, type)
+            elif event == "Flash Newest Bootloader":
+                # Use current type
+                if flashBootloader(self.bl, self.device, self.bl.getType()):
                     # Device will reboot, close previous and reset GUI
                     self.closeDevice()
                     self.resetGui()
                     self.getDevices()
                 else:
-                    print("Flashing bootloader cancelled.")
+                    print("Flashing bootloader canceled.")
+
+            # Danger
+            elif event == "flashFactoryBootloader":
+                sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
+                ok, type = sel.wait()
+                if ok:
+                    # We will reconnect, as we need to set allowFlashingBootloader to True
+                    self.closeDevice()
+                    flashFactoryBootloader(self.device, type)
+                    # Device will reboot, close previous and reset GUI
+                    self.closeDevice()
+                    self.resetGui()
+                    self.getDevices()
+                else:
+                    print("Flashing Factory bootloader cancelled.")
 
             elif event == "Factory reset":
                 sel = SelectBootloader(['NETWORK', 'USB'], "Select bootloader type used for factory reset.")
@@ -545,14 +692,24 @@ class DeviceManager:
                 self.window['-COL1-'].update(visible=False)
                 self.window['-COL2-'].update(visible=True)
                 self.window['-COL3-'].update(visible=False)
+                self.window['-COL4-'].update(visible=False)
             elif event.startswith("_unique_aboutBtn"):
-                self.window['-COL2-'].update(visible=False)
                 self.window['-COL1-'].update(visible=True)
-                self.window['-COL3-'].update(visible=False)
-            elif event.startswith("_unique_appBtn"):
                 self.window['-COL2-'].update(visible=False)
+                self.window['-COL3-'].update(visible=False)
+                self.window['-COL4-'].update(visible=False)
+            elif event.startswith("_unique_appBtn"):
                 self.window['-COL1-'].update(visible=False)
+                self.window['-COL2-'].update(visible=False)
                 self.window['-COL3-'].update(visible=True)
+                self.window['-COL4-'].update(visible=False)
+            elif event.startswith("_unique_dangerBtn"):
+                self.window['-COL1-'].update(visible=False)
+                self.window['-COL2-'].update(visible=False)
+                self.window['-COL3-'].update(visible=False)
+                self.window['-COL4-'].update(visible=True)
+
+
             elif event == "recoveryMode":
                 if recoveryMode(self.bl):
                     sg.Popup(f'Device successfully put into USB recovery mode.')
@@ -565,6 +722,14 @@ class DeviceManager:
                 self.window.Element('ip').update('')
                 self.window.Element('mask').update('')
                 self.window.Element('gateway').update('')
+
+            elif event == "startStreamingApp":
+                # We will reconnect, as we need to set allowFlashingBootloader to True
+                self.closeDevice()
+                connectAndStartStreaming(self.device)
+                self.resetGui()
+                self.getDevices()
+
         self.window.close()
 
     @property
@@ -630,7 +795,7 @@ class DeviceManager:
                 self.window.Element('usbSpeed').update(str(conf.getUsbMaxSpeed()).split('.')[1])
 
             self.window.Element('devName').update(device.name)
-            self.window.Element('devNameConf').update(device.getMxId())
+            # self.window.Element('devNameConf').update(device.getMxId())
             self.window.Element('newBoot').update(dai.DeviceBootloader.getEmbeddedBootloaderVersion())
 
             # The "isEmbeddedVersion" tells you whether BL had to be booted,
@@ -661,7 +826,8 @@ class DeviceManager:
             for el in CONF_TEXT_USB:
                 self.window[el].update(text_color="black")
 
-        self.window['Flash newest Bootloader'].update(disabled=False)
+        self.window['Flash Newest Bootloader'].update(disabled=False)
+        self.window['flashFactoryBootloader'].update(disabled=False)
         self.window['Flash configuration'].update(disabled=False)
         self.window['Clear configuration'].update(disabled=False)
         self.window['View configuration'].update(disabled=False)
@@ -669,6 +835,7 @@ class DeviceManager:
 
         self.window['Flash application'].update(disabled=False)
         self.window['Remove application'].update(disabled=False)
+        self.window['startStreamingApp'].update(disabled=False)
 
         self.window['recoveryMode'].update(disabled=False)
 
@@ -684,17 +851,20 @@ class DeviceManager:
             for el in conf:
                 self.window[el].update(text_color="gray")
 
-        self.window['Flash newest Bootloader'].update(disabled=True)
+        self.window['Flash Newest Bootloader'].update(disabled=True)
+        self.window['flashFactoryBootloader'].update(disabled=True)
         self.window['Flash configuration'].update(disabled=True)
         self.window['Clear configuration'].update(disabled=True)
         self.window['View configuration'].update(disabled=True)
         self.window['Factory reset'].update(disabled=True)
         self.window['Flash application'].update(disabled=True)
         self.window['Remove application'].update(disabled=True)
+        self.window['startStreamingApp'].update(disabled=True)
+
         self.window['recoveryMode'].update(disabled=True)
 
         self.window.Element('devName').update("-name-")
-        self.window.Element('devNameConf').update("")
+        # self.window.Element('devNameConf').update("")
         self.window.Element('newBoot').update("-version-")
         self.window.Element('currBoot').update("-version-")
         self.window.Element('version').update("-version-")

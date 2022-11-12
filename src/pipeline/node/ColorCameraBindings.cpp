@@ -36,7 +36,9 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
         .value("THE_5_MP", ColorCameraProperties::SensorResolution::THE_5_MP)
         .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
+        .value("THE_4000X3000", ColorCameraProperties::SensorResolution::THE_4000X3000)
         .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
+        .value("THE_5312X6000", ColorCameraProperties::SensorResolution::THE_5312X6000)
         .value("THE_48_MP", ColorCameraProperties::SensorResolution::THE_48_MP)
         .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
@@ -83,6 +85,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
         .def_readonly("isp", &ColorCamera::isp, DOC(dai, node, ColorCamera, isp))
         .def_readonly("raw", &ColorCamera::raw, DOC(dai, node, ColorCamera, raw))
+        .def_readonly("frameEvent",  &ColorCamera::frameEvent, DOC(dai, node, ColorCamera, frameEvent))
         .def("setCamId", [](ColorCamera& c, int64_t id) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setCamId() is deprecated, use setBoardSocket() instead.", 1);
