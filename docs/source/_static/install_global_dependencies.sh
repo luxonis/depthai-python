@@ -1,6 +1,34 @@
 #!/bin/bash
 
+# create environment variables
+export APP_NAME="depthai"
+WORKING="$HOME/$APP_NAME"
+install_path=""
+export WORKING_DIR="$WORKING"
+path_correct="false"
+
 trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
+
+while [ "$path_correct" = "false" ]
+do
+  echo ""
+  read -p $'ENTER absolute installation path for depthai or leave empty and default path: $HOME will be used.\n' -r install_path
+  echo ""
+
+  if [ "$install_path" = "" ]; then
+    echo "Using default installation path: $WORKING_DIR"
+  else
+    echo "Using given installation path: $install_path"
+    export WORKING_DIR="$install_path/$APP_NAME"
+  fi
+
+  if [ -d "$(dirname "$WORKING_DIR")" ]; then
+    echo "Directory: $WORKING_DIR is OK"
+    path_correct="true"
+  else
+    echo "Directory: $WORKING_DIR is not valid. Try again!"
+  fi
+done
 
 write_in_file () {
   # just make sure only strings are appended which are not in there yet
@@ -173,16 +201,6 @@ else
 fi
 
 echo "Finished installing global libraries."
-
-# create environment variables and save important ones into .bashrc
-this_dir=$(pwd)
-# to be used in next script
-export CURR_DIR="$this_dir"
-
-export APP_NAME="depthai"
-WORKING="$HOME/$APP_NAME"
-export WORKING_DIR="$WORKING"
-export PATH="$PATH":"$CURR_DIR"
 
 # add depthai working dir to .bashrc if its not already there
 COMMENT='# Home directory of depthai and depthai app, enables to run <run_demo> in terminal'
