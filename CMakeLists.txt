@@ -246,6 +246,7 @@ target_link_libraries(${TARGET_NAME}
         depthai::core # Use non-opencv target as we use opencv-python in bindings
         hedley
         pybind11_json
+        xtensor-python
 )
 
 # Find Git
