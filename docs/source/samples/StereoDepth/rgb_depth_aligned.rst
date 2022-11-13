@@ -4,6 +4,15 @@ RGB Depth alignment
 This example shows usage of RGB depth alignment. Since OAK-D has a color and a pair of stereo cameras,
 you can align depth map to the color frame on top of that to get RGB depth.
 
+In this example, rgb and depth aren't perfectly in sync. For that, you would need to add :ref:`Software syncing`, which
+has been added to the `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-syncing#host-rgb-depth-sync>`__,
+where RGB and depth frames have sub-ms delay.
+
+By default, the depth map will get scaled to match the resolution of the camera sensor we want to align to. In other words, if
+depth is aligned to the 1080P color sensor, StereoDepth will upscale depth to 1080P as well.
+Depth scaling can be avoided by configuring :ref:`StereoDepth`'s ``stereo.setOutputSize(width, height)``.
+
+
 Demo
 ####
 
