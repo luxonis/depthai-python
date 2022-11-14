@@ -5,8 +5,6 @@ import argparse
 import re
 import platform
 
-# TODO remove, just for testing
-
 convert_default = "empty"
 parser = argparse.ArgumentParser()
 parser.add_argument('-sdai', "--skip_depthai", action="store_true", help="Skip installation of depthai library.")
