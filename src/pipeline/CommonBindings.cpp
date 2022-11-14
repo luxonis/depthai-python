@@ -4,6 +4,8 @@
 #include "depthai-shared/common/CameraBoardSocket.hpp"
 #include "depthai-shared/common/EepromData.hpp"
 #include "depthai-shared/common/CameraImageOrientation.hpp"
+#include "depthai-shared/common/CameraSensorType.hpp"
+#include "depthai-shared/common/CameraFeatures.hpp"
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
 #include "depthai-shared/common/CpuUsage.hpp"
@@ -27,7 +29,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Point3f> point3f(m, "Point3f", DOC(dai, Point3f));
     py::class_<Size2f> size2f(m, "Size2f", DOC(dai, Size2f));
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
+    py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
+    py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
     py::class_<CpuUsage> cpuUsage(m, "CpuUsage", DOC(dai, CpuUsage));
@@ -120,7 +124,24 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("RGB", CameraBoardSocket::RGB)
         .value("LEFT", CameraBoardSocket::LEFT)
         .value("RIGHT", CameraBoardSocket::RIGHT)
+        .value("CENTER", CameraBoardSocket::CENTER)
+        .value("CAM_A", CameraBoardSocket::CAM_A)
+        .value("CAM_B", CameraBoardSocket::CAM_B)
+        .value("CAM_C", CameraBoardSocket::CAM_C)
+        .value("CAM_D", CameraBoardSocket::CAM_D)
         .value("VERTICAL", CameraBoardSocket::VERTICAL)
+        .value("CAM_E", CameraBoardSocket::CAM_E)
+        .value("CAM_F", CameraBoardSocket::CAM_F)
+        .value("CAM_G", CameraBoardSocket::CAM_G)
+        .value("CAM_H", CameraBoardSocket::CAM_H)
+    ;
+
+    // CameraSensorType enum bindings
+    cameraSensorType
+        .value("COLOR", CameraSensorType::COLOR)
+        .value("MONO", CameraSensorType::MONO)
+        .value("TOF", CameraSensorType::TOF)
+        .value("THERMAL", CameraSensorType::THERMAL)
     ;
 
     // CameraImageOrientation enum bindings
@@ -130,6 +151,18 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("HORIZONTAL_MIRROR", CameraImageOrientation::HORIZONTAL_MIRROR)
         .value("VERTICAL_FLIP", CameraImageOrientation::VERTICAL_FLIP)
         .value("ROTATE_180_DEG", CameraImageOrientation::ROTATE_180_DEG)
+    ;
+
+    // CameraFeatures
+    cameraFeatures
+        .def(py::init<>())
+        .def_readwrite("socket", &CameraFeatures::socket)
+        .def_readwrite("sensorName", &CameraFeatures::sensorName)
+        .def_readwrite("width", &CameraFeatures::width)
+        .def_readwrite("height", &CameraFeatures::height)
+        .def_readwrite("orientation", &CameraFeatures::orientation)
+        .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
+        .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
     ;
 
     // MemoryInfo

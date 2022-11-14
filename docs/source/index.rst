@@ -72,6 +72,7 @@ node functionalities are presented with code.
 
    tutorials/hello_world.rst
    tutorials/standalone_mode.rst
+   tutorials/message_syncing.rst
    tutorials/multiple.rst
    tutorials/maximize_fov.rst
    tutorials/debugging.rst
