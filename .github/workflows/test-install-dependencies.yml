@@ -6,6 +6,7 @@
     paths:
       - 'docs/source/_static/install_dependencies.sh'
       - 'examples/install_requirements.py'
+  pull_request:
 
  jobs:
    install_dependencies:
