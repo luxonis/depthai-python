@@ -63,10 +63,25 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
         },
         return_value_policy::reference_internal // ref + keepalive
     );
+    // Modified __getitem__. Uses operator[] underneath
+    cl.def("__getitem__",
+        [](Map &m, const std::string &k) -> MappedType & {
+            return m[k];
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
 
     cl.def("__contains__",
         [](Map &m, const KeyType &k) -> bool {
             auto it = m.find(k);
+            if (it == m.end())
+              return false;
+           return true;
+        }
+    );
+    cl.def("__contains__",
+        [](Map &m, const std::string &k) -> bool {
+            auto it = m.find({m.name, k});
             if (it == m.end())
               return false;
            return true;
@@ -79,6 +94,14 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
     cl.def("__delitem__",
            [](Map &m, const KeyType &k) {
                auto it = m.find(k);
+               if (it == m.end())
+                   throw key_error();
+               m.erase(it);
+           }
+    );
+    cl.def("__delitem__",
+           [](Map &m, const std::string &k) {
+               auto it = m.find({m.name, k});
                if (it == m.end())
                    throw key_error();
                m.erase(it);
@@ -233,7 +256,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
-        .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
+        // .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
     ;
 
     nodeConnection
@@ -260,7 +283,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-        .def_property("properties", [](Node& n) -> const Properties& { return n.properties; }, [](Node& n, const Properties& p) { n.properties = p; }, DOC(dai, Node, properties), py::return_value_policy::reference_internal)
+        .def_property("properties", [](Node& n) -> const Properties& { return n.getProperties(); }, [](Node& n, const Properties& p) { n.getProperties() = p; }, DOC(dai, Node, properties), py::return_value_policy::reference_internal)
     ;
 
 }
