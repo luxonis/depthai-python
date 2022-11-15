@@ -56,32 +56,34 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
            keep_alive<0, 1>() /* Essential: keep list alive while iterator exists */
     );
 
-    // Modified __getitem__. Uses operator[] underneath
-    cl.def("__getitem__",
-        [](Map &m, const KeyType &k) -> MappedType & {
-            return m[k];
-        },
-        return_value_policy::reference_internal // ref + keepalive
-    );
-    // Modified __getitem__. Uses operator[] underneath
+    // Warning - overload order matters!
+   // Modified __getitem__. Uses operator[string] underneath
     cl.def("__getitem__",
         [](Map &m, const std::string &k) -> MappedType & {
             return m[k];
         },
         return_value_policy::reference_internal // ref + keepalive
     );
+    // Modified __getitem__. Uses operator[pair<string,string>] underneath
+    cl.def("__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            return m[k];
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
 
+    // Warning - overload order matters!
     cl.def("__contains__",
-        [](Map &m, const KeyType &k) -> bool {
-            auto it = m.find(k);
+        [](Map &m, const std::string &k) -> bool {
+            auto it = m.find({m.name, k});
             if (it == m.end())
               return false;
            return true;
         }
     );
     cl.def("__contains__",
-        [](Map &m, const std::string &k) -> bool {
-            auto it = m.find({m.name, k});
+        [](Map &m, const KeyType &k) -> bool {
+            auto it = m.find(k);
             if (it == m.end())
               return false;
            return true;
@@ -91,17 +93,18 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
     // Assignment provided only if the type is copyable
     detail::map_assignment<Map, Class_>(cl);
 
+    // Warning - overload order matters!
     cl.def("__delitem__",
-           [](Map &m, const KeyType &k) {
-               auto it = m.find(k);
+           [](Map &m, const std::string &k) {
+               auto it = m.find({m.name, k});
                if (it == m.end())
                    throw key_error();
                m.erase(it);
            }
     );
     cl.def("__delitem__",
-           [](Map &m, const std::string &k) {
-               auto it = m.find({m.name, k});
+           [](Map &m, const KeyType &k) {
+               auto it = m.find(k);
                if (it == m.end())
                    throw key_error();
                m.erase(it);
