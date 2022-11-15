@@ -60,51 +60,7 @@ following:
 
 See the `Video preview window fails to appear on macOS <https://discuss.luxonis.com/d/95-video-preview-window-fails-to-appear-on-macos>`_ thread on our forum for more information.
 
-M1 Mac build wheels natively
-----------------------------
-
-In order to run DepthAI natively on M1 Mac, you currently need to build the wheels locally. We will add pre-building M1 wheels
-in Q2 of 2022, so this won't be needed anymore.
-
-This tutorial was provided by whab and tested on a MacBookPro M1 Pro running macOS Monterey 12.1 with a OAK-D-Lite.
-
-.. code-block:: bash
-
-  # Install native M1 version of brew
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-
-  # Install conda to create virtual environments for Python
-  brew install --cask miniconda
-  conda init zsh
-
-  # Close and re-open a Terminal window
-
-  # Install DepthAI by building a M1 wheel (inside ~/DepthAI/)
-  conda create --name DepthAIEnv39 python=3.9
-  conda activate DepthAIEnv39
-  python3 -m pip install -U pip
-  brew update
-  brew install cmake libusb
-  cd ~; mkdir DepthAI; cd DepthAI
-  git clone --recursive  https://github.com/luxonis/depthai-python.git
-  cd depthai-python
-  mkdir build && cd build
-  # Build depthai-python
-  cmake ..
-  cmake --build . --parallel
-  cd ..
-  python3 -m pip wheel . -w wheelhouse
-  pip install wheelhouse/depthai-*
-
-  # Test DepthAI with a OAK plugged to your new M1 Mac
-  cd examples
-  nano install_requirements.py
-  #   Remove code of block (3 lines) starting with: if thisPlatform == "arm64" and platform.system() == "Darwin":
-  #   Remove code of block (48 lines) starting with: if not args.skip_depthai:
-  python3 install_requirements.py
-  python3 ColorCamera/rgb_preview.py
+We provide **Mac M1 prebuilt Python wheels** for depthai since the version ``2.17.3.1``.
 
 Ubuntu
 ******
