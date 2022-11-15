@@ -107,11 +107,17 @@ write_in_file () {
 # add depthai working dir to .bashrc if its not already there
 COMMENT='# Entry point for Depthai demo app, enables to run <run_demo> in terminal'
 BASHRC="$HOME/.bashrc"
+ZSHRC="$HOME/.zshrc"
 ADD_ENTRYPOINT_TO_PATH='export PATH=$PATH'":$ENTRYPOINT_DIR"
 
 # add to .bashrc only if it is not in there already
 write_in_file "$COMMENT" "$BASHRC"
 write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$BASHRC"
+
+if [ -f "$ZSHRC" ]; then
+  write_in_file "$COMMENT" "$ZSHRC"
+  write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$ZSHRC"
+fi
 
 # install global dependencies
 echo "Installing global dependencies."

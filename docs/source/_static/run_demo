@@ -41,6 +41,22 @@ else
 fi
 
 source "$VENV_DIR/bin/activate"
+
+# add pyqt5 to pythonpath if on arm
+python_version=$(python3 --version)
+nr_1="${python_version:7:1}"
+nr_2=$(echo "${python_version:9:2}" | tr -d -c 0-9)
+
+if [[ $(uname -m) == 'arm64' ]]; then
+    #if [[ $(uname -s) == "Darwin" ]]; then
+    if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
+      echo "/opt/homebrew/lib/python$nr_1.$nr_2/site-packages already in PYTHONPATH"
+    else
+      export "PYTHONPATH=/opt/homebrew/lib/python$nr_1.$nr_2/site-packages:"$PYTHONPATH
+      echo "/opt/homebrew/lib/pythonv$nr_1.$nr_2/site-packages added to PYTHONPATH"
+    fi
+fi
+
 echo "running launcher with python version"
 echo python --version
 python "$DEPTHAI_DIR"/launcher/launcher.py
