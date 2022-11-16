@@ -911,8 +911,10 @@ class DeviceManager:
         try:
             if self.isPoE:
                 if self.values['staticBut']:
-                    if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway']):
+                    if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway'], req=False):
                         conf.setStaticIPv4(values['ip'], values['mask'], values['gateway'])
+                    else:
+                        raise Exception('IP or Mask missing using static IP configuration')
                 else:
                     if check_ip(values['ip'], req=False) and check_ip(values['mask'], req=False) and check_ip(values['gateway'], req=False):
                         conf.setDynamicIPv4(values['ip'], values['mask'], values['gateway'])
