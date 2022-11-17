@@ -47,12 +47,12 @@ readonly ubuntu_pkgs=(
 
 readonly ubuntu_pkgs_pre22_04=(
     "${ubuntu_pkgs[@]}"
-    libdc1394-dev
+    libdc1394-22-dev
 )
 
 readonly ubuntu_pkgs_22_04=(
     "${ubuntu_pkgs[@]}"
-    libdc1394-22-dev
+    libdc1394-dev
 )
 
 readonly ubuntu_arm_pkgs=(
