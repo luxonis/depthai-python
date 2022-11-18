@@ -83,7 +83,8 @@ void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
     rawSystemInformationS3.def(py::init<>())
         .def_readwrite("ddrMemoryUsage", &RawSystemInformationS3::ddrMemoryUsage)
         .def_readwrite("cpuAvgUsage", &RawSystemInformationS3::cpuAvgUsage)
-        .def_readwrite("chipTemperature", &RawSystemInformationS3::chipTemperature);
+        .def_readwrite("chipTemperature", &RawSystemInformationS3::chipTemperature)
+        .def_readwrite("cpuUsages", &RawSystemInformationS3::cpuUsages);
 
     // Message
     systemInformationS3.def(py::init<>())
@@ -91,6 +92,7 @@ void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
             "ddrMemoryUsage", [](SystemInformationS3& i) { return &i.ddrMemoryUsage; }, [](SystemInformationS3& i, MemoryInfo val) { i.ddrMemoryUsage = val; })
         .def_property(
             "cpuAvgUsage", [](SystemInformationS3& i) { return &i.cpuAvgUsage; }, [](SystemInformationS3& i, CpuUsage val) { i.cpuAvgUsage = val; })
+        .def_property("cpuUsages", [](SystemInformationS3& i) { return &i.cpuUsages; }, [](SystemInformationS3& i, std::vector<CpuUsage> val) { i.cpuUsages = val; })
         .def_property(
             "chipTemperature",
             [](SystemInformationS3& i) { return &i.chipTemperature; },

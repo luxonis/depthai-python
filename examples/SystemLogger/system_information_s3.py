@@ -9,6 +9,9 @@ def printSystemInformation(info: dai.SystemInformationS3):
     t = info.chipTemperature
     print(f"Chip temperature - average: {t.average:.2f}, css: {t.css:.2f}, mss: {t.mss:.2f}, nce: {t.nce:.2f}, soc: {t.soc:.2f}")
     print(f"Cpu usage average: {info.cpuAvgUsage.average * 100:.2f}%")
+    print("Cpu usage per core: ")
+    for i, cpuUsage in enumerate(info.cpuUsages):
+        print(f"Core {i}: {cpuUsage.average * 100:.2f}%")
     print("----------------------------------------")
 
 # Create pipeline
