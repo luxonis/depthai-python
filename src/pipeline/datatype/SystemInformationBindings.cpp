@@ -64,7 +64,7 @@ void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
 
     py::class_<RawSystemInformationS3, RawBuffer, std::shared_ptr<RawSystemInformationS3>> rawSystemInformationS3(
         m, "RawSystemInformationS3", DOC(dai, RawSystemInformationS3));
-    py::class_<SystemInformationS3, Buffer, std::shared_ptr<SystemInformationS3>> SystemInformationS3(m, "SystemInformationS3", DOC(dai, SystemInformationS3));
+    py::class_<SystemInformationS3, Buffer, std::shared_ptr<SystemInformationS3>> systemInformationS3(m, "SystemInformationS3", DOC(dai, SystemInformationS3));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
