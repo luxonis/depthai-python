@@ -1,5 +1,8 @@
 #!/bin/bash
 
+trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ;
+exit $RET' ERR
+
 readonly linux_pkgs=(
     python3
     python3-pip
