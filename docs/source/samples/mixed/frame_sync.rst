@@ -1,7 +1,8 @@
 Frame syncing on OAK
 ====================
 
-This example showcases how you can use :ref:`Script` node to sync frames from multiple streams. It uses :ref:`ImgFrame`'s timestamps to achieve syncing precision.
+This example showcases how you can use :ref:`Script` node to perform :ref:`Message syncing` of multiple streams.
+Example uses :ref:`ImgFrame`'s timestamps to achieve syncing precision.
 
 Similar syncing demo scripts (python) can be found at our depthai-experiments repository in `gen2-syncing <https://github.com/luxonis/depthai-experiments/tree/master/gen2-syncing>`__
 folder.

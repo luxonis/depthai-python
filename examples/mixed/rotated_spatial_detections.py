@@ -87,7 +87,7 @@ spatialDetectionNetwork.out.link(xoutNN.input)
 
 rotate_stereo_manip.out.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-
+color = (255, 0, 0)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
