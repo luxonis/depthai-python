@@ -11,6 +11,7 @@ set(PYBIND11_TEST_FILES
     "xlink_exceptions_test.cpp"
     "utf8_support_test.py"
     "dai_path_conversion_test.py"
+    "nndata_tensor_test.py"
 )
 
 string(REPLACE ".cpp" ".py" PYBIND11_PYTEST_FILES "${PYBIND11_TEST_FILES}")
