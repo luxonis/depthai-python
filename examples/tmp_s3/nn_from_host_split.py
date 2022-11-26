@@ -39,27 +39,28 @@ labelMap = [
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-nn = pipeline.create(dai.node.YoloDetectionNetworkSub)
+nn = pipeline.create(dai.node.NeuralNetwork)
+det = pipeline.create(dai.node.DetectionParser)
 
 xinFrame = pipeline.create(dai.node.XLinkIn)
 nnOut = pipeline.create(dai.node.XLinkOut)
 
 xinFrame.setStreamName("inFrame")
 nnOut.setStreamName("nn")
-
-# Properties
-nn.setConfidenceThreshold(0.8)
-nn.setNumClasses(80)
-nn.setCoordinateSize(4)
-nn.setAnchors([10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
-nn.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-nn.setIouThreshold(0.2)
 nn.setBlobPath(nnPath)
-nn.setNumInferenceThreads(2)
+# Properties
+det.setNNFamily(dai.DetectionNetworkType.YOLO)
+det.setConfidenceThreshold(0.8)
+det.setNumClasses(80)
+det.setCoordinateSize(4)
+det.setAnchors([10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
+det.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+det.setIouThreshold(0.2)
 
 # Linking
 xinFrame.out.link(nn.input)
-nn.out.link(nnOut.input)
+nn.out.link(det.input)
+det.out.link(nnOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
