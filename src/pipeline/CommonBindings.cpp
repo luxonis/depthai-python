@@ -20,6 +20,9 @@
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
 
+// depthai
+#include "depthai/common/CameraFeatures.hpp"
+
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
@@ -162,6 +165,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("name", &CameraFeatures::name)
+        .def("__repr__", [](CameraFeatures& camera) {
+            std::stringstream stream;
+            stream << camera;
+            return stream.str();
+        });
     ;
 
     // MemoryInfo
