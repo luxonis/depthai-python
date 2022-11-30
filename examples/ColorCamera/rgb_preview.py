@@ -23,7 +23,7 @@ camRgb.preview.link(xoutRgb.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    print('Connected cameras:', device.getConnectedCameras())
+    print('Connected cameras:', device.getConnectedCameraFeatures())
     # Print out usb speed
     print('Usb speed:', device.getUsbSpeed().name)
     # Bootloader version
@@ -31,7 +31,6 @@ with dai.Device(pipeline) as device:
         print('Bootloader version:', device.getBootloaderVersion())
     # Device name
     print('Device name:', device.getDeviceName())
-    print('Cameras: ', device.getConnectedCameraFeatures())
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
