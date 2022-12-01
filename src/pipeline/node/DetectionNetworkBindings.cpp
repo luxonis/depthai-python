@@ -71,7 +71,7 @@ void bind_detectionnetworksub(pybind11::module& m, void* pCallstack) {
     // Node and Properties declare upfront
     // py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(
     //     m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
-    auto detectionNetworkSub = ADD_NODE(DetectionNetworkSub);
+    auto detectionNetworkSub = ADD_NODE_ABSTRACT(DetectionNetworkSub);
     auto mobileNetDetectionNetworkSub = ADD_NODE_DERIVED(MobileNetDetectionNetworkSub, DetectionNetworkSub);
     auto yoloDetectionNetworkSub = ADD_NODE_DERIVED(YoloDetectionNetworkSub, DetectionNetworkSub);
 
