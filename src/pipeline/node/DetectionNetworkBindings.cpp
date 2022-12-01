@@ -1,6 +1,7 @@
 #include "Common.hpp"
 #include "NodeBindings.hpp"
 #include "depthai/pipeline/Node.hpp"
+#include "depthai/pipeline/NodeGroup.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/DetectionNetwork.hpp"
 #include "depthai/pipeline/node/DetectionNetworkSub.hpp"
@@ -70,7 +71,7 @@ void bind_detectionnetworksub(pybind11::module& m, void* pCallstack) {
     // Node and Properties declare upfront
     // py::class_<DetectionNetworkProperties, NeuralNetworkProperties, std::shared_ptr<DetectionNetworkProperties>> detectionNetworkProperties(
     //     m, "DetectionNetworkProperties", DOC(dai, DetectionNetworkProperties));
-    auto detectionNetworkSub = ADD_NODE_DERIVED_ABSTRACT(DetectionNetworkSub, NeuralNetwork);
+    auto detectionNetworkSub = ADD_NODE(DetectionNetworkSub);
     auto mobileNetDetectionNetworkSub = ADD_NODE_DERIVED(MobileNetDetectionNetworkSub, DetectionNetworkSub);
     auto yoloDetectionNetworkSub = ADD_NODE_DERIVED(YoloDetectionNetworkSub, DetectionNetworkSub);
 
@@ -92,6 +93,21 @@ void bind_detectionnetworksub(pybind11::module& m, void* pCallstack) {
 
     // DetectionNetwork Node
     detectionNetworkSub
+        // Copied from NN node
+        .def("setBlobPath", &DetectionNetworkSub::setBlobPath, py::arg("path"), DOC(dai, node, DetectionNetworkSub, setBlobPath))
+        .def("setNumPoolFrames", &DetectionNetworkSub::setNumPoolFrames, py::arg("numFrames"), DOC(dai, node, DetectionNetworkSub, setNumPoolFrames))
+        .def("setNumInferenceThreads", &DetectionNetworkSub::setNumInferenceThreads, py::arg("numThreads"), DOC(dai, node, DetectionNetworkSub, setNumInferenceThreads))
+        .def("setNumNCEPerInferenceThread", &DetectionNetworkSub::setNumNCEPerInferenceThread, py::arg("numNCEPerThread"), DOC(dai, node, DetectionNetworkSub, setNumNCEPerInferenceThread))
+        .def("getNumInferenceThreads", &DetectionNetworkSub::getNumInferenceThreads, DOC(dai, node, DetectionNetworkSub, getNumInferenceThreads))
+        .def("setBlob", py::overload_cast<dai::OpenVINO::Blob>(&DetectionNetworkSub::setBlob), py::arg("blob"), DOC(dai, node, DetectionNetworkSub, setBlob))
+        .def("setBlob", py::overload_cast<const dai::Path&>(&DetectionNetworkSub::setBlob), py::arg("path"), DOC(dai, node, DetectionNetworkSub, setBlob, 2))
+        .def("setXmlModelPath", &DetectionNetworkSub::setXmlModelPath, py::arg("xmlModelPath"), py::arg("binModelPath") = Path{""}, DOC(dai, node, DetectionNetworkSub, setXmlModelPath))
+        .def("setNumShavesPerInferenceThread", &DetectionNetworkSub::setNumShavesPerInferenceThread, py::arg("numShavesPerInferenceThread"), DOC(dai, node, DetectionNetworkSub, setNumShavesPerInferenceThread))
+        .def("setBackend", &DetectionNetworkSub::setBackend, py::arg("setBackend"), DOC(dai, node, DetectionNetworkSub, setBackend))
+        .def("setCustomSettings", &DetectionNetworkSub::setCustomSettings, py::arg("setCustomSettings"), DOC(dai, node, DetectionNetworkSub, setCustomSettings))
+
+
+        // Detection specific properties
         .def_property_readonly(
             "input",
             [](const DetectionNetworkSub n) { return &n.neuralNetwork->input; },
