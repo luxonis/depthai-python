@@ -25,7 +25,7 @@ camRgb.setPreviewSize(224, 224)
 camRgb.setInterleaved(False)
 camRgb.setFps(40)
 # Define a neural network that will make predictions based on the source frames
-nn.setBlobPath("/home/matevz/Downloads/resnet50.blob")
+nn.setBlobPath("${Path to resnet blob}")
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
