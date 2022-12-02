@@ -2,6 +2,7 @@
 
 // depthai
 #include "depthai/device/Device.hpp"
+#include "depthai/device/EepromError.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
@@ -327,6 +328,13 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
     py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
+
+    // pybind11 limitation of having actual classes as exceptions
+    // Possible but requires a larger workaround
+    // https://stackoverflow.com/questions/62087383/how-can-you-bind-exceptions-with-custom-fields-and-constructors-in-pybind11-and
+
+    // Bind EepromError
+    auto eepromError = py::register_exception<EepromError>(m, "EepromError", PyExc_RuntimeError);
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////

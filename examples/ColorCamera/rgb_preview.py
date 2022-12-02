@@ -23,7 +23,7 @@ camRgb.preview.link(xoutRgb.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-    print('Connected cameras:', device.getConnectedCameras())
+    print('Connected cameras:', device.getConnectedCameraFeatures())
     # Print out usb speed
     print('Usb speed:', device.getUsbSpeed().name)
     # Bootloader version
