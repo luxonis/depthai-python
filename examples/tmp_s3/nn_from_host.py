@@ -39,7 +39,7 @@ labelMap = [
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
-nn = pipeline.create(dai.node.YoloDetectionNetworkSub)
+nn = pipeline.create(dai.node.YoloDetectionNetwork)
 
 xinFrame = pipeline.create(dai.node.XLinkIn)
 nnOut = pipeline.create(dai.node.XLinkOut)
