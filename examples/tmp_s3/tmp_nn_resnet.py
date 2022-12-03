@@ -37,7 +37,7 @@ nn.out.link(nnOut.input)
 labels = []
 
 # Parse
-with open(str((Path(__file__).parent / Path("labeles.txt")).resolve().absolute())) as f:
+with open(str((Path(__file__).parent / Path("resnet_labels.txt")).resolve().absolute())) as f:
     for line in f:
         splitLine = line.split("\'")
         labels.append(splitLine[1])
