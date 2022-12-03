@@ -42,8 +42,10 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
         .def("setXmlModelPath", &DetectionNetwork::setXmlModelPath, py::arg("xmlModelPath"), py::arg("binModelPath") = Path{""}, DOC(dai, node, DetectionNetwork, setXmlModelPath))
         .def("setNumShavesPerInferenceThread", &DetectionNetwork::setNumShavesPerInferenceThread, py::arg("numShavesPerInferenceThread"), DOC(dai, node, DetectionNetwork, setNumShavesPerInferenceThread))
         .def("setBackend", &DetectionNetwork::setBackend, py::arg("setBackend"), DOC(dai, node, DetectionNetwork, setBackend))
-        .def("setCustomSettings", &DetectionNetwork::setCustomSettings, py::arg("setCustomSettings"), DOC(dai, node, DetectionNetwork, setCustomSettings))
-
+        .def("setBackendProperties",
+             &DetectionNetwork::setBackendProperties,
+             py::arg("setBackendProperties"),
+             DOC(dai, node, DetectionNetwork, setBackendProperties))
 
         // Detection specific properties
         .def_property_readonly(

@@ -51,8 +51,14 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
              py::arg("numNCEPerThread"),
              DOC(dai, node, SpatialDetectionNetwork, setNumNCEPerInferenceThread))
         .def("getNumInferenceThreads", &SpatialDetectionNetwork::getNumInferenceThreads, DOC(dai, node, SpatialDetectionNetwork, getNumInferenceThreads))
-        .def("setBlob", py::overload_cast<dai::OpenVINO::Blob>(&SpatialDetectionNetwork::setBlob), py::arg("blob"), DOC(dai, node, SpatialDetectionNetwork, setBlob))
-        .def("setBlob", py::overload_cast<const dai::Path&>(&SpatialDetectionNetwork::setBlob), py::arg("path"), DOC(dai, node, SpatialDetectionNetwork, setBlob, 2))
+        .def("setBlob",
+             py::overload_cast<dai::OpenVINO::Blob>(&SpatialDetectionNetwork::setBlob),
+             py::arg("blob"),
+             DOC(dai, node, SpatialDetectionNetwork, setBlob))
+        .def("setBlob",
+             py::overload_cast<const dai::Path&>(&SpatialDetectionNetwork::setBlob),
+             py::arg("path"),
+             DOC(dai, node, SpatialDetectionNetwork, setBlob, 2))
         .def("setXmlModelPath",
              &SpatialDetectionNetwork::setXmlModelPath,
              py::arg("xmlModelPath"),
@@ -63,10 +69,16 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
              py::arg("numShavesPerInferenceThread"),
              DOC(dai, node, SpatialDetectionNetwork, setNumShavesPerInferenceThread))
         .def("setBackend", &SpatialDetectionNetwork::setBackend, py::arg("setBackend"), DOC(dai, node, SpatialDetectionNetwork, setBackend))
-        .def("setCustomSettings", &SpatialDetectionNetwork::setCustomSettings, py::arg("setCustomSettings"), DOC(dai, node, SpatialDetectionNetwork, setCustomSettings))
+        .def("setBackendProperties",
+             &SpatialDetectionNetwork::setBackendProperties,
+             py::arg("setBackendProperties"),
+             DOC(dai, node, SpatialDetectionNetwork, setBackendProperties))
 
         // Detection parser
-        .def("setConfidenceThreshold", &SpatialDetectionNetwork::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, SpatialDetectionNetwork, setConfidenceThreshold))
+        .def("setConfidenceThreshold",
+             &SpatialDetectionNetwork::setConfidenceThreshold,
+             py::arg("thresh"),
+             DOC(dai, node, SpatialDetectionNetwork, setConfidenceThreshold))
         .def("getConfidenceThreshold", &SpatialDetectionNetwork::getConfidenceThreshold, DOC(dai, node, SpatialDetectionNetwork, getConfidenceThreshold))
 
         .def_property_readonly(
