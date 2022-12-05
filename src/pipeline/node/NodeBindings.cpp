@@ -286,7 +286,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-        .def_property("properties", [](Node& n) -> const Properties& { return n.getProperties(); }, [](Node& n, const Properties& p) { n.getProperties() = p; }, DOC(dai, Node, properties), py::return_value_policy::reference_internal)
+        .def_property("properties", [](Node& n) -> const Properties& { return n.getProperties(); }, [](Node& n, const Properties& p) { n.getProperties() = p; }, DOC(dai, Node, getProperties), py::return_value_policy::reference_internal)
     ;
 
 }

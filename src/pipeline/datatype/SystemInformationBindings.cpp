@@ -5,6 +5,7 @@
 
 // depthai
 #include "depthai/pipeline/datatype/SystemInformation.hpp"
+#include "depthai/pipeline/datatype/SystemInformationS3.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -56,4 +57,44 @@ void bind_systeminformation(pybind11::module& m, void* pCallstack){
         .def_property("chipTemperature", [](SystemInformation& i) { return &i.chipTemperature; }, [](SystemInformation& i, ChipTemperature val) { i.chipTemperature = val; } )
         ;
 
+}
+
+void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
+    using namespace dai;
+
+    py::class_<RawSystemInformationS3, RawBuffer, std::shared_ptr<RawSystemInformationS3>> rawSystemInformationS3(
+        m, "RawSystemInformationS3", DOC(dai, RawSystemInformationS3));
+    py::class_<SystemInformationS3, Buffer, std::shared_ptr<SystemInformationS3>> systemInformationS3(m, "SystemInformationS3", DOC(dai, SystemInformationS3));
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // Call the rest of the type defines, then perform the actual bindings
+    Callstack* callstack = (Callstack*)pCallstack;
+    auto cb = callstack->top();
+    callstack->pop();
+    cb(m, pCallstack);
+    // Actual bindings
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    // Metadata / raw
+    rawSystemInformationS3.def(py::init<>())
+        .def_readwrite("ddrMemoryUsage", &RawSystemInformationS3::ddrMemoryUsage)
+        .def_readwrite("cpuAvgUsage", &RawSystemInformationS3::cpuAvgUsage)
+        .def_readwrite("chipTemperature", &RawSystemInformationS3::chipTemperature)
+        .def_readwrite("cpuUsages", &RawSystemInformationS3::cpuUsages);
+
+    // Message
+    systemInformationS3.def(py::init<>())
+        .def_property(
+            "ddrMemoryUsage", [](SystemInformationS3& i) { return &i.ddrMemoryUsage; }, [](SystemInformationS3& i, MemoryInfo val) { i.ddrMemoryUsage = val; })
+        .def_property(
+            "cpuAvgUsage", [](SystemInformationS3& i) { return &i.cpuAvgUsage; }, [](SystemInformationS3& i, CpuUsage val) { i.cpuAvgUsage = val; })
+        .def_property("cpuUsages", [](SystemInformationS3& i) { return &i.cpuUsages; }, [](SystemInformationS3& i, std::vector<CpuUsage> val) { i.cpuUsages = val; })
+        .def_property(
+            "chipTemperature",
+            [](SystemInformationS3& i) { return &i.chipTemperature; },
+            [](SystemInformationS3& i, ChipTemperatureS3 val) { i.chipTemperature = val; });
 }

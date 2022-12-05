@@ -8,6 +8,7 @@
 #include "depthai-shared/common/CameraFeatures.hpp"
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
+#include "depthai-shared/common/ChipTemperatureS3.hpp"
 #include "depthai-shared/common/CpuUsage.hpp"
 #include "depthai-shared/common/ProcessorType.hpp"
 #include "depthai-shared/common/Timestamp.hpp"
@@ -19,6 +20,9 @@
 #include "depthai-shared/common/DetectionParserOptions.hpp"
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
+
+// depthai
+#include "depthai/common/CameraFeatures.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -34,6 +38,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
+    py::class_<ChipTemperatureS3> chipTemperatureS3(m, "ChipTemperatureS3", DOC(dai, ChipTemperatureS3));
     py::class_<CpuUsage> cpuUsage(m, "CpuUsage", DOC(dai, CpuUsage));
     py::enum_<CameraModel> cameraModel(m, "CameraModel", DOC(dai, CameraModel));
     py::class_<StereoRectification> stereoRectification(m, "StereoRectification", DOC(dai, StereoRectification));
@@ -163,6 +168,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("name", &CameraFeatures::name)
+        .def("__repr__", [](CameraFeatures& camera) {
+            std::stringstream stream;
+            stream << camera;
+            return stream.str();
+        });
     ;
 
     // MemoryInfo
@@ -182,6 +193,15 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("dss", &ChipTemperature::dss)
         .def_readwrite("average", &ChipTemperature::average)
     ;
+
+    // ChipTemperatureS3
+    chipTemperatureS3
+        .def(py::init<>())
+        .def_readwrite("css", &ChipTemperatureS3::css)
+        .def_readwrite("mss", &ChipTemperatureS3::mss)
+        .def_readwrite("nce", &ChipTemperatureS3::nce)
+        .def_readwrite("soc", &ChipTemperatureS3::soc)
+        .def_readwrite("average", &ChipTemperatureS3::average);
 
     // CpuUsage
     cpuUsage

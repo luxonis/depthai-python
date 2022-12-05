@@ -239,6 +239,8 @@ endif()
 # Add include directory
 target_include_directories(${TARGET_NAME} PRIVATE src ${DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR})
 
+# Add include directories from external dependanices
+target_include_directories(${TARGET_NAME} PRIVATE external/xtensor-python/include external/numpy/numpy/core/include)
 # Link with libraries
 target_link_libraries(${TARGET_NAME}
     PUBLIC
