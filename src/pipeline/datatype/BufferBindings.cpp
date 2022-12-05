@@ -35,13 +35,13 @@ void bind_buffer(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     rawBuffer
         .def(py::init<>())
-        .def_property("data", [](py::object &obj){
-            dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
-            return py::array_t<uint8_t>(a.data.size(), a.data.data(), obj);
-        }, [](py::object &obj, py::array_t<std::uint8_t, py::array::c_style> array){
-            dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
-            a.data = {array.data(), array.data() + array.size()};
-        })
+        // .def_property("data", [](py::object &obj){
+        //     dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
+        //     return py::array_t<uint8_t>(a.data.size(), a.data.data(), obj);
+        // }, [](py::object &obj, py::array_t<std::uint8_t, py::array::c_style> array){
+        //     dai::RawBuffer &a = obj.cast<dai::RawBuffer&>();
+        //     a.data = {array.data(), array.data() + array.size()};
+        // })
         ;
 
     // Message
@@ -56,8 +56,7 @@ void bind_buffer(pybind11::module& m, void* pCallstack){
         }, DOC(dai, Buffer, getData))
         .def("setData", py::overload_cast<const std::vector<std::uint8_t>&>(&Buffer::setData), DOC(dai, Buffer, setData))
         .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
-            buffer.getData().clear();
-            buffer.getData().insert(buffer.getData().begin(), array.data(), array.data() + array.nbytes());
+            buffer.setData({array.data(), array.data() + array.nbytes()});
         }, DOC(dai, Buffer, setData))
         ;
 
