@@ -39,6 +39,8 @@ void bind_detectionparser(pybind11::module& m, void* pCallstack){
         .def("setNumFramesPool", &DetectionParser::setNumFramesPool, py::arg("numFramesPool"), DOC(dai, node, DetectionParser, setNumFramesPool))
         .def("getNumFramesPool", &DetectionParser::getNumFramesPool, DOC(dai, node, DetectionParser, getNumFramesPool))
         .def("setBlob", &DetectionParser::setBlob, py::arg("blob"), DOC(dai, node, DetectionParser, setBlob))
+        .def("setInputImageSize", static_cast<void(DetectionParser::*)(int,int)>(&DetectionParser::setInputImageSize), py::arg("width"), py::arg("height"), DOC(dai, node, DetectionParser, setInputImageSize))
+        .def("setInputImageSize", static_cast<void(DetectionParser::*)(std::tuple<int,int>)>(&DetectionParser::setInputImageSize), py::arg("size"), DOC(dai, node, DetectionParser, setInputImageSize, 2))
         .def("setNNFamily", &DetectionParser::setNNFamily, py::arg("type"), DOC(dai, node, DetectionParser, setNNFamily))
         .def("getNNFamily", &DetectionParser::getNNFamily, DOC(dai, node, DetectionParser, getNNFamily))
         .def("setConfidenceThreshold", &DetectionParser::setConfidenceThreshold, py::arg("thresh"), DOC(dai, node, DetectionParser, setConfidenceThreshold))
