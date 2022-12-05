@@ -4,3 +4,6 @@
 [submodule "external/xtensor-python"]
 	path = external/xtensor-python
 	url = git@github.com:xtensor-stack/xtensor-python.git
+[submodule "external/numpy"]
+	path = external/numpy
+	url = git@github.com:numpy/numpy.git
