@@ -3,4 +3,4 @@
 	url = ../depthai-core.git
 [submodule "external/xtensor-python"]
 	path = external/xtensor-python
-	url = git@github.com:xtensor-stack/xtensor-python.git
+	url = https://github.com/xtensor-stack/xtensor-python.git
