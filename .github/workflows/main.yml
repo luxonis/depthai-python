@@ -50,7 +50,6 @@ jobs:
           python -m pip install --upgrade pip
           sudo apt install libusb-1.0-0-dev
           python -m pip install -r docs/requirements_mkdoc.txt
-          python -m pip install numpy
       - name: Configure project
         run: cmake -S . -B build -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
       - name: Build target 'pybind11_mkdoc'
