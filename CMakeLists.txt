@@ -73,9 +73,6 @@ else()
     add_subdirectory(depthai-core)
 endif()
 
-# Add external dependencies
-add_subdirectory(external)
-
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
 hunter_add_package(pybind11)
@@ -85,6 +82,9 @@ if(MINGW)
     set(PYBIND11_LTO_CXX_FLAGS "" CACHE STRING "" FORCE)
 endif()
 find_package(pybind11 CONFIG REQUIRED)
+
+# Add external dependencies
+add_subdirectory(external)
 
 # Add files for python module
 pybind11_add_module(${TARGET_NAME}
