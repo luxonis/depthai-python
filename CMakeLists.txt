@@ -65,8 +65,6 @@ option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCSTRINGS "Generate docstrings from header files if module 'pybind11_mkdoc' available" ON)
 
-# Add external dependencies
-add_subdirectory(external)
 
 # Add depthai-core dependency
 if(DEPTHAI_PYTHON_USE_FIND_PACKAGE)
@@ -74,7 +72,6 @@ if(DEPTHAI_PYTHON_USE_FIND_PACKAGE)
 else()
     add_subdirectory(depthai-core)
 endif()
-
 
 # Add pybind11 dependency
 #add_subdirectory(pybind11-2.5.0)
@@ -85,6 +82,9 @@ if(MINGW)
     set(PYBIND11_LTO_CXX_FLAGS "" CACHE STRING "" FORCE)
 endif()
 find_package(pybind11 CONFIG REQUIRED)
+
+# Add external dependencies
+add_subdirectory(external)
 
 # Add files for python module
 pybind11_add_module(${TARGET_NAME}
