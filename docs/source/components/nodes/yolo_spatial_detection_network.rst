@@ -94,6 +94,8 @@ Examples of functionality
 
 - :ref:`RGB & TinyYolo with spatial data`
 
+.. include::  /includes/spatial-coords.rst
+
 Reference
 #########
 
