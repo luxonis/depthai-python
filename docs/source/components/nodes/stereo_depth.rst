@@ -242,7 +242,7 @@ Examples of functionality
 =========================
 
 - :ref:`Depth Preview`
-- :ref:`RGB Depth alignment`
+- :ref:`RGB Depth alignment` - align depth to color camera
 - :ref:`Mono & MobilenetSSD & Depth`
 - :ref:`RGB & MobilenetSSD with spatial data`
 
@@ -460,12 +460,12 @@ on the following picture.
 
 Meaning of variables on the picture:
 
-- :code:`BL [cm]` - Baseline of stereo cameras.
-- :code:`Dv [cm]` - Minimum distace where both cameras see an object (thus where depth can be calculated).
-- :code:`B [pixels]` - Width of the band where depth cannot be calculated.
-- :code:`W [pixels]` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
-- :code:`D [cm]` - Distance from the cameras to an object.
-- :code:`F [cm]` - Width of image at the distance :code:`D`.
+- ``BL [cm]`` - Baseline of stereo cameras.
+- ``Dv [cm]`` - Minimum distace where both cameras see an object (thus where depth can be calculated).
+- ``B [pixels]`` - Width of the band where depth cannot be calculated.
+- ``W [pixels]`` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
+- ``D [cm]`` - Distance from the **camera plane** to an object (see image :ref:`here <Measuring real-world object dimensions>`).
+- ``F [cm]`` - Width of image at the distance ``D``.
 
 .. image:: https://user-images.githubusercontent.com/59799831/135310972-c37ba40b-20ad-4967-92a7-c71078bcef99.png
 
