@@ -142,8 +142,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
             }
 
             py::array contiguous = numpy.attr("ascontiguousarray")(arr);
-            frm.getData().resize(contiguous.nbytes());
-            memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());
+            frm.setData({(uint8_t*) contiguous.data(), (uint8_t*) contiguous.data() + contiguous.nbytes()});
+            // frm.getData().resize(contiguous.nbytes());
+            // memcpy(frm.getData().data(), contiguous.data(), contiguous.nbytes());
 
         }, py::arg("array"), "Copies array bytes to ImgFrame buffer")
         .def("getFrame", [](py::object &obj, bool copy){
