@@ -39,6 +39,7 @@ PYBIND11_MODULE(depthai, m)
     m.attr("__build_datetime__") = DEPTHAI_PYTHON_BUILD_DATETIME;
     m.attr("__device_version__") = dai::build::DEVICE_VERSION;
     m.attr("__bootloader_version__") = dai::build::BOOTLOADER_VERSION;
+    m.attr("__device_rvc3_version__") = dai::build::DEVICE_RVC3_VERSION;
 
     // Add bindings
     std::deque<StackFunction> callstack;
