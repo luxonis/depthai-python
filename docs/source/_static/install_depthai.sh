@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # create some variables
-# TODO: CURRENT_DIR will not be needed in production
-CURRENT_DIR="$(pwd)"
 APP_NAME="depthai"
 WORKING_DIR_NAME="Luxonis"
 WORKING_DIR="$HOME/$WORKING_DIR_NAME"
@@ -36,8 +34,7 @@ done
 
 DEPTHAI_DIR="$WORKING_DIR/$APP_NAME"
 VENV_DIR="$WORKING_DIR/venv"
-ENTRYPOINT_DIR="$WORKING_DIR/entrypoint"
-mkdir -p "$ENTRYPOINT_DIR"
+ENTRYPOINT_DIR="$DEPTHAI_DIR/entrypoint"
 
 # Get Python version or find out tha python 3.10 must be installed
 python_executable=$(which python3)
@@ -105,31 +102,35 @@ write_in_file () {
 }
 
 # add depthai working dir to .bashrc if its not already there
-COMMENT='# Entry point for Depthai demo app, enables to run <run_demo> in terminal'
+COMMENT='# Entry point for Depthai demo app, enables to run <depthai_launcher> in terminal'
+COMMENT_DEPTHAI_HOME='# Depthai home directory'
 BASHRC="$HOME/.bashrc"
 ZSHRC="$HOME/.zshrc"
 ADD_ENTRYPOINT_TO_PATH='export PATH=$PATH'":$ENTRYPOINT_DIR"
+ADD_DEPTHAI_HOME_TO_PATH='export PATH=$PATH'":$DEPTHAI_DIR"
 
 # add to .bashrc only if it is not in there already
 write_in_file "$COMMENT" "$BASHRC"
 write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$BASHRC"
+# write_in_file "$COMMENT_DEPTHAI_HOME" "$BASHRC"
+# write_in_file "$ADD_DEPTHAI_HOME_TO_PATH" "$BASHRC"
 
 if [ -f "$ZSHRC" ]; then
   write_in_file "$COMMENT" "$ZSHRC"
   write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$ZSHRC"
+  # write_in_file "$COMMENT_DEPTHAI_HOME" "$ZSHRC"
+  # write_in_file "$ADD_DEPTHAI_HOME_TO_PATH" "$ZSHRC"
 fi
-
-# install global dependencies
-echo "Installing global dependencies."
-# sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
-./install_dependencies.sh
-
 
 if [[ $(uname -s) == "Darwin" ]]; then
   echo _____________________________
   echo "Calling macOS_installer.sh"
   echo _____________________________
   echo "Running macOS installer."
+
+  echo "Installing global dependencies."
+  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+
   echo "Upgrading brew."
   brew upgrade
 
@@ -142,7 +143,7 @@ if [[ $(uname -s) == "Darwin" ]]; then
   fi
   cd "$DEPTHAI_DIR"
   git fetch
-  git checkout demo_app_installation_v2
+  git checkout main
   git pull
 
   # install python 3.10 and python dependencies
@@ -189,10 +190,14 @@ elif [[ $(uname -s) == "Linux" ]]; then
   echo _____________________________
   echo "Calling linux_installer.sh"
   echo _____________________________
-  echo $'\nRunning Linux installer.'
-  echo "Updating sudo-apt."
 
+  echo "Updating sudo-apt."
   sudo apt-get update
+
+  echo "Installing global dependencies."
+  sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+
+  echo $'\nRunning Linux installer.'
 
   # clone depthai form git
 
@@ -206,7 +211,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
 
   cd "$DEPTHAI_DIR"
   git fetch
-  git checkout demo_app_installation_v2
+  git checkout main
   git pull
 
   # install python 3.10
@@ -234,16 +239,8 @@ else
   exit 99
 fi
 
-
-# Create entrypoint, it is a small script. Maybe we can store it on server and download it?
-echo "Installing global dependencies."
-# TODO: in production this should work
-#sudo curl -fL https://docs.luxonis.com/run_demo.sh
-cp "$CURRENT_DIR/run_demo" "$ENTRYPOINT_DIR"
-
-
 echo $'\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
-echo $'\nTo run demo app write <run_demo> in terminal.'
+echo $'\nTo run demo app write <depthai_launcher> in terminal.'
 read -rsp $'Press ANY KEY to finish and run the demo app...\n' -n1 key
 echo "STARTING DEMO APP."
 python "$DEPTHAI_DIR/launcher/launcher.py" -r "$DEPTHAI_DIR"
