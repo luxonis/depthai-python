@@ -119,6 +119,7 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
 
 void bind_xlinkin(pybind11::module& m, void* pCallstack);
 void bind_xlinkout(pybind11::module& m, void* pCallstack);
+void bind_testnodes(pybind11::module& m, void* pCallstack);
 void bind_colorcamera(pybind11::module& m, void* pCallstack);
 void bind_monocamera(pybind11::module& m, void* pCallstack);
 void bind_stereodepth(pybind11::module& m, void* pCallstack);
@@ -148,6 +149,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind all other nodes
     callstack.push_front(bind_xlinkin);
     callstack.push_front(bind_xlinkout);
+    callstack.push_front(bind_testnodes);
     callstack.push_front(bind_colorcamera);
     callstack.push_front(bind_monocamera);
     callstack.push_front(bind_stereodepth);
