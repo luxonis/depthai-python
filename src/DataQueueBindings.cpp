@@ -140,24 +140,24 @@ void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
             } while(!sent);
 
         }, py::arg("msg"), DOC(dai, DataInputQueue, send, 2))
-        .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::RawBuffer> d){
+        // .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::RawBuffer> d){
 
-            bool sent = false;
-            do {
-                 // block for 100ms
-                {
-                    // Release GIL, then block
-                    py::gil_scoped_release release;
-                    sent = obj.send(d, milliseconds(100));
-                }
-                // reacquires GIL as PyErr_CheckSignals requires GIL
+        //     bool sent = false;
+        //     do {
+        //          // block for 100ms
+        //         {
+        //             // Release GIL, then block
+        //             py::gil_scoped_release release;
+        //             sent = obj.send(d, milliseconds(100));
+        //         }
+        //         // reacquires GIL as PyErr_CheckSignals requires GIL
 
-                // check if interrupt triggered in between
-                if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+        //         // check if interrupt triggered in between
+        //         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
 
-            } while(!sent);
+        //     } while(!sent);
 
-        }, py::arg("rawMsg"), DOC(dai, DataInputQueue, send))
+        // }, py::arg("rawMsg"), DOC(dai, DataInputQueue, send))
         ;
 
 }
