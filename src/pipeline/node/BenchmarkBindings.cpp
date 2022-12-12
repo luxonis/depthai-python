@@ -32,5 +32,6 @@ void bind_benchmark(pybind11::module& m, void* pCallstack) {
         .def_readonly("input", &BenchmarkOut::input, DOC(dai, node, BenchmarkOut, input))
         .def("setNumMessagesToSend", &BenchmarkOut::setNumMessagesToSend, py::arg("num"), DOC(dai, node, BenchmarkOut, setNumMessagesToSend));
     benchmarkIn.def_readonly("input", &BenchmarkIn::input, DOC(dai, node, BenchmarkIn, input))
+        .def_readonly("report", &BenchmarkIn::report, DOC(dai, node, BenchmarkIn, report))
         .def("setNumMessagesToGet", &BenchmarkIn::setNumMessagesToGet, py::arg("num"), DOC(dai, node, BenchmarkIn, setNumMessagesToGet));
 }

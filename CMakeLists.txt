@@ -148,6 +148,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
+    src/pipeline/datatype/BenchmarkReportBindings.cpp
 
 )
 
