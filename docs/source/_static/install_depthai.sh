@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# create some variables
 APP_NAME="depthai"
 WORKING_DIR_NAME="Luxonis"
 WORKING_DIR="$HOME/$WORKING_DIR_NAME"
@@ -23,7 +22,7 @@ do
     echo "Using given installation path: $install_path"
     WORKING_DIR="$install_path"
   fi
-# find parent dir if [ -d "$(dirname "$WORKING_DIR")" ]; then
+
   if [ -d "$WORKING_DIR" ]; then
     echo "Directory: $WORKING_DIR is OK"
     path_correct="true"
@@ -36,7 +35,7 @@ DEPTHAI_DIR="$WORKING_DIR/$APP_NAME"
 VENV_DIR="$WORKING_DIR/venv"
 ENTRYPOINT_DIR="$DEPTHAI_DIR/entrypoint"
 
-# Get Python version or find out tha python 3.10 must be installed
+# Get Python version or find out that python 3.10 must be installed
 python_executable=$(which python3)
 python_chosen="false"
 install_python="false"
@@ -101,25 +100,18 @@ write_in_file () {
   fi
 }
 
-# add depthai working dir to .bashrc if its not already there
 COMMENT='# Entry point for Depthai demo app, enables to run <depthai_launcher> in terminal'
-COMMENT_DEPTHAI_HOME='# Depthai home directory'
 BASHRC="$HOME/.bashrc"
 ZSHRC="$HOME/.zshrc"
 ADD_ENTRYPOINT_TO_PATH='export PATH=$PATH'":$ENTRYPOINT_DIR"
-ADD_DEPTHAI_HOME_TO_PATH='export PATH=$PATH'":$DEPTHAI_DIR"
 
 # add to .bashrc only if it is not in there already
 write_in_file "$COMMENT" "$BASHRC"
 write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$BASHRC"
-# write_in_file "$COMMENT_DEPTHAI_HOME" "$BASHRC"
-# write_in_file "$ADD_DEPTHAI_HOME_TO_PATH" "$BASHRC"
 
 if [ -f "$ZSHRC" ]; then
   write_in_file "$COMMENT" "$ZSHRC"
   write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$ZSHRC"
-  # write_in_file "$COMMENT_DEPTHAI_HOME" "$ZSHRC"
-  # write_in_file "$ADD_DEPTHAI_HOME_TO_PATH" "$ZSHRC"
 fi
 
 if [[ $(uname -s) == "Darwin" ]]; then
@@ -170,16 +162,14 @@ if [[ $(uname -s) == "Darwin" ]]; then
   pip install --upgrade pip
 
   # install launcher dependencies
-  # only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqth5 with pip
+  # only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqt5 with pip
   if [[ $(uname -m) == 'arm64' ]]; then
-    #if [[ $(uname -s) == "Darwin" ]]; then
     if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
       echo "/opt/homebrew/lib/python$nr_1.$nr_2/site-packages already in PYTHONPATH"
     else
       export "PYTHONPATH=/opt/homebrew/lib/python$nr_1.$nr_2/site-packages:"$PYTHONPATH
       echo "/opt/homebrew/lib/pythonv$nr_1.$nr_2/site-packages added to PYTHONPATH"
     fi
-    #fi
   else
     pip install pyqt5
   fi
@@ -200,7 +190,6 @@ elif [[ $(uname -s) == "Linux" ]]; then
   echo $'\nRunning Linux installer.'
 
   # clone depthai form git
-
   if [ -d "$DEPTHAI_DIR" ]; then
      echo "Demo app already downloaded. Checking out main and updating."
 
@@ -224,11 +213,10 @@ elif [[ $(uname -s) == "Linux" ]]; then
     python_executable=$(which python3.10)
   fi
 
-  # create python virtual environment
   echo "Creating python virtual environment in $VENV_DIR"
 
   "$python_executable" -m venv "$VENV_DIR"
-  # activate environment
+
   source "$VENV_DIR/bin/activate"
   pip install --upgrade pip
 
