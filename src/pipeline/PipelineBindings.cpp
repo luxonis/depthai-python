@@ -8,8 +8,8 @@
 // depthai - nodes
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
-#include "depthai/pipeline/node/TestIn.hpp"
-#include "depthai/pipeline/node/TestOut.hpp"
+#include "depthai/pipeline/node/BenchmarkOut.hpp"
+#include "depthai/pipeline/node/BenchmarkIn.hpp"
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
