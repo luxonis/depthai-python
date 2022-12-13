@@ -5,11 +5,6 @@ Please install the necessary dependencies for your platform by following the ins
 
 .. tabs::
 
-  .. tab:: **Windows 10**
-
-    Windows 10 users can either install DepthAI dependencies via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps/#use-windows-installer>`__,
-    or follow :ref:`instructions below <Windows 10>`.
-
   .. tab:: **macOS**
 
     Execute the script below to install macOS dependencies:
@@ -19,6 +14,11 @@ Please install the necessary dependencies for your platform by following the ins
       bash -c "$(curl -fL https://docs.luxonis.com/install_depthai.sh)"
 
     Please refer to :ref:`documentation below <macOS>` if any issues occur.
+
+  .. tab:: **Windows 10**
+
+    Windows 10 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps/#use-windows-installer>`__,
+    or follow :ref:`instructions below <Windows 10>`.
 
   .. tab:: **Linux**
 
@@ -30,7 +30,7 @@ Please install the necessary dependencies for your platform by following the ins
 
     Please refer to :ref:`Supported Platforms` if any issues occur.
 
-Once installed, you can :ref:`install the DepthAI library <Install from PyPI>`.
+Once installed, you can :ref:`install the DepthAI library <Install from PyPI>` from PyPI.
 
 Supported Platforms
 ###################
