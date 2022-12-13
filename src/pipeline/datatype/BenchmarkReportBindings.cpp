@@ -29,11 +29,15 @@ void bind_benchmarkreport(pybind11::module& m, void* pCallstack) {
     rawBenchmarkReport.def(py::init<>())
         .def_readwrite("fps", &RawBenchmarkReport::fps)
         .def_readwrite("timeTotal", &RawBenchmarkReport::timeTotal)
-        .def_readwrite("numMessagesReceived", &RawBenchmarkReport::numMessagesReceived);
+        .def_readwrite("numMessagesReceived", &RawBenchmarkReport::numMessagesReceived)
+        .def_readwrite("latencies", &RawBenchmarkReport::latencies)
+        .def_readwrite("averageLatency", &RawBenchmarkReport::averageLatency);
 
     // Message
     benchmarkReport.def(py::init<>())
         .def_property_readonly("fps", [](BenchmarkReport& i) { return &i.fps; })
         .def_property_readonly("timeTotal", [](BenchmarkReport& i) { return &i.timeTotal; })
-        .def_property_readonly("numMessagesReceived", [](BenchmarkReport& i) { return &i.numMessagesReceived; });
+        .def_property_readonly("numMessagesReceived", [](BenchmarkReport& i) { return &i.numMessagesReceived; })
+        .def_property_readonly("latencies", [](BenchmarkReport& i) { return &i.latencies; })
+        .def_property_readonly("averageLatency", [](BenchmarkReport& i) { return &i.averageLatency; });
 }

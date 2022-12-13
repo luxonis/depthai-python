@@ -9,8 +9,7 @@ void bind_benchmark(pybind11::module& m, void* pCallstack) {
     using namespace dai;
     using namespace dai::node;
 
-    // Node and Properties declare upfront
-    // py::class_<BenchmarkProperties> benchmarkOutProperties(m, "benchmarkOutProperties", DOC(dai, benchmarkOutProperties));
+    // Declare node upfront
     auto benchmarkOut = ADD_NODE(BenchmarkOut);
     auto benchmarkIn = ADD_NODE(BenchmarkIn);
 
@@ -27,11 +26,12 @@ void bind_benchmark(pybind11::module& m, void* pCallstack) {
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // Node
+    // Nodes
     benchmarkOut.def_readonly("out", &BenchmarkOut::out, DOC(dai, node, BenchmarkOut, out))
         .def_readonly("input", &BenchmarkOut::input, DOC(dai, node, BenchmarkOut, input))
         .def("setNumMessagesToSend", &BenchmarkOut::setNumMessagesToSend, py::arg("num"), DOC(dai, node, BenchmarkOut, setNumMessagesToSend));
     benchmarkIn.def_readonly("input", &BenchmarkIn::input, DOC(dai, node, BenchmarkIn, input))
         .def_readonly("report", &BenchmarkIn::report, DOC(dai, node, BenchmarkIn, report))
+        .def_readonly("passthrough", &BenchmarkIn::passthrough, DOC(dai, node, BenchmarkIn, passthrough))
         .def("setNumMessagesToGet", &BenchmarkIn::setNumMessagesToGet, py::arg("num"), DOC(dai, node, BenchmarkIn, setNumMessagesToGet));
 }
