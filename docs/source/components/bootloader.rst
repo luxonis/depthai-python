@@ -60,9 +60,9 @@ Boot switches
 
     OAK-D-PoE with switches 2,4,5 ON, for the purpose of connecting to the device via USB.
 
-On newer versions of OAK devices we have 0 ohm resistors (see image below) instead of DIP switch, which means OAK will boot into flash by default. These new devices
-have bootloader flashed, which handles the booting process. There's also an additional button on the baseboard that switches boot to recovery mode when
-pressed, which can be useful if bootlaoder hasn't yet been flashed (eg. early access devices). You need to press this button when powering the device (when booting
+On newer versions of OAK devices we have 0 ohm resistors (see image below) instead of a DIP switch, which means OAK will boot into flash by default. These new devices
+have the bootloader flashed, which handles the booting process. There's also an additional button on the baseboard that switches boot to recovery mode when
+pressed, which can be useful if the bootloader hasn't yet been flashed (eg. early access devices). You need to press this button when powering the device (when booting
 happens).
 
 .. image:: https://user-images.githubusercontent.com/18037362/207295832-613fae0a-c0ae-411e-b03b-8a4736f1bfc7.png
