@@ -60,6 +60,8 @@ Boot switches
 
 OAK-D-PoE with switches 2,4,5 ON, for the purpose of connecting to the device via USB.
 
+On newever
+
 API
 ###
 
