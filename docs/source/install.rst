@@ -1,49 +1,81 @@
 Installation
 ============
 
-Please install the necessary dependencies for your platform by :ref:`referring to the table below <Supported Platforms>`.
-Once installed, you can :ref:`install the DepthAI library <Install from PyPI>`.
+Please install the necessary dependencies for your platform by following the instructions below.
 
-We are constantly striving to improve how we release our software to keep up
-with countless platforms and the numerous ways to package it.  If you do not
-see a particular platform or package format listed below please reach out to
-us on `Discord <https://discord.com/channels/790680891252932659/794255653870370857>`__
-or on `Github <https://github.com/luxonis/depthai>`__.
+.. tabs::
+
+  .. tab:: **macOS**
+
+    Execute the script below to install macOS dependencies:
+
+    .. code-block:: bash
+
+      bash -c "$(curl -fL https://docs.luxonis.com/install_depthai.sh)"
+
+    Please refer to :ref:`documentation below <macOS>` if any issues occur.
+
+  .. tab:: **Windows 10**
+
+    Windows 10 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps/#use-windows-installer>`__,
+    or follow :ref:`instructions below <Windows 10>`.
+
+  .. tab:: **Linux**
+
+    Execute the script below to install Linux dependencies:
+
+    .. code-block:: bash
+
+      sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+
+    Please refer to :ref:`Supported Platforms` if any issues occur.
+
+Once installed, you can :ref:`install the DepthAI library <Install from PyPI>` from PyPI.
 
 Supported Platforms
 ###################
 
-======================== ============================================== ================================================================================
-Platform                 Instructions                                   Support
-======================== ============================================== ================================================================================
-Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
-Ubuntu                   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
-Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-Jestson Nano/Xavier      :ref:`Platform dependencies <Jetson>`          `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
-======================== ============================================== ================================================================================
+See documentation below for other platforms or additional information.
 
-The following platforms are also supported by a combination of the community and Luxonis:
+.. list-table::
+   :header-rows: 1
 
-====================== =========================================================================== ================================================================================
-Platform               Instructions                                                                Support
-====================== =========================================================================== ================================================================================
-Fedora                                                                                             `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
-Robot Operating System Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__ `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
-Windows 7              :ref:`WinUSB driver <Windows 7>`                                            `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-Docker                 :ref:`Pull and run official images <Docker>`                                `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
-Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`                                  `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-VMware                 :ref:`Run on VMware <vmware>`                                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`                                     `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-WSL2                   :ref:`Run on WSL2 <WSL 2>`                                                   /
-====================== =========================================================================== ================================================================================
+   * - Platform
+     - Instructions
+   * - Windows 10
+     - :ref:`Platform dependencies <Windows 10>`
+   * - macOS
+     - :ref:`Platform dependencies <macOS>`
+   * - Ubuntu
+     - :ref:`Platform dependencies <Ubuntu>`
+   * - Raspberry Pi OS
+     - :ref:`Platform dependencies <Raspberry Pi OS>`
+   * - Jetson Nano/Xavier
+     - :ref:`Platform dependencies <Jetson>`
+   * - ROS
+     - Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__
+   * - Windows 7
+     - :ref:`WinUSB driver <Windows 7>`
+   * - Docker
+     - :ref:`Pull and run official images <Docker>`
+   * - Kernel Virtual Machine
+     - :ref:`Run on KVM <Kernel Virtual Machine>`
+   * - VMware
+     - :ref:`Run on VMware <vmware>`
+   * - Virtual Box
+     - :ref:`Run on Virtual Box <Virtual Box>`
+   * - WSL2
+     - :ref:`Run on WSL2 <WSL 2>`
+
+If you do not see a particular platform or package format listed below please reach out to us on `Discord <luxonis.com/discord>`__
+or on `Github <https://github.com/luxonis/depthai>`__.
 
 macOS
 *****
 
 .. code-block:: bash
 
-  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+  bash -c "$(curl -fL https://docs.luxonis.com/install_depthai.sh)"
 
 Close and re-open the terminal window after this command.
 
@@ -51,8 +83,7 @@ The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as s
 support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__
 for some additional troubleshooting steps.
 
-Note that if the video streaming window does not appear consider running the
-following:
+Note that if the video streaming window does not appear consider running the following:
 
 .. code-block:: bash
 
@@ -80,14 +111,12 @@ Note! If opencv fails with illegal instruction after installing from PyPi, add:
 
 Raspberry Pi OS
 ***************
-  
+
   .. code-block:: bash
-  
+
     sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
-
 We have also prepared `pre-configured RPi images <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/raspberrypi.html>`__ so you can get up & running faster.
-
 
 Jetson
 ******
@@ -98,7 +127,7 @@ perform the following steps, after completing a fresh install and setup. On the 
 This first step is optional: go to the *Software* (App Store) and delete the apps or software that you probably will not use. 
 
 Open a terminal window and run the following commands:
-  
+
   .. code-block:: bash
 
     sudo apt update && sudo apt upgrade
