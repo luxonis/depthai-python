@@ -29,7 +29,8 @@ void bind_benchmark(pybind11::module& m, void* pCallstack) {
     // Nodes
     benchmarkOut.def_readonly("out", &BenchmarkOut::out, DOC(dai, node, BenchmarkOut, out))
         .def_readonly("input", &BenchmarkOut::input, DOC(dai, node, BenchmarkOut, input))
-        .def("setNumMessagesToSend", &BenchmarkOut::setNumMessagesToSend, py::arg("num"), DOC(dai, node, BenchmarkOut, setNumMessagesToSend));
+        .def("setNumMessagesToSend", &BenchmarkOut::setNumMessagesToSend, py::arg("num"), DOC(dai, node, BenchmarkOut, setNumMessagesToSend))
+        .def("setFps", &BenchmarkOut::setFps, py::arg("fps"), DOC(dai, node, BenchmarkOut, setFps));
     benchmarkIn.def_readonly("input", &BenchmarkIn::input, DOC(dai, node, BenchmarkIn, input))
         .def_readonly("report", &BenchmarkIn::report, DOC(dai, node, BenchmarkIn, report))
         .def_readonly("passthrough", &BenchmarkIn::passthrough, DOC(dai, node, BenchmarkIn, passthrough))
