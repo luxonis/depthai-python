@@ -1,7 +1,10 @@
 Installation
 ============
 
-Please install the necessary dependencies for your platform by following the instructions below.
+Refer to `DepthAI installer documentation <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__ to install
+full `DepthAI demo <https://github.com/luxonis/depthai#depthai-api-demo-program>`__ and its dependencies and requirements.
+
+Follow the steps below to install dependencies for your platform.
 
 .. tabs::
 
@@ -11,13 +14,13 @@ Please install the necessary dependencies for your platform by following the ins
 
     .. code-block:: bash
 
-      bash -c "$(curl -fL https://docs.luxonis.com/install_depthai.sh)"
+      bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
     Please refer to :ref:`documentation below <macOS>` if any issues occur.
 
   .. tab:: **Windows 10**
 
-    Windows 10 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps/#use-windows-installer>`__,
+    Windows 10 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__,
     or follow :ref:`instructions below <Windows 10>`.
 
   .. tab:: **Linux**
@@ -429,7 +432,8 @@ And then for each additional depthai/OAK device you would like to pass through, 
 Install from PyPI
 #################
 
-Our packages are distributed `via PyPi <https://pypi.org/project/depthai/>`__, to install it in your environment use
+After installing depthai dependencies, you can either refer to depthai-core for C++ development, or download the depthai **Python library**
+`via PyPi <https://pypi.org/project/depthai/>`__:
 
 .. code-block:: bash
 
@@ -497,102 +501,100 @@ Other installation methods
 
 To get the latest and yet unreleased features from our source code, you can go ahead and compile depthai package manually.
 
-Dependencies to build from source
-*********************************
+.. tabs::
 
-- CMake > 3.2.0
-- Generation tool (Ninja, make, ...)
-- C/C++ compiler
-- libusb1 development package
+  .. tab:: **Build from source**
 
-.. _raspbian:
+      **Dependencies to build from source**
 
-Ubuntu, Raspberry Pi OS, ... (Debian based systems)
----------------------------------------------------
+      - CMake > 3.2.0
+      - Generation tool (Ninja, make, ...)
+      - C/C++ compiler
+      - libusb1 development package
 
-On Debian based systems (Raspberry Pi OS, Ubuntu, ...) these can be acquired by running:
+      .. tabs::
 
-.. code-block:: bash
+        .. tab:: Debian/Ubuntu/RPi OS
 
-  sudo apt-get -y install cmake libusb-1.0-0-dev build-essential
+          On Debian based systems (Raspberry Pi OS, Ubuntu, ...) these can be acquired by running:
 
-macOS (Mac OS X)
-----------------
+          .. code-block:: bash
 
-Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/depthai-python>`__ library needs following dependencies
+            sudo apt-get -y install cmake libusb-1.0-0-dev build-essential
 
-- Homebrew (If it's not installed already)
+        .. tab:: maxOS
 
-  .. code-block:: bash
+          Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/depthai-python>`__ library needs following dependencies
 
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+          - Homebrew (If it's not installed already)
 
-- Python, :code:`libusb`, CMake, :code:`wget`
+            .. code-block:: bash
 
-  .. code-block:: bash
+              /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-      brew install coreutils python3 cmake libusb wget
+          - Python, :code:`libusb`, CMake, :code:`wget`
 
-And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python>`__ from Github and build it for Mac OS X.
+            .. code-block:: bash
 
-Install using GitHub commit
-***************************
+                brew install coreutils python3 cmake libusb wget
 
-Pip allows users to install the packages from specific commits, even if they are not yet released on PyPi.
+          And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python>`__ from Github and build it for Mac OS X.
 
-To do so, use the command below - and be sure to replace the :code:`<commit_sha>` with the correct commit hash `from here <https://github.com/luxonis/depthai-python/commits>`__
+  .. tab:: **Install from commit**
 
-.. code-block:: bash
+    Pip allows users to install the packages from specific commits, even if they are not yet released on PyPi.
 
-    python3 -m pip install git+https://github.com/luxonis/depthai-python.git@<commit_sha>
+    To do so, use the command below - and be sure to replace the :code:`<commit_sha>` with the correct commit hash `from here <https://github.com/luxonis/depthai-python/commits>`__
 
-Using/Testing a Specific Branch/PR
-**********************************
+    .. code-block:: bash
 
-From time to time, it may be of interest to use a specific branch.  This may occur, for example,
-because we have listened to your feature request and implemented a quick implementation in a branch.
-Or it could be to get early access to a feature that is soaking in our :code:`develop` for stability purposes before being merged into :code:`main`
-(:code:`develop` is the branch we use to soak new features before merging them into :code:`main`):
+        python3 -m pip install git+https://github.com/luxonis/depthai-python.git@<commit_sha>
 
-So when working in the `depthai-python <https://github.com/luxonis/depthai-python>`__ repository, using a branch can be accomplished
-with the following commands.
+  .. tab:: **Using specific branch/PR**
 
-Prior to running the following, you can either clone the repository independently
-(for not over-writing any of your local changes) or simply do a :code:`git pull` first.
+    From time to time, it may be of interest to use a specific branch.  This may occur, for example,
+    because we have listened to your feature request and implemented a quick implementation in a branch.
+    Or it could be to get early access to a feature that is soaking in our :code:`develop` for stability purposes before being merged into :code:`main`
+    (:code:`develop` is the branch we use to soak new features before merging them into :code:`main`):
 
-.. code-block:: bash
+    So when working in the `depthai-python <https://github.com/luxonis/depthai-python>`__ repository, using a branch can be accomplished
+    with the following commands.
 
-  git checkout <branch>
-  git submodule update --init --recursive
-  python3 setup.py develop
+    Prior to running the following, you can either clone the repository independently
+    (for not over-writing any of your local changes) or simply do a :code:`git pull` first.
 
-Install from source
-*******************
+    .. code-block:: bash
 
-If desired, you can also install the package from the source code itself - it will allow you to make the changes
-to the API and see them live in action.
+      git checkout <branch>
+      git submodule update --init --recursive
+      python3 setup.py develop
 
-To do so, first download the repository and then add the package to your python interpreter in development mode
+  .. tab:: **Install from source**
 
-.. code-block:: bash
+    If desired, you can also install the package from the source code itself - it will allow you to make the changes
+    to the API and see them live in action.
 
-  git clone https://github.com/luxonis/depthai-python.git
-  cd depthai-python
-  git submodule update --init --recursive
-  python3 setup.py develop  # you may need to add sudo if using system interpreter instead of virtual environment
+    To do so, first download the repository and then add the package to your python interpreter in development mode
 
-If you want to use other branch (e.g. :code:`develop`) than default (:code:`main`), you can do so by typing
+    .. code-block:: bash
 
-.. code-block:: bash
+      git clone https://github.com/luxonis/depthai-python.git
+      cd depthai-python
+      git submodule update --init --recursive
+      python3 setup.py develop  # you may need to add sudo if using system interpreter instead of virtual environment
 
-  git checkout develop  # replace the "develop" with a desired branch name
-  git submodule update --recursive
-  python3 setup.py develop
+    If you want to use other branch (e.g. :code:`develop`) than default (:code:`main`), you can do so by typing
 
-Or, if you want to checkout a specific commit, type
+    .. code-block:: bash
 
-.. code-block:: bash
+      git checkout develop  # replace the "develop" with a desired branch name
+      git submodule update --recursive
+      python3 setup.py develop
 
-  git checkout <commit_sha>
-  git submodule update --recursive
-  python3 setup.py develop
+    Or, if you want to checkout a specific commit, type
+
+    .. code-block:: bash
+
+      git checkout <commit_sha>
+      git submodule update --recursive
+      python3 setup.py develop
