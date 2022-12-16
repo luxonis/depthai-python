@@ -26,7 +26,7 @@ Please install the necessary dependencies for your platform by following the ins
 
     .. code-block:: bash
 
-      sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+      sudo wget -qO- https://docs.luxonis.com/install_depthai.sh | bash
 
     Please refer to :ref:`Supported Platforms` if any issues occur.
 
