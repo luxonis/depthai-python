@@ -182,6 +182,10 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("getIspNumFramesPool", &Camera::getIspNumFramesPool, DOC(dai, node, Camera, getIspNumFramesPool))
         .def("setCamera", &Camera::setCamera, py::arg("name"), DOC(dai, node, Camera, setCamera))
         .def("getCamera", &Camera::getCamera, DOC(dai, node, Camera, getCamera))
+
+        .def("setSensorSize", static_cast<void(Camera::*)(int,int)>(&Camera::setSensorSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setSensorSize))
+        .def("setSensorSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setSensorSize), py::arg("size"), DOC(dai, node, Camera, setSensorSize, 2))
+
         ;
     // ALIAS
     daiNodeModule.attr("Camera").attr("Properties") = cameraProperties;
