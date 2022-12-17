@@ -12,7 +12,7 @@ with dai.Device() as device:
         print(str(cam), str(cam.socket), cam.socket)
         c = pipeline.create(dai.node.Camera)
         x = pipeline.create(dai.node.XLinkOut)
-        c.isp.link(x.input)
+        c.preview.link(x.input)
         c.setBoardSocket(cam.socket)
         stream = str(cam.socket)
         if cam.name:
