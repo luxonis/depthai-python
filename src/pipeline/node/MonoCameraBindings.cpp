@@ -45,6 +45,7 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("fps", &MonoCameraProperties::fps)
         .def_readwrite("numFramesPool", &MonoCameraProperties::numFramesPool)
         .def_readwrite("numFramesPoolRaw", &MonoCameraProperties::numFramesPoolRaw)
+        .def_readwrite("eventFilter", &MonoCameraProperties::eventFilter)
         ;
 
     // Node
@@ -76,6 +77,8 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def("getImageOrientation", &MonoCamera::getImageOrientation, DOC(dai, node, MonoCamera, getImageOrientation))
         .def("setResolution", &MonoCamera::setResolution, py::arg("resolution"), DOC(dai, node, MonoCamera, setResolution))
         .def("getResolution", &MonoCamera::getResolution, DOC(dai, node, MonoCamera, getResolution))
+        .def("setFrameEventFilter", &MonoCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, MonoCamera, setFrameEventFilter))
+        .def("getFrameEventFilter", &MonoCamera::getFrameEventFilter, DOC(dai, node, MonoCamera, getFrameEventFilter))
         .def("setFps",        &MonoCamera::setFps, py::arg("fps"), DOC(dai, node, MonoCamera, setFps))
         .def("getFps",        &MonoCamera::getFps, DOC(dai, node, MonoCamera, getFps))
         .def("getResolutionSize", &MonoCamera::getResolutionSize, DOC(dai, node, MonoCamera, getResolutionSize))
