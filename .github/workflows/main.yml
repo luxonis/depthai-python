@@ -538,3 +538,15 @@ jobs:
           repository: luxonis/robothub-apps
           event-type: depthai-python-release
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+  notify_hil_workflow_linux_x86_64:
+    needs: [build-linux-x86_64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.HIL_CORE_DISPATCH_TOKEN }}
+          repository: luxonis/depthai-core-hil-tests
+          event-type: python-hil-event
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
