@@ -241,8 +241,6 @@ endif()
 # Add include directory
 target_include_directories(${TARGET_NAME} PRIVATE src ${DOCSTRINGS_INCLUDE_PLACEHOLDER_DIR})
 
-# Add include directories from external dependanices
-target_include_directories(${TARGET_NAME} PRIVATE external/xtensor-python/include)
 # Link with libraries
 target_link_libraries(${TARGET_NAME}
     PUBLIC
@@ -251,6 +249,7 @@ target_link_libraries(${TARGET_NAME}
         depthai::core # Use non-opencv target as we use opencv-python in bindings
         hedley
         pybind11_json
+        xtensor-python
 )
 
 # Find Git
