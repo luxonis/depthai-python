@@ -1,10 +1,12 @@
 Installation
 ============
 
-Refer to `DepthAI installer documentation <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__ to install
-full `DepthAI demo <https://github.com/luxonis/depthai#depthai-api-demo-program>`__ and its dependencies and requirements.
+.. note::
 
-Follow the steps below to install dependencies for your platform.
+  Refer to `DepthAI installer documentation <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__ to install
+  full `DepthAI demo <https://github.com/luxonis/depthai#depthai-api-demo-program>`__ and its dependencies and requirements.
+
+Follow the steps below to just install depthai api library dependencies for your platform.
 
 .. tabs::
 
