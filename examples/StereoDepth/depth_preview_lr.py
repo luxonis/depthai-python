@@ -5,9 +5,9 @@ import depthai as dai
 import numpy as np
 
 # Closer-in minimum depth, disparity range is doubled (from 95 to 190):
-extended_disparity = False
+extended_disparity = True
 # Better accuracy for longer distance, fractional disparity 32-levels:
-subpixel = False
+subpixel = True
 # Better handling for occlusions:
 lr_check = True
 
@@ -43,6 +43,7 @@ depth.setInputResolution(1280, 800)
 depth.setLeftRightCheck(lr_check)
 depth.setExtendedDisparity(extended_disparity)
 depth.setSubpixel(subpixel)
+depth.setInputResolution(1280, 800)
 
 # Linking
 left.isp.link(depth.left)
@@ -59,6 +60,13 @@ with dai.Device(pipeline) as device:
             message = device.getOutputQueue(q).get()
             # Display arrived frames
             if type(message) == dai.ImgFrame:
-                cv2.imshow(q, message.getCvFrame())
+                frame = message.getCvFrame()
+                if 'disparity' in q:
+                    maxDisp = depth.initialConfig.getMaxDisparity()
+                    disp = (frame * (255.0 / maxDisp)).astype(np.uint8)
+                    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+                    cv2.imshow(q, disp)
+                else:
+                    cv2.imshow(q, frame)
         if cv2.waitKey(1) == ord('q'):
             break
