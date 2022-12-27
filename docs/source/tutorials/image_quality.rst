@@ -75,5 +75,16 @@ To tune your own camera sensors, one would need Intel's software, for which a li
 
 .. image:: https://user-images.githubusercontent.com/18037362/149826169-3b92901d-3367-460b-afbf-c33d8dc9d118.jpeg
 
+Motion blur
+###########
+
+`Motion blur <https://en.wikipedia.org/wiki/Motion_blur>`__ appears when the camera shutter is open for a longer time, and the object is moving during that time.
+
+.. image:: 
+
+Potential workarounds:
+
+- Decrease the shutter (exposure) time - this will decrease the motion blur, but will also decrease the light that reaches the sensor, so the image will be darker. You could either use larger sensor (so more photons hit the sensor), or use a higher ISO (sensitivity) value.
+- If the motion blur negatively affects your model's accuracy, you could fine-tune it to be more robust to motion blur by including motion blur images in your training dataset.
 
 .. include::  /includes/footer-short.rst
