@@ -80,7 +80,10 @@ Motion blur
 
 `Motion blur <https://en.wikipedia.org/wiki/Motion_blur>`__ appears when the camera shutter is open for a longer time, and the object is moving during that time.
 
-.. image:: 
+.. image:: https://user-images.githubusercontent.com/18037362/209683640-2a640794-8422-4119-9d78-6c23690418a1.jpg
+
+On the image above the right foot moved about 50 pixels during the exposure time, which results in a blurry image in that region.
+The left foot was on the ground the whole time of the exposure, so it's not blurry.
 
 Potential workarounds:
 
