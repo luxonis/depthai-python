@@ -12,7 +12,7 @@ camRgb.setInterleaved(False)
 maxFrameSize = camRgb.getPreviewWidth() * camRgb.getPreviewHeight() * 3
 
 # Warp preview frame 1
-manip1 = pipeline.create(dai.node.Warp)
+manip1 = pipeline.create(dai.node.ImageManip)
 # Create a custom warp mesh
 tl = dai.Point2f(20, 20)
 tr = dai.Point2f(460, 20)
