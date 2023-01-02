@@ -12,7 +12,7 @@ void bind_camera(pybind11::module& m, void* pCallstack){
 
     // Node and Properties declare upfront
     py::class_<CameraProperties> cameraProperties(m, "CameraProperties", DOC(dai, CameraProperties));
-    // py::enum_<CameraProperties::SensorResolution> cameraPropertiesSensorResolution(cameraProperties, "SensorResolution", DOC(dai, CameraProperties, SensorResolution));
+    py::enum_<CameraProperties::WarpMeshSource> cameraPropertiesWarpMeshSource(cameraProperties, "WarpMeshSource", DOC(dai, CameraProperties, WarpMeshSource));
     py::enum_<CameraProperties::ColorOrder> cameraPropertiesColorOrder(cameraProperties, "ColorOrder", DOC(dai, CameraProperties, ColorOrder));
     auto camera = ADD_NODE(Camera);
 
@@ -44,6 +44,14 @@ void bind_camera(pybind11::module& m, void* pCallstack){
     //     .value("THE_800_P", CameraProperties::SensorResolution::THE_800_P)
     //     ;
 
+    // Camera Properties - WarpMeshSource
+    cameraPropertiesWarpMeshSource
+        .value("AUTO", CameraProperties::WarpMeshSource::AUTO)
+        .value("NONE", CameraProperties::WarpMeshSource::NONE)
+        .value("CALIBRATION", CameraProperties::WarpMeshSource::CALIBRATION)
+        .value("URI", CameraProperties::WarpMeshSource::URI)
+        ;
+
     cameraPropertiesColorOrder
         .value("BGR", CameraProperties::ColorOrder::BGR)
         .value("RGB", CameraProperties::ColorOrder::RGB)
@@ -68,11 +76,20 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def_readwrite("sensorCropY", &CameraProperties::sensorCropY)
         .def_readwrite("previewKeepAspectRatio", &CameraProperties::previewKeepAspectRatio)
         .def_readwrite("ispScale", &CameraProperties::ispScale)
+
         .def_readwrite("numFramesPoolRaw", &CameraProperties::numFramesPoolRaw)
         .def_readwrite("numFramesPoolIsp", &CameraProperties::numFramesPoolIsp)
         .def_readwrite("numFramesPoolVideo", &CameraProperties::numFramesPoolVideo)
         .def_readwrite("numFramesPoolPreview", &CameraProperties::numFramesPoolPreview)
         .def_readwrite("numFramesPoolStill", &CameraProperties::numFramesPoolStill)
+
+        .def_readwrite("warpMeshSource", &CameraProperties::warpMeshSource)
+        .def_readwrite("warpMeshUri", &CameraProperties::warpMeshUri)
+        .def_readwrite("warpMeshWidth", &CameraProperties::warpMeshWidth)
+        .def_readwrite("warpMeshHeight", &CameraProperties::warpMeshHeight)
+        .def_readwrite("calibAlpha", &CameraProperties::calibAlpha)
+        .def_readwrite("warpMeshStepWidth", &CameraProperties::warpMeshStepWidth)
+        .def_readwrite("warpMeshStepHeight", &CameraProperties::warpMeshStepHeight)
     ;
 
     // Camera node
@@ -128,6 +145,16 @@ void bind_camera(pybind11::module& m, void* pCallstack){
 
         .def("setSize", static_cast<void(Camera::*)(int,int)>(&Camera::setSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setSize))
         .def("setSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setSize), py::arg("size"), DOC(dai, node, Camera, setSize, 2))
+
+
+        .def("setMeshSource", &Camera::setMeshSource, py::arg("source"), DOC(dai, node, Camera, setMeshSource))
+        .def("getMeshSource", &Camera::getMeshSource, DOC(dai, node, Camera, getMeshSource))
+        .def("loadMeshFile", &Camera::loadMeshFile, py::arg("warpMesh"), DOC(dai, node, Camera, loadMeshFile))
+        .def("loadMeshData", &Camera::loadMeshData, py::arg("warpMesh"), DOC(dai, node, Camera, loadMeshData))
+        .def("setMeshStep", &Camera::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setMeshStep))
+        .def("getMeshStep", &Camera::getMeshStep, DOC(dai, node, Camera, getMeshStep))
+        .def("setCalibrationAlpha", &Camera::setCalibrationAlpha, py::arg("alpha"), DOC(dai, node, Camera, setCalibrationAlpha))
+        .def("getCalibrationAlpha", &Camera::getCalibrationAlpha, DOC(dai, node, Camera, getCalibrationAlpha))
 
         ;
     // ALIAS
