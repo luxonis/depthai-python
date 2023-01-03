@@ -64,6 +64,7 @@ option(DEPTHAI_PYTHON_ENABLE_TESTS "Enable tests" OFF)
 option(DEPTHAI_PYTHON_ENABLE_EXAMPLES "Enable examples" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCS "Build documentation - see docs/requirements.txt for needed dependencies" OFF)
 option(DEPTHAI_PYTHON_BUILD_DOCSTRINGS "Generate docstrings from header files if module 'pybind11_mkdoc' available" ON)
+option(DEPTHAI_PYTHON_EMBEDDED_MODULE "Create an embeddable module" OFF)
 
 
 # Add depthai-core dependency
@@ -86,8 +87,7 @@ find_package(pybind11 CONFIG REQUIRED)
 # Add external dependencies
 add_subdirectory(external)
 
-# Add files for python module
-pybind11_add_module(${TARGET_NAME}
+set(SOURCE_LIST
     src/py_bindings.cpp
     src/XLinkBindings.cpp
     src/DeviceBindings.cpp
@@ -149,8 +149,14 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
     src/pipeline/datatype/BenchmarkReportBindings.cpp
-
 )
+
+# Add files for python module
+if(DEPTHAI_PYTHON_EMBEDDED_MODULE)
+    add_library(${TARGET_NAME} ${SOURCE_LIST})
+else()
+    pybind11_add_module(${TARGET_NAME} ${SOURCE_LIST})
+endif()
 
 if(WIN32)
     # Copy dlls to target directory - Windows only
@@ -251,6 +257,11 @@ target_link_libraries(${TARGET_NAME}
         pybind11_json
         xtensor-python
 )
+
+# Add embedded module option, otherwise link to pybind11 as usual
+if(DEPTHAI_PYTHON_EMBEDDED_MODULE)
+    target_compile_definitions(${TARGET_NAME} PRIVATE DEPTHAI_PYTHON_EMBEDDED_MODULE)
+endif()
 
 # Find Git
 find_package(Git)
