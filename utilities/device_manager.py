@@ -10,6 +10,7 @@ import sys
 from typing import Dict
 import platform
 import os
+import numpy
 
 if USE_OPENCV:
     # import cv2
@@ -103,16 +104,13 @@ class AreYouSure:
         self.ok = False
         layout = [
             [sg.Text(text)],
-            [sg.Submit(button_text="Yes"), sg.Cancel(button_text="No")],
+            [sg.Submit(), sg.Cancel()],
         ]
         self.window = sg.Window("Are You Sure?", layout, size=(450,150), modal=True, finalize=True)
     def wait(self):
         event, values = self.window.Read()
         self.window.close()
-        if values is not None:
-            return str(event) == "Submit"
-        else:
-            return False
+        return str(event) == "Submit"
 
 
 class SelectIP:
@@ -188,8 +186,8 @@ class SearchDevice:
                     return deviceSelected
 
 def flashBootloader(bl: dai.DeviceBootloader, device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
-    factoryBlWarningMessage = """Main Bootloader type or version doesn't support User Bootloader flashing.
-Main (factory) bootloader will be updated instead.
+    factoryBlWarningMessage = """Factory Bootloader type or version doesn't support User Bootloader flashing.
+Factory bootloader will be updated instead.
 Proceed with caution
     """
 
@@ -281,8 +279,10 @@ def connectAndStartStreaming(dev):
         # Create pipeline (no opencv)
         pipeline = dai.Pipeline()
         camRgb = pipeline.create(dai.node.ColorCamera)
+        m1 = pipeline.create(dai.node.MonoCamera)
+        m2 = pipeline.create(dai.node.MonoCamera)
         camRgb.setIspScale(1,3)
-        camRgb.setPreviewSize(camRgb.getIspSize())
+        camRgb.setPreviewSize(480, 360)
         camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
 
         xout = pipeline.create(dai.node.XLinkOut)
@@ -407,7 +407,7 @@ aboutDeviceLayout = [
     [sg.HSeparator()],
     [
         sg.Text("", size=(7, 2)),
-        sg.Button("Flash Newest Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+        sg.Button("Update Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500'),
     ]
 ]
@@ -614,7 +614,7 @@ class DeviceManager:
                     if self.bl is None: continue
                     self.getConfigs()
                 self.unlockConfig()
-            elif event == "Flash Newest Bootloader":
+            elif event == "Update Bootloader":
                 # Use current type
                 if flashBootloader(self.bl, self.device, self.bl.getType()):
                     # Device will reboot, close previous and reset GUI
@@ -826,7 +826,7 @@ class DeviceManager:
             for el in CONF_TEXT_USB:
                 self.window[el].update(text_color="black")
 
-        self.window['Flash Newest Bootloader'].update(disabled=False)
+        self.window['Update Bootloader'].update(disabled=False)
         self.window['flashFactoryBootloader'].update(disabled=False)
         self.window['Flash configuration'].update(disabled=False)
         self.window['Clear configuration'].update(disabled=False)
@@ -851,7 +851,7 @@ class DeviceManager:
             for el in conf:
                 self.window[el].update(text_color="gray")
 
-        self.window['Flash Newest Bootloader'].update(disabled=True)
+        self.window['Update Bootloader'].update(disabled=True)
         self.window['flashFactoryBootloader'].update(disabled=True)
         self.window['Flash configuration'].update(disabled=True)
         self.window['Clear configuration'].update(disabled=True)
