@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
 
 readonly linux_pkgs=(
     python3
@@ -26,7 +26,6 @@ readonly ubuntu_pkgs=(
     libjpeg-dev
     libpng-dev
     libtiff-dev
-    libdc1394-22-dev
     # https://stackoverflow.com/questions/55313610
     ffmpeg
     libsm6
@@ -46,8 +45,19 @@ readonly ubuntu_pkgs=(
     qml-module-qtquick-window2
 )
 
+readonly ubuntu_pkgs_pre22_04=(
+    "${ubuntu_pkgs[@]}"
+    libdc1394-22-dev
+)
+
+readonly ubuntu_pkgs_22_04=(
+    "${ubuntu_pkgs[@]}"
+    libdc1394-dev
+)
+
 readonly ubuntu_arm_pkgs=(
     "${ubuntu_pkgs[@]}"
+    libdc1394-22-dev
     # https://stackoverflow.com/a/53402396/5494277
     libhdf5-dev
     libhdf5-dev
@@ -116,7 +126,11 @@ elif [ -f /etc/os-release ]; then
     if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
-            sudo apt-get install -y "${ubuntu_pkgs[@]}"
+            if [[ "$VERSION_ID" == "22.04" ]]; then
+                sudo apt-get install -y "${ubuntu_pkgs_22_04[@]}"
+            else
+                sudo apt-get install -y "${ubuntu_pkgs_pre22_04[@]}"
+            fi
             python3 -m pip install --upgrade pip
         elif [[ $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
@@ -124,9 +138,11 @@ elif [ -f /etc/os-release ]; then
             python3 -m pip install --upgrade pip
         fi
 
-        dpkg -s uvcdynctrl > /dev/null 2>&1
+        # As set -e is set, retrieve the return value without exiting
+        RET=0
+        dpkg -s uvcdynctrl > /dev/null 2>&1 || RET=$? || true
         # is uvcdynctrl installed
-        if [ $? -eq 0 ]; then
+        if [[ "$RET" == "0" ]]; then
           echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
           echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
           echo -e "\033[33mYou can do so by running the following commands:\033[0m"
@@ -154,7 +170,8 @@ elif [ -f /etc/os-release ]; then
     fi
 
     # Allow all users to read and write to Myriad X devices
-    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+    echo "Installing udev rules..."
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules > /dev/null
     sudo udevadm control --reload-rules && sudo udevadm trigger
 else
     echo "ERROR: Host not supported"

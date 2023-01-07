@@ -24,6 +24,8 @@ Other controls:
 '0' - Select control: sharpness
 '[' - Select control: luma denoise
 ']' - Select control: chroma denoise
+'a' 'd' - Increase/decrease dot projector intensity
+'w' 's' - Increase/decrease flood LED intensity
 
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
@@ -54,12 +56,16 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '4k', '5mp', '12mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 parser.add_argument('-fps', '--fps', type=float, default=30,
                     help="FPS to set for all cameras")
+parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
+                    help="Downscale the ISP output by this factor")
+parser.add_argument('-rs', '--resizable-windows', action='store_true',
+                    help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 args = parser.parse_args()
 
 cam_list = []
@@ -80,6 +86,13 @@ cam_socket_opts = {
     'camd' : dai.CameraBoardSocket.CAM_D,
 }
 
+cam_socket_to_name = {
+    'RGB'  : 'rgb',
+    'LEFT' : 'left',
+    'RIGHT': 'right',
+    'CAM_D': 'camd',
+}
+
 rotate = {
     'rgb'  : args.rotate in ['all', 'rgb'],
     'left' : args.rotate in ['all', 'mono'],
@@ -92,15 +105,18 @@ mono_res_opts = {
     480: dai.MonoCameraProperties.SensorResolution.THE_480_P,
     720: dai.MonoCameraProperties.SensorResolution.THE_720_P,
     800: dai.MonoCameraProperties.SensorResolution.THE_800_P,
+    1200: dai.MonoCameraProperties.SensorResolution.THE_1200_P,
 }
 
 color_res_opts = {
     '720':  dai.ColorCameraProperties.SensorResolution.THE_720_P,
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
+    '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
 }
 
 def clamp(num, v0, v1):
@@ -137,7 +153,7 @@ for c in cam_list:
     if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
-        #cam[c].setIspScale(1, 2)
+        cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
         cam[c].isp.link(xout[c].input)
     else:
@@ -147,6 +163,8 @@ for c in cam_list:
     cam[c].setBoardSocket(cam_socket_opts[c])
     # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
     #cam[c].initialControl.setExternalTrigger(2, 1)
+    #cam[c].initialControl.setStrobeExternal(48, 1)
+    #cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
@@ -166,12 +184,16 @@ if 0:
 with dai.Device(pipeline) as device:
     #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
     print('Connected cameras:')
-    for p in device.getConnectedCameraProperties():
+    cam_name = {}
+    for p in device.getConnectedCameraFeatures():
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
+        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
+
+    print('IR drivers:', device.getIrDrivers())
 
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
@@ -179,7 +201,7 @@ with dai.Device(pipeline) as device:
     for c in cam_list:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
-        if 0 and c == 'rgb':
+        if args.resizable_windows:
             cv2.namedWindow(c, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(c, (640, 480))
         fps_host[c] = FPS()
@@ -191,6 +213,10 @@ with dai.Device(pipeline) as device:
     EXP_STEP = 500  # us
     ISO_STEP = 50
     LENS_STEP = 3
+    DOT_STEP = 100
+    FLOOD_STEP = 100
+    DOT_MAX = 1200
+    FLOOD_MAX = 1500
 
     # Defaults and limits for manual focus/exposure controls
     lensPos = 150
@@ -204,6 +230,9 @@ with dai.Device(pipeline) as device:
     sensIso = 800
     sensMin = 100
     sensMax = 1600
+
+    dotIntensity = 0
+    floodIntensity = 0
 
     awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
     anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
@@ -222,6 +251,7 @@ with dai.Device(pipeline) as device:
 
     print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
 
+    capture_list = []
     while True:
         for c in cam_list:
             pkt = q[c].tryGet()
@@ -229,6 +259,21 @@ with dai.Device(pipeline) as device:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 frame = pkt.getCvFrame()
+                if c in capture_list:
+                    width, height = pkt.getWidth(), pkt.getHeight()
+                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
+                                     + '_' + str(width) + 'x' + str(height)
+                                     + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                                     + '_iso_' + str(pkt.getSensitivity())
+                                     + '_lens_' + str(pkt.getLensPosition())
+                                     + '_' + capture_time
+                                     + '_' + str(pkt.getSequenceNum())
+                                     + ".png"
+                                    )
+                    print("\nSaving:", capture_file_name)
+                    cv2.imwrite(capture_file_name, frame)
+                    capture_list.remove(c)
+
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
@@ -237,10 +282,9 @@ with dai.Device(pipeline) as device:
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
-        elif False:  # key == ord('c'):
-            ctrl = dai.CameraControl()
-            ctrl.setCaptureStill(True)
-            controlQueue.send(ctrl)
+        elif key == ord('c'):
+            capture_list = cam_list.copy()
+            capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -288,6 +332,26 @@ with dai.Device(pipeline) as device:
             ctrl = dai.CameraControl()
             ctrl.setAutoExposureLock(ae_lock)
             controlQueue.send(ctrl)
+        elif key == ord('a'):
+            dotIntensity = dotIntensity - DOT_STEP
+            if dotIntensity < 0:
+                dotIntensity = 0
+            device.setIrLaserDotProjectorBrightness(dotIntensity)
+        elif key == ord('d'):
+            dotIntensity = dotIntensity + DOT_STEP
+            if dotIntensity > DOT_MAX:
+                dotIntensity = DOT_MAX
+            device.setIrLaserDotProjectorBrightness(dotIntensity)
+        elif key == ord('w'):
+            floodIntensity = floodIntensity + FLOOD_STEP
+            if floodIntensity > FLOOD_MAX:
+                floodIntensity = FLOOD_MAX
+            device.setIrFloodLightBrightness(floodIntensity)
+        elif key == ord('s'):
+            floodIntensity = floodIntensity - FLOOD_STEP
+            if floodIntensity < 0:
+                floodIntensity = 0
+            device.setIrFloodLightBrightness(floodIntensity)
         elif key >= 0 and chr(key) in '34567890[]':
             if   key == ord('3'): control = 'awb_mode'
             elif key == ord('4'): control = 'ae_comp'

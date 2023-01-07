@@ -1,10 +1,14 @@
 IMU
 ===
 
-IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data from the IMU chip on the device.
-Our DepthAI devices use `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ 9-axis sensor (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__)
-that supports sensor fusion on the (IMU) chip itself. The IMU chip is connected to the Myriad X (VPU) over SPI (we have integrated
-`this driver <https://github.com/hcrest/bno080-driver>`__ to the DepthAI).
+IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data
+from the IMU chip on the device. Our OAK devices use either:
+
+- `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__) 9-axis sensor, combining accelerometer, gyroscope, and magnetometer. It also does sensor fusion on the (IMU) chip itself. We have efficiently integrated `this driver <https://github.com/hcrest/bno080-driver>`__ into the DepthAI.
+- `BMI270 <https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi270/>`__ 6-axis sensor, combining accelerometer and gyroscope
+
+. The IMU chip is connected to the `RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__
+over SPI.
 
 
 How to place it
@@ -40,11 +44,11 @@ Inputs and Outputs
 
 - :code:`out` - :ref:`IMUData`
 
-Maximum frequencies
-###################
+Limitations
+###########
 
-Maximum output frequencies are 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500 Hz combined (synced) output.
-You can obtain the combined (synced) 500 Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)`.
+- For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
+- **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 500)`.
 
 Usage
 #####
@@ -56,8 +60,8 @@ Usage
     pipeline = dai.Pipeline()
     imu = pipeline.create(dai.node.IMU)
 
-    # enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 100)
+    # enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 100)
     # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu.setBatchReportThreshold(1)
     # maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
@@ -70,8 +74,8 @@ Usage
     dai::Pipeline pipeline;
     auto imu = pipeline.create<dai::node::IMU>();
 
-    // enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu->enableIMUSensor({dai::IMUSensor::RAW_ACCELEROMETER, dai::IMUSensor::RAW_GYROSCOPE}, 100);
+    // enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu->enableIMUSensor({dai::IMUSensor::ACCELEROMETER_RAW, dai::IMUSensor::GYROSCOPE_RAW}, 100);
     // above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu->setBatchReportThreshold(1);
     // maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it

@@ -33,9 +33,9 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getEepromData", &CalibrationHandler::getEepromData, DOC(dai, CalibrationHandler, getEepromData))
 
-        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, int, int, Point2f, Point2f>(&CalibrationHandler::getCameraIntrinsics), py::arg("cameraId"), py::arg("resizeWidth") = -1, py::arg("resizeHeight") = -1, py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, CalibrationHandler, getCameraIntrinsics))
-        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, Size2f, Point2f, Point2f>(&CalibrationHandler::getCameraIntrinsics), py::arg("cameraId"), py::arg("destShape"), py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, CalibrationHandler, getCameraIntrinsics, 2))
-        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::tuple<int, int>, Point2f, Point2f>(&CalibrationHandler::getCameraIntrinsics), py::arg("cameraId"), py::arg("destShape"), py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), DOC(dai, CalibrationHandler, getCameraIntrinsics, 3))
+        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, int, int, Point2f, Point2f, bool>(&CalibrationHandler::getCameraIntrinsics, py::const_), py::arg("cameraId"), py::arg("resizeWidth") = -1, py::arg("resizeHeight") = -1, py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), py::arg("keepAspectRatio") = true, DOC(dai, CalibrationHandler, getCameraIntrinsics))
+        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, Size2f, Point2f, Point2f, bool>(&CalibrationHandler::getCameraIntrinsics, py::const_), py::arg("cameraId"), py::arg("destShape"), py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), py::arg("keepAspectRatio") = true, DOC(dai, CalibrationHandler, getCameraIntrinsics, 2))
+        .def("getCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::tuple<int, int>, Point2f, Point2f, bool>(&CalibrationHandler::getCameraIntrinsics, py::const_), py::arg("cameraId"), py::arg("destShape"), py::arg("topLeftPixelId") = Point2f(), py::arg("bottomRightPixelId") = Point2f(), py::arg("keepAspectRatio") = true, DOC(dai, CalibrationHandler, getCameraIntrinsics, 3))
 
         .def("getDefaultIntrinsics", &CalibrationHandler::getDefaultIntrinsics, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDefaultIntrinsics))
         .def("getDistortionCoefficients", &CalibrationHandler::getDistortionCoefficients, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDistortionCoefficients))
@@ -61,6 +61,7 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setBoardInfo", py::overload_cast<std::string, std::string>(&CalibrationHandler::setBoardInfo), py::arg("boardName"), py::arg("boardRev"), DOC(dai, CalibrationHandler, setBoardInfo))
         .def("setBoardInfo", py::overload_cast<std::string, std::string, std::string, std::string, std::string, std::string, uint64_t, uint32_t, std::string>(&CalibrationHandler::setBoardInfo), py::arg("productName"), py::arg("boardName"), py::arg("boardRev"), py::arg("boardConf"), py::arg("hardwareConf"), py::arg("batchName"), py::arg("batchTime"), py::arg("boardOptions"), py::arg("boardCustom") = "", DOC(dai, CalibrationHandler, setBoardInfo, 2))
+        .def("setProductName", &CalibrationHandler::setProductName, py::arg("productName"), DOC(dai, CalibrationHandler, setProductName))
 
         .def("setCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::vector<std::vector<float>>, Size2f>(&CalibrationHandler::setCameraIntrinsics), py::arg("cameraId"), py::arg("intrinsics"), py::arg("frameSize"), DOC(dai, CalibrationHandler, setCameraIntrinsics))
         .def("setCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::vector<std::vector<float>>, int, int>(&CalibrationHandler::setCameraIntrinsics), py::arg("cameraId"), py::arg("intrinsics"), py::arg("width"), py::arg("height"), DOC(dai, CalibrationHandler, setCameraIntrinsics, 2))

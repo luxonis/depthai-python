@@ -163,6 +163,8 @@ add_python_example(spatial_object_tracker ObjectTracker/spatial_object_tracker.p
 
 ## Script
 add_python_example(script_camera_control Script/script_camera_control.py)
+add_python_example(script_json_communication Script/script_json_communication.py)
+add_python_example(script_get_device_info Script/script_get_device_info.py)
 
 ## SpatialDetection
 add_python_example(spatial_tiny_yolo_v3 SpatialDetection/spatial_tiny_yolo.py yolo3)
