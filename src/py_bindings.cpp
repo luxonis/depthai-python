@@ -29,7 +29,17 @@
 #include "log/LogBindings.hpp"
 #include "VersionBindings.hpp"
 
+#ifdef DEPTHAI_PYTHON_EMBEDDED_MODULE
+#include <pybind11/embed.h>
+extern "C" void depthai_bindings_init() {} // to force inclusion
+#endif
+
+// Specify module
+#ifdef DEPTHAI_PYTHON_EMBEDDED_MODULE
+PYBIND11_EMBEDDED_MODULE(depthai, m)
+#else
 PYBIND11_MODULE(depthai, m)
+#endif
 {
 
     // Depthai python version consists of: (depthai-core).(bindings revision)[+bindings hash]
