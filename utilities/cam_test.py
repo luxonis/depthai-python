@@ -69,7 +69,31 @@ parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
+parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
+                    help='Enable the RAW camera streams')
 args = parser.parse_args()
+
+if args.enable_raw:
+    ''' Packing scheme for RAW10 - MIPI CSI-2
+    === 4 pixels: p0[9:0], p1[9:0], p2[9:0], p3[9:0]
+    === stored on 5 bytes (byte0..4) as:
+    | byte0[7:0] | byte1[7:0] | byte2[7:0] | byte3[7:0] |          byte4[7:0]             |
+    |    p0[9:2] |    p1[9:2] |    p2[9:2] |    p3[9:2] | p3[1:0],p2[1:0],p1[1:0],p0[1:0] |
+    '''
+    # Optimized with 'numba' as otherwise would be extremely slow (55 seconds per frame!)
+    import numba as nb
+    import numpy as np
+    @nb.njit(nb.uint16[::1] (nb.uint8[::1], nb.uint16[::1], nb.boolean), parallel=True, cache=True)
+    def unpack_raw10(input, out, expand16bit):
+        lShift = 6 if expand16bit else 0
+       #for i in np.arange(input.size // 5): # around 25ms per frame (with numba)
+        for i in nb.prange(input.size // 5): # around  5ms per frame
+            b4 = input[i * 5 + 4]
+            out[i * 4]     = ((input[i * 5]     << 2) | ( b4       & 0x3)) << lShift
+            out[i * 4 + 1] = ((input[i * 5 + 1] << 2) | ((b4 >> 2) & 0x3)) << lShift
+            out[i * 4 + 2] = ((input[i * 5 + 2] << 2) | ((b4 >> 4) & 0x3)) << lShift
+            out[i * 4 + 3] = ((input[i * 5 + 3] << 2) |  (b4 >> 6)       ) << lShift
+        return out
 
 cam_list = []
 cam_type_color = {}
@@ -150,9 +174,12 @@ control.setStreamName('control')
 
 cam = {}
 xout = {}
+xout_raw = {}
+streams = []
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
+    streams.append(c)
     if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -176,6 +203,13 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
+    if args.enable_raw:
+        raw_name = 'raw_' + c
+        xout_raw[c] = pipeline.create(dai.node.XLinkOut)
+        xout_raw[c].setStreamName(raw_name)
+        if args.enable_raw:
+            streams.append(raw_name)
+        cam[c].raw.link(xout_raw[c].input)
 
 if args.camera_tuning:
     pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
@@ -189,7 +223,10 @@ with dai.Device(pipeline) as device:
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
-        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
+        socket_name = cam_socket_to_name[p.socket.name]
+        cam_name[socket_name] = p.sensorName
+        if args.enable_raw:
+            cam_name['raw_'+socket_name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -198,7 +235,7 @@ with dai.Device(pipeline) as device:
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
     fps_capt = {}  # FPS computed based on capture timestamps from device
-    for c in cam_list:
+    for c in streams:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
         if args.resizable_windows:
@@ -253,27 +290,52 @@ with dai.Device(pipeline) as device:
 
     capture_list = []
     while True:
-        for c in cam_list:
+        for c in streams:
             pkt = q[c].tryGet()
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
-                frame = pkt.getCvFrame()
-                if c in capture_list:
-                    width, height = pkt.getWidth(), pkt.getHeight()
-                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
-                                     + '_' + str(width) + 'x' + str(height)
-                                     + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
-                                     + '_iso_' + str(pkt.getSensitivity())
-                                     + '_lens_' + str(pkt.getLensPosition())
-                                     + '_' + capture_time
-                                     + '_' + str(pkt.getSequenceNum())
-                                     + ".png"
-                                    )
-                    print("\nSaving:", capture_file_name)
-                    cv2.imwrite(capture_file_name, frame)
+                width, height = pkt.getWidth(), pkt.getHeight()
+                capture = c in capture_list
+                if capture:
+                    capture_file_info = ('capture_' + c + '_' + cam_name[c]
+                         + '_' + str(width) + 'x' + str(height)
+                         + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                         + '_iso_' + str(pkt.getSensitivity())
+                         + '_lens_' + str(pkt.getLensPosition())
+                         + '_' + capture_time
+                         + '_' + str(pkt.getSequenceNum())
+                        )
                     capture_list.remove(c)
-
+                    print()
+                if c.startswith('raw_'):
+                    payload = pkt.getData()
+                    unpacked = np.empty(payload.size * 4 // 5, dtype=np.uint16)
+                    if capture:
+                        # Save to capture file on bits [9:0] of the 16-bit pixels
+                        unpack_raw10(payload, unpacked, expand16bit=False)
+                        filename = capture_file_info + '_10bit.bw'
+                        print('Saving:', filename)
+                        unpacked.tofile(filename)
+                    # Full range for display, use bits [15:6] of the 16-bit pixels
+                    unpack_raw10(payload, unpacked, expand16bit=True)
+                    shape = (height, width)
+                    bayer = unpacked.reshape(shape).astype(np.uint16)
+                    # See this for the ordering, at the end of page:
+                    # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
+                    bgr = cv2.cvtColor(bayer, cv2.COLOR_BayerBG2BGR)
+                    frame = np.ascontiguousarray(bgr)  # just in case
+                else:
+                    if capture and args.enable_raw:
+                        payload = pkt.getData()
+                        filename = capture_file_info + '_P420.yuv'
+                        print('Saving:', filename)
+                        payload.tofile(filename)
+                    frame = pkt.getCvFrame()
+                if capture:
+                    filename = capture_file_info + '.png'
+                    print('Saving:', filename)
+                    cv2.imwrite(filename, frame)
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
@@ -283,7 +345,7 @@ with dai.Device(pipeline) as device:
         if key == ord('q'):
             break
         elif key == ord('c'):
-            capture_list = cam_list.copy()
+            capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
