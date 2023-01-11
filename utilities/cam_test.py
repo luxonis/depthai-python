@@ -310,7 +310,14 @@ with dai.Device(pipeline) as device:
                     print()
                 if c.startswith('raw_'):
                     payload = pkt.getData()
-                    unpacked = np.empty(payload.size * 4 // 5, dtype=np.uint16)
+                    num_pixels = payload.size * 4 // 5
+                    # Workaround for raw metadata at the top, trim it
+                    trim_pixels = num_pixels - width * height
+                    if trim_pixels > 0:
+                        trim_size = trim_pixels * 5 // 4
+                        payload = payload[trim_size:]
+                        num_pixels -= trim_pixels
+                    unpacked = np.empty(num_pixels, dtype=np.uint16)
                     if capture:
                         # Save to capture file on bits [9:0] of the 16-bit pixels
                         unpack_raw10(payload, unpacked, expand16bit=False)
