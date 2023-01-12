@@ -347,7 +347,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-        .def_property_readonly(
+        .def_property_readonly( // TODO - This casting of the inputs/outputs might be illegal / cause bad behavior
             "io",
             [](Node& n) -> py::object {
                 auto dict = py::dict();
