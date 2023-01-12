@@ -5,7 +5,7 @@ import depthai as dai
 import time
 
 # Connect to device and start pipeline
-with dai.Device(dai.OpenVINO.VERSION_2021_1, dai.UsbSpeed.SUPER_PLUS) as device:
+with dai.Device(dai.OpenVINO.DEFAULT_VERSION, dai.UsbSpeed.SUPER_PLUS) as device:
     # Device name
     print('Device name:', device.getDeviceName())
     # Bootloader version
