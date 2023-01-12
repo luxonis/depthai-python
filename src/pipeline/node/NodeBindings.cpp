@@ -352,9 +352,11 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
             [](Node& n) -> py::object {
                 auto dict = py::dict();
                 for(auto& output : n.getOutputRefs()) {
+                    // TODO - Revisit, pybind might try to release the output when refcount goes to zero
                     dict[py::str(output->name)] = output;
                 }
                 for(auto& input : n.getInputRefs()) {
+                    // TODO - Revisit, pybind might try to release the input when refcount goes to zero
                     dict[py::str(input->name)] = input;
                 }
                 return dict;
