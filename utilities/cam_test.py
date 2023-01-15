@@ -30,6 +30,8 @@ Other controls:
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
   '+' or '=' to increase
+
+'/' to toggle printing camera settings: exposure, ISO, lens position, color temperature
 """
 
 import os
@@ -269,6 +271,7 @@ with dai.Device(pipeline) as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
+    show = False
 
     print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
 
@@ -281,6 +284,13 @@ with dai.Device(pipeline) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
+                if show:
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
+                    txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
+                    txt += f"ISO: {pkt.getSensitivity():4}, "
+                    txt += f"Lens pos: {pkt.getLensPosition():3}, "
+                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    print(txt)
                 capture = c in capture_list
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[c]
@@ -320,11 +330,16 @@ with dai.Device(pipeline) as device:
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
-              end='', flush=True)
+              end=' ', flush=True)
+        if show: print()
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('/'):
+            show = not show
+            # Print empty string as FPS status new-line separator
+            print("" if show else "Printing camera settings: OFF")
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
