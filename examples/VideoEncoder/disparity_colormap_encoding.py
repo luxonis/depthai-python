@@ -27,7 +27,7 @@ monoRight.out.link(depth.right)
 
 # Colormap
 colormap = pipeline.create(dai.node.ImageManip)
-colormap.initialConfig.setColormap(dai.Colormap.TURBO, 0, 95)
+colormap.initialConfig.setColormap(dai.Colormap.TURBO, depth.initialConfig.getMaxDisparity())
 colormap.initialConfig.setFrameType(dai.ImgFrame.Type.NV12)
 
 videoEnc = pipeline.create(dai.node.VideoEncoder)

@@ -38,7 +38,7 @@ depth.setSubpixel(subpixel)
 
 # Create a colormap
 colormap = pipeline.create(dai.node.ImageManip)
-colormap.initialConfig.setColormap(dai.Colormap.TURBO, 0, 95)
+colormap.initialConfig.setColormap(dai.Colormap.STEREO_TURBO, depth.initialConfig.getMaxDisparity())
 colormap.initialConfig.setFrameType(dai.ImgFrame.Type.NV12)
 
 # Linking
