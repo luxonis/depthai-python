@@ -51,7 +51,7 @@ readonly ubuntu_pkgs_pre22_04=(
     libdc1394-22-dev
 )
 
-readonly ubuntu_pkgs_22_04=(
+readonly ubuntu_pkgs_post22_04=(
     "${ubuntu_pkgs[@]}"
     libdc1394-dev
 )
@@ -112,8 +112,8 @@ elif [ -f /etc/os-release ]; then
     if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
-            if [[ "$VERSION_ID" == "22.04" ]]; then
-                sudo apt-get install -y "${ubuntu_pkgs_22_04[@]}"
+            if [[ "$VERSION_ID" > "22.04" || "$VERSION_ID" == "22.04" ]]; then
+                sudo apt-get install -y "${ubuntu_pkgs_post22_04[@]}"
             else
                 sudo apt-get install -y "${ubuntu_pkgs_pre22_04[@]}"
             fi
