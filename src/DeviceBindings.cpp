@@ -469,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
         .def_readwrite("board", &Device::Config::board)
+        .def_readwrite("nonExclusiveMode", &Device::Config::nonExclusiveMode)
     ;
 
     // Bind constructors
