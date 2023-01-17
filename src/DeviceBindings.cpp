@@ -289,14 +289,24 @@ static void bindConstructors(ARG& arg){
     }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
 
     // DeviceInfo version
-     .def(py::init([](const DeviceInfo& deviceInfo){
+    .def(py::init([](const DeviceInfo& deviceInfo){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo);
     }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
-     .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+    .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo, maxUsbSpeed);
     }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
+
+    // name or device id version
+    .def(py::init([](std::string nameOrDeviceId){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId));
+    }), py::arg("nameOrDeviceId"), DOC(dai, DeviceBase, DeviceBase, 22))
+    .def(py::init([](std::string nameOrDeviceId, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId), maxUsbSpeed);
+    }), py::arg("nameOrDeviceId"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 23))
     ;
 
 }
