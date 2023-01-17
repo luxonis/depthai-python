@@ -47,7 +47,7 @@ void bind_spatiallocationcalculatorconfig(pybind11::module& m, void* pCallstack)
         .value("MIN", SpatialLocationCalculatorAlgorithm::MIN)
         .value("MAX", SpatialLocationCalculatorAlgorithm::MAX)
         .value("MODE", SpatialLocationCalculatorAlgorithm::MODE)
-        .value("AVERAGE", SpatialLocationCalculatorAlgorithm::AVERAGE)
+        .value("MEDIAN", SpatialLocationCalculatorAlgorithm::MEDIAN)
         ;
 
     spatialLocationCalculatorConfigData
