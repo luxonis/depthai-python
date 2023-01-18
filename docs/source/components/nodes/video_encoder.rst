@@ -1,7 +1,7 @@
 VideoEncoder
 ============
 
-VideoEncoder node is used to encode :ref:`ImgFrame`s into either H264, H265, or MJPEG streams. Only NV12 or GRAY8 (which gets converted to NV12) format is
+VideoEncoder node is used to encode :ref:`ImgFrame` into either H264, H265, or MJPEG streams. Only NV12 or GRAY8 (which gets converted to NV12) format is
 supported as an input.
 
 .. include::  /includes/container-encoding.rst
