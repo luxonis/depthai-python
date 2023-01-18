@@ -102,4 +102,11 @@ Depthai application package (**.dap**) consists of:
 - Assets structure (section “assets”)
 - Asset storage (section “asset_storage”)
 
+MAC address
+###########
+
+All OAK PoE cameras have a unique MAC address which is used to identify the device on the network. It is calculated from the
+MxID of the device, see `logic here <https://gist.github.com/Erol444/85d6ef7ae9c946f5688854b86c548dc7>`__.
+The MAC address is stored in the DeviceBootloader configuration.
+
 .. include::  ../includes/footer-short.rst
