@@ -24,6 +24,8 @@ Other controls:
 '0' - Select control: sharpness
 '[' - Select control: luma denoise
 ']' - Select control: chroma denoise
+'a' 'd' - Increase/decrease dot projector intensity
+'w' 's' - Increase/decrease flood LED intensity
 
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
@@ -191,6 +193,8 @@ with dai.Device(pipeline) as device:
 
     print('USB speed:', device.getUsbSpeed().name)
 
+    print('IR drivers:', device.getIrDrivers())
+
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
     fps_capt = {}  # FPS computed based on capture timestamps from device
@@ -209,6 +213,10 @@ with dai.Device(pipeline) as device:
     EXP_STEP = 500  # us
     ISO_STEP = 50
     LENS_STEP = 3
+    DOT_STEP = 100
+    FLOOD_STEP = 100
+    DOT_MAX = 1200
+    FLOOD_MAX = 1500
 
     # Defaults and limits for manual focus/exposure controls
     lensPos = 150
@@ -222,6 +230,9 @@ with dai.Device(pipeline) as device:
     sensIso = 800
     sensMin = 100
     sensMax = 1600
+
+    dotIntensity = 0
+    floodIntensity = 0
 
     awb_mode = cycle([item for name, item in vars(dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
     anti_banding_mode = cycle([item for name, item in vars(dai.CameraControl.AntiBandingMode).items() if name.isupper()])
@@ -321,6 +332,26 @@ with dai.Device(pipeline) as device:
             ctrl = dai.CameraControl()
             ctrl.setAutoExposureLock(ae_lock)
             controlQueue.send(ctrl)
+        elif key == ord('a'):
+            dotIntensity = dotIntensity - DOT_STEP
+            if dotIntensity < 0:
+                dotIntensity = 0
+            device.setIrLaserDotProjectorBrightness(dotIntensity)
+        elif key == ord('d'):
+            dotIntensity = dotIntensity + DOT_STEP
+            if dotIntensity > DOT_MAX:
+                dotIntensity = DOT_MAX
+            device.setIrLaserDotProjectorBrightness(dotIntensity)
+        elif key == ord('w'):
+            floodIntensity = floodIntensity + FLOOD_STEP
+            if floodIntensity > FLOOD_MAX:
+                floodIntensity = FLOOD_MAX
+            device.setIrFloodLightBrightness(floodIntensity)
+        elif key == ord('s'):
+            floodIntensity = floodIntensity - FLOOD_STEP
+            if floodIntensity < 0:
+                floodIntensity = 0
+            device.setIrFloodLightBrightness(floodIntensity)
         elif key >= 0 and chr(key) in '34567890[]':
             if   key == ord('3'): control = 'awb_mode'
             elif key == ord('4'): control = 'ae_comp'

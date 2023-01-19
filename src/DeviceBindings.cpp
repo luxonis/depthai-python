@@ -2,6 +2,7 @@
 
 // depthai
 #include "depthai/device/Device.hpp"
+#include "depthai/device/EepromError.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
@@ -288,14 +289,24 @@ static void bindConstructors(ARG& arg){
     }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
 
     // DeviceInfo version
-     .def(py::init([](const DeviceInfo& deviceInfo){
+    .def(py::init([](const DeviceInfo& deviceInfo){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo);
     }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
-     .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+    .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo, maxUsbSpeed);
     }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
+
+    // name or device id version
+    .def(py::init([](std::string nameOrDeviceId){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId));
+    }), py::arg("nameOrDeviceId"), DOC(dai, DeviceBase, DeviceBase, 22))
+    .def(py::init([](std::string nameOrDeviceId, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId), maxUsbSpeed);
+    }), py::arg("nameOrDeviceId"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 23))
     ;
 
 }
@@ -327,6 +338,13 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
     py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
+
+    // pybind11 limitation of having actual classes as exceptions
+    // Possible but requires a larger workaround
+    // https://stackoverflow.com/questions/62087383/how-can-you-bind-exceptions-with-custom-fields-and-constructors-in-pybind11-and
+
+    // Bind EepromError
+    auto eepromError = py::register_exception<EepromError>(m, "EepromError", PyExc_RuntimeError);
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -451,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
         .def_readwrite("board", &Device::Config::board)
+        .def_readwrite("nonExclusiveMode", &Device::Config::nonExclusiveMode)
     ;
 
     // Bind constructors
@@ -536,6 +555,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
+        .def("getDeviceName", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDeviceName(); }, DOC(dai, DeviceBase, getDeviceName))
     ;
 
 

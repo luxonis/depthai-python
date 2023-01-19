@@ -73,6 +73,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
         .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
         .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
+        .def_readwrite("eventFilter", &ColorCameraProperties::eventFilter)
     ;
 
     // ColorCamera node
@@ -122,6 +123,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getResolution", &ColorCamera::getResolution, DOC(dai, node, ColorCamera, getResolution))
         .def("setFps", &ColorCamera::setFps, py::arg("fps"), DOC(dai, node, ColorCamera, setFps))
         .def("getFps", &ColorCamera::getFps, DOC(dai, node, ColorCamera, getFps))
+        .def("setFrameEventFilter", &ColorCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, ColorCamera, setFrameEventFilter))
+        .def("getFrameEventFilter", &ColorCamera::getFrameEventFilter, DOC(dai, node, ColorCamera, getFrameEventFilter))
         .def("getPreviewSize", &ColorCamera::getPreviewSize, DOC(dai, node, ColorCamera, getPreviewSize))
         .def("getPreviewWidth", &ColorCamera::getPreviewWidth, DOC(dai, node, ColorCamera, getPreviewWidth))
         .def("getPreviewHeight", &ColorCamera::getPreviewHeight, DOC(dai, node, ColorCamera, getPreviewHeight))
@@ -180,6 +183,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getStillNumFramesPool", &ColorCamera::getStillNumFramesPool, DOC(dai, node, ColorCamera, getStillNumFramesPool))
         .def("getRawNumFramesPool", &ColorCamera::getRawNumFramesPool, DOC(dai, node, ColorCamera, getRawNumFramesPool))
         .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
+        .def("setCamera", &ColorCamera::setCamera, py::arg("name"), DOC(dai, node, ColorCamera, setCamera))
+        .def("getCamera", &ColorCamera::getCamera, DOC(dai, node, ColorCamera, getCamera))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
