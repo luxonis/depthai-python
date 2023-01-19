@@ -187,7 +187,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
   echo "Installing global dependencies."
   sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
-  echo $'\nRunning Linux installer.'
+  echo -e '\nRunning Linux installer.'
 
   # clone depthai form git
   if [ -d "$DEPTHAI_DIR" ]; then
@@ -227,8 +227,8 @@ else
   exit 99
 fi
 
-echo '\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
-echo '\nTo run demo app write <depthai_launcher> in terminal.'
+echo -e '\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
+echo -e '\nTo run demo app write <depthai_launcher> in terminal.'
 read -rsp $'Press ANY KEY to finish and run the demo app...\n' -n1 key
 echo "STARTING DEMO APP."
 python "$DEPTHAI_DIR/launcher/launcher.py" -r "$DEPTHAI_DIR"
