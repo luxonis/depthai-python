@@ -22,6 +22,7 @@
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
+#include "depthai/common/CameraExposureOffset.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -50,6 +51,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
     py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -290,4 +292,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
         ;
 
+    cameraExposureOffset
+        .value("START", CameraExposureOffset::START)
+        .value("MIDDLE", CameraExposureOffset::MIDDLE)
+        .value("END", CameraExposureOffset::END)
+    ;
 }
