@@ -19,6 +19,11 @@
 #include "depthai-shared/common/DetectionParserOptions.hpp"
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
+#include "depthai-shared/common/Colormap.hpp"
+
+// depthai
+#include "depthai/common/CameraFeatures.hpp"
+#include "depthai/common/CameraExposureOffset.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -47,6 +52,8 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
     py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
+    py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -162,6 +169,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("name", &CameraFeatures::name)
+        .def("__repr__", [](CameraFeatures& camera) {
+            std::stringstream stream;
+            stream << camera;
+            return stream.str();
+        });
     ;
 
     // MemoryInfo
@@ -280,5 +293,39 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("anchorMasks", &DetectionParserOptions::anchorMasks)
         .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
         ;
+
+    cameraExposureOffset
+        .value("START", CameraExposureOffset::START)
+        .value("MIDDLE", CameraExposureOffset::MIDDLE)
+        .value("END", CameraExposureOffset::END)
+    ;
+
+    colormap
+        .value("NONE", Colormap::NONE)
+        .value("JET", Colormap::JET)
+        .value("TURBO", Colormap::TURBO)
+        .value("STEREO_JET", Colormap::STEREO_JET)
+        .value("STEREO_TURBO", Colormap::STEREO_TURBO)
+        // .value("AUTUMN", Colormap::AUTUMN)
+        // .value("BONE", Colormap::BONE)
+        // .value("WINTER", Colormap::WINTER)
+        // .value("RAINBOW", Colormap::RAINBOW)
+        // .value("OCEAN", Colormap::OCEAN)
+        // .value("SUMMER", Colormap::SUMMER)
+        // .value("SPRING", Colormap::SPRING)
+        // .value("COOL", Colormap::COOL)
+        // .value("HSV", Colormap::HSV)
+        // .value("PINK", Colormap::PINK)
+        // .value("HOT", Colormap::HOT)
+        // .value("PARULA", Colormap::PARULA)
+        // .value("MAGMA", Colormap::MAGMA)
+        // .value("INFERNO", Colormap::INFERNO)
+        // .value("PLASMA", Colormap::PLASMA)
+        // .value("VIRIDIS", Colormap::VIRIDIS)
+        // .value("CIVIDIS", Colormap::CIVIDIS)
+        // .value("TWILIGHT", Colormap::TWILIGHT)
+        // .value("TWILIGHT_SHIFTED", Colormap::TWILIGHT_SHIFTED)
+        // .value("DEEPGREEN", Colormap::DEEPGREEN)
+    ;
 
 }
