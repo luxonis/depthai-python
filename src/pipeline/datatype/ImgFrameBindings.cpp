@@ -117,12 +117,10 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         imgFrame
         .def(py::init<>())
         // getters
-        .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
-        .def("getTimestampDevice", &ImgFrame::getTimestampDevice, DOC(dai, ImgFrame, getTimestampDevice))
-        .def("getTimestampExposureMiddle", &ImgFrame::getTimestampExposureMiddle, DOC(dai, ImgFrame, getTimestampExposureMiddle))
-        .def("getTimestampDeviceExposureMiddle", &ImgFrame::getTimestampDeviceExposureMiddle, DOC(dai, ImgFrame, getTimestampDeviceExposureMiddle))
-        .def("getTimestampExposureStart", &ImgFrame::getTimestampExposureStart, DOC(dai, ImgFrame, getTimestampExposureStart))
-        .def("getTimestampDeviceExposureStart", &ImgFrame::getTimestampDeviceExposureStart, DOC(dai, ImgFrame, getTimestampDeviceExposureStart))
+        .def("getTimestamp", py::overload_cast<>(&ImgFrame::getTimestamp, py::const_), DOC(dai, ImgFrame, getTimestamp))
+        .def("getTimestampDevice", py::overload_cast<>(&ImgFrame::getTimestampDevice, py::const_), DOC(dai, ImgFrame, getTimestampDevice))
+        .def("getTimestamp", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestamp, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestamp))
+        .def("getTimestampDevice", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestampDevice, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestampDevice))
         .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
         .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
