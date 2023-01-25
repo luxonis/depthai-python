@@ -7,7 +7,7 @@ The node can also be used to apply a perspective transform to the image.
 Compared to :ref:`ImageManip` node (the `setWarpMesh()` function):
 
 **Warp node** uses underlyting warp HW block (additional `docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html>`__),
-with no extra resources (SHAVE/cmx cores).
+with no extra resources (SHAVE/cmx cores). HW limitation: **width must be divisible by 16.**
 
 **ImageManip node** combines the power of warp HW block together  the efficiency of CMX memory to achieve higher
 throughput (e.g. 4k@30 fps). Scheduling of the HW block is done by SHAVE cores which also do color space conversion, type conversion (YUV420 to NV12), etc.
@@ -21,13 +21,12 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    imu = pipeline.create(dai.node.Warp)
+    warp = pipeline.create(dai.node.Warp)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto imu = pipeline.create<dai::node::Warp>();
-
+    auto warp = pipeline.create<dai::node::Warp>();
 
 Inputs and Outputs
 ##################
@@ -61,9 +60,9 @@ Usage
     p3 = dai.Point2f(20, 460)
     p4 = dai.Point2f(460, 460)
     warp.setWarpMesh([p1,p2,p3,p4], 2, 2)
-    warp.setOutputSize((992,500))
-    warp.setMaxOutputFrameSize(992 * 500 * 3)
-    # Specify hardware warp engine IDs to be used
+    warp.setOutputSize((512,512))
+    warp.setMaxOutputFrameSize(512 * 512 * 3)
+    # Warp engines to be used (0,1,2)
     warp.setHwIds([1])
     # Warp interpolation mode, choose between BILINEAR, BICUBIC, BYPASS
     warp.setInterpolation(dai.node.Warp.Properties.Interpolation.BYPASS)
@@ -79,9 +78,9 @@ Usage
     dai::Point2f p3(20, 460);
     dai::Point2f p4(460, 460);
     warp->setWarpMesh({p1,p2,p3,p4}, 2, 2);
-    warp->setOutputSize({992, 500});
-    warp->setMaxOutputFrameSize(992 * 500 * 3);
-    // Specify hardware warp engine IDs to be used
+    warp->setOutputSize({512, 512});
+    warp->setMaxOutputFrameSize(512 * 512 * 3);
+    // Warp engines to be used (0,1,2)
     warp->setHwIds({1});
     // Warp interpolation mode, choose between BILINEAR, BICUBIC, BYPASS
     warp->setInterpolation(dai::node::Warp::Properties::Interpolation::BYPASS);
@@ -90,6 +89,7 @@ Examples of functionality
 #########################
 
 - :ref:`Warp Mesh`
+- :ref:`Interactive Warp Mesh`
 
 Reference
 #########

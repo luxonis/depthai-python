@@ -1,8 +1,7 @@
 Warp Mesh
 =========
 
-This example shows usage of :ref:`ImageManip` to crop a rotated rectangle area on a frame,
-or perform various image transforms: rotate, mirror, flip, perspective transform.
+This example shows usage of :ref:`Warp` node to warp the input image frame.
 
 Setup
 #####
@@ -12,16 +11,9 @@ Setup
 Demo
 ####
 
-.. image:: https://user-images.githubusercontent.com/18037362/152208899-461fa163-42ec-4922-84b5-5cd09332ea32.png
+.. figure:: https://user-images.githubusercontent.com/18037362/214597821-2f76239a-48fa-4146-ba47-9cad872454ea.png
 
-.. code-block::
-
-    === Controls:
-    z -rotated rectangle crop, decrease rate
-    x -rotated rectangle crop, increase rate
-    c -warp 4-point transform, cycle through modes
-    v -resize cropped region, or disable resize
-    h -print controls (help)
+    Warped images
 
 
 Source code
@@ -31,17 +23,17 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/ImageManip/rgb_rotate_warp.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/Warp/warp_mesh.py>`__
 
-        .. literalinclude:: ../../../../examples/ImageManip/rgb_rotate_warp.py
+        .. literalinclude:: ../../../../examples/Warp/warp_mesh.py
            :language: python
            :linenos:
 
     .. tab:: C++
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/ImageManip/rgb_rotate_warp.cpp>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/Warp/warp_mesh.cpp>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/ImageManip/rgb_rotate_warp.cpp
+        .. literalinclude:: ../../../../depthai-core/examples/Warp/warp_mesh.cpp
            :language: cpp
            :linenos:
 
