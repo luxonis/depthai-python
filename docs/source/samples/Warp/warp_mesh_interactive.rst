@@ -10,6 +10,8 @@ User-defined arguments:
 - ``--resolution`` - Resolution of the input image (default: ``512x512``). Width must be divisible by 16.
 - ``--random`` - To generate random mesh points (disabled by default).
 
+Originally developed by `geaxgx <https://github.com/geaxgx>`__.
+
 Setup
 #####
 
