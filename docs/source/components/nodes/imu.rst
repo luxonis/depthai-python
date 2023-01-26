@@ -53,8 +53,8 @@ Limitations
 IMU sensor frequencies
 ######################
 
-Below are the discrete **stable frequencies** available for each (raw) IMU sensor. Maximum IMU frequencies are higher, eg.
-for BNO086, maximum frequency for gyroscope is 1000Hz, but up to 400Hz is stable with depthai.
+Below are the discrete **stable frequencies** available for each (raw) IMU sensor. Some maximum IMU frequencies are higher, eg.
+for BNO086, maximum frequency for gyroscope is 1000Hz, but up to 400Hz is stable (due to driver limitation).
 
 **BNO086:**
 
