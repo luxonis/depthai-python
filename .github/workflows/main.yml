@@ -465,7 +465,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-macos-arm64, build-linux-x86_64, build-linux-arm64]
+    needs: [deploy-mock, pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-macos-arm64, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
 
     steps:
@@ -473,23 +473,17 @@ jobs:
       with:
         submodules: 'recursive'
 
-    # Get tag version
-    # TODO(themarpe) - Node12, has to be updated
-    - name: Get tag version
-      id: tag
-      uses: battila7/get-version-action@v2
-
     - uses: actions/setup-python@v4
       with:
         python-version: '3.8'
 
     - name: Check if version matches
-      run: python3.8 -c 'import find_version as v; exit(0) if "${{ steps.tag.outputs.version-without-v }}" == v.get_package_version() else exit(1)'
+      run: python3.8 -c 'import find_version as v; exit(0) if "${{ github.ref_name }}" == f"v{v.get_package_version()}" else exit(1)'
 
     # Create GitHub release
     - uses: actions/create-release@master
       id: createRelease
-      name: Create ${{ steps.tag.outputs.version-without-v }} depthai-core release
+      name: Create ${{ github.ref_name }} depthai-python release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -504,8 +498,8 @@ jobs:
 
         draft: true
 
-  # Deploy to PyPi. Only when a commit is tagged
-  deploy-pypi:
+  # Deploy to PyPi and Artifactory. Only when a commit is tagged
+  deploy:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [release]
     runs-on: ubuntu-latest
@@ -525,6 +519,12 @@ jobs:
           PYPI_SERVER: ${{ secrets.PYPI_SERVER }}
           PYPI_USER: ${{ secrets.PYPI_USER }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      - name: Run deploy to Artifactory
+        run: bash ./ci/upload-artifactory-release.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
   notify_robothub:
     if: startsWith(github.ref, 'refs/tags/v')
