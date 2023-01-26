@@ -50,6 +50,23 @@ Limitations
 - For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
 - **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 500)`.
 
+IMU sensor frequencies
+######################
+
+Below are the discrete **stable frequencies** available for each (raw) IMU sensor. Maximum IMU frequencies are higher, eg.
+for BNO086, maximum frequency for gyroscope is 1000Hz, but up to 400Hz is stable with depthai.
+
+**BNO086:**
+
+- Accelerometer: 100Hz, 200Hz, 400Hz
+- Gyroscope: 125Hz, 250Hz, 400Hz
+- Magnetometer: 100Hz
+
+**BMI270:**
+
+- Accelerometer: 25Hz, 50Hz, 100Hz, 200Hz, 400Hz
+- Gyroscope: 25Hz, 50Hz, 100Hz, 200Hz, 400Hz
+
 Usage
 #####
 
