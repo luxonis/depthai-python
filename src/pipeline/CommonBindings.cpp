@@ -20,6 +20,7 @@
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
 #include "depthai-shared/common/Colormap.hpp"
+#include "depthai-shared/common/FrameEvent.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -54,6 +55,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
     py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
+    py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -326,6 +328,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         // .value("TWILIGHT", Colormap::TWILIGHT)
         // .value("TWILIGHT_SHIFTED", Colormap::TWILIGHT_SHIFTED)
         // .value("DEEPGREEN", Colormap::DEEPGREEN)
+    ;
+
+    frameEvent
+        .value("NONE", FrameEvent::NONE)
+        .value("READOUT_START", FrameEvent::READOUT_START)
+        .value("READOUT_END", FrameEvent::READOUT_END)
     ;
 
 }
