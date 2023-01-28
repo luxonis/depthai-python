@@ -250,7 +250,7 @@ static void bindConstructors(ARG& arg){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev);
-    }), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, DeviceBase, 10))
+    }), py::arg("version") = OpenVINO::VERSION_UNIVERSAL, DOC(dai, DeviceBase, DeviceBase, 10))
     .def(py::init([](OpenVINO::Version version, bool usb2Mode){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
@@ -289,14 +289,24 @@ static void bindConstructors(ARG& arg){
     }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
 
     // DeviceInfo version
-     .def(py::init([](const DeviceInfo& deviceInfo){
+    .def(py::init([](const DeviceInfo& deviceInfo){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo);
     }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
-     .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+    .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(deviceInfo, maxUsbSpeed);
     }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
+
+    // name or device id version
+    .def(py::init([](std::string nameOrDeviceId){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId));
+    }), py::arg("nameOrDeviceId"), DOC(dai, DeviceBase, DeviceBase, 22))
+    .def(py::init([](std::string nameOrDeviceId, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId), maxUsbSpeed);
+    }), py::arg("nameOrDeviceId"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 23))
     ;
 
 }
@@ -459,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
         .def_readwrite("board", &Device::Config::board)
+        .def_readwrite("nonExclusiveMode", &Device::Config::nonExclusiveMode)
     ;
 
     // Bind constructors
@@ -480,7 +491,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
-        .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
+        .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::VERSION_UNIVERSAL, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
         .def_static("getAllConnectedDevices", &DeviceBase::getAllConnectedDevices, DOC(dai, DeviceBase, getAllConnectedDevices))
@@ -546,7 +557,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashRead", [](DeviceBase& d, uint32_t s, uint64_t o) { py::gil_scoped_release release; return d.flashRead(s, o); }, py::arg("size"), py::arg("offset") = 0, DOC(dai, DeviceBase, flashRead))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
-        .def("getDeviceName", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDeviceName(); }, DOC(dai, DeviceBase, getDeviceName))
+        .def("getDeviceName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getDeviceName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getDeviceName))
     ;
 
 

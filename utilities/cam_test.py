@@ -41,6 +41,7 @@ import depthai as dai
 import collections
 import time
 from itertools import cycle
+from pathlib import Path
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -66,6 +67,8 @@ parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
                     help="Downscale the ISP output by this factor")
 parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
+parser.add_argument('-tun', '--camera-tuning', type=Path,
+                    help="Path to custom camera tuning database")
 args = parser.parse_args()
 
 cam_list = []
@@ -174,11 +177,8 @@ for c in cam_list:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
 
-if 0:
-    print("=== Using custom camera tuning, and limiting RGB FPS to 10")
-    pipeline.setCameraTuningBlobPath("/home/user/Downloads/tuning_color_low_light.bin")
-    # TODO: change sensor driver to make FPS automatic (based on requested exposure time)
-    cam['rgb'].setFps(10)
+if args.camera_tuning:
+    pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:
