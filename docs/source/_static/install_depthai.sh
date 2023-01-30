@@ -159,7 +159,7 @@ if [[ $(uname -s) == "Darwin" ]]; then
   "$python_executable" -m venv "$VENV_DIR"
   # activate environment
   source "$VENV_DIR/bin/activate"
-  pip install --upgrade pip
+  python -m pip install --upgrade pip
 
   # install launcher dependencies
   # only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqt5 with pip
@@ -218,7 +218,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
   "$python_executable" -m venv "$VENV_DIR"
 
   source "$VENV_DIR/bin/activate"
-  pip install --upgrade pip
+  python -m pip install --upgrade pip
 
   pip install packaging
   pip install pyqt5
