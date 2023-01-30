@@ -118,7 +118,7 @@ PoE latency
 
 On PoE, the latency can vary quite a bit due to a number of factors:
 
-* **Network** itself. Eg. if you are in a big network with many switches, the latency will be higher than if you are using a direct connection.
+* **Network** itself. Eg. if you are in a large network with many nodes, the latency will be higher compared to using a direct connection.
 * There's a **bottleneck** in **bandwidth**:
 
   * Perhaps some network link is 10mbps/100mbps instead of full 1gbps (due to switch/network card..). You can test this with `PoE Test script <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#poe-test-script>`__ (``speed`` should be 1000).
