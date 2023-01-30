@@ -185,6 +185,8 @@ class SearchDevice:
                     return deviceSelected
 
 def flashBootloader(bl: dai.DeviceBootloader, device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
+    userBlWarningMessage = """Updating bootloader can soft-brick a device.
+Proceed with caution"""
     factoryBlWarningMessage = """Factory Bootloader type or version doesn't support User Bootloader flashing.
 Factory bootloader will be updated instead.
 Proceed with caution
@@ -192,10 +194,13 @@ Proceed with caution
 
     try:
         if bl.isUserBootloaderSupported():
-            pr = Progress('Flashing...')
-            progress = lambda p : pr.update(p)
-            bl.flashUserBootloader(progress)
-            pr.finish("Flashed newest User Bootloader version.")
+            if AreYouSure(text=userBlWarningMessage).wait():
+                pr = Progress('Flashing...')
+                progress = lambda p : pr.update(p)
+                bl.flashUserBootloader(progress)
+                pr.finish("Flashed newest User Bootloader version.")
+            else:
+                return False
         elif AreYouSure(text=factoryBlWarningMessage).wait():
             bl.close()
             pr = Progress('Connecting...')
@@ -400,12 +405,6 @@ aboutDeviceLayout = [
         sg.Text("-version-", key="version", size=(30, 1)),
         sg.VSeparator(),
         sg.Text("-version-", key="commit", size=(31, 1))
-    ],
-    [sg.HSeparator()],
-    [
-        sg.Text("", size=(7, 2)),
-        sg.Button("Update Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
-                  button_color='#FFA500'),
     ]
 ]
 
@@ -510,12 +509,17 @@ dangerLayout = [
     ],
     [sg.HSeparator()],
     [
+        sg.Button("Update Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
+                  button_color='#FFA500'),
         sg.Button("Flash Factory Bootloader", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
                   button_color='#FFA500', key='flashFactoryBootloader'),
+    ],
+    [sg.HSeparator()],
+    [
         sg.Button("Factory reset",  size=(17, 2), font=('Arial', 10, 'bold'), disabled=True, button_color='#FFA500'),
         sg.Button("Boot into USB\nRecovery mode", size=(20, 2), font=('Arial', 10, 'bold'), disabled=True,
                   key='recoveryMode', button_color='#FFA500')
-    ],
+    ]
 ]
 
 
@@ -611,6 +615,8 @@ class DeviceManager:
                     if self.bl is None: continue
                     self.getConfigs()
                 self.unlockConfig()
+
+            # Danger
             elif event == "Update Bootloader":
                 # Use current type
                 if flashBootloader(self.bl, self.device, self.bl.getType()):
@@ -620,8 +626,6 @@ class DeviceManager:
                     self.getDevices()
                 else:
                     print("Flashing bootloader canceled.")
-
-            # Danger
             elif event == "flashFactoryBootloader":
                 sel = SelectBootloader(['AUTO', 'USB', 'NETWORK'], "Select bootloader type to flash.")
                 ok, type = sel.wait()
