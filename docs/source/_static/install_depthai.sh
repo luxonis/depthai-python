@@ -12,7 +12,8 @@ trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a
 while [ "$path_correct" = "false" ]
 do
   echo ""
-  read -p $'ENTER absolute installation path for depthai or leave empty and default path: $HOME will be used.\n' -r install_path
+  echo 'ENTER absolute installation path for depthai or leave empty and default path: $HOME will be used.'
+  read install_path < /dev/tty
   echo ""
 
   if [ "$install_path" = "" ]; then
@@ -44,7 +45,7 @@ python_version_number=""
 if [[ "$python_version" != 'Python'* ]]; then
   python_version=""
 fi
-echo $'\n'
+echo ""
 
 # check default python version, offer it to the user or get another one
 while [ "$python_chosen" = "false" ]
@@ -52,7 +53,8 @@ do
   if [[ "$python_version" == "" ]]; then
     echo "No python version found."
     echo "Input path for python binary, version 3.8 or higher, or leave empty and python 3.10 will be installed for you."
-    read -p $'Press any key to continue\n' -r python_binary_path
+    echo "Press any key to continue"
+    read python_binary_path < /dev/tty
     # python not found and user wants to install python 3.10
     if [ "$python_binary_path" = "" ]; then
         install_python="true"
@@ -65,14 +67,16 @@ do
     echo "Python version: $python_version found."
     if [ "$nr_1" -gt 2 ] && [ "$nr_2" -gt 7 ]; then  # first two digits of python version greater then 3.7 -> python version 3.8 or greater is allowed.
       echo "If you want to use it for installation, press ANY key, otherwise input path to python binary."
-      read -p $'Press any key to continue\n' -r python_binary_path
+      echo "Press any key to continue"
+      read python_binary_path < /dev/tty
       # user wants to use already installed python whose version is high enough
       if [ "$python_binary_path" = "" ]; then
         python_chosen="true"
     fi
     else
       echo "This python version is not supported by depthai. Enter path to python binary version et least 3.8, or leave empty and python 3.10 will be installed automatically."
-      read -p $'Press any key to continue\n' -r python_binary_path
+      echo "Press any key to continue"
+      read python_binary_path < /dev/tty
       # python version is too low and user wants to install python 3.10
       if [ "$python_binary_path" = "" ]; then
         install_python="true"
@@ -229,6 +233,7 @@ fi
 
 echo -e '\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
 echo -e '\nTo run demo app write <depthai_launcher> in terminal.'
-read -rsp $'Press ANY KEY to finish and run the demo app...\n' -n1 key
+echo "Press ANY KEY to finish and run the demo app..."
+read -n1 key < /dev/tty
 echo "STARTING DEMO APP."
 python "$DEPTHAI_DIR/launcher/launcher.py" -r "$DEPTHAI_DIR"
