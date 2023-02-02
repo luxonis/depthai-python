@@ -3,6 +3,14 @@ POE set IP
 
 This script allows you to set static or dynamic IP, or clear bootloader config on your OAK-POE device.
 
+.. warning::
+    Make sure to **set mask and gateway correctly!** If they are set incorrectly you will soft-brick your
+    device (you won't be able to access it), and will have to `factory reset <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#factory-reset>`__
+    your OAK PoE.
+
+.. note::
+    We suggest using :ref:`Device Manager`, a GUI tool for interfacing with the bootloader and its configurations.
+
 Demo
 ####
 

@@ -3,9 +3,9 @@
 Device
 ======
 
-Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful vision processing unit
-(**VPU**), called `Myriad X <https://www.intel.com/content/www/us/en/products/details/processors/movidius-vpu.html>`__.
-The VPU is optimized for performing AI inference algorithms and for processing sensory inputs (eg. calculating stereo disparity from two cameras).
+Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful Robotics Vision Core
+(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference algorithms and
+for processing sensory inputs (eg. calculating stereo disparity from two cameras).
 
 Device API
 ##########
@@ -21,7 +21,7 @@ When you create the device in the code, firmware is uploaded together with the p
 
   # Upload the pipeline to the device
   with depthai.Device(pipeline) as device:
-    # Print Myriad X Id (MxID), USB speed, and available cameras on the device
+    # Print MxID, USB speed, and available cameras on the device
     print('MxId:',device.getDeviceInfo().getMxId())
     print('USB speed:',device.getUsbSpeed())
     print('Connected cameras:',device.getConnectedCameras())
@@ -40,6 +40,20 @@ When you create the device in the code, firmware is uploaded together with the p
         cfg = depthai.ImageManipConfig()
         input_q.send(cfg)
 
+Connect to specified device
+###########################
+
+If you have multiple devices and only want to connect to a specific one, or if your OAK PoE camera is outside of your
+subnet, you can specify the device (either with MxID, IP, or USB port name) you want to connect to.
+
+.. code-block:: python
+
+  # Specify MXID, IP Address or USB path
+  device_info = depthai.DeviceInfo("14442C108144F1D000") # MXID
+  #device_info = depthai.DeviceInfo("192.168.1.44") # IP Address
+  #device_info = depthai.DeviceInfo("3.3.3") # USB port name
+  with depthai.Device(pipeline, device_info) as device:
+      # ...
 
 Multiple devices
 ################

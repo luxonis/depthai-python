@@ -16,6 +16,15 @@
 #include "depthai-shared/common/Size2f.hpp"
 #include "depthai-shared/common/UsbSpeed.hpp"
 #include "depthai-shared/common/DetectionNetworkType.hpp"
+#include "depthai-shared/common/DetectionParserOptions.hpp"
+#include "depthai-shared/common/RotatedRect.hpp"
+#include "depthai-shared/common/Rect.hpp"
+#include "depthai-shared/common/Colormap.hpp"
+#include "depthai-shared/common/FrameEvent.hpp"
+
+// depthai
+#include "depthai/common/CameraFeatures.hpp"
+#include "depthai/common/CameraExposureOffset.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -40,7 +49,13 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<UsbSpeed> usbSpeed(m, "UsbSpeed", DOC(dai, UsbSpeed));
     py::enum_<ProcessorType> processorType(m, "ProcessorType");
     py::enum_<DetectionNetworkType> detectionNetworkType(m, "DetectionNetworkType");
-
+    py::enum_<SerializationType> serializationType(m, "SerializationType");
+    py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
+    py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
+    py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
+    py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
+    py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -55,6 +70,33 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
+    rotatedRect
+        .def(py::init<>())
+        .def_readwrite("center", &RotatedRect::center)
+        .def_readwrite("size", &RotatedRect::size)
+        .def_readwrite("angle", &RotatedRect::angle)
+        ;
+
+    rect
+        .def(py::init<>())
+        .def(py::init<float, float, float, float>())
+        .def(py::init<Point2f, Point2f>())
+        .def(py::init<Point2f, Size2f>())
+
+        .def("topLeft", &Rect::topLeft, DOC(dai, Rect, topLeft))
+        .def("bottomRight", &Rect::bottomRight, DOC(dai, Rect, bottomRight))
+        .def("size", &Rect::size, DOC(dai, Rect, size))
+        .def("area", &Rect::area, DOC(dai, Rect, area))
+        .def("empty", &Rect::empty, DOC(dai, Rect, empty))
+        .def("contains", &Rect::contains, DOC(dai, Rect, contains))
+        .def("isNormalized", &Rect::isNormalized, DOC(dai, Rect, isNormalized))
+        .def("denormalize", &Rect::denormalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, denormalize))
+        .def("normalize", &Rect::normalize, py::arg("width"), py::arg("height"), DOC(dai, Rect, normalize))
+        .def_readwrite("x", &Rect::x)
+        .def_readwrite("y", &Rect::y)
+        .def_readwrite("width", &Rect::width)
+        .def_readwrite("height", &Rect::height)
+        ;
 
     timestamp
         .def(py::init<>())
@@ -129,6 +171,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("name", &CameraFeatures::name)
+        .def("__repr__", [](CameraFeatures& camera) {
+            std::stringstream stream;
+            stream << camera;
+            return stream.str();
+        });
     ;
 
     // MemoryInfo
@@ -197,11 +245,19 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     eepromData
         .def(py::init<>())
         .def_readwrite("version", &EepromData::version)
+        .def_readwrite("boardCustom", &EepromData::boardCustom)
         .def_readwrite("boardName", &EepromData::boardName)
         .def_readwrite("boardRev", &EepromData::boardRev)
+        .def_readwrite("boardConf", &EepromData::boardConf)
+        .def_readwrite("hardwareConf", &EepromData::hardwareConf)
+        .def_readwrite("productName", &EepromData::productName)
+        .def_readwrite("batchName", &EepromData::batchName)
+        .def_readwrite("batchTime", &EepromData::batchTime)
+        .def_readwrite("boardOptions", &EepromData::boardOptions)
         .def_readwrite("cameraData", &EepromData::cameraData)
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
+        .def_readwrite("miscellaneousData", &EepromData::miscellaneousData)
         ;
     // UsbSpeed
     usbSpeed
@@ -223,4 +279,61 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("YOLO", DetectionNetworkType::YOLO)
         .value("MOBILENET", DetectionNetworkType::MOBILENET)
     ;
+
+    serializationType
+        .value("LIBNOP", SerializationType::LIBNOP)
+        .value("JSON", SerializationType::JSON)
+        .value("JSON_MSGPACK", SerializationType::JSON_MSGPACK)
+    ;
+
+    detectionParserOptions
+        .def_readwrite("nnFamily", &DetectionParserOptions::nnFamily)
+        .def_readwrite("confidenceThreshold", &DetectionParserOptions::confidenceThreshold)
+        .def_readwrite("classes", &DetectionParserOptions::classes)
+        .def_readwrite("coordinates", &DetectionParserOptions::coordinates)
+        .def_readwrite("anchors", &DetectionParserOptions::anchors)
+        .def_readwrite("anchorMasks", &DetectionParserOptions::anchorMasks)
+        .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
+        ;
+
+    cameraExposureOffset
+        .value("START", CameraExposureOffset::START)
+        .value("MIDDLE", CameraExposureOffset::MIDDLE)
+        .value("END", CameraExposureOffset::END)
+    ;
+
+    colormap
+        .value("NONE", Colormap::NONE)
+        .value("JET", Colormap::JET)
+        .value("TURBO", Colormap::TURBO)
+        .value("STEREO_JET", Colormap::STEREO_JET)
+        .value("STEREO_TURBO", Colormap::STEREO_TURBO)
+        // .value("AUTUMN", Colormap::AUTUMN)
+        // .value("BONE", Colormap::BONE)
+        // .value("WINTER", Colormap::WINTER)
+        // .value("RAINBOW", Colormap::RAINBOW)
+        // .value("OCEAN", Colormap::OCEAN)
+        // .value("SUMMER", Colormap::SUMMER)
+        // .value("SPRING", Colormap::SPRING)
+        // .value("COOL", Colormap::COOL)
+        // .value("HSV", Colormap::HSV)
+        // .value("PINK", Colormap::PINK)
+        // .value("HOT", Colormap::HOT)
+        // .value("PARULA", Colormap::PARULA)
+        // .value("MAGMA", Colormap::MAGMA)
+        // .value("INFERNO", Colormap::INFERNO)
+        // .value("PLASMA", Colormap::PLASMA)
+        // .value("VIRIDIS", Colormap::VIRIDIS)
+        // .value("CIVIDIS", Colormap::CIVIDIS)
+        // .value("TWILIGHT", Colormap::TWILIGHT)
+        // .value("TWILIGHT_SHIFTED", Colormap::TWILIGHT_SHIFTED)
+        // .value("DEEPGREEN", Colormap::DEEPGREEN)
+    ;
+
+    frameEvent
+        .value("NONE", FrameEvent::NONE)
+        .value("READOUT_START", FrameEvent::READOUT_START)
+        .value("READOUT_END", FrameEvent::READOUT_END)
+    ;
+
 }

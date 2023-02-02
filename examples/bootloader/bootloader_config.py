@@ -31,24 +31,27 @@ if usage:
 (res, info) = dai.DeviceBootloader.getFirstAvailableDevice()
 
 if res:
-    print(f'Found device with name: {info.desc.name}');
+    print(f'Found device with name: {info.name}');
     with dai.DeviceBootloader(info) as bl:
-        if read:
-            print('Current flashed configuration')
-            print(json.dumps(bl.readConfigData()))
-        else:
-            success = None
-            error = None
-            if clear:
-                (success, error) = bl.flashConfigClear()
+        try:
+            if read:
+                print('Current flashed configuration')
+                print(json.dumps(bl.readConfigData()))
             else:
-                if path == '':
-                    (success, error) = bl.flashConfig(dai.DeviceBootloader.Config())
+                success = None
+                error = None
+                if clear:
+                    (success, error) = bl.flashConfigClear()
                 else:
-                    (success, error) = bl.flashConfigFile(path)
-            if success:
-                print('Successfully flashed bootloader configuration')
-            else:
-                print(f'Error flashing bootloader configuration: {error}')
+                    if path == '':
+                        (success, error) = bl.flashConfig(dai.DeviceBootloader.Config())
+                    else:
+                        (success, error) = bl.flashConfigFile(path)
+                if success:
+                    print('Successfully flashed bootloader configuration')
+                else:
+                    print(f'Error flashing bootloader configuration: {error}')
+        except Exception as ex:
+            print(f'Error accessing config: {ex}')
 else:
     print('No devices found')

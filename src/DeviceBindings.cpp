@@ -2,6 +2,7 @@
 
 // depthai
 #include "depthai/device/Device.hpp"
+#include "depthai/device/EepromError.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
@@ -18,55 +19,166 @@
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>);
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 
+// Patch for bind_map naming
+// Remove if it gets mainlined in pybind11
+namespace pybind11 {
+
+template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+class_<Map, holder_type> bind_map_patched(handle scope, const std::string &name, Args &&...args) {
+    using KeyType = typename Map::key_type;
+    using MappedType = typename Map::mapped_type;
+    using KeysView = detail::keys_view<Map>;
+    using ValuesView = detail::values_view<Map>;
+    using ItemsView = detail::items_view<Map>;
+    using Class_ = class_<Map, holder_type>;
+
+    // If either type is a non-module-local bound type then make the map binding non-local as well;
+    // otherwise (e.g. both types are either module-local or converting) the map will be
+    // module-local.
+    auto *tinfo = detail::get_type_info(typeid(MappedType));
+    bool local = !tinfo || tinfo->module_local;
+    if (local) {
+        tinfo = detail::get_type_info(typeid(KeyType));
+        local = !tinfo || tinfo->module_local;
+    }
+
+    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
+    class_<KeysView> keys_view(
+        scope, ("KeysView_" + name).c_str(), pybind11::module_local(local));
+    class_<ValuesView> values_view(
+        scope, ("ValuesView_" + name).c_str(), pybind11::module_local(local));
+    class_<ItemsView> items_view(
+        scope, ("ItemsView_" + name).c_str(), pybind11::module_local(local));
+
+    cl.def(init<>());
+
+    // Register stream insertion operator (if possible)
+    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+
+    cl.def(
+        "__bool__",
+        [](const Map &m) -> bool { return !m.empty(); },
+        "Check whether the map is nonempty");
+
+    cl.def(
+        "__iter__",
+        [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+        keep_alive<0, 1>() /* Essential: keep map alive while iterator exists */
+    );
+
+    cl.def(
+        "keys",
+        [](Map &m) { return KeysView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "values",
+        [](Map &m) { return ValuesView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "items",
+        [](Map &m) { return ItemsView{m}; },
+        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+    );
+
+    cl.def(
+        "__getitem__",
+        [](Map &m, const KeyType &k) -> MappedType & {
+            auto it = m.find(k);
+            if (it == m.end()) {
+                throw key_error();
+            }
+            return it->second;
+        },
+        return_value_policy::reference_internal // ref + keepalive
+    );
+
+    cl.def("__contains__", [](Map &m, const KeyType &k) -> bool {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            return false;
+        }
+        return true;
+    });
+    // Fallback for when the object is not of the key type
+    cl.def("__contains__", [](Map &, const object &) -> bool { return false; });
+
+    // Assignment provided only if the type is copyable
+    detail::map_assignment<Map, Class_>(cl);
+
+    cl.def("__delitem__", [](Map &m, const KeyType &k) {
+        auto it = m.find(k);
+        if (it == m.end()) {
+            throw key_error();
+        }
+        m.erase(it);
+    });
+
+    cl.def("__len__", &Map::size);
+
+    keys_view.def("__len__", [](KeysView &view) { return view.map.size(); });
+    keys_view.def(
+        "__iter__",
+        [](KeysView &view) { return make_key_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+    keys_view.def("__contains__", [](KeysView &view, const KeyType &k) -> bool {
+        auto it = view.map.find(k);
+        if (it == view.map.end()) {
+            return false;
+        }
+        return true;
+    });
+    // Fallback for when the object is not of the key type
+    keys_view.def("__contains__", [](KeysView &, const object &) -> bool { return false; });
+
+    values_view.def("__len__", [](ValuesView &view) { return view.map.size(); });
+    values_view.def(
+        "__iter__",
+        [](ValuesView &view) { return make_value_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+
+    items_view.def("__len__", [](ItemsView &view) { return view.map.size(); });
+    items_view.def(
+        "__iter__",
+        [](ItemsView &view) { return make_iterator(view.map.begin(), view.map.end()); },
+        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+    );
+
+    return cl;
+}
+
+} // namespace pybind11
+
+
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
 
 template<typename DEVICE, class... Args>
 static auto deviceSearchHelper(Args&&... args){
 
-    auto startTime = std::chrono::steady_clock::now();
-    bool found = false;
-    bool invalidDeviceFound = false;
-    dai::DeviceInfo deviceInfo = {};
-    dai::DeviceInfo invalidDeviceInfo = {};
-    do {
-        {
-            // releases python GIL
-            py::gil_scoped_release release;
-            std::tie(found, deviceInfo) = DEVICE::getFirstAvailableDevice(false);
-
-            if(strcmp("<error>", deviceInfo.desc.name) == 0){
-                invalidDeviceFound = true;
-                invalidDeviceInfo = deviceInfo;
-                found = false;
-            }
-
-            // Check if found
-            if(found){
-                break;
-            } else {
-                // block for 100ms
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-        }
-        // reacquires python GIL for PyErr_CheckSignals call
-        // check if interrupt triggered in between
+    bool found;
+    dai::DeviceInfo deviceInfo;
+    // releases python GIL
+    py::gil_scoped_release release;
+    std::tie(found, deviceInfo) = DEVICE::getAnyAvailableDevice(DEVICE::getDefaultSearchTime(), [](){
+        py::gil_scoped_acquire acquire;
         if (PyErr_CheckSignals() != 0) throw py::error_already_set();
-    } while(std::chrono::steady_clock::now() - startTime < DEVICE::getDefaultSearchTime());
-
-    // Check if its an invalid device
-    if(invalidDeviceFound){
-        // Warn
-        // spdlog::warn("skipping {} device having name \"{}\"", XLinkDeviceStateToStr(invalidDeviceInfo.state), invalidDeviceInfo.desc.name);
-        // TODO(themarpe) - move device search into C++ and expose a callback
-        DEVICE::getFirstAvailableDevice(true);
-    }
-
-    // If neither UNBOOTED nor BOOTLOADER were found (after 'DEFAULT_SEARCH_TIME'), try BOOTED
-    if(!found) std::tie(found, deviceInfo) = dai::XLinkConnection::getFirstDevice(X_LINK_BOOTED);
+    });
 
     // if no devices found, then throw
-    if(!found) throw std::runtime_error("No available devices");
+    if(!found) {
+        auto numConnected = DEVICE::getAllAvailableDevices().size();
+        if(numConnected > 0) {
+            throw std::runtime_error("No available devices (" + std::to_string(numConnected) + " connected, but in use)");
+        } else {
+            throw std::runtime_error("No available devices");
+        }
+    }
 
     return deviceInfo;
 }
@@ -115,7 +227,7 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, dev, maxUsbSpeed);
     }), py::arg("pipeline"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 3))
-    .def(py::init([](const Pipeline& pipeline, const std::string& pathToCmd){
+    .def(py::init([](const Pipeline& pipeline, const dai::Path& pathToCmd){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, dev, pathToCmd);
@@ -123,58 +235,78 @@ static void bindConstructors(ARG& arg){
     .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, usb2Mode);
-    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 7))
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 6))
     .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, maxUsbSpeed);
-    }), py::arg("pipeline"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 8))
-    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, std::string pathToCmd){
+    }), py::arg("pipeline"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 7))
+    .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, dai::Path pathToCmd){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, pathToCmd);
-    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 9))
+    }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 8))
 
     // DeviceBase constructor - OpenVINO version
     .def(py::init([](OpenVINO::Version version){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev);
-    }), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, DeviceBase, 11))
+    }), py::arg("version") = OpenVINO::VERSION_UNIVERSAL, DOC(dai, DeviceBase, DeviceBase, 10))
     .def(py::init([](OpenVINO::Version version, bool usb2Mode){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, usb2Mode);
-    }), py::arg("version"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 13))
+    }), py::arg("version"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 11))
     .def(py::init([](OpenVINO::Version version, UsbSpeed maxUsbSpeed){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, maxUsbSpeed);
-    }), py::arg("version"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 14))
-    .def(py::init([](OpenVINO::Version version, const std::string& pathToCmd){
+    }), py::arg("version"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 12))
+    .def(py::init([](OpenVINO::Version version, const dai::Path& pathToCmd){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, pathToCmd);
-    }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 15))
+    }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 13))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 18))
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, maxUsbSpeed);
-    }), py::arg("version"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 19))
-    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, std::string pathToCmd){
+    }), py::arg("version"), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 16))
+    .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, dai::Path pathToCmd){
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, pathToCmd);
-    }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 20))
+    }), py::arg("version"), py::arg("deviceDesc"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 17))
     .def(py::init([](typename D::Config config){
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(config, dev);
-    }), py::arg("config"), DOC(dai, DeviceBase, DeviceBase, 22))
+    }), py::arg("config"), DOC(dai, DeviceBase, DeviceBase, 18))
     .def(py::init([](typename D::Config config, const DeviceInfo& deviceInfo){
         py::gil_scoped_release release;
         return std::make_unique<D>(config, deviceInfo);
-    }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 23))
+    }), py::arg("config"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 19))
+
+    // DeviceInfo version
+    .def(py::init([](const DeviceInfo& deviceInfo){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo);
+    }), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 20))
+    .def(py::init([](const DeviceInfo& deviceInfo, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(deviceInfo, maxUsbSpeed);
+    }), py::arg("deviceInfo"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 21))
+
+    // name or device id version
+    .def(py::init([](std::string nameOrDeviceId){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId));
+    }), py::arg("nameOrDeviceId"), DOC(dai, DeviceBase, DeviceBase, 22))
+    .def(py::init([](std::string nameOrDeviceId, UsbSpeed maxUsbSpeed){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(std::move(nameOrDeviceId), maxUsbSpeed);
+    }), py::arg("nameOrDeviceId"), py::arg("maxUsbSpeed"), DOC(dai, DeviceBase, DeviceBase, 23))
     ;
 
 }
@@ -203,9 +335,16 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<PyClock> clock(m, "Clock");
 
 
-    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
-    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
+    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
+
+    // pybind11 limitation of having actual classes as exceptions
+    // Possible but requires a larger workaround
+    // https://stackoverflow.com/questions/62087383/how-can-you-bind-exceptions-with-custom-fields-and-constructors-in-pybind11-and
+
+    // Bind EepromError
+    auto eepromError = py::register_exception<EepromError>(m, "EepromError", PyExc_RuntimeError);
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -234,6 +373,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     boardConfigNetwork
         .def(py::init<>())
         .def_readwrite("mtu", &BoardConfig::Network::mtu)
+        .def_readwrite("xlinkTcpNoDelay", &BoardConfig::Network::xlinkTcpNoDelay)
     ;
 
     // GPIO Mode
@@ -314,6 +454,14 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
         .def_readwrite("gpio", &BoardConfig::gpio)
         .def_readwrite("uart", &BoardConfig::uart)
+        .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock)
+        .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock)
+        .def_readwrite("mipi4LaneRgb", &BoardConfig::mipi4LaneRgb)
+        .def_readwrite("emmc", &BoardConfig::emmc)
+        .def_readwrite("logPath", &BoardConfig::logPath)
+        .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
+        .def_readwrite("logVerbosity", &BoardConfig::logVerbosity)
+        .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints)
     ;
 
     // Bind Device::Config
@@ -321,6 +469,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("version", &Device::Config::version)
         .def_readwrite("board", &Device::Config::board)
+        .def_readwrite("nonExclusiveMode", &Device::Config::nonExclusiveMode)
     ;
 
     // Bind constructors
@@ -334,19 +483,21 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
             d.close();
         })
         .def("close", [](DeviceBase& d) { py::gil_scoped_release release; d.close(); }, "Closes the connection to device. Better alternative is the usage of context manager: `with depthai.Device(pipeline) as device:`")
-        .def("isClosed", &DeviceBase::isClosed, "Check if the device is still connected`")
+        .def("isClosed", [](DeviceBase& d) { py::gil_scoped_release release; return d.isClosed(); }, DOC(dai, DeviceBase, isClosed))
 
         //dai::Device methods
         //static
-        .def_static("getAnyAvailableDevice", [](std::chrono::microseconds us){ return Device::getAnyAvailableDevice(us); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
+        .def_static("getAnyAvailableDevice", [](std::chrono::milliseconds ms){ return DeviceBase::getAnyAvailableDevice(ms); }, py::arg("timeout"), DOC(dai, DeviceBase, getAnyAvailableDevice))
         .def_static("getAnyAvailableDevice", [](){ return DeviceBase::getAnyAvailableDevice(); }, DOC(dai, DeviceBase, getAnyAvailableDevice, 2))
         .def_static("getFirstAvailableDevice", &DeviceBase::getFirstAvailableDevice, py::arg("skipInvalidDevices") = true, DOC(dai, DeviceBase, getFirstAvailableDevice))
         .def_static("getAllAvailableDevices", &DeviceBase::getAllAvailableDevices, DOC(dai, DeviceBase, getAllAvailableDevices))
-        .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
+        .def_static("getEmbeddedDeviceBinary", py::overload_cast<bool, OpenVINO::Version>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("usb2Mode"), py::arg("version") = OpenVINO::VERSION_UNIVERSAL, DOC(dai, DeviceBase, getEmbeddedDeviceBinary))
         .def_static("getEmbeddedDeviceBinary", py::overload_cast<DeviceBase::Config>(&DeviceBase::getEmbeddedDeviceBinary), py::arg("config"), DOC(dai, DeviceBase, getEmbeddedDeviceBinary, 2))
         .def_static("getDeviceByMxId", &DeviceBase::getDeviceByMxId, py::arg("mxId"), DOC(dai, DeviceBase, getDeviceByMxId))
+        .def_static("getAllConnectedDevices", &DeviceBase::getAllConnectedDevices, DOC(dai, DeviceBase, getAllConnectedDevices))
 
         // methods
+        .def("getBootloaderVersion", &DeviceBase::getBootloaderVersion, DOC(dai, DeviceBase, getBootloaderVersion))
         .def("isPipelineRunning", [](DeviceBase& d) { py::gil_scoped_release release; return d.isPipelineRunning(); }, DOC(dai, DeviceBase, isPipelineRunning))
         .def("startPipeline", [](DeviceBase& d){
             // Issue an deprecation warning
@@ -387,9 +538,24 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
-        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
-        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
+        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
         .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
+        .def("isEepromAvailable", [](DeviceBase& d) { py::gil_scoped_release release; return d.isEepromAvailable(); }, DOC(dai, DeviceBase, isEepromAvailable))
+        .def("flashCalibration2", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashCalibration2(ch); }, DOC(dai, DeviceBase, flashCalibration2))
+        .def("readCalibration2", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibration2(); }, DOC(dai, DeviceBase, readCalibration2))
+        .def("readCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationOrDefault(); }, DOC(dai, DeviceBase, readCalibrationOrDefault))
+        .def("factoryResetCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.factoryResetCalibration(); }, DOC(dai, DeviceBase, factoryResetCalibration))
+        .def("flashFactoryCalibration", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashFactoryCalibration(ch); }, DOC(dai, DeviceBase, flashFactoryCalibration))
+        .def("readFactoryCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibration(); }, DOC(dai, DeviceBase, readFactoryCalibration))
+        .def("readFactoryCalibrationOrDefault", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationOrDefault(); }, DOC(dai, DeviceBase, readFactoryCalibrationOrDefault))
+        .def("readCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationRaw(); }, DOC(dai, DeviceBase, readCalibrationRaw))
+        .def("readFactoryCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationRaw(); }, DOC(dai, DeviceBase, readFactoryCalibrationRaw))
+        .def("flashEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashEepromClear(); }, DOC(dai, DeviceBase, flashEepromClear))
+        .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
+        .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
+        .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
+        .def("getDeviceName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getDeviceName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getDeviceName))
     ;
 
 

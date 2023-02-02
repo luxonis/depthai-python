@@ -1,7 +1,7 @@
 Calibration Reader
 ==================
 
-This example shows how to read calibration data stored on device over XLink.
+This example shows how to read calibration data stored on device over XLink. This example will print camera extrinsic and instrinsic parameters, along with other calibration values written on device (EEPROM).
 
 .. rubric:: Similar samples:
 

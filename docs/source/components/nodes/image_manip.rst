@@ -3,6 +3,8 @@ ImageManip
 
 ImageManip node can be used to crop, rotate rectangle area or perform various image transforms: rotate, mirror, flip, perspective transform.
 
+For downscaling, ImageManip uses the bilinear/bicubic interpolation.
+
 How to place it
 ###############
 
@@ -68,18 +70,21 @@ Usage
 Image formats supported
 #######################
 
-ImageManip node supports the following image formats:
+ImageManip node supports the following image formats (more info `in PR here <https://github.com/luxonis/depthai-core/pull/444>`__):
 
-- for RGB input/output types only :code:`RGB888p` / :code:`BGR888p` (planar, not interleaved)
-- :code:`RAW16` input, but can only for cropping (use-case: depth map), outputting same format
-- can output :code:`GRAY8` (either as single plane, or 3-plane RGB as set with setFrameType()), but only from these inputs: :code:`RAW8`, :code:`GRAY8`, :code:`YUV420p` (:ref:`ColorCamera` isp), :code:`NV12` (:ref:`ColorCamera` video / still)
+- Input formats supported: RGB/BGR, planar/interleaved, YUV/NV12, RAW8 and GRAY8
+- Convert format to any other format mentioned above
+- RAW16 (uint16, ``depth`` output)  supported, but without color conversion capability
+
+Note that planar formats are faster to process, so interleaved images should be avoided (eg. NV12 input).
 
 Limitations
 ###########
 
 Besides limitations mentioned above (unsupported frame formats), there are other limitations:
 
-- Due to HW warp constraint, rotating/warping can be done only on frames whose width values are multiples of 16. 
+- Due to HW warp constraint, rotating/warping can be done only on frames whose width values are multiples of 16
+- Maximum output width of a frame is 4056 pixels
 
 Examples of functionality
 #########################

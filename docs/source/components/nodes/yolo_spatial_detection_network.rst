@@ -65,8 +65,8 @@ Usage
     # Yolo specific parameters
     yoloSpatial.setNumClasses(80)
     yoloSpatial.setCoordinateSize(4)
-    yoloSpatial.setAnchors(np.array([10,14, 23,27, 37,58, 81,82, 135,169, 344,319]))
-    yoloSpatial.setAnchorMasks({ "side26": np.array([1,2,3]), "side13": np.array([3,4,5]) })
+    yoloSpatial.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+    yoloSpatial.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
     yoloSpatial.setIouThreshold(0.5)
 
   .. code-tab:: c++
@@ -93,6 +93,8 @@ Examples of functionality
 #########################
 
 - :ref:`RGB & TinyYolo with spatial data`
+
+.. include::  /includes/spatial-coords.rst
 
 Reference
 #########

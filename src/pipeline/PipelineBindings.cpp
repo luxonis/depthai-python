@@ -1,6 +1,6 @@
 
 #include "PipelineBindings.hpp"
-#include "NodeBindings.hpp"
+#include "node/NodeBindings.hpp"
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"
@@ -11,6 +11,7 @@
 #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
+#include "depthai/pipeline/node/Camera.hpp"
 #include "depthai/pipeline/node/VideoEncoder.hpp"
 #include "depthai/pipeline/node/SPIOut.hpp"
 #include "depthai/pipeline/node/SPIIn.hpp"
@@ -30,11 +31,10 @@
 #include "depthai/pipeline/node/UAC.hpp"
 #include "depthai/pipeline/node/ToF.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
+#include "depthai/pipeline/node/DetectionParser.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
-
-
 
 std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
     auto nodeCreateMap = NodeBindings::getNodeCreateMap();
@@ -98,7 +98,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("unlink", &Pipeline::unlink, DOC(dai, Pipeline, unlink), DOC(dai, Pipeline, unlink))
         .def("getAssetManager", static_cast<const AssetManager& (Pipeline::*)() const>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Pipeline::*)()>(&Pipeline::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getAssetManager))
-        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version") = OpenVINO::DEFAULT_VERSION, DOC(dai, Pipeline, setOpenVINOVersion))
+        .def("setOpenVINOVersion", &Pipeline::setOpenVINOVersion, py::arg("version"), DOC(dai, Pipeline, setOpenVINOVersion))
         .def("getOpenVINOVersion", &Pipeline::getOpenVINOVersion, DOC(dai, Pipeline, getOpenVINOVersion))
         .def("getRequiredOpenVINOVersion", &Pipeline::getRequiredOpenVINOVersion, DOC(dai, Pipeline, getRequiredOpenVINOVersion))
         .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
@@ -106,6 +106,9 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
         .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
         .def("getDeviceConfig", &Pipeline::getDeviceConfig, DOC(dai, Pipeline, getDeviceConfig))
+        .def("serializeToJson", &Pipeline::serializeToJson, DOC(dai, Pipeline, serializeToJson))
+        .def("setBoardConfig", &Pipeline::setBoardConfig, DOC(dai, Pipeline, setBoardConfig))
+        .def("getBoardConfig", &Pipeline::getBoardConfig, DOC(dai, Pipeline, getBoardConfig))
         // 'Template' create function
         .def("create", [](dai::Pipeline& p, py::object class_) {
             auto node = createNode(p, class_);
@@ -123,6 +126,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
         .def("createToF", &Pipeline::create<node::ToF>)      
         .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
+        .def("createScript", &Pipeline::create<node::Script>)
         .def("createSPIOut", &Pipeline::create<node::SPIOut>)
         .def("createSPIIn", &Pipeline::create<node::SPIIn>)
         .def("createImageManip", &Pipeline::create<node::ImageManip>)
@@ -141,6 +145,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createUAC", &Pipeline::create<node::UAC>)
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
+        .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
         ;
 
 
