@@ -197,8 +197,13 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
 xoutRectifRight = pipeline.create(dai.node.XLinkOut)
 
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+if args.swap_left_right:
+    camLeft.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    camRight.setBoardSocket(dai.CameraBoardSocket.LEFT)
+else:
+    camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
 res = (
     dai.MonoCameraProperties.SensorResolution.THE_800_P
     if resolution[1] == 800
@@ -224,12 +229,8 @@ xoutDepth.setStreamName("depth")
 xoutRectifLeft.setStreamName("rectifiedLeft")
 xoutRectifRight.setStreamName("rectifiedRight")
 
-if args.swap_left_right:
-    camLeft.out.link(stereo.right)
-    camRight.out.link(stereo.left)
-else:
-    camLeft.out.link(stereo.left)
-    camRight.out.link(stereo.right)
+camLeft.out.link(stereo.left)
+camRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
 stereo.disparity.link(xoutDisparity.input)

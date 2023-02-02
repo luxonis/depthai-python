@@ -555,6 +555,7 @@ if args.debug:
 if args.dumpdisparitycostvalues:
     stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
+
 StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow('Stereo control panel')
 
@@ -607,7 +608,7 @@ def convertToCv2Frame(name, image, config):
     elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
-
+        return frame
         # if 1: # Optionally, apply a color map
         #     frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
@@ -618,7 +619,7 @@ print("Connecting and starting the pipeline")
 with dai.Device(pipeline) as device:
 
     stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
-    inStreams = ['in_right', 'in_left']
+    inStreams = ['in_left', 'in_right']
     inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
     in_q_list = []
     for s in inStreams:
@@ -658,8 +659,6 @@ with dai.Device(pipeline) as device:
                 img.setWidth(width)
                 img.setHeight(height)
                 q.send(img)
-                if timestamp_ms == 0:  # Send twice for first iteration
-                    q.send(img)
                 # print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
