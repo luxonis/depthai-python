@@ -187,23 +187,6 @@ calibData = device.readCalibration()
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
 
-if args.swap_left_right:
-    M_left, width_l, height_l = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.LEFT)
-    M_right, width_r, height_r = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RIGHT)
-    d_l = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
-    d_r = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
-
-    rect_l = calibData.getStereoLeftRectificationRotation()
-    rect_r = calibData.getStereoRightRectificationRotation()
-
-    calibData.setCameraIntrinsics(dai.CameraBoardSocket.LEFT, M_right, width_r, height_r)
-    calibData.setCameraIntrinsics(dai.CameraBoardSocket.RIGHT, M_left, width_l, height_l)
-    calibData.setDistortionCoefficients(dai.CameraBoardSocket.LEFT, d_r)
-    calibData.setDistortionCoefficients(dai.CameraBoardSocket.RIGHT, d_l)
-    calibData.setStereoLeft(dai.CameraBoardSocket.LEFT, rect_r)
-    calibData.setStereoRight(dai.CameraBoardSocket.RIGHT, rect_l)
-    pipeline.setCalibrationData(calibData)
-
 camLeft = pipeline.create(dai.node.MonoCamera)
 camRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
