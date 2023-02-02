@@ -69,6 +69,13 @@ parser.add_argument(
     action="store_true",
     help="Display depth frames",
 )
+parser.add_argument(
+    "-swlr",
+    "--swap_left_right",
+    default=False,
+    action="store_true",
+    help="Swap left right frames",
+)
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -175,8 +182,27 @@ def getDisparityFrame(frame):
     return disp
 
 
+device = dai.Device()
+calibData = device.readCalibration()
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
+
+if args.swap_left_right:
+    M_left, width_l, height_l = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.LEFT)
+    M_right, width_r, height_r = calibData.getDefaultIntrinsics(dai.CameraBoardSocket.RIGHT)
+    d_l = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+    d_r = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+
+    rect_l = calibData.getStereoLeftRectificationRotation()
+    rect_r = calibData.getStereoRightRectificationRotation()
+
+    calibData.setCameraIntrinsics(dai.CameraBoardSocket.LEFT, M_right, width_r, height_r)
+    calibData.setCameraIntrinsics(dai.CameraBoardSocket.RIGHT, M_left, width_l, height_l)
+    calibData.setDistortionCoefficients(dai.CameraBoardSocket.LEFT, d_r)
+    calibData.setDistortionCoefficients(dai.CameraBoardSocket.RIGHT, d_l)
+    calibData.setStereoLeft(dai.CameraBoardSocket.LEFT, rect_r)
+    calibData.setStereoRight(dai.CameraBoardSocket.RIGHT, rect_l)
+    pipeline.setCalibrationData(calibData)
 
 camLeft = pipeline.create(dai.node.MonoCamera)
 camRight = pipeline.create(dai.node.MonoCamera)
@@ -215,8 +241,12 @@ xoutDepth.setStreamName("depth")
 xoutRectifLeft.setStreamName("rectifiedLeft")
 xoutRectifRight.setStreamName("rectifiedRight")
 
-camLeft.out.link(stereo.left)
-camRight.out.link(stereo.right)
+if args.swap_left_right:
+    camLeft.out.link(stereo.right)
+    camRight.out.link(stereo.left)
+else:
+    camLeft.out.link(stereo.left)
+    camRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
 stereo.disparity.link(xoutDisparity.input)
@@ -233,8 +263,6 @@ streams.append("disparity")
 if depth:
     streams.append("depth")
 
-device = dai.Device()
-calibData = device.readCalibration()
 leftMesh, rightMesh = getMesh(calibData)
 if generateMesh:
     meshLeft = list(leftMesh.tobytes())
