@@ -620,7 +620,7 @@ with dai.Device(pipeline) as device:
 
     stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
     inStreams = ['in_left', 'in_right']
-    inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
+    inStreamsCameraID = [dai.CameraBoardSocket.LEFT, dai.CameraBoardSocket.RIGHT]
     in_q_list = []
     for s in inStreams:
         q = device.getInputQueue(s)
