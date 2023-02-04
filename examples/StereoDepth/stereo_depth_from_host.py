@@ -156,6 +156,7 @@ class StereoConfigHandler:
     trSpatialNumIterations = list()
     trDecimationFactor = list()
     trDisparityShift = list()
+    trCenterAlignmentShift = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -277,6 +278,16 @@ class StereoConfigHandler:
         StereoConfigHandler.config.algorithmControl.disparityShift = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trDisparityShift:
+            tr.set(value)
+
+    def trackbarCenterAlignmentShift(value):    
+        if StereoConfigHandler.config.algorithmControl.depthAlign != dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER:
+            print("Center alignment shift factor requires CENTER alignment enabled!")
+            return
+        StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor = value / 100.
+        print(f"centerAlignmentShiftFactor: {StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor:.2f}")
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCenterAlignmentShift:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -416,6 +427,7 @@ class StereoConfigHandler:
         StereoConfigHandler.trLrCheck.append(StereoConfigHandler.Trackbar('LR-check threshold', stream, 0, 16, StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold, StereoConfigHandler.trackbarLrCheckThreshold))
         StereoConfigHandler.trFractionalBits.append(StereoConfigHandler.Trackbar('Subpixel fractional bits', stream, 3, 5, StereoConfigHandler.config.algorithmControl.subpixelFractionalBits, StereoConfigHandler.trackbarFractionalBits))
         StereoConfigHandler.trDisparityShift.append(StereoConfigHandler.Trackbar('Disparity shift', stream, 0, 100, StereoConfigHandler.config.algorithmControl.disparityShift, StereoConfigHandler.trackbarDisparityShift))
+        StereoConfigHandler.trCenterAlignmentShift.append(StereoConfigHandler.Trackbar('Center alignment shift factor', stream, 0, 100, StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor, StereoConfigHandler.trackbarCenterAlignmentShift))
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))

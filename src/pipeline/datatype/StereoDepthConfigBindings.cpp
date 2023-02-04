@@ -87,6 +87,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
+        .def_readwrite("centerAlignmentShiftFactor", &RawStereoDepthConfig::AlgorithmControl::centerAlignmentShiftFactor, DOC(dai, RawStereoDepthConfig, AlgorithmControl, centerAlignmentShiftFactor))
         ;
 
     spatialFilter
