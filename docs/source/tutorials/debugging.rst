@@ -104,4 +104,21 @@ Code above will print the following values to the user:
     [Script(0)] [warning] FP16 values: [1.2001953125, 1.2001953125, 3.900390625, 5.5]
     [Script(0)] [warning] UINT8 values: [6, 9, 4, 2, 0]
 
+Resource Debugging
+==================
+
+By enabling ``info`` log level (or lower), depthai will print usage of `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__,
+specifically SHAVE core and CMX memory usage:
+
+.. code-block:: bash
+
+    NeuralNetwork allocated resources: shaves: [0-11] cmx slices: [0-11] # 12 SHAVES/CMXs allocated to NN
+    ColorCamera allocated resources: no shaves; cmx slices: [13-15] # 3 CMXs allocated to Color an Mono cameras (ISP)
+    MonoCamera allocated resources: no shaves; cmx slices: [13-15]
+    StereoDepth allocated resources: shaves: [12-12] cmx slices: [12-12] # StereoDepth node consumes 1 CMX and 1 SHAVE core
+    ImageManip allocated resources: shaves: [15-15] no cmx slices. # ImageManip node(s) consume 1 SHAVE core
+    SpatialLocationCalculator allocated resources: shaves: [14-14] no cmx slices. # SLC consumes 1 SHAVE core
+
+In total, this pipeline consumes 15 SHAVE cores and 16 CMX slices.
+
 .. include::  /includes/footer-short.rst
