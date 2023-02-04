@@ -119,6 +119,6 @@ specifically SHAVE core and CMX memory usage:
     ImageManip allocated resources: shaves: [15-15] no cmx slices. # ImageManip node(s) consume 1 SHAVE core
     SpatialLocationCalculator allocated resources: shaves: [14-14] no cmx slices. # SLC consumes 1 SHAVE core
 
-In total, this pipeline consumes 15 SHAVE cores and 16 CMX slices.
+In total, this pipeline consumes 15 SHAVE cores and 16 CMX slices. The pipeline is running an object detection model compiled for 6 SHAVE cores.
 
 .. include::  /includes/footer-short.rst
