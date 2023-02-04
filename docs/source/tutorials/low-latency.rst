@@ -113,6 +113,20 @@ branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat inste
 so performance improvement would depend on the image sizes you are using.
 (Note: API differs and not all functionality is available as is on the `message_zero_copy` branch)
 
+PoE latency
+###########
+
+On PoE, the latency can vary quite a bit due to a number of factors:
+
+* **Network** itself. Eg. if you are in a large network with many nodes, the latency will be higher compared to using a direct connection.
+* There's a **bottleneck** in **bandwidth**:
+
+  * Perhaps some network link is 10mbps/100mbps instead of full 1gbps (due to switch/network card..). You can test this with `PoE Test script <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#poe-test-script>`__ (``speed`` should be 1000).
+  * Network/computer is saturated with other traffic. You can test the actual bandwidth with `OAK bandwidth test <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-bandwidth-test>`__ script. With direct link I got ~800mbps downlink and ~210mbps uplink.
+
+* Computer's **Network Interface Card settings**, `documentation here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#network-interface-controller-settings>`__
+* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should.
+* Another potential way to improve PoE latency would be to fine-tune network settings, like MTU, TCP window size, etc. (see `here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#advance-network-settings>`__ for more info)
 
 Reducing latency when running NN
 ################################
