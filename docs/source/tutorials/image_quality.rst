@@ -85,9 +85,18 @@ Motion blur
 In the image above the right foot moved about 50 pixels during the exposure time, which results in a blurry image in that region.
 The left foot was on the ground the whole time of the exposure, so it's not blurry.
 
+In **high-vibration environments** we recommend **using Fixed-Focus** color camera, as otherwise the Auto-Focus lens will be shaking and
+cause blurry images (`docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/af_ff.html#trade-offs>`__).
+
 **Potential workarounds:**
 
-- Decrease the shutter (exposure) time - this will decrease the motion blur, but will also decrease the light that reaches the sensor, so the image will be darker. You could either use a larger sensor (so more photons hit the sensor) or use a higher ISO (sensitivity) value.
-- If the motion blur negatively affects your model's accuracy, you could fine-tune it to be more robust to motion blur by including motion blur images in your training dataset.
+1. Decrease the shutter (exposure) time - this will decrease the motion blur, but will also decrease the light that reaches the sensor, so the image will be darker. You could either use a larger sensor (so more photons hit the sensor) or use a higher ISO (sensitivity) value.
+2. If the motion blur negatively affects your model's accuracy, you could fine-tune it to be more robust to motion blur by including motion blur images in your training dataset. Example video:
+
+.. raw:: html
+
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
+        <iframe src="https://www.youtube.com/embed/q9r8IJBTev0" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+    </div>
 
 .. include::  /includes/footer-short.rst
