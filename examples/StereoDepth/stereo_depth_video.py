@@ -69,6 +69,13 @@ parser.add_argument(
     action="store_true",
     help="Display depth frames",
 )
+parser.add_argument(
+    "-swlr",
+    "--swap_left_right",
+    default=False,
+    action="store_true",
+    help="Swap left right frames",
+)
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -175,6 +182,8 @@ def getDisparityFrame(frame):
     return disp
 
 
+device = dai.Device()
+calibData = device.readCalibration()
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
 
@@ -188,8 +197,13 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
 xoutRectifRight = pipeline.create(dai.node.XLinkOut)
 
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+if args.swap_left_right:
+    camLeft.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    camRight.setBoardSocket(dai.CameraBoardSocket.LEFT)
+else:
+    camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
 res = (
     dai.MonoCameraProperties.SensorResolution.THE_800_P
     if resolution[1] == 800
@@ -233,8 +247,6 @@ streams.append("disparity")
 if depth:
     streams.append("depth")
 
-device = dai.Device()
-calibData = device.readCalibration()
 leftMesh, rightMesh = getMesh(calibData)
 if generateMesh:
     meshLeft = list(leftMesh.tobytes())
