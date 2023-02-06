@@ -47,6 +47,7 @@ void bind_buffer(pybind11::module& m, void* pCallstack){
     // Message
     buffer
         .def(py::init<>(), DOC(dai, Buffer, Buffer))
+        .def(py::init<size_t>(), DOC(dai, Buffer, Buffer, 2))
 
         // obj is "Python" object, which we used then to bind the numpy arrays lifespan to
         .def("getData", [](py::object &obj){
@@ -57,6 +58,10 @@ void bind_buffer(pybind11::module& m, void* pCallstack){
         .def("setData", py::overload_cast<const std::vector<std::uint8_t>&>(&Buffer::setData), DOC(dai, Buffer, setData))
         .def("setData", [](Buffer& buffer, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> array){
             buffer.setData({array.data(), array.data() + array.nbytes()});
+        }, DOC(dai, Buffer, setData))
+        .def("setData", [](Buffer& buffer, py::buffer data){
+            std::string str = data.cast<std::string>();
+            buffer.setData({str.data(), str.data() + str.size()});
         }, DOC(dai, Buffer, setData))
         ;
 

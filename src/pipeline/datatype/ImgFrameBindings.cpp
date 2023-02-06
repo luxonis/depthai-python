@@ -117,6 +117,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
     // Message
         imgFrame
         .def(py::init<>())
+        .def(py::init<size_t>())
         // getters
         .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
         .def("getTimestampDevice", &ImgFrame::getTimestampDevice, DOC(dai, ImgFrame, getTimestampDevice))

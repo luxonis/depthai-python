@@ -13,8 +13,8 @@ on:
     branches:
     - main
     - develop
-    - gen2
-    - gen2_develop
+    - rvc3_support
+    - rvc3_develop
     tags:
     - 'v*'
 

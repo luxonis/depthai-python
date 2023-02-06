@@ -90,12 +90,9 @@ with dai.Device(pipeline) as device:
 
         img.setWidth(inputFrameShape[0])
         img.setHeight(inputFrameShape[1])
-
         qIn.send(img)
-        print('sent', time.time())
-        continue
+
         manip = qManip.get()
-        print('received', time.time())
 
         counter+=1
         current_time = time.monotonic()

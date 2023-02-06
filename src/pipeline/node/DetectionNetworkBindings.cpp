@@ -9,7 +9,7 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
     using namespace dai;
     using namespace dai::node;
 
-    auto detectionNetwork = ADD_NODE_ABSTRACT(DetectionNetwork);
+    auto detectionNetwork = ADD_NODE_DERIVED_ABSTRACT(DetectionNetwork, NodeGroup);
     auto mobileNetDetectionNetwork = ADD_NODE_DERIVED(MobileNetDetectionNetwork, DetectionNetwork);
     auto yoloDetectionNetwork = ADD_NODE_DERIVED(YoloDetectionNetwork, DetectionNetwork);
 

@@ -3,6 +3,9 @@
 
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
+#include "depthai/pipeline/ThreadedNode.hpp"
+#include "depthai/pipeline/DeviceNode.hpp"
+#include "depthai/pipeline/NodeGroup.hpp"
 
 // Libraries
 #include "hedley/hedley.h"
@@ -174,8 +177,9 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
-
     using namespace dai;
+    using namespace std::chrono;
+
     //// Bindings for actual nodes
     // Move properties into nodes and nodes under 'node' submodule
     daiNodeModule = m.def_submodule("node");
@@ -189,7 +193,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Properties, std::shared_ptr<Properties>> pyProperties(m, "Properties", DOC(dai, Properties));
     py::class_<Node::DatatypeHierarchy> nodeDatatypeHierarchy(pyNode, "DatatypeHierarchy", DOC(dai, Node, DatatypeHierarchy));
 
-
     // Node::Id bindings
     py::class_<Node::Id>(pyNode, "Id", "Node identificator. Unique for every node on a single Pipeline");
     // Node::Connection bindings
@@ -199,6 +202,12 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
     // Node::OutputMap bindings
     bindNodeMap<Node::OutputMap>(pyNode, "OutputMap");
 
+    // NodeGroup
+    py::class_<NodeGroup, Node, std::shared_ptr<NodeGroup>> pyNodeGroup(m, "NodeGroup", DOC(dai, NodeGroup));
+
+    // Threaded & Device nodes
+    py::class_<ThreadedNode, Node, std::shared_ptr<ThreadedNode>> pyThreadedNode(m, "ThreadedNode", DOC(dai, ThreadedNode));
+    py::class_<DeviceNode, ThreadedNode, std::shared_ptr<DeviceNode>> pyDeviceNode(m, "DeviceNode", DOC(dai, DeviceNode));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -246,6 +255,54 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getWaitForMessage", &Node::Input::getWaitForMessage, DOC(dai, Node, Input, getWaitForMessage))
         .def("setReusePreviousMessage", &Node::Input::setReusePreviousMessage, py::arg("reusePreviousMessage"), DOC(dai, Node, Input, setReusePreviousMessage))
         .def("getReusePreviousMessage", &Node::Input::getReusePreviousMessage, DOC(dai, Node, Input, getReusePreviousMessage))
+
+
+        // TODO(themarpe) - refactor
+        .def("getAll", [](Node::Input& obj){
+            std::vector<std::shared_ptr<ADatatype>> messages;
+            bool timedout = true;
+            do {
+                {
+                    // releases python GIL
+                    py::gil_scoped_release release;
+
+                    // block for 100ms
+                    messages = obj.getAll(milliseconds(100), timedout);
+                }
+
+                // reacquires python GIL for PyErr_CheckSignals call
+
+                // check if interrupt triggered in between
+                if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+
+            } while(timedout); // Keep reiterating until a message is received (not timedout)
+
+            return messages;
+        }, DOC(dai, Node, Input, getAll, 2))
+        .def("get", [](Node::Input& obj){
+            std::shared_ptr<ADatatype> d = nullptr;
+            bool timedout = true;
+            do {
+                {
+                    // releases python GIL
+                    py::gil_scoped_release release;
+
+                    // block for 100ms
+                    d = obj.get(milliseconds(100), timedout);
+                }
+
+                // reacquires python GIL for PyErr_CheckSignals call
+
+                // check if interrupt triggered in between
+                if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+
+            } while(timedout);
+
+            return d;
+        }, DOC(dai, Node, Input, get, 2))
+        .def("has", static_cast<bool(Node::Input::*)()>(&Node::Input::has), DOC(dai, Node, Input, has, 2))
+        .def("tryGet", static_cast<std::shared_ptr<ADatatype>(Node::Input::*)()>(&Node::Input::tryGet), DOC(dai, Node, Input, tryGet, 2))
+        .def("tryGetAll", static_cast<std::vector<std::shared_ptr<ADatatype>>(Node::Input::*)()>(&Node::Input::tryGetAll), DOC(dai, Node, Input, tryGetAll, 2))
     ;
 
     // Node::Output bindings
@@ -262,6 +319,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
         // .def("getConnections", &Node::Output::getConnections, DOC(dai, Node, Output, getConnections))
+        .def("send", &Node::Output::send, py::arg("msg"), DOC(dai, Node, Output, send))
+        .def("trySend", &Node::Output::trySend, py::arg("msg"), DOC(dai, Node, Output, trySend))
     ;
 
     nodeConnection
@@ -288,8 +347,42 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getParentPipeline", py::overload_cast<>(&Node::getParentPipeline, py::const_), DOC(dai, Node, getParentPipeline))
         .def("getAssetManager", static_cast<const AssetManager& (Node::*)() const>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
         .def("getAssetManager", static_cast<AssetManager& (Node::*)()>(&Node::getAssetManager), py::return_value_policy::reference_internal, DOC(dai, Node, getAssetManager))
-        .def_property("properties", [](Node& n) -> const Properties& { return n.getProperties(); }, [](Node& n, const Properties& p) { n.getProperties() = p; }, DOC(dai, Node, getProperties), py::return_value_policy::reference_internal)
+        .def_property_readonly( // TODO - This casting of the inputs/outputs might be illegal / cause bad behavior
+            "io",
+            [](Node& n) -> py::object {
+                auto dict = py::dict();
+                for(auto& output : n.getOutputRefs()) {
+                    // TODO - Revisit, pybind might try to release the output when refcount goes to zero
+                    dict[py::str(output->name)] = output;
+                }
+                for(auto& input : n.getInputRefs()) {
+                    // TODO - Revisit, pybind might try to release the input when refcount goes to zero
+                    dict[py::str(input->name)] = input;
+                }
+                return dict;
+            },
+            py::return_value_policy::reference_internal)
     ;
 
+    // TODO(themarpe) - refactor, threaded node could be separate from Node
+    pyThreadedNode
+        .def("trace", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->trace(msg);
+        })
+        .def("debug", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->debug(msg);
+        })
+        .def("info", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->info(msg);
+        })
+        .def("warn", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->warn(msg);
+        })
+        .def("error", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->error(msg);
+        })
+        .def("critical", [](dai::ThreadedNode& node, const std::string& msg) {
+            node.logger->critical(msg);
+        });
 }
 
