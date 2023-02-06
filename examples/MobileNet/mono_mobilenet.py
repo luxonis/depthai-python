@@ -33,7 +33,7 @@ manipOut.setStreamName("right")
 nnOut.setStreamName("nn")
 
 # Properties
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Convert the grayscale frame into the nn-acceptable form

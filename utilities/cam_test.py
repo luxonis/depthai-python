@@ -85,9 +85,9 @@ print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb'  : dai.CameraBoardSocket.RGB,   # Or CAM_A
-    'left' : dai.CameraBoardSocket.LEFT,  # Or CAM_B
-    'right': dai.CameraBoardSocket.RIGHT, # Or CAM_C
+    'rgb'  : dai.CameraBoardSocket.CAM_A,   # Or CAM_A
+    'left' : dai.CameraBoardSocket.CAM_B,  # Or CAM_B
+    'right': dai.CameraBoardSocket.CAM_C, # Or CAM_C
     'camd' : dai.CameraBoardSocket.CAM_D,
 }
 

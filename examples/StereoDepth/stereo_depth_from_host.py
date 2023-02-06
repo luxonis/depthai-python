@@ -280,7 +280,7 @@ class StereoConfigHandler:
         for tr in StereoConfigHandler.trDisparityShift:
             tr.set(value)
 
-    def trackbarCenterAlignmentShift(value):    
+    def trackbarCenterAlignmentShift(value):
         if StereoConfigHandler.config.algorithmControl.depthAlign != dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER:
             print("Center alignment shift factor requires CENTER alignment enabled!")
             return
@@ -632,7 +632,7 @@ with dai.Device(pipeline) as device:
 
     stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
     inStreams = ['in_left', 'in_right']
-    inStreamsCameraID = [dai.CameraBoardSocket.LEFT, dai.CameraBoardSocket.RIGHT]
+    inStreamsCameraID = [dai.CameraBoardSocket.CAM_B, dai.CameraBoardSocket.CAM_C]
     in_q_list = []
     for s in inStreams:
         q = device.getInputQueue(s)

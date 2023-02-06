@@ -42,8 +42,8 @@ nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 
 camRgb.preview.link(nn.inputs['img2'])
-create_mono(p, dai.CameraBoardSocket.LEFT).link(nn.inputs['img1'])
-create_mono(p, dai.CameraBoardSocket.RIGHT).link(nn.inputs['img3'])
+create_mono(p, dai.CameraBoardSocket.CAM_B).link(nn.inputs['img1'])
+create_mono(p, dai.CameraBoardSocket.CAM_C).link(nn.inputs['img3'])
 
 # Send bouding box from the NN to the host via XLink
 nn_xout = p.createXLinkOut()

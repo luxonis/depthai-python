@@ -22,10 +22,10 @@ ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoLeft.setCamera("left")
+monoRight.setCamera("right")
 
 # Setting to 26fps will trigger error
 ve1.setDefaultProfilePreset(25, dai.VideoEncoderProperties.Profile.H264_MAIN)
