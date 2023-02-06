@@ -6,6 +6,7 @@ There are a few ways to improve Image Quality (IQ) on OAK cameras. A few example
 #. Changing :ref:`Color camera ISP configuration`
 #. Try keeping camera sensitivity low - :ref:`Low-light increased sensitivity`
 #. :ref:`Camera tuning` with custom tuning blobs
+#. Ways to reduce :ref:`Motion blur` effects
 
 Note that the `Series 3 OAK cameras <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s3.html>`__ will
 also have **temporal noise filter**, which will improve IQ.

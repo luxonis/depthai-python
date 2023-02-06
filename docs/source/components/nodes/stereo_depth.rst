@@ -270,14 +270,9 @@ Disparity
 =========
 
 Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
-By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
 
 .. image:: /_static/images/components/disparity_explanation.jpeg
    :target: https://stackoverflow.com/a/17620159
-
-Since we know points :code:`XL` and :code:`XR` refer to the same point: :code:`X`, the disparity for this point is equal to the magnitude of the vector between :code:`(u, v)` and :code:`(p, q)`.
-
-For a more detailed explanation see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
 
 When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
 as:
