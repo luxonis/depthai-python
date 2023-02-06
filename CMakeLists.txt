@@ -125,12 +125,18 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/EdgeDetectorBindings.cpp
     src/pipeline/node/FeatureTrackerBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
+    src/pipeline/node/UVCBindings.cpp
+    src/pipeline/node/UACBindings.cpp
+    src/pipeline/node/AudioMicBindings.cpp
+    src/pipeline/node/AudioProcBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
     src/pipeline/node/WarpBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
     src/pipeline/datatype/AprilTagsBindings.cpp
+    src/pipeline/datatype/AudioInConfigBindings.cpp
     src/pipeline/datatype/BufferBindings.cpp
     src/pipeline/datatype/CameraControlBindings.cpp
     src/pipeline/datatype/EdgeDetectorConfigBindings.cpp

@@ -6,6 +6,7 @@
 void bind_adatatype(pybind11::module& m, void* pCallstack);
 void bind_apriltagconfig(pybind11::module& m, void* pCallstack);
 void bind_apriltags(pybind11::module& m, void* pCallstack);
+void bind_audioinconfig(pybind11::module& m, void* pCallstack);
 void bind_buffer(pybind11::module& m, void* pCallstack);
 void bind_cameracontrol(pybind11::module& m, void* pCallstack);
 void bind_edgedetectorconfig(pybind11::module& m, void* pCallstack);
@@ -32,6 +33,7 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_buffer);
     callstack.push_front(bind_apriltagconfig);
     callstack.push_front(bind_apriltags);
+    callstack.push_front(bind_audioinconfig);
     callstack.push_front(bind_cameracontrol);
     callstack.push_front(bind_edgedetectorconfig);
     callstack.push_front(bind_featuretrackerconfig);

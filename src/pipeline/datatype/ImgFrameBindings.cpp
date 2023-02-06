@@ -17,6 +17,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
     py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     py::enum_<RawImgFrame::Type> rawImgFrameType(rawImgFrame, "Type");
     py::class_<RawImgFrame::Specs> rawImgFrameSpecs(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs));
+    py::class_<RawImgFrame::WhiteBalance> rawImgFrameWhiteBalance(rawImgFrame, "WhiteBalance", DOC(dai, RawImgFrame, WhiteBalance));
     py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>> imgFrame(m, "ImgFrame", DOC(dai, ImgFrame));
 
     ///////////////////////////////////////////////////////////////////////
@@ -111,6 +112,14 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
         ;
 
+    rawImgFrameWhiteBalance
+        .def(py::init<>())
+        .def_readwrite("gainR", &RawImgFrame::WhiteBalance::gainR)
+        .def_readwrite("gainGr", &RawImgFrame::WhiteBalance::gainGr)
+        .def_readwrite("gainGb", &RawImgFrame::WhiteBalance::gainGb)
+        .def_readwrite("gainB", &RawImgFrame::WhiteBalance::gainB)
+        ;
+
     // TODO add RawImgFrame::CameraSettings
 
     // Message
@@ -130,6 +139,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
         .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
         .def("getColorTemperature", &ImgFrame::getColorTemperature, DOC(dai, ImgFrame, getColorTemperature))
+        .def("getWhiteBalanceGains", &ImgFrame::getWhiteBalanceGains, DOC(dai, ImgFrame, getWhiteBalanceGains))
         .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
 
         // OpenCV Support section
@@ -330,5 +340,6 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
     m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
+    m.attr("ImgFrame").attr("WhiteBalance") = m.attr("RawImgFrame").attr("WhiteBalance");
 
 }

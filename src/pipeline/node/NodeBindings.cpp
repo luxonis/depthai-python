@@ -113,6 +113,11 @@ void bind_imu(pybind11::module& m, void* pCallstack);
 void bind_edgedetector(pybind11::module& m, void* pCallstack);
 void bind_featuretracker(pybind11::module& m, void* pCallstack);
 void bind_apriltag(pybind11::module& m, void* pCallstack);
+void bind_uvc(pybind11::module& m, void* pCallstack);
+void bind_uac(pybind11::module& m, void* pCallstack);
+void bind_audiomic(pybind11::module& m, void* pCallstack);
+void bind_audioproc(pybind11::module& m, void* pCallstack);
+void bind_tof(pybind11::module& m, void* pCallstack);
 void bind_detectionparser(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
@@ -142,6 +147,11 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_edgedetector);
     callstack.push_front(bind_featuretracker);
     callstack.push_front(bind_apriltag);
+    callstack.push_front(bind_uvc);
+    callstack.push_front(bind_uac);
+    callstack.push_front(bind_audiomic);
+    callstack.push_front(bind_audioproc);
+    callstack.push_front(bind_tof);
     callstack.push_front(bind_detectionparser);
 }
 
