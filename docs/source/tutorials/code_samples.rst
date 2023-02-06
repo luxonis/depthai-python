@@ -23,6 +23,7 @@ Code Samples
    ../samples/StereoDepth/*
    ../samples/SystemLogger/*
    ../samples/VideoEncoder/*
+   ../samples/Warp/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -149,6 +150,11 @@ are presented with code.
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`RGB Full Resolution Saver` - Saves full resolution RGB images (4k) on the host (:code:`.jpeg`)
+
+.. rubric:: Warp
+
+- :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
+- :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
 
 .. rubric:: Yolo
 
