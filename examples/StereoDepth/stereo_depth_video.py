@@ -76,6 +76,13 @@ parser.add_argument(
     action="store_true",
     help="Swap left right frames",
 )
+parser.add_argument(
+    "-a",
+    "--alpha",
+    type=float,
+    default=None,
+    help="Alpha scaling parameter to increase FOV",
+)
 args = parser.parse_args()
 
 resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
@@ -174,10 +181,10 @@ def saveMeshFiles(meshLeft, meshRight, outputPath):
     meshRight.tofile(outputPath + "/right_mesh.calib")
 
 
-def getDisparityFrame(frame):
+def getDisparityFrame(frame, cvColorMap):
     maxDisp = stereo.initialConfig.getMaxDisparity()
     disp = (frame * (255.0 / maxDisp)).astype(np.uint8)
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+    disp = cv2.applyColorMap(disp, cvColorMap)
 
     return disp
 
@@ -221,6 +228,11 @@ stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)
 stereo.setSubpixel(subpixel)
+if args.alpha is not None:
+    stereo.setAlphaScaling(args.alpha)
+    config = stereo.initialConfig.get()
+    config.postProcessing.brightnessFilter.minBrightness = 0
+    stereo.initialConfig.set(config)
 
 xoutLeft.setStreamName("left")
 xoutRight.setStreamName("right")
@@ -256,7 +268,8 @@ if generateMesh:
 if meshDirectory is not None:
     saveMeshFiles(leftMesh, rightMesh, meshDirectory)
 
-
+cvColorMap = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+cvColorMap[0] = [0, 0, 0]
 print("Creating DepthAI device")
 with device:
     device.startPipeline(pipeline)
@@ -271,7 +284,7 @@ with device:
             if name == "depth":
                 frame = frame.astype(np.uint16)
             elif name == "disparity":
-                frame = getDisparityFrame(frame)
+                frame = getDisparityFrame(frame, cvColorMap)
 
             cv2.imshow(name, frame)
         if cv2.waitKey(1) == ord("q"):
