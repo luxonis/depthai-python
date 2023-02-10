@@ -485,6 +485,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind CrashDump
     crashDump
         .def(py::init<>())
+        .def("serializeToJson", &CrashDump::serializeToJson, DOC(dai, CrashDump, serializeToJson))
+        
         .def_readwrite("crashReports", &CrashDump::crashReports, DOC(dai, CrashDump, crashReports))
         .def_readwrite("depthaiCommitHash", &CrashDump::depthaiCommitHash, DOC(dai, CrashDump, depthaiCommitHash))
     ;
