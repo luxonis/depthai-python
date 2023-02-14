@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <stack>
 #include <depthai/utility/Path.hpp>
+#include <utility/SpanBindings.hpp>
 
 // Include docstring file
 #include "docstring.hpp"
