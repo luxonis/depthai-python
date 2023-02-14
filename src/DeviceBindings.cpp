@@ -489,6 +489,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         
         .def_readwrite("crashReports", &CrashDump::crashReports, DOC(dai, CrashDump, crashReports))
         .def_readwrite("depthaiCommitHash", &CrashDump::depthaiCommitHash, DOC(dai, CrashDump, depthaiCommitHash))
+        .def_readwrite("deviceId", &CrashDump::deviceId, DOC(dai, CrashDump, deviceId))
     ;
 
     crashReport
