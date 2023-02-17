@@ -128,6 +128,27 @@ On PoE, the latency can vary quite a bit due to a number of factors:
 * 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should.
 * Another potential way to improve PoE latency would be to fine-tune network settings, like MTU, TCP window size, etc. (see `here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#advance-network-settings>`__ for more info)
 
+Bandwidth
+#########
+
+With large, unencoded frames, one can quickly saturate the bandwidth even at 30FPS, especially on PoE devices (1gbps link):
+
+.. code-block::bash
+
+  720P NV12/YUV420 frames: 1280 * 720 * 1.5 * 30fps * 8bits = 331 mbps
+  1080P NV12/YUV420 frames: 1920 * 1080 * 1.5 * 30fps * 8bits = 747 mbps
+  1080P RGB frames: 1920 * 1080 * 3 * 30fps * 8bits = 1.5 gbps
+  4K NV12/YUV420 frames: 3840 * 2160 * 1.5 * 30fps * 8bits = 3 gbps
+  800P depth frames: 1280 * 800 * 2 * 30fps * 8bits = 492 mbps
+  400P depth frames: 640 * 400 * 2 * 30fps * 8bits = 123 mbps
+
+The third value in the formula is byte/pixel, which is 1.5 for NV12/YUV420, 3 for RGB, and 2 for depth frames.
+
+A few options to reduce bandwidth:
+
+- Encode frames (H.264, H.265, MJPEG) on-device using :ref:`VideoEncoder node <VideoEncoder>`
+- Reduce FPS/resolution/number of streams
+
 Reducing latency when running NN
 ################################
 
@@ -153,11 +174,11 @@ This time includes the following:
 - And finally, eventual extra latency until it reaches the app
 
 Note: if the FPS is increased slightly more, towards 19..21 FPS, an extra latency of about 10ms appears, that we believe
-is related to firmware. We are activaly looking for improvements for lower latencies.
+is related to firmware. We are actively looking for improvements for lower latencies.
 
 
-NN input queue size and blocking behaviour
-------------------------------------------
+NN input queue size and blocking behavior
+-----------------------------------------
 
 If the app has ``detNetwork.input.setBlocking(False)``, but the queue size doesn't change, the following adjustment
 may help improve latency performance:
