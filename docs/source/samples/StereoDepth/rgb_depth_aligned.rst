@@ -12,6 +12,9 @@ By default, the depth map will get scaled to match the resolution of the camera 
 depth is aligned to the 1080P color sensor, StereoDepth will upscale depth to 1080P as well.
 Depth scaling can be avoided by configuring :ref:`StereoDepth`'s ``stereo.setOutputSize(width, height)``.
 
+To align depth with **higher resolution color stream** (eg. 12MP), you need to limit the resolution of the depth map. You can
+do that with ``stereo.setOutputSize(w,h)``. Code `example here <https://gist.github.com/Erol444/25f374fa18efa7939ec9bb848b39249a>`__.
+
 
 Demo
 ####
