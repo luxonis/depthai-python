@@ -4,4 +4,4 @@ rm -rf build
 mkdir build
 cd build
 cmake ..
-cmake --build . --parallel
+cmake --build .
