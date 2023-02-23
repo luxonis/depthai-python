@@ -117,6 +117,7 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         // .def("setResolution", &Camera::setResolution, py::arg("resolution"), DOC(dai, node, Camera, setResolution))
         // .def("getResolution", &Camera::getResolution, DOC(dai, node, Camera, getResolution))
         .def("setFps", &Camera::setFps, py::arg("fps"), DOC(dai, node, Camera, setFps))
+        .def("set3AFpsDenominator", &Camera::set3AFpsDenominator, DOC(dai, node, Camera, set3AFpsDenominator))
         .def("getFps", &Camera::getFps, DOC(dai, node, Camera, getFps))
         .def("getPreviewSize", &Camera::getPreviewSize, DOC(dai, node, Camera, getPreviewSize))
         .def("getPreviewWidth", &Camera::getPreviewWidth, DOC(dai, node, Camera, getPreviewWidth))

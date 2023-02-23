@@ -80,6 +80,7 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def("setFrameEventFilter", &MonoCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, MonoCamera, setFrameEventFilter))
         .def("getFrameEventFilter", &MonoCamera::getFrameEventFilter, DOC(dai, node, MonoCamera, getFrameEventFilter))
         .def("setFps",        &MonoCamera::setFps, py::arg("fps"), DOC(dai, node, MonoCamera, setFps))
+        .def("set3AFpsDenominator", &MonoCamera::set3AFpsDenominator, DOC(dai, node, MonoCamera, set3AFpsDenominator))
         .def("getFps",        &MonoCamera::getFps, DOC(dai, node, MonoCamera, getFps))
         .def("getResolutionSize", &MonoCamera::getResolutionSize, DOC(dai, node, MonoCamera, getResolutionSize))
         .def("getResolutionWidth", &MonoCamera::getResolutionWidth, DOC(dai, node, MonoCamera, getResolutionWidth))

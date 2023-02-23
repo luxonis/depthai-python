@@ -123,6 +123,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("setResolution", &ColorCamera::setResolution, py::arg("resolution"), DOC(dai, node, ColorCamera, setResolution))
         .def("getResolution", &ColorCamera::getResolution, DOC(dai, node, ColorCamera, getResolution))
         .def("setFps", &ColorCamera::setFps, py::arg("fps"), DOC(dai, node, ColorCamera, setFps))
+        .def("set3AFpsDenominator", &ColorCamera::set3AFpsDenominator, DOC(dai, node, ColorCamera, set3AFpsDenominator))
         .def("getFps", &ColorCamera::getFps, DOC(dai, node, ColorCamera, getFps))
         .def("setFrameEventFilter", &ColorCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, ColorCamera, setFrameEventFilter))
         .def("getFrameEventFilter", &ColorCamera::getFrameEventFilter, DOC(dai, node, ColorCamera, getFrameEventFilter))
