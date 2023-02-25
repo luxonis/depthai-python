@@ -63,6 +63,8 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 parser.add_argument('-fps', '--fps', type=float, default=30,
                     help="FPS to set for all cameras")
+parser.add_argument('-isp3afps', '--isp3afps', type=int, default=0,
+                    help="3A FPS to set for all cameras")
 parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
                     help="Downscale the ISP output by this factor")
 parser.add_argument('-rs', '--resizable-windows', action='store_true',
@@ -176,6 +178,7 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
+    cam[c].setIsp3aFps(args.isp3afps)
 
 if args.camera_tuning:
     pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
