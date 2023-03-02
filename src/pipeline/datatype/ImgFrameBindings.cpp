@@ -125,6 +125,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
         .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
+        .def("getStride", &ImgFrame::getStride, DOC(dai, ImgFrame, getStride))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
         .def("getBytesPerPixel", &ImgFrame::getBytesPerPixel, DOC(dai, ImgFrame, getBytesPerPixel))
