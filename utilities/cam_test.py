@@ -44,7 +44,7 @@ from itertools import cycle
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'camd']):  raise ValueError("")
+    if not (socket in ['rgb', 'left', 'right', 'camd', 'came', 'camf']):  raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color']): raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     return [socket, is_color]
@@ -84,6 +84,8 @@ cam_socket_opts = {
     'left' : dai.CameraBoardSocket.LEFT,  # Or CAM_B
     'right': dai.CameraBoardSocket.RIGHT, # Or CAM_C
     'camd' : dai.CameraBoardSocket.CAM_D,
+    'came' : dai.CameraBoardSocket.CAM_E,
+    'camf' : dai.CameraBoardSocket.CAM_F,
 }
 
 cam_socket_to_name = {
@@ -91,6 +93,8 @@ cam_socket_to_name = {
     'LEFT' : 'left',
     'RIGHT': 'right',
     'CAM_D': 'camd',
+    'CAM_E': 'came',
+    'CAM_F': 'camf',
 }
 
 rotate = {
@@ -98,6 +102,8 @@ rotate = {
     'left' : args.rotate in ['all', 'mono'],
     'right': args.rotate in ['all', 'mono'],
     'camd' : args.rotate in ['all', 'rgb'],
+    'came' : args.rotate in ['all', 'rgb'],
+    'camf' : args.rotate in ['all', 'rgb'],
 }
 
 mono_res_opts = {
