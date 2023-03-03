@@ -1,7 +1,7 @@
 StereoDepth
 ###########
 
-StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`).
+StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`/:ref:`ColorCamera`).
 
 How to place it
 ===============
@@ -285,54 +285,6 @@ as:
 For the final disparity map, a filtering is applied based on the confidence threshold value: the pixels that have their confidence score larger than
 the threshold get invalidated, i.e. their disparity value is set to zero. You can set the confidence threshold with :code:`stereo.initialConfig.setConfidenceThreshold()`.
 
-Calculate depth using disparity map
-===================================
-
-Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
-
-By considering this fact, depth can be calculated using this formula:
-
-.. code-block:: python
-
-  depth = focal_length_in_pixels * baseline / disparity_in_pixels
-
-Where baseline is the distance between two mono cameras. Note the unit used for baseline and depth is the same.
-
-To get focal length in pixels, you can :ref:`read camera calibration <Calibration Reader>`, as focal length in pixels is
-written in camera intrinsics (``intrinsics[0][0]``):
-
-.. code-block:: python
-
-  import depthai as dai
-
-  with dai.Device() as device:
-    calibData = device.readCalibration()
-    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT)
-    print('Right mono camera focal length in pixels:', intrinsics[0][0])
-
-Here's theoretical calculation of the focal length in pixels:
-
-.. code-block:: python
-
-  focal_length_in_pixels = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
-  
-  # With 400P mono camera resolution where HFOV=71.9 degrees
-  focal_length_in_pixels = 640 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 441.25
-  
-  # With 800P mono camera resolution where HFOV=71.9 degrees
-  focal_length_in_pixels = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
-
-Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
-
-.. code-block:: python
-
-  # For OAK-D @ 400P mono cameras and disparity of eg. 50 pixels
-  depth = 441.25 * 7.5 / 50 = 66.19 # cm
-  
-  # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
-  depth = 882.5 * 7.5 / 10 = 661.88 # cm
-
-Note the value of disparity depth data is stored in :code:`uint16`, where 0 is a special value, meaning that distance is unknown.
 
 Min stereo depth distance
 =========================
@@ -383,10 +335,10 @@ Disparity shift can be combined with extended/subpixel/LR-check modes.
 **Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Calculate depth using disparity map`.
 Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
 
+**Limitations**:
 **Right graph** shows the same, but at disparity shift set to 30 pixels. This means that disparity search will be from 30 pixels (depth=2.2m) to 125 pixels (depth=50cm).
 This also means that depth will be very accurate at the short range (**theoretically** below 5mm depth error).
 
-**Limitations**:
 
 - Because of the inverse relationship between disparity and depth, MaxZ will decrease much faster than MinZ as the disparity shift is increased. Therefore, it is **advised not to use a larger than necessary disparity shift**.
 - Tradeoff in reducing the MinZ this way is that objects at **distances farther away than MaxZ will not be seen**.
@@ -425,23 +377,6 @@ So using this formula for existing models the *theoretical* max distance is:
 
 If greater precision for long range measurements is required, consider enabling Subpixel Disparity or using a larger baseline distance between mono cameras. For a custom baseline, you could consider using `OAK-FFC <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__ device or design your own baseboard PCB with required baseline. For more information see Subpixel Disparity under the Stereo Mode tab in :ref:`this table <Currently configurable blocks>`.
 
-Depth perception accuracy
-=========================
-
-Disparity depth works by matching features from one image to the other and its accuracy is based on multiple parameters:
-
-* Texture of objects / backgrounds
-
-Backgrounds may interfere with the object detection, since backgrounds are objects too, which will make depth perception less accurate. So disparity depth works very well outdoors as there are very rarely perfectly-clean/blank surfaces there - but these are relatively commonplace indoors (in clean buildings at least).
-
-* Lighting
-
-If the illumination is low, the diparity map will be of low confidence, which will result in a noisy depth map.
-
-* Baseline / distance to objects
-
-Lower baseline enables us to detect the depth at a closer distance as long as the object is visible in both the frames. However, this reduces the accuracy for large distances due to less pixels representing the object and disparity decreasing towards 0 much faster.
-So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
 
 Limitation
 ==========
