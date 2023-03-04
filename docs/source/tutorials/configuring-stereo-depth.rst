@@ -41,6 +41,10 @@ Let's first look at how the depth is calculated:
 which limits the minimal depth perception. Baseline is the distance between two cameras of the
 stereo camera pair. You can read camera's focal length (in pixels) from calibration, see :ref:`tutorial here <Camera intrinsics>`
 
+Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length.
+Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth.
+Similarly, if the disparity value is big, then some change in disparity doesn't lead to a large change in depth (better accuracy).
+
 Here's a graph showing disparity vs depth for OAK-D (7.5cm baseline distance) at 800P:
 
 .. figure:: /_static/images/components/disp_to_depth.jpg
@@ -48,6 +52,20 @@ Here's a graph showing disparity vs depth for OAK-D (7.5cm baseline distance) at
     `Full chart here <https://docs.google.com/spreadsheets/d/1ymn-0D4HcCbzYP-iPycj_PIdSwmrLenlGryuZDyA4rQ/edit#gid=0>`__
 
 Note the value of disparity depth data is stored in *uint16*, where 0 means that the distance is invalid/unknown.
+
+How baseline distance and focal length affect depth
+---------------------------------------------------
+
+Looking at the depth formula above, we can see that either larger baseline distance, or larger focal length will result
+in further depth at the same disparity, which means that the depth accuracy will be better.
+
+Focal length is the distance between the camera lens and the image sensor. The larger the focal length, the narrower the FOV.
+
+So to get **long range depth** perception, you can **increase the baseline distance and/or decrease the FOV**.
+
+.. note::
+
+    Wider FOV will result in worse depth accuracy, even at shorter range (but at shorter range it won't be as noticeable).
 
 2. Fixing noisy depth
 *********************
@@ -70,8 +88,7 @@ low-visual-interest surfaces (blank surfaces with little to no texture), such as
 Our `Pro version <https://docs.luxonis.com/projects/hardware/en/latest/pages/articles/oak-s2.html#pro-version>`__ of OAK cameras have onboard **IR laser dot projector**,
 which projects thousands of little dots on the scene, which helps the stereo matching algorithm as it provides more texture to the scene.
 
-..
-    .. image:: dot projector vs no dot projector gif
+.. image:: https://user-images.githubusercontent.com/18037362/222730554-a6c8d4d3-cb0b-422e-8474-6a979e73727a.gif
 
 The technique that we use is called ASV (`Conventional Active Stereo Vision <https://en.wikipedia.org/wiki/Computer_stereo_vision#Conventional_active_stereo_vision_(ASV)>`__)
 as stereo matching is performed on the device the same way as on a passive stereo OAK-D.
@@ -182,56 +199,220 @@ There are a few ways to improve depth accuracy:
 
 - (mentioned above) :ref:`Fixing noisy depth <2. Fixing noisy depth>` - depth should be high quality in order to be accurate
 - (mentioned above) :ref:`Stereo depth confidence threshold` should we low(er) in order to get the best accuracy
-- 
+- :ref:`Move camera closer to the object` for best depth accuracy
+- Enable :ref:`Stereo Subpixel mode`, especially if object/scene isn't close to MinZ of the camera
+
+Move camera closer to the object
+--------------------------------
+
+Looking at :ref:`Depth from disparity` section, from the graph it's clear that at the 95 disparity pixels (close distance),
+depth change between disparity pixels (eg. 95->94) is the lowest, so the **depth accuracy is the best**.
 
 
+.. image:: /_static/images/components/theoretical_error.jpg
 
-Looking at :ref:`Depth from disparity` section, from the graph it's clear that at the 95 disparity pixels (close distance, about 70cm),
-depth change between disparity pixels (eg. 95->94) is the lowest, so the depth accuracy is the highest.
+It's clear that depth accuracy decreases exponentially with the distance from the camera. Note that with :ref:`Stereo Subpixel mode`
+enabled you can have better depth accuracy (even at a longer distance) but it only works to some extent.
 
-
-.. figure:: /_static/images/components/theoretical_error.jpg
-
-It's clear that depth accuracy decreases exponentially with the distance from the camera. Note that With :ref:`Stereo Subpixel mode`
-you can have a better depth accuracy at a longer distance but it only works to some extent.
-
-
+So to conclude, **object/scene you are measuring** should be **as close as possible to MinZ** (minimal depth perception) of the camera
+for **best depth accuracy**. You can find MinZ specification for each device in `hardware docs <https://docs.luxonis.com/projects/hardware/en/latest/>`__.
 
 Stereo Subpixel mode
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
-(see `What's subpixel? <https://dsp.stackexchange.com/questions/34103/subpixel-what-is-it>`__)
+Let's first start at what Stereo Subpixel mode is and how it works. For image subpixel explanation, see `What's subpixel? <https://dsp.stackexchange.com/questions/34103/subpixel-what-is-it>`__).
 
+.. note::
 
+    The stereo depth pipeline is very complex (see :ref:`Internal block diagram of StereoDepth node`), and we will simplify it here for better understanding. It actually doesn't use confidence (eg. ``stereoDepth.confidenceMap`` output), but cost dump, which is what is used to calculate confidence values.
 
-Disparity and depth are inversely related. As disparity decreases, depth increases exponentially depending on baseline and focal length. Meaning, if the disparity value is close to zero, then a small change in disparity generates a large change in depth. Similarly, if the disparity value is big, then large changes in disparity do not lead to a large change in depth.
+When calculating disparity depth, stereo matching algorithm assign a "confidence" for each disparity pixel, which means each pixel
+of the depth image contains 96 bytes (for confidence). If you are interested in all these cost values, you can use ``stereoDepth.debugDispCostDump`` output,
+just note it's a very large output (eg. 1280*800*96 => 98MB for each frame).
 
-* Baseline / distance to objects
+.. image:: /_static/images/components/disparity_confidence.jpg
 
-Lower baseline enables us to detect the depth at a closer distance as long as the object is visible in both the frames. However, this reduces the accuracy for large distances due to less pixels representing the object and disparity decreasing towards 0 much faster.
-So the common norm is to adjust the baseline according to how far/close we want to be able to detect objects.
+Stereo Subpixel mode will calculate subpixel disparity by looking at the confidence values of the 2 neighboring disparity pixels in each direction.
+In above example graph, in normal mode, Stereo Depth would just get the max disparity = 34 pixels, but in Subpixel
+mode, it will return a bit more, eg. 37.375 pixels, as confidences for pixels 35 and 36 are quite high as well.
 
+**TL;DR:** Stereo Subpixel mode should always provide more accurate depth, but will consume additional HW resources (see :ref:`Stereo depth FPS` for impact).
+
+Stereo subpixel affect on layering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default stereo depth output has 0..95 disparity pixels, which would produce 96 unique depth values. This can especially be seen when using pointcloud representation
+ and seeing how there are discrete "layers" of points, instead of a smooth transition:
+
+.. image:: /_static/images/components/layered-pointcloud.png
+
+This layering can especially be seen at longer distances, where these layers are exponentially further apart.
+
+But with Stereo Subpixel mode enabled, there are many more unique values possible, which produces a more granular depth steps, and thus smoother a pointcloud.
+
+.. math::
+
+    94 * 2^3 [subpixel bits] + 2 [min/max value] = 754 unique values
+    94 * 2^4 [subpixel bits] + 2 [min/max value] = 1506 unique values
+    94 * 2^5 [subpixel bits] + 2 [min/max value] = 3010 unique values
+
+One can change the number of subpixel bits by setting ``stereoDepth.setSubpixelFractionalBits(int)`` parameter to 3, 4 or 5 bits.
 
 4. Short range stereo depth
 ***************************
 
-To get an accurate short-range 
+To get accurate short-range depth, you'd first need to follow :ref:`3. Improving depth accuracy` steps.
+For most normal FOV OV9282 OAK-D* cameras, you'd want to have object/scene about 70cm away from the camera,
+where you'd get below 2% error (with good :ref:`Scene Texture`), so ± 1.5cm error.
 
-- Extended mode
-- Lower resolution
-- Disparity shift
-- Closer baseline distance (OAK-D-SR)
+But how to get an even better depth accuracy, eg. **sub-cm stereo depth accuracy**?
+As we have learned at :Ref:`How baseline distance and focal length affect depth`, we would want to
+have closer baseline distance and/or narrower FOV lenses.
 
-Long range stereo depth
-***********************
+That's why, for short range depth perception, **we suggest using** `OAK-D SR <https://docs.luxonis.com/projects/hardware/en/latest/pages/OAK-D-SR.html>`__,
+which has 2 cm baseline distance, 800P resolution, and is ideal for depth sensing of up to 1 meter.
+
+Going back to :ref:`Depth from disparity`, minimal depth perception (**MinZ**) is defined by the following formula, where disparity is 95 pixels
+(maximum number of pixel for disparity search):
+
+.. math::
+
+    depth = focal_length * baseline / disparity
+    MinZ = focal_length * baseline / 95
+
+How to get lower MinZ
+---------------------
+
+You can get lower MinZ for OAK cameras by:
+
+- :ref:`Lowering resolution <Lowering resolution to decrease MinZ>`
+- Enabling :ref:`Stereo Extended Disparity mode`
+- Using :ref:`Disparity shift` - suggested in controlled environment, where MaxZ is known
+
+Lowering resolution to decrease MinZ
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Above we have a formula for MinZ, and by lowering resolution, we are lowering focal length (in pixels), so let's look at the formula again:
+
+.. math::
+
+    MinZ = focal_length * baseline / 95
+    MinZ [800P OAK-D] = 882.5 * 7.5 / 95 = 70 cm
+    MinZ [400P OAK-D] = 441 * 7.5 / 95 = 35 cm
+
+As you can see, by lowering resolution by 2, we are also lowering MinZ by 2. Note that because you have less pixels, you will also have lower depth accuracy (in cm).
+
+Stereo Extended Disparity mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Very similar to :ref:`Lowering resolution to decrease MinZ`, Extended mode runs stereo depth pipeline twice (thus consuming more HW resources); once with resolution of
+the frame that was passed to :ref:`StereoDepth` node, and once with resolution downscaled by 2, then combine the 2 output disparity maps.
+
+Disparity shift
+~~~~~~~~~~~~~~~
+
+In a controller environment, where MaxZ is known in advance, to perceive closer depth range it's advised to use disparity shift, as it doesn't decrease depth accuracy
+as other 2 methods above do.
+
+Disparity shift will shift the starting point of the disparity search, which will significantly decrease max depth (MaxZ) perception, but
+it will also decrease min depth (MinZ) perception. Disparity shift can be combined with extended/subpixel/LR-check modes.
+
+.. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
+
+**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Calculate depth using disparity map`.
+Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
+
+**Limitations**:
+**Right graph** shows the same, but at disparity shift set to 30 pixels. This means that disparity search will be from 30 pixels (depth=2.2m) to 125 pixels (depth=50cm).
+This also means that depth will be very accurate at the short range (**theoretically** below 5mm depth error).
+
+
+- Because of the inverse relationship between disparity and depth, MaxZ will decrease much faster than MinZ as the disparity shift is increased. Therefore, it is **advised not to use a larger than necessary disparity shift**.
+- Tradeoff in reducing the MinZ this way is that objects at **distances farther away than MaxZ will not be seen**.
+- Because of the point above, **we only recommend using disparity shift when MaxZ is known**, such as having a depth camera mounted above a table pointing down at the table surface.
+- Output disparity map is not expanded, only the depth map. So if disparity shift is set to 50, and disparity value obtained is 90, the real disparity is 140.
+
+**Compared to Extended disparity**, disparity shift:
+
+- **(+)** Is faster, as it doesn't require an extra computation, which means there's also no extra latency
+- **(-)** Reduces the MaxZ (significantly), while extended disparity only reduces MinZ.
+
+Disparity shift can be combined with extended disparity.
+
+.. doxygenfunction:: dai::StereoDepthConfig::setDisparityShift
+  :project: depthai-core
+  :no-link:
+
+Close range depth limitations
+-----------------------------
+
+Since depth is calculated from disparity, which requires the pixels to overlap, there is inherently a vertical
+band on the left side of the left mono camera and on the right side of the right mono camera, where depth
+can not be calculated, since it is seen by only 1 stereo camera.
+
+At very close distance, even when enabling :ref:`Stereo Extended Disparity mode` and :ref:`Lowering resolution <Lowering resolution to decrease MinZ>`,
+you will notice this vertical band of invalid depth pixel.
+
+.. image:: https://user-images.githubusercontent.com/59799831/135310921-67726c28-07e7-4ffa-bc8d-74861049517e.png
+
+Meaning of variables on the picture:
+
+- ``BL [cm]`` - Baseline of stereo cameras.
+- ``Dv [cm]`` - Minimum distance where both cameras see an object (thus where depth can be calculated).
+- ``W [pixels]`` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
+- ``D [cm]`` - Distance from the **camera plane** to an object (see image :ref:`here <Measuring real-world object dimensions>`).
+
+.. image:: https://user-images.githubusercontent.com/59799831/135310972-c37ba40b-20ad-4967-92a7-c71078bcef99.png
+
+With the use of the :code:`tan` function, the following formulas can be obtained:
+
+
+.. math::
+    F = 2 * D * tan(HFOV/2)
+    Dv = (BL/2) * tan(90 - HFOV/2)
+
+In order to obtain :code:`B`, we can use :code:`tan` function again (same as for :code:`F`), but this time
+we must also multiply it by the ratio between :code:`W` and :code:`F` in order to convert units to pixels.
+That gives the following formula:
+
+.. math::
+
+  B = 2 * Dv * tan(HFOV/2) * W / F
+  B = 2 * Dv * tan(HFOV/2) * W / (2 * D * tan(HFOV/2))
+  B = W * Dv / D  # pixels
+
+Example: If we are using OAK-D, which has a :code:`HFOV` of 72°, a baseline (:code:`BL`) of 7.5 cm and
+:code:`640x400 (400P)` resolution is used, therefore :code:`W = 640` and an object is :code:`D = 100` cm away, we can
+calculate :code:`B` in the following way:
+
+.. math::
+
+  Dv = 7.5 / 2 * tan(90 - 72/2) = 3.75 * tan(54°) = 5.16 cm
+  B = 640 * 5.16 / 100 = 33 # pixels
+
+Credit for calculations and images goes to our community member gregflurry, which he made on
+`this <https://discuss.luxonis.com/d/339-naive-question-regarding-stereodepth-disparity-and-depth-outputs/7>`__
+forum post.
+
+5. Long range stereo depth
+**************************
+
+To get accurate long-range depth, you'd first need to follow :ref:`3. Improving depth accuracy` steps.
+
+
+
+
+
 
 - Subpixel mode
 - Narrow FOV lenses/wider baseline distance -> OAK-D-LR
 
 
 
-Fixing noisy pointcloud
-***********************
+6. Fixing noisy pointcloud
+**************************
+
+:ref:`Stereo subpixel affect on layering`
 
 - First check Depth is noisy
 - Voxalization + remove statistical outliers
@@ -248,11 +429,5 @@ Best practices in certain environments
 
 - In high dynamic range env (like outside), use brightness filter (img above)
 - In more static env, temporal filter
-
-
-
-
-
-
 
 .. include::  /includes/footer-short.rst
