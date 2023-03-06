@@ -16,6 +16,7 @@ void bind_imudata(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
+    py::enum_<IMUVersion> imuVersion(m, "IMUVersion");
     py::class_<IMUReport, std::shared_ptr<IMUReport>> imuReport(m, "IMUReport", DOC(dai, IMUReport));
     py::enum_<IMUReport::Accuracy> imuReportAccuracy(imuReport, "Accuracy");
     py::class_<IMUReportAccelerometer, IMUReport, std::shared_ptr<IMUReportAccelerometer>> imuReportAccelerometer(m, "IMUReportAccelerometer", DOC(dai, IMUReportAccelerometer));
@@ -40,6 +41,12 @@ void bind_imudata(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // Metadata / raw
+    imuVersion
+        .value("NONE", IMUVersion::NONE)
+        .value("BNO086", IMUVersion::BNO086)
+        .value("BMI270", IMUVersion::BMI270)
+        ;
+
     imuReport
         .def(py::init<>())
         .def_readwrite("sequence", &IMUReport::sequence)

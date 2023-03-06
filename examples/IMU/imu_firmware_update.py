@@ -5,6 +5,12 @@ import depthai as dai
 import time
 import math
 
+device = dai.Device()
+
+imuVersion = device.getConnectedIMUVersion()
+imuFirmwareVersion = device.getIMUFirmwareVersion()
+print(f"IMU version: {imuVersion}, firmware version: {imuFirmwareVersion}")
+
 print("Warning! Flashing IMU firmware can potentially soft brick your device and should be done with caution.")
 print("Do not unplug your device while the IMU firmware is flashing.")
 print("Type 'y' and press enter to proceed, otherwise exits: ")
@@ -39,10 +45,17 @@ imu.out.link(xlinkOut.input)
 imu.enableFirmwareUpdate(True)
 
 # Pipeline is defined, now we can connect to the device
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
 
     def timeDeltaToMilliS(delta) -> float:
         return delta.total_seconds()*1000
+
+    fwUpdatePending = True
+    while fwUpdatePending:
+        fwUpdatePending, percentage = device.getIMUFirmwareUpdateStatus()
+        print(f"IMU FW update status: {percentage:.1f}%")
+        time.sleep(1)
 
     # Output queue for imu bulk packets
     imuQueue = device.getOutputQueue(name="imu", maxSize=50, blocking=False)
