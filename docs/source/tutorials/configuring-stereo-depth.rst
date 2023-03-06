@@ -177,6 +177,25 @@ Spatial filter
 Spatial Edge-Preserving Filter will fill invalid depth pixels with valid neighboring depth pixels. It performs a series of 1D horizontal and vertical passes or
 iterations, to enhance the smoothness of the reconstructed data. It is based on `this research paper <https://www.inf.ufrgs.br/~eslgastal/DomainTransform/>`__.
 
+Brightness filter
+~~~~~~~~~~~~~~~~~
+
+Brightness filter will filter out (invalidate, by setting to 0) all depth pixels for which input stereo camera image pixels are outside the configured
+min/max brightness threshold values. This filter is useful when you have high dynamic range scene, like outside on a bright day, or in general whenever
+stereo camera pair can directly see a light source:
+
+.. figure:: https://user-images.githubusercontent.com/18037362/216110871-fe807fc0-858d-4c4d-bbae-3a8eff35645d.png
+
+    Direct light source (ceiling light) - depth pixels are invalid
+
+It also helps with rectification "artifacts", especially when you have Wide FOV lenses and you apply alpha param. When there's no available pixel,
+StereoDepth node will set that area to 0 (black) by default, but can be changed with ``stereoDepth.setRectifyEdgeFillColor(int8)``. This black area can then be
+invalidated with brightness filter, as seen below:
+
+.. figure:: https://user-images.githubusercontent.com/18037362/223171135-734babe6-72b4-4aa1-9741-9fd8b4552555.jpeg
+
+    Invalidating depth where we have rectification "artifacts"
+
 Threshold filter
 ~~~~~~~~~~~~~~~~
 
@@ -187,18 +206,21 @@ Decimation filter
 ~~~~~~~~~~~~~~~~~
 
 Decimation Filter will sub-samples the depth map, which means it reduces the depth scene complexity and allows other filters to run faster. Setting
-*decimationFactor* to 2 will downscale 1280x800 depth map to 640x400.
+*decimationFactor* to 2 will downscale 1280x800 depth map to 640x400. We can either select pixel skipping, median, or mean decimation mode, and the latter two
+modes help with filtering as well.
+
+It's also very useful for :ref:`for pointclouds <Decimation filter for pointcloud>`.
 
 3. Improving depth accuracy
 ***************************
 
-The above chapter () was focused on noise, which isn't necessary the only reason for
+The above chapter we focused on noise, which isn't necessary the only reason for
 inaccurate depth.
 
 There are a few ways to improve depth accuracy:
 
 - (mentioned above) :ref:`Fixing noisy depth <2. Fixing noisy depth>` - depth should be high quality in order to be accurate
-- (mentioned above) :ref:`Stereo depth confidence threshold` should we low(er) in order to get the best accuracy
+- (mentioned above) :ref:`Stereo depth confidence threshold` should be low(er) in order to get the best accuracy
 - :ref:`Move camera closer to the object` for best depth accuracy
 - Enable :ref:`Stereo Subpixel mode`, especially if object/scene isn't close to MinZ of the camera
 
@@ -397,37 +419,59 @@ forum post.
 5. Long range stereo depth
 **************************
 
-To get accurate long-range depth, you'd first need to follow :ref:`3. Improving depth accuracy` steps.
+To get accurate long-range depth, we should first check :ref:`3. Improving depth accuracy` steps,
+as they are especially applicable to long-range depth.
 
+For long-range depth, we should also consider the following:
 
+- Narrow FOV lenses
+- Wide baseline distance between stereo cameras
 
-
-
-
-- Subpixel mode
-- Narrow FOV lenses/wider baseline distance -> OAK-D-LR
-
-
+That's why for long range, **we suggest using** `OAK-D LR <https://docs.luxonis.com/projects/hardware/en/latest/pages/OAK-D-LR.html>`__,
+which has a (larger) baseline distance of 15cm and default FOV of 60°. It has `M12 mount lenses <https://docs.luxonis.com/projects/hardware/en/latest/pages/ffc-cameras.html#m12-selectable-fov>`__,
+so users can replace these with even narrower (or wider) FOV lenses.
 
 6. Fixing noisy pointcloud
 **************************
 
-:ref:`Stereo subpixel affect on layering`
+For noisy pointcloud we suggest a few approaches:
 
-- First check Depth is noisy
-- Voxalization + remove statistical outliers
-- Invalidation a few pixels around the corner of depth image, invalidating left part (eg. 30 pixels)
-- Brightness filter (remove black part from rectification)
-- Decimation filter?
+* (mentioned above) Start with the :ref:`Fixing noisy depth <2. Fixing noisy depth>` chapter, as otherwise noise will produce points all over the pointcloud
+* (mentioned above) Continue with :ref:`Improving depth accuracy <3. Improving depth accuracy>` chapter - depth inaccuracy will be easily visible in pointcloud
+    * Enable Stereo subpixel mode, especially due to :ref:`Stereo subpixel affect on layering`
 
-Decimation filter - for PCL, you don't really want 1 million points (Although it sounds good from marketing POV), as it's too much data to process.
-Decimation filter helps here, I'd go as far as must have. It has capabilities of filtering also, if you change it to median mode vs default pixel skipping,
-not just reducing image size. It also makes the other filters faster, since there will be less data to process.
+* :ref:`Decimation filter for pointcloud` for faster processing (FPS) and additional filtering
+* :ref:`Invalidating pixels around the corner` should help to reduce noise around the corners of the depth frame
+* :ref:`Host-side pointcloud filtering` for additional filtering
 
-Best practices in certain environments
-**************************************
+Decimation filter for pointcloud
+--------------------------------
 
-- In high dynamic range env (like outside), use brightness filter (img above)
-- In more static env, temporal filter
+:ref:`Decimation filter` is especially useful for pointclouds, you don't really want 1 million points (even though it sounds good for marketing),
+as it's too much data to process. Decimation filter helps here, and should be enabled when working with pointclouds.
+
+When using decimation filter for pointcloud you should enable **median/mean mode decimation**, as it will provide additional filtering (compared to pixel skipping mode).
+It also makes other :ref:`Stereo postprocessing filters` faster, since there will be less data to process.
+
+Invalidating pixels around the corner
+-------------------------------------
+
+There are often invalid/noisy pixels around the corners, and we have seen that some customers preventively invalidate a few pixels (eg. 3) all around the corner of depth
+image. We also suggest enabling :ref:`Brightness filter`, especially due to rectification "artifacts".
+
+Host-side pointcloud filtering
+------------------------------
+
+Besides device-side :ref:`Stereo postprocessing filters`, we also suggest running host-side pointcloud filtering (with eg. `Open3D <www.open3d.org/>`__, or `PCL <https://pointclouds.org/>`__ library).
+
+We especially suggest using pointcloud voxalization and removing statistical outliers techniques, `example here <https://github.com/luxonis/depthai-experiments/blob/master/gen2-box_measurement/projector_3d.py#L35-L38>`__ for both of these.
+
+
+..
+    Best practices in certain environments
+    **************************************
+
+    - In high dynamic range env (like outside), use brightness filter (img above)
+    - In more static env, temporal filter
 
 .. include::  /includes/footer-short.rst
