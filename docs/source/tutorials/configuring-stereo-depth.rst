@@ -284,14 +284,14 @@ One can change the number of subpixel bits by setting ``stereoDepth.setSubpixelF
 ***************************
 
 To get accurate short-range depth, you'd first need to follow :ref:`3. Improving depth accuracy` steps.
-For most normal FOV OV9282 OAK-D* cameras, you'd want to have object/scene about 70cm away from the camera,
+For most normal-FOV, OV9282 OAK-D* cameras, you'd want to have object/scene about 70cm away from the camera,
 where you'd get below 2% error (with good :ref:`Scene Texture`), so ± 1.5cm error.
 
 But how to get an even better depth accuracy, eg. **sub-cm stereo depth accuracy**?
 As we have learned at :Ref:`How baseline distance and focal length affect depth`, we would want to
-have closer baseline distance and/or narrower FOV lenses.
+have a closer baseline distance and/or narrower FOV lenses.
 
-That's why, for short range depth perception, **we suggest using** `OAK-D SR <https://docs.luxonis.com/projects/hardware/en/latest/pages/OAK-D-SR.html>`__,
+That's why for the short range depth perception **we suggest using** `OAK-D SR <https://docs.luxonis.com/projects/hardware/en/latest/pages/OAK-D-SR.html>`__,
 which has 2 cm baseline distance, 800P resolution, and is ideal for depth sensing of up to 1 meter.
 
 Going back to :ref:`Depth from disparity`, minimal depth perception (**MinZ**) is defined by the following formula, where disparity is 95 pixels
@@ -305,11 +305,14 @@ Going back to :ref:`Depth from disparity`, minimal depth perception (**MinZ**) i
 How to get lower MinZ
 ---------------------
 
-You can get lower MinZ for OAK cameras by:
+If the depth results for close-in objects look weird, this is likely because they are below MinZ distance of the OAK camera. You can get lower MinZ for OAK cameras by either:
 
 - :ref:`Lowering resolution <Lowering resolution to decrease MinZ>`
 - Enabling :ref:`Stereo Extended Disparity mode`
 - Using :ref:`Disparity shift` - suggested in controlled environment, where MaxZ is known
+
+Both of these last 2 options can be enabled at the same time, which would set the minimum depth to 1/4 of the standard settings, but at such short distances the MinZ
+could be limited by the focal length.
 
 Lowering resolution to decrease MinZ
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -341,7 +344,7 @@ it will also decrease min depth (MinZ) perception. Disparity shift can be combin
 
 .. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
 
-**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Calculate depth using disparity map`.
+**Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Depth from disparity`.
 Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
 
 **Limitations**:
