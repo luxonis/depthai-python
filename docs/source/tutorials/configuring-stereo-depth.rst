@@ -34,7 +34,7 @@ Let's first look at how the depth is calculated:
 
 .. math::
 
-   depth [m] = focalLength [pix] * baseline [m] / disparity [pix]
+   depth [mm] = focalLength [pix] * baseline [mm] / disparity [pix]
 
 
 `RVC2 <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html>`__-based cameras have a **0..95 disparity search** range,
@@ -51,7 +51,7 @@ Here's a graph showing disparity vs depth for OAK-D (7.5cm baseline distance) at
 
     `Full chart here <https://docs.google.com/spreadsheets/d/1ymn-0D4HcCbzYP-iPycj_PIdSwmrLenlGryuZDyA4rQ/edit#gid=0>`__
 
-Note the value of disparity depth data is stored in *uint16*, where 0 means that the distance is invalid/unknown.
+Note the value of depth data is stored in *uint16*, where 0 means that the distance is invalid/unknown.
 
 How baseline distance and focal length affect depth
 ---------------------------------------------------
@@ -106,16 +106,35 @@ the threshold get invalidated, i.e. their disparity value is set to zero. You ca
 
 This means that with the confidence threshold, users can prioritize **fill-rate or accuracy**.
 
-.. code-block:: python
+.. tabs::
 
-    stereo_depth = pipeline.create(dai.node.StereoDepth)
-    stereo_depth.initialConfig.setConfidenceThreshold(int)
+    .. tab:: Python
 
-    # Or, alternatively, set the Stereo Preset Mode:
-    # Prioritize fill-rate, sets Confidence threshold to 245
-    stereo_depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-    # Prioritize accuracy, sets Confidence threshold to 200
-    stereo_depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+        .. code-block:: python
+
+            # Create the StereoDepth node
+            stereo_depth = pipeline.create(dai.node.StereoDepth)
+            stereo_depth.initialConfig.setConfidenceThreshold(threshold)
+
+            # Or, alternatively, set the Stereo Preset Mode:
+            # Prioritize fill-rate, sets Confidence threshold to 245
+            stereo_depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+            # Prioritize accuracy, sets Confidence threshold to 200
+            stereo_depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+
+    .. tab:: C++
+
+        .. code-block:: cpp
+
+            // Create the StereoDepth node
+            auto stereo_depth = pipeline.create<dai::node::StereoDepth>();
+            stereo_depth->initialConfig.setConfidenceThreshold(threshold);
+
+            // Or, alternatively, set the Stereo Preset Mode:
+            // Prioritize fill-rate, sets Confidence threshold to 245
+            stereo_depth->setDefaultProfilePreset(dai::node::StereoDepth::Preset::HIGH_DENSITY);
+            // Prioritize accuracy, sets Confidence threshold to 200
+            stereo_depth->setDefaultProfilePreset(dai::node::StereoDepth::Preset::HIGH_ACCURACY);
 
 
 ..
@@ -230,7 +249,7 @@ depth change between disparity pixels (eg. 95->94) is the lowest, so the **depth
 
 .. image:: /_static/images/components/theoretical_error.jpg
 
-It's clear that depth accuracy decreases exponentially with the distance from the camera. Note that with :ref:`Stereo Subpixel mode`
+Depth accuracy decreases exponentially with the distance from the camera. Note that with :ref:`Stereo Subpixel mode`
 enabled you can have better depth accuracy (even at a longer distance) but it only works to some extent.
 
 So to conclude, **object/scene you are measuring** should be **as close as possible to MinZ** (minimal depth perception) of the camera
