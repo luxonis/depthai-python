@@ -140,7 +140,7 @@ Another potential improvement is to tweak the sensor's ISP settings, like chroma
 Stereo postprocessing filters
 -----------------------------
 
-The :ref:`StereoDepth`` node has a few postprocessing filters that **run on-device**, which can be enabled to improve the quality of the disparity map. For **implementation
+The :ref:`StereoDepth` node has a few postprocessing filters that **run on-device**, which can be enabled to improve the quality of the disparity map. For **implementation
 (API) details**, see :ref:`StereoDepth configurable blocks <Currently configurable blocks>`. For an example, see the :ref:`Depth Post-Processing` example.
 
 As these filters run on the device, it has a some **performance cost**, which means that at high-resolution frames (1MP) these might bottleneck the FPS. To improve 
