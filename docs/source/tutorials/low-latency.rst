@@ -44,7 +44,7 @@ disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example
      - `link <https://user-images.githubusercontent.com/18037362/162675393-e3fb08fb-0f17-49d0-85d0-31ae7b5af0f9.png>`__
 
 - **Time-to-Host** is measured time between frame timestamp (:code:`imgFrame.getTimestamp()`) and host timestamp when the frame is received (:code:`dai.Clock.now()`).
-- **Histogram** shows how much Time-to-Host varies frame to frame. Y axis represents number of frame that occured at that time while the X axis represents microseconds.
+- **Histogram** shows how much Time-to-Host varies frame to frame. Y axis represents number of frame that occurred at that time while the X axis represents microseconds.
 - **Bandwidth** is calculated bandwidth required to stream specified frames at specified FPS.
 
 Encoded frames

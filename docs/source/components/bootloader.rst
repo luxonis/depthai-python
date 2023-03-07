@@ -97,10 +97,10 @@ to the pipeline. Instead of transferring the whole package, only Pipeline descri
 Depthai application package (**.dap**) consists of:
 
 - SBR (512B header which describes sections of data)
-- Depthai device firmware (section “__firmware”)
-- Pipeline description (section “pipeline”)
-- Assets structure (section “assets”)
-- Asset storage (section “asset_storage”)
+- Depthai device firmware (section "__firmware")
+- Pipeline description (section "pipeline")
+- Assets structure (section "assets")
+- Asset storage (section "asset_storage")
 
 MAC address
 ###########
