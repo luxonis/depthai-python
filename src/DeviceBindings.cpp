@@ -375,6 +375,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+        .def_readwrite("isp3aMaxFps", &BoardConfig::USB::isp3aMaxFps, DOC(dai, BoardConfig, USB, isp3aMaxFps))
     ;
 
     // Bind BoardConfig::Network
@@ -382,6 +383,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("mtu", &BoardConfig::Network::mtu)
         .def_readwrite("xlinkTcpNoDelay", &BoardConfig::Network::xlinkTcpNoDelay)
+        .def_readwrite("isp3aMaxFps", &BoardConfig::Network::isp3aMaxFps, DOC(dai, BoardConfig, Network, isp3aMaxFps))
     ;
 
     // GPIO Mode
