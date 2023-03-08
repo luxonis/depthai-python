@@ -2,30 +2,40 @@
 
 import cv2
 import depthai as dai
+import numpy as np
 
 # Create pipeline
 pipeline = dai.Pipeline()
 
 # Define source and output
-monoLeft = pipeline.create(dai.node.MonoCamera)
+tofCam = pipeline.create(dai.node.ColorCamera)
 tofProcess = pipeline.create(dai.node.TofCamera)
 
-xoutRgb = pipeline.create(dai.node.XLinkOut)
+#isp
+xoutVideo = pipeline.create(dai.node.XLinkOut)
+
+xoutPasstrough = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 
-xoutRgb.setStreamName("raw")
+xoutPasstrough.setStreamName("passtroughTof")
 xoutDepth.setStreamName("depth")
+#isp
+xoutVideo.setStreamName("video")
 
-monoLeft.setVideoSize(1280, 962)
-
+# Properties
+tofCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1280X962)
 
 # Linking
-monoLeft.raw.link(xoutRgb.input)
-#camRgb.isp.link(xoutDepth.input)
+tofCam.raw.link(tofProcess.inputRaw)
+tofProcess.passthroughInputRaw.link(xoutPasstrough.input)
+#isp
+tofCam.isp.link(xoutVideo.input)
 
-monoLeft.initialControl.setManualExposure(100,100)
+#tofCam.initialControl.setManualExposure(100,100)
 
-monoLeft.raw.link(tofProcess.inputRaw)
+xoutPasstrough.input.setBlocking(False)
+xoutPasstrough.input.setQueueSize(1)
+
 tofProcess.depth.link(xoutDepth.input)
 
 
@@ -42,17 +52,23 @@ with dai.Device(pipeline) as device:
     print('Device name:', device.getDeviceName())
 
     # Output queue will be used to get the rgb frames from the output defined above
-    qRgb = device.getOutputQueue(name="raw", maxSize=4, blocking=False)
-    qIsp = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+    qPassthrough = device.getOutputQueue(name="passtroughTof", maxSize=4, blocking=True)
+    video = device.getOutputQueue(name="video", maxSize=1, blocking=True)
+
+    qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=True)
 
     while True:
-        inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
-        inIsp = qIsp.get()  # blocking call, will wait until a new data has arrived
-        #print(inRgb.getType())
-        #print(inRgb.getData())
+        print("==videoin")
+        videoIn = video.get()
+
+        inPassthrough = qPassthrough.get()  # blocking call, will wait until a new data has arrived
+        inDepth = qDepth.get()  # blocking call, will wait until a new data has arrived
+        print(inPassthrough.getData())
         # Retrieve 'bgr' (opencv format) frame
-        cv2.imshow("raw", inRgb.getFrame()*16)
-        cv2.imshow("depth", inIsp.getFrame())
+        cv2.imshow("passtroughTof", inPassthrough.getFrame())
+        #cv2.imshow("depth", (inDepth.getFrame() / 25.6).astype(np.uint8))
+        cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8))
+        cv2.imshow("video", videoIn.getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
