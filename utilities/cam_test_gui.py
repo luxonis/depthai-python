@@ -184,16 +184,34 @@ class CamTestGui:
             self.cameras_list.itemAt(i).itemAt(2).widget().setDisabled(True)
 
 
+class WorkerSignals(QtCore.QObject):
+    finished = QtCore.pyqtSignal(list)
+
+class Worker(QtCore.QRunnable):
+
+    def __init__(self, fn, *args, **kwargs):
+        super().__init__()
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+    
+    @QtCore.pyqtSlot()
+    def run(self):
+        result = self.fn(*self.args, **self.kwargs)
+        self.signals.finished.emit(result)
+
+
 class Application(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.available_devices: List[dai.DeviceInfo] = []
         self.ui = CamTestGui(self)
-        self.query_devices()
         self.query_devices_timer = QtCore.QTimer()
         self.query_devices_timer.timeout.connect(self.query_devices)
-        self.query_devices_timer.start(1000)
+        self.query_devices_timer.start(2000)
+        self.query_devices()
         self.test_process = None
 
     def construct_args_from_gui(self) -> List[str]:
@@ -255,13 +273,21 @@ class Application(QtWidgets.QMainWindow):
         self.query_devices_timer.start()
         self.ui.handle_disconnect()
         if self.test_process.state() == QtCore.QProcess.Running:
-            self.test_process.terminate()
+            self.test_process.kill()
 
     def query_devices(self):
+        self.query_devices_timer.stop()
+        pool = QtCore.QThreadPool.globalInstance()
+        query_devices_worker = Worker(dai.Device.getAllAvailableDevices)
+        query_devices_worker.signals.finished.connect(self.on_finish_query_devices)
+        pool.start(query_devices_worker)
+
+    def on_finish_query_devices(self, result):
         self.ui.available_devices_combo.clear()
-        self.available_devices = dai.Device.getAllAvailableDevices()
+        self.available_devices = result
         self.ui.available_devices_combo.addItems(
             list(map(lambda d: f"{d.name} ({d.getMxId()})", self.available_devices)))
+        self.query_devices_timer.start()
 
 
 def main():
