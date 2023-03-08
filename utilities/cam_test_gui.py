@@ -1,10 +1,7 @@
 from typing import List
-import PyQt5.sip
 from PyQt5 import QtCore, QtGui, QtWidgets
-import subprocess
 import depthai as dai
 import sys
-import os
 import signal
 
 
@@ -193,7 +190,7 @@ class Application(QtWidgets.QMainWindow):
         if not self.available_devices:
             return []
         self.device = self.available_devices[self.ui.available_devices_combo.currentIndex()].mxid
-        cmd = [f"{os.path.dirname(__file__)}/cam_test.py"]
+        cmd = []
         cmd.append("--cameras")
         for i in range(self.ui.cameras_list.count()):
             hbox = self.ui.cameras_list.itemAt(i)
