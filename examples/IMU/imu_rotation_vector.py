@@ -9,7 +9,7 @@ device = dai.Device()
 
 imuType = device.getConnectedIMU()
 imuFirmwareVersion = device.getIMUFirmwareVersion()
-print(f"IMU version: {imuType}, firmware version: {imuFirmwareVersion}")
+print(f"IMU type: {imuType}, firmware version: {imuFirmwareVersion}")
 
 if imuType != "BNO086":
     print("Rotation vector output is supported only by BNO086!")

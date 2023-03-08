@@ -10,7 +10,7 @@ device = dai.Device()
 imuVersion = device.getConnectedIMU()
 imuFirmwareVersion = device.getIMUFirmwareVersion()
 embeddedIMUFirmwareVersion = device.getEmbeddedIMUFirmwareVersion()
-print(f"IMU version: {imuVersion}, firmware version: {imuFirmwareVersion}, embedded firmware version: {embeddedIMUFirmwareVersion}")
+print(f"IMU type: {imuVersion}, firmware version: {imuFirmwareVersion}, embedded firmware version: {embeddedIMUFirmwareVersion}")
 
 print("Warning! Flashing IMU firmware can potentially soft brick your device and should be done with caution.")
 print("Do not unplug your device while the IMU firmware is flashing.")
