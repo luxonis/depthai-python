@@ -7,7 +7,7 @@ import math
 
 device = dai.Device()
 
-imuType = device.getConnectedIMUVersion()
+imuType = device.getConnectedIMU()
 imuFirmwareVersion = device.getIMUFirmwareVersion()
 print(f"IMU version: {imuType}, firmware version: {imuFirmwareVersion}")
 
