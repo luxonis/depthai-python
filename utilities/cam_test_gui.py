@@ -241,8 +241,13 @@ class Application(QtWidgets.QMainWindow):
         if not args:
             return
         self.test_process = QtCore.QProcess()
+        # Forward stdout
+        self.test_process.setProcessChannelMode(QtCore.QProcess.ProcessChannelMode.ForwardedChannels)
         self.test_process.finished.connect(self.disconnect)
-        self.test_process.start(sys.executable, sys.argv + args)
+        if getattr(sys, 'frozen', False):
+            self.test_process.start(sys.executable, args)
+        else:
+            self.test_process.start(sys.executable, sys.argv + args)
         self.query_devices_timer.stop()
         self.ui.handle_connect()
 
