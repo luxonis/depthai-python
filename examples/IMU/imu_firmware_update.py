@@ -9,8 +9,8 @@ device = dai.Device()
 
 imuVersion = device.getConnectedIMU()
 imuFirmwareVersion = device.getIMUFirmwareVersion()
-latestImuFirmwareVersion = device.getLatestAvailableIMUFirmwareVersion()
-print(f"IMU version: {imuVersion}, firmware version: {imuFirmwareVersion}, latest available firmware version: {latestImuFirmwareVersion}")
+embeddedIMUFirmwareVersion = device.getEmbeddedIMUFirmwareVersion()
+print(f"IMU version: {imuVersion}, firmware version: {imuFirmwareVersion}, embedded firmware version: {embeddedIMUFirmwareVersion}")
 
 print("Warning! Flashing IMU firmware can potentially soft brick your device and should be done with caution.")
 print("Do not unplug your device while the IMU firmware is flashing.")
@@ -28,12 +28,12 @@ with device:
         exit(1)
 
     while True:
-        fwUpdatePending, percentage = device.getIMUFirmwareUpdateStatus()
+        fwUpdateFinished, percentage = device.getIMUFirmwareUpdateStatus()
         print(f"IMU FW update status: {percentage:.1f}%")
-        if fwUpdatePending == False and percentage == 100:
-            print("Firmware update successful!")
-            break
-        if fwUpdatePending == False and percentage != 100:
-            print("Firmware update failed!")
+        if fwUpdateFinished:
+            if percentage == 100:
+                print("Firmware update successful!")
+            else: 
+                print("Firmware update failed!")
             break
         time.sleep(1)

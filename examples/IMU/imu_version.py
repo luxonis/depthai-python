@@ -4,6 +4,6 @@ import depthai as dai
 
 device = dai.Device()
 
-imuVersion = device.getConnectedIMU()
+imuType = device.getConnectedIMU()
 imuFirmwareVersion = device.getIMUFirmwareVersion()
-print(f"IMU version: {imuVersion}, firmware version: {imuFirmwareVersion}")
+print(f"IMU type: {imuType}, firmware version: {imuFirmwareVersion}")

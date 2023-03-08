@@ -597,7 +597,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
         .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))
-        .def("getLatestAvailableIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getLatestAvailableIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getLatestAvailableIMUFirmwareVersion))
+        .def("getEmbeddedIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmbeddedIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getEmbeddedIMUFirmwareVersion))
         .def("startIMUFirmwareUpdate", [](DeviceBase& d, bool forceUpdate) { py::gil_scoped_release release; return d.startIMUFirmwareUpdate(forceUpdate); }, py::arg("forceUpdate") = false, DOC(dai, DeviceBase, startIMUFirmwareUpdate))
         .def("getIMUFirmwareUpdateStatus", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareUpdateStatus(); }, DOC(dai, DeviceBase, getIMUFirmwareUpdateStatus))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
