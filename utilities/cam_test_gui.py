@@ -90,6 +90,14 @@ class CamTestGui:
         self.spin_fps.setValue(30)
         self.main_layout.addWidget(self.spin_fps)
 
+        self.label_isp3afps = QtWidgets.QLabel("ISP3 AFPS")
+        self.main_layout.addWidget(self.label_isp3afps)
+        self.spin_isp3afps = QtWidgets.QSpinBox()
+        self.spin_isp3afps.setMinimum(1)
+        self.spin_isp3afps.setMaximum(120)
+        self.spin_isp3afps.setValue(0)
+        self.main_layout.addWidget(self.spin_isp3afps)
+
         self.label_isp_downscale = QtWidgets.QLabel("ISP Downscale")
         self.main_layout.addWidget(self.label_isp_downscale)
         self.spin_isp_downscale = QtWidgets.QSpinBox()
@@ -102,7 +110,7 @@ class CamTestGui:
         self.main_layout.addWidget(self.label_resizable_windows)
         self.check_resizable_windows = QtWidgets.QCheckBox()
         self.main_layout.addWidget(self.check_resizable_windows)
-        
+
         self.label_camera_tuning = QtWidgets.QLabel("Camera Tuning")
         self.main_layout.addWidget(self.label_camera_tuning)
         self.camera_tuning_path = QtWidgets.QLineEdit()
@@ -113,7 +121,8 @@ class CamTestGui:
         self.spin_connect_timeout = QtWidgets.QSpinBox()
         self.spin_connect_timeout.setMinimum(1)
         self.spin_connect_timeout.setMaximum(60000)
-        self.spin_connect_timeout.setValue(self.DEPTHAI_CONNECT_TIMEOUT_DEFAULT)
+        self.spin_connect_timeout.setValue(
+            self.DEPTHAI_CONNECT_TIMEOUT_DEFAULT)
         self.main_layout.addWidget(self.spin_connect_timeout)
 
         self.label_boot_timeout = QtWidgets.QLabel("Bootup Timeout (ms)")
@@ -138,8 +147,6 @@ class CamTestGui:
         self.main_layout.addWidget(self.disconnect_button)
         self.disconnect_button.setHidden(True)
 
-
-    
     def handle_disconnect(self):
         self.connect_button.setDisabled(False)
         self.disconnect_button.setDisabled(True)
@@ -150,6 +157,7 @@ class CamTestGui:
         self.combo_color_resolution.setDisabled(False)
         self.combo_rotate.setDisabled(False)
         self.spin_fps.setDisabled(False)
+        self.spin_isp3afps.setDisabled(False)
         self.spin_isp_downscale.setDisabled(False)
         self.check_resizable_windows.setDisabled(False)
         self.camera_tuning_path.setDisabled(False)
@@ -167,12 +175,14 @@ class CamTestGui:
         self.combo_color_resolution.setDisabled(True)
         self.combo_rotate.setDisabled(True)
         self.spin_fps.setDisabled(True)
+        self.spin_isp3afps.setDisabled(True)
         self.spin_isp_downscale.setDisabled(True)
         self.check_resizable_windows.setDisabled(True)
         self.camera_tuning_path.setDisabled(True)
         self.available_devices_combo.setDisabled(True)
         for i in range(self.cameras_list.count()):
             self.cameras_list.itemAt(i).itemAt(2).widget().setDisabled(True)
+
 
 class Application(QtWidgets.QMainWindow):
 
@@ -189,7 +199,8 @@ class Application(QtWidgets.QMainWindow):
     def construct_args_from_gui(self) -> List[str]:
         if not self.available_devices:
             return []
-        self.device = self.available_devices[self.ui.available_devices_combo.currentIndex()].mxid
+        self.device = self.available_devices[self.ui.available_devices_combo.currentIndex(
+        )].mxid
         cmd = []
         cmd.append("--cameras")
         for i in range(self.ui.cameras_list.count()):
@@ -208,6 +219,8 @@ class Application(QtWidgets.QMainWindow):
             cmd.append(self.ui.combo_rotate.currentText())
         cmd.append("-fps")
         cmd.append(str(self.ui.spin_fps.value()))
+        cmd.append("-isp3afps")
+        cmd.append(str(self.ui.spin_isp3afps.value()))
         cmd.append("-ds")
         cmd.append(str(self.ui.spin_isp_downscale.value()))
         if self.ui.check_resizable_windows.isChecked():
@@ -242,7 +255,9 @@ class Application(QtWidgets.QMainWindow):
     def query_devices(self):
         self.ui.available_devices_combo.clear()
         self.available_devices = dai.Device.getAllAvailableDevices()
-        self.ui.available_devices_combo.addItems(list(map(lambda d: f"{d.name} ({d.getMxId()})", self.available_devices)))
+        self.ui.available_devices_combo.addItems(
+            list(map(lambda d: f"{d.name} ({d.getMxId()})", self.available_devices)))
+
 
 def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
