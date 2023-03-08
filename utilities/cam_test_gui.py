@@ -93,7 +93,7 @@ class CamTestGui:
         self.label_isp3afps = QtWidgets.QLabel("ISP3 AFPS")
         self.main_layout.addWidget(self.label_isp3afps)
         self.spin_isp3afps = QtWidgets.QSpinBox()
-        self.spin_isp3afps.setMinimum(1)
+        self.spin_isp3afps.setMinimum(0)
         self.spin_isp3afps.setMaximum(120)
         self.spin_isp3afps.setValue(0)
         self.main_layout.addWidget(self.spin_isp3afps)
@@ -242,7 +242,7 @@ class Application(QtWidgets.QMainWindow):
             return
         self.test_process = QtCore.QProcess()
         self.test_process.finished.connect(self.disconnect)
-        self.test_process.start(sys.executable, args)
+        self.test_process.start(sys.executable, sys.argv + args)
         self.query_devices_timer.stop()
         self.ui.handle_connect()
 
