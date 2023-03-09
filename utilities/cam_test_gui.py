@@ -148,13 +148,9 @@ class CamTestGui:
         self.main_layout.addWidget(self.disconnect_button)
         self.disconnect_button.setHidden(True)
 
-        self.process_label = QtWidgets.QLabel("Process")
-        self.pid_label = QtWidgets.QLabel("")
-        self.main_layout.addWidget(self.process_label)
-        self.main_layout.addWidget(self.pid_label)
-
     def handle_disconnect(self):
-        self.connect_button.setDisabled(False)
+        self.available_devices_combo.clear()
+        self.connect_button.setDisabled(True)
         self.disconnect_button.setDisabled(True)
         self.disconnect_button.setHidden(True)
         self.connect_button.setHidden(False)
@@ -287,7 +283,6 @@ class Application(QtWidgets.QMainWindow):
             self.test_process_pid = None
             self.disconnect()
             return
-        self.ui.pid_label.setText(f"PID: {self.test_process_pid}")
         self.query_devices_timer.stop()
         self.ui.handle_connect()
 
@@ -311,6 +306,10 @@ class Application(QtWidgets.QMainWindow):
         self.ui.available_devices_combo.addItems(
             list(map(lambda d: f"{d.name} ({d.getMxId()})", self.available_devices)))
         self.query_devices_timer.start()
+        if self.available_devices:
+            self.ui.connect_button.setDisabled(False)
+        else:
+            self.ui.connect_button.setDisabled(True)
 
 
 def main():

@@ -27,7 +27,7 @@ Optionally, append `--runtime-tmpdir [path or .]` to modify where the temporary 
 
 
 ## Cam Test
-### Standalone executable
+### Bundled executable
 Requirements:
 ```
 # Linux/macOS
@@ -36,7 +36,9 @@ python3 -m pip install pyinstaller
 python -m pip install pyinstaller
 ```
 
-To build standalone executable issue the following command:
+To build a bundled executable issue the following command:
 ```sh
-pyinstaller --onefile -w cam_test.py --hidden-import PyQt5.sip
+pyinstaller -w cam_test.py --hidden-import PyQt5.sip
 ```
+
+The executable will be located in `dist/cam_test` folder.
