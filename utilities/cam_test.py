@@ -300,7 +300,11 @@ with dai.Device(*dai_device_args) as device:
     capture_list = []
     while True:
         for c in cam_list:
-            pkt = q[c].tryGet()
+            try:
+                pkt = q[c].tryGet()
+            except Exception as e:
+                print(e)
+                exit_cleanly(0, 0)
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())

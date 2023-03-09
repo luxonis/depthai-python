@@ -4,6 +4,7 @@ import depthai as dai
 import sys
 import signal
 import os
+import psutil
 
 
 class CamTestGui:
@@ -300,24 +301,19 @@ class Application(QtWidgets.QMainWindow):
         return cmd
 
     def check_test_process(self):
-        # Raises OSError if a process with the given PID doesn't exist
-        try:
-            os.kill(self.test_process_pid, 0)
-        except (OSError, TypeError):
-            self.test_process_pid = None
-            self.disconnect()
-            self.check_test_process_timer.stop()
+        if self.test_process_pid and psutil.pid_exists(self.test_process_pid):
+            return
+        self.test_process_pid = None
+        self.disconnect()
+        self.check_test_process_timer.stop()
 
     def connect(self):
         args = self.construct_args_from_gui()
         if not args:
             return
+        
         started_successfully = False
-
         self.test_process = QtCore.QProcess()
-        # Forward stdout
-        self.test_process.setProcessChannelMode(
-            QtCore.QProcess.ProcessChannelMode.ForwardedChannels)
         # Start detached process with the function that also returns the PID
         if getattr(sys, 'frozen', False):
             started_successfully, self.test_process_pid = self.test_process.startDetached(
