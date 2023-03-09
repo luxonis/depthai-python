@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import depthai as dai
 import sys
 import signal
+import os
 
 
 class CamTestGui:
@@ -147,6 +148,11 @@ class CamTestGui:
         self.main_layout.addWidget(self.disconnect_button)
         self.disconnect_button.setHidden(True)
 
+        self.process_label = QtWidgets.QLabel("Process")
+        self.pid_label = QtWidgets.QLabel("")
+        self.main_layout.addWidget(self.process_label)
+        self.main_layout.addWidget(self.pid_label)
+
     def handle_disconnect(self):
         self.connect_button.setDisabled(False)
         self.disconnect_button.setDisabled(True)
@@ -163,9 +169,16 @@ class CamTestGui:
         self.camera_tuning_path.setDisabled(False)
         self.available_devices_combo.setDisabled(False)
         for i in range(self.cameras_list.count()):
+            self.cameras_list.itemAt(i).itemAt(0).widget().setDisabled(False)
+            self.cameras_list.itemAt(i).itemAt(1).widget().setDisabled(False)
             self.cameras_list.itemAt(i).itemAt(2).widget().setDisabled(False)
+        self.spin_connect_timeout.setDisabled(False)
+        self.spin_boot_timeout.setDisabled(False)
+
 
     def handle_connect(self):
+        self.spin_boot_timeout.setDisabled(True)
+        self.spin_connect_timeout.setDisabled(True)
         self.connect_button.setDisabled(True)
         self.disconnect_button.setDisabled(False)
         self.disconnect_button.setHidden(False)
@@ -181,6 +194,8 @@ class CamTestGui:
         self.camera_tuning_path.setDisabled(True)
         self.available_devices_combo.setDisabled(True)
         for i in range(self.cameras_list.count()):
+            self.cameras_list.itemAt(i).itemAt(0).widget().setDisabled(True)
+            self.cameras_list.itemAt(i).itemAt(1).widget().setDisabled(True)
             self.cameras_list.itemAt(i).itemAt(2).widget().setDisabled(True)
 
 
@@ -262,18 +277,26 @@ class Application(QtWidgets.QMainWindow):
         # Forward stdout
         self.test_process.setProcessChannelMode(QtCore.QProcess.ProcessChannelMode.ForwardedChannels)
         self.test_process.finished.connect(self.disconnect)
+        started_successfully = False
+        # Start detached process with the function that also returns the PID
         if getattr(sys, 'frozen', False):
-            self.test_process.start(sys.executable, args)
+            started_successfully, self.test_process_pid = self.test_process.startDetached(sys.executable, args, "")
         else:
-            self.test_process.start(sys.executable, sys.argv + args)
+            started_successfully, self.test_process_pid = self.test_process.startDetached(sys.executable, sys.argv + args, "")
+        if not started_successfully:
+            self.test_process_pid = None
+            self.disconnect()
+            return
+        self.ui.pid_label.setText(f"PID: {self.test_process_pid}")
         self.query_devices_timer.stop()
         self.ui.handle_connect()
 
     def disconnect(self):
+        if self.test_process_pid:
+            os.kill(self.test_process_pid, signal.SIGINT)
+        self.test_process_pid = None
         self.query_devices_timer.start()
         self.ui.handle_disconnect()
-        if self.test_process.state() == QtCore.QProcess.Running:
-            self.test_process.kill()
 
     def query_devices(self):
         self.query_devices_timer.stop()

@@ -43,6 +43,7 @@ from itertools import cycle
 from pathlib import Path
 import sys
 import cam_test_gui
+import signal
 
 
 def socket_type_pair(arg):
@@ -207,6 +208,13 @@ for c in cam_list:
 
 if args.camera_tuning:
     pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
+
+def exit_cleanly(signum, frame):
+    print("Exiting cleanly")
+    cv2.destroyAllWindows()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, exit_cleanly)
 
 
 # Pipeline is defined, now we can connect to the device
