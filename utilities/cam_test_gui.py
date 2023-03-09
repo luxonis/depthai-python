@@ -49,9 +49,13 @@ class CamTestGui:
         self.app = app
         self.app.setWindowTitle("Camera Test")
         self.main_widget = QtWidgets.QWidget()
+        self.scroll_widget = QtWidgets.QScrollArea()
+        self.scroll_widget.setWidget(self.main_widget)
+        self.scroll_widget.setWidgetResizable(True)
+        self.scroll_widget.setMinimumHeight(500)
         self.main_layout = QtWidgets.QVBoxLayout()
         self.main_widget.setLayout(self.main_layout)
-        self.app.setCentralWidget(self.main_widget)
+        self.app.setCentralWidget(self.scroll_widget)
         self.label_cameras = QtWidgets.QLabel("Cameras")
         self.main_layout.addWidget(self.label_cameras)
 
@@ -139,21 +143,33 @@ class CamTestGui:
         self.available_devices_combo = QtWidgets.QComboBox()
         self.main_layout.addWidget(self.available_devices_combo)
 
+        self.connect_layout = QtWidgets.QHBoxLayout()
         self.connect_button = QtWidgets.QPushButton("Connect")
         self.connect_button.clicked.connect(self.app.connect)
-        self.main_layout.addWidget(self.connect_button)
+        self.connect_layout.addWidget(self.connect_button)
+        self.check_auto_mode = QtWidgets.QCheckBox("Auto Mode")
+        self.check_auto_mode.setToolTip(
+            "Whenever a device is available, connect to it automatically")
+        self.connect_layout.addWidget(self.check_auto_mode)
+        self.check_auto_mode.setChecked(False)
+        self.main_layout.addLayout(self.connect_layout)
 
         self.disconnect_button = QtWidgets.QPushButton("Disconnect")
         self.disconnect_button.clicked.connect(self.app.disconnect)
         self.main_layout.addWidget(self.disconnect_button)
         self.disconnect_button.setHidden(True)
 
+    def handle_automode_changed(self, state):
+        self.disconnect_button.setHidden(bool(state))
+        self.connect_button.setHidden(bool(state))
+
     def handle_disconnect(self):
         self.available_devices_combo.clear()
-        self.connect_button.setDisabled(True)
-        self.disconnect_button.setDisabled(True)
-        self.disconnect_button.setHidden(True)
-        self.connect_button.setHidden(False)
+        if not self.check_auto_mode.isChecked():
+            self.connect_button.setDisabled(True)
+            self.disconnect_button.setDisabled(True)
+            self.disconnect_button.setHidden(True)
+            self.connect_button.setHidden(False)
         self.add_cam_button.setDisabled(False)
         self.mono_resolution_combo.setDisabled(False)
         self.combo_color_resolution.setDisabled(False)
@@ -171,14 +187,14 @@ class CamTestGui:
         self.spin_connect_timeout.setDisabled(False)
         self.spin_boot_timeout.setDisabled(False)
 
-
     def handle_connect(self):
         self.spin_boot_timeout.setDisabled(True)
         self.spin_connect_timeout.setDisabled(True)
-        self.connect_button.setDisabled(True)
-        self.disconnect_button.setDisabled(False)
-        self.disconnect_button.setHidden(False)
-        self.connect_button.setHidden(True)
+        if not self.check_auto_mode.isChecked():
+            self.connect_button.setDisabled(True)
+            self.disconnect_button.setDisabled(False)
+            self.disconnect_button.setHidden(False)
+            self.connect_button.setHidden(True)
         self.add_cam_button.setDisabled(True)
         self.mono_resolution_combo.setDisabled(True)
         self.combo_color_resolution.setDisabled(True)
@@ -198,6 +214,7 @@ class CamTestGui:
 class WorkerSignals(QtCore.QObject):
     finished = QtCore.pyqtSignal(list)
 
+
 class Worker(QtCore.QRunnable):
 
     def __init__(self, fn, *args, **kwargs):
@@ -206,7 +223,7 @@ class Worker(QtCore.QRunnable):
         self.args = args
         self.kwargs = kwargs
         self.signals = WorkerSignals()
-    
+
     @QtCore.pyqtSlot()
     def run(self):
         result = self.fn(*self.args, **self.kwargs)
@@ -223,7 +240,24 @@ class Application(QtWidgets.QMainWindow):
         self.query_devices_timer.timeout.connect(self.query_devices)
         self.query_devices_timer.start(2000)
         self.query_devices()
-        self.test_process = None
+
+        self.test_process_pid = None
+
+        # Once the test process is started, periodically check if it's still running (catches eg. camera unplugged)
+        self.check_test_process_timer = QtCore.QTimer()
+        self.check_test_process_timer.timeout.connect(self.check_test_process)
+
+        self.ui.check_auto_mode.stateChanged.connect(self.automode_changed)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        if self.test_process_pid:
+            os.kill(self.test_process_pid, signal.SIGINT)
+        return super().closeEvent(a0)
+
+    def automode_changed(self, state):
+        self.ui.handle_automode_changed(state)
+        if not state:
+            self.disconnect()
 
     def construct_args_from_gui(self) -> List[str]:
         if not self.available_devices:
@@ -265,30 +299,46 @@ class Application(QtWidgets.QMainWindow):
         cmd.append(str(self.ui.spin_boot_timeout.value()))
         return cmd
 
+    def check_test_process(self):
+        # Raises OSError if a process with the given PID doesn't exist
+        try:
+            os.kill(self.test_process_pid, 0)
+        except (OSError, TypeError):
+            self.test_process_pid = None
+            self.disconnect()
+            self.check_test_process_timer.stop()
+
     def connect(self):
         args = self.construct_args_from_gui()
         if not args:
             return
+        started_successfully = False
+
         self.test_process = QtCore.QProcess()
         # Forward stdout
-        self.test_process.setProcessChannelMode(QtCore.QProcess.ProcessChannelMode.ForwardedChannels)
-        self.test_process.finished.connect(self.disconnect)
-        started_successfully = False
+        self.test_process.setProcessChannelMode(
+            QtCore.QProcess.ProcessChannelMode.ForwardedChannels)
         # Start detached process with the function that also returns the PID
         if getattr(sys, 'frozen', False):
-            started_successfully, self.test_process_pid = self.test_process.startDetached(sys.executable, args, "")
+            started_successfully, self.test_process_pid = self.test_process.startDetached(
+                sys.executable, args, "")
         else:
-            started_successfully, self.test_process_pid = self.test_process.startDetached(sys.executable, sys.argv + args, "")
+            started_successfully, self.test_process_pid = self.test_process.startDetached(
+                sys.executable, sys.argv + args, "")
         if not started_successfully:
             self.test_process_pid = None
             self.disconnect()
             return
         self.query_devices_timer.stop()
+        self.check_test_process_timer.start(1000)
         self.ui.handle_connect()
 
     def disconnect(self):
         if self.test_process_pid:
-            os.kill(self.test_process_pid, signal.SIGINT)
+            try:
+                os.kill(self.test_process_pid, signal.SIGINT)
+            except OSError:
+                self.test_process_pid = None
         self.test_process_pid = None
         self.query_devices_timer.start()
         self.ui.handle_disconnect()
@@ -297,16 +347,25 @@ class Application(QtWidgets.QMainWindow):
         self.query_devices_timer.stop()
         pool = QtCore.QThreadPool.globalInstance()
         query_devices_worker = Worker(dai.Device.getAllAvailableDevices)
-        query_devices_worker.signals.finished.connect(self.on_finish_query_devices)
+        query_devices_worker.signals.finished.connect(
+            self.on_finish_query_devices)
         pool.start(query_devices_worker)
 
     def on_finish_query_devices(self, result):
+        current_device = self.ui.available_devices_combo.currentText()
         self.ui.available_devices_combo.clear()
         self.available_devices = result
         self.ui.available_devices_combo.addItems(
             list(map(lambda d: f"{d.name} ({d.getMxId()})", self.available_devices)))
         self.query_devices_timer.start()
         if self.available_devices:
+            if current_device:
+                index = self.ui.available_devices_combo.findText(
+                    current_device)
+                if index != -1:
+                    self.ui.available_devices_combo.setCurrentIndex(index)
+            if self.ui.check_auto_mode.isChecked():
+                self.connect()
             self.ui.connect_button.setDisabled(False)
         else:
             self.ui.connect_button.setDisabled(True)
