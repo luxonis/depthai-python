@@ -36,6 +36,13 @@ Let's first look at how the depth is calculated:
 
    depth [mm] = focalLength [pix] * baseline [mm] / disparity [pix]
 
+.. dropdown::
+
+Examples for calculating the depth value, using the OAK-D (7.5cm baseline OV9282), for 400P resolution and disparity of 50 pixels:
+
+.. math::
+
+  depth = 441.25 * 7.5 / 50 = 66.19 cm
 
 `RVC2 <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html>`__-based cameras have a **0..95 disparity search** range,
 which limits the minimal depth perception. Baseline is the distance between two cameras of the
@@ -280,7 +287,7 @@ Stereo subpixel effect on layering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Default stereo depth output has 0..95 disparity pixels, which would produce 96 unique depth values. This can especially be seen when using pointcloud representation
- and seeing how there are discrete "layers" of points, instead of a smooth transition:
+and seeing how there are discrete "layers" of points, instead of a smooth transition:
 
 .. image:: /_static/images/components/layered-pointcloud.png
 
@@ -288,14 +295,19 @@ This layering can especially be seen at longer distances, where these layers are
 
 But with Stereo Subpixel mode enabled, there are many more unique values possible, which produces more granular depth steps, and thus smoother a pointcloud.
 
-.. math::
-    94 * 2^3 [subpixel bits] + 2 [min/max value] = 754 unique values
+.. code-block:: python
+
+    # Number of unique values based on subpixel bits setting.
+    Unique values = 94 * 2 ^ subpixel_bits + 2 (min/max value)
 
 .. math::
-    94 * 2^4 [subpixel bits] + 2 [min/max value] = 1506 unique values
+    94 * 2^3 + 2 = 754
 
 .. math::
-    94 * 2^5 [subpixel bits] + 2 [min/max value] = 3010 unique values
+    94 * 2^4 + 2 = 1506
+
+.. math::
+    94 * 2^5 + 2 = 3010
 
 One can change the number of subpixel bits by setting ``stereoDepth.setSubpixelFractionalBits(int)`` parameter to 3, 4 or 5 bits.
 
@@ -317,10 +329,10 @@ Going back to :ref:`Depth from disparity`, minimal depth perception (**MinZ**) i
 (maximum number of pixel for disparity search):
 
 .. math::
-    depth = focal_length * baseline / disparity
+    depth = focalLength * baseline / disparity
 
 .. math::
-    MinZ = focal_length * baseline / 95
+    MinZ = focalLength * baseline / 95
 
 How to get lower MinZ
 ---------------------
@@ -343,10 +355,10 @@ Above we have a formula for MinZ, and by lowering the resolution, we are lowerin
     MinZ = focalLength * baseline / 95
 
 .. math::
-    MinZ [800P OAK-D] = 882.5 * 7.5 / 95 = 70 cm
+    MinZ [800P] = 882.5 * 7.5 / 95 = 70 cm
 
 .. math::
-    MinZ [400P OAK-D] = 441 * 7.5 / 95 = 35 cm
+    MinZ [400P] = 441 * 7.5 / 95 = 35 cm
 
 As you can see, by lowering resolution by 2, we are also lowering MinZ by 2. Note that because you have fewer pixels, you will also have lower depth accuracy (in cm).
 
@@ -431,7 +443,7 @@ That gives the following formula:
   B = 2 * Dv * tan(HFOV/2) * W / (2 * D * tan(HFOV/2))
 
 .. math::
-  B = W * Dv / D  # pixels
+  B [pixels] = W * Dv / D
 
 Example: If we are using OAK-D, which has a HFOV of 72°, a baseline (:code:`BL`) of 7.5 cm and
 640x400 (400P) resolution is used, therefore :code:`W = 640` and an object is :code:`D = 100` cm away, we can
@@ -440,7 +452,7 @@ calculate :code:`B` in the following way:
 .. math::
 
   Dv = 7.5 / 2 * tan(90 - 72/2) = 3.75 * tan(54°) = 5.16 cm
-  B = 640 * 5.16 / 100 = 33 # pixels
+  B = 640 * 5.16 / 100 = 33
 
 Credit for calculations and images goes to our community member gregflurry, which he made on
 `this <https://discuss.luxonis.com/d/339-naive-question-regarding-stereodepth-disparity-and-depth-outputs/7>`__
