@@ -29,6 +29,9 @@ Here's theoretical calculation of the focal length in pixels:
 
   focalLength = width_px * 0.5 / tan(hfov * 0.5 * pi / 180)
 
+To get the HFOV you can use `this script <https://gist.github.com/Erol444/4aff71f4576637624d56dce4a60ad62e>`__, which also works for wide-FOV cameras and allows you to
+specif alpha parameter.
+
 With 400P (640x400) camera resolution where HFOV=71.9 degrees:
 
 .. math::
@@ -37,7 +40,11 @@ With 400P (640x400) camera resolution where HFOV=71.9 degrees:
 
 And for 800P (1280x800) camera resolution where HFOV=71.9 degrees:
 
+.. math::
+
   focalLength = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
+
+
 
 Setup
 #####

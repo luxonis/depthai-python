@@ -36,8 +36,6 @@ Let's first look at how the depth is calculated:
 
    depth [mm] = focalLength [pix] * baseline [mm] / disparity [pix]
 
-.. dropdown::
-
 Examples for calculating the depth value, using the OAK-D (7.5cm baseline OV9282), for 400P resolution and disparity of 50 pixels:
 
 .. math::
