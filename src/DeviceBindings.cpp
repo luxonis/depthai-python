@@ -219,6 +219,7 @@ static void bindConstructors(ARG& arg){
         return std::make_unique<D>(pipeline, dev);
     }), py::arg("pipeline"), DOC(dai, DeviceBase, DeviceBase))
     .def(py::init([](const Pipeline& pipeline, bool usb2Mode){
+        PyErr_WarnEx(PyExc_DeprecationWarning, "Use constructor taking 'UsbSpeed' instead", 1);
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, dev, usb2Mode);
@@ -234,6 +235,7 @@ static void bindConstructors(ARG& arg){
         return std::make_unique<D>(pipeline, dev, pathToCmd);
     }), py::arg("pipeline"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 4))
     .def(py::init([](const Pipeline& pipeline, const DeviceInfo& deviceInfo, bool usb2Mode){
+        PyErr_WarnEx(PyExc_DeprecationWarning, "Use constructor taking 'UsbSpeed' instead", 1);
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, usb2Mode);
     }), py::arg("pipeline"), py::arg("devInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 6))
@@ -253,6 +255,7 @@ static void bindConstructors(ARG& arg){
         return std::make_unique<D>(version, dev);
     }), py::arg("version") = OpenVINO::VERSION_UNIVERSAL, DOC(dai, DeviceBase, DeviceBase, 10))
     .def(py::init([](OpenVINO::Version version, bool usb2Mode){
+        PyErr_WarnEx(PyExc_DeprecationWarning, "Use constructor taking 'UsbSpeed' instead", 1);
         auto dev = deviceSearchHelper<D>();
         py::gil_scoped_release release;
         return std::make_unique<D>(version, dev, usb2Mode);
@@ -268,6 +271,7 @@ static void bindConstructors(ARG& arg){
         return std::make_unique<D>(version, dev, pathToCmd);
     }), py::arg("version"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 13))
     .def(py::init([](OpenVINO::Version version, const DeviceInfo& deviceInfo, bool usb2Mode){
+        PyErr_WarnEx(PyExc_DeprecationWarning, "Use constructor taking 'UsbSpeed' instead", 1);
         py::gil_scoped_release release;
         return std::make_unique<D>(version, deviceInfo, usb2Mode);
     }), py::arg("version"), py::arg("deviceInfo"), py::arg("usb2Mode") = false, DOC(dai, DeviceBase, DeviceBase, 15))
