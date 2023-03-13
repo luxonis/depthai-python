@@ -37,6 +37,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
+    py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
     py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
@@ -172,11 +173,22 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
         .def_readwrite("name", &CameraFeatures::name)
+        .def_readwrite("configs", &CameraFeatures::configs)
         .def("__repr__", [](CameraFeatures& camera) {
             std::stringstream stream;
             stream << camera;
             return stream.str();
         });
+    ;
+
+    // CameraSensorConfig
+    cameraSensorConfig
+        .def(py::init<>())
+        .def_readwrite("width", &CameraSensorConfig::width)
+        .def_readwrite("height", &CameraSensorConfig::height)
+        .def_readwrite("minFps", &CameraSensorConfig::minFps)
+        .def_readwrite("maxFps", &CameraSensorConfig::maxFps)
+        .def_readwrite("type", &CameraSensorConfig::type)
     ;
 
     // MemoryInfo
