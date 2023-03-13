@@ -27,23 +27,23 @@ Here's theoretical calculation of the focal length in pixels:
 
 .. math::
 
-  focal_length_in_pixels = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
+  focalLength = width_px * 0.5 / tan(hfov * 0.5 * pi / 180)
 
-  // With 400P mono camera resolution where HFOV=71.9 degrees
-  focal_length_in_pixels = 640 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 441.25
+To get the HFOV you can use `this script <https://gist.github.com/Erol444/4aff71f4576637624d56dce4a60ad62e>`__, which also works for wide-FOV cameras and allows you to
+specif alpha parameter.
 
-  // With 800P mono camera resolution where HFOV=71.9 degrees
-  focal_length_in_pixels = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
-
-Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
+With 400P (640x400) camera resolution where HFOV=71.9 degrees:
 
 .. math::
 
-  # For OAK-D @ 400P resolution and disparity of eg. 50 pixels
-  depth = 441.25 * 7.5 / 50 = 66.19 # cm
+  focalLength = 640 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 441.25
 
-  # For OAK-D @ 800P resolution and disparity of eg. 10 pixels
-  depth = 882.5 * 7.5 / 10 = 661.88 # cm
+And for 800P (1280x800) camera resolution where HFOV=71.9 degrees:
+
+.. math::
+
+  focalLength = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
+
 
 
 Setup
