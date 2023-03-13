@@ -295,8 +295,8 @@ But with Stereo Subpixel mode enabled, there are many more unique values possibl
 
 .. code-block:: python
 
-    # Number of unique values based on subpixel bits setting.
-    Unique values = 94 * 2 ^ subpixel_bits + 2 (min/max value)
+    # Number of unique values based on subpixel bits setting
+    unique_values = 94 * 2 ^ subpixel_bits + 2 [min/max value]
 
 .. math::
     94 * 2^3 + 2 = 754
@@ -478,6 +478,7 @@ For noisy pointcloud we suggest a few approaches:
 
 * (mentioned above) Start with the :ref:`Fixing noisy depth <2. Fixing noisy depth>` chapter, as otherwise, noise will produce points all over the pointcloud
 * (mentioned above) Continue with the :ref:`Improving depth accuracy <3. Improving depth accuracy>` chapter - depth inaccuracy will be easily visible in pointcloud
+
     * Enable Stereo subpixel mode, especially due to the :ref:`Stereo subpixel effect on layering`
 
 * :ref:`Decimation filter for pointcloud` for faster processing (FPS) and additional filtering
