@@ -2,7 +2,7 @@ VideoEncoder
 ============
 
 VideoEncoder node is used to encode :ref:`ImgFrame` into either H264, H265, or MJPEG streams. Only NV12 or GRAY8 (which gets converted to NV12) format is
-supported as an input.
+supported as an input. All codecs are lossy (except lossless MJPEG), for more information please see `encoding quality docs <https://github.com/luxonis/depthai-experiments/tree/master/gen2-record-replay/encoding_quality>`__.
 
 .. include::  /includes/container-encoding.rst
 
