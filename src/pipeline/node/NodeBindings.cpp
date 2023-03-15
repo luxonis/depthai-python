@@ -230,6 +230,8 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("name", &Node::Output::name, DOC(dai, Node, Output, name))
         .def_readwrite("type", &Node::Output::type, DOC(dai, Node, Output, type))
         .def_readwrite("possibleDatatypes", &Node::Output::possibleDatatypes, DOC(dai, Node, Output, possibleDatatypes))
+        .def("getParent", &Node::Output::getParent, DOC(dai, Node, Output, getParent))
+        .def("isSamePipeline", &Node::Output::isSamePipeline, py::arg("input"), DOC(dai, Node, Output, isSamePipeline))
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))
