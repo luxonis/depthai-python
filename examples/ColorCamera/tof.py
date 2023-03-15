@@ -21,9 +21,10 @@ xoutPasstrough.setStreamName("passtroughTof")
 xoutDepth.setStreamName("depth")
 #isp
 xoutVideo.setStreamName("video")
-
+                     
 # Properties
 tofCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1280X962)
+tofCam.setBoardSocket(dai.CameraBoardSocket.CAM_E)
 
 # Linking
 tofCam.raw.link(tofProcess.inputRaw)
@@ -65,10 +66,14 @@ with dai.Device(pipeline) as device:
         inDepth = qDepth.get()  # blocking call, will wait until a new data has arrived
         print(inPassthrough.getData())
         # Retrieve 'bgr' (opencv format) frame
-        cv2.imshow("passtroughTof", inPassthrough.getFrame())
-        #cv2.imshow("depth", (inDepth.getFrame() / 25.6).astype(np.uint8))
-        cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8))
-        cv2.imshow("video", videoIn.getCvFrame())
+        cv2.imshow("passtroughTof", (inPassthrough.getFrame()).clip(0, 255).astype(np.uint8))
+        # depth in cm
+        cv2.imshow("depth",(inDepth.getFrame()).clip(0, 255).astype(np.uint8))
+        #w = 240
+        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8).reshape(640 * 120 // w,w))
+        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8))
+        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame()).clip(0, 255).astype(np.uint8))
+        #cv2.imshow("video", videoIn.getCvFrame())
 
         if cv2.waitKey(1) == ord('q'):
             break
