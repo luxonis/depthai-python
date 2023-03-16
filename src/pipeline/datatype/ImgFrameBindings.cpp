@@ -125,12 +125,15 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
         .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
+        .def("getStride", &ImgFrame::getStride, DOC(dai, ImgFrame, getStride))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
+        .def("getBytesPerPixel", &ImgFrame::getBytesPerPixel, DOC(dai, ImgFrame, getBytesPerPixel))
         .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
         .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
         .def("getColorTemperature", &ImgFrame::getColorTemperature, DOC(dai, ImgFrame, getColorTemperature))
         .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
+        .def("get", &ImgFrame::get, DOC(dai, ImgFrame, get))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
@@ -327,6 +330,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("setSize", static_cast<ImgFrame&(ImgFrame::*)(unsigned int, unsigned int)>(&ImgFrame::setSize), py::arg("width"), py::arg("height"), DOC(dai, ImgFrame, setSize))
         .def("setSize", static_cast<ImgFrame&(ImgFrame::*)(std::tuple<unsigned int, unsigned int>)>(&ImgFrame::setSize), py::arg("sizer"), DOC(dai, ImgFrame, setSize, 2))
         .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
+        .def("set", &ImgFrame::set, py::arg("type"), DOC(dai, ImgFrame, set))
         ;
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
