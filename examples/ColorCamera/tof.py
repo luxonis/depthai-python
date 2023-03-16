@@ -59,21 +59,20 @@ with dai.Device(pipeline) as device:
     qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=True)
 
     while True:
-        print("==videoin")
+        print("videoin")
         videoIn = video.get()
 
         inPassthrough = qPassthrough.get()  # blocking call, will wait until a new data has arrived
         inDepth = qDepth.get()  # blocking call, will wait until a new data has arrived
         print(inPassthrough.getData())
-        # Retrieve 'bgr' (opencv format) frame
-        cv2.imshow("passtroughTof", (inPassthrough.getFrame()).clip(0, 255).astype(np.uint8))
-        # depth in cm
-        cv2.imshow("depth",(inDepth.getFrame()).clip(0, 255).astype(np.uint8))
-        #w = 240
-        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8).reshape(640 * 120 // w,w))
-        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8))
-        #cv2.imshow("depth-" + str(inDepth.getSequenceNum() % 4), (inDepth.getFrame()).clip(0, 255).astype(np.uint8))
-        #cv2.imshow("video", videoIn.getCvFrame())
+        # Preview
+        cv2.imshow("passtroughTof(raw8)", (inPassthrough.getFrame()).clip(0, 255).astype(np.uint8))
+        
+        #cv2.imshow("depth",(inDepth.getFrame()).clip(0, 255).astype(np.uint8))
+        name = "depth"
+        if inDepth.getSequenceNum() % 2 :
+            name += " amplitude/confidence"
+        cv2.imshow(name, (inDepth.getFrame()))
 
         if cv2.waitKey(1) == ord('q'):
             break
