@@ -20,9 +20,12 @@
 #include "depthai-shared/common/DetectionParserOptions.hpp"
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
+#include "depthai-shared/common/Colormap.hpp"
+#include "depthai-shared/common/FrameEvent.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
+#include "depthai/common/CameraExposureOffset.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -35,6 +38,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
+    py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
     py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
@@ -52,6 +56,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
     py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
+    py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
+    py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -169,11 +176,22 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
         .def_readwrite("name", &CameraFeatures::name)
+        .def_readwrite("configs", &CameraFeatures::configs)
         .def("__repr__", [](CameraFeatures& camera) {
             std::stringstream stream;
             stream << camera;
             return stream.str();
         });
+    ;
+
+    // CameraSensorConfig
+    cameraSensorConfig
+        .def(py::init<>())
+        .def_readwrite("width", &CameraSensorConfig::width)
+        .def_readwrite("height", &CameraSensorConfig::height)
+        .def_readwrite("minFps", &CameraSensorConfig::minFps)
+        .def_readwrite("maxFps", &CameraSensorConfig::maxFps)
+        .def_readwrite("type", &CameraSensorConfig::type)
     ;
 
     // MemoryInfo
@@ -301,5 +319,45 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("anchorMasks", &DetectionParserOptions::anchorMasks)
         .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
         ;
+
+    cameraExposureOffset
+        .value("START", CameraExposureOffset::START)
+        .value("MIDDLE", CameraExposureOffset::MIDDLE)
+        .value("END", CameraExposureOffset::END)
+    ;
+
+    colormap
+        .value("NONE", Colormap::NONE)
+        .value("JET", Colormap::JET)
+        .value("TURBO", Colormap::TURBO)
+        .value("STEREO_JET", Colormap::STEREO_JET)
+        .value("STEREO_TURBO", Colormap::STEREO_TURBO)
+        // .value("AUTUMN", Colormap::AUTUMN)
+        // .value("BONE", Colormap::BONE)
+        // .value("WINTER", Colormap::WINTER)
+        // .value("RAINBOW", Colormap::RAINBOW)
+        // .value("OCEAN", Colormap::OCEAN)
+        // .value("SUMMER", Colormap::SUMMER)
+        // .value("SPRING", Colormap::SPRING)
+        // .value("COOL", Colormap::COOL)
+        // .value("HSV", Colormap::HSV)
+        // .value("PINK", Colormap::PINK)
+        // .value("HOT", Colormap::HOT)
+        // .value("PARULA", Colormap::PARULA)
+        // .value("MAGMA", Colormap::MAGMA)
+        // .value("INFERNO", Colormap::INFERNO)
+        // .value("PLASMA", Colormap::PLASMA)
+        // .value("VIRIDIS", Colormap::VIRIDIS)
+        // .value("CIVIDIS", Colormap::CIVIDIS)
+        // .value("TWILIGHT", Colormap::TWILIGHT)
+        // .value("TWILIGHT_SHIFTED", Colormap::TWILIGHT_SHIFTED)
+        // .value("DEEPGREEN", Colormap::DEEPGREEN)
+    ;
+
+    frameEvent
+        .value("NONE", FrameEvent::NONE)
+        .value("READOUT_START", FrameEvent::READOUT_START)
+        .value("READOUT_END", FrameEvent::READOUT_END)
+    ;
 
 }

@@ -44,6 +44,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         .value("THE_240X180", ColorCameraProperties::SensorResolution::THE_240X180)
         .value("THE_1280X962", ColorCameraProperties::SensorResolution::THE_1280X962)
+        .value("THE_1440X1080", ColorCameraProperties::SensorResolution::THE_1440X1080)
         ;
 
     colorCameraPropertiesColorOrder
@@ -66,6 +67,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
         .def_readwrite("resolution", &ColorCameraProperties::resolution)
         .def_readwrite("fps", &ColorCameraProperties::fps)
+        .def_readwrite("isp3aFps", &ColorCameraProperties::isp3aFps)
         .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
         .def_readwrite("previewKeepAspectRatio", &ColorCameraProperties::previewKeepAspectRatio)
@@ -75,6 +77,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
         .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
         .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
+        .def_readwrite("eventFilter", &ColorCameraProperties::eventFilter)
     ;
 
     // ColorCamera node
@@ -123,7 +126,10 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("setResolution", &ColorCamera::setResolution, py::arg("resolution"), DOC(dai, node, ColorCamera, setResolution))
         .def("getResolution", &ColorCamera::getResolution, DOC(dai, node, ColorCamera, getResolution))
         .def("setFps", &ColorCamera::setFps, py::arg("fps"), DOC(dai, node, ColorCamera, setFps))
+        .def("setIsp3aFps", &ColorCamera::setIsp3aFps, DOC(dai, node, ColorCamera, setIsp3aFps))
         .def("getFps", &ColorCamera::getFps, DOC(dai, node, ColorCamera, getFps))
+        .def("setFrameEventFilter", &ColorCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, ColorCamera, setFrameEventFilter))
+        .def("getFrameEventFilter", &ColorCamera::getFrameEventFilter, DOC(dai, node, ColorCamera, getFrameEventFilter))
         .def("getPreviewSize", &ColorCamera::getPreviewSize, DOC(dai, node, ColorCamera, getPreviewSize))
         .def("getPreviewWidth", &ColorCamera::getPreviewWidth, DOC(dai, node, ColorCamera, getPreviewWidth))
         .def("getPreviewHeight", &ColorCamera::getPreviewHeight, DOC(dai, node, ColorCamera, getPreviewHeight))

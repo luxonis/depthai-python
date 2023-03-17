@@ -6,8 +6,9 @@
 DepthAI API Documentation
 =========================
 
-.. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
-   :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
+..
+   .. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
+      :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
 
 DepthAI API allows users to connect to, configure and communicate with their OAK devices.
 We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ API Reference>`.

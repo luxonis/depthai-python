@@ -217,6 +217,8 @@ Examples of functionality
 - :ref:`Script camera control` - Controlling the camera
 - :ref:`Script get local IP` - Get local IP
 - :ref:`Script HTTP client` - Send HTTP request
+- `Script TCP streaming <https://github.com/luxonis/depthai-experiments/tree/master/gen2-poe-tcp-streaming>`__ - TCP communication from within Script node, either in host or client mode
+- `Script MQTT publishing <https://github.com/luxonis/depthai-experiments/tree/master/gen2-poe-mqtt>`__ - MQTT publishing from within Script node
 - :ref:`Script HTTP server` - still image over HTTP
 - :ref:`Script MJPEG server` - MJPEG video stream over HTTP
 - :ref:`Script NNData example` - Constructs :ref:`NNData`

@@ -37,6 +37,8 @@ void bind_spatiallocationcalculatordata(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("config", &SpatialLocations::config, DOC(dai, SpatialLocations, config))
         .def_readwrite("depthAverage", &SpatialLocations::depthAverage, DOC(dai, SpatialLocations, depthAverage))
+        .def_readwrite("depthMode", &SpatialLocations::depthMode, DOC(dai, SpatialLocations, depthMode))
+        .def_readwrite("depthMedian", &SpatialLocations::depthMedian, DOC(dai, SpatialLocations, depthMedian))
         .def_readwrite("depthMin", &SpatialLocations::depthMin, DOC(dai, SpatialLocations, depthMin))
         .def_readwrite("depthMax", &SpatialLocations::depthMax, DOC(dai, SpatialLocations, depthMax))
         .def_readwrite("depthAveragePixelCount", &SpatialLocations::depthAveragePixelCount, DOC(dai, SpatialLocations, depthAveragePixelCount))

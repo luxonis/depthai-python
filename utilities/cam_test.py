@@ -42,6 +42,7 @@ import depthai as dai
 import collections
 import time
 from itertools import cycle
+from pathlib import Path
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -63,12 +64,19 @@ parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mon
                     help="Which cameras to rotate 180 degrees. All if not filtered")
 parser.add_argument('-fps', '--fps', type=float, default=30,
                     help="FPS to set for all cameras")
+parser.add_argument('-isp3afps', '--isp3afps', type=int, default=0,
+                    help="3A FPS to set for all cameras")
 parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
                     help="Downscale the ISP output by this factor")
 parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
+<<<<<<< HEAD
 parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
+=======
+parser.add_argument('-tun', '--camera-tuning', type=Path,
+                    help="Path to custom camera tuning database")
+>>>>>>> origin/develop
 args = parser.parse_args()
 
 cam_list = []
@@ -185,6 +193,7 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
+<<<<<<< HEAD
     if args.enable_raw:
         raw_name = 'raw_' + c
         xout_raw[c] = pipeline.create(dai.node.XLinkOut)
@@ -192,12 +201,12 @@ for c in cam_list:
         if args.enable_raw:
             streams.append(raw_name)
         cam[c].raw.link(xout_raw[c].input)
+=======
+    cam[c].setIsp3aFps(args.isp3afps)
+>>>>>>> origin/develop
 
-if 0:
-    print("=== Using custom camera tuning, and limiting RGB FPS to 10")
-    pipeline.setCameraTuningBlobPath("/home/user/Downloads/tuning_color_low_light.bin")
-    # TODO: change sensor driver to make FPS automatic (based on requested exposure time)
-    cam['rgb'].setFps(10)
+if args.camera_tuning:
+    pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
 
 # Pipeline is defined, now we can connect to the device
 with dai.Device(pipeline) as device:

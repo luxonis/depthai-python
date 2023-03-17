@@ -26,6 +26,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
     py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
     py::class_<RawStereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter));
+    py::class_<RawStereoDepthConfig::PostProcessing::BrightnessFilter> brightnessFilter(postProcessing, "BrightnessFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::SpeckleFilter> speckleFilter(postProcessing, "SpeckleFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::DecimationFilter> decimationFilter(postProcessing, "DecimationFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter));
     py::enum_<RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode> decimationMode(decimationFilter, "DecimationMode", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode));
@@ -87,6 +88,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
+        .def_readwrite("centerAlignmentShiftFactor", &RawStereoDepthConfig::AlgorithmControl::centerAlignmentShiftFactor, DOC(dai, RawStereoDepthConfig, AlgorithmControl, centerAlignmentShiftFactor))
         ;
 
     spatialFilter
@@ -124,6 +126,12 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("maxRange", &RawStereoDepthConfig::PostProcessing::ThresholdFilter::maxRange, DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter, maxRange))
         ;
 
+    brightnessFilter
+        .def(py::init<>())
+        .def_readwrite("minBrightness", &RawStereoDepthConfig::PostProcessing::BrightnessFilter::minBrightness, DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter, minBrightness))
+        .def_readwrite("maxBrightness", &RawStereoDepthConfig::PostProcessing::BrightnessFilter::maxBrightness, DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter, maxBrightness))
+        ;
+
     speckleFilter
         .def(py::init<>())
         .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, enable))
@@ -149,6 +157,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("spatialFilter", &RawStereoDepthConfig::PostProcessing::spatialFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, spatialFilter))
         .def_readwrite("temporalFilter", &RawStereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, temporalFilter))
         .def_readwrite("thresholdFilter", &RawStereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, thresholdFilter))
+        .def_readwrite("brightnessFilter", &RawStereoDepthConfig::PostProcessing::brightnessFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, brightnessFilter))
         .def_readwrite("speckleFilter", &RawStereoDepthConfig::PostProcessing::speckleFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, speckleFilter))
         .def_readwrite("decimationFilter", &RawStereoDepthConfig::PostProcessing::decimationFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, decimationFilter))
         ;
