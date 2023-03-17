@@ -159,6 +159,7 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("setCalibrationAlpha", &Camera::setCalibrationAlpha, py::arg("alpha"), DOC(dai, node, Camera, setCalibrationAlpha))
         .def("getCalibrationAlpha", &Camera::getCalibrationAlpha, DOC(dai, node, Camera, getCalibrationAlpha))
 
+        .def("setRawOutputPacked", &Camera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, Camera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("Camera").attr("Properties") = cameraProperties;
