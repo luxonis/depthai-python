@@ -186,7 +186,8 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
-    cam[c].setIsp3aFps(args.isp3afps)
+    if args.isp3afps:
+        cam[c].setIsp3aFps(args.isp3afps)
 
     if args.enable_raw:
         raw_name = 'raw_' + c
@@ -195,7 +196,7 @@ for c in cam_list:
         if args.enable_raw:
             streams.append(raw_name)
         cam[c].raw.link(xout_raw[c].input)
-        # to be added cam[c].setRawOutputPacked(False)
+        cam[c].setRawOutputPacked(False)
 
 if args.camera_tuning:
     pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
@@ -309,7 +310,11 @@ with dai.Device(pipeline) as device:
                         print('Saving:', filename)
                         frame.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
-                    frame = frame * (1 << 6)
+                    type = pkt.getType()
+                    multiplier = 1
+                    if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
+                    if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
+                    frame = frame * multiplier
                     # Debayer color for preview/png
                     if cam_type_color[c.split('_')[-1]]:
                         # See this for the ordering, at the end of page:
