@@ -120,6 +120,30 @@ Reducing latency when running NN
 In the examples above we were only streaming frames, without doing anything else on the OAK camera. This section will focus
 on how to reduce latency when also running NN model on the OAK.
 
+Resource utilization
+--------------------
+
+Configuring `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__
+on RVC will result in lower latency, but also in lower FPS.
+
+By default, NN nodes have run 2 threads and 1 NCE/thread, and it's suggested to compile the model for half of the
+available SHAVEs of the pipeline.
+
+To minimize the latency, we should allocate all resources to the single inference. To get lowest latency (which will result in a bit lower FPS),
+we suggest the following:
+
+- Setting the number of threads to 1
+- Setting the number of NCE per thread to 2
+- Compiling the model for all available SHAVE cores - `documentation here <https://docs.luxonis.com/en/latest/pages/model_conversion/#compile-tool>`__)
+
+.. code-block:: python
+
+  nn = pipeline.create(dai.node.NeuralNetwork)
+  # Same for Yolo/MobileNet (Spatial) Detection node
+  nn.setNumNCEPerInferenceThread(2)
+  nn.setNumInferenceThreads(1)
+  nn.setBlobPath('path/to/compiled/model_max_shaves.blob')
+
 Lowering camera FPS to match NN FPS
 -----------------------------------
 
