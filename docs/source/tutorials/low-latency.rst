@@ -126,10 +126,14 @@ Resource utilization
 Configuring `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__
 on RVC will result in lower latency, but also in lower FPS.
 
-By default, NN nodes have run 2 threads and 1 NCE/thread, and it's suggested to compile the model for half of the
-available SHAVEs of the pipeline.
+By default, NN nodes are running 2 threads, 1 NCE/thread, and we suggest compiling the model for half of the
+available SHAVE cores of the pipeline. This configuration will provide best throughput, as all threads can run freely.
+Compiling the model for more SHAVE cores will only provide marginal improvement, due to:
 
-To minimize the latency, we should allocate all resources to the single inference. To get lowest latency (which will result in a bit lower FPS),
+1. `Model optimizer`__ doing a great work at optimizing the model
+2. On-deivce parallelization of NN operations (splitting the operation task between multiple SHAVEs) doesn't scale linearly due to " `memory wall <https://en.wikipedia.org/wiki/Random-access_memory#Memory_wall>`__ "
+
+To minimize the latency, though, we should allocate all resources to the single inference. To get lowest latency (which will result in much lower FPS),
 we suggest the following:
 
 - Setting the number of threads to 1
