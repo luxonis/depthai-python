@@ -111,7 +111,7 @@ Encoded frames
 You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-core/tree/message_zero_copy>`__
 branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat instead of doing memcopy (as it currently does),
 so performance improvement would depend on the image sizes you are using.
-(Note: API differs and not all functionality is available as is on the `message_zero_copy` branch)
+(Note: API differs and not all functionality is available as-is on the `message_zero_copy` branch)
 
 
 Reducing latency when running NN
@@ -119,6 +119,34 @@ Reducing latency when running NN
 
 In the examples above we were only streaming frames, without doing anything else on the OAK camera. This section will focus
 on how to reduce latency when also running NN model on the OAK.
+
+Resource utilization
+--------------------
+
+Configuring `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__
+on RVC will result in lower latency, but also in lower FPS.
+
+By default, NN nodes are running 2 threads, 1 NCE/thread, and we suggest compiling the model for half of the
+available SHAVE cores of the pipeline. This configuration will provide best throughput, as all threads can run freely.
+Compiling the model for more SHAVE cores will only provide marginal improvement, due to:
+
+1. `Model optimizer <https://docs.luxonis.com/en/latest/pages/model_conversion/#model-optimizer>`__ doing a great work at optimizing the model
+2. On-device parallelization of NN operations (splitting the operation task between multiple SHAVEs) doesn't scale linearly due to " `memory wall <https://en.wikipedia.org/wiki/Random-access_memory#Memory_wall>`__ "
+
+To minimize the latency, though, we should allocate all resources to the single inference. To get lowest latency (which will result in much lower FPS),
+we suggest the following:
+
+- Setting the number of threads to 1
+- Setting the number of NCE per thread to 2
+- Compiling the model for all available SHAVE cores - `documentation here <https://docs.luxonis.com/en/latest/pages/model_conversion/#compile-tool>`__)
+
+.. code-block:: python
+
+  nn = pipeline.create(dai.node.NeuralNetwork)
+  # Same for Yolo/MobileNet (Spatial) Detection node
+  nn.setNumNCEPerInferenceThread(2)
+  nn.setNumInferenceThreads(1)
+  nn.setBlobPath('path/to/compiled/model_max_shaves.blob')
 
 Lowering camera FPS to match NN FPS
 -----------------------------------
