@@ -111,7 +111,7 @@ Encoded frames
 You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-core/tree/message_zero_copy>`__
 branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat instead of doing memcopy (as it currently does),
 so performance improvement would depend on the image sizes you are using.
-(Note: API differs and not all functionality is available as is on the `message_zero_copy` branch)
+(Note: API differs and not all functionality is available as-is on the `message_zero_copy` branch)
 
 
 Reducing latency when running NN
@@ -130,8 +130,8 @@ By default, NN nodes are running 2 threads, 1 NCE/thread, and we suggest compili
 available SHAVE cores of the pipeline. This configuration will provide best throughput, as all threads can run freely.
 Compiling the model for more SHAVE cores will only provide marginal improvement, due to:
 
-1. `Model optimizer`__ doing a great work at optimizing the model
-2. On-deivce parallelization of NN operations (splitting the operation task between multiple SHAVEs) doesn't scale linearly due to " `memory wall <https://en.wikipedia.org/wiki/Random-access_memory#Memory_wall>`__ "
+1. `Model optimizer <https://docs.luxonis.com/en/latest/pages/model_conversion/#model-optimizer>`__ doing a great work at optimizing the model
+2. On-device parallelization of NN operations (splitting the operation task between multiple SHAVEs) doesn't scale linearly due to " `memory wall <https://en.wikipedia.org/wiki/Random-access_memory#Memory_wall>`__ "
 
 To minimize the latency, though, we should allocate all resources to the single inference. To get lowest latency (which will result in much lower FPS),
 we suggest the following:
