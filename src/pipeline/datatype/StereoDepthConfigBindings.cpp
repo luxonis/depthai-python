@@ -89,6 +89,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
         .def_readwrite("centerAlignmentShiftFactor", &RawStereoDepthConfig::AlgorithmControl::centerAlignmentShiftFactor, DOC(dai, RawStereoDepthConfig, AlgorithmControl, centerAlignmentShiftFactor))
+        .def_readwrite("numInvalidateEdgePixels", &RawStereoDepthConfig::AlgorithmControl::numInvalidateEdgePixels, DOC(dai, RawStereoDepthConfig, AlgorithmControl, numInvalidateEdgePixels))
         ;
 
     spatialFilter

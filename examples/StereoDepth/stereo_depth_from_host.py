@@ -157,6 +157,7 @@ class StereoConfigHandler:
     trDecimationFactor = list()
     trDisparityShift = list()
     trCenterAlignmentShift = list()
+    trInvalidateEdgePixels = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -288,6 +289,13 @@ class StereoConfigHandler:
         print(f"centerAlignmentShiftFactor: {StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor:.2f}")
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trCenterAlignmentShift:
+            tr.set(value)
+    
+    def trackbarInvalidateEdgePixels(value):    
+        StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels = value
+        print(f"numInvalidateEdgePixels: {StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels:.2f}")
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trInvalidateEdgePixels:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -428,6 +436,7 @@ class StereoConfigHandler:
         StereoConfigHandler.trFractionalBits.append(StereoConfigHandler.Trackbar('Subpixel fractional bits', stream, 3, 5, StereoConfigHandler.config.algorithmControl.subpixelFractionalBits, StereoConfigHandler.trackbarFractionalBits))
         StereoConfigHandler.trDisparityShift.append(StereoConfigHandler.Trackbar('Disparity shift', stream, 0, 100, StereoConfigHandler.config.algorithmControl.disparityShift, StereoConfigHandler.trackbarDisparityShift))
         StereoConfigHandler.trCenterAlignmentShift.append(StereoConfigHandler.Trackbar('Center alignment shift factor', stream, 0, 100, StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor, StereoConfigHandler.trackbarCenterAlignmentShift))
+        StereoConfigHandler.trInvalidateEdgePixels.append(StereoConfigHandler.Trackbar('Invalidate edge pixels', stream, 0, 100, StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels, StereoConfigHandler.trackbarInvalidateEdgePixels))
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
