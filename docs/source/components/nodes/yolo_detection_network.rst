@@ -1,9 +1,8 @@
 YoloDetectionNetwork
 ====================
 
-Yolo detection network node is very similar to :ref:`NeuralNetwork` (in fact it extends it). The only difference is that this node
-is specifically for the **(tiny) Yolo V3/V4** NN and it decodes the result of the NN on device. This means that :code:`Out` of this node is not a
-:ref:`NNData` (a byte array) but a :ref:`ImgDetections` that can easily be used in your code.
+Yolo detection network extends :ref:`NeuralNetwork` node by also adding **YOLO NN result decoding**, which happens on the OAK device.
+This means that :code:`Out` of this node is not a :ref:`NNData` (a byte array) but a :ref:`ImgDetections` that can easily be used in your code.
 
 How to place it
 ###############

@@ -71,9 +71,9 @@ node functionalities are presented with code.
    :hidden:
    :caption: Tutorials:
 
-   tutorials/hello_world.rst
    tutorials/standalone_mode.rst
    tutorials/message_syncing.rst
+   tutorials/configuring-stereo-depth.rst
    tutorials/multiple.rst
    tutorials/maximize_fov.rst
    tutorials/debugging.rst
@@ -81,6 +81,7 @@ node functionalities are presented with code.
    tutorials/dispaying_detections.rst
    tutorials/image_quality.rst
    tutorials/low-latency.rst
+   tutorials/hello_world.rst
 
 .. toctree::
    :maxdepth: 1
