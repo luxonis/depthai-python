@@ -6,19 +6,8 @@ import numpy as np
 from pathlib import Path
 import argparse
 
-#run examples/install_requirements.py -sdai
-
-calibJsonFile = str((Path(__file__).parent / Path('./depthai_calib.json')).resolve().absolute())
-
-parser = argparse.ArgumentParser()
-parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
-args = parser.parse_args()
-
-calibData = dai.CalibrationHandler(args.calibJsonFile)
-
 # Create pipeline
 pipeline = dai.Pipeline()
-pipeline.setCalibrationData(calibData)
 
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
@@ -50,7 +39,6 @@ monoRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
 stereo.depth.link(xoutDepth.input)
-stereo.setInputResolution(1280,720)
 stereo.rectifiedLeft.link(xoutRectifiedLeft.input)
 stereo.rectifiedRight.link(xoutRectifiedRight.input)
 stereo.pixelDescriptors.link(xoutDescriptors.input)
