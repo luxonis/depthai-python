@@ -21,6 +21,7 @@
 #include "depthai-shared/common/Rect.hpp"
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
+#include "depthai-shared/common/Interpolation.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -57,6 +58,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
+    py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -347,5 +349,17 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
     ;
+    interpolation
+        .value("BILINEAR", Interpolation::BILINEAR)
+        .value("BICUBIC", Interpolation::BICUBIC)
+        .value("NEAREST_NEIGHBOR", Interpolation::NEAREST_NEIGHBOR)
+        .value("BYPASS", Interpolation::BYPASS)
+    ;
+
+    m.attr("DEFAULT_INTERPOLATION") = dai::DEFAULT_INTERPOLATION;
+    m.attr("DEFAULT_DISPARITY_DEPTH_INTERPOLATION") = dai::DEFAULT_DISPARITY_DEPTH_INTERPOLATION;
+    //backward compatibility
+    m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
+
 
 }

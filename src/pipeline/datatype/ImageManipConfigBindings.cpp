@@ -21,7 +21,6 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
     py::class_<RawImageManipConfig::CropConfig> rawImageManipCropConfig(rawImageManipConfig, "CropConfig", DOC(dai, RawImageManipConfig, CropConfig));
     py::class_<RawImageManipConfig::ResizeConfig>rawImageManipConfigResizeConfig(rawImageManipConfig, "ResizeConfig", DOC(dai, RawImageManipConfig, ResizeConfig));
     py::class_<RawImageManipConfig::FormatConfig> rawImageManipConfigFormatConfig(rawImageManipConfig, "FormatConfig", DOC(dai, RawImageManipConfig, FormatConfig));
-    py::enum_<RawImageManipConfig::Interpolation> rawImageManipConfigInterpolation(rawImageManipConfig, "Interpolation", DOC(dai, RawImageManipConfig, Interpolation));
     py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>> imageManipConfig(m, "ImageManipConfig", DOC(dai, ImageManipConfig));
 
     ///////////////////////////////////////////////////////////////////////
@@ -94,12 +93,6 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("flipVertical", &RawImageManipConfig::FormatConfig::flipVertical)
         ;
 
-    rawImageManipConfigInterpolation
-        .value("BILINEAR", RawImageManipConfig::Interpolation::BILINEAR)
-        .value("BICUBIC", RawImageManipConfig::Interpolation::BICUBIC)
-        .value("BYPASS", RawImageManipConfig::Interpolation::BYPASS)
-        ;
-
     // Message
 
     imageManipConfig
@@ -144,9 +137,6 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("getColormap", &ImageManipConfig::getColormap, DOC(dai, ImageManipConfig, getColormap))
         .def("getInterpolation", &ImageManipConfig::getInterpolation, DOC(dai, ImageManipConfig, getInterpolation))
         ;
-
-    m.attr("ImageManipConfig").attr("Interpolation") = rawImageManipConfigInterpolation;
-
 
 
 }
