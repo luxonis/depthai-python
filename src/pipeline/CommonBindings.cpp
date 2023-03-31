@@ -354,10 +354,10 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("BICUBIC", Interpolation::BICUBIC)
         .value("NEAREST_NEIGHBOR", Interpolation::NEAREST_NEIGHBOR)
         .value("BYPASS", Interpolation::BYPASS)
+        .value("DEFAULT", Interpolation::DEFAULT)
+        .value("DEFAULT_DISPARITY_DEPTH", Interpolation::DEFAULT_DISPARITY_DEPTH)
     ;
 
-    m.attr("DEFAULT_INTERPOLATION") = dai::DEFAULT_INTERPOLATION;
-    m.attr("DEFAULT_DISPARITY_DEPTH_INTERPOLATION") = dai::DEFAULT_DISPARITY_DEPTH_INTERPOLATION;
     //backward compatibility
     m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
 
