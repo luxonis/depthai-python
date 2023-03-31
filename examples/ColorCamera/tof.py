@@ -23,8 +23,10 @@ xoutDepth.setStreamName("depth")
 xoutVideo.setStreamName("video")
                      
 # Properties
-tofCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1280X962)
-tofCam.setBoardSocket(dai.CameraBoardSocket.CAM_E)
+tofCam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_240X180)
+tofCam.setBoardSocket(dai.CameraBoardSocket.CAM_F)
+tofProcess.setTofModel(dai.TofCameraProperties.TofSensorModel.TOF_IMX316)
+tofProcess.setDepthSize(240, 180)
 
 # Linking
 tofCam.raw.link(tofProcess.inputRaw)
@@ -53,10 +55,10 @@ with dai.Device(pipeline) as device:
     print('Device name:', device.getDeviceName())
 
     # Output queue will be used to get the rgb frames from the output defined above
-    qPassthrough = device.getOutputQueue(name="passtroughTof", maxSize=4, blocking=True)
-    video = device.getOutputQueue(name="video", maxSize=1, blocking=True)
+    qPassthrough = device.getOutputQueue(name="passtroughTof", maxSize=4, blocking=False)
+    video = device.getOutputQueue(name="video", maxSize=4, blocking=False)
 
-    qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=True)
+    qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     while True:
         print("videoin")
@@ -67,12 +69,13 @@ with dai.Device(pipeline) as device:
         print(inPassthrough.getData())
         # Preview
         cv2.imshow("passtroughTof(raw8)", (inPassthrough.getFrame()).clip(0, 255).astype(np.uint8))
-        
-        #cv2.imshow("depth",(inDepth.getFrame()).clip(0, 255).astype(np.uint8))
+
+        #cv2.imshow(name, (inDepth.getFrame() // 10).clip(0, 255).astype(np.uint8))
         name = "depth"
         if inDepth.getSequenceNum() % 2 :
             name += " amplitude/confidence"
-        cv2.imshow(name, (inDepth.getFrame()))
+        #cv2.imshow(name, (inDepth.getFrame()))
+        cv2.imshow(name, (inDepth.getFrame()).clip(0, 255).astype(np.uint8))
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -13,6 +13,7 @@ void bind_tofcamera(pybind11::module& m, void* pCallstack){
 
     // Node and Properties declare upfront
     py::class_<TofCameraProperties> tofCameraProperties(m, "TofCameraProperties", DOC(dai, TofCameraProperties));
+    py::enum_<TofCameraProperties::TofSensorModel> tofCameraTofSensorModel(tofCameraProperties, "TofSensorModel", DOC(dai, TofCameraProperties, TofSensorModel));
     auto tofCamera = ADD_NODE(TofCamera);
 
     ///////////////////////////////////////////////////////////////////////
@@ -31,6 +32,12 @@ void bind_tofcamera(pybind11::module& m, void* pCallstack){
     // TofCamera properties
     tofCameraProperties
         .def_readwrite("initialConfig", &TofCameraProperties::initialConfig, DOC(dai, TofCameraProperties, initialConfig))
+        ;
+
+    tofCameraTofSensorModel
+        .value("TOF_AUTO", TofCameraProperties::TofSensorModel::AUTO)
+        .value("TOF_IMX316", TofCameraProperties::TofSensorModel::IMX316)
+        .value("TOF_SAMSUNG33D", TofCameraProperties::TofSensorModel::SAMSUNG33D)
         ;
 
     // TofCamera Node
@@ -65,9 +72,8 @@ void bind_tofcamera(pybind11::module& m, void* pCallstack){
         .def("getDepthWidth", &TofCamera::getDepthWidth, DOC(dai, node, TofCamera, getDepthWidth))
         .def("getDepthHeight", &TofCamera::getDepthHeight, DOC(dai, node, TofCamera, getDepthHeight))
         .def("setDepthSize", static_cast<void(TofCamera::*)(int,int)>(&TofCamera::setDepthSize), py::arg("width"), py::arg("height"), DOC(dai, node, TofCamera, setDepthSize))
-        .def("setTofModel", static_cast<void(TofCamera::*)(dai::TofSensorModel)>(&TofCamera::setTofModel), py::arg("model"), DOC(dai, node, TofCamera, setTofModel))
+        .def("setTofModel", &TofCamera::setTofModel, py::arg("tofmodel"), DOC(dai, node, TofCamera, setTofModel))
         .def("getTofModel", &TofCamera::getTofModel, DOC(dai, node, TofCamera, getTofModel))
-
         ;
     daiNodeModule.attr("TofCamera").attr("Properties") = tofCameraProperties;
 
