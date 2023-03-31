@@ -131,10 +131,6 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     // CameraBoardSocket enum bindings
     cameraBoardSocket
         .value("AUTO", CameraBoardSocket::AUTO)
-        .value("RGB", CameraBoardSocket::RGB)
-        .value("LEFT", CameraBoardSocket::LEFT)
-        .value("RIGHT", CameraBoardSocket::RIGHT)
-        .value("CENTER", CameraBoardSocket::CENTER)
         .value("CAM_A", CameraBoardSocket::CAM_A)
         .value("CAM_B", CameraBoardSocket::CAM_B)
         .value("CAM_C", CameraBoardSocket::CAM_C)
@@ -143,6 +139,13 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("CAM_F", CameraBoardSocket::CAM_F)
         .value("CAM_G", CameraBoardSocket::CAM_G)
         .value("CAM_H", CameraBoardSocket::CAM_H)
+
+        // Deprecated
+        // TODO(themarpe) - issue a Deprecation warning
+        .value("RGB", CameraBoardSocket::RGB, "**Deprecated:** Use CAM_A or address camera by name instead")
+        .value("LEFT", CameraBoardSocket::LEFT, "**Deprecated:** Use CAM_B or address camera by name instead")
+        .value("RIGHT", CameraBoardSocket::RIGHT, "**Deprecated:** Use CAM_C or address camera by name instead")
+        .value("CENTER", CameraBoardSocket::CENTER, "**Deprecated:** Use CAM_A or address camera by name instead")
     ;
 
     // CameraSensorType enum bindings
