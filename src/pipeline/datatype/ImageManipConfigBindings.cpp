@@ -21,6 +21,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
     py::class_<RawImageManipConfig::CropConfig> rawImageManipCropConfig(rawImageManipConfig, "CropConfig", DOC(dai, RawImageManipConfig, CropConfig));
     py::class_<RawImageManipConfig::ResizeConfig>rawImageManipConfigResizeConfig(rawImageManipConfig, "ResizeConfig", DOC(dai, RawImageManipConfig, ResizeConfig));
     py::class_<RawImageManipConfig::FormatConfig> rawImageManipConfigFormatConfig(rawImageManipConfig, "FormatConfig", DOC(dai, RawImageManipConfig, FormatConfig));
+    py::enum_<RawImageManipConfig::Interpolation> rawImageManipConfigInterpolation(rawImageManipConfig, "Interpolation", DOC(dai, RawImageManipConfig, Interpolation));
     py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>> imageManipConfig(m, "ImageManipConfig", DOC(dai, ImageManipConfig));
 
     ///////////////////////////////////////////////////////////////////////
@@ -45,6 +46,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("cropConfig", &RawImageManipConfig::cropConfig)
         .def_readwrite("resizeConfig", &RawImageManipConfig::resizeConfig)
         .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
+        .def_readwrite("interpolation", &RawImageManipConfig::interpolation)
         ;
 
     rawImageManipConfigCropRect
@@ -92,6 +94,12 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("flipVertical", &RawImageManipConfig::FormatConfig::flipVertical)
         ;
 
+    rawImageManipConfigInterpolation
+        .value("BILINEAR", RawImageManipConfig::Interpolation::BILINEAR)
+        .value("BICUBIC", RawImageManipConfig::Interpolation::BICUBIC)
+        .value("BYPASS", RawImageManipConfig::Interpolation::BYPASS)
+        ;
+
     // Message
 
     imageManipConfig
@@ -120,6 +128,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
         .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
+        .def("setInterpolation", &ImageManipConfig::setInterpolation, py::arg("interpolation"), DOC(dai, ImageManipConfig, setInterpolation))
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin, DOC(dai, ImageManipConfig, getCropXMin))
@@ -133,8 +142,10 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("getFormatConfig", &ImageManipConfig::getFormatConfig, DOC(dai, ImageManipConfig, getFormatConfig))
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         .def("getColormap", &ImageManipConfig::getColormap, DOC(dai, ImageManipConfig, getColormap))
+        .def("getInterpolation", &ImageManipConfig::getInterpolation, DOC(dai, ImageManipConfig, getInterpolation))
         ;
 
+    m.attr("ImageManipConfig").attr("Interpolation") = rawImageManipConfigInterpolation;
 
 
 
