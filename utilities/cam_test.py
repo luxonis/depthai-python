@@ -57,7 +57,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4000', '4k', '5mp', '12mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -122,6 +122,7 @@ color_res_opts = {
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
+    '4000': dai.ColorCameraProperties.SensorResolution.THE_4000X3000,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
@@ -200,9 +201,9 @@ if 0:
     cam['rgb'].setFps(10)
 
 # Pipeline is defined, now we can connect to the device
-with dai.Device(pipeline) as device:
+with dai.Device() as device:
     #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
-    print('Connected cameras:')
+    print('Connected cameras:', device.getConnectedCameraFeatures())
     cam_name = {}
     for p in device.getConnectedCameraFeatures():
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
@@ -216,6 +217,8 @@ with dai.Device(pipeline) as device:
     print('USB speed:', device.getUsbSpeed().name)
 
     print('IR drivers:', device.getIrDrivers())
+
+    device.startPipeline(pipeline)
 
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
