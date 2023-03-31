@@ -30,11 +30,20 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-# Options: MEDIAN_OFF, KERNEL_3x3, KERNEL_5x5, KERNEL_7x7 (default)
-depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(lr_check)
 depth.setExtendedDisparity(extended_disparity)
 depth.setSubpixel(subpixel)
+
+config = depth.initialConfig.get()
+config.algorithmControl.enableLeftRightCheck = True
+config.algorithmControl.leftRightCheckThreshold = 10
+config.algorithmControl.replaceInvalidDisparity = False
+config.algorithmControl.outlierRemoveThreshold = 15
+config.algorithmControl.outlierCensusThreshold = 32
+config.algorithmControl.outlierDiffThreshold = 4
+config.costMatching.confidenceThreshold = 245
+config.costAggregation.localAggregationMode = dai.StereoDepthConfig.CostAggregation.LocalAggregationMode.AVG3x3 #CLAMP3x3, PASS3x3
+depth.initialConfig.set(config)
 
 # Linking
 monoLeft.out.link(depth.left)
