@@ -30,6 +30,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
     py::class_<RawStereoDepthConfig::PostProcessing::DecimationFilter> decimationFilter(postProcessing, "DecimationFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter));
     py::enum_<RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode> decimationMode(decimationFilter, "DecimationMode", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode));
     py::class_<RawStereoDepthConfig::CostAggregation> costAggregation(rawStereoDepthConfig, "CostAggregation", DOC(dai, RawStereoDepthConfig, CostAggregation));
+    py::enum_<RawStereoDepthConfig::CostAggregation::LocalAggregationMode> localAggregationMode(costAggregation, "LocalAggregationMode", DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode));
     py::class_<RawStereoDepthConfig::CostMatching> costMatching(rawStereoDepthConfig, "CostMatching", DOC(dai, RawStereoDepthConfig, CostMatching));
     py::class_<RawStereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters));
     py::enum_<RawStereoDepthConfig::CostMatching::DisparityWidth> costMatchingDisparityWidth(costMatching, "DisparityWidth", DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth));
@@ -87,6 +88,10 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
         .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
         .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
+        .def_readwrite("replaceInvalidDisparity", &RawStereoDepthConfig::AlgorithmControl::replaceInvalidDisparity, DOC(dai, RawStereoDepthConfig, AlgorithmControl, replaceInvalidDisparity))
+        .def_readwrite("outlierRemoveThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierRemoveThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierRemoveThreshold))
+        .def_readwrite("outlierCensusThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierCensusThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierCensusThreshold))
+        .def_readwrite("outlierDiffThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierDiffThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierDiffThreshold))
         ;
 
     spatialFilter
@@ -191,6 +196,13 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("linearEquationParameters", &RawStereoDepthConfig::CostMatching::linearEquationParameters, DOC(dai, RawStereoDepthConfig, CostMatching, linearEquationParameters))
         ;
 
+    // KernelSize
+    localAggregationMode
+        .value("AVG3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::AVG3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, AVG3x3))
+        .value("CLAMP3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::CLAMP3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, CLAMP3x3))
+        .value("PASS3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::PASS3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, PASS3x3))
+        ;
+
     costAggregation
         .def(py::init<>())
         .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
@@ -198,6 +210,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("horizontalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
         .def_readwrite("verticalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
         .def_readwrite("verticalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
+        .def_readwrite("localAggregationMode", &RawStereoDepthConfig::CostAggregation::localAggregationMode, DOC(dai, RawStereoDepthConfig, CostAggregation, localAggregationMode))
         ;
 
     rawStereoDepthConfig
