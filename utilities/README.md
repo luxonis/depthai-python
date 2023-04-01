@@ -27,6 +27,13 @@ Optionally, append `--runtime-tmpdir [path or .]` to modify where the temporary 
 
 
 ## Cam Test
+Run:
+```sh
+python3 cam_test.py
+```
+To start cam test with GUI.  
+Run cam_test.py with args to start cam test without GUI:  
+
 ### Bundled executable
 Requirements:
 ```
