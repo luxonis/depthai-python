@@ -6,6 +6,7 @@
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
+#include "depthai-shared/device/CrashDump.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -321,6 +322,13 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DeviceBase> deviceBase(m, "DeviceBase", DOC(dai, DeviceBase));
     py::class_<Device, DeviceBase> device(m, "Device", DOC(dai, Device));
     py::class_<Device::Config> deviceConfig(device, "Config", DOC(dai, DeviceBase, Config));
+    py::class_<CrashDump> crashDump(m, "CrashDump", DOC(dai, CrashDump));
+    py::class_<CrashDump::CrashReport> crashReport(crashDump, "CrashReport", DOC(dai, CrashDump, CrashReport));
+    py::class_<CrashDump::CrashReport::ErrorSourceInfo> errorSourceInfo(crashReport, "ErrorSourceInfo", DOC(dai, CrashDump, CrashReport, ErrorSourceInfo));
+    py::class_<CrashDump::CrashReport::ErrorSourceInfo::AssertContext> assertContext(errorSourceInfo, "AssertContext", DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, AssertContext));
+    py::class_<CrashDump::CrashReport::ErrorSourceInfo::TrapContext> trapContext(errorSourceInfo, "TrapContext", DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, TrapContext));
+    py::class_<CrashDump::CrashReport::ThreadCallstack> threadCallstack(crashReport, "ThreadCallstack", DOC(dai, CrashDump, CrashReport, ThreadCallstack));
+    py::class_<CrashDump::CrashReport::ThreadCallstack::CallstackContext> callstackContext(threadCallstack, "CallstackContext", DOC(dai, CrashDump, CrashReport, ThreadCallstack, CallstackContext));
     py::class_<BoardConfig> boardConfig(m, "BoardConfig", DOC(dai, BoardConfig));
     py::class_<BoardConfig::USB> boardConfigUsb(boardConfig, "USB", DOC(dai, BoardConfig, USB));
     py::class_<BoardConfig::Network> boardConfigNetwork(boardConfig, "Network", DOC(dai, BoardConfig, Network));
@@ -447,21 +455,21 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind BoardConfig
     boardConfig
         .def(py::init<>())
-        .def_readwrite("usb", &BoardConfig::usb)
-        .def_readwrite("network", &BoardConfig::network)
-        .def_readwrite("sysctl", &BoardConfig::sysctl)
-        .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs)
-        .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs)
-        .def_readwrite("gpio", &BoardConfig::gpio)
-        .def_readwrite("uart", &BoardConfig::uart)
-        .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock)
-        .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock)
-        .def_readwrite("mipi4LaneRgb", &BoardConfig::mipi4LaneRgb)
-        .def_readwrite("emmc", &BoardConfig::emmc)
-        .def_readwrite("logPath", &BoardConfig::logPath)
-        .def_readwrite("logSizeMax", &BoardConfig::logSizeMax)
-        .def_readwrite("logVerbosity", &BoardConfig::logVerbosity)
-        .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints)
+        .def_readwrite("usb", &BoardConfig::usb, DOC(dai, BoardConfig, usb))
+        .def_readwrite("network", &BoardConfig::network, DOC(dai, BoardConfig, network))
+        .def_readwrite("sysctl", &BoardConfig::sysctl, DOC(dai, BoardConfig, sysctl))
+        .def_readwrite("watchdogTimeoutMs", &BoardConfig::watchdogTimeoutMs, DOC(dai, BoardConfig, watchdogTimeoutMs))
+        .def_readwrite("watchdogInitialDelayMs", &BoardConfig::watchdogInitialDelayMs, DOC(dai, BoardConfig, watchdogInitialDelayMs))
+        .def_readwrite("gpio", &BoardConfig::gpio, DOC(dai, BoardConfig, gpio))
+        .def_readwrite("uart", &BoardConfig::uart, DOC(dai, BoardConfig, uart))
+        .def_readwrite("pcieInternalClock", &BoardConfig::pcieInternalClock, DOC(dai, BoardConfig, pcieInternalClock))
+        .def_readwrite("usb3PhyInternalClock", &BoardConfig::usb3PhyInternalClock, DOC(dai, BoardConfig, usb3PhyInternalClock))
+        .def_readwrite("mipi4LaneRgb", &BoardConfig::mipi4LaneRgb, DOC(dai, BoardConfig, mipi4LaneRgb))
+        .def_readwrite("emmc", &BoardConfig::emmc, DOC(dai, BoardConfig, emmc))
+        .def_readwrite("logPath", &BoardConfig::logPath, DOC(dai, BoardConfig, logPath))
+        .def_readwrite("logSizeMax", &BoardConfig::logSizeMax, DOC(dai, BoardConfig, logSizeMax))
+        .def_readwrite("logVerbosity", &BoardConfig::logVerbosity, DOC(dai, BoardConfig, logVerbosity))
+        .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints, DOC(dai, BoardConfig, logDevicePrints))
     ;
 
     // Bind Device::Config
@@ -470,6 +478,65 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("version", &Device::Config::version)
         .def_readwrite("board", &Device::Config::board)
         .def_readwrite("nonExclusiveMode", &Device::Config::nonExclusiveMode)
+    ;
+
+    // Bind CrashDump
+    crashDump
+        .def(py::init<>())
+        .def("serializeToJson", &CrashDump::serializeToJson, DOC(dai, CrashDump, serializeToJson))
+        
+        .def_readwrite("crashReports", &CrashDump::crashReports, DOC(dai, CrashDump, crashReports))
+        .def_readwrite("depthaiCommitHash", &CrashDump::depthaiCommitHash, DOC(dai, CrashDump, depthaiCommitHash))
+        .def_readwrite("deviceId", &CrashDump::deviceId, DOC(dai, CrashDump, deviceId))
+    ;
+
+    crashReport
+        .def(py::init<>())
+        .def_readwrite("processor", &CrashDump::CrashReport::processor, DOC(dai, CrashDump, CrashReport, processor))
+        .def_readwrite("errorSource", &CrashDump::CrashReport::errorSource, DOC(dai, CrashDump, CrashReport, errorSource))
+        .def_readwrite("crashedThreadId", &CrashDump::CrashReport::crashedThreadId, DOC(dai, CrashDump, CrashReport, crashedThreadId))
+        .def_readwrite("threadCallstack", &CrashDump::CrashReport::threadCallstack, DOC(dai, CrashDump, CrashReport, threadCallstack))
+    ;
+ 
+    errorSourceInfo
+        .def(py::init<>())
+        .def_readwrite("assertContext", &CrashDump::CrashReport::ErrorSourceInfo::assertContext, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, assertContext))
+        .def_readwrite("trapContext", &CrashDump::CrashReport::ErrorSourceInfo::trapContext, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, trapContext))
+        .def_readwrite("errorId", &CrashDump::CrashReport::ErrorSourceInfo::errorId, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, errorId))
+    ;
+
+    assertContext
+        .def(py::init<>())
+        .def_readwrite("fileName", &CrashDump::CrashReport::ErrorSourceInfo::AssertContext::fileName, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, AssertContext, fileName))
+        .def_readwrite("functionName", &CrashDump::CrashReport::ErrorSourceInfo::AssertContext::functionName, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, AssertContext, functionName))
+        .def_readwrite("line", &CrashDump::CrashReport::ErrorSourceInfo::AssertContext::line, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, AssertContext, line))
+    ;
+
+    trapContext
+        .def(py::init<>())
+        .def_readwrite("trapNumber", &CrashDump::CrashReport::ErrorSourceInfo::TrapContext::trapNumber, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, TrapContext, trapNumber))
+        .def_readwrite("trapAddress", &CrashDump::CrashReport::ErrorSourceInfo::TrapContext::trapAddress, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, TrapContext, trapAddress))
+        .def_readwrite("trapName", &CrashDump::CrashReport::ErrorSourceInfo::TrapContext::trapName, DOC(dai, CrashDump, CrashReport, ErrorSourceInfo, TrapContext, trapName))
+    ;
+
+    threadCallstack
+        .def(py::init<>())
+        .def_readwrite("threadId", &CrashDump::CrashReport::ThreadCallstack::threadId, DOC(dai, CrashDump, CrashReport, ThreadCallstack, threadId))
+        .def_readwrite("threadName", &CrashDump::CrashReport::ThreadCallstack::threadName, DOC(dai, CrashDump, CrashReport, ThreadCallstack, threadName))
+        .def_readwrite("stackBottom", &CrashDump::CrashReport::ThreadCallstack::stackBottom, DOC(dai, CrashDump, CrashReport, ThreadCallstack, stackBottom))
+        .def_readwrite("stackTop", &CrashDump::CrashReport::ThreadCallstack::stackTop, DOC(dai, CrashDump, CrashReport, ThreadCallstack, stackTop))
+        .def_readwrite("stackPointer", &CrashDump::CrashReport::ThreadCallstack::stackPointer, DOC(dai, CrashDump, CrashReport, ThreadCallstack, stackPointer))
+        .def_readwrite("instructionPointer", &CrashDump::CrashReport::ThreadCallstack::instructionPointer, DOC(dai, CrashDump, CrashReport, ThreadCallstack, instructionPointer))
+        .def_readwrite("threadStatus", &CrashDump::CrashReport::ThreadCallstack::threadStatus, DOC(dai, CrashDump, CrashReport, ThreadCallstack, threadStatus))
+        .def_readwrite("callStack", &CrashDump::CrashReport::ThreadCallstack::callStack, DOC(dai, CrashDump, CrashReport, ThreadCallstack, callStack))
+    ;
+
+    callstackContext
+        .def(py::init<>())
+        .def_readwrite("callSite", &CrashDump::CrashReport::ThreadCallstack::CallstackContext::callSite, DOC(dai, CrashDump, CrashReport, ThreadCallstack, CallstackContext, callSite))
+        .def_readwrite("calledTarget", &CrashDump::CrashReport::ThreadCallstack::CallstackContext::calledTarget, DOC(dai, CrashDump, CrashReport, ThreadCallstack, CallstackContext, calledTarget))
+        .def_readwrite("framePointer", &CrashDump::CrashReport::ThreadCallstack::CallstackContext::framePointer, DOC(dai, CrashDump, CrashReport, ThreadCallstack, CallstackContext, framePointer))
+        .def_readwrite("context", &CrashDump::CrashReport::ThreadCallstack::CallstackContext::context, DOC(dai, CrashDump, CrashReport, ThreadCallstack, CallstackContext, context))
     ;
 
     // Bind constructors
@@ -519,9 +586,16 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getLogLevel", [](DeviceBase& d) { py::gil_scoped_release release; return d.getLogLevel(); }, DOC(dai, DeviceBase, getLogLevel))
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
+        .def("getCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCrashDump(); }, DOC(dai, DeviceBase, getCrashDump))
+        .def("hasCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.hasCrashDump(); }, DOC(dai, DeviceBase, hasCrashDump))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
+        .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
+        .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))
+        .def("getEmbeddedIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmbeddedIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getEmbeddedIMUFirmwareVersion))
+        .def("startIMUFirmwareUpdate", [](DeviceBase& d, bool forceUpdate) { py::gil_scoped_release release; return d.startIMUFirmwareUpdate(forceUpdate); }, py::arg("forceUpdate") = false, DOC(dai, DeviceBase, startIMUFirmwareUpdate))
+        .def("getIMUFirmwareUpdateStatus", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareUpdateStatus(); }, DOC(dai, DeviceBase, getIMUFirmwareUpdateStatus))
         .def("getDdrMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getDdrMemoryUsage(); }, DOC(dai, DeviceBase, getDdrMemoryUsage))
         .def("getCmxMemoryUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCmxMemoryUsage(); }, DOC(dai, DeviceBase, getCmxMemoryUsage))
         .def("getLeonCssHeapUsage", [](DeviceBase& d) { py::gil_scoped_release release; return d.getLeonCssHeapUsage(); }, DOC(dai, DeviceBase, getLeonCssHeapUsage))
