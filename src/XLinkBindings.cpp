@@ -109,6 +109,8 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .value("X_LINK_BOOTLOADER", X_LINK_BOOTLOADER)
         .value("X_LINK_FLASH_BOOTED", X_LINK_BOOTED_NON_EXCLUSIVE)
         .value("X_LINK_BOOTED_NON_EXCLUSIVE", X_LINK_BOOTED_NON_EXCLUSIVE)
+        .value("X_LINK_GATE", X_LINK_GATE)
+        .value("X_LINK_GATE_BOOTED", X_LINK_GATE_BOOTED)
         .export_values()
         ;
 
