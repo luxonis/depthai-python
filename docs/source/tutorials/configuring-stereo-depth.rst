@@ -287,7 +287,7 @@ Stereo subpixel effect on layering
 Default stereo depth output has 0..95 disparity pixels, which would produce 96 unique depth values. This can especially be seen when using pointcloud representation
 and seeing how there are discrete "layers" of points, instead of a smooth transition:
 
-.. image:: /_static/images/components/layered-pointcloud.png
+.. image:: /_static/images/components/pointcloud_layering.jpg
 
 This layering can especially be seen at longer distances, where these layers are exponentially further apart.
 
