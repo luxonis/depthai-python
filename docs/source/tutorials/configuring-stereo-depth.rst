@@ -375,7 +375,7 @@ as the other 2 methods above do.
 Disparity shift will shift the starting point of the disparity search, which will significantly decrease MaxZ, but
 it will also decrease the MinZ. Disparity shift can be combined with extended/subpixel/LR-check modes.
 
-.. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
+.. image:: /_static/images/components/disparity_shift.png
 
 The **Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Depth from disparity`.
 Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
