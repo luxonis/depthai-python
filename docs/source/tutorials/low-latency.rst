@@ -44,7 +44,7 @@ disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example
      - `link <https://user-images.githubusercontent.com/18037362/162675393-e3fb08fb-0f17-49d0-85d0-31ae7b5af0f9.png>`__
 
 - **Time-to-Host** is measured time between frame timestamp (:code:`imgFrame.getTimestamp()`) and host timestamp when the frame is received (:code:`dai.Clock.now()`).
-- **Histogram** shows how much Time-to-Host varies frame to frame. Y axis represents number of frame that occured at that time while the X axis represents microseconds.
+- **Histogram** shows how much Time-to-Host varies frame to frame. Y axis represents number of frame that occurred at that time while the X axis represents microseconds.
 - **Bandwidth** is calculated bandwidth required to stream specified frames at specified FPS.
 
 Encoded frames
@@ -111,8 +111,49 @@ Encoded frames
 You can also reduce frame latency by using `Zero-Copy <https://github.com/luxonis/depthai-core/tree/message_zero_copy>`__
 branch of the DepthAI. This will pass pointers (at XLink level) to cv2.Mat instead of doing memcopy (as it currently does),
 so performance improvement would depend on the image sizes you are using.
-(Note: API differs and not all functionality is available as-is on the `message_zero_copy` branch)
+(Note: API differs and not all functionality is available as is on the `message_zero_copy` branch)
 
+PoE latency
+###########
+
+On PoE, the latency can vary quite a bit due to a number of factors:
+
+* **Network** itself. Eg. if you are in a large network with many nodes, the latency will be higher compared to using a direct connection.
+* There's a **bottleneck** in **bandwidth**:
+
+  * Perhaps some network link is 10mbps/100mbps instead of full 1gbps (due to switch/network card..). You can test this with `PoE Test script <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#poe-test-script>`__ (``speed`` should be 1000).
+  * Network/computer is saturated with other traffic. You can test the actual bandwidth with `OAK bandwidth test <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-bandwidth-test>`__ script. With direct link I got ~800mbps downlink and ~210mbps uplink.
+
+* Computer's **Network Interface Card settings**, `documentation here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#network-interface-controller-settings>`__
+* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should.
+* Another potential way to improve PoE latency would be to fine-tune network settings, like MTU, TCP window size, etc. (see `here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#advance-network-settings>`__ for more info)
+
+Bandwidth
+#########
+
+With large, unencoded frames, one can quickly saturate the bandwidth even at 30FPS, especially on PoE devices (1gbps link):
+
+.. code-block::bash
+
+  4K NV12/YUV420 frames: 3840 * 2160 * 1.5 * 30fps * 8bits = 3 gbps
+  1080P NV12/YUV420 frames: 1920 * 1080 * 1.5 * 30fps * 8bits = 747 mbps
+  720P NV12/YUV420 frames: 1280 * 720 * 1.5 * 30fps * 8bits = 331 mbps
+
+  1080P RGB frames: 1920 * 1080 * 3 * 30fps * 8bits = 1.5 gbps
+
+  800P depth frames: 1280 * 800 * 2 * 30fps * 8bits = 492 mbps
+  400P depth frames: 640 * 400 * 2 * 30fps * 8bits = 123 mbps
+
+  800P mono frames: 1280 * 800 * 1 * 30fps * 8bits = 246 mbps
+  400P mono frames: 640 * 400 * 1 * 30fps * 8bits = 62 mbps
+
+The third value in the formula is byte/pixel, which is 1.5 for NV12/YUV420, 3 for RGB, and 2 for depth frames, and 1
+for mono (grayscale) frames. It's either 1 (normal) or 2 (subpixel mode) for disparity frames.
+
+A few options to reduce bandwidth:
+
+- Encode frames (H.264, H.265, MJPEG) on-device using :ref:`VideoEncoder node <VideoEncoder>`
+- Reduce FPS/resolution/number of streams
 
 Reducing latency when running NN
 ################################
@@ -120,36 +161,65 @@ Reducing latency when running NN
 In the examples above we were only streaming frames, without doing anything else on the OAK camera. This section will focus
 on how to reduce latency when also running NN model on the OAK.
 
-Resource utilization
---------------------
+1. Increasing NN resources
+--------------------------
 
-Configuring `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__
-on RVC will result in lower latency, but also in lower FPS.
-
-By default, NN nodes are running 2 threads, 1 NCE/thread, and we suggest compiling the model for half of the
-available SHAVE cores of the pipeline. This configuration will provide best throughput, as all threads can run freely.
-Compiling the model for more SHAVE cores will only provide marginal improvement, due to:
-
-1. `Model optimizer <https://docs.luxonis.com/en/latest/pages/model_conversion/#model-optimizer>`__ doing a great work at optimizing the model
-2. On-device parallelization of NN operations (splitting the operation task between multiple SHAVEs) doesn't scale linearly due to " `memory wall <https://en.wikipedia.org/wiki/Random-access_memory#Memory_wall>`__ "
-
-To minimize the latency, though, we should allocate all resources to the single inference. To get lowest latency (which will result in much lower FPS),
-we suggest the following:
-
-- Setting the number of threads to 1
-- Setting the number of NCE per thread to 2
-- Compiling the model for all available SHAVE cores - `documentation here <https://docs.luxonis.com/en/latest/pages/model_conversion/#compile-tool>`__)
+One option to reduce latency is to increase the NN resources. This can be done by changing the number of allocated NCEs and SHAVES (see HW accelerator `docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__).
+`Compile Tool <https://docs.luxonis.com/en/latest/pages/model_conversion/#compile-tool>`__ can compile a model for more SHAVE cores. To allocate more NCEs, you can use API below:
 
 .. code-block:: python
 
-  nn = pipeline.create(dai.node.NeuralNetwork)
-  # Same for Yolo/MobileNet (Spatial) Detection node
-  nn.setNumNCEPerInferenceThread(2)
-  nn.setNumInferenceThreads(1)
-  nn.setBlobPath('path/to/compiled/model_max_shaves.blob')
+  import depthai as dai
 
-Lowering camera FPS to match NN FPS
------------------------------------
+  pipeline = dai.Pipeline()
+  # nn = pipeline.createNeuralNetwork()
+  # nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
+  nn = pipeline.create(dai.node.YoloDetectionNetwork)
+  nn.setNumInferenceThreads(1) # By default 2 threads are used
+  nn.setNumNCEPerInferenceThread(2) # By default, 1 NCE is used per thread
+
+Models usually run at **max FPS** when using 2 threads (1 NCE/Thread), and compiling model for ``AVAILABLE_SHAVES / 2``.
+
+Example of FPS & latency comparison for YoloV7-tiny:
+
+.. list-table::
+   :header-rows: 1
+
+   * - NN resources
+     - Camera FPS
+     - Latency
+     - NN FPS
+   * - **6 SHAVEs, 2x Threads (1NCE/Thread)**
+     - 15
+     - 155 ms
+     - 15
+   * - 6 SHAVEs, 2x Threads (1NCE/Thread)
+     - 14
+     - 149 ms
+     - 14
+   * - 6 SHAVEs, 2x Threads (1NCE/Thread)
+     - 13
+     - 146 ms
+     - 13
+   * - 6 SHAVEs, 2x Threads (1NCE/Thread)
+     - 10
+     - 141 ms
+     - 10
+   * - **13 SHAVEs, 1x Thread (2NCE/Thread)**
+     - 30
+     - 145 ms
+     - 11.6
+   * - 13 SHAVEs, 1x Thread (2NCE/Thread)
+     - 12
+     - 128 ms
+     - 12
+   * - 13 SHAVEs, 1x Thread (2NCE/Thread)
+     - 10
+     - 118 ms
+     - 10
+
+2. Lowering camera FPS to match NN FPS
+--------------------------------------
 
 Lowering FPS to not exceed NN capabilities typically provides the best latency performance, since the NN is able to
 start the inference as soon as a new frame is available.
@@ -167,11 +237,11 @@ This time includes the following:
 - And finally, eventual extra latency until it reaches the app
 
 Note: if the FPS is increased slightly more, towards 19..21 FPS, an extra latency of about 10ms appears, that we believe
-is related to firmware. We are activaly looking for improvements for lower latencies.
+is related to firmware. We are actively looking for improvements for lower latencies.
 
 
-NN input queue size and blocking behaviour
-------------------------------------------
+3. NN input queue size and blocking behavior
+--------------------------------------------
 
 If the app has ``detNetwork.input.setBlocking(False)``, but the queue size doesn't change, the following adjustment
 may help improve latency performance:
