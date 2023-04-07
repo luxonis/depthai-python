@@ -4,7 +4,7 @@
 #include <memory>
 
 // depthai
-#include "depthai/pipeline/datatype/TofCameraConfig.hpp"
+#include "depthai/pipeline/datatype/ToFConfig.hpp"
 
 //pybind
 #include <pybind11/chrono.h>
@@ -12,12 +12,12 @@
 
 // #include "spdlog/spdlog.h"
 
-void bind_tofcameraconfig(pybind11::module& m, void* pCallstack){
+void bind_tofconfig(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawTofCameraConfig, RawBuffer, std::shared_ptr<RawTofCameraConfig>> rawTofCameraConfig(m, "RawTofCameraConfig", DOC(dai, RawTofCameraConfig));
-    py::class_<TofCameraConfig, Buffer, std::shared_ptr<TofCameraConfig>> tofCameraConfig(m, "TofCameraConfig", DOC(dai, TofCameraConfig));
+    py::class_<RawToFConfig, RawBuffer, std::shared_ptr<RawToFConfig>> rawToFConfig(m, "RawToFConfig", DOC(dai, RawToFConfig));
+    py::class_<ToFConfig, Buffer, std::shared_ptr<ToFConfig>> tofConfig(m, "ToFConfig", DOC(dai, ToFConfig));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -33,18 +33,18 @@ void bind_tofcameraconfig(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // Metadata / raw
-    rawTofCameraConfig
+    rawToFConfig
         .def(py::init<>())
-        .def_readwrite("dummy", &RawTofCameraConfig::dummy, DOC(dai, RawTofCameraConfig, dummy))
+        .def_readwrite("dummy", &RawToFConfig::dummy, DOC(dai, RawToFConfig, dummy))
         ;
 
     // Message
-    tofCameraConfig
+    tofConfig
         .def(py::init<>())
-        .def(py::init<std::shared_ptr<RawTofCameraConfig>>())
+        .def(py::init<std::shared_ptr<RawToFConfig>>())
 
-        .def("set", &TofCameraConfig::set, py::arg("config"), DOC(dai, TofCameraConfig, set))
-        .def("get", &TofCameraConfig::get, DOC(dai, TofCameraConfig, get))
+        .def("set", &ToFConfig::set, py::arg("config"), DOC(dai, ToFConfig, set))
+        .def("get", &ToFConfig::get, DOC(dai, ToFConfig, get))
         ;
 
 }

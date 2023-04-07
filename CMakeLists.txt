@@ -123,7 +123,7 @@ set(SOURCE_LIST
     src/pipeline/node/IMUBindings.cpp
     src/pipeline/node/EdgeDetectorBindings.cpp
     src/pipeline/node/FeatureTrackerBindings.cpp
-    src/pipeline/node/TofCameraBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
     src/pipeline/node/WarpBindings.cpp
@@ -137,7 +137,7 @@ set(SOURCE_LIST
     src/pipeline/datatype/CameraControlBindings.cpp
     src/pipeline/datatype/EdgeDetectorConfigBindings.cpp
     src/pipeline/datatype/FeatureTrackerConfigBindings.cpp
-    src/pipeline/datatype/TofCameraConfigBindings.cpp
+    src/pipeline/datatype/ToFConfigBindings.cpp
     src/pipeline/datatype/ImageManipConfigBindings.cpp
     src/pipeline/datatype/ImgDetectionsBindings.cpp
     src/pipeline/datatype/ImgFrameBindings.cpp

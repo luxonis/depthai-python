@@ -9,7 +9,7 @@ pipeline = dai.Pipeline()
 
 # Define source and output
 tofCam = pipeline.create(dai.node.ColorCamera)
-tofProcess = pipeline.create(dai.node.TofCamera)
+tofProcess = pipeline.create(dai.node.ToF)
 
 #isp
 xoutVideo = pipeline.create(dai.node.XLinkOut)
