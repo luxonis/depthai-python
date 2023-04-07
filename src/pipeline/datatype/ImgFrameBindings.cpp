@@ -206,6 +206,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 break;
 
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                     shape = {img.getHeight(), img.getWidth()};
                     dtype = py::dtype::of<uint16_t>();
                 break;
@@ -307,6 +310,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
 
                 case ImgFrame::Type::RAW8:
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                 case ImgFrame::Type::GRAY8:
                 case ImgFrame::Type::GRAYF16:
                 default:
