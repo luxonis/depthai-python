@@ -41,6 +41,7 @@ import cv2
 import numpy as np
 import argparse
 import depthai as dai
+import numpy as np
 import collections
 import time
 from itertools import cycle
@@ -49,15 +50,16 @@ from pathlib import Path
 def socket_type_pair(arg):
     socket, type = arg.split(',')
     if not (socket in ['rgb', 'left', 'right', 'camd']):  raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color']): raise ValueError("")
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']): raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
-    return [socket, is_color]
+    is_tof = True if type in ['t', 'tof'] else False
+    return [socket, is_color, is_tof]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True], ['left', False], ['right', False], ['camd', True]],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
-                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
+                    default=[['rgb', True, True], ['left', False, False], ['right', False, False], ['camd', True, False]],
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
+                    "E.g: -cams rgb,m right,c . Default: rgb,t left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
 parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '48mp'},
@@ -76,15 +78,23 @@ parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
 parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
+parser.add_argument('-tofraw', '--tof-raw', action='store_true',
+                    help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofcm', '--tof-cm', action='store_true',
+                    help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
+                    help="Show RGB `preview` stream instead of full size `isp`")
 args = parser.parse_args()
 
 cam_list = []
 cam_type_color = {}
+cam_type_tof = {}
 print("Enabled cameras:")
-for socket, is_color in args.cameras:
+for socket, is_color, is_tof in args.cameras:
     cam_list.append(socket)
     cam_type_color[socket] = is_color
-    print(socket.rjust(7), ':', 'color' if is_color else 'mono')
+    cam_type_tof[socket] = is_tof
+    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -163,12 +173,23 @@ for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
     streams.append(c)
-    if cam_type_color[c]:
+    if cam_type_tof[c]:
+        cam[c] = pipeline.createColorCamera()  # .createCamera()
+        if args.tof_raw:
+            cam[c].raw.link(xout[c].input)
+        else:
+            tof[c] = pipeline.createToF()
+            cam[c].raw.link(tof[c].input)
+            tof[c].depth.link(xout[c].input)
+    elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if args.rgb_preview:
+            cam[c].preview.link(xout[c].input)
+        else:
+            cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -274,6 +295,9 @@ with dai.Device(pipeline) as device:
     control = 'none'
     show = False
 
+    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom[0] = [0, 0, 0]
+
     print("Cam:", *['     ' + c.ljust(8) for c in cam_list], "[host | capture timestamp]")
 
     capture_list = []
@@ -285,6 +309,13 @@ with dai.Device(pipeline) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
+                if cam_type_tof[c]:
+                    # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
+                    frame = (frame // 10).clip(0, 255).astype(np.uint8)
+                else:
+                    frame = (frame.view(np.int16).astype(np.float)).reshape(shape)
+                    frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                    frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "

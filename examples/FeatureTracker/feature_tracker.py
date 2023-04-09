@@ -76,7 +76,7 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 monoLeft = pipeline.create(dai.node.MonoCamera)
-monoRight = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.ColorCamera)
 featureTrackerLeft = pipeline.create(dai.node.FeatureTracker)
 featureTrackerRight = pipeline.create(dai.node.FeatureTracker)
 
@@ -95,7 +95,7 @@ xinTrackedFeaturesConfig.setStreamName("trackedFeaturesConfig")
 # Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Linking
@@ -104,7 +104,7 @@ featureTrackerLeft.passthroughInputImage.link(xoutPassthroughFrameLeft.input)
 featureTrackerLeft.outputFeatures.link(xoutTrackedFeaturesLeft.input)
 xinTrackedFeaturesConfig.out.link(featureTrackerLeft.inputConfig)
 
-monoRight.out.link(featureTrackerRight.inputImage)
+monoRight.isp.link(featureTrackerRight.inputImage)
 featureTrackerRight.passthroughInputImage.link(xoutPassthroughFrameRight.input)
 featureTrackerRight.outputFeatures.link(xoutTrackedFeaturesRight.input)
 xinTrackedFeaturesConfig.out.link(featureTrackerRight.inputConfig)
@@ -142,8 +142,8 @@ with dai.Device(pipeline) as device:
         leftFrame = cv2.cvtColor(passthroughFrameLeft, cv2.COLOR_GRAY2BGR)
 
         inPassthroughFrameRight = passthroughImageRightQueue.get()
-        passthroughFrameRight = inPassthroughFrameRight.getFrame()
-        rightFrame = cv2.cvtColor(passthroughFrameRight, cv2.COLOR_GRAY2BGR)
+        passthroughFrameRight = inPassthroughFrameRight.getCvFrame()
+        rightFrame = passthroughFrameRight # cv2.cvtColor(passthroughFrameRight, cv2.COLOR_GRAY2BGR)
 
         trackedFeaturesLeft = outputFeaturesLeftQueue.get().trackedFeatures
         leftFeatureDrawer.trackFeaturePath(trackedFeaturesLeft)
