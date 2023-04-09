@@ -166,19 +166,21 @@ control = pipeline.createXLinkIn()
 control.setStreamName('control')
 
 cam = {}
+tof = {}
 xout = {}
 xout_raw = {}
 streams = []
 for c in cam_list:
+    tofEnableRaw = False
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
     streams.append(c)
     if cam_type_tof[c]:
-        cam[c] = pipeline.createColorCamera()  # .createCamera()
+        cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
         if args.tof_raw:
-            cam[c].raw.link(xout[c].input)
+            tofEnableRaw = True
         else:
-            tof[c] = pipeline.createToF()
+            tof[c] = pipeline.create(dai.node.ToF)
             cam[c].raw.link(tof[c].input)
             tof[c].depth.link(xout[c].input)
     elif cam_type_color[c]:
@@ -210,12 +212,11 @@ for c in cam_list:
     if args.isp3afps:
         cam[c].setIsp3aFps(args.isp3afps)
 
-    if args.enable_raw:
+    if args.enable_raw or tofEnableRaw:
         raw_name = 'raw_' + c
         xout_raw[c] = pipeline.create(dai.node.XLinkOut)
         xout_raw[c].setStreamName(raw_name)
-        if args.enable_raw:
-            streams.append(raw_name)
+        streams.append(raw_name)
         cam[c].raw.link(xout_raw[c].input)
         cam[c].setRawOutputPacked(False)
 
@@ -309,13 +310,14 @@ with dai.Device(pipeline) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
-                if cam_type_tof[c]:
-                    # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
-                    frame = (frame // 10).clip(0, 255).astype(np.uint8)
-                else:
-                    frame = (frame.view(np.int16).astype(np.float)).reshape(shape)
-                    frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-                    frame = cv2.applyColorMap(frame, jet_custom)
+                if cam_type_tof[c.split('_')[-1]] and not c.startswith('raw_'):
+                    if args.tof_cm:
+                        # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
+                        frame = (frame // 10).clip(0, 255).astype(np.uint8)
+                    else:
+                        frame = (frame.view(np.int16).astype(float))
+                        frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
@@ -346,7 +348,7 @@ with dai.Device(pipeline) as device:
                     if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
                     if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
                     frame = frame * multiplier
-                    # Debayer color for preview/png
+                    # Debayer as color for preview/png
                     if cam_type_color[c.split('_')[-1]]:
                         # See this for the ordering, at the end of page:
                         # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
