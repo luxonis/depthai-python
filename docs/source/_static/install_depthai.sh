@@ -13,7 +13,7 @@ while [ "$path_correct" = "false" ]
 do
   echo ""
   echo 'ENTER absolute installation path for depthai or leave empty and default path: $HOME will be used.'
-  read install_path < /dev/tty
+  read -e install_path < /dev/tty
   echo ""
 
   if [ "$install_path" = "" ]; then
@@ -54,7 +54,7 @@ do
     echo "No python version found."
     echo "Input path for python binary, version 3.8 or higher, or leave empty and python 3.10 will be installed for you."
     echo "Press any key to continue"
-    read python_binary_path < /dev/tty
+    read -e python_binary_path < /dev/tty
     # python not found and user wants to install python 3.10
     if [ "$python_binary_path" = "" ]; then
         install_python="true"
@@ -68,7 +68,7 @@ do
     if [ "$nr_1" -gt 2 ] && [ "$nr_2" -gt 7 ]; then  # first two digits of python version greater then 3.7 -> python version 3.8 or greater is allowed.
       echo "If you want to use it for installation, press ANY key, otherwise input path to python binary."
       echo "Press any key to continue"
-      read python_binary_path < /dev/tty
+      read -e python_binary_path < /dev/tty
       # user wants to use already installed python whose version is high enough
       if [ "$python_binary_path" = "" ]; then
         python_chosen="true"
@@ -76,7 +76,7 @@ do
     else
       echo "This python version is not supported by depthai. Enter path to python binary version et least 3.8, or leave empty and python 3.10 will be installed automatically."
       echo "Press any key to continue"
-      read python_binary_path < /dev/tty
+      read -e python_binary_path < /dev/tty
       # python version is too low and user wants to install python 3.10
       if [ "$python_binary_path" = "" ]; then
         install_python="true"
