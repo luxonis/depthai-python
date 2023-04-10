@@ -29,17 +29,14 @@ void bind_sync(pybind11::module& m, void* pCallstack){
 
     // // Properties
     syncProperties
-        .def_readwrite("syncPolicy", &SyncProperties::syncPolicy)
+        .def_readwrite("syncThresholdMs", &SyncProperties::syncThresholdMs, DOC(dai, SyncProperties, syncThresholdMs))
     ;
 
     // Node
     sync
-        .def_readonly("input1", &Sync::input1, DOC(dai, node, Sync, input1))
-        .def_readonly("input2", &Sync::input2, DOC(dai, node, Sync, input2))
-        .def_readonly("input3", &Sync::input3, DOC(dai, node, Sync, input3))
-        .def_readonly("output1", &Sync::output1, DOC(dai, node, Sync, output1))
-        .def_readonly("output2", &Sync::output2, DOC(dai, node, Sync, output2))
-        .def_readonly("output3", &Sync::output3, DOC(dai, node, Sync, output3))
+        .def_readonly("inputs", &Sync::inputs, DOC(dai, node, Sync, inputs))
+        .def_readonly("outputs", &Sync::outputs, DOC(dai, node, Sync, outputs))
+        .def("setSyncThresholdMs", &Sync::setSyncThresholdMs, DOC(dai, node, Sync, setSyncThresholdMs))
         ;
     daiNodeModule.attr("Sync").attr("Properties") = syncProperties;
 
