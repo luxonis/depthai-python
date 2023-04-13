@@ -3,16 +3,17 @@
 
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
-#include "depthai/pipeline/node/Sync.hpp"
+#include "depthai/pipeline/node/ToF.hpp"
 
-void bind_sync(pybind11::module& m, void* pCallstack){
+
+void bind_tof(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
     using namespace dai::node;
 
     // Node and Properties declare upfront
-    py::class_<SyncProperties> syncProperties(m, "SyncProperties");
-    auto sync = ADD_NODE(Sync);
+    py::class_<ToFProperties> tofProperties(m, "ToFProperties", DOC(dai, ToFProperties));
+    auto tof = ADD_NODE(ToF);
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -27,17 +28,19 @@ void bind_sync(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // // Properties
-    syncProperties
-        .def_readwrite("syncThresholdMs", &SyncProperties::syncThresholdMs, DOC(dai, SyncProperties, syncThresholdMs))
-    ;
-
-    // Node
-    sync
-        .def_readonly("inputs", &Sync::inputs, DOC(dai, node, Sync, inputs))
-        .def_readonly("outputs", &Sync::outputs, DOC(dai, node, Sync, outputs))
-        .def("setSyncThresholdMs", &Sync::setSyncThresholdMs, DOC(dai, node, Sync, setSyncThresholdMs))
+    // ToF properties
+    tofProperties
+        .def_readwrite("initialConfig", &ToFProperties::initialConfig, DOC(dai, ToFProperties, initialConfig))
         ;
-    daiNodeModule.attr("Sync").attr("Properties") = syncProperties;
+
+    // ToF Node
+    tof
+        .def_readonly("inputConfig", &ToF::inputConfig, DOC(dai, node, ToF, inputConfig))
+        .def_readonly("inputRaw", &ToF::inputRaw, DOC(dai, node, ToF, inputRaw))
+        .def_readonly("depth", &ToF::depth, DOC(dai, node, ToF, depth))
+        .def_readonly("passthroughInputRaw", &ToF::passthroughInputRaw, DOC(dai, node, ToF, passthroughInputRaw))
+        .def_readonly("initialConfig", &ToF::initialConfig, DOC(dai, node, ToF, initialConfig))
+        ;
+    daiNodeModule.attr("ToF").attr("Properties") = tofProperties;
 
 }

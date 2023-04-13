@@ -36,6 +36,7 @@ import os
 #os.environ["DEPTHAI_LEVEL"] = "debug"
 
 import cv2
+import numpy as np
 import argparse
 import depthai as dai
 import collections
@@ -44,7 +45,7 @@ from itertools import cycle
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'camd']):  raise ValueError("")
+    if not (socket in ['rgb', 'left', 'right', 'camd', 'came', 'camf']):  raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color']): raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     return [socket, is_color]
@@ -56,7 +57,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4000', '4k', '5mp', '12mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -66,6 +67,8 @@ parser.add_argument('-ds', '--isp-downscale', default=1, type=int,
                     help="Downscale the ISP output by this factor")
 parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
+parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
+                    help='Enable the RAW camera streams')
 args = parser.parse_args()
 
 cam_list = []
@@ -84,6 +87,8 @@ cam_socket_opts = {
     'left' : dai.CameraBoardSocket.LEFT,  # Or CAM_B
     'right': dai.CameraBoardSocket.RIGHT, # Or CAM_C
     'camd' : dai.CameraBoardSocket.CAM_D,
+    'came' : dai.CameraBoardSocket.CAM_E,
+    'camf' : dai.CameraBoardSocket.CAM_F,
 }
 
 cam_socket_to_name = {
@@ -91,6 +96,8 @@ cam_socket_to_name = {
     'LEFT' : 'left',
     'RIGHT': 'right',
     'CAM_D': 'camd',
+    'CAM_E': 'came',
+    'CAM_F': 'camf',
 }
 
 rotate = {
@@ -98,6 +105,8 @@ rotate = {
     'left' : args.rotate in ['all', 'mono'],
     'right': args.rotate in ['all', 'mono'],
     'camd' : args.rotate in ['all', 'rgb'],
+    'came' : args.rotate in ['all', 'rgb'],
+    'camf' : args.rotate in ['all', 'rgb'],
 }
 
 mono_res_opts = {
@@ -113,6 +122,7 @@ color_res_opts = {
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
+    '4000': dai.ColorCameraProperties.SensorResolution.THE_4000X3000,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
@@ -147,9 +157,12 @@ control.setStreamName('control')
 
 cam = {}
 xout = {}
+xout_raw = {}
+streams = []
 for c in cam_list:
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
+    streams.append(c)
     if cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -173,6 +186,13 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
+    if args.enable_raw:
+        raw_name = 'raw_' + c
+        xout_raw[c] = pipeline.create(dai.node.XLinkOut)
+        xout_raw[c].setStreamName(raw_name)
+        if args.enable_raw:
+            streams.append(raw_name)
+        cam[c].raw.link(xout_raw[c].input)
 
 if 0:
     print("=== Using custom camera tuning, and limiting RGB FPS to 10")
@@ -181,24 +201,29 @@ if 0:
     cam['rgb'].setFps(10)
 
 # Pipeline is defined, now we can connect to the device
-with dai.Device(pipeline) as device:
+with dai.Device() as device:
     #print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
-    print('Connected cameras:')
+    print('Connected cameras:', device.getConnectedCameraFeatures())
     cam_name = {}
     for p in device.getConnectedCameraFeatures():
         print(f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
-        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
+        socket_name = cam_socket_to_name[p.socket.name]
+        cam_name[socket_name] = p.sensorName
+        if args.enable_raw:
+            cam_name['raw_'+socket_name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
     print('IR drivers:', device.getIrDrivers())
 
+    device.startPipeline(pipeline)
+
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
     fps_capt = {}  # FPS computed based on capture timestamps from device
-    for c in cam_list:
+    for c in streams:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
         if args.resizable_windows:
@@ -253,27 +278,54 @@ with dai.Device(pipeline) as device:
 
     capture_list = []
     while True:
-        for c in cam_list:
+        for c in streams:
             pkt = q[c].tryGet()
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
-                frame = pkt.getCvFrame()
-                if c in capture_list:
-                    width, height = pkt.getWidth(), pkt.getHeight()
-                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
-                                     + '_' + str(width) + 'x' + str(height)
-                                     + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
-                                     + '_iso_' + str(pkt.getSensitivity())
-                                     + '_lens_' + str(pkt.getLensPosition())
-                                     + '_' + capture_time
-                                     + '_' + str(pkt.getSequenceNum())
-                                     + ".png"
-                                    )
-                    print("\nSaving:", capture_file_name)
-                    cv2.imwrite(capture_file_name, frame)
+                width, height = pkt.getWidth(), pkt.getHeight()
+                capture = c in capture_list
+                if capture:
+                    capture_file_info = ('capture_' + c + '_' + cam_name[c]
+                         + '_' + str(width) + 'x' + str(height)
+                         + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                         + '_iso_' + str(pkt.getSensitivity())
+                         + '_lens_' + str(pkt.getLensPosition())
+                         + '_' + capture_time
+                         + '_' + str(pkt.getSequenceNum())
+                        )
                     capture_list.remove(c)
-
+                    print()
+                if c.startswith('raw_'):
+                    # Resize is done to skip the +50 black lines we get with RVC3.
+                    # TODO: handle RAW10/RAW12 to work with getFrame/getCvFrame
+                    payload = pkt.getData().view(np.uint16).copy()
+                    payload.resize(height, width)
+                    if capture:
+                        # TODO based on getType
+                        filename = capture_file_info + '_10bit.bw'
+                        print('Saving:', filename)
+                        payload.tofile(filename)
+                    # Full range for display, use bits [15:6] of the 16-bit pixels
+                    frame = payload * (1 << 6)
+                    # Debayer color for preview/png
+                    if cam_type_color[c.split('_')[-1]]:
+                        # See this for the ordering, at the end of page:
+                        # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
+                        # TODO add bayer order to ImgFrame getType()
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BayerGB2BGR)
+                    #frame = np.ascontiguousarray(bgr)  # just in case
+                else:
+                    if capture and args.enable_raw:
+                        payload = pkt.getData()
+                        filename = capture_file_info + '_NV12.yuv'
+                        print('Saving:', filename)
+                        payload.tofile(filename)
+                    frame = pkt.getCvFrame()
+                if capture:
+                    filename = capture_file_info + '.png'
+                    print('Saving:', filename)
+                    cv2.imwrite(filename, frame)
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
@@ -283,7 +335,7 @@ with dai.Device(pipeline) as device:
         if key == ord('q'):
             break
         elif key == ord('c'):
-            capture_list = cam_list.copy()
+            capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
