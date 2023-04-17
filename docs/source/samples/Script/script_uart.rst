@@ -14,6 +14,11 @@ Demo
         <iframe src="https://www.youtube.com/embed/nbS1BczO5sE" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
+
+.. figure:: https://user-images.githubusercontent.com/18037362/232458809-a36dc418-6bb5-411f-9172-5130a926191d.jpg
+
+    Osciloscope connected to the OAK-FFC-4P UART pins
+
 Setup
 #####
 
