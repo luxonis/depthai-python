@@ -17,7 +17,7 @@ Demo
 
 .. figure:: https://user-images.githubusercontent.com/18037362/232458809-a36dc418-6bb5-411f-9172-5130a926191d.jpg
 
-    Osciloscope connected to the OAK-FFC-4P UART pins
+    Oscilloscope connected to the OAK-FFC-4P UART pins
 
 Setup
 #####
