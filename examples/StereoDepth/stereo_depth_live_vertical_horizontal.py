@@ -190,20 +190,20 @@ if not staticInput:
     monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking
-monoRight.out.link(syncNode.input1)
-monoLeft.out.link(syncNode.input2)
-monoVertical.out.link(syncNode.input3)
+monoRight.out.link(syncNode.inputs["right"])
+monoLeft.out.link(syncNode.inputs["left"])
+monoVertical.out.link(syncNode.inputs["vertical"])
 
-syncNode.output3.link(stereoVertical.left) # left input is bottom camera
-syncNode.output1.link(stereoVertical.right) # right input is right camera
+syncNode.outputs["left"].link(stereoVertical.left) # left input is bottom camera
+syncNode.outputs["vertical"].link(stereoVertical.right) # right input is right camera
 stereoVertical.disparity.link(xoutDisparityVertical.input)
 if enableRectified:
     stereoVertical.rectifiedLeft.link(xoutRectifiedVertical.input)
     stereoVertical.rectifiedRight.link(xoutRectifiedRight.input)
 stereoVertical.setVerticalStereo(True)
 
-syncNode.output2.link(stereoHorizontal.left)
-syncNode.output1.link(stereoHorizontal.right)
+syncNode.outputs["left"].link(stereoHorizontal.left)
+syncNode.outputs["right"].link(stereoHorizontal.right)
 stereoHorizontal.disparity.link(xoutDisparityHorizontal.input)
 if enableRectified:
     stereoHorizontal.rectifiedLeft.link(xoutRectifiedLeft.input)
