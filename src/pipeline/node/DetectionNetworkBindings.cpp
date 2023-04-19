@@ -72,7 +72,7 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
             "outSegmentation",
             [](const DetectionNetwork n) { return &n.detectionParser->outSegmentation; },
             py::return_value_policy::reference_internal,
-            DOC(dai, node, DetectionParser, detectionParser))
+            DOC(dai, node, DetectionParser, outSegmentation))
         .def("setConfidenceThreshold",
              &DetectionNetwork::setConfidenceThreshold,
              py::arg("thresh"),

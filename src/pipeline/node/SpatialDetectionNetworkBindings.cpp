@@ -105,7 +105,7 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
             "outSegmentation",
             [](const SpatialDetectionNetwork n) { return &n.detectionParser->outSegmentation; },
             py::return_value_policy::reference_internal,
-            DOC(dai, node, DetectionParser, detectionParser))
+            DOC(dai, node, DetectionParser, outSegmentation))
 
         .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth, DOC(dai, node, SpatialDetectionNetwork, inputDepth))
         .def_readonly("out", &SpatialDetectionNetwork::out, DOC(dai, node, SpatialDetectionNetwork, out))
