@@ -31,7 +31,7 @@ Follow the steps below to just install depthai api library dependencies for your
 
     .. code-block:: bash
 
-      sudo wget -qO- https://docs.luxonis.com/install_depthai.sh | bash
+      sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
 
     Please refer to :ref:`Supported Platforms` if any issues occur.
 

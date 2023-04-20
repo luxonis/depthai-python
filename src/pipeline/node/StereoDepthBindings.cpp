@@ -53,6 +53,14 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
         .def_readwrite("numPostProcessingShaves", &StereoDepthProperties::numPostProcessingShaves, DOC(dai, StereoDepthProperties, numPostProcessingShaves))
         .def_readwrite("numPostProcessingMemorySlices", &StereoDepthProperties::numPostProcessingMemorySlices, DOC(dai, StereoDepthProperties, numPostProcessingMemorySlices))
+        .def_readwrite("focalLengthFromCalibration", &StereoDepthProperties::focalLengthFromCalibration, DOC(dai, StereoDepthProperties, focalLengthFromCalibration))
+        .def_readwrite("useHomographyRectification", &StereoDepthProperties::useHomographyRectification, DOC(dai, StereoDepthProperties, useHomographyRectification))
+        .def_readwrite("baseline", &StereoDepthProperties::baseline, DOC(dai, StereoDepthProperties, baseline))
+        .def_readwrite("focalLength", &StereoDepthProperties::focalLength, DOC(dai, StereoDepthProperties, focalLength))
+        .def_readwrite("disparityToDepthUseSpecTranslation", &StereoDepthProperties::disparityToDepthUseSpecTranslation, DOC(dai, StereoDepthProperties, disparityToDepthUseSpecTranslation))
+        .def_readwrite("rectificationUseSpecTranslation", &StereoDepthProperties::rectificationUseSpecTranslation, DOC(dai, StereoDepthProperties, rectificationUseSpecTranslation))
+        .def_readwrite("depthAlignmentUseSpecTranslation", &StereoDepthProperties::depthAlignmentUseSpecTranslation, DOC(dai, StereoDepthProperties, depthAlignmentUseSpecTranslation))
+        .def_readwrite("alphaScaling", &StereoDepthProperties::alphaScaling, DOC(dai, StereoDepthProperties, alphaScaling))
         ;
 
     stereoDepthPresetMode
@@ -79,10 +87,6 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readonly("debugExtDispLrCheckIt2", &StereoDepth::debugExtDispLrCheckIt2, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
-#if 0 //will be enabled when confidence map RGB alignment/LR-check support will be added
-        .def_readonly("debugConfMapLrCheckIt1", &StereoDepth::debugConfMapLrCheckIt1, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt1))
-        .def_readonly("debugConfMapLrCheckIt2", &StereoDepth::debugConfMapLrCheckIt2, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt2))
-#endif
         .def("loadMeshFiles",           &StereoDepth::loadMeshFiles, py::arg("pathLeft"), py::arg("pathRight"), DOC(dai, node, StereoDepth, loadMeshFiles))
         .def("loadMeshData",            &StereoDepth::loadMeshData, py::arg("dataLeft"), py::arg("dataRight"), DOC(dai, node, StereoDepth, loadMeshData))
         .def("setMeshStep",             &StereoDepth::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, StereoDepth, setMeshStep))
@@ -168,6 +172,10 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
         .def("setBaseline", &StereoDepth::setBaseline, DOC(dai, node, StereoDepth, setBaseline))
         .def("setFocalLength", &StereoDepth::setFocalLength, DOC(dai, node, StereoDepth, setFocalLength))
+        .def("setDisparityToDepthUseSpecTranslation", &StereoDepth::setDisparityToDepthUseSpecTranslation, DOC(dai, node, StereoDepth, setDisparityToDepthUseSpecTranslation))
+        .def("setRectificationUseSpecTranslation", &StereoDepth::setRectificationUseSpecTranslation, DOC(dai, node, StereoDepth, setRectificationUseSpecTranslation))
+        .def("setDepthAlignmentUseSpecTranslation", &StereoDepth::setDepthAlignmentUseSpecTranslation, DOC(dai, node, StereoDepth, setDepthAlignmentUseSpecTranslation))
+        .def("setAlphaScaling", &StereoDepth::setAlphaScaling, DOC(dai, node, StereoDepth, setAlphaScaling))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;

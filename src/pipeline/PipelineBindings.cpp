@@ -74,6 +74,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("cameraTuningBlobSize", &GlobalProperties::cameraTuningBlobSize, DOC(dai, GlobalProperties, cameraTuningBlobSize))
         .def_readwrite("cameraTuningBlobUri", &GlobalProperties::cameraTuningBlobUri, DOC(dai, GlobalProperties, cameraTuningBlobUri))
         .def_readwrite("xlinkChunkSize", &GlobalProperties::xlinkChunkSize, DOC(dai, GlobalProperties, xlinkChunkSize))
+        .def_readwrite("sippBufferSize", &GlobalProperties::sippBufferSize, DOC(dai, GlobalProperties, sippBufferSize))
+        .def_readwrite("sippDmaBufferSize", &GlobalProperties::sippDmaBufferSize, DOC(dai, GlobalProperties, sippDmaBufferSize))
         ;
 
     // bind pipeline
@@ -99,6 +101,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getRequiredOpenVINOVersion", &Pipeline::getRequiredOpenVINOVersion, DOC(dai, Pipeline, getRequiredOpenVINOVersion))
         .def("setCameraTuningBlobPath", &Pipeline::setCameraTuningBlobPath, py::arg("path"), DOC(dai, Pipeline, setCameraTuningBlobPath))
         .def("setXLinkChunkSize", &Pipeline::setXLinkChunkSize, py::arg("sizeBytes"), DOC(dai, Pipeline, setXLinkChunkSize))
+        .def("setSippBufferSize", &Pipeline::setSippBufferSize, py::arg("sizeBytes"), DOC(dai, Pipeline, setSippBufferSize))
+        .def("setSippDmaBufferSize", &Pipeline::setSippDmaBufferSize, py::arg("sizeBytes"), DOC(dai, Pipeline, setSippDmaBufferSize))
         .def("setCalibrationData", &Pipeline::setCalibrationData, py::arg("calibrationDataHandler"), DOC(dai, Pipeline, setCalibrationData))
         .def("getCalibrationData", &Pipeline::getCalibrationData, DOC(dai, Pipeline, getCalibrationData))
         .def("getDeviceConfig", &Pipeline::getDeviceConfig, DOC(dai, Pipeline, getDeviceConfig))
