@@ -45,7 +45,7 @@ import time
 from itertools import cycle
 from pathlib import Path
 import sys
-import cam_test_gui
+#import cam_test_gui
 import signal
 
 
@@ -181,6 +181,9 @@ pipeline = dai.Pipeline()
 control = pipeline.createXLinkIn()
 control.setStreamName('control')
 
+xinTofConfig = pipeline.createXLinkIn()
+xinTofConfig.setStreamName('tofConfig')
+
 cam = {}
 tof = {}
 xout = {}
@@ -199,6 +202,11 @@ for c in cam_list:
             tof[c] = pipeline.create(dai.node.ToF)
             cam[c].raw.link(tof[c].input)
             tof[c].depth.link(xout[c].input)
+            xinTofConfig.out.link(tof[c].inputConfig)
+            tofConfig = tof[c].initialConfig.get()
+            tofConfig.setFreqModUsed(dai.ToFConfig.DepthParams.TypeFMod.F_MOD_MIN)
+            tofConfig.SetAvgPhaseShuffle(True)
+            tofConfig.setMinAmplitude(20.0)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -230,7 +238,7 @@ for c in cam_list:
         xout_raw[c] = pipeline.create(dai.node.XLinkOut)
         xout_raw[c].setStreamName(raw_name)
         streams.append(raw_name)
-        cam[c].raw.link(xout_raw[c].input)
+        tof[c].amplitude.link(xout_raw[c].input)
         cam[c].setRawOutputPacked(False)
 
 if args.camera_tuning:
