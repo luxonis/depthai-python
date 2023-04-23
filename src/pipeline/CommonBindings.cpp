@@ -1,5 +1,8 @@
 #include "CommonBindings.hpp"
 
+// Libraries
+#include "hedley/hedley.h"
+
 // depthai-shared
 #include "depthai-shared/common/CameraBoardSocket.hpp"
 #include "depthai-shared/common/EepromData.hpp"
@@ -141,11 +144,31 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("CAM_H", CameraBoardSocket::CAM_H)
 
         // Deprecated
-        // TODO(themarpe) - issue a Deprecation warning
+        HEDLEY_DIAGNOSTIC_PUSH
+        HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
         .value("RGB", CameraBoardSocket::RGB, "**Deprecated:** Use CAM_A or address camera by name instead")
         .value("LEFT", CameraBoardSocket::LEFT, "**Deprecated:** Use CAM_B or address camera by name instead")
         .value("RIGHT", CameraBoardSocket::RIGHT, "**Deprecated:** Use CAM_C or address camera by name instead")
         .value("CENTER", CameraBoardSocket::CENTER, "**Deprecated:** Use CAM_A or address camera by name instead")
+
+        // Deprecated overriden
+        .def_property_readonly_static("RGB", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RGB is deprecated, use CAM_A or address camera by name instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("CENTER", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "CENTER is deprecated, use CAM_A or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("LEFT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "LEFT is deprecated, use CAM_B or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_B;
+        })
+        .def_property_readonly_static("RIGHT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RIGHT is deprecated, use CAM_C or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_C;
+        })
+        HEDLEY_DIAGNOSTIC_POP
     ;
 
     // CameraSensorType enum bindings
