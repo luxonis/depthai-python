@@ -277,7 +277,7 @@ just note it's a very large output (eg. 1280*800*96 => 98MB for each frame).
 
 Stereo Subpixel mode will calculate subpixel disparity by looking at the confidence values of the 2 neighboring disparity pixels in each direction.
 In the above example graph, in normal mode, StereoDepth would just get the max disparity = 34 pixels, but in Subpixel
-mode, it will return a bit more, eg. 37.375 pixels, as confidences for pixels 35 and 36 are quite high as well.
+mode, it will return a bit more, eg. 34.375 pixels, as confidences for pixels 35 and 36 are quite high as well.
 
 **TL;DR:** Stereo Subpixel mode should always provide more accurate depth, but will consume additional HW resources (see :ref:`Stereo depth FPS` for impact).
 
