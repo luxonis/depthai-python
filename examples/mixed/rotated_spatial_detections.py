@@ -50,14 +50,14 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 camRgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # Setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # Align depth map to the perspective of RGB camera, on which inference is done
-stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 rotate_stereo_manip = pipeline.createImageManip()

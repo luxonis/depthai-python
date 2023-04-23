@@ -9,7 +9,7 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 camRgb = pipeline.create(dai.node.ColorCamera)
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 
 xoutRgb = pipeline.create(dai.node.XLinkOut)
@@ -56,7 +56,7 @@ with dai.Device(pipeline) as device:
             with open(fName, "wb") as f:
                 f.write(qStill.get().getData())
                 print('Image saved to', fName)
-        
+
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
