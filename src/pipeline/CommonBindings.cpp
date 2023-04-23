@@ -132,6 +132,10 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
     // CameraBoardSocket enum bindings
+
+    // Deprecated
+    HEDLEY_DIAGNOSTIC_PUSH
+    HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
     cameraBoardSocket
         .value("AUTO", CameraBoardSocket::AUTO)
         .value("CAM_A", CameraBoardSocket::CAM_A)
@@ -143,9 +147,6 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("CAM_G", CameraBoardSocket::CAM_G)
         .value("CAM_H", CameraBoardSocket::CAM_H)
 
-        // Deprecated
-        HEDLEY_DIAGNOSTIC_PUSH
-        HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
         .value("RGB", CameraBoardSocket::RGB, "**Deprecated:** Use CAM_A or address camera by name instead")
         .value("LEFT", CameraBoardSocket::LEFT, "**Deprecated:** Use CAM_B or address camera by name instead")
         .value("RIGHT", CameraBoardSocket::RIGHT, "**Deprecated:** Use CAM_C or address camera by name instead")
@@ -168,8 +169,8 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
             PyErr_WarnEx(PyExc_DeprecationWarning, "RIGHT is deprecated, use CAM_C or address camera by name  instead.", 1);
             return CameraBoardSocket::CAM_C;
         })
-        HEDLEY_DIAGNOSTIC_POP
     ;
+    HEDLEY_DIAGNOSTIC_POP
 
     // CameraSensorType enum bindings
     cameraSensorType
