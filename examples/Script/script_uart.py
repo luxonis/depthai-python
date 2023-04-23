@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+'''
+NOTE: This should only be run on OAK-FFC-4P, as other OAK cameras might have different GPIO configuration!
+'''
 import depthai as dai
 import time
 
