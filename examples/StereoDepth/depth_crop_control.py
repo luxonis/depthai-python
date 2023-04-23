@@ -32,8 +32,8 @@ topLeft = dai.Point2f(0.2, 0.2)
 bottomRight = dai.Point2f(0.8, 0.8)
 
 # Properties
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setCamera("right")
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
