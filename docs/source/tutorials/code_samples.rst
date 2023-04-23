@@ -122,6 +122,7 @@ are presented with code.
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
+- :ref:`Script UART communication` - UART communication with Script node
 
 .. rubric:: SpatialDetection
 
