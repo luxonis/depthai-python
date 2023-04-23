@@ -9,6 +9,5 @@ ENV CXX clang++-10
 WORKDIR /app
 ADD docs/requirements.txt docs/requirements.txt
 RUN python3 -m pip install -r docs/requirements.txt
-RUN python3 -m pip install clang==14.0 --force-reinstall
 ADD . .
 CMD docs/docker/docker_run.sh
