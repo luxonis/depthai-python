@@ -126,6 +126,7 @@ are presented with code.
 
 .. rubric:: SpatialDetection
 
+- :ref:`Spatial Calculator Multi-ROI` - Selects multiple ROIs and calculates spatial coordinates for each of them
 - :ref:`Spatial location calculator` - Demonstrates how to use the spatial location calculator
 - :ref:`RGB & MobilenetSSD with spatial data` - Displays RGB frames with MobileNet detections and spatial coordinates on them
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
