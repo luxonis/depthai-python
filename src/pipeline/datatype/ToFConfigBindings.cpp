@@ -58,8 +58,11 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
     toFConfig
         .def(py::init<>())
         .def(py::init<std::shared_ptr<RawToFConfig>>())
-
+        
         .def("setDepthParams", static_cast<ToFConfig&(ToFConfig::*)(dai::ToFConfig::DepthParams)>(&ToFConfig::setDepthParams), py::arg("config"), DOC(dai, ToFConfig, setDepthParams, 2))
+        .def("setFreqModUsed", static_cast<ToFConfig&(ToFConfig::*)(dai::ToFConfig::DepthParams::TypeFMod)>(&ToFConfig::setFreqModUsed), DOC(dai, ToFConfig, setDepthParams, 2))
+        .def("setAvgPhaseShuffle", &ToFConfig::setAvgPhaseShuffle, DOC(dai, node, ToFConfig, setAvgPhaseShuffle))
+        .def("setMinAmplitude", &ToFConfig::setMinAmplitude, DOC(dai, node, ToFConfig, setMinAmplitude))
 
         .def("set", &ToFConfig::set, py::arg("config"), DOC(dai, ToFConfig, set))
         .def("get", &ToFConfig::get, DOC(dai, ToFConfig, get))

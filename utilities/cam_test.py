@@ -199,6 +199,7 @@ tof = {}
 xout = {}
 xout_raw = {}
 streams = []
+tofConfig = {}
 for c in cam_list:
     tofEnableRaw = False
     xout[c] = pipeline.createXLinkOut()
@@ -214,9 +215,10 @@ for c in cam_list:
             tof[c].depth.link(xout[c].input)
             xinTofConfig.out.link(tof[c].inputConfig)
             tofConfig = tof[c].initialConfig.get()
-            tofConfig.setFreqModUsed(dai.ToFConfig.DepthParams.TypeFMod.F_MOD_MIN)
-            tofConfig.SetAvgPhaseShuffle(True)
-            tofConfig.setMinAmplitude(20.0)
+            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            tofConfig.depthParams.avgPhaseShuffle = False
+            tofConfig.depthParams.minimumAmplitude = 3.0
+            tof[c].initialConfig.set(tofConfig)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -301,6 +303,7 @@ with dai.Device(*dai_device_args) as device:
         fps_capt[c] = FPS()
 
     controlQueue = device.getInputQueue('control')
+    tofCfgQueue = device.getInputQueue('tofConfig')
 
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
@@ -345,6 +348,7 @@ with dai.Device(*dai_device_args) as device:
     chroma_denoise = 0
     control = 'none'
     show = False
+    tof_amp_min = tofConfig.depthParams.minimumAmplitude
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -436,6 +440,11 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
+        elif key == ord('g'):
+            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            print("ToF toggling f_mod value to:", f_mod)
+            tofConfig.depthParams.freqModUsed = f_mod
+            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -510,7 +519,7 @@ with dai.Device(*dai_device_args) as device:
             if floodIntensity < 0:
                 floodIntensity = 0
             device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]':
+        elif key >= 0 and chr(key) in '34567890[]p':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -531,6 +540,8 @@ with dai.Device(*dai_device_args) as device:
                 control = 'luma_denoise'
             elif key == ord(']'):
                 control = 'chroma_denoise'
+            elif key == ord('p'):
+                control = 'tof_amplitude_min'
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -581,4 +592,9 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'tof_amplitude_min':
+                amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
+                print("Setting min amplitude(confidence) to:", amp_min)
+                tofConfig.depthParams.minimumAmplitude = amp_min
+                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
