@@ -29,13 +29,13 @@ void bind_tof(pybind11::module& m, void* pCallstack){
 
     // Properties
     tofProperties
-        .def_readwrite("initialConfig", &ToFProperties::initialConfig)
+        .def_readwrite("initialConfig", &ToFProperties::initialConfig, DOC(dai, ToFProperties, initialConfig))
         ;
 
     // Node
     tof
-        .def_readonly("input", &ToF::input, DOC(dai, node, ToF, input), DOC(dai, node, ToF, input))
         .def_readonly("inputConfig", &ToF::inputConfig, DOC(dai, node, ToF, inputConfig), DOC(dai, node, ToF, inputConfig))
+        .def_readonly("input", &ToF::input, DOC(dai, node, ToF, input), DOC(dai, node, ToF, input))
         .def_readonly("depth", &ToF::depth, DOC(dai, node, ToF, depth), DOC(dai, node, ToF, depth))
         .def_readonly("amplitude", &ToF::amplitude, DOC(dai, node, ToF, amplitude), DOC(dai, node, ToF, amplitude))
         .def_readonly("error", &ToF::error, DOC(dai, node, ToF, error), DOC(dai, node, ToF, error))
