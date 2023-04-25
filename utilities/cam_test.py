@@ -445,6 +445,10 @@ with dai.Device(*dai_device_args) as device:
             print("ToF toggling f_mod value to:", f_mod)
             tofConfig.depthParams.freqModUsed = f_mod
             tofCfgQueue.send(tofConfig)
+        elif key == ord('h'):
+            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
+            print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
+            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
