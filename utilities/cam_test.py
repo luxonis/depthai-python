@@ -81,10 +81,19 @@ parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
-parser.add_argument('-d', '--device', default="", type=str,
-                    help="Optional MX ID of the device to connect to.")
 parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
+parser.add_argument('-tofraw', '--tof-raw', action='store_true',
+                    help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
+                    help="Show also ToF amplitude output alongside depth")
+parser.add_argument('-tofcm', '--tof-cm', action='store_true',
+                    help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
+                    help="Show RGB `preview` stream instead of full size `isp`")
+
+parser.add_argument('-d', '--device', default="", type=str,
+                    help="Optional MX ID of the device to connect to.")
 
 parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
                     help="Connection timeout in ms. Default: %(default)s (sets DEPTHAI_CONNECTION_TIMEOUT environment variable)")
@@ -188,6 +197,7 @@ cam = {}
 tof = {}
 xout = {}
 xout_raw = {}
+xout_tof_amp = {}
 streams = []
 tofConfig = {}
 for c in cam_list:
@@ -209,6 +219,12 @@ for c in cam_list:
             tofConfig.depthParams.avgPhaseShuffle = False
             tofConfig.depthParams.minimumAmplitude = 3.0
             tof[c].initialConfig.set(tofConfig)
+            if args.tof_amplitude:
+                amp_name = 'tof_amplitude_' + c
+                xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
+                xout_tof_amp[c].setStreamName(amp_name)
+                streams.append(amp_name)
+                tof[c].amplitude.link(xout_tof_amp[c].input)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -240,7 +256,7 @@ for c in cam_list:
         xout_raw[c] = pipeline.create(dai.node.XLinkOut)
         xout_raw[c].setStreamName(raw_name)
         streams.append(raw_name)
-        tof[c].amplitude.link(xout_raw[c].input)
+        cam[c].raw.link(xout_raw[c].input)
         cam[c].setRawOutputPacked(False)
 
 if args.camera_tuning:
@@ -271,6 +287,8 @@ with dai.Device(*dai_device_args) as device:
         cam_name[p.socket.name] = p.sensorName
         if args.enable_raw:
             cam_name['raw_'+p.socket.name] = p.sensorName
+        if args.tof_amplitude:
+            cam_name['tof_amplitude_'+p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -352,7 +370,7 @@ with dai.Device(*dai_device_args) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
-                if cam_type_tof[c.split('_')[-1]] and not c.startswith('raw_'):
+                if cam_type_tof[c.split('_')[-1]] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
@@ -379,7 +397,7 @@ with dai.Device(*dai_device_args) as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
                     if capture:
                         filename = capture_file_info + '_10bit.bw'
                         print('Saving:', filename)
