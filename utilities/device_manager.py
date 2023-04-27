@@ -10,6 +10,7 @@ import sys
 from typing import Dict
 import platform
 import os
+import numpy
 
 if USE_OPENCV:
     # import cv2
@@ -20,10 +21,14 @@ else:
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+PLATFORM_ICON_PATH = None
 if platform.system() == 'Windows':
-    sg.set_global_icon(f'{SCRIPT_DIR}/assets/icon.ico')
+    PLATFORM_ICON_PATH = f'{SCRIPT_DIR}/assets/icon.ico'
 else:
-    sg.set_global_icon(f'{SCRIPT_DIR}/assets/icon.png')
+    PLATFORM_ICON_PATH = f'{SCRIPT_DIR}/assets/icon.png'
+
+# Apply icon globally
+sg.set_global_icon(PLATFORM_ICON_PATH)
 
 CONF_TEXT_POE = ['ipTypeText', 'ipText', 'maskText', 'gatewayText', 'dnsText', 'dnsAltText', 'networkTimeoutText', 'macText']
 CONF_INPUT_POE = ['staticBut', 'dynamicBut', 'ip', 'mask', 'gateway', 'dns', 'dnsAlt', 'networkTimeout', 'mac']
@@ -38,27 +43,35 @@ def PrintException():
     filename = f.f_code.co_filename
     print('Exception in {}, line {}; {}'.format(filename, lineno, exc_obj))
 
-def check_ip(s: str, req = True):
+def Popup(msg, window):
+    main_window_location = window.CurrentLocation()
+    main_window_size = window.size
+    # Calculate the centered location for the new window
+    centered_location = (main_window_location[0] + (main_window_size[0] - 50) // 2,
+                         main_window_location[1] + (main_window_size[1] - 50) // 2)
+    return sg.Popup(msg, location=centered_location)
+
+def check_ip(window, s: str, req = True):
     if s == "":
         return not req
     spl = s.split(".")
     if len(spl) != 4:
-        sg.Popup("Wrong IP format.\nValue should be similar to 255.255.255.255")
+        Popup("Wrong IP format.\nValue should be similar to 255.255.255.255", window=window)
         return False
     for num in spl:
         if 255 < int(num):
-            sg.Popup("Wrong IP format.\nValues can not be above 255!")
+            Popup("Wrong IP format.\nValues can not be above 255!", window=window)
             return False
     return True
 
-def check_mac(s):
+def check_mac(window, s):
     if s.count(":") != 5:
-        sg.Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF")
+        Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF", window=window)
         return False
     for i in s.split(":"):
         for j in i:
             if j > "F" or (j < "A" and not j.isdigit()) or len(i) != 2:
-                sg.Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF")
+                Popup("Wrong MAC format.\nValue should be similar to FF:FF:FF:FF:FF:FF", window=window)
                 return False
     return True
 
@@ -113,7 +126,7 @@ class AreYouSure:
 
 
 class SelectIP:
-    def __init__(self):
+    def __init__(self, window):
         self.ok = False
         layout = [
             [sg.Text("Specify the custom IP of the OAK PoE\ncamera you want to connect to")],
@@ -124,15 +137,24 @@ class SelectIP:
             [sg.Submit(), sg.Cancel()],
         ]
         self.window = sg.Window("Specify IP", layout, size=(300,110), modal=True, finalize=True)
+
+        main_window_location = window.CurrentLocation()
+        main_window_size = window.size
+        new_window_size = self.window.size
+        # Calculate the centered location for the new window
+        centered_location = (main_window_location[0] + (main_window_size[0] - new_window_size[0]) // 2,
+                         main_window_location[1] + (main_window_size[1] - new_window_size[1]) // 2)
+        self.window.move(*centered_location)
+
     def wait(self):
         event, values = self.window.Read()
         self.window.close()
-        if str(event) == "Cancel" or values is None or not check_ip(values["ip"]):
+        if str(event) == "Cancel" or values is None or not check_ip(self.window, values["ip"]):
             return False, ""
         return True, values["ip"]
 
 class SearchDevice:
-    def __init__(self):
+    def __init__(self, window):
         self.infos = []
         layout = [
             [sg.Text("Select an OAK camera you would like to connect to.", font=('Arial', 10, 'bold'))],
@@ -156,12 +178,22 @@ class SearchDevice:
             [sg.Button('Search', size=(15, 2), font=('Arial', 10, 'bold'))],
         ]
         self.window = sg.Window("Select Device", layout, size=(550,375), modal=True, finalize=True)
+
+        main_window_location = window.CurrentLocation()
+        main_window_size = window.size
+        new_window_size = self.window.size
+        # Calculate the centered location for the new window
+        centered_location = (main_window_location[0] + (main_window_size[0] - new_window_size[0]) // 2,
+                         main_window_location[1] + (main_window_size[1] - new_window_size[1]) // 2)
+        self.window.move(*centered_location)
+
         self.search_devices()
 
     def search_devices(self):
         self.infos = dai.XLinkConnection.getAllConnectedDevices()
         if not self.infos:
-            sg.Popup("No devices found.")
+            pass
+            # sg.Popup("No devices found.")
         else:
             rows = []
             for info in self.infos:
@@ -257,21 +289,20 @@ def factoryReset(device: dai.DeviceInfo, type: dai.DeviceBootloader.Type):
 
 def connectAndStartStreaming(dev):
 
-    # OpenCV
-    if USE_OPENCV:
+    with dai.Device(dev) as d:
         # Create pipeline
         pipeline = dai.Pipeline()
+        # OpenCV
+        if USE_OPENCV:
+            camRgb = pipeline.create(dai.node.ColorCamera)
+            camRgb.setIspScale(1,3)
+            videnc = pipeline.create(dai.node.VideoEncoder)
+            videnc.setDefaultProfilePreset(camRgb.getFps(), videnc.Properties.Profile.MJPEG)
+            xout = pipeline.create(dai.node.XLinkOut)
+            xout.setStreamName("mjpeg")
+            camRgb.video.link(videnc.input)
+            videnc.bitstream.link(xout.input)
 
-        camRgb = pipeline.create(dai.node.ColorCamera)
-        camRgb.setIspScale(1,3)
-        videnc = pipeline.create(dai.node.VideoEncoder)
-        videnc.setDefaultProfilePreset(camRgb.getFps(), videnc.Properties.Profile.MJPEG)
-        xout = pipeline.create(dai.node.XLinkOut)
-        xout.setStreamName("mjpeg")
-        camRgb.video.link(videnc.input)
-        videnc.bitstream.link(xout.input)
-
-        with dai.Device(pipeline, dev) as d:
             while not d.isClosed():
                 mjpeg = d.getOutputQueue('mjpeg').get()
                 frame = cv2.imdecode(mjpeg.getData(), cv2.IMREAD_UNCHANGED)
@@ -279,21 +310,22 @@ def connectAndStartStreaming(dev):
                 if cv2.waitKey(1) == ord('q'):
                     cv2.destroyWindow('Color Camera')
                     break
-    else:
-        # Create pipeline (no opencv)
-        pipeline = dai.Pipeline()
-        camRgb = pipeline.create(dai.node.ColorCamera)
-        camRgb.setIspScale(1,3)
-        camRgb.setPreviewSize(camRgb.getIspSize())
-        camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
+        else:
+            camRgb = pipeline.create(dai.node.ColorCamera)
+            camRgb.setIspScale(1,3)
+            firstSensor = d.getConnectedCameraFeatures()[0]
+            camRgb.setPreviewSize(firstSensor.width // 3, firstSensor.height // 3)
+            camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
 
-        xout = pipeline.create(dai.node.XLinkOut)
-        xout.input.setQueueSize(2)
-        xout.input.setBlocking(False)
-        xout.setStreamName("color")
-        camRgb.preview.link(xout.input)
+            xout = pipeline.create(dai.node.XLinkOut)
+            xout.input.setQueueSize(2)
+            xout.input.setBlocking(False)
+            xout.setStreamName("color")
+            camRgb.preview.link(xout.input)
 
-        with dai.Device(pipeline, dev) as d:
+            # Start pipeline
+            d.startPipeline(pipeline)
+
             frame = d.getOutputQueue('color', 2, False).get()
             width, height = frame.getWidth(), frame.getHeight()
 
@@ -540,7 +572,7 @@ class DeviceManager:
 
     def __init__(self) -> None:
         self.window = sg.Window(title="Device Manager",
-            icon="assets/icon.png",
+            icon=PLATFORM_ICON_PATH,
             layout=layout,
             size=(645, 380),
             finalize=True # So we can do First search for devices
@@ -556,7 +588,7 @@ class DeviceManager:
             return self.bl.getType() == dai.DeviceBootloader.Type.NETWORK
         except Exception as ex:
             PrintException()
-            sg.Popup(f'{ex}')
+            Popup(f'{ex}', self.window)
 
     def isUsb(self) -> bool:
         return not self.isPoE()
@@ -577,7 +609,7 @@ class DeviceManager:
                     device = self.device
                     if deviceStateTxt(device.state) == "BOOTED":
                         # device is already booted somewhere else
-                        sg.Popup("Device is already booted somewhere else!")
+                        Popup("Device is already booted somewhere else!", self.window)
                     else:
                         self.resetGui()
                         self.bl = connectToDevice(device)
@@ -588,7 +620,7 @@ class DeviceManager:
                     self.window.Element('progress').update("No device selected.")
             elif event == "Search":
                 self.getDevices() # Re-search devices for dropdown
-                selDev = SearchDevice()
+                selDev = SearchDevice(window=self.window)
                 di = selDev.wait()
                 if di is not None:
                     self.resetGui()
@@ -601,7 +633,7 @@ class DeviceManager:
                     self.getConfigs()
                 self.unlockConfig()
             elif event == "Specify IP":
-                select = SelectIP()
+                select = SelectIP(window=self.window)
                 ok, ip = select.wait()
                 if ok:
                     self.resetGui()
@@ -655,14 +687,14 @@ class DeviceManager:
                     print("Factory reset cancelled.")
 
             elif event == "Flash configuration":
-                self.flashConfig()
-                self.getConfigs()
-                self.resetGui()
-                if self.isUsb():
-                    self.unlockConfig()
-                else:
-                    self.devices.clear()
-                    self.window.Element('devices').update("Search for devices", values=[])
+                if self.flashConfig() is not None:
+                    self.getConfigs()
+                    self.resetGui()
+                    if self.isUsb():
+                        self.unlockConfig()
+                    else:
+                        self.devices.clear()
+                        self.window.Element('devices').update("Search for devices", values=[])
             elif event == "Clear configuration":
                 self.clearConfig()
                 self.getConfigs()
@@ -677,7 +709,7 @@ class DeviceManager:
                     confJson = self.bl.readConfigData()
                     sg.popup_scrolled(confJson, title='Configuration')
                 except Exception as ex:
-                    sg.popup(f'No existing config to view ({ex})')
+                    Popup(f'No existing config to view ({ex})', self.window)
 
             elif event == "Flash application":
                 file = sg.popup_get_file("Select .dap file", file_types=(('DepthAI Application Package', '*.dap'), ('All Files', '*.* *')))
@@ -685,9 +717,9 @@ class DeviceManager:
             elif event == "Remove application":
                 try:
                     self.bl.flashClear()
-                    sg.popup(f'Successfully removed application')
+                    Popup(f'Successfully removed application', self.window)
                 except Exception as ex:
-                    sg.popup(f"Couldn't remove application ({ex})")
+                    sg.popup(f"Couldn't remove application ({ex})", self.window)
 
             elif event.startswith("_unique_configBtn"):
                 self.window['-COL1-'].update(visible=False)
@@ -713,7 +745,7 @@ class DeviceManager:
 
             elif event == "recoveryMode":
                 if recoveryMode(self.bl):
-                    sg.Popup(f'Device successfully put into USB recovery mode.')
+                    Popup(f'Device successfully put into USB recovery mode.', self.window)
                 # Device will reboot, close previous and reset GUI
                 self.closeDevice()
                 self.resetGui()
@@ -872,6 +904,12 @@ class DeviceManager:
         self.window.Element('commit').update("-version-")
         self.window.Element('devState').update("-state-")
 
+        # Move back to 'About' page
+        self.window['-COL1-'].update(visible=True)
+        self.window['-COL2-'].update(visible=False)
+        self.window['-COL3-'].update(visible=False)
+        self.window['-COL4-'].update(visible=False)
+
     def closeDevice(self):
         if self.bl is not None:
             self.bl.close()
@@ -885,7 +923,7 @@ class DeviceManager:
             deviceInfos = dai.XLinkConnection.getAllConnectedDevices()
             if not deviceInfos:
                 self.window.Element('devices').update("No devices")
-                sg.Popup("No devices found.")
+                # sg.Popup("No devices found.")
             else:
                 for deviceInfo in deviceInfos:
                     deviceTxt = deviceInfo.getMxId()
@@ -896,7 +934,7 @@ class DeviceManager:
             self.window.Element('devices').update("Select device", values=listedDevices)
         except Exception as ex:
             PrintException()
-            sg.Popup(f'{ex}')
+            Popup(f'{ex}', window=self.window)
 
     def flashConfig(self):
         values = self.values
@@ -912,12 +950,12 @@ class DeviceManager:
         try:
             if self.isPoE:
                 if self.values['staticBut']:
-                    if check_ip(values['ip']) and check_ip(values['mask']) and check_ip(values['gateway'], req=False):
+                    if check_ip(self.window, values['ip']) and check_ip(self.window, values['mask']) and check_ip(self.window, values['gateway'], req=False):
                         conf.setStaticIPv4(values['ip'], values['mask'], values['gateway'])
                     else:
                         raise Exception('IP or Mask missing using static IP configuration')
                 else:
-                    if check_ip(values['ip'], req=False) and check_ip(values['mask'], req=False) and check_ip(values['gateway'], req=False):
+                    if check_ip(self.window, values['ip'], req=False) and check_ip(self.window, values['mask'], req=False) and check_ip(self.window, values['gateway'], req=False):
                         conf.setDynamicIPv4(values['ip'], values['mask'], values['gateway'])
 
                 conf.setDnsIPv4(values['dns'], values['dnsAlt'])
@@ -925,9 +963,9 @@ class DeviceManager:
                     if int(values['networkTimeout']) >= 0:
                         conf.setNetworkTimeout(timedelta(seconds=int(values['networkTimeout']) / 1000))
                     else:
-                        sg.Popup("Values can not be negative!")
+                        Popup("Values can not be negative!", window=self.window)
                 if values['mac'] != "":
-                    if check_mac(values['mac']):
+                    if check_mac(self.window, values['mac']):
                         conf.setMacAddress(values['mac'])
                 else:
                     conf.setMacAddress('00:00:00:00:00:00')
@@ -936,29 +974,34 @@ class DeviceManager:
                     if int(values['usbTimeout']) >= 0:
                         conf.setUsbTimeout(timedelta(seconds=int(values['usbTimeout']) / 1000))
                     else:
-                        sg.Popup("Values can not be negative!")
+                        Popup("Values can not be negative!", window=self.window)
                 if values['usbSpeed'] != "":
                     conf.setUsbMaxSpeed(getattr(dai.UsbSpeed, values['usbSpeed']))
 
             success, error = self.bl.flashConfig(conf)
             if not success:
-                sg.Popup(f"Flashing failed: {error}")
+                Popup(f"Flashing failed: {error}", window=self.window)
+                return False
             else:
-                sg.Popup("Flashing successful.")
+                Popup("Flashing successful.", window=self.window)
+                return True
+
         except Exception as ex:
             PrintException()
-            sg.Popup(f'{ex}')
+            Popup(f'{ex}', window=self.window)
+
+        return None
 
     def clearConfig(self):
         try:
             success, error = self.bl.flashConfigClear()
             if not success:
-                sg.Popup(f"Clearing configuration failed: {error}")
+                Popup(f"Clearing configuration failed: {error}", window=self.window)
             else:
-                sg.Popup("Successfully cleared configuration.")
+                Popup("Successfully cleared configuration.", window=self.window)
         except Exception as ex:
             PrintException()
-            sg.Popup(f'{ex}')
+            Popup(f'{ex}', window=self.window)
 
 
 app = DeviceManager()
