@@ -634,6 +634,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
         .def("getDeviceName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getDeviceName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getDeviceName))
+        .def("customRPC", [](DeviceBase& d, std::string rpc, int p1, int p2, int p3, int p4) { py::gil_scoped_release release; return d.customRPC(rpc, p1, p2, p3, p4); }, py::arg("rpc"), py::arg("p1") = 0, py::arg("p2") = 0, py::arg("p3") = 0, py::arg("p4") = 0, DOC(dai, DeviceBase, customRPC))
     ;
 
 
