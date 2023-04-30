@@ -127,6 +127,8 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
         .def("getStride", &ImgFrame::getStride, DOC(dai, ImgFrame, getStride))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
+        .def("getPlaneStride", &ImgFrame::getPlaneStride, DOC(dai, ImgFrame, getPlaneStride))
+        .def("getPlaneHeight", &ImgFrame::getPlaneHeight, DOC(dai, ImgFrame, getPlaneHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
         .def("getBytesPerPixel", &ImgFrame::getBytesPerPixel, DOC(dai, ImgFrame, getBytesPerPixel))
         .def("getExposureTime", &ImgFrame::getExposureTime, DOC(dai, ImgFrame, getExposureTime))
@@ -168,6 +170,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
             // shape
             bool valid = img.getWidth() > 0 && img.getHeight() > 0;
             std::vector<std::size_t> shape = {img.getData().size()};
+            std::vector<std::size_t> strides = {};
             py::dtype dtype = py::dtype::of<uint8_t>();
 
             switch(img.getType()){
@@ -190,7 +193,8 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 case ImgFrame::Type::NV12:
                 case ImgFrame::Type::NV21:
                     // Height 1.5x actual size
-                    shape = {img.getHeight() * 3 / 2, img.getWidth()};
+                    shape = {img.getPlaneHeight() * 3 / 2, img.getWidth()};
+                    strides = {img.getStride(), 1};
                     dtype = py::dtype::of<uint8_t>();
                 break;
 
@@ -250,9 +254,10 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
             if(copy){
                 py::array a(dtype, shape);
                 std::memcpy(a.mutable_data(), img.getData().data(), std::min( (long) (img.getData().size()), (long) (a.nbytes())));
+                // TODO handle strides
                 return a;
             } else {
-                return py::array(dtype, shape, img.getData().data(), obj);
+                return py::array(dtype, shape, strides, img.getData().data(), obj);
             }
 
         }, py::arg("copy") = false, "Returns numpy array with shape as specified by width, height and type")
@@ -301,12 +306,20 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                     break;
 
                 case ImgFrame::Type::NV12:
-                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV12"));
-                    break;
-
-                case ImgFrame::Type::NV21:
-                    return cv2.attr("cvtColor")(frame, cv2.attr("COLOR_YUV2BGR_NV21"));
-                    break;
+                case ImgFrame::Type::NV21: {
+                    auto code = (img.getType() == ImgFrame::Type::NV12) ? cv2.attr("COLOR_YUV2BGR_NV12") : cv2.attr("COLOR_YUV2BGR_NV21");
+                    if(img.getPlaneHeight() <= img.getHeight()) {
+                        return cv2.attr("cvtColor")(frame, code);
+                    } else {
+                        py::dtype dtype = py::dtype::of<uint8_t>();
+                        std::vector<std::size_t> shapeY = {img.getHeight(), img.getWidth()};
+                        std::vector<std::size_t> shapeUV = {img.getHeight() / 2, img.getWidth() / 2};
+                        std::vector<std::size_t> strides = {img.getStride(), 1};
+                        auto frameY = py::array(dtype, shapeY, strides, img.getData().data(), obj);
+                        auto frameUV = py::array(dtype, shapeUV, strides, img.getData().data() + img.getPlaneStride(), obj);
+                        return cv2.attr("cvtColorTwoPlane")(frameY, frameUV, code);
+                    }
+                } break;
 
                 case ImgFrame::Type::RAW8:
                 case ImgFrame::Type::RAW16:
