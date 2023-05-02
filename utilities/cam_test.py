@@ -45,7 +45,7 @@ import time
 from itertools import cycle
 from pathlib import Path
 import sys
-import cam_test_gui
+#import cam_test_gui
 import signal
 
 
@@ -86,6 +86,8 @@ parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
 parser.add_argument('-tofraw', '--tof-raw', action='store_true',
                     help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
+                    help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
                     help="Show ToF depth output in centimeters, capped to 255")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
@@ -191,11 +193,16 @@ pipeline = dai.Pipeline()
 control = pipeline.createXLinkIn()
 control.setStreamName('control')
 
+xinTofConfig = pipeline.createXLinkIn()
+xinTofConfig.setStreamName('tofConfig')
+
 cam = {}
 tof = {}
 xout = {}
 xout_raw = {}
+xout_tof_amp = {}
 streams = []
+tofConfig = {}
 for c in cam_list:
     tofEnableRaw = False
     xout[c] = pipeline.createXLinkOut()
@@ -209,6 +216,18 @@ for c in cam_list:
             tof[c] = pipeline.create(dai.node.ToF)
             cam[c].raw.link(tof[c].input)
             tof[c].depth.link(xout[c].input)
+            xinTofConfig.out.link(tof[c].inputConfig)
+            tofConfig = tof[c].initialConfig.get()
+            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            tofConfig.depthParams.avgPhaseShuffle = False
+            tofConfig.depthParams.minimumAmplitude = 3.0
+            tof[c].initialConfig.set(tofConfig)
+            if args.tof_amplitude:
+                amp_name = 'tof_amplitude_' + c
+                xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
+                xout_tof_amp[c].setStreamName(amp_name)
+                streams.append(amp_name)
+                tof[c].amplitude.link(xout_tof_amp[c].input)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -275,6 +294,8 @@ with dai.Device(*dai_device_args) as device:
         cam_name[socket_name] = p.sensorName
         if args.enable_raw:
             cam_name['raw_'+socket_name] = p.sensorName
+        if args.tof_amplitude:
+            cam_name['tof_amplitude_'+socket_name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -293,6 +314,7 @@ with dai.Device(*dai_device_args) as device:
         fps_capt[c] = FPS()
 
     controlQueue = device.getInputQueue('control')
+    tofCfgQueue = device.getInputQueue('tofConfig')
 
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
@@ -337,6 +359,7 @@ with dai.Device(*dai_device_args) as device:
     chroma_denoise = 0
     control = 'none'
     show = False
+    tof_amp_min = tofConfig.depthParams.minimumAmplitude
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -357,7 +380,7 @@ with dai.Device(*dai_device_args) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
-                if cam_type_tof[c.split('_')[-1]] and not c.startswith('raw_'):
+                if cam_type_tof[c.split('_')[-1]] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
@@ -384,7 +407,7 @@ with dai.Device(*dai_device_args) as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
                     if capture:
                         filename = capture_file_info + '_10bit.bw'
                         print('Saving:', filename)
@@ -428,6 +451,15 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
+        elif key == ord('g'):
+            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            print("ToF toggling f_mod value to:", f_mod)
+            tofConfig.depthParams.freqModUsed = f_mod
+            tofCfgQueue.send(tofConfig)
+        elif key == ord('h'):
+            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
+            print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
+            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -502,7 +534,7 @@ with dai.Device(*dai_device_args) as device:
             if floodIntensity < 0:
                 floodIntensity = 0
             device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]':
+        elif key >= 0 and chr(key) in '34567890[]p':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -523,6 +555,8 @@ with dai.Device(*dai_device_args) as device:
                 control = 'luma_denoise'
             elif key == ord(']'):
                 control = 'chroma_denoise'
+            elif key == ord('p'):
+                control = 'tof_amplitude_min'
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -573,4 +607,9 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'tof_amplitude_min':
+                amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
+                print("Setting min amplitude(confidence) to:", amp_min)
+                tofConfig.depthParams.minimumAmplitude = amp_min
+                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
