@@ -48,7 +48,7 @@ import signal
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'camd']):
+    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
         raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color']):
         raise ValueError("")
@@ -112,20 +112,19 @@ cam_socket_opts = {
     'rgb'  : dai.CameraBoardSocket.CAM_A,
     'left' : dai.CameraBoardSocket.CAM_B,
     'right': dai.CameraBoardSocket.CAM_C,
+    'cama' : dai.CameraBoardSocket.CAM_A,
+    'camb' : dai.CameraBoardSocket.CAM_B,
+    'camc' : dai.CameraBoardSocket.CAM_C,
     'camd' : dai.CameraBoardSocket.CAM_D,
-}
-
-cam_socket_to_name = {
-    'RGB': 'rgb',
-    'LEFT': 'left',
-    'RIGHT': 'right',
-    'CAM_D': 'camd',
 }
 
 rotate = {
     'rgb': args.rotate in ['all', 'rgb'],
     'left': args.rotate in ['all', 'mono'],
     'right': args.rotate in ['all', 'mono'],
+    'cama': args.rotate in ['all', 'rgb'],
+    'camb': args.rotate in ['all', 'mono'],
+    'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
 }
 
@@ -231,7 +230,7 @@ with dai.Device(*dai_device_args) as device:
             f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
-        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
+        cam_name[p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -311,7 +310,7 @@ with dai.Device(*dai_device_args) as device:
                 frame = pkt.getCvFrame()
                 if c in capture_list:
                     width, height = pkt.getWidth(), pkt.getHeight()
-                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
+                    capture_file_name = ('capture_' + c + '_' + cam_name[cam_socket_opts[c].name]
                                          + '_' + str(width) + 'x' + str(height)
                                          + '_exp_' +
                                          str(int(
