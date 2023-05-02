@@ -28,6 +28,7 @@
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
 #include "depthai/common/CameraExposureOffset.hpp"
+#include "depthai/utility/ProfilingData.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -60,6 +61,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
+    py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -373,6 +375,11 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("NONE", FrameEvent::NONE)
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
+    ;
+
+    profilingData
+        .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))
+        .def_readwrite("numBytesRead", &ProfilingData::numBytesRead, DOC(dai, ProfilingData, numBytesRead))
     ;
 
 }

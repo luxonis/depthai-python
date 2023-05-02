@@ -234,7 +234,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                         + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
             } else if(actualSize > requiredSize) {
                 // FIXME check build on Windows
-                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
+                // logger::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
