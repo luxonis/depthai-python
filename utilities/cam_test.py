@@ -42,7 +42,6 @@ import time
 from itertools import cycle
 from pathlib import Path
 import sys
-import cam_test_gui
 import signal
 
 
@@ -80,6 +79,7 @@ parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
+parser.add_argument('-ir-test', '--ir-test', action='store_true')
 
 parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
                     help="Connection timeout in ms. Default: %(default)s (sets DEPTHAI_CONNECTION_TIMEOUT environment variable)")
@@ -95,6 +95,7 @@ os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
 import depthai as dai
 
 if len(sys.argv) == 1:
+    import cam_test_gui
     cam_test_gui.main()
 
 cam_list = []
@@ -235,6 +236,9 @@ with dai.Device(*dai_device_args) as device:
     print('USB speed:', device.getUsbSpeed().name)
 
     print('IR drivers:', device.getIrDrivers())
+    if args.ir_test:
+        from ir_handler import start_ir_handler, close_ir_handler
+        start_ir_handler(device)
 
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
@@ -334,6 +338,8 @@ with dai.Device(*dai_device_args) as device:
 
         key = cv2.waitKey(1)
         if key == ord('q'):
+            if args.ir_test:
+                close_ir_handler(device)
             break
         elif key == ord('c'):
             capture_list = cam_list.copy()
