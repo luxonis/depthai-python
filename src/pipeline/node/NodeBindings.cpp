@@ -94,6 +94,7 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
 void bind_xlinkin(pybind11::module& m, void* pCallstack);
 void bind_xlinkout(pybind11::module& m, void* pCallstack);
 void bind_colorcamera(pybind11::module& m, void* pCallstack);
+void bind_camera(pybind11::module& m, void* pCallstack);
 void bind_monocamera(pybind11::module& m, void* pCallstack);
 void bind_stereodepth(pybind11::module& m, void* pCallstack);
 void bind_neuralnetwork(pybind11::module& m, void* pCallstack);
@@ -123,6 +124,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_xlinkin);
     callstack.push_front(bind_xlinkout);
     callstack.push_front(bind_colorcamera);
+    callstack.push_front(bind_camera);
     callstack.push_front(bind_monocamera);
     callstack.push_front(bind_stereodepth);
     callstack.push_front(bind_neuralnetwork);
@@ -230,6 +232,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("name", &Node::Output::name, DOC(dai, Node, Output, name))
         .def_readwrite("type", &Node::Output::type, DOC(dai, Node, Output, type))
         .def_readwrite("possibleDatatypes", &Node::Output::possibleDatatypes, DOC(dai, Node, Output, possibleDatatypes))
+        .def("getParent", static_cast<const Node& (Node::Output::*)() const>(&Node::Output::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Output, getParent))
+        .def("getParent", static_cast<Node& (Node::Output::*)()>(&Node::Output::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Output, getParent))
+        .def("isSamePipeline", &Node::Output::isSamePipeline, py::arg("input"), DOC(dai, Node, Output, isSamePipeline))
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))

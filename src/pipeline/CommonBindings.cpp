@@ -1,5 +1,8 @@
 #include "CommonBindings.hpp"
 
+// Libraries
+#include "hedley/hedley.h"
+
 // depthai-shared
 #include "depthai-shared/common/CameraBoardSocket.hpp"
 #include "depthai-shared/common/EepromData.hpp"
@@ -19,9 +22,13 @@
 #include "depthai-shared/common/DetectionParserOptions.hpp"
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
+#include "depthai-shared/common/Colormap.hpp"
+#include "depthai-shared/common/FrameEvent.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
+#include "depthai/common/CameraExposureOffset.hpp"
+#include "depthai/utility/ProfilingData.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -34,6 +41,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
+    py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
     py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
@@ -50,6 +58,10 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
     py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
+    py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
+    py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
+    py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -122,12 +134,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
     // CameraBoardSocket enum bindings
+
+    // Deprecated
+    HEDLEY_DIAGNOSTIC_PUSH
+    HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
     cameraBoardSocket
         .value("AUTO", CameraBoardSocket::AUTO)
-        .value("RGB", CameraBoardSocket::RGB)
-        .value("LEFT", CameraBoardSocket::LEFT)
-        .value("RIGHT", CameraBoardSocket::RIGHT)
-        .value("CENTER", CameraBoardSocket::CENTER)
         .value("CAM_A", CameraBoardSocket::CAM_A)
         .value("CAM_B", CameraBoardSocket::CAM_B)
         .value("CAM_C", CameraBoardSocket::CAM_C)
@@ -136,7 +148,31 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("CAM_F", CameraBoardSocket::CAM_F)
         .value("CAM_G", CameraBoardSocket::CAM_G)
         .value("CAM_H", CameraBoardSocket::CAM_H)
+
+        .value("RGB", CameraBoardSocket::RGB, "**Deprecated:** Use CAM_A or address camera by name instead")
+        .value("LEFT", CameraBoardSocket::LEFT, "**Deprecated:** Use CAM_B or address camera by name instead")
+        .value("RIGHT", CameraBoardSocket::RIGHT, "**Deprecated:** Use CAM_C or address camera by name instead")
+        .value("CENTER", CameraBoardSocket::CENTER, "**Deprecated:** Use CAM_A or address camera by name instead")
+
+        // Deprecated overriden
+        .def_property_readonly_static("RGB", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RGB is deprecated, use CAM_A or address camera by name instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("CENTER", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "CENTER is deprecated, use CAM_A or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("LEFT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "LEFT is deprecated, use CAM_B or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_B;
+        })
+        .def_property_readonly_static("RIGHT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RIGHT is deprecated, use CAM_C or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_C;
+        })
     ;
+    HEDLEY_DIAGNOSTIC_POP
 
     // CameraSensorType enum bindings
     cameraSensorType
@@ -166,11 +202,22 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
         .def_readwrite("name", &CameraFeatures::name)
+        .def_readwrite("configs", &CameraFeatures::configs)
         .def("__repr__", [](CameraFeatures& camera) {
             std::stringstream stream;
             stream << camera;
             return stream.str();
         });
+    ;
+
+    // CameraSensorConfig
+    cameraSensorConfig
+        .def(py::init<>())
+        .def_readwrite("width", &CameraSensorConfig::width)
+        .def_readwrite("height", &CameraSensorConfig::height)
+        .def_readwrite("minFps", &CameraSensorConfig::minFps)
+        .def_readwrite("maxFps", &CameraSensorConfig::maxFps)
+        .def_readwrite("type", &CameraSensorConfig::type)
     ;
 
     // MemoryInfo
@@ -289,5 +336,50 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("anchorMasks", &DetectionParserOptions::anchorMasks)
         .def_readwrite("iouThreshold", &DetectionParserOptions::iouThreshold)
         ;
+
+    cameraExposureOffset
+        .value("START", CameraExposureOffset::START)
+        .value("MIDDLE", CameraExposureOffset::MIDDLE)
+        .value("END", CameraExposureOffset::END)
+    ;
+
+    colormap
+        .value("NONE", Colormap::NONE)
+        .value("JET", Colormap::JET)
+        .value("TURBO", Colormap::TURBO)
+        .value("STEREO_JET", Colormap::STEREO_JET)
+        .value("STEREO_TURBO", Colormap::STEREO_TURBO)
+        // .value("AUTUMN", Colormap::AUTUMN)
+        // .value("BONE", Colormap::BONE)
+        // .value("WINTER", Colormap::WINTER)
+        // .value("RAINBOW", Colormap::RAINBOW)
+        // .value("OCEAN", Colormap::OCEAN)
+        // .value("SUMMER", Colormap::SUMMER)
+        // .value("SPRING", Colormap::SPRING)
+        // .value("COOL", Colormap::COOL)
+        // .value("HSV", Colormap::HSV)
+        // .value("PINK", Colormap::PINK)
+        // .value("HOT", Colormap::HOT)
+        // .value("PARULA", Colormap::PARULA)
+        // .value("MAGMA", Colormap::MAGMA)
+        // .value("INFERNO", Colormap::INFERNO)
+        // .value("PLASMA", Colormap::PLASMA)
+        // .value("VIRIDIS", Colormap::VIRIDIS)
+        // .value("CIVIDIS", Colormap::CIVIDIS)
+        // .value("TWILIGHT", Colormap::TWILIGHT)
+        // .value("TWILIGHT_SHIFTED", Colormap::TWILIGHT_SHIFTED)
+        // .value("DEEPGREEN", Colormap::DEEPGREEN)
+    ;
+
+    frameEvent
+        .value("NONE", FrameEvent::NONE)
+        .value("READOUT_START", FrameEvent::READOUT_START)
+        .value("READOUT_END", FrameEvent::READOUT_END)
+    ;
+
+    profilingData
+        .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))
+        .def_readwrite("numBytesRead", &ProfilingData::numBytesRead, DOC(dai, ProfilingData, numBytesRead))
+    ;
 
 }

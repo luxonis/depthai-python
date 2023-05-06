@@ -56,9 +56,16 @@ Boot switches
 - **Boot from flash** - DIP switch: 0x03 (switches 5,6 ON) - used by OAK PoE and USB cameras when bootloader is installed.
 - **Recovery mode for USB** - DIP switch: 0x16 (switches 2,4,5 ON) - to boot directly into USB mode, so camera waits for the host to connect to it via USB.
 
-.. image:: https://user-images.githubusercontent.com/18037362/154956812-c3fcc961-af46-4dfd-8080-e15c8c6b43f0.png
+.. figure:: https://user-images.githubusercontent.com/18037362/154956812-c3fcc961-af46-4dfd-8080-e15c8c6b43f0.png
 
-OAK-D-PoE with switches 2,4,5 ON, for the purpose of connecting to the device via USB.
+    OAK-D-PoE with switches 2,4,5 ON, for the purpose of connecting to the device via USB.
+
+On newer versions of OAK devices we have 0 ohm resistors (see image below) instead of a DIP switch, which means OAK will boot into flash by default. These new devices
+have the bootloader flashed, which handles the booting process. There's also an additional button on the baseboard that switches boot to recovery mode when
+pressed, which can be useful if the bootloader hasn't yet been flashed (eg. early access devices). You need to press this button when powering the device (when booting
+happens).
+
+.. image:: https://user-images.githubusercontent.com/18037362/207295832-613fae0a-c0ae-411e-b03b-8a4736f1bfc7.png
 
 API
 ###
@@ -90,9 +97,16 @@ to the pipeline. Instead of transferring the whole package, only Pipeline descri
 Depthai application package (**.dap**) consists of:
 
 - SBR (512B header which describes sections of data)
-- Depthai device firmware (section “__firmware”)
-- Pipeline description (section “pipeline”)
-- Assets structure (section “assets”)
-- Asset storage (section “asset_storage”)
+- Depthai device firmware (section "__firmware")
+- Pipeline description (section "pipeline")
+- Assets structure (section "assets")
+- Asset storage (section "asset_storage")
+
+MAC address
+###########
+
+All OAK PoE cameras have a unique MAC address which is used to identify the device on the network. It is calculated from the
+MxID of the device, see `logic here <https://gist.github.com/Erol444/85d6ef7ae9c946f5688854b86c548dc7>`__.
+The MAC address is stored in the DeviceBootloader configuration.
 
 .. include::  ../includes/footer-short.rst

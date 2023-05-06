@@ -26,9 +26,9 @@ xinSpatialCalcConfig.setStreamName("spatialCalcConfig")
 
 # Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 lrcheck = False
 subpixel = False
@@ -44,6 +44,7 @@ bottomRight = dai.Point2f(0.6, 0.6)
 config = dai.SpatialLocationCalculatorConfigData()
 config.depthThresholds.lowerThreshold = 100
 config.depthThresholds.upperThreshold = 10000
+calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MEDIAN
 config.roi = dai.Rect(topLeft, bottomRight)
 
 spatialLocationCalculator.inputConfig.setWaitForMessage(False)
@@ -123,10 +124,30 @@ with dai.Device(pipeline) as device:
                 topLeft.x += stepSize
                 bottomRight.x += stepSize
                 newConfig = True
+        elif key == ord('1'):
+            calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MEAN
+            print('Switching calculation algorithm to MEAN!')
+            newConfig = True
+        elif key == ord('2'):
+            calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MIN
+            print('Switching calculation algorithm to MIN!')
+            newConfig = True
+        elif key == ord('3'):
+            calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MAX
+            print('Switching calculation algorithm to MAX!')
+            newConfig = True
+        elif key == ord('4'):
+            calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MODE
+            print('Switching calculation algorithm to MODE!')
+            newConfig = True
+        elif key == ord('5'):
+            calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.MEDIAN
+            print('Switching calculation algorithm to MEDIAN!')
+            newConfig = True
 
         if newConfig:
             config.roi = dai.Rect(topLeft, bottomRight)
-            config.calculationAlgorithm = dai.SpatialLocationCalculatorAlgorithm.AVERAGE
+            config.calculationAlgorithm = calculationAlgorithm
             cfg = dai.SpatialLocationCalculatorConfig()
             cfg.addROI(config)
             spatialCalcConfigInQueue.send(cfg)

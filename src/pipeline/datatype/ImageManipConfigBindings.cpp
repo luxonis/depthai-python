@@ -97,7 +97,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
     imageManipConfig
         .def(py::init<>())
         // setters
-        .def("setCropRect", static_cast<ImageManipConfig&(ImageManipConfig::*)(float, float, float, float)>(&ImageManipConfig::setCropRect), py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("xmax"), DOC(dai, ImageManipConfig, setCropRect))
+        .def("setCropRect", static_cast<ImageManipConfig&(ImageManipConfig::*)(float, float, float, float)>(&ImageManipConfig::setCropRect), py::arg("xmin"), py::arg("ymin"), py::arg("xmax"), py::arg("ymax"), DOC(dai, ImageManipConfig, setCropRect))
         .def("setCropRect", static_cast<ImageManipConfig&(ImageManipConfig::*)(std::tuple<float, float, float, float>)>(&ImageManipConfig::setCropRect), py::arg("coordinates"), DOC(dai, ImageManipConfig, setCropRect, 2))
         .def("setCropRotatedRect", &ImageManipConfig::setCropRotatedRect, py::arg("rr"), py::arg("normalizedCoords") = true, DOC(dai, ImageManipConfig, setCropRotatedRect))
         .def("setCenterCrop", &ImageManipConfig::setCenterCrop, py::arg("ratio"), py::arg("whRatio")=1.0f, DOC(dai, ImageManipConfig, setCenterCrop))
@@ -111,12 +111,16 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("setResize", static_cast<ImageManipConfig&(ImageManipConfig::*)(std::tuple<int, int>)>(&ImageManipConfig::setResize), py::arg("size"), DOC(dai, ImageManipConfig, setResize, 2))
         .def("setResizeThumbnail", static_cast<ImageManipConfig&(ImageManipConfig::*)(int, int, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("w"), py::arg("h"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail))
         .def("setResizeThumbnail", static_cast<ImageManipConfig&(ImageManipConfig::*)(std::tuple<int, int>, int, int, int)>(&ImageManipConfig::setResizeThumbnail), py::arg("size"), py::arg("bgRed")=0, py::arg("bgGreen")=0, py::arg("bgBlue")=0, DOC(dai, ImageManipConfig, setResizeThumbnail, 2))
-        .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("name"), DOC(dai, ImageManipConfig, setFrameType))
+        .def("setFrameType", &ImageManipConfig::setFrameType, py::arg("type"), DOC(dai, ImageManipConfig, setFrameType))
+        .def("setColormap", static_cast<ImageManipConfig&(ImageManipConfig::*)(Colormap, int, int)>(&ImageManipConfig::setColormap), py::arg("colormap"), py::arg("min"), py::arg("max"), DOC(dai, ImageManipConfig, setColormap))
+        .def("setColormap", static_cast<ImageManipConfig&(ImageManipConfig::*)(Colormap, int)>(&ImageManipConfig::setColormap), py::arg("colormap"), py::arg("max") = 255, DOC(dai, ImageManipConfig, setColormap))
+        .def("setColormap", static_cast<ImageManipConfig&(ImageManipConfig::*)(Colormap, float)>(&ImageManipConfig::setColormap), py::arg("colormap"), py::arg("max") = 255.0f, DOC(dai, ImageManipConfig, setColormap))
         .def("setHorizontalFlip", &ImageManipConfig::setHorizontalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setHorizontalFlip))
         .def("setVerticalFlip", &ImageManipConfig::setVerticalFlip, py::arg("flip"), DOC(dai, ImageManipConfig, setVerticalFlip))
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
         .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
+        .def("set", &ImageManipConfig::set, py::arg("config"), DOC(dai, ImageManipConfig, set))
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin, DOC(dai, ImageManipConfig, getCropXMin))
@@ -129,6 +133,8 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("getResizeConfig", &ImageManipConfig::getResizeConfig, DOC(dai, ImageManipConfig, getResizeConfig))
         .def("getFormatConfig", &ImageManipConfig::getFormatConfig, DOC(dai, ImageManipConfig, getFormatConfig))
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
+        .def("getColormap", &ImageManipConfig::getColormap, DOC(dai, ImageManipConfig, getColormap))
+        .def("get", &ImageManipConfig::get, DOC(dai, ImageManipConfig, get))
         ;
 
 
