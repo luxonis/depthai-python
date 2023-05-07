@@ -14,6 +14,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
     py::enum_<ColorCameraProperties::SensorResolution> colorCameraPropertiesSensorResolution(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution));
     py::enum_<ColorCameraProperties::ColorOrder> colorCameraPropertiesColorOrder(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder));
+    py::enum_<ColorCameraProperties::WarpMeshSource> colorCameraPropertiesWarpMeshSource(colorCameraProperties, "WarpMeshSource", DOC(dai, ColorCameraProperties, WarpMeshSource));
     auto colorCamera = ADD_NODE(ColorCamera);
 
     ///////////////////////////////////////////////////////////////////////
@@ -51,6 +52,13 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("RGB", ColorCameraProperties::ColorOrder::RGB)
         ;
 
+    colorCameraPropertiesWarpMeshSource
+        .value("AUTO", ColorCameraProperties::WarpMeshSource::AUTO)
+        .value("NONE", ColorCameraProperties::WarpMeshSource::NONE)
+        .value("CALIBRATION", ColorCameraProperties::WarpMeshSource::CALIBRATION)
+        .value("URI", ColorCameraProperties::WarpMeshSource::URI)
+        ;
+
     colorCameraProperties
         .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
         .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
@@ -75,6 +83,13 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
         .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
         .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
+        .def_readwrite("warpMeshSource", &ColorCameraProperties::warpMeshSource)
+        .def_readwrite("warpMeshUri", &ColorCameraProperties::warpMeshUri)
+        .def_readwrite("warpMeshWidth", &ColorCameraProperties::warpMeshWidth)
+        .def_readwrite("warpMeshHeight", &ColorCameraProperties::warpMeshHeight)
+        .def_readwrite("calibAlpha", &ColorCameraProperties::calibAlpha)
+        .def_readwrite("warpMeshStepWidth", &ColorCameraProperties::warpMeshStepWidth)
+        .def_readwrite("warpMeshStepHeight", &ColorCameraProperties::warpMeshStepHeight)
     ;
 
     // ColorCamera node
@@ -184,6 +199,18 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
         .def("setCamera", &ColorCamera::setCamera, py::arg("name"), DOC(dai, node, ColorCamera, setCamera))
         .def("getCamera", &ColorCamera::getCamera, DOC(dai, node, ColorCamera, getCamera))
+        
+        .def("setMeshSource", &ColorCamera::setMeshSource, py::arg("source"), DOC(dai, node, ColorCamera, setMeshSource))
+        .def("getMeshSource", &ColorCamera::getMeshSource, DOC(dai, node, ColorCamera, getMeshSource))
+        // .def("loadMeshFile", &ColorCamera::loadMeshFile, py::arg("warpMesh"), DOC(dai, node, ColorCamera, loadMeshFile))
+        .def("loadMeshData", &ColorCamera::loadMeshData, py::arg("warpMesh"), DOC(dai, node, ColorCamera, loadMeshData))
+        .def("setMeshStep", &ColorCamera::setMeshStep, py::arg("width"), py::arg("height"), DOC(dai, node, ColorCamera, setMeshStep))
+        .def("getMeshStep", &ColorCamera::getMeshStep, DOC(dai, node, ColorCamera, getMeshStep))
+        .def("setMeshSize", &ColorCamera::setMeshSize, py::arg("width"), py::arg("height"), DOC(dai, node, ColorCamera, setMeshSize))
+        .def("getMeshSize", &ColorCamera::getMeshSize, DOC(dai, node, ColorCamera, getMeshSize))
+        .def("setCalibrationAlpha", &ColorCamera::setCalibrationAlpha, py::arg("alpha"), DOC(dai, node, ColorCamera, setCalibrationAlpha))
+        .def("getCalibrationAlpha", &ColorCamera::getCalibrationAlpha, DOC(dai, node, ColorCamera, getCalibrationAlpha))
+        
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
