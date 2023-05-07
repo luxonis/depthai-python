@@ -4,20 +4,20 @@ import depthai as dai
 import time
 import argparse
 
-enable_4k = True  # Will downscale 4K -> 1080p
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_true")
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
+parser.add_argument('-l',  '--load-and-exit',    default=False, action="store_true")
 args = parser.parse_args()
 
 def getPipeline():
-    # Start defining a pipeline
+    enable_4k = True  # Will downscale 4K -> 1080p
+
     pipeline = dai.Pipeline()
 
     # Define a source - color camera
     cam_rgb = pipeline.createColorCamera()
-    cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+    cam_rgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
     cam_rgb.setInterleaved(False)
     #cam_rgb.initialControl.setManualFocus(130)
 
@@ -27,24 +27,28 @@ def getPipeline():
     else:
         cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
-    # Create an UVC (USB Video Class) output node. It needs 1920x1080, NV12 input
+    # Create an UVC (USB Video Class) output node
     uvc = pipeline.createUVC()
     cam_rgb.video.link(uvc.input)
 
-    return pipeline
+    # Note: if the pipeline is sent later to device (using startPipeline()),
+    # it is important to pass the device config separately when creating the device
+    config = dai.Device.Config()
+    # config.board.uvc = dai.BoardConfig.UVC()  # enable default 1920x1080 NV12
+    config.board.uvc = dai.BoardConfig.UVC(1920, 1080)
+    config.board.uvc.frameType = dai.ImgFrame.Type.NV12
+    # config.board.uvc.cameraName = "My Custom Cam"
+    pipeline.setBoardConfig(config.board)
 
-# Workaround for a bug with the timeout-enabled bootloader
-progressCalled = False
-# TODO move this under flash(), will need to handle `progressCalled` differently
-def progress(p):
-    global progressCalled
-    progressCalled = True
-    print(f'Flashing progress: {p*100:.1f}%')
+    return pipeline
 
 # Will flash the bootloader if no pipeline is provided as argument
 def flash(pipeline=None):
     (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
     bootloader = dai.DeviceBootloader(bl, True)
+
+    # Create a progress callback lambda
+    progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
 
     startTime = time.monotonic()
     if pipeline is None:
@@ -54,8 +58,6 @@ def flash(pipeline=None):
         print("Flashing application pipeline...")
         bootloader.flash(progress, pipeline)
 
-    if not progressCalled:
-        raise RuntimeError('Flashing failed, please try again')
     elapsedTime = round(time.monotonic() - startTime, 2)
     print("Done in", elapsedTime, "seconds")
 
@@ -65,11 +67,23 @@ if args.flash_bootloader or args.flash_app:
     print("Flashing successful. Please power-cycle the device")
     quit()
 
-# Pipeline defined, now the device is connected to
+if args.load_and_exit:
+    import os
+    # Disabling device watchdog, so it doesn't need the host to ping periodically
+    os.environ["DEPTHAI_WATCHDOG"] = "0"
+    device = dai.Device(getPipeline())
+    print("\nDevice started, open a UVC viewer to check the camera stream.")
+    print("Attempting to force-quit this process...")
+    print("To reconnect with depthai, a device power-cycle may be required")
+    # We do not want the device to be closed, so kill the process.
+    # (TODO add depthai API to be able to cleanly exit without closing device)
+    import signal
+    os.kill(os.getpid(),signal.SIGKILL)
+
+# Standard UVC load with depthai
 with dai.Device(getPipeline()) as device:
     print("\nDevice started, please keep this process running")
-    print("and open an UVC viewer. Example on Linux:")
-    print("    guvcview -d /dev/video0")
+    print("and open an UVC viewer to check the camera stream.")
     print("\nTo close: Ctrl+C")
 
     # Doing nothing here, just keeping the host feeding the watchdog
