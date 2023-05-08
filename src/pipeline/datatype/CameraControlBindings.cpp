@@ -214,7 +214,12 @@ std::vector<const char *> camCtrlAttr;
         .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
         .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
         .def("setEffectMode", &CameraControl::setEffectMode, py::arg("mode"), DOC(dai, CameraControl, setEffectMode))
+        .def("setMisc", py::overload_cast<std::string, std::string>(&CameraControl::setMisc), py::arg("control"), py::arg("value"), DOC(dai, CameraControl, setMisc))
+        .def("setMisc", py::overload_cast<std::string, int>(&CameraControl::setMisc), py::arg("control"), py::arg("value"), DOC(dai, CameraControl, setMisc, 2))
+        .def("setMisc", py::overload_cast<std::string, float>(&CameraControl::setMisc), py::arg("control"), py::arg("value"), DOC(dai, CameraControl, setMisc, 3))
+        .def("clearMiscControls", &CameraControl::clearMiscControls, DOC(dai, CameraControl, clearMiscControls))
         // getters
+        .def("getMiscControls", &CameraControl::getMiscControls, DOC(dai, CameraControl, getMiscControls))
         .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
         .def("getExposureTime", &CameraControl::getExposureTime, DOC(dai, CameraControl, getExposureTime))
         .def("getSensitivity", &CameraControl::getSensitivity, DOC(dai, CameraControl, getSensitivity))
