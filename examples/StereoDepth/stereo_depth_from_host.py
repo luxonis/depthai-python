@@ -464,12 +464,17 @@ class StereoConfigHandler:
 
 
 # StereoDepth initial config options.
-outDepth = True  # Disparity by default
-outConfidenceMap = True  # Output disparity confidence map
-outRectified = True   # Output and display rectified streams
-lrcheck = True   # Better handling for occlusions
+outDepth = False  # Disparity by default
+outConfidenceMap = False  # Output disparity confidence map
+outRectified = False   # Output and display rectified streams
+lrcheck = False   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled. Unsupported for now.
 subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
+
+enableDebugLrCheckIt1 = True
+enableDebugLrCheckIt2 = args.debug
+enableDebugExtLrCheckIt1 = args.debug
+enableDebugExtLrCheckIt2 = args.debug
 
 width = 1280
 height = 800
@@ -494,11 +499,19 @@ xoutDisparity = pipeline.create(dai.node.XLinkOut)
 xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
 xoutRectifRight = pipeline.create(dai.node.XLinkOut)
 xoutStereoCfg = pipeline.create(dai.node.XLinkOut)
-if args.debug:
+if enableDebugLrCheckIt1:
     xoutDebugLrCheckIt1 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugLrCheckIt1.setStreamName('disparity_lr_check_iteration1')
+if enableDebugLrCheckIt2:
     xoutDebugLrCheckIt2 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugLrCheckIt2.setStreamName('disparity_lr_check_iteration2')
+if enableDebugExtLrCheckIt1:
     xoutDebugExtLrCheckIt1 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugExtLrCheckIt1.setStreamName('disparity_ext_lr_check_iteration1')
+if enableDebugExtLrCheckIt2:
     xoutDebugExtLrCheckIt2 = pipeline.create(dai.node.XLinkOut)
+    xoutDebugExtLrCheckIt2.setStreamName('disparity_ext_lr_check_iteration2')
+
 if args.dumpdisparitycostvalues:
     xoutDebugCostDump = pipeline.create(dai.node.XLinkOut)
 
@@ -514,11 +527,6 @@ xoutDisparity.setStreamName('disparity')
 xoutRectifLeft.setStreamName('rectified_left')
 xoutRectifRight.setStreamName('rectified_right')
 xoutStereoCfg.setStreamName('stereo_cfg')
-if args.debug:
-    xoutDebugLrCheckIt1.setStreamName('disparity_lr_check_iteration1')
-    xoutDebugLrCheckIt2.setStreamName('disparity_lr_check_iteration2')
-    xoutDebugExtLrCheckIt1.setStreamName('disparity_ext_lr_check_iteration1')
-    xoutDebugExtLrCheckIt2.setStreamName('disparity_ext_lr_check_iteration2')
 if args.dumpdisparitycostvalues:
     xoutDebugCostDump.setStreamName('disparity_cost_dump')
 
@@ -547,10 +555,16 @@ if outRectified:
     stereo.rectifiedLeft.link(xoutRectifLeft.input)
     stereo.rectifiedRight.link(xoutRectifRight.input)
 stereo.outConfig.link(xoutStereoCfg.input)
-if args.debug:
+debugStreams = []
+if enableDebugLrCheckIt1:
     stereo.debugDispLrCheckIt1.link(xoutDebugLrCheckIt1.input)
+    debugStreams.append('disparity_lr_check_iteration1') 
+if enableDebugLrCheckIt2:
     stereo.debugDispLrCheckIt2.link(xoutDebugLrCheckIt2.input)
+    debugStreams.append('disparity_lr_check_iteration2')
+if enableDebugExtLrCheckIt1:
     stereo.debugExtDispLrCheckIt1.link(xoutDebugExtLrCheckIt1.input)
+if enableDebugExtLrCheckIt2:
     stereo.debugExtDispLrCheckIt2.link(xoutDebugExtLrCheckIt2.input)
 if args.dumpdisparitycostvalues:
     stereo.debugDispCostDump.link(xoutDebugCostDump.input)
@@ -574,10 +588,8 @@ if outDepth:
     streams.append('depth')
 if outConfidenceMap:
     streams.append('confidence_map')
-debugStreams = []
-if args.debug:
-    debugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
-    debugStreams.extend(['disparity_ext_lr_check_iteration1', 'disparity_ext_lr_check_iteration2'])
+# if args.debug:
+#     debugStreams.extend(['disparity_ext_lr_check_iteration1', 'disparity_ext_lr_check_iteration2'])
 if args.dumpdisparitycostvalues:
     debugStreams.append('disparity_cost_dump')
 
@@ -676,12 +688,14 @@ with dai.Device(pipeline) as device:
             q = device.getOutputQueue('disparity_cost_dump', 8, blocking=False)
             queues.append(q)
 
-        if args.debug:
+        if enableDebugLrCheckIt1:
             q_list_debug = []
 
             activeDebugStreams = []
             if lrCheckEnabled:
-                activeDebugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+                # activeDebugStreams.extend(['disparity_lr_check_iteration1', 'disparity_lr_check_iteration2'])
+                pass
+            activeDebugStreams.append('disparity_lr_check_iteration1')
             if extendedEnabled:
                 activeDebugStreams.extend(['disparity_ext_lr_check_iteration1'])
                 if lrCheckEnabled:

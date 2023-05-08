@@ -123,7 +123,7 @@ class StereoConfigHandler:
 
         StereoConfigHandler.config = config
 
-
+customPixelDescriptors = False
 
 datasetDefault = str((Path(__file__).parent / Path('../models/dataset')).resolve().absolute())
 if not Path(datasetDefault).exists():
@@ -136,11 +136,11 @@ right = datasetDefault + '/' + '0' + '/' + 'in_right' + '.png'
 
 inW = 1920
 inH = 1200
-# inW = 1280
-# inH = 800
+inW = 1280
+inH = 800
 
-# left = "horizontal-rectified_left_screenshot_13.04.2023.png"
-# right = "horizontal-rectified_right_screenshot_13.04.2023.png"
+left = "horizontal-rectified_left_screenshot_13.04.2023.png"
+right = "horizontal-rectified_right_screenshot_13.04.2023.png"
 
 leftImg = cv2.imread(left, cv2.IMREAD_GRAYSCALE)
 rightImg = cv2.imread(right, cv2.IMREAD_GRAYSCALE)
@@ -152,7 +152,48 @@ height = leftImg.shape[0]
 
 cv2.imshow("leftImg", leftImg)
 cv2.imshow("rightImg", rightImg)
-cv2.waitKey(1) 
+cv2.waitKey(1)
+
+#https://stackoverflow.com/questions/38265364/census-transform-in-python-opencv
+def censusTransform(image, window_size=5):
+    """
+    Take a gray scale image and for each pixel around the center of the window generate a bit value of length
+    window_size * 2 - 1. window_size of 3 produces bit length of 8, and 5 produces 24.
+
+    The image gets border of zero padded pixels half the window size.
+
+    Bits are set to one if pixel under consideration is greater than the center, otherwise zero.
+
+    :param image: numpy.ndarray(shape=(MxN), dtype=numpy.uint8)
+    :param window_size: int odd-valued
+    :return: numpy.ndarray(shape=(MxN), , dtype=numpy.uint8)
+    >>> image = np.array([ [50, 70, 80], [90, 100, 110], [60, 120, 150] ])
+    >>> np.binary_repr(transform(image)[0, 0])
+    '1011'
+    >>> image = np.array([ [60, 75, 85], [115, 110, 105], [70, 130, 170] ])
+    >>> np.binary_repr(transform(image)[0, 0])
+    '10011'
+    """
+    half_window_size = window_size // 2
+
+    image = cv2.copyMakeBorder(image, top=half_window_size, left=half_window_size, right=half_window_size, bottom=half_window_size, borderType=cv2.BORDER_CONSTANT, value=0)
+    rows, cols = image.shape
+    census = np.zeros((rows - half_window_size * 2, cols - half_window_size * 2), dtype=np.uint32)
+    center_pixels = image[half_window_size:rows - half_window_size, half_window_size:cols - half_window_size]
+
+    offsets = [(row, col) for row in range(half_window_size) for col in range(half_window_size) if not row == half_window_size + 1 == col]
+    for (row, col) in offsets:
+        census = (census << 1) | (image[row:row + rows - half_window_size * 2, col:col + cols - half_window_size * 2] >= center_pixels)
+    return census
+
+
+if customPixelDescriptors:
+    leftCensus = censusTransform(leftImg, 5)
+    print(leftCensus.shape)
+    print(leftCensus.dtype)
+    rightCensus = censusTransform(rightImg, 5)
+    # cv2.imshow("census", census)
+    # cv2.waitKey(0)
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -172,6 +213,12 @@ xoutLeft.setStreamName("left")
 xoutRight.setStreamName("right")
 xoutDepth.setStreamName("depth")
 
+leftDescriptors = pipeline.create(dai.node.XLinkIn)
+rightDescriptors = pipeline.create(dai.node.XLinkIn)
+leftDescriptors.setStreamName("inLeftDescriptor")
+rightDescriptors.setStreamName("inRightDescriptor")
+leftDescriptors.setMaxDataSize(1920*1200*4)
+rightDescriptors.setMaxDataSize(1920*1200*4)
 
 monoLeft.setMaxDataSize(width * height)
 monoRight.setMaxDataSize(width * height)
@@ -179,17 +226,19 @@ monoRight.setMaxDataSize(width * height)
 # Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
+leftDescriptors.out.link(stereo.inputLeftPixelDescriptor)
+rightDescriptors.out.link(stereo.inputRightPixelDescriptor)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.rectifiedRight.link(xoutRight.input)
 stereo.disparity.link(xoutDepth.input)
 stereo.setInputResolution(width,height) # set input resolution specifically
 
-stereo.setRectification(True) #disable rectification, frames are pre-rectified
+stereo.setRectification(False) #disable rectification, frames are pre-rectified
 
 stereo.setLeftRightCheck(False)
 stereo.setSubpixel(True)
 stereo.setSubpixelFractionalBits(5)
-
+stereo.setCustomPixelDescriptors(customPixelDescriptors)
 
 stereo.setConfidenceThreshold(230)
 
@@ -219,6 +268,8 @@ with dai.Device(pipeline) as device:
 
     qInLeft = device.getInputQueue("inLeft")
     qInRight = device.getInputQueue("inRight")
+    qInLeftDescriptor = device.getInputQueue("inLeftDescriptor")
+    qInRightDescriptor = device.getInputQueue("inRightDescriptor")
     qLeft = device.getOutputQueue("left", 4, False)
     qRight = device.getOutputQueue("right", 4, False)
     qDepth = device.getOutputQueue("depth", 4, False)
@@ -248,7 +299,28 @@ with dai.Device(pipeline) as device:
         img.setWidth(width)
         img.setHeight(height)
         qInRight.send(img)
-        # print("right send")
+
+        if customPixelDescriptors:
+
+            data = list(np.array(leftCensus.flatten()).view(dtype=np.int8))
+            leftDescImg = dai.ImgFrame()
+            leftDescImg.setData(data)
+            leftDescImg.setInstanceNum(1)
+            leftDescImg.setType(dai.ImgFrame.Type.RAW32)
+            leftDescImg.setWidth(width)
+            leftDescImg.setHeight(height)
+            # print("left descriptor send")
+            qInLeftDescriptor.send(leftDescImg)
+
+            data = list(np.array(rightCensus.flatten()).view(dtype=np.int8))
+            rightDescImg = dai.ImgFrame()
+            rightDescImg.setData(data)
+            rightDescImg.setInstanceNum(2)
+            rightDescImg.setType(dai.ImgFrame.Type.RAW32)
+            rightDescImg.setWidth(width)
+            rightDescImg.setHeight(height)
+            # print("right descriptor send")
+            qInRightDescriptor.send(rightDescImg)
 
         inLeft = qLeft.get()
         frameLeft = inLeft.getCvFrame()

@@ -66,6 +66,8 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readonly("inputConfig",    &StereoDepth::inputConfig, DOC(dai, node, StereoDepth, inputConfig))
         .def_readonly("left",           &StereoDepth::left, DOC(dai, node, StereoDepth, left))
         .def_readonly("right",          &StereoDepth::right, DOC(dai, node, StereoDepth, right))
+        .def_readonly("inputLeftPixelDescriptor",          &StereoDepth::inputLeftPixelDescriptor, DOC(dai, node, StereoDepth, inputLeftPixelDescriptor))
+        .def_readonly("inputRightPixelDescriptor",          &StereoDepth::inputRightPixelDescriptor, DOC(dai, node, StereoDepth, inputRightPixelDescriptor))
         .def_readonly("depth",          &StereoDepth::depth, DOC(dai, node, StereoDepth, depth))
         .def_readonly("disparity",      &StereoDepth::disparity, DOC(dai, node, StereoDepth, disparity))
         .def_readonly("syncedLeft",     &StereoDepth::syncedLeft, DOC(dai, node, StereoDepth, syncedLeft))
@@ -79,7 +81,8 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readonly("debugExtDispLrCheckIt2", &StereoDepth::debugExtDispLrCheckIt2, DOC(dai, node, StereoDepth, debugExtDispLrCheckIt2))
         .def_readonly("debugDispCostDump",   &StereoDepth::debugDispCostDump, DOC(dai, node, StereoDepth, debugDispCostDump))
         .def_readonly("confidenceMap",          &StereoDepth::confidenceMap, DOC(dai, node, StereoDepth, confidenceMap))
-        .def_readonly("pixelDescriptors",          &StereoDepth::pixelDescriptors, DOC(dai, node, StereoDepth, pixelDescriptors))
+        .def_readonly("pixelDescriptorsLeft",          &StereoDepth::pixelDescriptorsLeft, DOC(dai, node, StereoDepth, pixelDescriptorsLeft))
+        .def_readonly("pixelDescriptorsRight",          &StereoDepth::pixelDescriptorsRight, DOC(dai, node, StereoDepth, pixelDescriptorsRight))
 #if 0 //will be enabled when confidence map RGB alignment/LR-check support will be added
         .def_readonly("debugConfMapLrCheckIt1", &StereoDepth::debugConfMapLrCheckIt1, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt1))
         .def_readonly("debugConfMapLrCheckIt2", &StereoDepth::debugConfMapLrCheckIt2, DOC(dai, node, StereoDepth, debugConfMapLrCheckIt2))
@@ -168,6 +171,7 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("useHomographyRectification", &StereoDepth::useHomographyRectification, DOC(dai, node, StereoDepth, useHomographyRectification))
         .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
         .def("setVerticalStereo", &StereoDepth::setVerticalStereo, DOC(dai, node, StereoDepth, setVerticalStereo))
+        .def("setCustomPixelDescriptors", &StereoDepth::setCustomPixelDescriptors, DOC(dai, node, StereoDepth, setCustomPixelDescriptors))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
