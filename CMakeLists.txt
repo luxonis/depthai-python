@@ -124,7 +124,6 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/IMUBindings.cpp
     src/pipeline/node/EdgeDetectorBindings.cpp
     src/pipeline/node/FeatureTrackerBindings.cpp
-    src/pipeline/node/ToFBindings.cpp
     src/pipeline/node/AprilTagBindings.cpp
     src/pipeline/node/DetectionParserBindings.cpp
     src/pipeline/node/WarpBindings.cpp

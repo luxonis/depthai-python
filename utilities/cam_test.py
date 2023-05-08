@@ -45,7 +45,6 @@ import time
 from itertools import cycle
 from pathlib import Path
 import sys
-#import cam_test_gui
 import signal
 
 
@@ -53,17 +52,18 @@ def socket_type_pair(arg):
     socket, type = arg.split(',')
     if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
         raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color']):
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
         raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
-    return [socket, is_color]
+    is_tof = True if type in ['t', 'tof'] else False
+    return [socket, is_color, is_tof]
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True], ['left', False],
-                             ['right', False], ['camd', True]],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
+                    default=[['rgb', True, False], ['left', False, False],
+                             ['right', False, False], ['camd', True, False]],
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
@@ -109,15 +109,18 @@ os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
 import depthai as dai
 
 if len(sys.argv) == 1:
+    import cam_test_gui
     cam_test_gui.main()
 
 cam_list = []
 cam_type_color = {}
+cam_type_tof = {}
 print("Enabled cameras:")
-for socket, is_color in args.cameras:
+for socket, is_color, is_tof in args.cameras:
     cam_list.append(socket)
     cam_type_color[socket] = is_color
-    print(socket.rjust(7), ':', 'color' if is_color else 'mono')
+    cam_type_tof[socket] = is_tof
+    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -230,7 +233,10 @@ for c in cam_list:
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].setIspScale(1, args.isp_downscale)
         # cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if args.rgb_preview:
+            cam[c].preview.link(xout[c].input)
+        else:
+            cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -352,7 +358,9 @@ with dai.Device(*dai_device_args) as device:
     chroma_denoise = 0
     control = 'none'
     show = False
-    tof_amp_min = tofConfig.depthParams.minimumAmplitude
+
+    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom[0] = [0, 0, 0]
 
     print("Cam:", *['     ' + c.ljust(8)
           for c in cam_list], "[host | capture timestamp]")
@@ -370,7 +378,8 @@ with dai.Device(*dai_device_args) as device:
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
-                if cam_type_tof[c.split('_')[-1]] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+                cam_skt = c.split('_')[-1]
+                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
@@ -387,7 +396,7 @@ with dai.Device(*dai_device_args) as device:
                     print(txt)
                 capture = c in capture_list
                 if capture:
-                    capture_file_info = ('capture_' + c + '_' + cam_name[c]
+                    capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
                          + '_' + str(width) + 'x' + str(height)
                          + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
                          + '_iso_' + str(pkt.getSensitivity())
@@ -409,7 +418,7 @@ with dai.Device(*dai_device_args) as device:
                     if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
                     frame = frame * multiplier
                     # Debayer as color for preview/png
-                    if cam_type_color[c.split('_')[-1]]:
+                    if cam_type_color[cam_skt]:
                         # See this for the ordering, at the end of page:
                         # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
                         # TODO add bayer order to ImgFrame getType()
@@ -441,12 +450,12 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g'):
+        elif key == ord('g') and tof:
             f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
             print("ToF toggling f_mod value to:", f_mod)
             tofConfig.depthParams.freqModUsed = f_mod
             tofCfgQueue.send(tofConfig)
-        elif key == ord('h'):
+        elif key == ord('h') and tof:
             tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
             print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
             tofCfgQueue.send(tofConfig)
@@ -597,7 +606,7 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
-            elif control == 'tof_amplitude_min':
+            elif control == 'tof_amplitude_min' and tof:
                 amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
                 print("Setting min amplitude(confidence) to:", amp_min)
                 tofConfig.depthParams.minimumAmplitude = amp_min
