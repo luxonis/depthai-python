@@ -593,7 +593,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getLogLevel", [](DeviceBase& d) { py::gil_scoped_release release; return d.getLogLevel(); }, DOC(dai, DeviceBase, getLogLevel))
         .def("setSystemInformationLoggingRate", [](DeviceBase& d, float hz) { py::gil_scoped_release release; d.setSystemInformationLoggingRate(hz); }, py::arg("rateHz"), DOC(dai, DeviceBase, setSystemInformationLoggingRate))
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
-        .def("getCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCrashDump(); }, DOC(dai, DeviceBase, getCrashDump))
+        .def("getCrashDump", [](DeviceBase& d, bool clearCrashDump) { py::gil_scoped_release release; return d.getCrashDump(clearCrashDump); }, py::arg("clearCrashDump") = true, DOC(dai, DeviceBase, getCrashDump))
         .def("hasCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.hasCrashDump(); }, DOC(dai, DeviceBase, hasCrashDump))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
