@@ -53,6 +53,9 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPool", &StereoDepthProperties::numFramesPool, DOC(dai, StereoDepthProperties, numFramesPool))
         .def_readwrite("numPostProcessingShaves", &StereoDepthProperties::numPostProcessingShaves, DOC(dai, StereoDepthProperties, numPostProcessingShaves))
         .def_readwrite("numPostProcessingMemorySlices", &StereoDepthProperties::numPostProcessingMemorySlices, DOC(dai, StereoDepthProperties, numPostProcessingMemorySlices))
+        .def_readwrite("verticalStereo", &StereoDepthProperties::verticalStereo, DOC(dai, StereoDepthProperties, verticalStereo))
+        .def_readwrite("customPixelDescriptors", &StereoDepthProperties::customPixelDescriptors, DOC(dai, StereoDepthProperties, customPixelDescriptors))
+        .def_readwrite("enableFrameSync", &StereoDepthProperties::enableFrameSync, DOC(dai, StereoDepthProperties, enableFrameSync))
         ;
 
     stereoDepthPresetMode
@@ -172,6 +175,7 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("enableDistortionCorrection", &StereoDepth::enableDistortionCorrection, DOC(dai, node, StereoDepth, enableDistortionCorrection))
         .def("setVerticalStereo", &StereoDepth::setVerticalStereo, DOC(dai, node, StereoDepth, setVerticalStereo))
         .def("setCustomPixelDescriptors", &StereoDepth::setCustomPixelDescriptors, DOC(dai, node, StereoDepth, setCustomPixelDescriptors))
+        .def("setFrameSync", &StereoDepth::setFrameSync, DOC(dai, node, StereoDepth, setFrameSync))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
