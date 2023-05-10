@@ -8,6 +8,7 @@ Code Samples
    ../samples/bootloader/*
    ../samples/calibration/*
    ../samples/ColorCamera/*
+   ../samples/crash_report/*
    ../samples/EdgeDetector/*
    ../samples/FeatureTracker/*
    ../samples/host_side/*
@@ -50,6 +51,10 @@ are presented with code.
 - :ref:`RGB Preview` - Displays a small preview of the RGB camera
 - :ref:`RGB scene` - Shows how to select ColorCamera's scene and effect
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
+
+.. rubric:: Crash report
+
+- :ref:`Crash report` - In case of a firmware crash, example reads it from the device and saves it to a json file
 
 .. rubric:: EdgeDetector
 
