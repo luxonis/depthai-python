@@ -137,6 +137,7 @@ are presented with code.
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
+- :ref:`Stereo Depth custom Mesh` - Calculate and load custom mesh for stereo depth calculation
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
