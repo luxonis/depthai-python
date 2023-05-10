@@ -125,7 +125,7 @@ On PoE, the latency can vary quite a bit due to a number of factors:
   * Network/computer is saturated with other traffic. You can test the actual bandwidth with `OAK bandwidth test <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-bandwidth-test>`__ script. With direct link I got ~800mbps downlink and ~210mbps uplink.
 
 * Computer's **Network Interface Card settings**, `documentation here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#network-interface-controller-settings>`__
-* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should.
+* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should. **Workaround:** See :ref:`CPU usage` docs.
 * Another potential way to improve PoE latency would be to fine-tune network settings, like MTU, TCP window size, etc. (see `here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#advance-network-settings>`__ for more info)
 
 Bandwidth

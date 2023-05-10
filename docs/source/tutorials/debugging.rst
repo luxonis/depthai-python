@@ -142,7 +142,7 @@ example (code change below), the LeonOS CPU usage decreased from 100% to ~46%:
 
 Not having 100% CPU usage also drastically decreased frame latency, in the example for the script below it went from ~710 ms to ~110ms:
 
-.. image:: 
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/84ec8de8-58ce-49c7-b882-048141d284e0
 
 .. code-block:: diff
 
@@ -159,5 +159,7 @@ Not having 100% CPU usage also drastically decreased frame latency, in the examp
 
         oak.visualize([color, left, right], fps=True, scale=2/3)
         oak.start(blocking=True)
+
+Limiting 3A FPS can be achieved by calling :code:`setIsp3aFps()` function on the camera node (either :ref:`ColorCamera` or :ref:`MonoCamera`).
 
 .. include::  /includes/footer-short.rst
