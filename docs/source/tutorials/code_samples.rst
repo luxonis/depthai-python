@@ -52,7 +52,7 @@ are presented with code.
 - :ref:`RGB scene` - Shows how to select ColorCamera's scene and effect
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
 
-.. rubtic:: Crash report
+.. rubric:: Crash report
 
 - :ref:`Crash report` - In case of a firmware crash, example reads it from the device and saves it to a json file
 
