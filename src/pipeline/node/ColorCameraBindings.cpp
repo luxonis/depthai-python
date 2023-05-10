@@ -4,6 +4,7 @@
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
+#include "depthai/pipeline/datatype/ImgFrame.hpp"
 
 void bind_colorcamera(pybind11::module& m, void* pCallstack){
 
@@ -68,6 +69,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("imageOrientation", &ColorCameraProperties::imageOrientation)
         .def_readwrite("colorOrder", &ColorCameraProperties::colorOrder)
         .def_readwrite("interleaved", &ColorCameraProperties::interleaved)
+        .def_readwrite("previewType", &ColorCameraProperties::previewType)
         .def_readwrite("fp16", &ColorCameraProperties::fp16)
         .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
         .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
@@ -130,6 +132,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getColorOrder", &ColorCamera::getColorOrder, DOC(dai, node, ColorCamera, getColorOrder))
         .def("setInterleaved", &ColorCamera::setInterleaved, py::arg("interleaved"), DOC(dai, node, ColorCamera, setInterleaved))
         .def("getInterleaved", &ColorCamera::getInterleaved, DOC(dai, node, ColorCamera, getInterleaved))
+        .def("setPreviewType", &ColorCamera::setPreviewType, py::arg("previewType"), DOC(dai, node, ColorCamera, setPreviewType))
+        .def("getPreviewType", &ColorCamera::getPreviewType, DOC(dai, node, ColorCamera, getPreviewType))
         .def("setFp16", &ColorCamera::setFp16, py::arg("fp16"), DOC(dai, node, ColorCamera, setFp16))
         .def("getFp16", &ColorCamera::getFp16, DOC(dai, node, ColorCamera, getFp16))
         .def("setPreviewSize", static_cast<void(ColorCamera::*)(int,int)>(&ColorCamera::setPreviewSize), py::arg("width"), py::arg("height"), DOC(dai, node, ColorCamera, setPreviewSize))
