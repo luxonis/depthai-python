@@ -1,7 +1,8 @@
 StereoDepth
 ###########
 
-StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`/:ref:`ColorCamera`).
+StereoDepth node calculates the disparity and/or depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`/:ref:`ColorCamera`).
+We suggest following :ref:`Configuring Stereo Depth` tutorial to achieve the best depth results.
 
 How to place it
 ===============
