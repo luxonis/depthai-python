@@ -202,6 +202,7 @@ for c in cam_list:
     # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
     # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
+    # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
