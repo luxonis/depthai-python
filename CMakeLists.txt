@@ -128,6 +128,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/DetectionParserBindings.cpp
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -136,6 +137,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/CameraControlBindings.cpp
     src/pipeline/datatype/EdgeDetectorConfigBindings.cpp
     src/pipeline/datatype/FeatureTrackerConfigBindings.cpp
+    src/pipeline/datatype/ToFConfigBindings.cpp
     src/pipeline/datatype/ImageManipConfigBindings.cpp
     src/pipeline/datatype/ImgDetectionsBindings.cpp
     src/pipeline/datatype/ImgFrameBindings.cpp
