@@ -200,7 +200,8 @@ for c in cam_list:
     # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
-    # cam[c].initialControl.setMisc("some-test", 1)
+    # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
+    # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
