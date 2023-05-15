@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import depthai as dai
 import time
 import argparse
 
@@ -9,6 +8,14 @@ parser.add_argument('-fb', '--flash-bootloader', default=False, action="store_tr
 parser.add_argument('-f',  '--flash-app',        default=False, action="store_true")
 parser.add_argument('-l',  '--load-and-exit',    default=False, action="store_true")
 args = parser.parse_args()
+
+if args.load_and_exit:
+    import os
+    # Disabling device watchdog, so it doesn't need the host to ping periodically.
+    # Note: this is done before importing `depthai`
+    os.environ["DEPTHAI_WATCHDOG"] = "0"
+
+import depthai as dai
 
 def getPipeline():
     enable_4k = True  # Will downscale 4K -> 1080p
@@ -68,17 +75,14 @@ if args.flash_bootloader or args.flash_app:
     quit()
 
 if args.load_and_exit:
-    import os
-    # Disabling device watchdog, so it doesn't need the host to ping periodically
-    os.environ["DEPTHAI_WATCHDOG"] = "0"
     device = dai.Device(getPipeline())
-    print("\nDevice started, open a UVC viewer to check the camera stream.")
-    print("Attempting to force-quit this process...")
-    print("To reconnect with depthai, a device power-cycle may be required")
-    # We do not want the device to be closed, so kill the process.
+    print("\nDevice started. Attempting to force-terminate this process...")
+    print("Open an UVC viewer to check the camera stream.")
+    print("To reconnect with depthai, a device power-cycle may be required in some cases")
+    # We do not want the device to be closed, so terminate the process uncleanly.
     # (TODO add depthai API to be able to cleanly exit without closing device)
     import signal
-    os.kill(os.getpid(),signal.SIGKILL)
+    os.kill(os.getpid(), signal.SIGTERM)
 
 # Standard UVC load with depthai
 with dai.Device(getPipeline()) as device:
