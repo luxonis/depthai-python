@@ -343,6 +343,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<BoardConfig::GPIO::Pull> boardConfigGpioPull(boardConfigGpio, "Pull", DOC(dai, BoardConfig, GPIO, Pull));
     py::enum_<BoardConfig::GPIO::Drive> boardConfigGpioDrive(boardConfigGpio, "Drive", DOC(dai, BoardConfig, GPIO, Drive));
     py::class_<BoardConfig::UART> boardConfigUart(boardConfig, "UART", DOC(dai, BoardConfig, UART));
+    py::class_<BoardConfig::UVC> boardConfigUvc(boardConfig, "UVC", DOC(dai, BoardConfig, UVC));
     struct PyClock{};
     py::class_<PyClock> clock(m, "Clock");
 
@@ -379,6 +380,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("flashBootedVid", &BoardConfig::USB::flashBootedVid)
         .def_readwrite("flashBootedPid", &BoardConfig::USB::flashBootedPid)
         .def_readwrite("maxSpeed", &BoardConfig::USB::maxSpeed)
+        .def_readwrite("productName", &BoardConfig::USB::productName)
+        .def_readwrite("manufacturer", &BoardConfig::USB::manufacturer)
     ;
 
     // Bind BoardConfig::Network
@@ -456,6 +459,17 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("tmp", &BoardConfig::UART::tmp)
     ;
 
+    // Bind BoardConfig::UVC
+    boardConfigUvc
+        .def(py::init<>())
+        .def(py::init<uint16_t, uint16_t>())
+        .def_readwrite("cameraName", &BoardConfig::UVC::cameraName)
+        .def_readwrite("width", &BoardConfig::UVC::width)
+        .def_readwrite("height", &BoardConfig::UVC::height)
+        .def_readwrite("frameType", &BoardConfig::UVC::frameType)
+        .def_readwrite("enable", &BoardConfig::UVC::enable)
+    ;
+
     // Bind BoardConfig
     boardConfig
         .def(py::init<>())
@@ -474,6 +488,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("logSizeMax", &BoardConfig::logSizeMax, DOC(dai, BoardConfig, logSizeMax))
         .def_readwrite("logVerbosity", &BoardConfig::logVerbosity, DOC(dai, BoardConfig, logVerbosity))
         .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints, DOC(dai, BoardConfig, logDevicePrints))
+        .def_readwrite("uvc", &BoardConfig::uvc, DOC(dai, BoardConfig, uvc))
     ;
 
     // Bind Device::Config
