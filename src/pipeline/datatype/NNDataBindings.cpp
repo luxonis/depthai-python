@@ -78,6 +78,9 @@ void bind_nndata(pybind11::module& m, void* pCallstack){
         .def_readwrite("strides", &TensorInfo::strides)
         .def_readwrite("name", &TensorInfo::name)
         .def_readwrite("offset", &TensorInfo::offset)
+        .def_readwrite("quantization", &TensorInfo::quantization)
+        .def_readwrite("qpZp", &TensorInfo::qpZp)
+        .def_readwrite("qpScale", &TensorInfo::qpScale)
         ;
 
     tensorInfoDataType
