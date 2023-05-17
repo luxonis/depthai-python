@@ -334,7 +334,7 @@ with dai.Device() as device:
                 cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
-              end='', flush=True)
+              end=' ', flush=True)
 
         key = cv2.waitKey(1)
         if key == ord('q'):
@@ -342,6 +342,15 @@ with dai.Device() as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
+        elif key == ord('x'):
+            ctrl = dai.CameraControl()
+            stopped = not stopped
+            print("Streaming", "stop" if stopped else "start")
+            if stopped:
+                ctrl.setStopStreaming()
+            else:
+                ctrl.setStartStreaming()
+            controlQueue.send(ctrl)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
