@@ -237,8 +237,9 @@ with dai.Device(*dai_device_args) as device:
 
     print('IR drivers:', device.getIrDrivers())
     if args.ir_test:
-        from ir_handler import start_ir_handler, close_ir_handler
-        start_ir_handler(device)
+        from ir_handler import IrHandler
+        irHandler = IrHandler()
+        irHandler.set_device(device)
 
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
@@ -339,7 +340,7 @@ with dai.Device(*dai_device_args) as device:
         key = cv2.waitKey(1)
         if key == ord('q'):
             if args.ir_test:
-                close_ir_handler(device)
+                irHandler.close()
             break
         elif key == ord('c'):
             capture_list = cam_list.copy()
