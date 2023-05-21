@@ -48,14 +48,14 @@ Usage
 
     pipeline = dai.Pipeline()
     mono = pipeline.create(dai.node.MonoCamera)
-    mono.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    mono.setCamera("right")
     mono.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
     auto mono = pipeline.create<dai::node::MonoCamera>();
-    mono->setBoardSocket(dai::CameraBoardSocket::RIGHT);
+    mono->setCamera("right");
     mono->setResolution(dai::MonoCameraProperties::SensorResolution::THE_720_P);
 
 Examples of functionality

@@ -85,11 +85,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-resolutionMap = {"800": (1280, 800), "720": (1280, 720), "400": (640, 400)}
-if args.resolution not in resolutionMap:
+RES_MAP = {
+    '800': {'w': 1280, 'h': 800, 'res': dai.MonoCameraProperties.SensorResolution.THE_800_P },
+    '720': {'w': 1280, 'h': 720, 'res': dai.MonoCameraProperties.SensorResolution.THE_720_P },
+    '400': {'w': 640, 'h': 400, 'res': dai.MonoCameraProperties.SensorResolution.THE_400_P }
+}
+if args.resolution not in RES_MAP:
     exit("Unsupported resolution!")
 
-resolution = resolutionMap[args.resolution]
+resolution = RES_MAP[args.resolution]
+
 meshDirectory = args.mesh_dir  # Output dir for mesh files
 generateMesh = args.load_mesh  # Load mesh files
 
@@ -111,7 +116,7 @@ if args.median not in medianMap:
 median = medianMap[args.median]
 
 print("StereoDepth config options:")
-print("    Resolution:  ", resolution)
+print(f"    Resolution:  {resolution['w']}x{resolution['h']}")
 print("    Left-Right check:  ", lrcheck)
 print("    Extended disparity:", extended)
 print("    Subpixel:          ", subpixel)
@@ -121,11 +126,11 @@ print("    Outputting mesh files to:  ", meshDirectory)
 
 
 def getMesh(calibData):
-    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
-    d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_B, resolution[0], resolution[1]))
+    d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.CAM_B))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
-    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
-    d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_C, resolution[0], resolution[1]))
+    d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.CAM_C))
     R2 = np.array(calibData.getStereoRightRectificationRotation())
     mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
     mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
@@ -188,7 +193,6 @@ def getDisparityFrame(frame, cvColorMap):
 
     return disp
 
-
 device = dai.Device()
 calibData = device.readCalibration()
 print("Creating Stereo Depth pipeline")
@@ -205,21 +209,14 @@ xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
 xoutRectifRight = pipeline.create(dai.node.XLinkOut)
 
 if args.swap_left_right:
-    camLeft.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-    camRight.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    camLeft.setCamera("right")
+    camRight.setCamera("left")
 else:
-    camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-    camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    camLeft.setCamera("left")
+    camRight.setCamera("right")
 
-res = (
-    dai.MonoCameraProperties.SensorResolution.THE_800_P
-    if resolution[1] == 800
-    else dai.MonoCameraProperties.SensorResolution.THE_720_P
-    if resolution[1] == 720
-    else dai.MonoCameraProperties.SensorResolution.THE_400_P
-)
 for monoCam in (camLeft, camRight):  # Common config
-    monoCam.setResolution(res)
+    monoCam.setResolution(resolution['res'])
     # monoCam.setFps(20.0)
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
@@ -258,15 +255,6 @@ if outRectified:
 streams.append("disparity")
 if depth:
     streams.append("depth")
-
-leftMesh, rightMesh = getMesh(calibData)
-if generateMesh:
-    meshLeft = list(leftMesh.tobytes())
-    meshRight = list(rightMesh.tobytes())
-    stereo.loadMeshData(meshLeft, meshRight)
-
-if meshDirectory is not None:
-    saveMeshFiles(leftMesh, rightMesh, meshDirectory)
 
 cvColorMap = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
 cvColorMap[0] = [0, 0, 0]

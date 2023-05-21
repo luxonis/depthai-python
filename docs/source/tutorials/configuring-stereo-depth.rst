@@ -277,7 +277,7 @@ just note it's a very large output (eg. 1280*800*96 => 98MB for each frame).
 
 Stereo Subpixel mode will calculate subpixel disparity by looking at the confidence values of the 2 neighboring disparity pixels in each direction.
 In the above example graph, in normal mode, StereoDepth would just get the max disparity = 34 pixels, but in Subpixel
-mode, it will return a bit more, eg. 37.375 pixels, as confidences for pixels 35 and 36 are quite high as well.
+mode, it will return a bit more, eg. 34.375 pixels, as confidences for pixels 35 and 36 are quite high as well.
 
 **TL;DR:** Stereo Subpixel mode should always provide more accurate depth, but will consume additional HW resources (see :ref:`Stereo depth FPS` for impact).
 
@@ -287,7 +287,7 @@ Stereo subpixel effect on layering
 Default stereo depth output has 0..95 disparity pixels, which would produce 96 unique depth values. This can especially be seen when using pointcloud representation
 and seeing how there are discrete "layers" of points, instead of a smooth transition:
 
-.. image:: /_static/images/components/layered-pointcloud.png
+.. image:: /_static/images/components/pointcloud_layering.jpg
 
 This layering can especially be seen at longer distances, where these layers are exponentially further apart.
 
@@ -375,7 +375,7 @@ as the other 2 methods above do.
 Disparity shift will shift the starting point of the disparity search, which will significantly decrease MaxZ, but
 it will also decrease the MinZ. Disparity shift can be combined with extended/subpixel/LR-check modes.
 
-.. image:: https://user-images.githubusercontent.com/18037362/189375017-2fa137d2-ad6b-46de-8899-6304bbc6c9d7.png
+.. image:: /_static/images/components/disparity_shift.png
 
 The **Left graph** shows min and max disparity and depth for OAK-D (7.5cm baseline, 800P resolution, ~70° HFOV) by default (disparity shift=0). See :ref:`Depth from disparity`.
 Since hardware (stereo block) has a fixed 95 pixel disparity search, DepthAI will search from 0 pixels (depth=INF) to 95 pixels (depth=71cm).
