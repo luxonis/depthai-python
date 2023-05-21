@@ -112,7 +112,8 @@ elif [ -f /etc/os-release ]; then
     if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
-            if [[ "$VERSION_ID" > "22.04" || "$VERSION_ID" == "22.04" ]]; then
+            UBUNTU_VERSION=$(inxi -Sx | grep -oP '(?<=Ubuntu\s)\d+\.\d+')
+            if [[ "$UBUNTU_VERSION" > "22.04" || "$UBUNTU_VERSION" == "22.04" ]]; then
                 sudo apt-get install -y "${ubuntu_pkgs_post22_04[@]}"
             else
                 sudo apt-get install -y "${ubuntu_pkgs_pre22_04[@]}"
