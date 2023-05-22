@@ -26,7 +26,7 @@ staticInput = args.si
 
 enableRectified = args.rectified
 cameraFPS = args.fps
-blockingOutputs = True
+blockingOutputs = False
 
 if staticInput:
     left = args.left
@@ -194,6 +194,10 @@ monoRight.out.link(syncNode.inputs["right"])
 monoLeft.out.link(syncNode.inputs["left"])
 monoVertical.out.link(syncNode.inputs["vertical"])
 
+monoRight.setFps(20)
+monoLeft.setFps(20)
+monoVertical.setFps(20)
+
 syncNode.outputs["left"].link(stereoVertical.left) # left input is bottom camera
 syncNode.outputs["vertical"].link(stereoVertical.right) # right input is right camera
 stereoVertical.disparity.link(xoutDisparityVertical.input)
@@ -210,8 +214,8 @@ if enableRectified:
 # stereoHorizontal.rectifiedRight.link(xoutRectifiedRight.input)
 stereoHorizontal.setVerticalStereo(False)
 
-stereoHorizontal.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
-stereoVertical.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
+# stereoHorizontal.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
+# stereoVertical.initialConfig.setDepthAlign(dai.StereoDepthConfig.AlgorithmControl.DepthAlign.RECTIFIED_RIGHT)
 
 if 1:
     # leftMesh, rightMesh = getMesh(calibData, resolution)
@@ -264,12 +268,6 @@ if 1:
     mapXV_rot, mapYV_rot = rotate_mesh_90_cw(mapXV, mapYV)
     mapXR_rot, mapYR_rot = rotate_mesh_90_cw(mapXR, mapYR)
 
-    #clip for now due to HW limit
-    mapXV_rot = mapXV_rot[:1024,:]
-    mapYV_rot = mapYV_rot[:1024,:]
-    mapXR_rot = mapXR_rot[:1024,:]
-    mapYR_rot = mapYR_rot[:1024,:]
-
     rightMeshRot, verticalMeshRot = downSampleMesh(mapXR_rot, mapYR_rot, mapXV_rot, mapYV_rot)
 
     meshLeft = list(leftMesh.tobytes())
@@ -299,6 +297,18 @@ if 1:
 
 
     # stereoVertical.setOutputSize(720,1024)
+
+stereoHorizontal.left.setQueueSize(1)
+stereoHorizontal.left.setBlocking(False)
+stereoHorizontal.right.setQueueSize(1)
+stereoHorizontal.right.setBlocking(False)
+stereoVertical.left.setQueueSize(1)
+stereoVertical.left.setBlocking(False)
+stereoVertical.right.setQueueSize(1)
+stereoVertical.right.setBlocking(False)
+
+stereoHorizontal.setNumFramesPool(10)
+stereoVertical.setNumFramesPool(10)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
