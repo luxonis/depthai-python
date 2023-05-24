@@ -24,7 +24,7 @@ Demo
     Found device '192.168.33.192', MxId: '1844301011F4C51200', State: 'BOOTLOADER'
 
     Booting the first available camera (1.3)...
-    Available camera sensors:  {<CameraBoardSocket.RIGHT: 2>: 'OV9282', <CameraBoardSocket.RGB: 0>: 'IMX378', <CameraBoardSocket.LEFT: 1>: 'OV9282'}
+    Available camera sensors:  {<CameraBoardSocket.CAM_C: 2>: 'OV9282', <CameraBoardSocket.CAM_A: 0>: 'IMX378', <CameraBoardSocket.CAM_B: 1>: 'OV9282'}
     Product name: OAK-D Pro AF, board name DM9098
 
 

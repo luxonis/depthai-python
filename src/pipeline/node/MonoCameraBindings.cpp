@@ -92,6 +92,8 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def("getRawNumFramesPool", &MonoCamera::getRawNumFramesPool, DOC(dai, node, MonoCamera, getRawNumFramesPool))
         .def("setCamera", &MonoCamera::setCamera, py::arg("name"), DOC(dai, node, MonoCamera, setCamera))
         .def("getCamera", &MonoCamera::getCamera, DOC(dai, node, MonoCamera, getCamera))
+
+        .def("setRawOutputPacked", &MonoCamera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, MonoCamera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("MonoCamera").attr("Properties") = monoCameraProperties;
