@@ -55,6 +55,8 @@ def socket_type_pair(arg):
     is_color = True if type in ['c', 'color'] else False
     return [socket, is_color]
 
+def string_pair(arg):
+    return arg.split('=')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
@@ -78,6 +80,10 @@ parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
+parser.add_argument('-misc', '--misc-controls', type=string_pair, nargs='+',
+                    default=[],
+                    help="List of miscellaneous camera controls to set initially, "
+                    "as pairs: key1=value1 key2=value2 ...")
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
 
@@ -203,6 +209,10 @@ for c in cam_list:
     # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
     # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
     # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
+    # cam[c].initialControl.setMisc("hdr-exposure-ratio", 4)  # enables HDR when set `> 1`, current options: 2, 4, 8
+    # cam[c].initialControl.setMisc("hdr-local-tone-weight", 75)  # default 75, range 0..100
+    for kvPair in args.misc_controls:
+        cam[c].initialControl.setMisc(*kvPair)
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
