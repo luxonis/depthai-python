@@ -67,7 +67,7 @@ can flash the pipeline to the device, along with its assests (eg. AI models). Yo
 After successfully flashing the pipeline, it will get started automatically when you power up the device.
 If you would like to change the flashed pipeline, simply re-flash it again.
 
-Alternatively, you can also flash the pipeline with the :ref:`Device Manager`. For this apporach, you will need a Depthai Applicaion Package (.dap), which you
+Alternatively, you can also flash the pipeline with the :ref:`Device Manager`. For this approach, you will need a Depthai Application Package (.dap), which you
 can create with the following script:
 
 
