@@ -155,6 +155,28 @@ A few options to reduce bandwidth:
 - Encode frames (H.264, H.265, MJPEG) on-device using :ref:`VideoEncoder node <VideoEncoder>`
 - Reduce FPS/resolution/number of streams
 
+Measuring operation times
+#########################
+
+If user sets depthai level to `trace` (see :ref:`DepthAI debugging level`), depthai will log operation times for each node/process, as shown below.
+
+.. code-block:: bash
+  :emphasize-lines: 1,2,5,6,7,8,9,10,13
+
+  [SpatialDetectionNetwork(1)] [trace] SpatialDetectionNetwork syncing took '70.39142' ms.
+  [StereoDepth(4)] [trace] Warp node took '2.2945' ms.
+  [system] [trace] EV:0,S:0,IDS:27,IDD:10,TSS:2,TSN:601935518
+  [system] [trace] EV:0,S:1,IDS:27,IDD:10,TSS:2,TSN:602001382
+  [StereoDepth(4)] [trace] Stereo took '12.27392' ms.
+  [StereoDepth(4)] [trace] 'Median+Disparity to depth' pipeline took '0.86295' ms.
+  [StereoDepth(4)] [trace] Stereo post processing (total) took '0.931422' ms.
+  [SpatialDetectionNetwork(1)] [trace] NeuralNetwork inference took '62.274784' ms.
+  [StereoDepth(4)] [trace] Stereo rectification took '2.686294' ms.
+  [MonoCamera(3)] [trace] Mono ISP took '1.726888' ms.
+  [system] [trace] EV:0,S:0,IDS:20,IDD:25,TSS:2,TSN:616446812
+  [system] [trace] EV:0,S:1,IDS:20,IDD:25,TSS:2,TSN:616489715
+  [SpatialDetectionNetwork(1)] [trace] DetectionParser took '3.464118' ms.
+
 Reducing latency when running NN
 ################################
 
