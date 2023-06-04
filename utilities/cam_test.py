@@ -140,15 +140,21 @@ class FPS:
     def __init__(self, window_size=30):
         self.dq = collections.deque(maxlen=window_size)
         self.fps = 0
+        self.frameDiff = 0
 
     def update(self, timestamp=None):
         if timestamp == None: timestamp = time.monotonic()
         count = len(self.dq)
-        if count > 0: self.fps = count / (timestamp - self.dq[0])
+        if count > 0:
+            self.frameDiff = timestamp - self.dq[-1]
+            self.fps = count / (timestamp - self.dq[0])
         self.dq.append(timestamp)
 
     def get(self):
         return self.fps
+
+    def getFrameDiff(self):
+        return self.frameDiff
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -171,7 +177,13 @@ for c in cam_list:
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if 0:
+            cam[c].isp.link(xout[c].input)
+        else:
+            # TMP until isp scaling will get implemented
+            cam[c].video.link(xout[c].input)
+            cam[c].setVideoSize(cam[c].getResolutionWidth()  // args.isp_downscale,
+                                cam[c].getResolutionHeight() // args.isp_downscale)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -180,9 +192,13 @@ for c in cam_list:
     # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
     #cam[c].initialControl.setExternalTrigger(2, 1)
     #cam[c].initialControl.setStrobeExternal(48, 1)
-    #cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
+    # cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
-    #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
+    if 1:
+        exp, iso = 20000, 400
+        print(f'============================ WARNING ================================')
+        print(f'=== Configuring manual exposure: {exp} us, ISO {iso}')
+        cam[c].initialControl.setManualExposure(exp, iso) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     # cam[c].initialControl.setMisc("stride-align", 1)
@@ -288,6 +304,7 @@ with dai.Device() as device:
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
+                print(f'diff {c}: {fps_capt[c].getFrameDiff()*1000:.3f} ms')
                 width, height = pkt.getWidth(), pkt.getHeight()
                 capture = c in capture_list
                 if capture:
