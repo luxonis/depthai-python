@@ -141,13 +141,16 @@ class FPS:
         self.dq = collections.deque(maxlen=window_size)
         self.fps = 0
         self.frameDiff = 0
+        self.frameJitter = 0
 
     def update(self, timestamp=None):
         if timestamp == None: timestamp = time.monotonic()
         count = len(self.dq)
         if count > 0:
+            prevDiff = self.frameDiff
             self.frameDiff = timestamp - self.dq[-1]
             self.fps = count / (timestamp - self.dq[0])
+            if count > 1: self.frameJitter = self.frameDiff - prevDiff
         self.dq.append(timestamp)
 
     def get(self):
@@ -155,6 +158,9 @@ class FPS:
 
     def getFrameDiff(self):
         return self.frameDiff
+
+    def getFrameJitter(self):
+        return self.frameJitter
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -303,8 +309,10 @@ with dai.Device() as device:
             pkt = q[c].tryGet()
             if pkt is not None:
                 fps_host[c].update()
-                fps_capt[c].update(pkt.getTimestamp().total_seconds())
-                print(f'diff {c}: {fps_capt[c].getFrameDiff()*1000:.3f} ms')
+                fps_capt[c].update(pkt.getTimestampDevice().total_seconds())
+                jitter = fps_capt[c].getFrameJitter() * 1000  # ms
+                if abs(jitter) >= 0.002:
+                    print(f'jitter {c}: {jitter:.3f} ms')
                 width, height = pkt.getWidth(), pkt.getHeight()
                 capture = c in capture_list
                 if capture:
