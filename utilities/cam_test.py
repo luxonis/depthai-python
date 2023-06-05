@@ -220,7 +220,7 @@ for c in cam_list:
             tofConfig = tof[c].initialConfig.get()
             tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
             tofConfig.depthParams.avgPhaseShuffle = False
-            tofConfig.depthParams.minimumAmplitude = 3.0
+            tofConfig.depthParams.minimumAmplitude = 20.0
             tof[c].initialConfig.set(tofConfig)
             if args.tof_amplitude:
                 amp_name = 'tof_amplitude_' + c
@@ -383,10 +383,16 @@ with dai.Device(*dai_device_args) as device:
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
+                        frame = cv2.medianBlur(frame, 5)
                     else:
                         frame = (frame.view(np.int16).astype(float))
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                        #print("--->FRAME FILTERING")
+                        frame = cv2.medianBlur(frame, 5)
+                        #frame = cv2.GaussianBlur(frame, (5,5), 0)
+                        #frame = np.concatenate((median, gauss), axis=1)
+                        #frame = cv2.bilateralFilter(frame, 5, 80, 80)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
