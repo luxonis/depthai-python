@@ -1,4 +1,4 @@
-import cv2
+#!/usr/bin/env python3
 import depthai as dai
 
 # Start defining a pipeline
@@ -8,6 +8,7 @@ pipeline = dai.Pipeline()
 script = pipeline.create(dai.node.Script)
 script.setProcessor(dai.ProcessorType.LEON_CSS)
 script.setScript("""
+    import time
     
     cal = Device.readCalibration2()
     left_camera_id = cal.getStereoLeftCameraId()
@@ -19,9 +20,14 @@ script.setScript("""
     print(extrinsics)
     print(intrinsics_left)
 
+    time.sleep(1)
+    node.io['end'].send(Buffer(32))
 """)
+
+xout = pipeline.create(dai.node.XLinkOut)
+xout.setStreamName('end')
+script.outputs['end'].link(xout.input)
 
 # Connect to device with pipeline
 with dai.Device(pipeline) as device:
-    while True:
-        pass
+    device.getOutputQueue('end').get()
