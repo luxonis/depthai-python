@@ -67,26 +67,49 @@ can flash the pipeline to the device, along with its assests (eg. AI models). Yo
 After successfully flashing the pipeline, it will get started automatically when you power up the device.
 If you would like to change the flashed pipeline, simply re-flash it again.
 
-..
-    Clear flash
-    ###########
+Alternatively, you can also flash the pipeline with the :ref:`Device Manager`. For this approach, you will need a Depthai Application Package (.dap), which you
+can create with the following script:
 
-    Since pipeline will start when powering the device, this can lead to unnecesary heating. If you would like to clear
-    the flashed pipeline, use the code snippet below.
 
-    .. warning::
-        Code below doesn't work yet. We will be adding "flashClear" helper function to the library.
+.. code-block:: python
 
-    .. code-block:: python
+    import depthai as dai
 
-        import depthai as dai
-        (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
-        if not f:
-            print('No devices found, exiting...')
-            exit(-1)
+    pipeline = dai.Pipeline()
 
-        with dai.DeviceBootloader(bl) as bootloader:
-            bootloader.flashClear()
+    # Define standalone pipeline; add nodes and link them
+    # cam = pipeline.create(dai.node.ColorCamera)
+    # script = pipeline.create(dai.node.Script)
+    # ...
+
+    # Create Depthai Application Package (.dap)
+    (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+    bootloader = dai.DeviceBootloader(bl)
+    bootloader.saveDepthaiApplicationPackage(pipeline=pipeline, path=<path_of_new_dap>)
+
+
+Clear flash
+###########
+
+Since pipeline will start when powering the device, this can lead to unnecesary heating. If you would like to clear
+the flashed pipeline, use the code snippet below.
+
+
+.. warning::
+    Code below doesn't work yet. We will be adding "flashClear" helper function to the library.
+
+
+.. code-block:: python
+
+    import depthai as dai
+    (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+    if not f:
+        print('No devices found, exiting...')
+        exit(-1)
+
+    with dai.DeviceBootloader(bl) as bootloader:
+        bootloader.flashClear()
+
 
 Factory reset
 #############
