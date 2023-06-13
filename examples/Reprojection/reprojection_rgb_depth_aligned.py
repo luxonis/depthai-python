@@ -12,7 +12,8 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
 
     for i in prange(0, height):
         for j in prange(0, width):
-            d = depth_image[i][j]
+            # convert depth from mm to cm
+            d = depth_image[i][j] / 10
 
             # converte pixel to 3d point
             x = (j - depth_camera_intrinsics[0][2]) * d / depth_camera_intrinsics[0][0]
@@ -88,6 +89,7 @@ try:
     rgb_intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_A, 1280, 720)
     depth_intrinsics = calibData.getCameraIntrinsics(calibData.getStereoRightCameraId(), 1280, 720)
     rgb_extrinsics = calibData.getCameraExtrinsics(calibData.getStereoRightCameraId(), dai.CameraBoardSocket.CAM_A)
+
     lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.CAM_A)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
@@ -107,7 +109,6 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 camRgb.isp.link(rgbOut.input)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
-
 stereo.depth.link(depthOut.input)
 
 # Connect to device and start pipeline
