@@ -12,8 +12,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
 
     for i in prange(0, height):
         for j in prange(0, width):
-            # convert depth from mm to cm
-            d = depth_image[i][j] / 10
+            d = depth_image[i][j]
 
             # converte pixel to 3d point
             x = (j - depth_camera_intrinsics[0][2]) * d / depth_camera_intrinsics[0][0]
@@ -90,6 +89,11 @@ try:
     depth_intrinsics = calibData.getCameraIntrinsics(calibData.getStereoRightCameraId(), 1280, 720)
     rgb_extrinsics = calibData.getCameraExtrinsics(calibData.getStereoRightCameraId(), dai.CameraBoardSocket.CAM_A)
 
+    depth_intrinsics = np.asarray(depth_intrinsics).reshape(3, 3)
+    rgb_extrinsics = np.asarray(rgb_extrinsics).reshape(4, 4)
+    rgb_extrinsics[:,3] *= 10
+    rgb_intrinsics = np.asarray(rgb_intrinsics).reshape(3, 3)
+
     lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.CAM_A)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
@@ -143,9 +147,6 @@ with device:
         
         # Blend when both received
         if frameRgb is not None and frameDisp is not None:
-            depth_intrinsics = np.asarray(depth_intrinsics).reshape(3, 3)
-            rgb_extrinsics = np.asarray(rgb_extrinsics).reshape(4, 4)
-            rgb_intrinsics = np.asarray(rgb_intrinsics).reshape(3, 3)
 
             if hardware_rectify:
                 rectification_map = cv2.initUndistortRectifyMap(depth_intrinsics, None, rgb_extrinsics[0:3, 0:3], depth_intrinsics, (1280, 720), cv2.CV_16SC2)
