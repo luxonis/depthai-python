@@ -48,7 +48,7 @@ disparityOut.setStreamName("disp")
 queueNames.append("disp")
 
 #Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setFps(fps)
 if downscaleColor: camRgb.setIspScale(2, 3)
@@ -56,22 +56,22 @@ if downscaleColor: camRgb.setIspScale(2, 3)
 # This value was used during calibration
 try:
     calibData = device.readCalibration2()
-    lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.RGB)
+    lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.CAM_A)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
 except:
     raise
 left.setResolution(monoResolution)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+left.setCamera("left")
 left.setFps(fps)
 right.setResolution(monoResolution)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+right.setCamera("right")
 right.setFps(fps)
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
-stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
 
 # Linking
 camRgb.isp.link(rgbOut.input)

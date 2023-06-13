@@ -22,9 +22,9 @@ ve2Out.setStreamName('ve2Out')
 ve3Out.setStreamName('ve3Out')
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+monoLeft.setCamera("left")
+monoRight.setCamera("right")
 # Create encoders, one for each camera, consuming the frames and encoding them using H.264 / H.265 encoding
 ve1.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H264_MAIN)
 ve2.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H265_MAIN)

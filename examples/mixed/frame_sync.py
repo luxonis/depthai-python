@@ -15,12 +15,12 @@ camRgb.setFps(FPS)
 
 left = pipeline.create(dai.node.MonoCamera)
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+left.setCamera("left")
 left.setFps(FPS)
 
 right = pipeline.create(dai.node.MonoCamera)
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+right.setCamera("right")
 right.setFps(FPS)
 
 stereo = pipeline.createStereoDepth()

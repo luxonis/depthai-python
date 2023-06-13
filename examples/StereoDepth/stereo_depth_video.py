@@ -126,11 +126,11 @@ print("    Outputting mesh files to:  ", meshDirectory)
 
 
 def getMesh(calibData):
-    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.LEFT, resolution[0], resolution[1]))
-    d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.LEFT))
+    M1 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_B, resolution[0], resolution[1]))
+    d1 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.CAM_B))
     R1 = np.array(calibData.getStereoLeftRectificationRotation())
-    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT, resolution[0], resolution[1]))
-    d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.RIGHT))
+    M2 = np.array(calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_C, resolution[0], resolution[1]))
+    d2 = np.array(calibData.getDistortionCoefficients(dai.CameraBoardSocket.CAM_C))
     R2 = np.array(calibData.getStereoRightRectificationRotation())
     mapXL, mapYL = cv2.initUndistortRectifyMap(M1, d1, R1, M2, resolution, cv2.CV_32FC1)
     mapXR, mapYR = cv2.initUndistortRectifyMap(M2, d2, R2, M2, resolution, cv2.CV_32FC1)
@@ -209,11 +209,11 @@ xoutRectifLeft = pipeline.create(dai.node.XLinkOut)
 xoutRectifRight = pipeline.create(dai.node.XLinkOut)
 
 if args.swap_left_right:
-    camLeft.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-    camRight.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    camLeft.setCamera("right")
+    camRight.setCamera("left")
 else:
-    camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-    camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    camLeft.setCamera("left")
+    camRight.setCamera("right")
 
 for monoCam in (camLeft, camRight):  # Common config
     monoCam.setResolution(resolution['res'])
