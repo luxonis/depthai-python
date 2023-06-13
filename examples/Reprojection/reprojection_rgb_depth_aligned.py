@@ -4,7 +4,7 @@ import depthai as dai
 from numba import jit, prange
 
 @jit(nopython=True, parallel=True)
-def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_camera_intrinsics):
+def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_camera_intrinsics, hardware_rectify=False):
     height = len(depth_image)
     width = len(depth_image[0])
     
@@ -20,9 +20,14 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             z = d
 
             # apply transformation
-            x1 = camera_extrinsics[0][0] * x + camera_extrinsics[0][1] * y + camera_extrinsics[0][2] * z + camera_extrinsics[0][3]
-            y1 = camera_extrinsics[1][0] * x + camera_extrinsics[1][1] * y + camera_extrinsics[1][2] * z + camera_extrinsics[1][3]
-            z1 = camera_extrinsics[2][0] * x + camera_extrinsics[2][1] * y + camera_extrinsics[2][2] * z + camera_extrinsics[2][3]
+            if hardware_rectify:
+                x1 = x + camera_extrinsics[0][3]
+                y1 = y 
+                z1 = z 
+            else:
+                x1 = camera_extrinsics[0][0] * x + camera_extrinsics[0][1] * y + camera_extrinsics[0][2] * z + camera_extrinsics[0][3]
+                y1 = camera_extrinsics[1][0] * x + camera_extrinsics[1][1] * y + camera_extrinsics[1][2] * z + camera_extrinsics[1][3]
+                z1 = camera_extrinsics[2][0] * x + camera_extrinsics[2][1] * y + camera_extrinsics[2][2] * z + camera_extrinsics[2][3]
             
             # project 3d point to pixel
             if z1 == 0:
@@ -37,7 +42,6 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
 
 rgbWeight = 0.4
 depthWeight = 0.6
-
 
 def updateBlendWeights(percent_rgb):
     """
@@ -68,6 +72,8 @@ rgbOut.setStreamName("rgb")
 queueNames.append("rgb")
 depthOut.setStreamName("disp")
 queueNames.append("disp")
+
+hardware_rectify = True 
 
 fps = 30
 
@@ -140,7 +146,11 @@ with device:
             rgb_extrinsics = np.asarray(rgb_extrinsics).reshape(4, 4)
             rgb_intrinsics = np.asarray(rgb_intrinsics).reshape(3, 3)
 
-            frameDisp = reprojection(frameDisp, depth_intrinsics, rgb_extrinsics, rgb_intrinsics)
+            if hardware_rectify:
+                rectification_map = cv2.initUndistortRectifyMap(depth_intrinsics, None, rgb_extrinsics[0:3, 0:3], depth_intrinsics, (1280, 720), cv2.CV_16SC2)
+                frameDisp = cv2.remap(frameDisp, rectification_map[0], rectification_map[1], cv2.INTER_LINEAR)
+
+            frameDisp = reprojection(frameDisp, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, hardware_rectify)
 
             frameDisp = cv2.cvtColor(frameDisp, cv2.COLOR_GRAY2BGR)
 
@@ -148,7 +158,6 @@ with device:
             cv2.imshow(rgb_depth_window_name, blended)
             frameRgb = None
             frameDisp = None
-            pass
 
         if cv2.waitKey(1) == ord('q'):
             break
