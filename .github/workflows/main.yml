@@ -560,12 +560,12 @@ jobs:
         uses: codex-/return-dispatch@v1
         id: return_dispatch
         with:
-          token: ${{ secrets.HIL_CORE_DISPATCH_TOKEN }} # Note this is NOT GITHUB_TOKEN but a PAT 
+          token: ${{ secrets.HIL_CORE_DISPATCH_TOKEN }} # Note this is NOT GITHUB_TOKEN but a PAT
           ref: main # or refs/heads/target_branch
           repo: depthai-core-hil-tests
           owner: luxonis
           workflow: regression_test.yml
-          workflow_inputs: '{"commit": "${{ github.ref }}", "sha": "${{ github.sha }}", "parent_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' 
+          workflow_inputs: '{"commit": "${{ github.ref }}", "parent_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
           workflow_timeout_seconds: 120 # Default: 300
 
       - name: Release
