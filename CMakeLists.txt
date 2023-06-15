@@ -129,6 +129,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/PointCloudBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -150,6 +151,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
 
 )
 
