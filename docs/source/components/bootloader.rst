@@ -14,7 +14,7 @@ Device Manager
 ``device_manager.py`` is a Python helper that interfaces with device :ref:`Bootloader` and bootloader configuration.
 It can be found at `depthai-python/utilities <https://github.com/luxonis/depthai-python/tree/main/utilities>`__.
 
-.. image:: https://user-images.githubusercontent.com/18037362/171629704-0f78f31a-1778-4338-8ac0-bdfb0d2d593f.png
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/b2f067d8-8b4b-4158-9342-ea0dfbe0caf6
 
 About Device
 ------------
@@ -36,6 +36,10 @@ After you select a device that has bootloader flashed, you can also configure bo
 - If the device has **USB bootloader flashed**, you will be able to set its USB max speed and USB timeout.
 
 After setting some values, you have to click on the ``Flash configuration`` button. You can also ``Clear configuration``, or ``View configuration`` (its JSON).
+
+.. figure:: https://github.com/luxonis/depthai-python/assets/18037362/4bced0ab-92fa-4a73-986f-4a3ba8848940
+
+  When flashing static IP, make sure to also set the gateway/mask
 
 Applications settings
 ---------------------
