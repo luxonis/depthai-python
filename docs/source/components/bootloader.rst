@@ -11,7 +11,7 @@ Bootloader is part of the ``depthai`` library, so to eg. flash the newest bootlo
 Device Manager
 ##############
 
-``device_manager.py`` is a Python helper that interfaces with device :ref:`Bootloader` and bootloader configuration.
+``device_manager.py`` is a Python script that interfaces with device :ref:`Bootloader` and bootloader configuration.
 It can be found at `depthai-python/utilities <https://github.com/luxonis/depthai-python/tree/main/utilities>`__.
 
 .. image:: https://github.com/luxonis/depthai-python/assets/18037362/b2f067d8-8b4b-4158-9342-ea0dfbe0caf6
