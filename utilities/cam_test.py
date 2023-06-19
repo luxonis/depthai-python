@@ -101,6 +101,8 @@ parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
 parser.add_argument('-btimeout', '--boot-timeout', default=30000,
                     help="Boot timeout in ms. Default: %(default)s (sets DEPTHAI_BOOT_TIMEOUT environment variable)")
 
+parser.add_argument('--stress', action='store_true', help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
+
 args = parser.parse_args()
 
 # Set timeouts before importing depthai
@@ -111,6 +113,11 @@ import depthai as dai
 if len(sys.argv) == 1:
     import cam_test_gui
     cam_test_gui.main()
+
+if args.stress:
+    from stress_test import stress_test
+    stress_test(args.device)
+    exit(0)
 
 cam_list = []
 cam_type_color = {}
