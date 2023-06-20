@@ -62,10 +62,9 @@ def socket_type_pair(arg):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True, False], ['left', False, False],
-                             ['right', False, False], ['camd', True, False]],
+                    default=[],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
-                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
+                    "E.g: -cams rgb,m right,c . If not specified, all connected cameras will be used.")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
 parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '13mp', '48mp'},
@@ -104,6 +103,8 @@ parser.add_argument('-btimeout', '--boot-timeout', default=30000,
 
 parser.add_argument('--stress', action='store_true',
                     help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
+
+parser.add_argument("--no-stereo", action="store_true", help="Don't create a stereo depth node if the device has a stereo pair.")
 
 parser.add_argument("--gui", action="store_true", help="Use GUI instead of CLI")
 
@@ -208,7 +209,7 @@ with dai.Device(*dai_device_args) as device:
     cam_type_tof = {}
     print("Enabled cameras:")
 
-    if len(sys.argv) == 1:
+    if not args.cameras:
         connected_cameras = device.getConnectedCameraFeatures()
         args.cameras = [(socket_to_socket_opt(cam.socket), cam.supportedTypes[0] ==
                          dai.CameraSensorType.COLOR, cam.supportedTypes[0] == dai.CameraSensorType.TOF) for cam in connected_cameras]
@@ -305,68 +306,72 @@ with dai.Device(*dai_device_args) as device:
         pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
 
     stereo = None
-    try:
+
+    if args.no_stereo:
+        print("--no-stereo specified, skipping stereo depth creation")
+    else:
         try:
-            calib = device.readCalibration2()
-        except:
-            raise Exception("Device is not calibrated.")
-        eeprom = calib.getEepromData()
-        left, right = eeprom.stereoRectificationData.leftCameraSocket, eeprom.stereoRectificationData.rightCameraSocket
+            try:
+                calib = device.readCalibration2()
+            except:
+                raise Exception("Device is not calibrated.")
+            eeprom = calib.getEepromData()
+            left, right = eeprom.stereoRectificationData.leftCameraSocket, eeprom.stereoRectificationData.rightCameraSocket
 
-        # Get the actual camera nodes
-        # The cameras may have been specified with -cams rgb,c left,m right,m kind of names, so we need to handle these edge cases
-        left_sock_opt = socket_to_socket_opt(left)
-        right_sock_opt = socket_to_socket_opt(right)
-        left_cam = cam.get(left_sock_opt, None)
-        right_cam = cam.get(right_sock_opt, None)
-        if not left_cam:
-            if left == dai.CameraBoardSocket.CAM_A:
-                left_sock_opt = "rgb"
-            elif left == dai.CameraBoardSocket.CAM_B:
-                left_sock_opt = "left"
-            elif left == dai.CameraBoardSocket.CAM_C:
-                left_sock_opt = "right"
+            # Get the actual camera nodes
+            # The cameras may have been specified with -cams rgb,c left,m right,m kind of names, so we need to handle these edge cases
+            left_sock_opt = socket_to_socket_opt(left)
+            right_sock_opt = socket_to_socket_opt(right)
             left_cam = cam.get(left_sock_opt, None)
-        if not right_cam:
-            if right == dai.CameraBoardSocket.CAM_A:
-                right_sock_opt = "rgb"
-            elif right == dai.CameraBoardSocket.CAM_B:
-                right_sock_opt = "left"
-            elif right == dai.CameraBoardSocket.CAM_C:
-                right_sock_opt = "right"
             right_cam = cam.get(right_sock_opt, None)
+            if not left_cam:
+                if left == dai.CameraBoardSocket.CAM_A:
+                    left_sock_opt = "rgb"
+                elif left == dai.CameraBoardSocket.CAM_B:
+                    left_sock_opt = "left"
+                elif left == dai.CameraBoardSocket.CAM_C:
+                    left_sock_opt = "right"
+                left_cam = cam.get(left_sock_opt, None)
+            if not right_cam:
+                if right == dai.CameraBoardSocket.CAM_A:
+                    right_sock_opt = "rgb"
+                elif right == dai.CameraBoardSocket.CAM_B:
+                    right_sock_opt = "left"
+                elif right == dai.CameraBoardSocket.CAM_C:
+                    right_sock_opt = "right"
+                right_cam = cam.get(right_sock_opt, None)
 
-        if left_cam and right_cam:
-            cam_features = device.getConnectedCameraFeatures()
-            left_cam_features = next(filter(lambda c: c.socket == left, cam_features))
-            right_cam_features = next(filter(lambda c: c.socket == right, cam_features))
-            if left_cam_features.width > 1280:
-                if args.isp_downscale == 1:
-                    raise Exception("Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
-            if right_cam_features.width > 1280:
-                if args.isp_downscale == 1:
-                    raise Exception("Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
-            left_out = "out"
-            right_out = "out"
-            if cam_type_color[left_sock_opt]:
-                left_out = "video"
-            if cam_type_color[right_sock_opt]:
-                right_out = "video"
+            if left_cam and right_cam:
+                cam_features = device.getConnectedCameraFeatures()
+                left_cam_features = next(filter(lambda c: c.socket == left, cam_features))
+                right_cam_features = next(filter(lambda c: c.socket == right, cam_features))
+                if left_cam_features.width > 1280:
+                    if args.isp_downscale == 1:
+                        raise Exception("Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
+                if right_cam_features.width > 1280:
+                    if args.isp_downscale == 1:
+                        raise Exception("Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
+                left_out = "out"
+                right_out = "out"
+                if cam_type_color[left_sock_opt]:
+                    left_out = "video"
+                if cam_type_color[right_sock_opt]:
+                    right_out = "video"
 
-            print("Device is calibrated and has a stereo pair, creating StereoDepth node.")
-            stereo = pipeline.createStereoDepth()
-            stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
-            stereo.setLeftRightCheck(True)
-            stereo.setSubpixel(True)
-            getattr(left_cam, left_out).link(stereo.left)
-            getattr(right_cam, right_out).link(stereo.right)
-            xout_stereo = pipeline.createXLinkOut()
-            depth_stream = "stereo_depth"
-            xout_stereo.setStreamName(depth_stream)
-            stereo.depth.link(xout_stereo.input)
-            streams.append(depth_stream)
-    except Exception as e:
-        print("Couldn't create depth:", e)
+                print("Device is calibrated and has a stereo pair, creating StereoDepth node.")
+                stereo = pipeline.createStereoDepth()
+                stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+                stereo.setLeftRightCheck(True)
+                stereo.setSubpixel(True)
+                getattr(left_cam, left_out).link(stereo.left)
+                getattr(right_cam, right_out).link(stereo.right)
+                xout_stereo = pipeline.createXLinkOut()
+                depth_stream = "stereo_depth"
+                xout_stereo.setStreamName(depth_stream)
+                stereo.depth.link(xout_stereo.input)
+                streams.append(depth_stream)
+        except Exception as e:
+            print("Couldn't create depth:", e)
     
     # Pipeline is defined, now we can start it
     device.startPipeline(pipeline)
