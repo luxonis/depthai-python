@@ -3,6 +3,6 @@ Spatial coordinate system
 
 OAK camera uses left-handed (Cartesian) coordinate system for all spatial coordiantes.
 
-.. image:: 
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/f9bfaa0c-0286-46c0-910c-77c1337493e1
 
-From the image you can see that on the frame to up the Y is positive, and on the frame to the right the X is positive.
+Middle of the frame is 0,0 in terms of X,Y coordinates. If you go up, Y will increase, and if you go right, X will increase.
