@@ -17,8 +17,8 @@ script.setScript("""
     extrinsics = cal.getCameraExtrinsics(left_camera_id, right_camera_id)
     intrinsics_left = cal.getCameraIntrinsics(left_camera_id)
 
-    print(extrinsics)
-    print(intrinsics_left)
+    node.info(extrinsics.__str__())
+    node.info(intrinsics_left.__str__())
 
     time.sleep(1)
     node.io['end'].send(Buffer(32))
