@@ -34,8 +34,9 @@ For the 'Select control: ...' options, use these keys to modify the value:
 '/' to toggle printing camera settings: exposure, ISO, lens position, color temperature
 """
 
+import depthai as dai
 import os
-#os.environ["DEPTHAI_LEVEL"] = "debug"
+# os.environ["DEPTHAI_LEVEL"] = "debug"
 
 import cv2
 import numpy as np
@@ -101,45 +102,37 @@ parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
 parser.add_argument('-btimeout', '--boot-timeout', default=30000,
                     help="Boot timeout in ms. Default: %(default)s (sets DEPTHAI_BOOT_TIMEOUT environment variable)")
 
-parser.add_argument('--stress', action='store_true', help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
+parser.add_argument('--stress', action='store_true',
+                    help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
+
+parser.add_argument("--gui", action="store_true", help="Use GUI instead of CLI")
 
 args = parser.parse_args()
 
 # Set timeouts before importing depthai
 os.environ["DEPTHAI_CONNECTION_TIMEOUT"] = str(args.connection_timeout)
 os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
-import depthai as dai
-
-if len(sys.argv) == 1:
-    import cam_test_gui
-    cam_test_gui.main()
 
 if args.stress:
     from stress_test import stress_test
     stress_test(args.device)
     exit(0)
 
-cam_list = []
-cam_type_color = {}
-cam_type_tof = {}
-print("Enabled cameras:")
-for socket, is_color, is_tof in args.cameras:
-    cam_list.append(socket)
-    cam_type_color[socket] = is_color
-    cam_type_tof[socket] = is_tof
-    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
+if args.gui:
+    import cam_test_gui
+    cam_test_gui.main()
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb'  : dai.CameraBoardSocket.CAM_A,
-    'left' : dai.CameraBoardSocket.CAM_B,
+    'rgb': dai.CameraBoardSocket.CAM_A,
+    'left': dai.CameraBoardSocket.CAM_B,
     'right': dai.CameraBoardSocket.CAM_C,
-    'cama' : dai.CameraBoardSocket.CAM_A,
-    'camb' : dai.CameraBoardSocket.CAM_B,
-    'camc' : dai.CameraBoardSocket.CAM_C,
-    'camd' : dai.CameraBoardSocket.CAM_D,
+    'cama': dai.CameraBoardSocket.CAM_A,
+    'camb': dai.CameraBoardSocket.CAM_B,
+    'camc': dai.CameraBoardSocket.CAM_C,
+    'camd': dai.CameraBoardSocket.CAM_D,
 }
 
 rotate = {
@@ -192,103 +185,192 @@ class FPS:
     def get(self):
         return self.fps
 
-# Start defining a pipeline
-pipeline = dai.Pipeline()
-# Uncomment to get better throughput
-# pipeline.setXLinkChunkSize(0)
-
-control = pipeline.createXLinkIn()
-control.setStreamName('control')
-
-xinTofConfig = pipeline.createXLinkIn()
-xinTofConfig.setStreamName('tofConfig')
-
-cam = {}
-tof = {}
-xout = {}
-xout_raw = {}
-xout_tof_amp = {}
-streams = []
-tofConfig = {}
-for c in cam_list:
-    tofEnableRaw = False
-    xout[c] = pipeline.createXLinkOut()
-    xout[c].setStreamName(c)
-    streams.append(c)
-    if cam_type_tof[c]:
-        cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
-        if args.tof_raw:
-            tofEnableRaw = True
-        else:
-            tof[c] = pipeline.create(dai.node.ToF)
-            cam[c].raw.link(tof[c].input)
-            tof[c].depth.link(xout[c].input)
-            xinTofConfig.out.link(tof[c].inputConfig)
-            tofConfig = tof[c].initialConfig.get()
-            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            tofConfig.depthParams.avgPhaseShuffle = False
-            tofConfig.depthParams.minimumAmplitude = 3.0
-            tof[c].initialConfig.set(tofConfig)
-            if args.tof_amplitude:
-                amp_name = 'tof_amplitude_' + c
-                xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
-                xout_tof_amp[c].setStreamName(amp_name)
-                streams.append(amp_name)
-                tof[c].amplitude.link(xout_tof_amp[c].input)
-    elif cam_type_color[c]:
-        cam[c] = pipeline.createColorCamera()
-        cam[c].setResolution(color_res_opts[args.color_resolution])
-        cam[c].setIspScale(1, args.isp_downscale)
-        # cam[c].initialControl.setManualFocus(85) # TODO
-        if args.rgb_preview:
-            cam[c].preview.link(xout[c].input)
-        else:
-            cam[c].isp.link(xout[c].input)
-    else:
-        cam[c] = pipeline.createMonoCamera()
-        cam[c].setResolution(mono_res_opts[args.mono_resolution])
-        cam[c].out.link(xout[c].input)
-    cam[c].setBoardSocket(cam_socket_opts[c])
-    # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
-    # cam[c].initialControl.setExternalTrigger(2, 1)
-    # cam[c].initialControl.setStrobeExternal(48, 1)
-    # cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
-
-    # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
-    # When set, takes effect after the first 2 frames
-    # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
-    control.out.link(cam[c].inputControl)
-    if rotate[c]:
-        cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
-    cam[c].setFps(args.fps)
-    if args.isp3afps:
-        cam[c].setIsp3aFps(args.isp3afps)
-
-    if args.enable_raw or tofEnableRaw:
-        raw_name = 'raw_' + c
-        xout_raw[c] = pipeline.create(dai.node.XLinkOut)
-        xout_raw[c].setStreamName(raw_name)
-        streams.append(raw_name)
-        cam[c].raw.link(xout_raw[c].input)
-        cam[c].setRawOutputPacked(False)
-
-if args.camera_tuning:
-    pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
 
 def exit_cleanly(signum, frame):
     print("Exiting cleanly")
     cv2.destroyAllWindows()
     sys.exit(0)
 
+
+def socket_to_socket_opt(socket: dai.CameraBoardSocket) -> str:
+    return str(socket).split('.')[-1].replace("_", "").lower()
+
 signal.signal(signal.SIGINT, exit_cleanly)
 
-
-# Pipeline is defined, now we can connect to the device
-device = dai.Device.getDeviceByMxId(args.device)
-dai_device_args = [pipeline]
-if device[0]:
-    dai_device_args.append(device[1])
+# Connect to device, so that we can get connected cameras in case of no args
+success, device = dai.Device.getDeviceByMxId(args.device)
+dai_device_args = []
+if success:
+    dai_device_args.append(device)
 with dai.Device(*dai_device_args) as device:
+    cam_list = []
+    cam_type_color = {}
+    cam_type_tof = {}
+    print("Enabled cameras:")
+
+    if len(sys.argv) == 1:
+        connected_cameras = device.getConnectedCameraFeatures()
+        args.cameras = [(socket_to_socket_opt(cam.socket), cam.supportedTypes[0] ==
+                         dai.CameraSensorType.COLOR, cam.supportedTypes[0] == dai.CameraSensorType.TOF) for cam in connected_cameras]
+
+    for socket, is_color, is_tof in args.cameras:
+        cam_list.append(socket)
+        cam_type_color[socket] = is_color
+        cam_type_tof[socket] = is_tof
+        print((socket).rjust(7), ':',
+              'tof' if is_tof else 'color' if is_color else 'mono')
+
+    # Start defining a pipeline
+    pipeline = dai.Pipeline()
+    # Uncomment to get better throughput
+    # pipeline.setXLinkChunkSize(0)
+
+    control = pipeline.createXLinkIn()
+    control.setStreamName('control')
+
+    xinTofConfig = pipeline.createXLinkIn()
+    xinTofConfig.setStreamName('tofConfig')
+
+    cam = {}
+    tof = {}
+    xout = {}
+    xout_raw = {}
+    xout_tof_amp = {}
+    streams = []
+    tofConfig = {}
+    for c in cam_list:
+        tofEnableRaw = False
+        xout[c] = pipeline.createXLinkOut()
+        xout[c].setStreamName(c)
+        streams.append(c)
+        if cam_type_tof[c]:
+            cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
+            if args.tof_raw:
+                tofEnableRaw = True
+            else:
+                tof[c] = pipeline.create(dai.node.ToF)
+                cam[c].raw.link(tof[c].input)
+                tof[c].depth.link(xout[c].input)
+                xinTofConfig.out.link(tof[c].inputConfig)
+                tofConfig = tof[c].initialConfig.get()
+                tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
+                tofConfig.depthParams.avgPhaseShuffle = False
+                tofConfig.depthParams.minimumAmplitude = 3.0
+                tof[c].initialConfig.set(tofConfig)
+                if args.tof_amplitude:
+                    amp_name = 'tof_amplitude_' + c
+                    xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
+                    xout_tof_amp[c].setStreamName(amp_name)
+                    streams.append(amp_name)
+                    tof[c].amplitude.link(xout_tof_amp[c].input)
+        elif cam_type_color[c]:
+            cam[c] = pipeline.createColorCamera()
+            cam[c].setResolution(color_res_opts[args.color_resolution])
+            cam[c].setIspScale(1, args.isp_downscale)
+            # cam[c].initialControl.setManualFocus(85) # TODO
+            if args.rgb_preview:
+                cam[c].preview.link(xout[c].input)
+            else:
+                cam[c].isp.link(xout[c].input)
+        else:
+            cam[c] = pipeline.createMonoCamera()
+            cam[c].setResolution(mono_res_opts[args.mono_resolution])
+            cam[c].out.link(xout[c].input)
+        cam[c].setBoardSocket(cam_socket_opts[c])
+        # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
+        # cam[c].initialControl.setExternalTrigger(2, 1)
+        # cam[c].initialControl.setStrobeExternal(48, 1)
+        # cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
+
+        # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
+        # When set, takes effect after the first 2 frames
+        # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
+        control.out.link(cam[c].inputControl)
+        if rotate[c]:
+            cam[c].setImageOrientation(
+                dai.CameraImageOrientation.ROTATE_180_DEG)
+        cam[c].setFps(args.fps)
+        if args.isp3afps:
+            cam[c].setIsp3aFps(args.isp3afps)
+
+        if args.enable_raw or tofEnableRaw:
+            raw_name = 'raw_' + c
+            xout_raw[c] = pipeline.create(dai.node.XLinkOut)
+            xout_raw[c].setStreamName(raw_name)
+            streams.append(raw_name)
+            cam[c].raw.link(xout_raw[c].input)
+            cam[c].setRawOutputPacked(False)
+
+    if args.camera_tuning:
+        pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
+
+    stereo = None
+    try:
+        try:
+            calib = device.readCalibration2()
+        except:
+            raise Exception("Device is not calibrated.")
+        eeprom = calib.getEepromData()
+        left, right = eeprom.stereoRectificationData.leftCameraSocket, eeprom.stereoRectificationData.rightCameraSocket
+
+        # Get the actual camera nodes
+        # The cameras may have been specified with -cams rgb,c left,m right,m kind of names, so we need to handle these edge cases
+        left_sock_opt = socket_to_socket_opt(left)
+        right_sock_opt = socket_to_socket_opt(right)
+        left_cam = cam.get(left_sock_opt, None)
+        right_cam = cam.get(right_sock_opt, None)
+        if not left_cam:
+            if left == dai.CameraBoardSocket.CAM_A:
+                left_sock_opt = "rgb"
+            elif left == dai.CameraBoardSocket.CAM_B:
+                left_sock_opt = "left"
+            elif left == dai.CameraBoardSocket.CAM_C:
+                left_sock_opt = "right"
+            left_cam = cam.get(left_sock_opt, None)
+        if not right_cam:
+            if right == dai.CameraBoardSocket.CAM_A:
+                right_sock_opt = "rgb"
+            elif right == dai.CameraBoardSocket.CAM_B:
+                right_sock_opt = "left"
+            elif right == dai.CameraBoardSocket.CAM_C:
+                right_sock_opt = "right"
+            right_cam = cam.get(right_sock_opt, None)
+
+        if left_cam and right_cam:
+            cam_features = device.getConnectedCameraFeatures()
+            left_cam_features = next(filter(lambda c: c.socket == left, cam_features))
+            right_cam_features = next(filter(lambda c: c.socket == right, cam_features))
+            if left_cam_features.width > 1280:
+                if args.isp_downscale == 1:
+                    raise Exception("Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
+            if right_cam_features.width > 1280:
+                if args.isp_downscale == 1:
+                    raise Exception("Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
+            left_out = "out"
+            right_out = "out"
+            if cam_type_color[left_sock_opt]:
+                left_out = "video"
+            if cam_type_color[right_sock_opt]:
+                right_out = "video"
+
+            print("Device is calibrated and has a stereo pair, creating StereoDepth node.")
+            stereo = pipeline.createStereoDepth()
+            stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+            stereo.setLeftRightCheck(True)
+            stereo.setSubpixel(True)
+            getattr(left_cam, left_out).link(stereo.left)
+            getattr(right_cam, right_out).link(stereo.right)
+            xout_stereo = pipeline.createXLinkOut()
+            depth_stream = "stereo_depth"
+            xout_stereo.setStreamName(depth_stream)
+            stereo.depth.link(xout_stereo.input)
+            streams.append(depth_stream)
+    except Exception as e:
+        print("Couldn't create depth:", e)
+    
+    # Pipeline is defined, now we can start it
+    device.startPipeline(pipeline)
+
     # print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
     print('Connected cameras:')
     cam_name = {}
@@ -366,11 +448,12 @@ with dai.Device(*dai_device_args) as device:
     control = 'none'
     show = False
 
-    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom = cv2.applyColorMap(
+        np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
 
     print("Cam:", *['     ' + c.ljust(8)
-          for c in cam_list], "[host | capture timestamp]")
+                    for c in cam_list], "[host | capture timestamp]")
 
     capture_list = []
     while True:
@@ -386,13 +469,27 @@ with dai.Device(*dai_device_args) as device:
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
                 cam_skt = c.split('_')[-1]
+
+                if c == "stereo_depth":
+                    depth_downscaled = frame[::4]
+                    try:
+                        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+                        max_depth = np.percentile(depth_downscaled, 99)
+                    except IndexError:
+                        continue
+                    depth_frame_color = np.interp(frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+                    depth_frame_color = cv2.applyColorMap(depth_frame_color, cv2.COLORMAP_HOT)
+                    cv2.imshow(c, depth_frame_color)
+                    continue
+
                 if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
                     else:
                         frame = (frame.view(np.int16).astype(float))
-                        frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        frame = cv2.normalize(
+                            frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
@@ -404,13 +501,16 @@ with dai.Device(*dai_device_args) as device:
                 capture = c in capture_list
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
-                         + '_' + str(width) + 'x' + str(height)
-                         + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
-                         + '_iso_' + str(pkt.getSensitivity())
-                         + '_lens_' + str(pkt.getLensPosition())
-                         + '_' + capture_time
-                         + '_' + str(pkt.getSequenceNum())
-                        )
+                                         + '_' + str(width) + 'x' + str(height)
+                                         + '_exp_' +
+                                         str(int(
+                                             pkt.getExposureTime().total_seconds()*1e6))
+                                         + '_iso_' + str(pkt.getSensitivity())
+                                         + '_lens_' +
+                                         str(pkt.getLensPosition())
+                                         + '_' + capture_time
+                                         + '_' + str(pkt.getSequenceNum())
+                                         )
                     capture_list.remove(c)
                     print()
                 if c.startswith('raw_') or c.startswith('tof_amplitude_'):
@@ -421,8 +521,10 @@ with dai.Device(*dai_device_args) as device:
                     # Full range for display, use bits [15:6] of the 16-bit pixels
                     type = pkt.getType()
                     multiplier = 1
-                    if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
-                    if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
+                    if type == dai.ImgFrame.Type.RAW10:
+                        multiplier = (1 << (16-10))
+                    if type == dai.ImgFrame.Type.RAW12:
+                        multiplier = (1 << (16-4))
                     frame = frame * multiplier
                     # Debayer as color for preview/png
                     if cam_type_color[cam_skt]:
@@ -443,7 +545,8 @@ with dai.Device(*dai_device_args) as device:
                     cv2.imwrite(filename, frame)
                 cv2.imshow(c, frame)
         print("\rFPS:",
-              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
+              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(),
+                                         fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
         if show: print()
 
@@ -458,13 +561,14 @@ with dai.Device(*dai_device_args) as device:
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
             print("ToF toggling f_mod value to:", f_mod)
             tofConfig.depthParams.freqModUsed = f_mod
             tofCfgQueue.send(tofConfig)
         elif key == ord('h') and tof:
             tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
-            print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
+            print("ToF toggling avgPhaseShuffle value to:",
+                  tofConfig.depthParams.avgPhaseShuffle)
             tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
@@ -614,7 +718,8 @@ with dai.Device(*dai_device_args) as device:
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
             elif control == 'tof_amplitude_min' and tof:
-                amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
+                amp_min = clamp(
+                    tofConfig.depthParams.minimumAmplitude + change, 0, 50)
                 print("Setting min amplitude(confidence) to:", amp_min)
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
