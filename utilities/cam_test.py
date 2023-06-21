@@ -104,9 +104,11 @@ parser.add_argument('-btimeout', '--boot-timeout', default=30000,
 parser.add_argument('--stress', action='store_true',
                     help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
 
-parser.add_argument("--no-stereo", action="store_true", help="Don't create a stereo depth node if the device has a stereo pair.")
+parser.add_argument("--no-stereo", action="store_true",
+                    help="Don't create a stereo depth node if the device has a stereo pair.")
 
-parser.add_argument("--gui", action="store_true", help="Use GUI instead of CLI")
+parser.add_argument("--gui", action="store_true",
+                    help="Use GUI instead of CLI")
 
 args = parser.parse_args()
 
@@ -166,10 +168,13 @@ color_res_opts = {
     '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
 }
 
+
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
 # Calculates FPS over a moving window, configurable
+
+
 class FPS:
     def __init__(self, window_size=30):
         self.dq = collections.deque(maxlen=window_size)
@@ -195,6 +200,7 @@ def exit_cleanly(signum, frame):
 
 def socket_to_socket_opt(socket: dai.CameraBoardSocket) -> str:
     return str(socket).split('.')[-1].replace("_", "").lower()
+
 
 signal.signal(signal.SIGINT, exit_cleanly)
 
@@ -343,14 +349,18 @@ with dai.Device(*dai_device_args) as device:
 
             if left_cam and right_cam:
                 cam_features = device.getConnectedCameraFeatures()
-                left_cam_features = next(filter(lambda c: c.socket == left, cam_features))
-                right_cam_features = next(filter(lambda c: c.socket == right, cam_features))
+                left_cam_features = next(
+                    filter(lambda c: c.socket == left, cam_features))
+                right_cam_features = next(
+                    filter(lambda c: c.socket == right, cam_features))
                 if left_cam_features.width > 1280:
                     if args.isp_downscale == 1:
-                        raise Exception("Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
+                        raise Exception(
+                            "Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
                 if right_cam_features.width > 1280:
                     if args.isp_downscale == 1:
-                        raise Exception("Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
+                        raise Exception(
+                            "Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
                 left_out = "out"
                 right_out = "out"
                 if cam_type_color[left_sock_opt]:
@@ -358,9 +368,11 @@ with dai.Device(*dai_device_args) as device:
                 if cam_type_color[right_sock_opt]:
                     right_out = "video"
 
-                print("Device is calibrated and has a stereo pair, creating StereoDepth node.")
+                print(
+                    "Device is calibrated and has a stereo pair, creating StereoDepth node.")
                 stereo = pipeline.createStereoDepth()
-                stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+                stereo.setDefaultProfilePreset(
+                    dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
                 stereo.setLeftRightCheck(True)
                 stereo.setSubpixel(True)
                 getattr(left_cam, left_out).link(stereo.left)
@@ -372,7 +384,7 @@ with dai.Device(*dai_device_args) as device:
                 streams.append(depth_stream)
         except Exception as e:
             print("Couldn't create depth:", e)
-    
+
     # Pipeline is defined, now we can start it
     device.startPipeline(pipeline)
 
@@ -478,12 +490,15 @@ with dai.Device(*dai_device_args) as device:
                 if c == "stereo_depth":
                     depth_downscaled = frame[::4]
                     try:
-                        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+                        min_depth = np.percentile(
+                            depth_downscaled[depth_downscaled != 0], 1)
                         max_depth = np.percentile(depth_downscaled, 99)
                     except IndexError:
                         continue
-                    depth_frame_color = np.interp(frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
-                    depth_frame_color = cv2.applyColorMap(depth_frame_color, cv2.COLORMAP_HOT)
+                    depth_frame_color = np.interp(
+                        frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+                    depth_frame_color = cv2.applyColorMap(
+                        depth_frame_color, cv2.COLORMAP_HOT)
                     cv2.imshow(c, depth_frame_color)
                     continue
 
@@ -553,7 +568,8 @@ with dai.Device(*dai_device_args) as device:
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(),
                                          fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
-        if show: print()
+        if show:
+            print()
 
         key = cv2.waitKey(1)
         if key == ord('q'):
@@ -633,21 +649,25 @@ with dai.Device(*dai_device_args) as device:
             dotIntensity = dotIntensity - DOT_STEP
             if dotIntensity < 0:
                 dotIntensity = 0
+            print("Setting dot projector brightness: ", dotIntensity)
             device.setIrLaserDotProjectorBrightness(dotIntensity)
         elif key == ord('d'):
             dotIntensity = dotIntensity + DOT_STEP
             if dotIntensity > DOT_MAX:
                 dotIntensity = DOT_MAX
+            print("Setting dot projector brightness: ", dotIntensity)
             device.setIrLaserDotProjectorBrightness(dotIntensity)
         elif key == ord('w'):
             floodIntensity = floodIntensity + FLOOD_STEP
             if floodIntensity > FLOOD_MAX:
                 floodIntensity = FLOOD_MAX
+            print("Setting flood light brightness: ", floodIntensity)
             device.setIrFloodLightBrightness(floodIntensity)
         elif key == ord('s'):
             floodIntensity = floodIntensity - FLOOD_STEP
             if floodIntensity < 0:
                 floodIntensity = 0
+            print("Setting flood light brightness: ", floodIntensity)
             device.setIrFloodLightBrightness(floodIntensity)
         elif key >= 0 and chr(key) in '34567890[]p':
             if key == ord('3'):
