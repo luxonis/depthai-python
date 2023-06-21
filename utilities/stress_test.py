@@ -104,8 +104,8 @@ def stress_test(mxid: str = ""):
                 print_system_information(sys_info)
 
 
-RGB_FPS = 60
-MONO_FPS = 60
+RGB_FPS = 20
+MONO_FPS = 20
 ENCODER_FPS = 10
 
 
@@ -147,8 +147,9 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
     # Used for spatial detection network (if available)
     color_cam: dai.Node = None
 
+    n_color_cams = 0
     for cam in camera_features:
-        print("Cam: ", [(conf.width, conf.height) for conf in cam.configs])
+        print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs])
         max_sensor_size = (cam.configs[-1].width, cam.configs[-1].height)
         node = None
         cam_kind = cam.supportedTypes[0]
@@ -161,6 +162,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 dai.MonoCameraProperties.SensorResolution.THE_400_P)
             mono.setFps(MONO_FPS)
         elif cam_kind == dai.CameraSensorType.COLOR:
+            n_color_cams += 1
             color = pipeline.createColorCamera()
             node = color
             color.setBoardSocket(cam.socket)
@@ -212,24 +214,23 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         elif cam.socket == right_socket:
             right = node
 
-        video_encoder = pipeline.createVideoEncoder()
-        video_encoder.setDefaultProfilePreset(
-            ENCODER_FPS, dai.VideoEncoderProperties.Profile.H264_MAIN
-        )
+        if n_color_cams < 2:  # For hardcode max 2 color cam video encoders, to avoid out of memory errors
+            video_encoder = pipeline.createVideoEncoder()
+            video_encoder.setDefaultProfilePreset(
+                ENCODER_FPS, dai.VideoEncoderProperties.Profile.H264_MAIN
+            )
+            getattr(node, output).link(video_encoder.input)
+            ve_xlink = pipeline.createXLinkOut()
+            stream_name = f"{cam.socket}.ve_out"
+            ve_xlink.setStreamName(stream_name)
+            video_encoder.bitstream.link(ve_xlink.input)
+            xlink_outs.append((stream_name, 30))
 
         edge_detector = pipeline.createEdgeDetector()
         if cam_kind == dai.CameraSensorType.COLOR:
             edge_detector.setMaxOutputFrameSize(8294400)
 
-        getattr(node, output).link(video_encoder.input)
         getattr(node, output).link(edge_detector.inputImage)
-
-        ve_xlink = pipeline.createXLinkOut()
-        stream_name = f"{cam.socket}.ve_out"
-        ve_xlink.setStreamName(stream_name)
-        video_encoder.bitstream.link(ve_xlink.input)
-        xlink_outs.append((stream_name, 30))
-
         edge_detector_xlink = pipeline.createXLinkOut()
         stream_name = f"{cam.socket}.edge_detector"
         edge_detector_xlink.setStreamName(stream_name)
@@ -237,6 +238,12 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         xlink_outs.append((stream_name, 8))
 
     if left and right:
+        if left.getResolutionWidth() > 1280:
+            print("Left camera width is greater than 1280, setting ISP scale to 2/3")
+            left.setIspScale(2, 3)
+        if right.getResolutionWidth() > 1280:
+            print("Right camera width is greater than 1280, setting ISP scale to 2/3")
+            right.setIspScale(2, 3)
         stereo = pipeline.createStereoDepth()
         output = "out" if hasattr(left, "out") else "video"
         getattr(left, output).link(stereo.left)
