@@ -588,6 +588,9 @@ baseline = 75
 fov = 71.86
 focal = width / (2 * math.tan(fov / 2 / 180 * math.pi))
 
+stereo.setBaseline(baseline/10)
+stereo.setFocalLength(focal)
+
 streams = ['left', 'right']
 if outRectified:
     streams.extend(['rectified_left', 'rectified_right'])
