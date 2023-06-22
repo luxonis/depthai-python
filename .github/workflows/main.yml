@@ -158,11 +158,8 @@ jobs:
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
       - name: Install tweaked auditwheel and add armv6l tag
         run: |
-          python3 -m venv newauditvenv
-          source newauditvenv/bin/activate
           python3 -m pip install git+https://github.com/luxonis/auditwheel@main
           for whl in wheelhouse/*.whl; do python3 -m auditwheel addtag -t linux_armv7l linux_armv6l -w wheelhouse/postaudited/ "$whl"; done
-          deactivate
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v3
         with:
