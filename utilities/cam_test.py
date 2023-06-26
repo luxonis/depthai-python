@@ -69,6 +69,8 @@ parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
+parser.add_argument('-enc', '--encode', default='', choices={'h264', 'h265', 'jpeg'},
+                    help="Select encoding format. Default: not encoded")
 args = parser.parse_args()
 
 cam_list = []
@@ -132,6 +134,12 @@ color_res_opts = {
     '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
 }
 
+enc_opts = {
+    'h264': dai.VideoEncoderProperties.Profile.H264_MAIN,
+    'h265': dai.VideoEncoderProperties.Profile.H265_MAIN,
+    'jpeg': dai.VideoEncoderProperties.Profile.MJPEG,
+}
+
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
@@ -159,6 +167,7 @@ control = pipeline.createXLinkIn()
 control.setStreamName('control')
 
 cam = {}
+enc = {}
 xout = {}
 xout_raw = {}
 streams = []
@@ -171,7 +180,13 @@ for c in cam_list:
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].setIspScale(1, args.isp_downscale)
         #cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if args.encode:
+            enc[c] = pipeline.createVideoEncoder()
+            cam[c].isp.link(enc[c].input)
+            enc[c].bitstream.link(xout[c].input)
+            enc[c].setDefaultProfilePreset(cam[c].getFps(), enc_opts[args.encode])
+        else:
+            cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -331,7 +346,10 @@ with dai.Device() as device:
                     filename = capture_file_info + '.png'
                     print('Saving:', filename)
                     cv2.imwrite(filename, frame)
-                cv2.imshow(c, frame)
+                if args.encode:
+                    print('got', c, width, height)
+                else:
+                    cv2.imshow(c, frame)
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
