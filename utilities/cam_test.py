@@ -89,6 +89,8 @@ parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
                     help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, type=int,
+                    help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 
@@ -221,6 +223,16 @@ for c in cam_list:
             tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
             tofConfig.depthParams.avgPhaseShuffle = False
             tofConfig.depthParams.minimumAmplitude = 3.0
+
+            if args.tof_median == 0:
+                tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+            elif args.tof_median == 3:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+            elif args.tof_median == 5:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+            elif args.tof_median == 7:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
+
             tof[c].initialConfig.set(tofConfig)
             if args.tof_amplitude:
                 amp_name = 'tof_amplitude_' + c
