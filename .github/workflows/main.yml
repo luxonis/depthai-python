@@ -566,7 +566,7 @@ jobs:
           owner: luxonis
           workflow: regression_test.yml
           workflow_inputs: '{"commit": "${{ github.ref }}", "sha": "${{ github.sha }}", "parent_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' 
-          workflow_timeout_seconds: 120 # Default: 300
+          workflow_timeout_seconds: 300 # was 120 
 
       - name: Release
         run: echo "https://github.com/luxonis/depthai-core-hil-tests/actions/runs/${{steps.return_dispatch.outputs.run_id}}" >> $GITHUB_STEP_SUMMARY
