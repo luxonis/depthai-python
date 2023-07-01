@@ -153,7 +153,7 @@ are presented with code.
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 
-.. rubtic:: ToF
+.. rubric:: ToF
 
 - :ref:`ToF depth` - Displays colorized ToF depth frames
 
