@@ -23,6 +23,7 @@ Code Samples
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
    ../samples/SystemLogger/*
+   ../samples/ToF/*
    ../samples/VideoEncoder/*
    ../samples/Warp/*
    ../samples/Yolo/*
@@ -151,6 +152,10 @@ are presented with code.
 .. rubric:: SystemLogger
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
+
+.. rubtic:: ToF
+
+- :ref:`ToF depth` - Displays colorized ToF depth frames
 
 .. rubric:: VideoEncoder
 
