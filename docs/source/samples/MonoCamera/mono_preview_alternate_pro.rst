@@ -41,7 +41,8 @@ Source code
     .. tab:: C++
 
         Not yet implemented.
-        ..
+
+..
             Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/MonoCamera/mono_preview_alternate_pro.cpp>`__
 
             .. literalinclude:: ../../../../depthai-core/examples/MonoCamera/mono_preview_alternate_pro.cpp
