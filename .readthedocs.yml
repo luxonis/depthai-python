@@ -25,7 +25,9 @@ sphinx:
 #  configuration: mkdocs.yml
 
 # Optionally build your docs in additional formats such as PDF
-formats: []
+formats: [
+  pdf # enable pdf output
+]
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
