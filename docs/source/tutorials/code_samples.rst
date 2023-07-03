@@ -104,6 +104,7 @@ are presented with code.
 
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
+- :ref:`Mono preview - Alternate between dot projector and illumination LED` on OAK Pro devices
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
 .. rubric:: NeuralNetwork
