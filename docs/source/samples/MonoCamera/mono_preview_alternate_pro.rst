@@ -17,6 +17,9 @@ Demo
         <iframe src="https://www.youtube.com/embed/LkW50C4N-R8" frameborder="0" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
     </div>
 
+On the video, we disabled both projector and LED for about a second, just to demonstrate how the scene looks
+in almost-complete darkness.
+
 Setup
 #####
 
