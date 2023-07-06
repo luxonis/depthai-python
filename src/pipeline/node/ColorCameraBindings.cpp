@@ -188,6 +188,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
         .def("setCamera", &ColorCamera::setCamera, py::arg("name"), DOC(dai, node, ColorCamera, setCamera))
         .def("getCamera", &ColorCamera::getCamera, DOC(dai, node, ColorCamera, getCamera))
+
+        .def("setRawOutputPacked", &ColorCamera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, ColorCamera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;

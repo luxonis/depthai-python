@@ -42,11 +42,12 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("getFov", &CalibrationHandler::getFov, py::arg("cameraId"), py::arg("useSpec") = true, DOC(dai, CalibrationHandler, getFov))
         .def("getLensPosition", &CalibrationHandler::getLensPosition, py::arg("cameraId"), DOC(dai, CalibrationHandler, getLensPosition))
+        .def("getDistortionModel", &CalibrationHandler::getDistortionModel, py::arg("cameraId"), DOC(dai, CalibrationHandler, getDistortionModel))
 
         .def("getCameraExtrinsics", &CalibrationHandler::getCameraExtrinsics, py::arg("srcCamera"), py::arg("dstCamera"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getCameraExtrinsics))
 
         .def("getCameraTranslationVector", &CalibrationHandler::getCameraTranslationVector, py::arg("srcCamera"), py::arg("dstCamera"), py::arg("useSpecTranslation") = true, DOC(dai, CalibrationHandler, getCameraTranslationVector))
-        .def("getBaselineDistance", &CalibrationHandler::getBaselineDistance, py::arg("cam1") = dai::CameraBoardSocket::RIGHT, py::arg("cam2") = dai::CameraBoardSocket::LEFT, py::arg("useSpecTranslation") = true, DOC(dai, CalibrationHandler, getBaselineDistance))
+        .def("getBaselineDistance", &CalibrationHandler::getBaselineDistance, py::arg("cam1") = dai::CameraBoardSocket::CAM_C, py::arg("cam2") = dai::CameraBoardSocket::CAM_B, py::arg("useSpecTranslation") = true, DOC(dai, CalibrationHandler, getBaselineDistance))
 
         .def("getCameraToImuExtrinsics", &CalibrationHandler::getCameraToImuExtrinsics, py::arg("cameraId"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getCameraToImuExtrinsics))
         .def("getImuToCameraExtrinsics", &CalibrationHandler::getImuToCameraExtrinsics, py::arg("cameraId"), py::arg("useSpecTranslation") = false, DOC(dai, CalibrationHandler, getImuToCameraExtrinsics))

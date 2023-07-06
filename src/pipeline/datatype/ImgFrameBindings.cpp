@@ -202,6 +202,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 break;
 
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                     shape = {img.getHeight(), img.getWidth()};
                     dtype = py::dtype::of<uint16_t>();
                 break;
@@ -234,7 +237,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                         + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
             } else if(actualSize > requiredSize) {
                 // FIXME check build on Windows
-                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
+                // logger::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
@@ -303,6 +306,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
 
                 case ImgFrame::Type::RAW8:
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                 case ImgFrame::Type::GRAY8:
                 case ImgFrame::Type::GRAYF16:
                 default:

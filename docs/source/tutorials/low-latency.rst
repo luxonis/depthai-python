@@ -125,7 +125,7 @@ On PoE, the latency can vary quite a bit due to a number of factors:
   * Network/computer is saturated with other traffic. You can test the actual bandwidth with `OAK bandwidth test <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-bandwidth-test>`__ script. With direct link I got ~800mbps downlink and ~210mbps uplink.
 
 * Computer's **Network Interface Card settings**, `documentation here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#network-interface-controller-settings>`__
-* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should.
+* 100% OAK Leon CSS (CPU) usage. The Leon CSS core handles the POE communication (`see docs here <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__), and if the CPU is 100% used, it will not be able to handle the communication as fast as it should. **Workaround:** See :ref:`CPU usage` docs.
 * Another potential way to improve PoE latency would be to fine-tune network settings, like MTU, TCP window size, etc. (see `here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/getting-started-with-poe.html#advance-network-settings>`__ for more info)
 
 Bandwidth
@@ -133,7 +133,7 @@ Bandwidth
 
 With large, unencoded frames, one can quickly saturate the bandwidth even at 30FPS, especially on PoE devices (1gbps link):
 
-.. code-block::bash
+.. code-block::
 
   4K NV12/YUV420 frames: 3840 * 2160 * 1.5 * 30fps * 8bits = 3 gbps
   1080P NV12/YUV420 frames: 1920 * 1080 * 1.5 * 30fps * 8bits = 747 mbps
@@ -154,6 +154,28 @@ A few options to reduce bandwidth:
 
 - Encode frames (H.264, H.265, MJPEG) on-device using :ref:`VideoEncoder node <VideoEncoder>`
 - Reduce FPS/resolution/number of streams
+
+Measuring operation times
+#########################
+
+If user sets depthai level to `trace` (see :ref:`DepthAI debugging level`), depthai will log operation times for each node/process, as shown below.
+
+.. code-block:: bash
+  :emphasize-lines: 1,2,5,6,7,8,9,10,13
+
+  [SpatialDetectionNetwork(1)] [trace] SpatialDetectionNetwork syncing took '70.39142' ms.
+  [StereoDepth(4)] [trace] Warp node took '2.2945' ms.
+  [system] [trace] EV:0,S:0,IDS:27,IDD:10,TSS:2,TSN:601935518
+  [system] [trace] EV:0,S:1,IDS:27,IDD:10,TSS:2,TSN:602001382
+  [StereoDepth(4)] [trace] Stereo took '12.27392' ms.
+  [StereoDepth(4)] [trace] 'Median+Disparity to depth' pipeline took '0.86295' ms.
+  [StereoDepth(4)] [trace] Stereo post processing (total) took '0.931422' ms.
+  [SpatialDetectionNetwork(1)] [trace] NeuralNetwork inference took '62.274784' ms.
+  [StereoDepth(4)] [trace] Stereo rectification took '2.686294' ms.
+  [MonoCamera(3)] [trace] Mono ISP took '1.726888' ms.
+  [system] [trace] EV:0,S:0,IDS:20,IDD:25,TSS:2,TSN:616446812
+  [system] [trace] EV:0,S:1,IDS:20,IDD:25,TSS:2,TSN:616489715
+  [SpatialDetectionNetwork(1)] [trace] DetectionParser took '3.464118' ms.
 
 Reducing latency when running NN
 ################################

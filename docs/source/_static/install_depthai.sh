@@ -210,7 +210,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
   # install python 3.10
   if [ "$install_python" == "true" ]; then
     echo "installing python 3.10"
-  
+
     sudo yes "" | sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt -y install python3.10
     sudo apt -y install python3.10-venv
@@ -219,13 +219,21 @@ elif [[ $(uname -s) == "Linux" ]]; then
 
   echo "Creating python virtual environment in $VENV_DIR"
 
-  "$python_executable" -m venv "$VENV_DIR"
+  machine=$(uname -m)
+  if [[ $machine != 'armv6l' && $machine != 'armv7l' && $machine != 'aarch64' && $machine != 'arm64' ]]; then
+    "$python_executable" -m venv "$VENV_DIR"
+  else
+    "$python_executable" -m venv "$VENV_DIR" --system-site-packages
+  fi
 
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip
 
   pip install packaging
-  pip install pyqt5
+
+  if [[ $machine != 'armv6l' && $machine != 'armv7l' && $machine != 'aarch64' && $machine != 'arm64' ]]; then
+    pip install pyqt5
+  fi
 else
   echo "Error: Host $(uname -s) not supported."
   exit 99

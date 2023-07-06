@@ -1,5 +1,8 @@
 #include "CommonBindings.hpp"
 
+// Libraries
+#include "hedley/hedley.h"
+
 // depthai-shared
 #include "depthai-shared/common/CameraBoardSocket.hpp"
 #include "depthai-shared/common/EepromData.hpp"
@@ -26,6 +29,7 @@
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
 #include "depthai/common/CameraExposureOffset.hpp"
+#include "depthai/utility/ProfilingData.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
 
@@ -58,8 +62,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
+    py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
     py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
-
+	
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -131,12 +136,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         ;
 
     // CameraBoardSocket enum bindings
+
+    // Deprecated
+    HEDLEY_DIAGNOSTIC_PUSH
+    HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
     cameraBoardSocket
         .value("AUTO", CameraBoardSocket::AUTO)
-        .value("RGB", CameraBoardSocket::RGB)
-        .value("LEFT", CameraBoardSocket::LEFT)
-        .value("RIGHT", CameraBoardSocket::RIGHT)
-        .value("CENTER", CameraBoardSocket::CENTER)
         .value("CAM_A", CameraBoardSocket::CAM_A)
         .value("CAM_B", CameraBoardSocket::CAM_B)
         .value("CAM_C", CameraBoardSocket::CAM_C)
@@ -145,7 +150,31 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("CAM_F", CameraBoardSocket::CAM_F)
         .value("CAM_G", CameraBoardSocket::CAM_G)
         .value("CAM_H", CameraBoardSocket::CAM_H)
+
+        .value("RGB", CameraBoardSocket::RGB, "**Deprecated:** Use CAM_A or address camera by name instead")
+        .value("LEFT", CameraBoardSocket::LEFT, "**Deprecated:** Use CAM_B or address camera by name instead")
+        .value("RIGHT", CameraBoardSocket::RIGHT, "**Deprecated:** Use CAM_C or address camera by name instead")
+        .value("CENTER", CameraBoardSocket::CENTER, "**Deprecated:** Use CAM_A or address camera by name instead")
+
+        // Deprecated overriden
+        .def_property_readonly_static("RGB", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RGB is deprecated, use CAM_A or address camera by name instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("CENTER", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "CENTER is deprecated, use CAM_A or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_A;
+        })
+        .def_property_readonly_static("LEFT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "LEFT is deprecated, use CAM_B or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_B;
+        })
+        .def_property_readonly_static("RIGHT", [](py::object){
+            PyErr_WarnEx(PyExc_DeprecationWarning, "RIGHT is deprecated, use CAM_C or address camera by name  instead.", 1);
+            return CameraBoardSocket::CAM_C;
+        })
     ;
+    HEDLEY_DIAGNOSTIC_POP
 
     // CameraSensorType enum bindings
     cameraSensorType
@@ -349,6 +378,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
     ;
+	
     interpolation
         .value("BILINEAR", Interpolation::BILINEAR)
         .value("BICUBIC", Interpolation::BICUBIC)
@@ -361,5 +391,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     //backward compatibility
     m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
 
+    profilingData
+        .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))
+        .def_readwrite("numBytesRead", &ProfilingData::numBytesRead, DOC(dai, ProfilingData, numBytesRead))
+    ;
 
 }

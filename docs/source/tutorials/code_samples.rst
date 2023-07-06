@@ -8,6 +8,7 @@ Code Samples
    ../samples/bootloader/*
    ../samples/calibration/*
    ../samples/ColorCamera/*
+   ../samples/crash_report/*
    ../samples/EdgeDetector/*
    ../samples/FeatureTracker/*
    ../samples/host_side/*
@@ -50,6 +51,10 @@ are presented with code.
 - :ref:`RGB Preview` - Displays a small preview of the RGB camera
 - :ref:`RGB scene` - Shows how to select ColorCamera's scene and effect
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
+
+.. rubric:: Crash report
+
+- :ref:`Crash report` - In case of a firmware crash, example reads it from the device and saves it to a json file
 
 .. rubric:: EdgeDetector
 
@@ -122,9 +127,12 @@ are presented with code.
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
+- :ref:`Script UART communication` - UART communication with Script node
+- :ref:`Script EMMC access` - Access EMMC memory from the Script node
 
 .. rubric:: SpatialDetection
 
+- :ref:`Spatial Calculator Multi-ROI` - Selects multiple ROIs and calculates spatial coordinates for each of them
 - :ref:`Spatial location calculator` - Demonstrates how to use the spatial location calculator
 - :ref:`RGB & MobilenetSSD with spatial data` - Displays RGB frames with MobileNet detections and spatial coordinates on them
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
@@ -135,6 +143,7 @@ are presented with code.
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
+- :ref:`Stereo Depth custom Mesh` - Calculate and load custom mesh for stereo depth calculation
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
