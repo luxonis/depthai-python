@@ -44,6 +44,11 @@ are presented with code.
 - :ref:`Calibration Reader` - Reads calibration data stored on device over XLink
 - :ref:`Calibration Load` - Loads and uses calibration data of version 6 (gen2 calibration data) in a pipeline
 
+
+.. rubric:: Camera
+
+- :ref:`Undistort camera stream` - Showcases how Camera node undistorts camera streams
+
 .. rubric:: ColorCamera
 
 - :ref:`Auto Exposure on ROI` - Demonstrates how to use auto exposure based on the selected ROI
