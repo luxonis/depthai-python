@@ -23,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
-    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.18.tar.gz"
+    SHA1 "1292e4d661e1770d6d6ca08c12c07cf34a0bf718"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
