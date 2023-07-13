@@ -73,6 +73,7 @@ To tune your own camera sensors, one would need Intel's software, for which a li
 - **Mono tuning for low-light environments** `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_mono_low_light.bin>`__. This allows auto-exposure to go up to 200ms (otherwise limited with default tuning to 33ms). For 200ms auto-exposure, you also need to limit the FPS (:code:`monoRight.setFps(5)`)
 - **Color tuning for low-light environments** `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_color_low_light.bin>`__. Comparison below. This allows auto-exposure to go up to 100ms (otherwise limited with default tuning to 33ms). For 200ms auto-exposure, you also need to limit the FPS (:code:`rgbCam.setFps(10)`). *Known limitation*: flicker can be seen with auto-exposure over 33ms, it is caused by auto-focus working in continuous mode. A workaround is to change from CONTINUOUS_VIDEO (default) to AUTO (focusing only once at init, and on further focus trigger commands): :code:`camRgb.initialControl.setAutoFocusMode(dai.CameraControl.AutoFocusMode.AUTO)`
 - **OV9782 Wide FOV color tuning for sunlight environments** `here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_color_ov9782_wide_fov.bin>`__.  Fixes lens color filtering on direct sunglight, see `blog post here <https://www.luxonis.com/blog/lens_color_filtering_enhancement>`__. It also improves LSC (Lens Shading Correction). Currently doesn't work for OV9282, so when used on eg. Series 2 OAK with Wide FOV cams, mono cameras shouldn't be enabled.
+- **Camera exposure limit**: `max 500us <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_exp_limit_500us.bin>`__, `max 8300us <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/tuning_exp_limit_8300us.bin>`__. These tuning blobs will limit the maximum exposure time, and instead start increasing ISO (sensitivity) after max exposure time is reached. This is a useful approach to reduce the :ref:`Motion blur`.
 
 .. image:: https://user-images.githubusercontent.com/18037362/149826169-3b92901d-3367-460b-afbf-c33d8dc9d118.jpeg
 
@@ -91,7 +92,7 @@ cause blurry images (`docs here <https://docs.luxonis.com/projects/hardware/en/l
 
 **Potential workarounds:**
 
-1. Decrease the shutter (exposure) time - this will decrease the motion blur, but will also decrease the light that reaches the sensor, so the image will be darker. You could either use a larger sensor (so more photons hit the sensor) or use a higher ISO (sensitivity) value.
+1. Decrease the shutter (exposure) time - this will decrease the motion blur, but will also decrease the light that reaches the sensor, so the image will be darker. You could either use a larger sensor (so more photons hit the sensor) or use a higher ISO (sensitivity) value. One option to limit max exposure time is by using a :reF:`Camera tuning` blob.
 2. If the motion blur negatively affects your model's accuracy, you could fine-tune it to be more robust to motion blur by including motion blur images in your training dataset. Example video:
 
 .. raw:: html
