@@ -25,6 +25,7 @@ void bind_systeminformationS3(pybind11::module& m, void* pCallstack);
 void bind_trackedfeatures(pybind11::module& m, void* pCallstack);
 void bind_tracklets(pybind11::module& m, void* pCallstack);
 void bind_benchmarkreport(pybind11::module& m, void* pCallstack);
+void bind_pointcloudconfig(pybind11::module& m, void* pCallstack);
 
 void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
      // Bind common datatypebindings
@@ -53,6 +54,7 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_trackedfeatures);
     callstack.push_front(bind_tracklets);
     callstack.push_front(bind_benchmarkreport);
+    callstack.push_front(bind_pointcloudconfig);
 }
 
 void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
