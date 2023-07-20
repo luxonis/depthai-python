@@ -153,6 +153,7 @@ set(SOURCE_LIST
     src/pipeline/datatype/TrackletsBindings.cpp
     src/pipeline/datatype/PointCloudConfigBindings.cpp
     src/pipeline/datatype/BenchmarkReportBindings.cpp
+    src/pipeline/datatype/OccupancyPoolBindings.cpp
 )
 
 # Add files for python module
