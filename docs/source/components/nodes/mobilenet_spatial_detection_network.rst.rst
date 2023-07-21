@@ -91,6 +91,8 @@ Examples of functionality
 - :ref:`RGB & MobilenetSSD with spatial data`
 - :ref:`Mono & MobilenetSSD with spatial data`
 
+.. include::  /includes/spatial-coords.rst
+
 Reference
 #########
 

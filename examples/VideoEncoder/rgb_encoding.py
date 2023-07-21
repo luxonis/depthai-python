@@ -13,7 +13,7 @@ xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName('h265')
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 videoEnc.setDefaultProfilePreset(30, dai.VideoEncoderProperties.Profile.H265_MAIN)
 
