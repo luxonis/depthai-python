@@ -31,6 +31,7 @@ void bind_pointcloud(pybind11::module& m, void* pCallstack){
     properties
         .def_readwrite("initialConfig", &PointCloudProperties::initialConfig, DOC(dai, PointCloudProperties, initialConfig))
         .def_readwrite("numFramesPool", &PointCloudProperties::numFramesPool, DOC(dai, PointCloudProperties, numFramesPool))
+        .def_readwrite("numShaves", &PointCloudProperties::numShaves, DOC(dai, PointCloudProperties, numShaves))
         ;
 
     // Node
@@ -41,6 +42,7 @@ void bind_pointcloud(pybind11::module& m, void* pCallstack){
         .def_readonly("outputOccupancyPool", &PointCloud::outputOccupancyPool, DOC(dai, node, PointCloud, outputOccupancyPool), DOC(dai, node, PointCloud, outputOccupancyPool))
         .def_readonly("passthroughDepth", &PointCloud::passthroughDepth, DOC(dai, node, PointCloud, passthroughDepth), DOC(dai, node, PointCloud, passthroughDepth))
         .def_readonly("initialConfig", &PointCloud::initialConfig, DOC(dai, node, PointCloud, initialConfig), DOC(dai, node, PointCloud, initialConfig))
+        .def("setNumShaves", &PointCloud::setNumShaves, DOC(dai, node, PointCloud, setNumShaves), DOC(dai, node, PointCloud, setNumShaves))
     ;
     // ALIAS
     daiNodeModule.attr("PointCloud").attr("Properties") = properties;

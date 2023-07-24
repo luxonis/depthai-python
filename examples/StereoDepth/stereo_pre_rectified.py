@@ -5,6 +5,7 @@ import depthai as dai
 import numpy as np
 from pathlib import Path
 import argparse
+import hashlib
 
 class StereoConfigHandler:
 
@@ -266,11 +267,16 @@ xinStereoDepthConfigName = "stereoDepthConfig"
 xinStereoDepthConfig.setStreamName(xinStereoDepthConfigName)
 xinStereoDepthConfig.out.link(stereo.inputConfig)
 
+enableOccupancyPool = False
 
 pcl = pipeline.create(dai.node.PointCloud)
 stereo.depth.link(pcl.inputDepth)
 pcl.outputPointCloud.link(xoutPcl.input)
-pcl.outputOccupancyPool.link(xoutOccupancyPool.input)
+if enableOccupancyPool:
+    pcl.outputOccupancyPool.link(xoutOccupancyPool.input)
+pcl.setNumShaves(4)
+
+expectedHash = "107eee668e5d90a522d7a427150191be"
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -355,11 +361,16 @@ with dai.Device(pipeline) as device:
         cv2.imshow("disp", disp)
 
         inPcl = qPcl.get()
-        print(len(inPcl.getData()))
+        pclData = inPcl.getData()
+        print(len(pclData))
+        pclData.tofile('s.raw')
+        md5_hash = hashlib.md5(pclData).hexdigest()
+        print(f"MD5 Hash vs expected: {md5_hash} {expectedHash}")
+        # assert md5_hash == expectedHash, "MD5 Hash mismatch"
 
-        inOccupancyPool = qOccupancyPool.get()
-
-        print(inOccupancyPool.occupancyPool)
+        if enableOccupancyPool:
+            inOccupancyPool = qOccupancyPool.get()
+            print(inOccupancyPool.occupancyPool)
 
         cnt+=1
 

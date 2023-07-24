@@ -35,7 +35,15 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     rawConfig
         .def(py::init<>())
-        .def_readwrite("config", &RawPointCloudConfig::config, DOC(dai, RawPointCloudConfig, config))
+        .def_readwrite("minDist", &RawPointCloudConfig::minDist, DOC(dai, RawPointCloudConfig, minDist))
+        .def_readwrite("maxDist", &RawPointCloudConfig::maxDist, DOC(dai, RawPointCloudConfig, maxDist))
+        .def_readwrite("minAngle", &RawPointCloudConfig::minAngle, DOC(dai, RawPointCloudConfig, minAngle))
+        .def_readwrite("maxAngle", &RawPointCloudConfig::maxAngle, DOC(dai, RawPointCloudConfig, maxAngle))
+        .def_readwrite("minHeight", &RawPointCloudConfig::minHeight, DOC(dai, RawPointCloudConfig, minHeight))
+        .def_readwrite("maxHeight", &RawPointCloudConfig::maxHeight, DOC(dai, RawPointCloudConfig, maxHeight))
+        .def_readwrite("numRings", &RawPointCloudConfig::numRings, DOC(dai, RawPointCloudConfig, numRings))
+        .def_readwrite("numSectors", &RawPointCloudConfig::numSectors, DOC(dai, RawPointCloudConfig, numSectors))
+        .def_readwrite("occupancyThreshold", &RawPointCloudConfig::occupancyThreshold, DOC(dai, RawPointCloudConfig, occupancyThreshold))
         ;
 
     // Message
