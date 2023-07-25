@@ -2,7 +2,7 @@ Camera
 ======
 
 Camera node is a source of :ref:`image frames <ImgFrame>`. You can control in at runtime with the :code:`InputControl` and :code:`InputConfig`.
-It aims to unify the :ref:`Camera` and :ref:`MonoCamera` into one node.
+It aims to unify the :ref:`ColorCamera` and :ref:`MonoCamera` into one node.
 
 Compared to :ref:`ColorCamera`, Camera node:
 
