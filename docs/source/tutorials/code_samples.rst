@@ -7,6 +7,7 @@ Code Samples
 
    ../samples/bootloader/*
    ../samples/calibration/*
+   ../samples/Camera/*
    ../samples/ColorCamera/*
    ../samples/crash_report/*
    ../samples/EdgeDetector/*
