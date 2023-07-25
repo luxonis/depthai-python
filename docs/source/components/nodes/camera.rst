@@ -4,15 +4,15 @@ Camera
 Camera node is a source of :ref:`image frames <ImgFrame>`. You can control in at runtime with the :code:`InputControl` and :code:`InputConfig`.
 It aims to unify the :ref:`ColorCamera` and :ref:`MonoCamera` into one node.
 
-Compared to :ref:`ColorCamera`, Camera node:
+Compared to :ref:`ColorCamera` node, Camera node:
 
 - Supports **cam.setSize()**, which replaces both ``cam.setResolution()`` and ``cam.setIspScale()``. Camera node will automatically find resolution that fits best, and apply correct scaling to achieve user-selected size
 - Supports **cam.setCalibrationAlpha()**, example here: :ref:`Undistort camera stream`
 - Supports **cam.loadMeshData()** and **cam.setMeshStep()**, which can be used for custom image warping (undistortion, perspective correction, etc.)
 
-Besides points above, compared to :ref:`MonoCamera` Camera node:
+Besides points above, compared to :ref:`MonoCamera` node, Camera node:
 
-- Doesn't have ``out`` output, but same outputs as :ref:`ColorCamera` (``raw``, ``isp``, ``still``, ``preview``, ``video``). This means that ``preview`` will output 3 planes of the same grayscale frame (3x overhead), and ``isp`` / ``video`` / ``still``  will output luma (useful grayscale information) + chroma (all values are 128), which will result in 1.5x bandwidth overhead
+- Doesn't have ``out`` output, as it has the same outputs as :ref:`ColorCamera` (``raw``, ``isp``, ``still``, ``preview``, ``video``). This means that ``preview`` will output 3 planes of the same grayscale frame (3x overhead), and ``isp`` / ``video`` / ``still``  will output luma (useful grayscale information) + chroma (all values are 128), which will result in 1.5x bandwidth overhead
 
 How to place it
 ###############
