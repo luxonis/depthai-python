@@ -389,6 +389,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("mtu", &BoardConfig::Network::mtu)
         .def_readwrite("xlinkTcpNoDelay", &BoardConfig::Network::xlinkTcpNoDelay)
+        .def_readwrite("forceEnable", &BoardConfig::Network::forceEnable)
     ;
 
     // GPIO Mode
@@ -656,6 +657,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
         .def("getDeviceName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getDeviceName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getDeviceName))
+        .def("getEthernetLinkSpeed", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEthernetLinkSpeed(); }, DOC(dai, DeviceBase, getEthernetLinkSpeed))
+        .def("getEthernetLinkDuplex", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEthernetLinkDuplex(); }, DOC(dai, DeviceBase, getEthernetLinkDuplex))
+        .def("getBootMode", [](DeviceBase& d) { py::gil_scoped_release release; return d.getBootMode(); }, DOC(dai, DeviceBase, getBootMode))
+        .def("getBootModeCurrent", [](DeviceBase& d) { py::gil_scoped_release release; return d.getBootModeCurrent(); }, DOC(dai, DeviceBase, getBootModeCurrent))
+        .def("setBootGpioInput", [](DeviceBase& d) { py::gil_scoped_release release; d.setBootGpioInput(); }, DOC(dai, DeviceBase, setBootGpioInput))
+        .def("getEmmcMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmmcMemorySize(); }, DOC(dai, DeviceBase, getEmmcMemorySize))
     ;
 
 
