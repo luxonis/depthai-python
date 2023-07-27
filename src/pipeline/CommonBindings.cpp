@@ -24,6 +24,7 @@
 #include "depthai-shared/common/Rect.hpp"
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
+#include "depthai-shared/common/Interpolation.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -62,7 +63,8 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
-
+    py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
+	
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -376,6 +378,18 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
     ;
+	
+    interpolation
+        .value("BILINEAR", Interpolation::BILINEAR)
+        .value("BICUBIC", Interpolation::BICUBIC)
+        .value("NEAREST_NEIGHBOR", Interpolation::NEAREST_NEIGHBOR)
+        .value("BYPASS", Interpolation::BYPASS)
+        .value("DEFAULT", Interpolation::DEFAULT)
+        .value("DEFAULT_DISPARITY_DEPTH", Interpolation::DEFAULT_DISPARITY_DEPTH)
+    ;
+
+    //backward compatibility
+    m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
 
     profilingData
         .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))

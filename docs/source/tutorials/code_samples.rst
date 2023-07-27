@@ -7,6 +7,7 @@ Code Samples
 
    ../samples/bootloader/*
    ../samples/calibration/*
+   ../samples/Camera/*
    ../samples/ColorCamera/*
    ../samples/crash_report/*
    ../samples/EdgeDetector/*
@@ -43,6 +44,11 @@ are presented with code.
 - :ref:`Calibration Flash` - Flashes calibration data of version 6 (gen2 calibration data) to the device
 - :ref:`Calibration Reader` - Reads calibration data stored on device over XLink
 - :ref:`Calibration Load` - Loads and uses calibration data of version 6 (gen2 calibration data) in a pipeline
+
+
+.. rubric:: Camera
+
+- :ref:`Undistort camera stream` - Showcases how Camera node undistorts camera streams
 
 .. rubric:: ColorCamera
 

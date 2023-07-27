@@ -45,6 +45,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("cropConfig", &RawImageManipConfig::cropConfig)
         .def_readwrite("resizeConfig", &RawImageManipConfig::resizeConfig)
         .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
+        .def_readwrite("interpolation", &RawImageManipConfig::interpolation)
         ;
 
     rawImageManipConfigCropRect
@@ -121,6 +122,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
         .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
         .def("set", &ImageManipConfig::set, py::arg("config"), DOC(dai, ImageManipConfig, set))
+        .def("setInterpolation", &ImageManipConfig::setInterpolation, py::arg("interpolation"), DOC(dai, ImageManipConfig, setInterpolation))
 
         // getters
         .def("getCropXMin", &ImageManipConfig::getCropXMin, DOC(dai, ImageManipConfig, getCropXMin))
@@ -135,9 +137,8 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         .def("getColormap", &ImageManipConfig::getColormap, DOC(dai, ImageManipConfig, getColormap))
         .def("get", &ImageManipConfig::get, DOC(dai, ImageManipConfig, get))
+        .def("getInterpolation", &ImageManipConfig::getInterpolation, DOC(dai, ImageManipConfig, getInterpolation))
         ;
-
-
 
 
 }
