@@ -490,6 +490,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("logVerbosity", &BoardConfig::logVerbosity, DOC(dai, BoardConfig, logVerbosity))
         .def_readwrite("logDevicePrints", &BoardConfig::logDevicePrints, DOC(dai, BoardConfig, logDevicePrints))
         .def_readwrite("uvc", &BoardConfig::uvc, DOC(dai, BoardConfig, uvc))
+        .def_readwrite("eepromData", &BoardConfig::eepromData, DOC(dai, BoardConfig, eepromData))
     ;
 
     // Bind Device::Config
@@ -654,6 +655,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashWrite", [](DeviceBase& d, std::vector<std::uint8_t> data, uint64_t o) { py::gil_scoped_release release; d.flashWrite(data, o); }, py::arg("data"), py::arg("offset") = 0, DOC(dai, DeviceBase, flashWrite))
         .def("flashRead", [](DeviceBase& d, uint32_t s, uint64_t o) { py::gil_scoped_release release; return d.flashRead(s, o); }, py::arg("size"), py::arg("offset") = 0, DOC(dai, DeviceBase, flashRead))
         .def("flashBootloader", [](DeviceBase& db, DeviceBase::Memory memory, DeviceBase::Type type, std::function<void(float)> progressCallback, dai::Path path) { py::gil_scoped_release release; return db.flashBootloader(memory, type, progressCallback, path); }, py::arg("memory"), py::arg("type"), py::arg("progressCallback"), py::arg("path") = "", DOC(dai, DeviceBase, flashBootloader))
+        .def("flashBootHeader", [](DeviceBase& db) { py::gil_scoped_release release; return db.flashBootHeader(); }, DOC(dai, DeviceBase, flashBootHeader))
+        .def("flashUsbRecoveryBootHeader", [](DeviceBase& db) { py::gil_scoped_release release; return db.flashUsbRecoveryBootHeader(); }, DOC(dai, DeviceBase, flashUsbRecoveryBootHeader))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
         .def("setTimesync", [](DeviceBase& d, bool e) { py::gil_scoped_release release; return d.setTimesync(e); }, py::arg("enable"), DOC(dai, DeviceBase, setTimesync, 2))
         .def("getDeviceName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getDeviceName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getDeviceName))
