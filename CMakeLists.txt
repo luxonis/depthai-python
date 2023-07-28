@@ -129,6 +129,7 @@ set(SOURCE_LIST
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/BenchmarkBindings.cpp
+    src/pipeline/node/PointCloudBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -150,7 +151,9 @@ set(SOURCE_LIST
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
     src/pipeline/datatype/BenchmarkReportBindings.cpp
+    src/pipeline/datatype/OccupancyPoolBindings.cpp
 )
 
 # Add files for python module

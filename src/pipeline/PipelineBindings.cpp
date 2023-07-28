@@ -29,6 +29,7 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 #include "depthai/pipeline/node/DetectionParser.hpp"
+#include "depthai/pipeline/node/PointCloud.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -140,6 +141,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
+        .def("createPointCloud", &Pipeline::create<node::PointCloud>)
         ;
 
 
