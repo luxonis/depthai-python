@@ -16,7 +16,7 @@ xoutPreview.setStreamName("preview")
 
 # Properties
 camRgb.setPreviewSize(300, 300)
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(True)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)

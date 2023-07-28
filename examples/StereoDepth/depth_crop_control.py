@@ -32,14 +32,15 @@ topLeft = dai.Point2f(0.2, 0.2)
 bottomRight = dai.Point2f(0.8, 0.8)
 
 # Properties
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setCamera("right")
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 manip.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manip.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+stereo.setSubpixel(True)
 
 # Linking
 configIn.out.link(manip.inputConfig)
@@ -62,8 +63,10 @@ with dai.Device(pipeline) as device:
         depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
 
         # Frame is transformed, the color map will be applied to highlight the depth info
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depth_downscaled = depthFrame[::4]
+        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        max_depth = np.percentile(depth_downscaled, 99)
+        depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         # Frame is ready to be shown

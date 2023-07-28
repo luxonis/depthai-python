@@ -6,8 +6,9 @@
 DepthAI API Documentation
 =========================
 
-.. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
-   :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
+..
+   .. image:: https://github.com/luxonis/depthai-python/workflows/Python%20Wheel%20CI/badge.svg?branch=gen2_develop
+      :target: https://github.com/luxonis/depthai-python/actions?query=workflow%3A%22Python+Wheel+CI%22+branch%3A%22gen2_develop%22
 
 DepthAI API allows users to connect to, configure and communicate with their OAK devices.
 We support both :ref:`Python API <Python API Reference>` and :ref:`C++ API <C++ API Reference>`.
@@ -70,9 +71,9 @@ node functionalities are presented with code.
    :hidden:
    :caption: Tutorials:
 
-   tutorials/hello_world.rst
    tutorials/standalone_mode.rst
    tutorials/message_syncing.rst
+   tutorials/configuring-stereo-depth.rst
    tutorials/multiple.rst
    tutorials/maximize_fov.rst
    tutorials/debugging.rst
@@ -80,6 +81,7 @@ node functionalities are presented with code.
    tutorials/dispaying_detections.rst
    tutorials/image_quality.rst
    tutorials/low-latency.rst
+   tutorials/hello_world.rst
 
 .. toctree::
    :maxdepth: 1

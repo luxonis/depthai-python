@@ -1,7 +1,7 @@
 RGB & Tiny YOLO
 ===============
 
-This example shows how to run Tiny YOLOv4 or YOLOv3 on the RGB input frame, and how to display both the RGB
+This example shows how to run YOLO on the RGB input frame, and how to display both the RGB
 preview and the metadata results from the YOLO model on the preview. Decoding is done on the `RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__
 instead on the host computer.
 
