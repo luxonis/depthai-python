@@ -14,7 +14,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
         for j in prange(0, width):
             d = depth_image[i][j]
 
-            # converte pixel to 3d point
+            # convert pixel to 3d point
             x = (j - depth_camera_intrinsics[0][2]) * d / depth_camera_intrinsics[0][0]
             y = (i - depth_camera_intrinsics[1][2]) * d / depth_camera_intrinsics[1][1]
             z = d
@@ -70,41 +70,45 @@ depthOut = pipeline.create(dai.node.XLinkOut)
 
 rgbOut.setStreamName("rgb")
 queueNames.append("rgb")
-depthOut.setStreamName("disp")
-queueNames.append("disp")
+depthOut.setStreamName("depth")
+queueNames.append("depth")
 
-hardware_rectify = True 
+hardware_rectify = True
 
 fps = 30
 
+RGB_SOCKET = dai.CameraBoardSocket.RGB
+LEFT_SOCKET = dai.CameraBoardSocket.LEFT
+RIGHT_SOCKET = dai.CameraBoardSocket.RIGHT
+
 #Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setFps(fps)
 camRgb.setIspScale(2, 3)
 
 try:    
     calibData = device.readCalibration2()
-    rgb_intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_A, 1280, 720)
-    depth_intrinsics = calibData.getCameraIntrinsics(calibData.getStereoRightCameraId(), 1280, 720)
-    rgb_extrinsics = calibData.getCameraExtrinsics(calibData.getStereoRightCameraId(), dai.CameraBoardSocket.CAM_A)
+    rgb_intrinsics = calibData.getCameraIntrinsics(RGB_SOCKET, 1280, 720)
+    depth_intrinsics = calibData.getCameraIntrinsics(RIGHT_SOCKET, 1280, 720)
+    rgb_extrinsics = calibData.getCameraExtrinsics(RIGHT_SOCKET, RGB_SOCKET)
 
     depth_intrinsics = np.asarray(depth_intrinsics).reshape(3, 3)
     rgb_extrinsics = np.asarray(rgb_extrinsics).reshape(4, 4)
-    rgb_extrinsics[:,3] *= 10
+    rgb_extrinsics[:,3] *= 10 # to mm
     rgb_intrinsics = np.asarray(rgb_intrinsics).reshape(3, 3)
 
-    lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.CAM_A)
+    lensPosition = calibData.getLensPosition(RGB_SOCKET)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
 except:
     raise
 
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-left.setCamera("left")
+left.setBoardSocket(LEFT_SOCKET)
 left.setFps(fps)
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-right.setCamera("right")
+right.setBoardSocket(RIGHT_SOCKET)
 right.setFps(fps)
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
@@ -115,12 +119,16 @@ left.out.link(stereo.left)
 right.out.link(stereo.right)
 stereo.depth.link(depthOut.input)
 
+# if aligned to rectified right then need to calculated rotation matrix using https://github.com/szabi-luxonis/playfield/blob/main/stereoRectifyMinimal/stereoRectify.py
+# then multiply the inverse of it with the extrinsic matrix of right-rgb cam
+stereo.setDepthAlign(RIGHT_SOCKET)
+
 # Connect to device and start pipeline
 with device:
     device.startPipeline(pipeline)
 
     frameRgb = None
-    frameDisp = None
+    frameDepth = None
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
     rgb_depth_window_name = 'rgb-depth'
@@ -131,9 +139,9 @@ with device:
     while True:
         latestPacket = {}
         latestPacket["rgb"] = None
-        latestPacket["disp"] = None
+        latestPacket["depth"] = None
 
-        queueEvents = device.getQueueEvents(("rgb", "disp"))
+        queueEvents = device.getQueueEvents(("rgb", "depth"))
         for queueName in queueEvents:
             packets = device.getOutputQueue(queueName).tryGetAll()
             if len(packets) > 0:
@@ -142,24 +150,29 @@ with device:
         if latestPacket["rgb"] is not None:
             frameRgb = latestPacket["rgb"].getCvFrame()
 
-        if latestPacket["disp"] is not None:
-            frameDisp = latestPacket["disp"].getFrame()
+        if latestPacket["depth"] is not None:
+            frameDepth = latestPacket["depth"].getFrame()
         
         # Blend when both received
-        if frameRgb is not None and frameDisp is not None:
+        if frameRgb is not None and frameDepth is not None:
 
             if hardware_rectify:
-                rectification_map = cv2.initUndistortRectifyMap(depth_intrinsics, None, rgb_extrinsics[0:3, 0:3], depth_intrinsics, (1280, 720), cv2.CV_16SC2)
-                frameDisp = cv2.remap(frameDisp, rectification_map[0], rectification_map[1], cv2.INTER_LINEAR)
+                rectification_map = cv2.initUndistortRectifyMap(depth_intrinsics, None, rgb_extrinsics[0:3, 0:3], depth_intrinsics, (1280, 720), cv2.CV_32FC1)
+                frameDepth = cv2.remap(frameDepth, rectification_map[0], rectification_map[1], cv2.INTER_LINEAR)
 
-            frameDisp = reprojection(frameDisp, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, hardware_rectify)
+            frameDepth = reprojection(frameDepth, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, hardware_rectify)
 
-            frameDisp = cv2.cvtColor(frameDisp, cv2.COLOR_GRAY2BGR)
+            min_depth = np.percentile(frameDepth[frameDepth != 0], 1)
+            max_depth = np.percentile(frameDepth, 99)
+            depthFrameColor = np.interp(frameDepth, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+            depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDisp, depthWeight, 0)
+            frameDepth = depthFrameColor
+
+            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth, depthWeight, 0)
             cv2.imshow(rgb_depth_window_name, blended)
             frameRgb = None
-            frameDisp = None
+            frameDepth = None
 
         if cv2.waitKey(1) == ord('q'):
             break
