@@ -38,31 +38,41 @@ with dai.Device(pipeline) as device:
 
     cv2.namedWindow("rgb", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("rgb", (640, 480))
-    cv2.namedWindow("img3_16", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("img3_16", (640, 480))
+    cv2.namedWindow("img_celsius", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("img_celsius", (640, 480))
     cv2.namedWindow("color", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("color", (640, 480))
+    frame_nb = 0
+
     while True:
         inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
 
         # Retrieve 'bgr' (opencv format) frame
         im = inRgb.getFrame()
+        timestamp = inRgb.getTimestamp()
+        print("Timestamp:", timestamp)
+        #image frame
+        if frame_nb % 2 == 0:
+            im2 = im.reshape(192, 256, 2)
 
-        im2 = im.reshape(192, 256, 2)
+            rgb = cv2.cvtColor(im2, cv2.COLOR_YUV2BGR_YUYV)
 
-        rgb = cv2.cvtColor(im2, cv2.COLOR_YUV2BGR_YUYV)
+            cv2.imshow("rgb", rgb)
 
-        cv2.imshow("rgb", rgb)
+            img3 = im.view(np.uint16).reshape(192,256)
+            img3 = img3.astype(np.uint8)
+            color = cv2.applyColorMap(img3, cv2.COLORMAP_HOT)
 
-        img3 = im.view(np.uint16).reshape(192,256)
-        img3_16 = img3 * 256 # Now we get the good values in 16 bit format
-        cv2.imshow("img3_16", img3_16)
+            cv2.imshow("color", color)
+        else :
+            img3 = im.view(np.uint16).reshape(192,256)
+            img3 = img3.astype(np.uint8)
+            img_celsius = img3 # Now we get the good values in 16 bit format
+            cv2.imshow("img_celsius", img_celsius)
 
-        img3 = img3.astype(np.uint8)
-        color = cv2.applyColorMap(img3, cv2.COLORMAP_HOT)
 
-        cv2.imshow("color", color)
 
+        frame_nb = frame_nb + 1
 
         if cv2.waitKey(1) == ord('q'):
             break
