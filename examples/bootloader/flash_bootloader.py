@@ -56,10 +56,13 @@ with dai.DeviceBootloader(info, allowFlashingBootloader=True) as bl:
 
     # Create a progress callback lambda
     progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
-
-    print(f"Flashing {blType.name} bootloader...")
     startTime = time.monotonic()
-    (res, message) = bl.flashBootloader(dai.DeviceBootloader.Memory.FLASH, blType, progress)
+    is_user_bl = bl.isUserBootloaderSupported()
+    print(f"Flashing {blType.name} {'USER' if is_user_bl else 'FACTORY'} bootloader...")
+    if is_user_bl:
+        (res, message) = bl.flashUserBootloader(progress)
+    else: # Factory bootloader
+        (res, message) = bl.flashBootloader(dai.DeviceBootloader.Memory.FLASH, blType, progress)
     if res:
         print("Flashing successful. Took", time.monotonic() - startTime, "seconds")
     else:
