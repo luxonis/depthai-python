@@ -23,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
-    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.24.18.tar.gz"
+    SHA1 "1292e4d661e1770d6d6ca08c12c07cf34a0bf718"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -107,6 +107,7 @@ set(SOURCE_LIST
     src/pipeline/node/XLinkInBindings.cpp
     src/pipeline/node/XLinkOutBindings.cpp
     src/pipeline/node/ColorCameraBindings.cpp
+    src/pipeline/node/CameraBindings.cpp
     src/pipeline/node/MonoCameraBindings.cpp
     src/pipeline/node/StereoDepthBindings.cpp
     src/pipeline/node/NeuralNetworkBindings.cpp
@@ -129,6 +130,8 @@ set(SOURCE_LIST
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/BenchmarkBindings.cpp
+    src/pipeline/node/UVCBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp

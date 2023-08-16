@@ -218,12 +218,14 @@ std::vector<const char *> camCtrlAttr;
         .def("setMisc", py::overload_cast<std::string, int>(&CameraControl::setMisc), py::arg("control"), py::arg("value"), DOC(dai, CameraControl, setMisc, 2))
         .def("setMisc", py::overload_cast<std::string, float>(&CameraControl::setMisc), py::arg("control"), py::arg("value"), DOC(dai, CameraControl, setMisc, 3))
         .def("clearMiscControls", &CameraControl::clearMiscControls, DOC(dai, CameraControl, clearMiscControls))
+        .def("set",         &CameraControl::set, py::arg("config"), DOC(dai, CameraControl, set))
         // getters
         .def("getMiscControls", &CameraControl::getMiscControls, DOC(dai, CameraControl, getMiscControls))
         .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
         .def("getExposureTime", &CameraControl::getExposureTime, DOC(dai, CameraControl, getExposureTime))
         .def("getSensitivity", &CameraControl::getSensitivity, DOC(dai, CameraControl, getSensitivity))
         .def("getLensPosition", &CameraControl::getLensPosition, DOC(dai, CameraControl, getLensPosition))
+        .def("get",         &CameraControl::get, DOC(dai, CameraControl, get))
         ;
     // Add also enum attributes from RawCameraControl
     for (const auto& a : camCtrlAttr) {

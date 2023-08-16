@@ -96,6 +96,8 @@ Examples of functionality
 
 - :ref:`Spatial location calculator`
 
+.. include::  /includes/spatial-coords.rst
+
 Reference
 #########
 
