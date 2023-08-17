@@ -1,5 +1,6 @@
 import depthai as dai
 from typing import List, Tuple, Dict
+import cv2
 
 color_resoliutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, int]] = {
     # IMX582 cropped
@@ -78,6 +79,7 @@ def get_or_download_yolo_blob() -> str:
     return blob_path
 
 
+last_frame = {} # Store latest frame for each queue
 def stress_test(mxid: str = ""):
     import time
     success, device_info = dai.Device.getDeviceByMxId(mxid)
@@ -94,14 +96,24 @@ def stress_test(mxid: str = ""):
         usb_speed = device.getUsbSpeed()
         while True:
             for queue in queues:
-                queue.tryGetAll()
-
+                packet = queue.tryGet()
+                if packet is not None:
+                    if isinstance(packet, dai.ImgFrame):
+                        if packet.getType() == dai.ImgFrame.Type.BITSTREAM:
+                            last_frame[queue.getName()] = cv2.imdecode(packet.getData(), cv2.IMREAD_UNCHANGED)
+                        else:
+                            last_frame[queue.getName()] = packet.getCvFrame()
             sys_info: dai.SystemInformation = sys_info_q.tryGet()
             if sys_info:
                 print("----------------------------------------")
                 print(f"[{int(time.time() - start_time)}s] Usb speed {usb_speed}")
                 print("----------------------------------------")
                 print_system_information(sys_info)
+            for name, frame in last_frame.items():
+                cv2.imshow(name, frame)
+            if cv2.waitKey(1) == ord("q"):
+                print("Q Pressed, exiting stress test...")
+                break
 
 
 RGB_FPS = 20
@@ -217,7 +229,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         if n_color_cams < 2:  # For hardcode max 2 color cam video encoders, to avoid out of memory errors
             video_encoder = pipeline.createVideoEncoder()
             video_encoder.setDefaultProfilePreset(
-                ENCODER_FPS, dai.VideoEncoderProperties.Profile.H264_MAIN
+                ENCODER_FPS, dai.VideoEncoderProperties.Profile.MJPEG
             )
             getattr(node, output).link(video_encoder.input)
             ve_xlink = pipeline.createXLinkOut()
