@@ -48,6 +48,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("THE_2000X1500", ColorCameraProperties::SensorResolution::THE_2000X1500)
         .value("THE_2028X1520", ColorCameraProperties::SensorResolution::THE_2028X1520)
         .value("THE_2104X1560", ColorCameraProperties::SensorResolution::THE_2104X1560)
+        .value("THE_1440X1080", ColorCameraProperties::SensorResolution::THE_1440X1080)
         ;
 
     colorCameraPropertiesColorOrder
@@ -77,6 +78,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
         .def_readwrite("resolution", &ColorCameraProperties::resolution)
         .def_readwrite("fps", &ColorCameraProperties::fps)
+        .def_readwrite("isp3aFps", &ColorCameraProperties::isp3aFps)
         .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
         .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
         .def_readwrite("previewKeepAspectRatio", &ColorCameraProperties::previewKeepAspectRatio)
@@ -93,6 +95,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readwrite("calibAlpha", &ColorCameraProperties::calibAlpha)
         .def_readwrite("warpMeshStepWidth", &ColorCameraProperties::warpMeshStepWidth)
         .def_readwrite("warpMeshStepHeight", &ColorCameraProperties::warpMeshStepHeight)
+        .def_readwrite("eventFilter", &ColorCameraProperties::eventFilter)
     ;
 
     // ColorCamera node
@@ -141,7 +144,10 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("setResolution", &ColorCamera::setResolution, py::arg("resolution"), DOC(dai, node, ColorCamera, setResolution))
         .def("getResolution", &ColorCamera::getResolution, DOC(dai, node, ColorCamera, getResolution))
         .def("setFps", &ColorCamera::setFps, py::arg("fps"), DOC(dai, node, ColorCamera, setFps))
+        .def("setIsp3aFps", &ColorCamera::setIsp3aFps, DOC(dai, node, ColorCamera, setIsp3aFps))
         .def("getFps", &ColorCamera::getFps, DOC(dai, node, ColorCamera, getFps))
+        .def("setFrameEventFilter", &ColorCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, ColorCamera, setFrameEventFilter))
+        .def("getFrameEventFilter", &ColorCamera::getFrameEventFilter, DOC(dai, node, ColorCamera, getFrameEventFilter))
         .def("getPreviewSize", &ColorCamera::getPreviewSize, DOC(dai, node, ColorCamera, getPreviewSize))
         .def("getPreviewWidth", &ColorCamera::getPreviewWidth, DOC(dai, node, ColorCamera, getPreviewWidth))
         .def("getPreviewHeight", &ColorCamera::getPreviewHeight, DOC(dai, node, ColorCamera, getPreviewHeight))
@@ -214,6 +220,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("setCalibrationAlpha", &ColorCamera::setCalibrationAlpha, py::arg("alpha"), DOC(dai, node, ColorCamera, setCalibrationAlpha))
         .def("getCalibrationAlpha", &ColorCamera::getCalibrationAlpha, DOC(dai, node, ColorCamera, getCalibrationAlpha))
         
+
+        .def("setRawOutputPacked", &ColorCamera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, ColorCamera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;

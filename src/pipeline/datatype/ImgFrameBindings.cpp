@@ -119,8 +119,10 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def(py::init<size_t>())
         // getters
-        .def("getTimestamp", &ImgFrame::getTimestamp, DOC(dai, ImgFrame, getTimestamp))
-        .def("getTimestampDevice", &ImgFrame::getTimestampDevice, DOC(dai, ImgFrame, getTimestampDevice))
+        .def("getTimestamp", py::overload_cast<>(&ImgFrame::getTimestamp, py::const_), DOC(dai, ImgFrame, getTimestamp))
+        .def("getTimestampDevice", py::overload_cast<>(&ImgFrame::getTimestampDevice, py::const_), DOC(dai, ImgFrame, getTimestampDevice))
+        .def("getTimestamp", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestamp, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestamp))
+        .def("getTimestampDevice", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestampDevice, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestampDevice))
         .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
         .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
@@ -245,7 +247,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                         + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
             } else if(actualSize > requiredSize) {
                 // FIXME check build on Windows
-                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
+                // logger::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");

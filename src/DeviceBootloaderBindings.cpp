@@ -131,8 +131,10 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
         .def_static("getEmbeddedBootloaderVersion", &DeviceBootloader::getEmbeddedBootloaderVersion, DOC(dai, DeviceBootloader, getEmbeddedBootloaderVersion))
         .def_static("getEmbeddedBootloaderBinary", &DeviceBootloader::getEmbeddedBootloaderBinary, DOC(dai, DeviceBootloader, getEmbeddedBootloaderBinary))
 
-        .def(py::init<const DeviceInfo&, bool>(), py::arg("devInfo"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader))
-        .def(py::init<const DeviceInfo&, const Path&, bool>(), py::arg("devInfo"), py::arg("pathToCmd"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 2))
+        .def(py::init<const DeviceInfo&, bool>(), py::arg("devInfo"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 4))
+        .def(py::init<const DeviceInfo&, const Path&, bool>(), py::arg("devInfo"), py::arg("pathToCmd"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 5))
+        .def(py::init<std::string, bool>(), py::arg("nameOrDeviceId"), py::arg("allowFlashingBootloader") = false, DOC(dai, DeviceBootloader, DeviceBootloader, 6))
+
         .def("flash", [](DeviceBootloader& db, std::function<void(float)> progressCallback, const Pipeline& pipeline, bool compress, std::string applicationName, DeviceBootloader::Memory memory, bool checkChecksum) { py::gil_scoped_release release; return db.flash(progressCallback, pipeline, compress, applicationName, memory, checkChecksum); }, py::arg("progressCallback"), py::arg("pipeline"), py::arg("compress") = false, py::arg("applicationName") = "", py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("checkChecksum") = false, DOC(dai, DeviceBootloader, flash))
         .def("flash", [](DeviceBootloader& db, const Pipeline& pipeline, bool compress, std::string applicationName, DeviceBootloader::Memory memory, bool checkChecksum) { py::gil_scoped_release release; return db.flash(pipeline, compress, applicationName, memory, checkChecksum); }, py::arg("pipeline"), py::arg("compress") = false, py::arg("applicationName") = "", py::arg("memory") = DeviceBootloader::Memory::AUTO, py::arg("checkChecksum") = false, DOC(dai, DeviceBootloader, flash, 2))
 
