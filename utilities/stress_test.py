@@ -152,41 +152,41 @@ def stress_test(mxid: str = ""):
                 print("Q Pressed, exiting stress test...")
                 break
             elif key == ord('a'):
-                dot_intensity = clamp(0, dot_intensity - 100, 1200)
+                dot_intensity = clamp(dot_intensity - 100, 0, 1200)
                 print("Decreasing dot intensity by 100, new value:", dot_intensity)
                 device.setIrLaserDotProjectorBrightness(dot_intensity)
             elif key == ord('d'):
-                dot_intensity = clamp(0, dot_intensity + 100, 1200)
+                dot_intensity = clamp(dot_intensity + 100, 0, 1200)
                 print("Increasing dot intensity by 100, new value:", dot_intensity)
                 device.setIrLaserDotProjectorBrightness(dot_intensity)
             elif key == ord('w'):
-                flood_intensity = clamp(0, flood_intensity + 100, 1500)
+                flood_intensity = clamp(flood_intensity + 100, 0, 1500)
                 print("Increasing flood intensity by 100, new value:", flood_intensity)
                 device.setIrFloodLightBrightness(flood_intensity)
             elif key == ord('s'):
-                flood_intensity = clamp(0, flood_intensity - 100, 1500)
+                flood_intensity = clamp(flood_intensity - 100, 0, 1500)
                 print("Decreasing flood intensity by 100, new value:", flood_intensity)
                 device.setIrFloodLightBrightness(flood_intensity)
             elif key == ord('k'):
-                iso = clamp(0, iso - 50, 1600)
+                iso = clamp(iso - 50, 0, 1600)
                 print("Decreasing iso by 50, new value:", iso)
                 cam_ctrl  = dai.CameraControl()
                 cam_ctrl.setManualExposure(exp_time, iso)
                 camera_control_q.send(cam_ctrl)
             elif key == ord('l'):
-                iso = clamp(0, iso + 50, 1600)
+                iso = clamp(iso + 50, 0, 1600)
                 print("Increasing iso by 50, new value:", iso)
                 cam_ctrl  = dai.CameraControl()
                 cam_ctrl.setManualExposure(exp_time, iso)
                 camera_control_q.send(cam_ctrl)
             elif key == ord('i'):
-                exp_time = clamp(0, exp_time - 500, 33000)
+                exp_time = clamp(exp_time - 500, 0, 33000)
                 print("Decreasing exposure time by 500, new value:", exp_time)
                 cam_ctrl  = dai.CameraControl()
                 cam_ctrl.setManualExposure(exp_time, iso)
                 camera_control_q.send(cam_ctrl)
             elif key == ord('o'):
-                exp_time = clamp(0, exp_time + 500, 33000)
+                exp_time = clamp(exp_time + 500, 0, 33000)
                 print("Increasing exposure time by 500, new value:", exp_time)
                 cam_ctrl  = dai.CameraControl()
                 cam_ctrl.setManualExposure(exp_time, iso)
