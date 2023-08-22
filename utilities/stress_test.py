@@ -352,57 +352,57 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         stereo.setSubpixel(True)
         stereo.setDepthAlign(align_socket)
 
-        if color_cam:
-            yolo = pipeline.createYoloSpatialDetectionNetwork()
-            blob_path = get_or_download_yolo_blob()
-            yolo.setBlobPath(blob_path)
-            yolo.setConfidenceThreshold(0.5)
-            yolo.input.setBlocking(False)
-            yolo.setBoundingBoxScaleFactor(0.5)
-            yolo.setDepthLowerThreshold(100)
-            yolo.setDepthUpperThreshold(5000)
-            yolo.setNumClasses(80)
-            yolo.setCoordinateSize(4)
-            yolo.setAnchors(
-                [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
-            yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-            yolo.setIouThreshold(0.5)
-            color_cam.preview.link(yolo.input)
-            stereo.depth.link(yolo.inputDepth)
+        # if color_cam:
+        #     yolo = pipeline.createYoloSpatialDetectionNetwork()
+        #     blob_path = get_or_download_yolo_blob()
+        #     yolo.setBlobPath(blob_path)
+        #     yolo.setConfidenceThreshold(0.5)
+        #     yolo.input.setBlocking(False)
+        #     yolo.setBoundingBoxScaleFactor(0.5)
+        #     yolo.setDepthLowerThreshold(100)
+        #     yolo.setDepthUpperThreshold(5000)
+        #     yolo.setNumClasses(80)
+        #     yolo.setCoordinateSize(4)
+        #     yolo.setAnchors(
+        #         [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
+        #     yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+        #     yolo.setIouThreshold(0.5)
+        #     color_cam.preview.link(yolo.input)
+        #     stereo.depth.link(yolo.inputDepth)
 
-            xout_depth = pipeline.createXLinkOut()
-            depth_q_name = "depth"
-            xout_depth.setStreamName(depth_q_name)
-            yolo.passthroughDepth.link(xout_depth.input)
-            xlink_outs.append((depth_q_name, 4))
+        #     xout_depth = pipeline.createXLinkOut()
+        #     depth_q_name = "depth"
+        #     xout_depth.setStreamName(depth_q_name)
+        #     yolo.passthroughDepth.link(xout_depth.input)
+        #     xlink_outs.append((depth_q_name, 4))
 
-            xout_yolo = pipeline.createXLinkOut()
-            yolo_q_name = "yolo"
-            xout_yolo.setStreamName(yolo_q_name)
-            yolo.out.link(xout_yolo.input)
-            xlink_outs.append((yolo_q_name, 4))
-        else:
-            print(
-                "Device doesn't have color camera, skipping spatial detection network creation...")
-    elif color_cam:  # Only color camera, e.g. OAK-1: Create a YOLO
-        yolo = pipeline.createYoloDetectionNetwork()
-        blob_path = get_or_download_yolo_blob()
-        yolo.setBlobPath(blob_path)
-        yolo.setConfidenceThreshold(0.5)
-        yolo.input.setBlocking(False)
-        yolo.setNumClasses(80)
-        yolo.setCoordinateSize(4)
-        yolo.setAnchors(
-            [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
-        yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-        yolo.setIouThreshold(0.5)
-        color_cam.preview.link(yolo.input)
+        #     xout_yolo = pipeline.createXLinkOut()
+        #     yolo_q_name = "yolo"
+        #     xout_yolo.setStreamName(yolo_q_name)
+        #     yolo.out.link(xout_yolo.input)
+        #     xlink_outs.append((yolo_q_name, 4))
+        # else:
+        #     print(
+        #         "Device doesn't have color camera, skipping spatial detection network creation...")
+    # elif color_cam:  # Only color camera, e.g. OAK-1: Create a YOLO
+    #     yolo = pipeline.createYoloDetectionNetwork()
+    #     blob_path = get_or_download_yolo_blob()
+    #     yolo.setBlobPath(blob_path)
+    #     yolo.setConfidenceThreshold(0.5)
+    #     yolo.input.setBlocking(False)
+    #     yolo.setNumClasses(80)
+    #     yolo.setCoordinateSize(4)
+    #     yolo.setAnchors(
+    #         [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
+    #     yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+    #     yolo.setIouThreshold(0.5)
+    #     color_cam.preview.link(yolo.input)
 
-        xout_yolo = pipeline.createXLinkOut()
-        yolo_q_name = "yolo"
-        xout_yolo.setStreamName(yolo_q_name)
-        yolo.out.link(xout_yolo.input)
-        xlink_outs.append((yolo_q_name, 4))
+    #     xout_yolo = pipeline.createXLinkOut()
+    #     yolo_q_name = "yolo"
+    #     xout_yolo.setStreamName(yolo_q_name)
+    #     yolo.out.link(xout_yolo.input)
+    #     xlink_outs.append((yolo_q_name, 4))
     else:
         print("Device doesn't have a stereo pair, skipping depth and spatial detection network creation...")
 
