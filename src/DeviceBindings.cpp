@@ -614,6 +614,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
         .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
+        .def("getConnectivity", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectivity(); }, DOC(dai, DeviceBase, getConnectivity))
         .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))
         .def("getEmbeddedIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmbeddedIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getEmbeddedIMUFirmwareVersion))
         .def("startIMUFirmwareUpdate", [](DeviceBase& d, bool forceUpdate) { py::gil_scoped_release release; return d.startIMUFirmwareUpdate(forceUpdate); }, py::arg("forceUpdate") = false, DOC(dai, DeviceBase, startIMUFirmwareUpdate))
