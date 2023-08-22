@@ -10,7 +10,7 @@ def on_exit(sig, frame):
 
 signal.signal(signal.SIGINT, on_exit)
 
-color_resoliutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, int]] = {
+color_resolutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, int]] = {
     # IMX582 cropped
     (5312, 6000): dai.ColorCameraProperties.SensorResolution.THE_5312X6000,
     (4208, 3120): dai.ColorCameraProperties.SensorResolution.THE_13_MP,  # AR214
@@ -88,60 +88,36 @@ def get_or_download_yolo_blob() -> str:
 
 
 last_frame = {} # Store latest frame for each queue
-
-class StressTestSettings:
-    _dot_intensity = 500
-    _flood_intensity = 500
-
-    @property
-    def dot_intensity(self):
-        return self._dot_intensity
-    
-    @dot_intensity.setter
-    def dot_intensity(self, value):
-        DOT_MAX = 1200
-        if value < 0:
-            self._dot_intensity = 0
-        elif value > DOT_MAX:
-            self._dot_intensity = DOT_MAX
-        else:
-            self._dot_intensity = value
-
-    @property
-    def flood_intensity(self):
-        return self._flood_intensity
-    
-    @flood_intensity.setter
-    def flood_intensity(self, value):
-        FLOOD_MAX = 1500
-        if value < 0:
-            self._flood_intensity = 0
-        elif value > FLOOD_MAX:
-            self._flood_intensity = FLOOD_MAX
-        else:
-            self._flood_intensity = value
-
 jet_custom = cv2.applyColorMap(
     np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
 jet_custom[0] = [0, 0, 0]
 
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
+
 def stress_test(mxid: str = ""):
+    dot_intensity = 500
+    flood_intensity = 500
+    iso = 800
+    exp_time = 20000
+
+
     import time
     success, device_info = dai.Device.getDeviceByMxId(mxid)
     cam_args = []  # Device info or no args at all
     if success:
         cam_args.append(device_info)
     with dai.Device(*cam_args) as device:
-        settings = StressTestSettings()
-        print("Setting default dot intensity to", settings.dot_intensity)
-        device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
-        print("Setting default flood intensity to", settings.flood_intensity)
-        device.setIrFloodLightBrightness(settings.flood_intensity)
+        print("Setting default dot intensity to", dot_intensity)
+        device.setIrLaserDotProjectorBrightness(dot_intensity)
+        print("Setting default flood intensity to", flood_intensity)
+        device.setIrFloodLightBrightness(flood_intensity)
         pipeline, outputs = build_pipeline(device)
         device.startPipeline(pipeline)
         start_time = time.time()
         queues = [device.getOutputQueue(name, size, False)
                   for name, size in outputs if name != "sys_log"]
+        camera_control_q = device.getInputQueue("cam_control")
         sys_info_q = device.getOutputQueue("sys_log", 1, False)
         usb_speed = device.getUsbSpeed()
         while True:
@@ -176,22 +152,45 @@ def stress_test(mxid: str = ""):
                 print("Q Pressed, exiting stress test...")
                 break
             elif key == ord('a'):
-                settings.dot_intensity -= 100
-                print("Decreasing dot intensity by 100, new value:", settings.dot_intensity)
-                device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
+                dot_intensity = clamp(0, dot_intensity - 100, 1200)
+                print("Decreasing dot intensity by 100, new value:", dot_intensity)
+                device.setIrLaserDotProjectorBrightness(dot_intensity)
             elif key == ord('d'):
-                settings.dot_intensity += 100
-                print("Increasing dot intensity by 100, new value:", settings.dot_intensity)
-                device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
+                dot_intensity = clamp(0, dot_intensity + 100, 1200)
+                print("Increasing dot intensity by 100, new value:", dot_intensity)
+                device.setIrLaserDotProjectorBrightness(dot_intensity)
             elif key == ord('w'):
-                settings.flood_intensity += 100
-                print("Increasing flood intensity by 100, new value:", settings.flood_intensity)
-                device.setIrFloodLightBrightness(settings.flood_intensity)
+                flood_intensity = clamp(0, flood_intensity + 100, 1500)
+                print("Increasing flood intensity by 100, new value:", flood_intensity)
+                device.setIrFloodLightBrightness(flood_intensity)
             elif key == ord('s'):
-                settings.flood_intensity -= 100
-                print("Decreasing flood intensity by 100, new value:", settings.flood_intensity)
-                device.setIrFloodLightBrightness(settings.flood_intensity)
-
+                flood_intensity = clamp(0, flood_intensity - 100, 1500)
+                print("Decreasing flood intensity by 100, new value:", flood_intensity)
+                device.setIrFloodLightBrightness(flood_intensity)
+            elif key == ord('k'):
+                iso = clamp(0, iso - 50, 1600)
+                print("Decreasing iso by 50, new value:", iso)
+                cam_ctrl  = dai.CameraControl()
+                cam_ctrl.setManualExposure(exp_time, iso)
+                camera_control_q.send(cam_ctrl)
+            elif key == ord('l'):
+                iso = clamp(0, iso + 50, 1600)
+                print("Increasing iso by 50, new value:", iso)
+                cam_ctrl  = dai.CameraControl()
+                cam_ctrl.setManualExposure(exp_time, iso)
+                camera_control_q.send(cam_ctrl)
+            elif key == ord('i'):
+                exp_time = clamp(0, exp_time - 500, 33000)
+                print("Decreasing exposure time by 500, new value:", exp_time)
+                cam_ctrl  = dai.CameraControl()
+                cam_ctrl.setManualExposure(exp_time, iso)
+                camera_control_q.send(cam_ctrl)
+            elif key == ord('o'):
+                exp_time = clamp(0, exp_time + 500, 33000)
+                print("Increasing exposure time by 500, new value:", exp_time)
+                cam_ctrl  = dai.CameraControl()
+                cam_ctrl.setManualExposure(exp_time, iso)
+                camera_control_q.send(cam_ctrl)
 
 RGB_FPS = 20
 MONO_FPS = 20
@@ -231,14 +230,19 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
     sys_log_out.input.setBlocking(False)
     sys_log_out.input.setQueueSize(1)
 
+    cam_control = pipeline.createXLinkIn()
+    cam_control.setStreamName("cam_control")
+
     left: dai.Node = None
     right: dai.Node = None
     # Used for spatial detection network (if available)
     color_cam: dai.Node = None
 
     n_color_cams = 0
+    n_edge_detectors = 0
+    MAX_EDGE_DETECTORS = 1
     for cam in camera_features:
-        print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs])
+        print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs], "Supported Types:", cam.supportedTypes)
         max_sensor_size = (cam.configs[-1].width, cam.configs[-1].height)
         node = None
         cam_kind = cam.supportedTypes[0]
@@ -251,14 +255,15 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 dai.MonoCameraProperties.SensorResolution.THE_400_P)
             mono.setFps(MONO_FPS)
         elif cam_kind == dai.CameraSensorType.COLOR:
+            print("Camera socket:", cam.socket, "IS COLOR")
             n_color_cams += 1
             color = pipeline.createColorCamera()
             node = color
             color.setBoardSocket(cam.socket)
-            resolution = color_resoliutions.get(max_sensor_size, None)
+            resolution = color_resolutions.get(max_sensor_size, None)
             if resolution is None:
                 print(
-                    f"Skipping mono camera on board socket {cam.socket}. Unknown resolution: {max_sensor_size}")
+                    f"Skipping color camera on board socket {cam.socket}. Unknown resolution: {max_sensor_size}")
                 continue
             color.setResolution(resolution)
             color.setFps(RGB_FPS)
@@ -296,6 +301,8 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         else:
             print(f"Unsupported camera type: {cam.supportedTypes[0]}")
             exit(-1)
+        
+        cam_control.out.link(node.inputControl)
 
         output = "out" if cam_kind == dai.CameraSensorType.MONO else "video"
         if cam.socket == left_socket:
@@ -313,18 +320,18 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
             stream_name = f"{cam.socket}.ve_out"
             ve_xlink.setStreamName(stream_name)
             video_encoder.bitstream.link(ve_xlink.input)
-            xlink_outs.append((stream_name, 30))
-
-        edge_detector = pipeline.createEdgeDetector()
-        if cam_kind == dai.CameraSensorType.COLOR:
-            edge_detector.setMaxOutputFrameSize(8294400)
-
-        getattr(node, output).link(edge_detector.inputImage)
-        edge_detector_xlink = pipeline.createXLinkOut()
-        stream_name = f"{cam.socket}.edge_detector"
-        edge_detector_xlink.setStreamName(stream_name)
-        edge_detector.outputImage.link(edge_detector_xlink.input)
-        xlink_outs.append((stream_name, 8))
+            xlink_outs.append((stream_name, 5))
+        if n_edge_detectors < MAX_EDGE_DETECTORS:
+            n_edge_detectors += 1
+            edge_detector = pipeline.createEdgeDetector()
+            if cam_kind == dai.CameraSensorType.COLOR:
+                edge_detector.setMaxOutputFrameSize(8294400)
+            getattr(node, output).link(edge_detector.inputImage)
+            edge_detector_xlink = pipeline.createXLinkOut()
+            stream_name = f"{cam.socket}.edge_detector"
+            edge_detector_xlink.setStreamName(stream_name)
+            edge_detector.outputImage.link(edge_detector_xlink.input)
+            xlink_outs.append((stream_name, 5))
 
     if left and right:
         if left.getResolutionWidth() > 1280:
@@ -399,6 +406,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
     else:
         print("Device doesn't have a stereo pair, skipping depth and spatial detection network creation...")
 
+    print("XLINK OUTS:; ", xlink_outs)
     return (pipeline, xlink_outs)
 
 
