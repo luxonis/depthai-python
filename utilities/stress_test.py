@@ -240,7 +240,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
 
     n_color_cams = 0
     n_edge_detectors = 0
-    MAX_EDGE_DETECTORS = 1
+    MAX_EDGE_DETECTORS = 0
     for cam in camera_features:
         print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs], "Supported Types:", cam.supportedTypes)
         max_sensor_size = (cam.configs[-1].width, cam.configs[-1].height)
