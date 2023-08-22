@@ -1,6 +1,13 @@
 import depthai as dai
 from typing import List, Tuple, Dict
 import cv2
+import signal
+
+def on_exit(sig, frame):
+    cv2.destroyAllWindows()
+    exit(0)
+
+signal.signal(signal.SIGINT, on_exit)
 
 color_resoliutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, int]] = {
     # IMX582 cropped
@@ -80,6 +87,39 @@ def get_or_download_yolo_blob() -> str:
 
 
 last_frame = {} # Store latest frame for each queue
+
+class StressTestSettings:
+    _dot_intensity = 500
+    _flood_intensity = 500
+
+    @property
+    def dot_intensity(self):
+        return self._dot_intensity
+    
+    @dot_intensity.setter
+    def dot_intensity(self, value):
+        DOT_MAX = 1200
+        if value < 0:
+            self._dot_intensity = 0
+        elif value > DOT_MAX:
+            self._dot_intensity = DOT_MAX
+        else:
+            self._dot_intensity = value
+
+    @property
+    def flood_intensity(self):
+        return self._flood_intensity
+    
+    @flood_intensity.setter
+    def flood_intensity(self, value):
+        FLOOD_MAX = 1500
+        if value < 0:
+            self._flood_intensity = 0
+        elif value > FLOOD_MAX:
+            self._flood_intensity = FLOOD_MAX
+        else:
+            self._flood_intensity = value
+
 def stress_test(mxid: str = ""):
     import time
     success, device_info = dai.Device.getDeviceByMxId(mxid)
@@ -87,6 +127,11 @@ def stress_test(mxid: str = ""):
     if success:
         cam_args.append(device_info)
     with dai.Device(*cam_args) as device:
+        settings = StressTestSettings()
+        print("Setting default dot intensity to", settings.dot_intensity)
+        device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
+        print("Setting default flood intensity to", settings.flood_intensity)
+        device.setIrFloodLightBrightness(settings.flood_intensity)
         pipeline, outputs = build_pipeline(device)
         device.startPipeline(pipeline)
         start_time = time.time()
@@ -111,9 +156,28 @@ def stress_test(mxid: str = ""):
                 print_system_information(sys_info)
             for name, frame in last_frame.items():
                 cv2.imshow(name, frame)
-            if cv2.waitKey(1) == ord("q"):
+
+            # Parse keyboard input
+            key = cv2.waitKey(1)
+            if key == ord("q"):
                 print("Q Pressed, exiting stress test...")
                 break
+            elif key == ord('a'):
+                settings.dot_intensity -= 100
+                print("Decreasing dot intensity by 100, new value:", settings.dot_intensity)
+                device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
+            elif key == ord('d'):
+                settings.dot_intensity += 100
+                print("Increasing dot intensity by 100, new value:", settings.dot_intensity)
+                device.setIrLaserDotProjectorBrightness(settings.dot_intensity)
+            elif key == ord('w'):
+                settings.flood_intensity += 100
+                print("Increasing flood intensity by 100, new value:", settings.flood_intensity)
+                device.setIrFloodLightBrightness(settings.flood_intensity)
+            elif key == ord('s'):
+                settings.flood_intensity -= 100
+                print("Decreasing flood intensity by 100, new value:", settings.flood_intensity)
+                device.setIrFloodLightBrightness(settings.flood_intensity)
 
 
 RGB_FPS = 20
