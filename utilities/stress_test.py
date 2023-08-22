@@ -1,6 +1,7 @@
 import depthai as dai
 from typing import List, Tuple, Dict
 import cv2
+import numpy as np
 import signal
 
 def on_exit(sig, frame):
@@ -120,6 +121,10 @@ class StressTestSettings:
         else:
             self._flood_intensity = value
 
+jet_custom = cv2.applyColorMap(
+    np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+jet_custom[0] = [0, 0, 0]
+
 def stress_test(mxid: str = ""):
     import time
     success, device_info = dai.Device.getDeviceByMxId(mxid)
@@ -143,9 +148,17 @@ def stress_test(mxid: str = ""):
             for queue in queues:
                 packet = queue.tryGet()
                 if packet is not None:
-                    if isinstance(packet, dai.ImgFrame):
+                    if queue.getName() == "tof":
+                        frame = packet.getCvFrame()
+                        frame = (frame.view(np.int16).astype(float))
+                        frame = cv2.normalize(
+                            frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        frame = cv2.applyColorMap(frame, jet_custom)
+                        last_frame[queue.getName()] = frame
+                    elif isinstance(packet, dai.ImgFrame):
+                        # Skip encoded frames as decoding is heavy on the host machine
                         if packet.getType() == dai.ImgFrame.Type.BITSTREAM:
-                            last_frame[queue.getName()] = cv2.imdecode(packet.getData(), cv2.IMREAD_UNCHANGED)
+                            continue
                         else:
                             last_frame[queue.getName()] = packet.getCvFrame()
             sys_info: dai.SystemInformation = sys_info_q.tryGet()
@@ -249,23 +262,23 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 continue
             color.setResolution(resolution)
             color.setFps(RGB_FPS)
-            if is_align_socket_color:
-                if cam.socket == align_socket:
-                    color_cam = color
-                    color.setPreviewSize(416, 416)
-                    color.setColorOrder(
-                        dai.ColorCameraProperties.ColorOrder.BGR)
-                    color.setInterleaved(False)
+            color_cam = color
+            color.setPreviewSize(416, 416)
+            color.setColorOrder(
+                dai.ColorCameraProperties.ColorOrder.BGR)
+            color.setInterleaved(False)
 
-                    xlink_preview = pipeline.createXLinkOut()
-                    xlink_preview.setStreamName("preview")
-                    color.preview.link(xlink_preview.input)
-                    xlink_outs.append(("preview", 4))
+            xlink_preview = pipeline.createXLinkOut()
+            stream_name = "preview_" + cam.socket.name
+            xlink_preview.setStreamName(stream_name)
+            color.preview.link(xlink_preview.input)
+            xlink_outs.append((stream_name, 4))
 
-            else:
-                color_cam = color
         elif cam_kind == dai.CameraSensorType.TOF:
+            xin_tof_config = pipeline.createXLinkIn()
+            xin_tof_config.setStreamName("tof_config")
             tof = pipeline.create(dai.node.ToF)
+            xin_tof_config.out.link(tof.inputConfig)
             cam_node = pipeline.create(dai.node.ColorCamera)
             cam_node.setFps(RGB_FPS)
             cam_node.setBoardSocket(cam.socket)
@@ -290,10 +303,10 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         elif cam.socket == right_socket:
             right = node
 
-        if n_color_cams < 2:  # For hardcode max 2 color cam video encoders, to avoid out of memory errors
+        if n_color_cams < 1:  # For hardcode max 1 color cam video encoders, to avoid out of memory errors
             video_encoder = pipeline.createVideoEncoder()
             video_encoder.setDefaultProfilePreset(
-                ENCODER_FPS, dai.VideoEncoderProperties.Profile.MJPEG
+                ENCODER_FPS, dai.VideoEncoderProperties.Profile.H264_MAIN
             )
             getattr(node, output).link(video_encoder.input)
             ve_xlink = pipeline.createXLinkOut()
