@@ -310,7 +310,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         elif cam.socket == right_socket:
             right = node
 
-        if n_color_cams < 1:  # For hardcode max 1 color cam video encoders, to avoid out of memory errors
+        if n_color_cams < 2:  # For hardcode max 1 color cam video encoders, to avoid out of memory errors
             video_encoder = pipeline.createVideoEncoder()
             video_encoder.setDefaultProfilePreset(
                 ENCODER_FPS, dai.VideoEncoderProperties.Profile.H264_MAIN
