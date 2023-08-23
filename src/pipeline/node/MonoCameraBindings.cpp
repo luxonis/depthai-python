@@ -36,6 +36,8 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .value("THE_400_P", MonoCameraProperties::SensorResolution::THE_400_P)
         .value("THE_480_P", MonoCameraProperties::SensorResolution::THE_480_P)
         .value("THE_1200_P", MonoCameraProperties::SensorResolution::THE_1200_P)
+        .value("THE_4000X3000", MonoCameraProperties::SensorResolution::THE_4000X3000)
+        .value("THE_4224X3136", MonoCameraProperties::SensorResolution::THE_4224X3136)
         ;
 
     monoCameraProperties

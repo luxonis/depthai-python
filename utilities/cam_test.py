@@ -55,9 +55,9 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     default=[['rgb', True], ['left', False], ['right', False], ['camd', True]],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
-parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
+parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800, 1200, 4000, 4224},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '1500', '1520', '1560', '4000', '4k', '5mp', '12mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '1500', '1520', '1560', '4000', '4k', '5mp', '12mp', '13mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -118,6 +118,8 @@ mono_res_opts = {
     720: dai.MonoCameraProperties.SensorResolution.THE_720_P,
     800: dai.MonoCameraProperties.SensorResolution.THE_800_P,
     1200: dai.MonoCameraProperties.SensorResolution.THE_1200_P,
+    4000: dai.MonoCameraProperties.SensorResolution.THE_4000X3000,
+    4224: dai.MonoCameraProperties.SensorResolution.THE_4224X3136,
 }
 
 color_res_opts = {
