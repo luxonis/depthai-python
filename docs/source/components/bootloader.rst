@@ -89,7 +89,7 @@ There are two types of bootloaders:
 - **Factory bootloader**: bootloader that is flashed in the factory. We don't recommend re-flashing this bootloader, as it is not meant to be edited by end users.
 - **User bootloader**: bootloader that can be flashed by the user. If booting is unsuccessful (eg. gets corrupted when flashing), it will fallback to factory bootloader.
 
-USB devices don't support user bootloader.
+USB devices don't support user bootloader. If device has User bootloader, it will be used by default. If user bootloader is not flashed, it will fallback to Factory bootloader.
 
 Boot switches
 #############
