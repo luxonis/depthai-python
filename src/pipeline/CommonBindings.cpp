@@ -203,6 +203,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("hasAutofocusIC", &CameraFeatures::hasAutofocusIC)
         .def_readwrite("name", &CameraFeatures::name)
         .def_readwrite("configs", &CameraFeatures::configs)
         .def("__repr__", [](CameraFeatures& camera) {
