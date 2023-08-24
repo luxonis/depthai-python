@@ -25,12 +25,12 @@ else:
             with dai.DeviceBootloader(di) as bl:
                 print(f' current bootloader: {bl.getVersion()}', end='')
         print()
-    selected = input(f'Which DepthAI device to flash bootloader for [0..{len(deviceInfos)-1}]: ')
+    selected = input(f'Which OAK device to flash factory bootloader for [0..{len(deviceInfos)-1}]: ')
     info = deviceInfos[int(selected)]
 
 hasBootloader = (info.state == dai.XLinkDeviceState.X_LINK_BOOTLOADER)
 if hasBootloader:
-    print("Warning! Flashing bootloader can potentially soft brick your device and should be done with caution.")
+    print("Warning! Flashing factory bootloader can potentially soft brick your device and should be done with caution.")
     print("Do not unplug your device while the bootloader is flashing.")
     print("Type 'y' and press enter to proceed, otherwise exits: ")
     if input() != 'y':
@@ -54,15 +54,20 @@ with dai.DeviceBootloader(info, allowFlashingBootloader=True) as bl:
             print("Prompt declined, exiting...")
             exit(-1)
 
+    try:
+        # Clears out user bootloader
+        configJson = bl.readConfigData()
+        configJson["userBlSize"] = 0
+        bl.flashConfigData(configJson)
+    except:
+        print('No config found, skipping erasing user bootloader')
+
     # Create a progress callback lambda
     progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+
+    print(f"Flashing {blType.name} bootloader...")
     startTime = time.monotonic()
-    is_user_bl = bl.isUserBootloaderSupported()
-    print(f"Flashing {blType.name} {'USER' if is_user_bl else 'FACTORY'} bootloader...")
-    if is_user_bl:
-        (res, message) = bl.flashUserBootloader(progress)
-    else: # Factory bootloader
-        (res, message) = bl.flashBootloader(dai.DeviceBootloader.Memory.FLASH, blType, progress)
+    (res, message) = bl.flashBootloader(dai.DeviceBootloader.Memory.FLASH, blType, progress)
     if res:
         print("Flashing successful. Took", time.monotonic() - startTime, "seconds")
     else:
