@@ -35,7 +35,8 @@ are presented with code.
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
-- :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`Flash Bootloader` - Flash factory bootloader to the device
+- :ref:`Flash User Bootloader` - Flash user bootloader to the device
 - :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
