@@ -141,6 +141,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/ImageManipConfigBindings.cpp
     src/pipeline/datatype/ImgDetectionsBindings.cpp
     src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/EncodedFrameBindings.cpp
     src/pipeline/datatype/IMUDataBindings.cpp
     src/pipeline/datatype/NNDataBindings.cpp
     src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
