@@ -76,6 +76,7 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
         .value("I", EncodedFrame::FrameType::I)
         .value("P", EncodedFrame::FrameType::P)
         .value("B", EncodedFrame::FrameType::B)
+        .value("Unknown", EncodedFrame::FrameType::Unknown)
         ;
 
     // Message
