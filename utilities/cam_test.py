@@ -51,7 +51,7 @@ import signal
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
+    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came', 'camf', 'camg', 'camh']):
         raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
         raise ValueError("")
@@ -136,6 +136,10 @@ cam_socket_opts = {
     'camb': dai.CameraBoardSocket.CAM_B,
     'camc': dai.CameraBoardSocket.CAM_C,
     'camd': dai.CameraBoardSocket.CAM_D,
+    'came': dai.CameraBoardSocket.CAM_E,
+    'camf': dai.CameraBoardSocket.CAM_F,
+    'camg': dai.CameraBoardSocket.CAM_G,
+    'camh': dai.CameraBoardSocket.CAM_H,
 }
 
 rotate = {
@@ -146,6 +150,10 @@ rotate = {
     'camb': args.rotate in ['all', 'mono'],
     'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
+    'came': args.rotate in ['all', 'mono'],
+    'camf': args.rotate in ['all', 'mono'],
+    'camg': args.rotate in ['all', 'mono'],
+    'camh': args.rotate in ['all', 'mono'],
 }
 
 mono_res_opts = {
