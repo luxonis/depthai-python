@@ -1,93 +1,75 @@
 import depthai as dai
 import zipfile
-from json import dump , JSONEncoder
-from os.path import exists
-import os
+from json import dump, JSONEncoder
+import io
 
 class CustomEncoder(JSONEncoder):
     def default(self, obj):
-        # If the object has a `__str__` method, use it
         if hasattr(obj, '__str__'):
             return str(obj)
-        # Otherwise, use the default encoder's method
         return super().default(obj)
 
 data = {}
 
 with dai.Device() as device:
-
     data['BootloaderVersion'] = device.getBootloaderVersion()
     data['ConnectedIMU'] = device.getConnectedIMU()
     data['imuFirmwareVersion'] = device.getIMUFirmwareVersion()
-    filename = 'metadata.json'
-    with open(filename, 'w') as f:
-        dump(data, f, indent=2, cls=CustomEncoder)
 
+    filenames = [
+        "metadata.json",
+        "userCalib.json",
+        "factoryCalib.json"
+        
+    ]
 
-    usercalibPath = 'userCalib.json'
+    # Create in-memory file-like objects
+    metadata_io = io.StringIO()
+    usercalib_io = io.StringIO()
+    factcalib_io = io.StringIO()
+    crashDump_io = io.StringIO()
+    # Dump data into these in-memory files
+    dump(data, metadata_io, indent=2, cls=CustomEncoder)
+    
     try:
-        
-        with open(usercalibPath,'w') as f:
-            dump(device.readCalibration2().eepromToJson(), f, indent=2)
-            dump(device.readCalibrationRaw(), f, indent=4)
+        dump(device.readCalibration2().eepromToJson(), usercalib_io, indent=2)
+        dump(device.readCalibrationRaw(), usercalib_io, indent=4)
     except Exception as ex:
-        
-        with open(usercalibPath,'w') as f:
-            dump(str(ex), f, indent=2)
+        dump(str(ex), usercalib_io, indent=2)
 
-    factcalibPath = 'factoryCalib.json'
     try:
-        
-        with open(factcalibPath,'w') as f:
-            dump(device.readFactoryCalibration().eepromToJson(), f, indent=2)
-            dump(device.readFactoryCalibrationRaw(), f, indent=4)
+        dump(device.readFactoryCalibration().eepromToJson(), factcalib_io, indent=2)
+        dump(device.readFactoryCalibrationRaw(), factcalib_io, indent=4)
     except Exception as ex:
-        
-        with open(factcalibPath,'w') as f:
-            dump(str(ex), f, indent=2)
+        dump(str(ex), factcalib_io, indent=2)
+
+    in_memory_files = [metadata_io, usercalib_io, factcalib_io]
 
     zip_name = 'device_info.zip'
+    
+    with zipfile.ZipFile(zip_name, 'w') as z:
+        # Zip in-memory file-like objects without writing to disk
+        for file_io, filename in zip(in_memory_files, filenames):
+            file_io.seek(0)  # Reset cursor to the beginning of the file
+            z.writestr(filename, file_io.getvalue())
+
     if device.hasCrashDump():
         crashDump = device.getCrashDump()
         commitHash = crashDump.depthaiCommitHash
         deviceId = crashDump.deviceId
+        filenames.append("crashreport_" + commitHash + "_" + deviceId + ".json")
+        dump(crashDump.serializeToJson(), crashDump_io, indent=2)
+        in_memory_files.append(crashDump_io)
 
-        json = crashDump.serializeToJson()
-        
-        i = -1
-        while True:
-            i += 1
-            destPath = "crashDump_" + str(i) + "_" + deviceId + "_" + commitHash + ".json"
-            if exists(destPath):
-                continue
-
-            with open(destPath, 'w', encoding='utf-8') as f:
-                dump(json, f, ensure_ascii=False, indent=4)
-
-            print("Crash dump found on your device!")
-            print(f"Saved to {destPath}")
-            print("Please report to developers!")
-            with zipfile.ZipFile(zip_name, 'w') as z:
-                z.write(filename)
-                z.write(usercalibPath)
-                z.write(factcalibPath)
-                z.write(destPath)
-            os.remove(filename)
-            os.remove(usercalibPath)
-            os.remove(factcalibPath)
-            os.remove(destPath)
-            break
-    else:
         with zipfile.ZipFile(zip_name, 'w') as z:
-            z.write(filename)
-            z.write(usercalibPath)
-            z.write(factcalibPath)
-        os.remove(filename)
-        os.remove(usercalibPath)
-        os.remove(factcalibPath)
+        # Zip in-memory file-like objects without writing to disk
+            for file_io, filename in zip(in_memory_files, filenames):
+                file_io.seek(0)  # Reset cursor to the beginning of the file
+                z.writestr(filename, file_io.getvalue())
+
+        print("Crash dump found on your device!")
+        print("Please report to developers!")
+    else:
         print("There was no crash dump found on your device!")
-# Zip the JSON file
-
-
 
 print("Please report to developers via forum with the zip attached!")
