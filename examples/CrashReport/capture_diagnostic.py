@@ -19,8 +19,7 @@ with dai.Device() as device:
     filenames = [
         "metadata.json",
         "userCalib.json",
-        "factoryCalib.json"
-        
+        "factoryCalib.json"   
     ]
 
     # Create in-memory file-like objects
@@ -68,8 +67,7 @@ with dai.Device() as device:
                 z.writestr(filename, file_io.getvalue())
 
         print("Crash dump found on your device!")
-        print("Please report to developers!")
     else:
         print("There was no crash dump found on your device!")
 
-print("Please report to developers via forum with the zip attached!")
+print("Please report to developers with the zip attached!")
