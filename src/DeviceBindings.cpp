@@ -7,6 +7,7 @@
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
 #include "depthai-shared/device/CrashDump.hpp"
+#include "depthai/device/DeviceBootloader.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>
@@ -667,6 +668,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBootGpioInput", [](DeviceBase& d) { py::gil_scoped_release release; d.setBootGpioInput(); }, DOC(dai, DeviceBase, setBootGpioInput))
         .def("getEmmcMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmmcMemorySize(); }, DOC(dai, DeviceBase, getEmmcMemorySize))
         .def("getFlashMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getFlashMemorySize(); }, DOC(dai, DeviceBase, getFlashMemorySize))
+        .def("flashBootloaderConfig", [](DeviceBase& d,  dai::DeviceBootloader::Config& config, dai::bootloader::Type type) { py::gil_scoped_release release; d.flashBootloaderConfig(config, type); }, DOC(dai, DeviceBase, flashBootloaderConfig))
     ;
 
 
