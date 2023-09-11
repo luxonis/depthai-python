@@ -1,7 +1,7 @@
 IMU
 ===
 
-IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data
+IMU (`inertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data
 from the IMU chip on the device. Our OAK devices use either:
 
 - `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__) 9-axis sensor, combining accelerometer, gyroscope, and magnetometer. It also does sensor fusion on the (IMU) chip itself. We have efficiently integrated `this driver <https://github.com/hcrest/bno080-driver>`__ into the DepthAI.
@@ -48,7 +48,6 @@ Limitations
 ###########
 
 - For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
-- **Maximum frequencies**: 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500Hz combined (synced) output. You can obtain the combined synced 500Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 500)`.
 
 IMU sensor frequencies
 ######################
@@ -58,14 +57,53 @@ for BNO086, maximum frequency for gyroscope is 1000Hz, but up to 400Hz is stable
 
 **BNO086:**
 
-- Accelerometer: 100Hz, 200Hz, 400Hz
-- Gyroscope: 125Hz, 250Hz, 400Hz
+Note that BNO IMU "rounds up" the input frequency to the next available frequency. For example, if you set the frequency to 101 it will round it to 200Hz.
+
+- Accelerometer: 15Hz, 31Hz, 62Hz, 125Hz, 250Hz 500Hz
+- Gyroscope: 25Hz, 33Hz, 50Hz, 100Hz, 200Hz, 400Hz
 - Magnetometer: 100Hz
+
+**BNO086 max frequency:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - BNO086 Sensor
+     - Max Frequency
+   * - ``ACCELEROMETER_RAW``
+     - 512 Hz
+   * - ``ACCELEROMETER``
+     - 512 Hz
+   * - ``LINEAR_ACCELERATION``
+     - 400 Hz
+   * - ``GRAVITY``
+     - 400 Hz
+   * - ``GYROSCOPE_RAW``
+     - 1000 Hz
+   * - ``GYROSCOPE_CALIBRATED`` / ``GYROSCOPE_UNCALIBRATED``
+     - 100 Hz
+   * - ``MAGNETOMETER_RAW``
+     - 100 Hz
+   * - ``MAGNETOMETER_CALIBRATED`` / ``MAGNETOMETER_UNCALIBRATED``
+     - 100 Hz
+   * - ``ROTATION_VECTOR``
+     - 400 Hz
+   * - ``GAME_ROTATION_VECTOR``
+     - 400 Hz
+   * - ``GEOMAGNETIC_ROTATION_VECTOR``
+     - 100 Hz
+   * - ``ARVR_STABILIZED_ROTATION_VECTOR``
+     - 100 Hz
+   * - ``ARVR_STABILIZED_GAME_ROTATION_VECTOR``
+     - 100 Hz
 
 **BMI270:**
 
-- Accelerometer: 25Hz, 50Hz, 100Hz, 200Hz, 400Hz
-- Gyroscope: 25Hz, 50Hz, 100Hz, 200Hz, 400Hz
+Note that BMI279 "rounds down" the input frequency to the next available frequency. For example, if you set the frequency to 99 it will round it to 50Hz.
+Additionally, the current max frequency of ~250 Hz is set when the input is >400Hz.
+
+- Accelerometer: 25Hz, 50Hz, 100Hz, 200Hz, 250Hz
+- Gyroscope: 25Hz, 50Hz, 100Hz, 200Hz, 250Hz
 
 Usage
 #####
