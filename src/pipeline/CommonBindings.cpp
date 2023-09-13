@@ -262,6 +262,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("rectifiedRotationRight", &StereoRectification::rectifiedRotationRight)
         .def_readwrite("leftCameraSocket", &StereoRectification::leftCameraSocket)
         .def_readwrite("rightCameraSocket", &StereoRectification::rightCameraSocket)
+        .def_readwrite("verticalCameraSocket", &StereoRectification::verticalCameraSocket)
         ;
 
     // Extrinsics
@@ -303,6 +304,9 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
         .def_readwrite("miscellaneousData", &EepromData::miscellaneousData)
+        .def_readwrite("housingExtrinsics", &EepromData::housingExtrinsics)
+        .def_readwrite("stereoUseSpecTranslation", &EepromData::stereoUseSpecTranslation)
+        .def_readwrite("stereoEnableDistortionCorrection", &EepromData::stereoEnableDistortionCorrection)
         ;
     // UsbSpeed
     usbSpeed
