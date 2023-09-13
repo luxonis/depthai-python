@@ -295,7 +295,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("boardConf", &EepromData::boardConf)
         .def_readwrite("hardwareConf", &EepromData::hardwareConf)
         .def_readwrite("productName", &EepromData::productName)
-        .def_readwrite("batchName", &EepromData::batchName)
+        .def_readwrite("batchName", &EepromData::deviceName)
         .def_readwrite("batchTime", &EepromData::batchTime)
         .def_readwrite("boardOptions", &EepromData::boardOptions)
         .def_readwrite("cameraData", &EepromData::cameraData)
