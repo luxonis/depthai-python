@@ -89,6 +89,8 @@ parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
                     help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, type=int,
+                    help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 
