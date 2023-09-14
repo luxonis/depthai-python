@@ -5,7 +5,7 @@ from numba import jit, prange
 
 
 @jit(nopython=True, parallel=True)
-def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_camera_intrinsics, hardware_rectify=False):
+def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_camera_intrinsics, mode, hardware_rectify=False):
     height = len(depth_image)
     width = len(depth_image[0])
     
@@ -42,14 +42,33 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             if u >= 0 and u < len(image[0]) and v >= 0 and v < len(image):
                 int_u = int(u)
                 int_v = int(v)
-                
-                while int_v - prev_v_idxs[j] >= 1 and int_v - prev_v_idxs[j] < 3:
-                    prev_v_idxs[j] += 1
-                    prev_u_loc = prev_u
-                    while int_u - prev_u_loc >= 1 and int_u - prev_u_loc < 3:
-                        prev_u_loc += 1
-                        if image[prev_v_idxs[j]][prev_u_loc] == 0: 
-                            image[prev_v_idxs[j]][prev_u_loc] = z1
+                if mode == 0:
+                    count = 0
+                    while int_v - prev_v_idxs[j] >= 1 and int_v - prev_v_idxs[j] < 3:
+                        prev_v_idxs[j] += 1
+                        prev_u_loc = prev_u
+                        while int_u - prev_u_loc >= 1 and int_u - prev_u_loc < 3:
+                            prev_u_loc += 1
+                            count += 1
+                            if image[prev_v_idxs[j]][prev_u_loc] == 0: 
+                                image[prev_v_idxs[j]][prev_u_loc] = z1
+                                # if int_u - prev_u_loc != 0 and int_v - prev_v_idxs[j] != 0:
+                                    # frameRgb[prev_v_idxs[j]][prev_u_loc] = [255, 255, 255]
+
+
+                if mode == 1:
+                    if image[int_v - 1][int_u] == 0 and image[int_v - 2][int_u] != 0:
+                        image[int_v - 1][int_u] = z1
+                        # frameRgb[int_v - 1][int_u] = [255, 255, 255]
+
+                    if image[int_v][int_u - 1] == 0 and image[int_v][int_u - 2] != 0:
+                        image[int_v][int_u - 1] = z1
+                        # frameRgb[int_v][int_u - 1] = [255, 255, 255]
+
+                    if image[int_v - 1][int_u - 1] == 0 and image[int_v - 2][int_u - 2] != 0:
+                        image[int_v - 1][int_u - 1] = z1
+                        # frameRgb[int_v - 1][int_u - 1] = [255, 255, 255]
+                    image[int_v][int_u] = z1
 
                 prev_u = int_u
                 prev_v_idxs[j] = int_v
@@ -139,6 +158,14 @@ stereo.depth.link(depthOut.input)
 # then multiply the inverse of it with the extrinsic matrix of right-rgb cam
 stereo.setDepthAlign(RIGHT_SOCKET)
 
+def colorizeDepth(frameDepth):
+    min_depth = np.percentile(frameDepth[frameDepth != 0], 1)
+    max_depth = np.percentile(frameDepth, 99)
+    depthFrameColor = np.interp(frameDepth, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+    return depthFrameColor
+
+
 # Connect to device and start pipeline
 with device:
     device.startPipeline(pipeline)
@@ -147,10 +174,15 @@ with device:
     frameDepth = None
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
-    rgb_depth_window_name = 'rgb-depth'
+    rgb_depth_window_name = 'rgb-depth1'
 
     cv2.namedWindow(rgb_depth_window_name)
     cv2.createTrackbar('RGB Weight %', rgb_depth_window_name, int(rgbWeight*100), 100, updateBlendWeights)
+
+    rgb_depth_window_name1 = 'rgb-depth2'
+
+    cv2.namedWindow(rgb_depth_window_name1)
+    cv2.createTrackbar('RGB Weight %', rgb_depth_window_name1, int(rgbWeight*100), 100, updateBlendWeights)
 
     while True:
         latestPacket = {}
@@ -180,17 +212,19 @@ with device:
             # print(f'Intrinsics {rgb_intrinsics}')
             # print(f'Depth median is {np.median(frameDepth[frameDepth != 0])}')
             # exit(1)
-            frameDepth = reprojection(frameDepth, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, hardware_rectify)
+            frameDepth1 = reprojection(frameDepth, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, 0, hardware_rectify)
+            frameDepth2 = reprojection(frameDepth, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, 1, hardware_rectify)
 
-            min_depth = np.percentile(frameDepth[frameDepth != 0], 1)
-            max_depth = np.percentile(frameDepth, 99)
-            depthFrameColor = np.interp(frameDepth, (min_depth, max_depth), (0, 255)).astype(np.uint8)
-            depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+           
+            frameDepth1 = colorizeDepth(frameDepth1)
+            frameDepth2 = colorizeDepth(frameDepth2)
 
-            frameDepth = depthFrameColor
-
-            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth, depthWeight, 0)
+            blended = cv2.addWeighted(frameRgb, rgbWeight, frameDepth1, depthWeight, 0)
             cv2.imshow(rgb_depth_window_name, blended)
+
+            blended2 = cv2.addWeighted(frameRgb, rgbWeight, frameDepth2, depthWeight, 0)
+            cv2.imshow(rgb_depth_window_name1, blended2)
+            
             frameRgb = None
             frameDepth = None
 
