@@ -3,16 +3,23 @@ import cv2
 import depthai as dai
 from numba import jit, prange
 
+
 @jit(nopython=True, parallel=True)
 def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_camera_intrinsics, hardware_rectify=False):
     height = len(depth_image)
     width = len(depth_image[0])
     
     image = np.zeros((height, width), np.uint8)
-
-    for i in prange(0, height):
-        for j in prange(0, width):
+    prev_v_idxs = np.zeros(width, np.uint16)
+    for i in range(0, height):
+        prev_u = 0
+        for j in range(0, width):
             d = depth_image[i][j]
+
+            # project 3d point to pixel
+            if d == 0:
+                prev_v_idxs[j] = 0
+                continue
 
             # convert pixel to 3d point
             x = (j - depth_camera_intrinsics[0][2]) * d / depth_camera_intrinsics[0][0]
@@ -29,14 +36,23 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
                 y1 = camera_extrinsics[1][0] * x + camera_extrinsics[1][1] * y + camera_extrinsics[1][2] * z + camera_extrinsics[1][3]
                 z1 = camera_extrinsics[2][0] * x + camera_extrinsics[2][1] * y + camera_extrinsics[2][2] * z + camera_extrinsics[2][3]
             
-            # project 3d point to pixel
-            if z1 == 0:
-                continue
-
             u = color_camera_intrinsics[0][0] * (x1  / z1) + color_camera_intrinsics[0][2]
             v = color_camera_intrinsics[1][1] * (y1  / z1) + color_camera_intrinsics[1][2]
+
             if u >= 0 and u < len(image[0]) and v >= 0 and v < len(image):
-                image[int(v)][int(u)] = z1
+                int_u = int(u)
+                int_v = int(v)
+                
+                while int_v - prev_v_idxs[j] >= 1 and int_v - prev_v_idxs[j] < 3:
+                    prev_v_idxs[j] += 1
+                    prev_u_loc = prev_u
+                    while int_u - prev_u_loc >= 1 and int_u - prev_u_loc < 3:
+                        prev_u_loc += 1
+                        if image[prev_v_idxs[j]][prev_u_loc] == 0: 
+                            image[prev_v_idxs[j]][prev_u_loc] = z1
+
+                prev_u = int_u
+                prev_v_idxs[j] = int_v
 
     return image
 
@@ -160,6 +176,10 @@ with device:
                 rectification_map = cv2.initUndistortRectifyMap(depth_intrinsics, None, rgb_extrinsics[0:3, 0:3], depth_intrinsics, (1280, 720), cv2.CV_32FC1)
                 frameDepth = cv2.remap(frameDepth, rectification_map[0], rectification_map[1], cv2.INTER_LINEAR)
 
+            # print(f'Extrinsics {rgb_extrinsics}')
+            # print(f'Intrinsics {rgb_intrinsics}')
+            # print(f'Depth median is {np.median(frameDepth[frameDepth != 0])}')
+            # exit(1)
             frameDepth = reprojection(frameDepth, depth_intrinsics, rgb_extrinsics, rgb_intrinsics, hardware_rectify)
 
             min_depth = np.percentile(frameDepth[frameDepth != 0], 1)
