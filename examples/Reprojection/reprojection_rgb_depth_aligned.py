@@ -11,9 +11,9 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
     
     image = np.zeros((height, width), np.uint8)
     prev_v_idxs = np.zeros(width, np.uint16)
-    for i in range(0, height):
+    for i in prange(0, height):
         prev_u = 0
-        for j in range(0, width):
+        for j in prange(0, width):
             d = depth_image[i][j]
 
             # project 3d point to pixel
@@ -38,11 +38,11 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             
             u = color_camera_intrinsics[0][0] * (x1  / z1) + color_camera_intrinsics[0][2]
             v = color_camera_intrinsics[1][1] * (y1  / z1) + color_camera_intrinsics[1][2]
-
-            if u >= 0 and u < len(image[0]) and v >= 0 and v < len(image):
-                int_u = int(u)
-                int_v = int(v)
-                if mode == 0:
+            int_u = round(u)
+            int_v = round(v)
+            if int_u >= 0 and int_u < len(image[0]) and int_v >= 0 and int_v < len(image):
+                # print(f'j -> {j} => u -> {int_u} and i -> {i} => v -> {int_v}')
+                if mode == 2:
                     count = 0
                     while int_v - prev_v_idxs[j] >= 1 and int_v - prev_v_idxs[j] < 3:
                         prev_v_idxs[j] += 1
@@ -56,7 +56,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
                                     # frameRgb[prev_v_idxs[j]][prev_u_loc] = [255, 255, 255]
 
 
-                if mode == 1:
+                if mode == 3:
                     if image[int_v - 1][int_u] == 0 and image[int_v - 2][int_u] != 0:
                         image[int_v - 1][int_u] = z1
                         # frameRgb[int_v - 1][int_u] = [255, 255, 255]
@@ -68,7 +68,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
                     if image[int_v - 1][int_u - 1] == 0 and image[int_v - 2][int_u - 2] != 0:
                         image[int_v - 1][int_u - 1] = z1
                         # frameRgb[int_v - 1][int_u - 1] = [255, 255, 255]
-                    image[int_v][int_u] = z1
+                image[int_v][int_u] = z1
 
                 prev_u = int_u
                 prev_v_idxs[j] = int_v
