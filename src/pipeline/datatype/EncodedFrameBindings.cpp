@@ -36,8 +36,6 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
 
     rawEncodedFrame
         .def(py::init<>())
-        .def_readwrite("height", &RawEncodedFrame::height)
-        .def_readwrite("width", &RawEncodedFrame::width)
         .def_readwrite("quality", &RawEncodedFrame::quality)
         .def_readwrite("profile", &RawEncodedFrame::profile)
         .def_readwrite("lossless", &RawEncodedFrame::lossless)
@@ -86,8 +84,6 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
         .def("getTimestamp", py::overload_cast<>(&EncodedFrame::getTimestamp, py::const_), DOC(dai, EncodedFrame, getTimestamp))
         .def("getTimestampDevice", py::overload_cast<>(&EncodedFrame::getTimestampDevice, py::const_), DOC(dai, EncodedFrame, getTimestampDevice))
         .def("getSequenceNum", &EncodedFrame::getSequenceNum, DOC(dai, EncodedFrame, getSequenceNum))
-        .def("getWidth", &EncodedFrame::getWidth, DOC(dai, EncodedFrame, getWidth))
-        .def("getHeight", &EncodedFrame::getHeight, DOC(dai, EncodedFrame, getHeight))
         .def("getQuality", &EncodedFrame::getQuality, DOC(dai, EncodedFrame, getQuality))
         .def("getFrameType", &EncodedFrame::getFrameType, DOC(dai, EncodedFrame, getFrameType))
         .def("getLossless", &EncodedFrame::getLossless, DOC(dai, EncodedFrame, getLossless))
@@ -97,10 +93,6 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
         .def("setTimestamp", &EncodedFrame::setTimestamp, DOC(dai, EncodedFrame, setTimestamp))
         .def("setTimestampDevice", &EncodedFrame::setTimestampDevice, DOC(dai, EncodedFrame, setTimestampDevice))
         .def("setSequenceNum", &EncodedFrame::setSequenceNum, DOC(dai, EncodedFrame, getSequenceNum))
-        .def("setWidth", &EncodedFrame::setWidth, DOC(dai, EncodedFrame, getWidth))
-        .def("setHeight", &EncodedFrame::setHeight, DOC(dai, EncodedFrame, getHeight))
-        .def("setSize", static_cast<EncodedFrame&(EncodedFrame::*)(unsigned int, unsigned int)>(&EncodedFrame::setSize), py::arg("width"), py::arg("height"), DOC(dai, EncodedFrame, setSize))
-        .def("setSize", static_cast<EncodedFrame&(EncodedFrame::*)(std::tuple<unsigned int, unsigned int>)>(&EncodedFrame::setSize), py::arg("size"), DOC(dai, EncodedFrame, setSize, 2))
         .def("setQuality", &EncodedFrame::setQuality, DOC(dai, EncodedFrame, getQuality))
         .def("setFrameType", &EncodedFrame::setFrameType, DOC(dai, EncodedFrame, getFrameType))
         .def("setLossless", &EncodedFrame::setLossless, DOC(dai, EncodedFrame, getLossless))
