@@ -37,6 +37,7 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
     rawEncodedFrame
         .def(py::init<>())
         .def_readwrite("quality", &RawEncodedFrame::quality)
+        .def_readwrite("bitrate", &RawEncodedFrame::bitrate)
         .def_readwrite("profile", &RawEncodedFrame::profile)
         .def_readwrite("lossless", &RawEncodedFrame::lossless)
         .def_readwrite("type", &RawEncodedFrame::type)
@@ -85,6 +86,7 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
         .def("getTimestampDevice", py::overload_cast<>(&EncodedFrame::getTimestampDevice, py::const_), DOC(dai, EncodedFrame, getTimestampDevice))
         .def("getSequenceNum", &EncodedFrame::getSequenceNum, DOC(dai, EncodedFrame, getSequenceNum))
         .def("getQuality", &EncodedFrame::getQuality, DOC(dai, EncodedFrame, getQuality))
+        .def("getBitrate", &EncodedFrame::getBitrate, DOC(dai, EncodedFrame, getBitrate))
         .def("getFrameType", &EncodedFrame::getFrameType, DOC(dai, EncodedFrame, getFrameType))
         .def("getLossless", &EncodedFrame::getLossless, DOC(dai, EncodedFrame, getLossless))
         .def("getProfile", &EncodedFrame::getProfile, DOC(dai, EncodedFrame, getProfile))
@@ -94,6 +96,7 @@ void bind_encodedframe(pybind11::module& m, void* pCallstack){
         .def("setTimestampDevice", &EncodedFrame::setTimestampDevice, DOC(dai, EncodedFrame, setTimestampDevice))
         .def("setSequenceNum", &EncodedFrame::setSequenceNum, DOC(dai, EncodedFrame, getSequenceNum))
         .def("setQuality", &EncodedFrame::setQuality, DOC(dai, EncodedFrame, getQuality))
+        .def("setBitrate", &EncodedFrame::setBitrate, DOC(dai, EncodedFrame, getBitrate))
         .def("setFrameType", &EncodedFrame::setFrameType, DOC(dai, EncodedFrame, getFrameType))
         .def("setLossless", &EncodedFrame::setLossless, DOC(dai, EncodedFrame, getLossless))
         .def("setProfile", &EncodedFrame::setProfile, DOC(dai, EncodedFrame, getProfile))
