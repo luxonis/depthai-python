@@ -64,7 +64,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
     py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
-	
+
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -262,6 +262,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("rectifiedRotationRight", &StereoRectification::rectifiedRotationRight)
         .def_readwrite("leftCameraSocket", &StereoRectification::leftCameraSocket)
         .def_readwrite("rightCameraSocket", &StereoRectification::rightCameraSocket)
+        .def_readwrite("verticalCameraSocket", &StereoRectification::verticalCameraSocket)
         ;
 
     // Extrinsics
@@ -296,12 +297,16 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("hardwareConf", &EepromData::hardwareConf)
         .def_readwrite("productName", &EepromData::productName)
         .def_readwrite("batchName", &EepromData::batchName)
+        .def_readwrite("deviceName", &EepromData::deviceName)
         .def_readwrite("batchTime", &EepromData::batchTime)
         .def_readwrite("boardOptions", &EepromData::boardOptions)
         .def_readwrite("cameraData", &EepromData::cameraData)
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
         .def_readwrite("miscellaneousData", &EepromData::miscellaneousData)
+        .def_readwrite("housingExtrinsics", &EepromData::housingExtrinsics)
+        .def_readwrite("stereoUseSpecTranslation", &EepromData::stereoUseSpecTranslation)
+        .def_readwrite("stereoEnableDistortionCorrection", &EepromData::stereoEnableDistortionCorrection)
         ;
     // UsbSpeed
     usbSpeed
@@ -379,7 +384,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
     ;
-	
+
     interpolation
         .value("BILINEAR", Interpolation::BILINEAR)
         .value("BICUBIC", Interpolation::BICUBIC)
