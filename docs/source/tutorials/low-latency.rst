@@ -28,6 +28,13 @@ disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example
      - 150
      - 2.8 Gbps
      - `link <https://user-images.githubusercontent.com/18037362/162675403-f3c5a4c3-1f7d-4acc-a5d5-f5aecff5a66a.png>`__
+   * - Color (isp)
+     - 4K
+     - 26
+     - 26
+     - 83 (Std: 3.6)
+     - 2.6 Gbps
+     - /
    * - Mono
      - 720P/800P
      - 120
