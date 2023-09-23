@@ -4,14 +4,14 @@ Low Latency
 These tables show what performance you can expect from **USB 3.2** Gen 1 (5 Gbps) connection with an OAK camera. XLink chunking was
 disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example code, see :ref:`Latency measurement`.
 
-.. list-table::
+.. list-table:: USB 5gbps latency
    :header-rows: 1
 
    * - What
      - Resolution
      - FPS
      - FPS set
-     - Time-to-Host [ms]
+     - Latency [ms]
      - Bandwidth
      - Histogram
    * - Color (isp)
@@ -43,9 +43,9 @@ disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example
      - 246 Mbps
      - `link <https://user-images.githubusercontent.com/18037362/162675393-e3fb08fb-0f17-49d0-85d0-31ae7b5af0f9.png>`__
 
-Below are the same tests, but with **OAK PoE** camera, which uses Gigabit ethernet link. The camera was connected directly to the computer,
+Below are the same tests, but also with **OAK PoE** camera, which uses Gigabit ethernet link. The camera was connected directly to the computer,
 without any switches or routers in between. Power was supplied via M8 connector. `oak_bandwidth_test.py <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-bandwidth-test>`__ results: 797 mbps downlink, 264 mbps uplink.
-`oak_latency_test.py <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-latency-test>`__ results: Average: 5.2 ms, Std: 6.2
+`oak_latency_test.py <https://github.com/luxonis/depthai-experiments/tree/master/random-scripts#oak-latency-test>`__ results: Average: 5.2 ms, Std: 6.2.
 
 .. list-table::
    :header-rows: 1
@@ -54,41 +54,49 @@ without any switches or routers in between. Power was supplied via M8 connector.
      - Resolution
      - FPS
      - FPS set
-     - Time-to-Host [ms]
+     - PoE Latency [ms]
+     - USB Latency [ms]
      - Bandwidth
    * - Color (isp)
      - 1080P
      - 25
      - 25
      - 51
+     - 19.2 Std: 0.25
      - 622 Mbps
    * - Color (isp)
      - 4K
      - 8
      - 8
      - 148
+     - 19.4 Std: 0.6
      - 530 Mbps
    * - Color (isp)
      - 4K
      - 8.5
      - 10
      - 530
+     - 19.4 Std: 0.6
      - 663 Mbps
    * - Mono
      - 400P
      - 90
      - 90
-     - Avrg: 12 (Std: 5.0)
+     - 12 Std: 5.0
+     - 8 Std: 0.47
      - 184 Mbps
    * - Mono
      - 400P
      - 110
      - 110
-     - Avrg: 16 (Std: 9.4)
+     - 16 Std: 9.4
+     - 8 Std: 0.45
      - 225 Mbps
 
+We set lower FPS for the POE measurements due to bandwidth constraints. For example, 4K 8 FPS was 150ms latency, while 
+4K 10FPS had 530ms latency, as link was saturated.
 
-- **Time-to-Host** is measured time between frame timestamp (:code:`imgFrame.getTimestamp()`) and host timestamp when the frame is received (:code:`dai.Clock.now()`).
+- **Latency** is measured time between frame timestamp (:code:`imgFrame.getTimestamp()`) and host timestamp when the frame is received (:code:`dai.Clock.now()`).
 - **Histogram** shows how much Time-to-Host varies frame to frame. Y axis represents number of frame that occurred at that time while the X axis represents microseconds.
 - **Bandwidth** is calculated bandwidth required to stream specified frames at specified FPS.
 
