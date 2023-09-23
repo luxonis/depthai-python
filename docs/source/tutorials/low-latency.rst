@@ -62,21 +62,21 @@ without any switches or routers in between. Power was supplied via M8 connector.
      - 25
      - 25
      - 51
-     - 19.2 Std: 0.25
+     - 33 Std: 0.8
      - 622 Mbps
    * - Color (isp)
      - 4K
      - 8
      - 8
      - 148
-     - 19.4 Std: 0.6
+     - 80 Std: 1.2
      - 530 Mbps
    * - Color (isp)
      - 4K
      - 8.5
      - 10
      - 530
-     - 19.4 Std: 0.6
+     - 80 Std: 1.3
      - 663 Mbps
    * - Mono
      - 400P
