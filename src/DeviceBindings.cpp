@@ -669,6 +669,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getEmmcMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmmcMemorySize(); }, DOC(dai, DeviceBase, getEmmcMemorySize))
         .def("getFlashMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getFlashMemorySize(); }, DOC(dai, DeviceBase, getFlashMemorySize))
         .def("flashBootloaderConfig", [](DeviceBase& d,  dai::DeviceBootloader::Config& config, dai::bootloader::Type type) { py::gil_scoped_release release; d.flashBootloaderConfig(config, type); }, DOC(dai, DeviceBase, flashBootloaderConfig))
+        .def("getProductName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getProductName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getProductName))
     ;
 
 
