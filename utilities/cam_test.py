@@ -407,6 +407,9 @@ with dai.Device(*dai_device_args) as device:
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
                     txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    if needs_newline:
+                        print()
+                        needs_newline = False
                     print(txt)
                 capture = c in capture_list
                 if capture:
@@ -452,7 +455,7 @@ with dai.Device(*dai_device_args) as device:
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
-        if show: print()
+        needs_newline = True
 
         key = cv2.waitKey(1)
         if key == ord('q'):
@@ -626,3 +629,5 @@ with dai.Device(*dai_device_args) as device:
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()
