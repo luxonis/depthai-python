@@ -100,7 +100,7 @@ without any switches or routers in between. Power was supplied via M8 connector.
      - 8 Std: 0.45
      - 225 Mbps
 
-We set lower FPS for the POE measurements due to bandwidth constraints. For example, 4K 8 FPS was 150ms latency, while 
+We set lower FPS for the POE measurements due to bandwidth constraints. For example, 4K 8 FPS had 150ms latency, while
 4K 10FPS had 530ms latency, as link was saturated.
 
 - **Latency** is measured time between frame timestamp (:code:`imgFrame.getTimestamp()`) and host timestamp when the frame is received (:code:`dai.Clock.now()`).
