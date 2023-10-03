@@ -162,8 +162,9 @@ if(WIN32)
         set(depthai_dll_libraries "$<TARGET_RUNTIME_DLLS:${TARGET_NAME}>")
     endif()
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
-        ${CMAKE_COMMAND} -E copy ${depthai_dll_libraries} $<TARGET_FILE_DIR:${TARGET_NAME}>
+        "$<$<BOOL:${depthai_dll_libraries}>:${CMAKE_COMMAND};-E;copy_if_different;${depthai_dll_libraries};$<TARGET_FILE_DIR:${TARGET_NAME}>>"
         COMMAND_EXPAND_LISTS
+        VERBATIM
     )
 
     # Disable "d" postfix, so python can import the library as is

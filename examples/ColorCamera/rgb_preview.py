@@ -30,7 +30,7 @@ with dai.Device(pipeline) as device:
     if device.getBootloaderVersion() is not None:
         print('Bootloader version:', device.getBootloaderVersion())
     # Device name
-    print('Device name:', device.getDeviceName())
+    print('Device name:', device.getDeviceName(), ' Product name:', device.getProductName())
 
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)

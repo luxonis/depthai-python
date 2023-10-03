@@ -65,7 +65,7 @@ Usage
     # Warp engines to be used (0,1,2)
     warp.setHwIds([1])
     # Warp interpolation mode, choose between BILINEAR, BICUBIC, BYPASS
-    warp.setInterpolation(dai.node.Warp.Properties.Interpolation.BYPASS)
+    warp.setInterpolation(dai.Interpolation.NEAREST_NEIGHBOR)
 
   .. code-tab:: c++
 

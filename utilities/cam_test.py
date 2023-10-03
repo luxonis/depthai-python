@@ -67,7 +67,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '13mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '4k', '5mp', '12mp', '13mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -89,6 +89,8 @@ parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
                     help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, type=int,
+                    help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 
@@ -157,7 +159,9 @@ color_res_opts = {
     '720':  dai.ColorCameraProperties.SensorResolution.THE_720_P,
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1012': dai.ColorCameraProperties.SensorResolution.THE_1352X1012,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
+    '1520': dai.ColorCameraProperties.SensorResolution.THE_2024X1520,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
@@ -221,6 +225,16 @@ for c in cam_list:
             tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
             tofConfig.depthParams.avgPhaseShuffle = False
             tofConfig.depthParams.minimumAmplitude = 3.0
+
+            if args.tof_median == 0:
+                tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+            elif args.tof_median == 3:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+            elif args.tof_median == 5:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+            elif args.tof_median == 7:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
+
             tof[c].initialConfig.set(tofConfig)
             if args.tof_amplitude:
                 amp_name = 'tof_amplitude_' + c
@@ -393,6 +407,9 @@ with dai.Device(*dai_device_args) as device:
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
                     txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    if needs_newline:
+                        print()
+                        needs_newline = False
                     print(txt)
                 capture = c in capture_list
                 if capture:
@@ -438,7 +455,7 @@ with dai.Device(*dai_device_args) as device:
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
-        if show: print()
+        needs_newline = True
 
         key = cv2.waitKey(1)
         if key == ord('q'):
@@ -612,3 +629,5 @@ with dai.Device(*dai_device_args) as device:
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()

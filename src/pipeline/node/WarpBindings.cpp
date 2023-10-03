@@ -13,7 +13,6 @@ void bind_warp(pybind11::module& m, void* pCallstack){
     // Node and Properties declare upfront
     // TODO(themarpe) - properties
     py::class_<Warp::Properties> warpProperties(m, "WarpProperties", DOC(dai, WarpProperties));
-    py::enum_<Warp::Properties::Interpolation> warpPropertiesInterpolation(warpProperties, "Interpolation", DOC(dai, WarpProperties, Interpolation));
     auto warp = ADD_NODE(Warp);
 
     ///////////////////////////////////////////////////////////////////////
@@ -29,11 +28,6 @@ void bind_warp(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // properties
-    warpPropertiesInterpolation
-        .value("BILINEAR", Warp::Properties::Interpolation::BILINEAR)
-        .value("BICUBIC", Warp::Properties::Interpolation::BICUBIC)
-        .value("BYPASS", Warp::Properties::Interpolation::BYPASS)
-        ;
 
     // ImageManip Node
     warp
