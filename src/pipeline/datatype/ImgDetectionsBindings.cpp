@@ -42,6 +42,10 @@ void bind_imgdetections(pybind11::module& m, void* pCallstack){
         .def_readwrite("ymin", &ImgDetection::ymin)
         .def_readwrite("xmax", &ImgDetection::xmax)
         .def_readwrite("ymax", &ImgDetection::ymax)
+        .def_readwrite("xIndex", &ImgDetection::xIndex)
+        .def_readwrite("yIndex", &ImgDetection::yIndex)
+        .def_readwrite("headIndex", &ImgDetection::headIndex)
+        .def_readwrite("anchorIndex", &ImgDetection::anchorIndex)
         ;
 
     rawImgDetections
