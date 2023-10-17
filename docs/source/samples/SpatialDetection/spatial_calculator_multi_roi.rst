@@ -11,7 +11,7 @@ scanning camera for mobile robots.
 Demo
 ####
 
-.. image:: https://user-images.githubusercontent.com/18037362/190861621-b57fd1e3-5a3d-4d79-b1a7-d17a0b78c63e.gif
+.. image:: https://user-images.githubusercontent.com/18037362/231822498-6e3699a0-039e-424b-acb2-b246575e91ee.png
 
 Setup
 #####

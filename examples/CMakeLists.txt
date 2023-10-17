@@ -109,6 +109,7 @@ add_python_example(rgb_camera_control ColorCamera/rgb_camera_control.py)
 add_python_example(rgb_preview ColorCamera/rgb_preview.py)
 add_python_example(rgb_scene ColorCamera/rgb_scene.py)
 add_python_example(rgb_video ColorCamera/rgb_video.py)
+add_python_example(rgb_isp_scale ColorCamera/rgb_isp_scale.py)
 
 ## EdgeDetector
 add_python_example(edge_detector EdgeDetector/edge_detector.py)

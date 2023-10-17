@@ -1,6 +1,7 @@
 #!/bin/bash
 
-trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
+trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ;
+exit $RET' ERR
 
 readonly linux_pkgs=(
     python3
@@ -50,7 +51,7 @@ readonly ubuntu_pkgs_pre22_04=(
     libdc1394-22-dev
 )
 
-readonly ubuntu_pkgs_22_04=(
+readonly ubuntu_pkgs_post22_04=(
     "${ubuntu_pkgs[@]}"
     libdc1394-dev
 )
@@ -96,26 +97,11 @@ print_and_exec () {
 if [[ $(uname) == "Darwin" ]]; then
     echo "During Homebrew install, certain commands need 'sudo'. Requesting access..."
     sudo true
-    arch_cmd=
-    if [[ $(uname -m) == "arm64" ]]; then
-        arch_cmd="arch -x86_64"
-        echo "Running in native arm64 mode, will prefix commands with: $arch_cmd"
-        # Check if able to run with x86_64 emulation
-        retcode=0
-        $arch_cmd true || retcode=$?
-        if [[ $retcode -ne 0 ]]; then
-            print_action "=== Installing Rosetta 2 - Apple binary translator"
-            # Prompts the user to agree to license: <A> <Enter>
-            # Could be automated by adding: --agree-to-license
-            print_and_exec softwareupdate --install-rosetta
-        fi
-    fi
     homebrew_install_url="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
     print_action "Installing Homebrew from $homebrew_install_url"
     # CI=1 will skip some interactive prompts
-    CI=1 $arch_cmd /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
-    print_and_exec $arch_cmd brew install python3 git
-    print_and_exec python3 -m pip install -U pip
+    CI=1 /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
+    print_and_exec brew install git
     echo
     echo "=== Installed successfully!  IMPORTANT: For changes to take effect,"
     echo "please close and reopen the terminal window, or run:  exec \$SHELL"
@@ -126,8 +112,8 @@ elif [ -f /etc/os-release ]; then
     if [[ "$ID" == "ubuntu" || "$ID" == "debian" || "$ID_LIKE" == "ubuntu" || "$ID_LIKE" == "debian" || "$ID_LIKE" == "ubuntu debian" ]]; then
         if [[ ! $(uname -m) =~ ^arm* ]]; then
             sudo apt-get update
-            if [[ "$VERSION_ID" == "22.04" ]]; then
-                sudo apt-get install -y "${ubuntu_pkgs_22_04[@]}"
+            if [[ "$VERSION_ID" > "22.04" || "$VERSION_ID" == "22.04" ]]; then
+                sudo apt-get install -y "${ubuntu_pkgs_post22_04[@]}"
             else
                 sudo apt-get install -y "${ubuntu_pkgs_pre22_04[@]}"
             fi
@@ -177,3 +163,5 @@ else
     echo "ERROR: Host not supported"
     exit 99
 fi
+
+echo "Finished installing global libraries."

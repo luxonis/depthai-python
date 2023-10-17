@@ -76,7 +76,7 @@ ImageManip node supports the following image formats (more info `in PR here <htt
 - Convert format to any other format mentioned above
 - RAW16 (uint16, ``depth`` output)  supported, but without color conversion capability
 
-Note that planar formats are faster to process.
+Note that planar formats are faster to process, so interleaved images should be avoided (eg. NV12 input).
 
 Limitations
 ###########

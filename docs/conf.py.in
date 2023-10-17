@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.abspath(source_directory / ".." / "_extensions"))
 # -- Project information -----------------------------------------------------
 
 project = "DepthAI API Docs"
-copyright = u"@build_year@, Luxonis"
+html_show_copyright=False
 author = "Luxonis"
 version = u"@DEPTHAI_PYTHON_VERSION@"
 release = version

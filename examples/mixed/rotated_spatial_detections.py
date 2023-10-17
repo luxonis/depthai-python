@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import cv2
 import depthai as dai
-
+import numpy as np
 '''
 Spatial object detections demo for 180° rotated OAK camera.
 '''
@@ -50,14 +50,15 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 camRgb.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # Setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # Align depth map to the perspective of RGB camera, on which inference is done
-stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
+stereo.setSubpixel(True)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 rotate_stereo_manip = pipeline.createImageManip()
@@ -104,8 +105,10 @@ with dai.Device(pipeline) as device:
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depth_downscaled = depthFrame[::4]
+        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        max_depth = np.percentile(depth_downscaled, 99)
+        depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         detections = inDet.detections

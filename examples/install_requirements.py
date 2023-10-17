@@ -57,7 +57,7 @@ if requireOpenCv:
     if sys.version_info[0] == 3 and sys.version_info[1] == 9:
         DEPENDENCIES.append('opencv-python!=4.5.4.58')
     else:
-        DEPENDENCIES.append('opencv-python')
+        DEPENDENCIES.append('opencv-contrib-python==4.5.5.62') # same as in depthai requirementx.txt
 
 
 

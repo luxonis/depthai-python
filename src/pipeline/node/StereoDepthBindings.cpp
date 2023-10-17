@@ -56,6 +56,14 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readwrite("verticalStereo", &StereoDepthProperties::verticalStereo, DOC(dai, StereoDepthProperties, verticalStereo))
         .def_readwrite("customPixelDescriptors", &StereoDepthProperties::customPixelDescriptors, DOC(dai, StereoDepthProperties, customPixelDescriptors))
         .def_readwrite("enableFrameSync", &StereoDepthProperties::enableFrameSync, DOC(dai, StereoDepthProperties, enableFrameSync))
+        .def_readwrite("focalLengthFromCalibration", &StereoDepthProperties::focalLengthFromCalibration, DOC(dai, StereoDepthProperties, focalLengthFromCalibration))
+        .def_readwrite("useHomographyRectification", &StereoDepthProperties::useHomographyRectification, DOC(dai, StereoDepthProperties, useHomographyRectification))
+        .def_readwrite("baseline", &StereoDepthProperties::baseline, DOC(dai, StereoDepthProperties, baseline))
+        .def_readwrite("focalLength", &StereoDepthProperties::focalLength, DOC(dai, StereoDepthProperties, focalLength))
+        .def_readwrite("disparityToDepthUseSpecTranslation", &StereoDepthProperties::disparityToDepthUseSpecTranslation, DOC(dai, StereoDepthProperties, disparityToDepthUseSpecTranslation))
+        .def_readwrite("rectificationUseSpecTranslation", &StereoDepthProperties::rectificationUseSpecTranslation, DOC(dai, StereoDepthProperties, rectificationUseSpecTranslation))
+        .def_readwrite("depthAlignmentUseSpecTranslation", &StereoDepthProperties::depthAlignmentUseSpecTranslation, DOC(dai, StereoDepthProperties, depthAlignmentUseSpecTranslation))
+        .def_readwrite("alphaScaling", &StereoDepthProperties::alphaScaling, DOC(dai, StereoDepthProperties, alphaScaling))
         ;
 
     stereoDepthPresetMode
@@ -176,6 +184,12 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("setVerticalStereo", &StereoDepth::setVerticalStereo, DOC(dai, node, StereoDepth, setVerticalStereo))
         .def("setCustomPixelDescriptors", &StereoDepth::setCustomPixelDescriptors, DOC(dai, node, StereoDepth, setCustomPixelDescriptors))
         .def("setFrameSync", &StereoDepth::setFrameSync, DOC(dai, node, StereoDepth, setFrameSync))
+        .def("setBaseline", &StereoDepth::setBaseline, DOC(dai, node, StereoDepth, setBaseline))
+        .def("setFocalLength", &StereoDepth::setFocalLength, DOC(dai, node, StereoDepth, setFocalLength))
+        .def("setDisparityToDepthUseSpecTranslation", &StereoDepth::setDisparityToDepthUseSpecTranslation, DOC(dai, node, StereoDepth, setDisparityToDepthUseSpecTranslation))
+        .def("setRectificationUseSpecTranslation", &StereoDepth::setRectificationUseSpecTranslation, DOC(dai, node, StereoDepth, setRectificationUseSpecTranslation))
+        .def("setDepthAlignmentUseSpecTranslation", &StereoDepth::setDepthAlignmentUseSpecTranslation, DOC(dai, node, StereoDepth, setDepthAlignmentUseSpecTranslation))
+        .def("setAlphaScaling", &StereoDepth::setAlphaScaling, DOC(dai, node, StereoDepth, setAlphaScaling))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;

@@ -42,11 +42,11 @@ camRgb.setFps(40)
 nn.setNumInferenceThreads(2)
 nn.input.setBlocking(False)
 
-blob = dai.OpenVINO.Blob(args.nnPath);
-nn.setBlob(blob);
-det.setBlob(blob);
-det.setNNFamily(dai.DetectionNetworkType.MOBILENET);
-det.setConfidenceThreshold(0.5);
+blob = dai.OpenVINO.Blob(args.nnPath)
+nn.setBlob(blob)
+det.setBlob(blob)
+det.setNNFamily(dai.DetectionNetworkType.MOBILENET)
+det.setConfidenceThreshold(0.5)
 
 # Linking
 if args.sync:

@@ -107,6 +107,7 @@ set(SOURCE_LIST
     src/pipeline/node/XLinkInBindings.cpp
     src/pipeline/node/XLinkOutBindings.cpp
     src/pipeline/node/ColorCameraBindings.cpp
+    src/pipeline/node/CameraBindings.cpp
     src/pipeline/node/MonoCameraBindings.cpp
     src/pipeline/node/StereoDepthBindings.cpp
     src/pipeline/node/NeuralNetworkBindings.cpp
@@ -130,6 +131,8 @@ set(SOURCE_LIST
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/BenchmarkBindings.cpp
     src/pipeline/node/PointCloudBindings.cpp
+    src/pipeline/node/UVCBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp

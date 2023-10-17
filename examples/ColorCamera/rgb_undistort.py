@@ -3,7 +3,7 @@ import depthai as dai
 import numpy as np
 
 camRes = dai.ColorCameraProperties.SensorResolution.THE_1080_P
-camSocket = dai.CameraBoardSocket.RGB
+camSocket = dai.CameraBoardSocket.CAM_A
 ispScale = (1,2)
 
 def getMesh(calibData, ispSize):

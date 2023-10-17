@@ -36,7 +36,7 @@ videoOut.setStreamName("h265")
 nnOut.setStreamName("nn")
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setPreviewSize(300, 300)
 camRgb.setInterleaved(False)

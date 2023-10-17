@@ -1,7 +1,8 @@
 StereoDepth
 ###########
 
-StereoDepth node calculates the disparity/depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`).
+StereoDepth node calculates the disparity and/or depth from the stereo camera pair (2x :ref:`MonoCamera <MonoCamera>`/:ref:`ColorCamera`).
+We suggest following :ref:`Configuring Stereo Depth` tutorial to achieve the best depth results.
 
 How to place it
 ===============
@@ -47,28 +48,29 @@ Inputs and Outputs
 
   .. tab:: **Inputs**
 
-    - :code:`left` - :ref:`ImgFrame` from the left :ref:`MonoCamera`
-    - :code:`right` - :ref:`ImgFrame` from the right :ref:`MonoCamera`
-    - :code:`inputConfig` - :ref:`StereoDepthConfig`
+    - ``left`` - :ref:`ImgFrame` from the left stereo camera
+    - ``right`` - :ref:`ImgFrame` from the right stereo camera
+    - ``inputConfig`` - :ref:`StereoDepthConfig`
 
   .. tab:: **Outputs**
 
-    - :code:`confidenceMap` - :ref:`ImgFrame`
-    - :code:`rectifiedLeft` - :ref:`ImgFrame`
-    - :code:`syncedLeft` - :ref:`ImgFrame`
-    - :code:`depth` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
-    - :code:`disparity` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
-    - :code:`rectifiedRight` - :ref:`ImgFrame`
-    - :code:`syncedRight` - :ref:`ImgFrame`
-    - :code:`outConfig` - :ref:`StereoDepthConfig`
+    - ``confidenceMap`` - :ref:`ImgFrame`
+    - ``rectifiedLeft`` - :ref:`ImgFrame`
+    - ``syncedLeft`` - :ref:`ImgFrame`
+    - ``depth`` - :ref:`ImgFrame`: UINT16 values - depth in depth units (millimeter by default)
+    - ``disparity`` - :ref:`ImgFrame`: UINT8 or UINT16 if Subpixel mode
+    - ``rectifiedRight`` - :ref:`ImgFrame`
+    - ``syncedRight`` - :ref:`ImgFrame`
+    - ``outConfig`` - :ref:`StereoDepthConfig`
 
   .. tab:: **Debug outputs**
 
-    - :code:`debugDispLrCheckIt1` - :ref:`ImgFrame`
-    - :code:`debugDispLrCheckIt2` - :ref:`ImgFrame`
-    - :code:`debugExtDispLrCheckIt1` - :ref:`ImgFrame`
-    - :code:`debugExtDispLrCheckIt2` - :ref:`ImgFrame`
-    - :code:`debugDispCostDump` - :ref:`ImgFrame`
+    - ``debugDispLrCheckIt1`` - :ref:`ImgFrame`
+    - ``debugDispLrCheckIt2`` - :ref:`ImgFrame`
+    - ``debugExtDispLrCheckIt1`` - :ref:`ImgFrame`
+    - ``debugExtDispLrCheckIt2`` - :ref:`ImgFrame`
+    - ``debugDispCostDump`` - :ref:`ImgFrame`
+    - ``confidenceMap`` - :ref:`ImgFrame`
 
 Internal block diagram of StereoDepth node
 ==========================================
@@ -168,6 +170,8 @@ Limitations
 ===========
 
 - Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
+- For RGB-depth alignment the RGB camera has to be placed on the same horizontal line as the stereo camera pair.
+- RGB-depth alignment doesn't work when using disparity shift.
 
 Stereo depth FPS
 ================
@@ -241,7 +245,7 @@ Examples of functionality
 =========================
 
 - :ref:`Depth Preview`
-- :ref:`RGB Depth alignment`
+- :ref:`RGB Depth alignment` - align depth to color camera
 - :ref:`Mono & MobilenetSSD & Depth`
 - :ref:`RGB & MobilenetSSD with spatial data`
 
@@ -269,14 +273,9 @@ Disparity
 =========
 
 Disparity refers to the distance between two corresponding points in the left and right image of a stereo pair.
-By looking at the image below, it can be seen that point :code:`X` gets projected to :code:`XL = (u, v)` in the :code:`Left view` and :code:`XR = (p, q)` in the :code:`Right view`.
 
 .. image:: /_static/images/components/disparity_explanation.jpeg
    :target: https://stackoverflow.com/a/17620159
-
-Since we know points :code:`XL` and :code:`XR` refer to the same point: :code:`X`, the disparity for this point is equal to the magnitude of the vector between :code:`(u, v)` and :code:`(p, q)`.
-
-For a more detailed explanation see `this <https://stackoverflow.com/a/17620159>`__ answer on Stack Overflow.
 
 When calculating the disparity, each pixel in the disparity map gets assigned a confidence value :code:`0..255` by the stereo matching algorithm,
 as:
@@ -311,7 +310,7 @@ written in camera intrinsics (``intrinsics[0][0]``):
 
   with dai.Device() as device:
     calibData = device.readCalibration()
-    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.RIGHT)
+    intrinsics = calibData.getCameraIntrinsics(dai.CameraBoardSocket.CAM_C)
     print('Right mono camera focal length in pixels:', intrinsics[0][0])
 
 Here's theoretical calculation of the focal length in pixels:
@@ -319,10 +318,10 @@ Here's theoretical calculation of the focal length in pixels:
 .. code-block:: python
 
   focal_length_in_pixels = image_width_in_pixels * 0.5 / tan(HFOV * 0.5 * PI/180)
-  
+
   # With 400P mono camera resolution where HFOV=71.9 degrees
   focal_length_in_pixels = 640 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 441.25
-  
+
   # With 800P mono camera resolution where HFOV=71.9 degrees
   focal_length_in_pixels = 1280 * 0.5 / tan(71.9 * 0.5 * PI / 180) = 882.5
 
@@ -332,7 +331,7 @@ Examples for calculating the depth value, using the OAK-D (7.5cm baseline):
 
   # For OAK-D @ 400P mono cameras and disparity of eg. 50 pixels
   depth = 441.25 * 7.5 / 50 = 66.19 # cm
-  
+
   # For OAK-D @ 800P mono cameras and disparity of eg. 10 pixels
   depth = 882.5 * 7.5 / 10 = 661.88 # cm
 
@@ -423,7 +422,7 @@ So using this formula for existing models the *theoretical* max distance is:
 
   # For OAK-D (7.5cm baseline)
   Dm = (7.5/2) * tan((90 - 71.9/1280)*pi/180) = 3825.03cm = 38.25 meters
-  
+
   # For OAK-D-CM4 (9cm baseline)
   Dm = (9/2) * tan((90 - 71.9/1280)*pi/180) = 4590.04cm = 45.9 meters
 
@@ -459,12 +458,12 @@ on the following picture.
 
 Meaning of variables on the picture:
 
-- :code:`BL [cm]` - Baseline of stereo cameras.
-- :code:`Dv [cm]` - Minimum distace where both cameras see an object (thus where depth can be calculated).
-- :code:`B [pixels]` - Width of the band where depth cannot be calculated.
-- :code:`W [pixels]` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
-- :code:`D [cm]` - Distance from the cameras to an object.
-- :code:`F [cm]` - Width of image at the distance :code:`D`.
+- ``BL [cm]`` - Baseline of stereo cameras.
+- ``Dv [cm]`` - Minimum distace where both cameras see an object (thus where depth can be calculated).
+- ``B [pixels]`` - Width of the band where depth cannot be calculated.
+- ``W [pixels]`` - Width of mono in pixels camera or amount of horizontal pixels, also noted as :code:`HPixels` in other formulas.
+- ``D [cm]`` - Distance from the **camera plane** to an object (see image :ref:`here <Measuring real-world object dimensions>`).
+- ``F [cm]`` - Width of image at the distance ``D``.
 
 .. image:: https://user-images.githubusercontent.com/59799831/135310972-c37ba40b-20ad-4967-92a7-c71078bcef99.png
 

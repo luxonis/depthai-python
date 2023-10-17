@@ -10,7 +10,7 @@ nnPath = str((parentDir / Path('../models/mobilenet-ssd_openvino_2021.4_5shave.b
 pipeline = dai.Pipeline()
 
 cam = pipeline.createColorCamera()
-cam.setBoardSocket(dai.CameraBoardSocket.RGB)
+cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 cam.setInterleaved(False)
 cam.setIspScale(2,3)
 cam.setVideoSize(720,720)

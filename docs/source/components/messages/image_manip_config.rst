@@ -2,10 +2,9 @@ ImageManipConfig
 ================
 
 This message can is used for cropping, warping, rotating, resizing, etc. an image in runtime.
-It is sent either from the host to :ref:`ColorCamera` or :ref:`ImageManip`.
+It can be sent from host/:ref:`Script` node to either :ref:`ColorCamera` or :ref:`ImageManip`.
 
-..
-  It is sent either from the host or from the :ref:`Script` node to :ref:`ColorCamera` or :ref:`ImageManip`.
+.. note:: This message will reconfigure the whole config of the node, meaning you need to set all settings, not just the setting you want to change.
 
 Examples of functionality
 #########################

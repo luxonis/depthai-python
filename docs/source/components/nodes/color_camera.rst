@@ -87,7 +87,7 @@ Usage
       pipeline = dai.Pipeline()
       cam = pipeline.create(dai.node.ColorCamera)
       cam.setPreviewSize(300, 300)
-      cam.setBoardSocket(dai.CameraBoardSocket.RGB)
+      cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
       cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
       cam.setInterleaved(False)
       cam.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
@@ -97,7 +97,7 @@ Usage
       dai::Pipeline pipeline;
       auto cam = pipeline.create<dai::node::ColorCamera>();
       cam->setPreviewSize(300, 300);
-      cam->setBoardSocket(dai::CameraBoardSocket::RGB);
+      cam->setBoardSocket(dai::CameraBoardSocket::CAM_A);
       cam->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
       cam->setInterleaved(false);
       cam->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);

@@ -124,6 +124,7 @@ void bind_xlinkin(pybind11::module& m, void* pCallstack);
 void bind_xlinkout(pybind11::module& m, void* pCallstack);
 void bind_benchmark(pybind11::module& m, void* pCallstack);
 void bind_colorcamera(pybind11::module& m, void* pCallstack);
+void bind_camera(pybind11::module& m, void* pCallstack);
 void bind_monocamera(pybind11::module& m, void* pCallstack);
 void bind_stereodepth(pybind11::module& m, void* pCallstack);
 void bind_neuralnetwork(pybind11::module& m, void* pCallstack);
@@ -146,6 +147,7 @@ void bind_apriltag(pybind11::module& m, void* pCallstack);
 void bind_detectionparser(pybind11::module& m, void* pCallstack);
 void bind_sync(pybind11::module& m, void* pCallstack);
 void bind_pointcloud(pybind11::module& m, void* pCallstack);
+void bind_uvc(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -156,6 +158,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_xlinkout);
     callstack.push_front(bind_benchmark);
     callstack.push_front(bind_colorcamera);
+    callstack.push_front(bind_camera);
     callstack.push_front(bind_monocamera);
     callstack.push_front(bind_stereodepth);
     callstack.push_front(bind_neuralnetwork);
@@ -178,6 +181,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_detectionparser);
     callstack.push_front(bind_sync);
     callstack.push_front(bind_pointcloud);
+    callstack.push_front(bind_uvc);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
@@ -250,6 +254,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("group", &Node::Input::group, DOC(dai, Node, Input, group))
         .def_readwrite("name", &Node::Input::name, DOC(dai, Node, Input, name))
         .def_readwrite("type", &Node::Input::type, DOC(dai, Node, Input, type))
+        .def_readwrite("possibleDatatypes", &Node::Input::possibleDatatypes, DOC(dai, Node, Input, possibleDatatypes))
+        .def("getParent", static_cast<const Node& (Node::Input::*)() const>(&Node::Input::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Input, getParent))
+        .def("getParent", static_cast<Node& (Node::Input::*)()>(&Node::Input::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Input, getParent))
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
@@ -319,6 +326,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("name", &Node::Output::name, DOC(dai, Node, Output, name))
         .def_readwrite("type", &Node::Output::type, DOC(dai, Node, Output, type))
         .def_readwrite("possibleDatatypes", &Node::Output::possibleDatatypes, DOC(dai, Node, Output, possibleDatatypes))
+        .def("getParent", static_cast<const Node& (Node::Output::*)() const>(&Node::Output::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Output, getParent))
+        .def("getParent", static_cast<Node& (Node::Output::*)()>(&Node::Output::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Output, getParent))
+        .def("isSamePipeline", &Node::Output::isSamePipeline, py::arg("input"), DOC(dai, Node, Output, isSamePipeline))
         .def("canConnect", &Node::Output::canConnect, py::arg("input"), DOC(dai, Node, Output, canConnect))
         .def("link", &Node::Output::link, py::arg("input"), DOC(dai, Node, Output, link))
         .def("unlink", &Node::Output::unlink, py::arg("input"), DOC(dai, Node, Output, unlink))

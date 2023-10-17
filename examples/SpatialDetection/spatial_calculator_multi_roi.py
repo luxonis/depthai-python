@@ -3,6 +3,7 @@
 import cv2
 import depthai as dai
 import math
+import numpy as np
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -23,13 +24,13 @@ xinSpatialCalcConfig.setStreamName("spatialCalcConfig")
 
 # Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setLeftRightCheck(True)
-stereo.setExtendedDisparity(True)
+stereo.setSubpixel(True)
 spatialLocationCalculator.inputConfig.setWaitForMessage(False)
 
 # Create 10 ROIs
@@ -65,8 +66,10 @@ with dai.Device(pipeline) as device:
 
         depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depth_downscaled = depthFrame[::4]
+        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        max_depth = np.percentile(depth_downscaled, 99)
+        depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         spatialData = spatialCalcQueue.get().getSpatialLocations()

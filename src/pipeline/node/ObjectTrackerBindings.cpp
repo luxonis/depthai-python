@@ -65,6 +65,7 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def("setDetectionLabelsToTrack", &ObjectTracker::setDetectionLabelsToTrack, py::arg("labels"), DOC(dai, node, ObjectTracker, setDetectionLabelsToTrack))
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
         .def("setTrackerIdAssignmentPolicy", &ObjectTracker::setTrackerIdAssignmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssignmentPolicy))
+        .def("setTrackingPerClass", &ObjectTracker::setTrackingPerClass, py::arg("trackingPerClass"), DOC(dai, node, ObjectTracker, setTrackingPerClass))
         ;
     daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 

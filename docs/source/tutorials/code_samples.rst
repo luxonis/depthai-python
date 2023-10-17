@@ -8,6 +8,7 @@ Code Samples
    ../samples/bootloader/*
    ../samples/calibration/*
    ../samples/ColorCamera/*
+   ../samples/crash_report/*
    ../samples/EdgeDetector/*
    ../samples/FeatureTracker/*
    ../samples/host_side/*
@@ -22,7 +23,9 @@ Code Samples
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
    ../samples/SystemLogger/*
+   ../samples/ToF/*
    ../samples/VideoEncoder/*
+   ../samples/Warp/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -49,6 +52,10 @@ are presented with code.
 - :ref:`RGB Preview` - Displays a small preview of the RGB camera
 - :ref:`RGB scene` - Shows how to select ColorCamera's scene and effect
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
+
+.. rubric:: Crash report
+
+- :ref:`Crash report` - In case of a firmware crash, example reads it from the device and saves it to a json file
 
 .. rubric:: EdgeDetector
 
@@ -97,6 +104,7 @@ are presented with code.
 
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
+- :ref:`Mono preview - Alternate between dot projector and illumination LED` on OAK Pro devices
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
 .. rubric:: NeuralNetwork
@@ -121,9 +129,12 @@ are presented with code.
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
+- :ref:`Script UART communication` - UART communication with Script node
+- :ref:`Script EMMC access` - Access EMMC memory from the Script node
 
 .. rubric:: SpatialDetection
 
+- :ref:`Spatial Calculator Multi-ROI` - Selects multiple ROIs and calculates spatial coordinates for each of them
 - :ref:`Spatial location calculator` - Demonstrates how to use the spatial location calculator
 - :ref:`RGB & MobilenetSSD with spatial data` - Displays RGB frames with MobileNet detections and spatial coordinates on them
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
@@ -134,6 +145,7 @@ are presented with code.
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
+- :ref:`Stereo Depth custom Mesh` - Calculate and load custom mesh for stereo depth calculation
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
@@ -142,6 +154,10 @@ are presented with code.
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 
+.. rubric:: ToF
+
+- :ref:`ToF depth` - Displays colorized ToF depth frames
+
 .. rubric:: VideoEncoder
 
 - :ref:`Disparity encoding` - Encodes stereo disparity into :code:`.mjpeg`
@@ -149,6 +165,11 @@ are presented with code.
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`RGB Full Resolution Saver` - Saves full resolution RGB images (4k) on the host (:code:`.jpeg`)
+
+.. rubric:: Warp
+
+- :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
+- :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
 
 .. rubric:: Yolo
 

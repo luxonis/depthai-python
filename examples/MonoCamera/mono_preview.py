@@ -19,9 +19,9 @@ xoutRight.setStreamName('right')
 xoutVertical.setStreamName('vertical')
 
 # Properties
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 monoVertical.setBoardSocket(dai.CameraBoardSocket.VERTICAL)
 monoVertical.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)

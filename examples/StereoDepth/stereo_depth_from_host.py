@@ -156,6 +156,8 @@ class StereoConfigHandler:
     trSpatialNumIterations = list()
     trDecimationFactor = list()
     trDisparityShift = list()
+    trCenterAlignmentShift = list()
+    trInvalidateEdgePixels = list()
 
     def trackbarSigma(value):
         StereoConfigHandler.config.postProcessing.bilateralSigmaValue = value
@@ -277,6 +279,23 @@ class StereoConfigHandler:
         StereoConfigHandler.config.algorithmControl.disparityShift = value
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trDisparityShift:
+            tr.set(value)
+
+    def trackbarCenterAlignmentShift(value):
+        if StereoConfigHandler.config.algorithmControl.depthAlign != dai.StereoDepthConfig.AlgorithmControl.DepthAlign.CENTER:
+            print("Center alignment shift factor requires CENTER alignment enabled!")
+            return
+        StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor = value / 100.
+        print(f"centerAlignmentShiftFactor: {StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor:.2f}")
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trCenterAlignmentShift:
+            tr.set(value)
+    
+    def trackbarInvalidateEdgePixels(value):    
+        StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels = value
+        print(f"numInvalidateEdgePixels: {StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels:.2f}")
+        StereoConfigHandler.newConfig = True
+        for tr in StereoConfigHandler.trInvalidateEdgePixels:
             tr.set(value)
 
     def handleKeypress(key, stereoDepthConfigInQueue):
@@ -416,6 +435,8 @@ class StereoConfigHandler:
         StereoConfigHandler.trLrCheck.append(StereoConfigHandler.Trackbar('LR-check threshold', stream, 0, 16, StereoConfigHandler.config.algorithmControl.leftRightCheckThreshold, StereoConfigHandler.trackbarLrCheckThreshold))
         StereoConfigHandler.trFractionalBits.append(StereoConfigHandler.Trackbar('Subpixel fractional bits', stream, 3, 5, StereoConfigHandler.config.algorithmControl.subpixelFractionalBits, StereoConfigHandler.trackbarFractionalBits))
         StereoConfigHandler.trDisparityShift.append(StereoConfigHandler.Trackbar('Disparity shift', stream, 0, 100, StereoConfigHandler.config.algorithmControl.disparityShift, StereoConfigHandler.trackbarDisparityShift))
+        StereoConfigHandler.trCenterAlignmentShift.append(StereoConfigHandler.Trackbar('Center alignment shift factor', stream, 0, 100, StereoConfigHandler.config.algorithmControl.centerAlignmentShiftFactor, StereoConfigHandler.trackbarCenterAlignmentShift))
+        StereoConfigHandler.trInvalidateEdgePixels.append(StereoConfigHandler.Trackbar('Invalidate edge pixels', stream, 0, 100, StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels, StereoConfigHandler.trackbarInvalidateEdgePixels))
         StereoConfigHandler.trLineqAlpha.append(StereoConfigHandler.Trackbar('Linear equation alpha', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.alpha, StereoConfigHandler.trackbarLineqAlpha))
         StereoConfigHandler.trLineqBeta.append(StereoConfigHandler.Trackbar('Linear equation beta', stream, 0, 15, StereoConfigHandler.config.costMatching.linearEquationParameters.beta, StereoConfigHandler.trackbarLineqBeta))
         StereoConfigHandler.trLineqThreshold.append(StereoConfigHandler.Trackbar('Linear equation threshold', stream, 0, 255, StereoConfigHandler.config.costMatching.linearEquationParameters.threshold, StereoConfigHandler.trackbarLineqThreshold))
@@ -569,6 +590,7 @@ if enableDebugExtLrCheckIt2:
 if args.dumpdisparitycostvalues:
     stereo.debugDispCostDump.link(xoutDebugCostDump.input)
 
+
 StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow('Stereo control panel')
 
@@ -619,7 +641,7 @@ def convertToCv2Frame(name, image, config):
     elif 'disparity' in name:
         if 1: # Optionally, extend disparity range to better visualize it
             frame = (frame * 255. / maxDisp).astype(np.uint8)
-
+        return frame
         # if 1: # Optionally, apply a color map
         #     frame = cv2.applyColorMap(frame, cv2.COLORMAP_HOT)
 
@@ -630,8 +652,8 @@ print("Connecting and starting the pipeline")
 with dai.Device(pipeline) as device:
 
     stereoDepthConfigInQueue = device.getInputQueue("stereoDepthConfig")
-    inStreams = ['in_right', 'in_left']
-    inStreamsCameraID = [dai.CameraBoardSocket.RIGHT, dai.CameraBoardSocket.LEFT]
+    inStreams = ['in_left', 'in_right']
+    inStreamsCameraID = [dai.CameraBoardSocket.CAM_B, dai.CameraBoardSocket.CAM_C]
     in_q_list = []
     for s in inStreams:
         q = device.getInputQueue(s)
@@ -670,8 +692,6 @@ with dai.Device(pipeline) as device:
                 img.setWidth(width)
                 img.setHeight(height)
                 q.send(img)
-                if timestamp_ms == 0:  # Send twice for first iteration
-                    q.send(img)
                 # print("Sent frame: {:25s}".format(path), 'timestamp_ms:', timestamp_ms)
             timestamp_ms += frame_interval_ms
             index = (index + 1) % dataset_size
