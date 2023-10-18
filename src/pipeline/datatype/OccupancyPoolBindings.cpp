@@ -36,6 +36,7 @@ void bind_occupancypool(pybind11::module& m, void* pCallstack){
     rawOccupancyPool
         .def(py::init<>())
         .def_readwrite("occupancyPool", &RawOccupancyPool::occupancyPool)
+        .def_readwrite("occupancyPool3d", &RawOccupancyPool::occupancyPool3d)
         .def_readwrite("sequenceNum", &RawOccupancyPool::sequenceNum)
         .def_readwrite("ts", &RawOccupancyPool::ts)
         .def_readwrite("tsDevice", &RawOccupancyPool::tsDevice)
@@ -45,6 +46,7 @@ void bind_occupancypool(pybind11::module& m, void* pCallstack){
     occupancyPool
         .def(py::init<>())
         .def_property("occupancyPool", [](OccupancyPool& x) { return &x.occupancyPool; }, [](OccupancyPool& x, std::vector<std::vector<int>> val) { x.occupancyPool = val; }, DOC(dai, OccupancyPool, occupancyPool))
+        .def_property("occupancyPool3d", [](OccupancyPool& x) { return &x.occupancyPool3d; }, [](OccupancyPool& x, std::vector<std::vector<std::vector<int>>> val) { x.occupancyPool3d = val; }, DOC(dai, OccupancyPool, occupancyPool3d))
         .def("getTimestamp", &OccupancyPool::getTimestamp, DOC(dai, OccupancyPool, getTimestamp))
         .def("getTimestampDevice", &OccupancyPool::getTimestampDevice, DOC(dai, OccupancyPool, getTimestampDevice))
         .def("getSequenceNum", &OccupancyPool::getSequenceNum, DOC(dai, OccupancyPool, getSequenceNum))
