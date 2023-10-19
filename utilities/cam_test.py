@@ -60,7 +60,7 @@ def socket_type_pair(arg):
     return [socket, is_color, is_tof]
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     default=[],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
@@ -111,6 +111,8 @@ parser.add_argument("--no-stereo", action="store_true",
 
 parser.add_argument("--gui", action="store_true",
                     help="Use GUI instead of CLI")
+parser.add_argument("-h", "--help", action="store_true", default=False,
+                    help="Show this help message and exit") # So you can forward --help to stress test, without it being consumed by cam_test.py
 
 args, _unknown = parser.parse_known_args()
 
@@ -121,6 +123,10 @@ os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
 if args.stress:
     from stress_test import stress_test
     stress_test(args.device)
+    exit(0)
+
+if args.help:
+    parser.print_help()
     exit(0)
 
 if args.gui:
