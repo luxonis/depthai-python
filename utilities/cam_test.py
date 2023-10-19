@@ -112,7 +112,7 @@ parser.add_argument("--no-stereo", action="store_true",
 parser.add_argument("--gui", action="store_true",
                     help="Use GUI instead of CLI")
 
-args = parser.parse_args()
+args, _unknown = parser.parse_known_args()
 
 # Set timeouts before importing depthai
 os.environ["DEPTHAI_CONNECTION_TIMEOUT"] = str(args.connection_timeout)

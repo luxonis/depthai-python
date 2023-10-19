@@ -1,5 +1,5 @@
 import depthai as dai
-from typing import List, Tuple, Dict
+from typing import Any, List, Optional, Tuple, Dict
 import cv2
 import numpy as np
 import signal
@@ -10,7 +10,7 @@ def on_exit(sig, frame):
 
 signal.signal(signal.SIGINT, on_exit)
 
-color_resolutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, int]] = {
+color_resolutions: Dict[Tuple[int, int], dai.ColorCameraProperties.SensorResolution] = {
     # IMX582 cropped
     (5312, 6000): dai.ColorCameraProperties.SensorResolution.THE_5312X6000,
     (4208, 3120): dai.ColorCameraProperties.SensorResolution.THE_13_MP,  # AR214
@@ -27,7 +27,29 @@ color_resolutions: Dict[dai.ColorCameraProperties.SensorResolution, Tuple[int, i
     (1280, 720): dai.ColorCameraProperties.SensorResolution.THE_720_P,
 }
 
+YOLO_LABELS = [
+    "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+    "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+    "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+    "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+    "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+    "teddy bear",     "hair drier", "toothbrush"
+]
 
+# Parse args
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-ne", "--n-edge-detectors", default=0, type=int, help="Number of edge detectors to create.")
+parser.add_argument("--no-nnet", action="store_true", default=False, help="Don't create a neural network.")
+
+# May have some unknown args
+args, _ = parser.parse_known_args()
 def print_system_information(info: dai.SystemInformation):
     print(
         "Ddr: used / total - %.2f / %.2f MiB"
@@ -74,17 +96,18 @@ def get_or_download_yolo_blob() -> str:
     import os
     import subprocess
     import sys
+    from pathlib import Path
 
     this_file = os.path.realpath(__file__)
     this_dir = os.path.dirname(this_file)
     examples_dir = os.path.join(this_dir, "..", "examples")
     models_dir = os.path.join(examples_dir, "models")
-    blob_path = os.path.join(
-        models_dir, "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob")
     downloader_cmd = [sys.executable, f"{examples_dir}/downloader/downloader.py", "--name", "tiny-yolo",
                       "--cache_dir", f"{examples_dir}/downloader/", "--num_attempts", "5", "-o", f"{examples_dir}/models"]
     subprocess.run(downloader_cmd, check=True)
-    return blob_path
+    blob_path = Path(os.path.join(
+        models_dir, "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob"))
+    return str(Path.resolve(blob_path))
 
 
 last_frame = {} # Store latest frame for each queue
@@ -94,6 +117,10 @@ jet_custom[0] = [0, 0, 0]
 
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
+
+class PipelineContext:
+    q_name_yolo_passthrough: Optional[str] = None
+    """The name of the queue that the YOLO spatial detection network passthrough is connected to."""
 
 def stress_test(mxid: str = ""):
     dot_intensity = 500
@@ -112,7 +139,7 @@ def stress_test(mxid: str = ""):
         device.setIrLaserDotProjectorBrightness(dot_intensity)
         print("Setting default flood intensity to", flood_intensity)
         device.setIrFloodLightBrightness(flood_intensity)
-        pipeline, outputs = build_pipeline(device)
+        pipeline, outputs, pipeline_context = build_pipeline(device)
         device.startPipeline(pipeline)
         start_time = time.time()
         queues = [device.getOutputQueue(name, size, False)
@@ -123,6 +150,7 @@ def stress_test(mxid: str = ""):
         while True:
             for queue in queues:
                 packet = queue.tryGet()
+                # print("QUEUE", queue.getName(), "PACKET", packet)
                 if packet is not None:
                     if queue.getName() == "tof":
                         frame = packet.getCvFrame()
@@ -137,6 +165,15 @@ def stress_test(mxid: str = ""):
                             continue
                         else:
                             last_frame[queue.getName()] = packet.getCvFrame()
+                    elif isinstance(packet, dai.ImgDetections):
+                        frame = last_frame.get(pipeline_context.q_name_yolo_passthrough, None)
+                        if frame is None:
+                            continue # No frame to draw on
+                        for detection in packet.detections:
+                            bbox = np.array([detection.xmin * frame.shape[1], detection.ymin * frame.shape[0], detection.xmax * frame.shape[1], detection.ymax * frame.shape[0]], dtype=np.int32)
+                            cv2.putText(frame, YOLO_LABELS[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                            cv2.putText(frame, f"{int(detection.confidence)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
             sys_info: dai.SystemInformation = sys_info_q.tryGet()
             if sys_info:
                 print("----------------------------------------")
@@ -196,9 +233,12 @@ RGB_FPS = 20
 MONO_FPS = 20
 ENCODER_FPS = 10
 
-
-def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, int]]]:
+def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, int]], PipelineContext]:
+    """
+    Build a pipeline based on device capabilities. Return a tuple of (pipeline, output_queue_names, PipelineContext)
+    """
     camera_features = device.getConnectedCameraFeatures()
+    context = PipelineContext()
     try:
         calib = device.readCalibration2()
     except:
@@ -240,10 +280,10 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
 
     n_color_cams = 0
     n_edge_detectors = 0
-    MAX_EDGE_DETECTORS = 0
     for cam in camera_features:
         print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs], "Supported Types:", cam.supportedTypes)
-        max_sensor_size = (cam.configs[-1].width, cam.configs[-1].height)
+        sorted_configs = sorted(cam.configs, key=lambda conf: conf.width * conf.height)
+        max_sensor_size = (sorted_configs[-1].width, sorted_configs[-1].height)
         node = None
         cam_kind = cam.supportedTypes[0]
         if cam_kind == dai.CameraSensorType.MONO:
@@ -254,12 +294,18 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
             mono.setResolution(
                 dai.MonoCameraProperties.SensorResolution.THE_400_P)
             mono.setFps(MONO_FPS)
+            xlink_preview = pipeline.createXLinkOut()
+            stream_name = "preview_" + cam.socket.name
+            xlink_preview.setStreamName(stream_name)
+            mono.out.link(xlink_preview.input)
+            xlink_outs.append((stream_name, 4))
         elif cam_kind == dai.CameraSensorType.COLOR:
             print("Camera socket:", cam.socket, "IS COLOR")
             n_color_cams += 1
             color = pipeline.createColorCamera()
             node = color
             color.setBoardSocket(cam.socket)
+            print(max_sensor_size, "FOR CCAM ", cam.socket)
             resolution = color_resolutions.get(max_sensor_size, None)
             if resolution is None:
                 print(
@@ -267,17 +313,21 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 continue
             color.setResolution(resolution)
             color.setFps(RGB_FPS)
-            color_cam = color
+            if n_color_cams == 1:
+                color_cam = color
             color.setPreviewSize(416, 416)
             color.setColorOrder(
                 dai.ColorCameraProperties.ColorOrder.BGR)
             color.setInterleaved(False)
 
-            xlink_preview = pipeline.createXLinkOut()
-            stream_name = "preview_" + cam.socket.name
-            xlink_preview.setStreamName(stream_name)
-            color.preview.link(xlink_preview.input)
-            xlink_outs.append((stream_name, 4))
+            # Only create a preview here if we're not creating a detection network
+            # And create a preview for other color cameras, that are not used for yolo
+            if args.no_nnet or n_color_cams > 1:
+                xlink_preview = pipeline.createXLinkOut()
+                stream_name = "preview_" + cam.socket.name
+                xlink_preview.setStreamName(stream_name)
+                color.preview.link(xlink_preview.input)
+                xlink_outs.append((stream_name, 4))
 
         elif cam_kind == dai.CameraSensorType.TOF:
             xin_tof_config = pipeline.createXLinkIn()
@@ -301,7 +351,8 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         else:
             print(f"Unsupported camera type: {cam.supportedTypes[0]}")
             exit(-1)
-        
+        if node is None:
+            continue
         cam_control.out.link(node.inputControl)
 
         output = "out" if cam_kind == dai.CameraSensorType.MONO else "video"
@@ -321,7 +372,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
             ve_xlink.setStreamName(stream_name)
             video_encoder.bitstream.link(ve_xlink.input)
             xlink_outs.append((stream_name, 5))
-        if n_edge_detectors < MAX_EDGE_DETECTORS:
+        if n_edge_detectors < args.n_edge_detectors:
             n_edge_detectors += 1
             edge_detector = pipeline.createEdgeDetector()
             if cam_kind == dai.CameraSensorType.COLOR:
@@ -351,63 +402,71 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
         stereo.setLeftRightCheck(True)
         stereo.setSubpixel(True)
         stereo.setDepthAlign(align_socket)
-
-        # if color_cam:
-        #     yolo = pipeline.createYoloSpatialDetectionNetwork()
-        #     blob_path = get_or_download_yolo_blob()
-        #     yolo.setBlobPath(blob_path)
-        #     yolo.setConfidenceThreshold(0.5)
-        #     yolo.input.setBlocking(False)
-        #     yolo.setBoundingBoxScaleFactor(0.5)
-        #     yolo.setDepthLowerThreshold(100)
-        #     yolo.setDepthUpperThreshold(5000)
-        #     yolo.setNumClasses(80)
-        #     yolo.setCoordinateSize(4)
-        #     yolo.setAnchors(
-        #         [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
-        #     yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-        #     yolo.setIouThreshold(0.5)
-        #     color_cam.preview.link(yolo.input)
-        #     stereo.depth.link(yolo.inputDepth)
-
-        #     xout_depth = pipeline.createXLinkOut()
-        #     depth_q_name = "depth"
-        #     xout_depth.setStreamName(depth_q_name)
-        #     yolo.passthroughDepth.link(xout_depth.input)
-        #     xlink_outs.append((depth_q_name, 4))
-
-        #     xout_yolo = pipeline.createXLinkOut()
-        #     yolo_q_name = "yolo"
-        #     xout_yolo.setStreamName(yolo_q_name)
-        #     yolo.out.link(xout_yolo.input)
-        #     xlink_outs.append((yolo_q_name, 4))
-        # else:
-        #     print(
-        #         "Device doesn't have color camera, skipping spatial detection network creation...")
-    # elif color_cam:  # Only color camera, e.g. OAK-1: Create a YOLO
-    #     yolo = pipeline.createYoloDetectionNetwork()
-    #     blob_path = get_or_download_yolo_blob()
-    #     yolo.setBlobPath(blob_path)
-    #     yolo.setConfidenceThreshold(0.5)
-    #     yolo.input.setBlocking(False)
-    #     yolo.setNumClasses(80)
-    #     yolo.setCoordinateSize(4)
-    #     yolo.setAnchors(
-    #         [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
-    #     yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-    #     yolo.setIouThreshold(0.5)
-    #     color_cam.preview.link(yolo.input)
-
-    #     xout_yolo = pipeline.createXLinkOut()
-    #     yolo_q_name = "yolo"
-    #     xout_yolo.setStreamName(yolo_q_name)
-    #     yolo.out.link(xout_yolo.input)
-    #     xlink_outs.append((yolo_q_name, 4))
     else:
-        print("Device doesn't have a stereo pair, skipping depth and spatial detection network creation...")
+        print("Device doesn't have a stereo pair, skipping stereo depth creation...")
+    if color_cam is not None:
+        if not args.no_nnet:
+            if left is not None and right is not None: # Create spatial detection net
+                print("Creating spatial detection network...")
+                yolo = pipeline.createYoloSpatialDetectionNetwork()
+                blob_path = get_or_download_yolo_blob()
+                yolo.setBlobPath(blob_path)
+                yolo.setConfidenceThreshold(0.5)
+                yolo.input.setBlocking(False)
+                yolo.setBoundingBoxScaleFactor(0.5)
+                yolo.setDepthLowerThreshold(100)
+                yolo.setDepthUpperThreshold(5000)
+                yolo.setNumClasses(80)
+                yolo.setCoordinateSize(4)
+                yolo.setAnchors(
+                    [10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
+                yolo.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+                yolo.setIouThreshold(0.5)
+                color_cam.preview.link(yolo.input)
+                stereo.depth.link(yolo.inputDepth)
 
+                xout_depth = pipeline.createXLinkOut()
+                depth_q_name = "depth"
+                xout_depth.setStreamName(depth_q_name)
+                yolo.passthroughDepth.link(xout_depth.input)
+                xlink_outs.append((depth_q_name, 4))
+
+                xout_yolo = pipeline.createXLinkOut()
+                yolo_q_name = "yolo"
+                xout_yolo.setStreamName(yolo_q_name)
+                yolo.out.link(xout_yolo.input)
+                xlink_outs.append((yolo_q_name, 4))
+            else:
+                print("Creating YOLO detection network...")
+                nn_blob_path = get_or_download_yolo_blob()
+                yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
+                yoloDet.setBlobPath(nn_blob_path)
+                # Yolo specific parameters
+                yoloDet.setConfidenceThreshold(0.5)
+                yoloDet.setNumClasses(80)
+                yoloDet.setCoordinateSize(4)
+                yoloDet.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+                yoloDet.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+                yoloDet.setIouThreshold(0.5)
+                yoloDet.input.setBlocking(False)
+                color_cam.preview.link(yoloDet.input)
+                xoutColor = pipeline.createXLinkOut()
+                passthrough_q_name = f"preview_{color_cam.getBoardSocket()}"
+                xoutColor.setStreamName(passthrough_q_name)
+                yoloDet.passthrough.link(xoutColor.input)
+                xlink_outs.append((passthrough_q_name, 4))
+                context.q_name_yolo_passthrough = passthrough_q_name
+                xout_yolo = pipeline.createXLinkOut()
+                yolo_q_name = "yolo"
+                xout_yolo.setStreamName(yolo_q_name)
+                yoloDet.out.link(xout_yolo.input)
+                xlink_outs.append((yolo_q_name, 4))
+        else:
+            print("Skipping YOLO detection network creation...")
+    else:
+        print("No color camera found, skipping YOLO detection network creation...")
     print("XLINK OUTS:; ", xlink_outs)
-    return (pipeline, xlink_outs)
+    return (pipeline, xlink_outs, context)
 
 
 if __name__ == "__main__":
