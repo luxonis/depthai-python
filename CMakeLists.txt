@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4) # For Hunter
 # Set defaults
 # PIC toolchain as we are building a shared library
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/toolchain/pic.cmake" CACHE STRING "")
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Build dependencies as 'Release' only by default (if not MSVC, as it requires same debug level for libraries to be linked against)
 if(NOT WIN32)
     set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
@@ -179,6 +179,9 @@ if(WIN32)
     # Disable "d" postfix, so python can import the library as is
     set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "")
 endif()
+
+# TODO - this in only temporary for a test
+target_include_directories(depthai BEFORE PUBLIC "${CMAKE_SYSROOT}/usr/include/python3.8")
 
 # Add stubs (pyi) generation step after building bindings
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
