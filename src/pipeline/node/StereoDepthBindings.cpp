@@ -61,6 +61,8 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def_readwrite("rectificationUseSpecTranslation", &StereoDepthProperties::rectificationUseSpecTranslation, DOC(dai, StereoDepthProperties, rectificationUseSpecTranslation))
         .def_readwrite("depthAlignmentUseSpecTranslation", &StereoDepthProperties::depthAlignmentUseSpecTranslation, DOC(dai, StereoDepthProperties, depthAlignmentUseSpecTranslation))
         .def_readwrite("alphaScaling", &StereoDepthProperties::alphaScaling, DOC(dai, StereoDepthProperties, alphaScaling))
+        .def_readwrite("verticalStereo", &StereoDepthProperties::verticalStereo, DOC(dai, StereoDepthProperties, verticalStereo))
+        .def_readwrite("rectificationInterpolation", &StereoDepthProperties::rectificationInterpolation, DOC(dai, StereoDepthProperties, rectificationInterpolation))
         ;
 
     stereoDepthPresetMode
@@ -176,6 +178,8 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("setRectificationUseSpecTranslation", &StereoDepth::setRectificationUseSpecTranslation, DOC(dai, node, StereoDepth, setRectificationUseSpecTranslation))
         .def("setDepthAlignmentUseSpecTranslation", &StereoDepth::setDepthAlignmentUseSpecTranslation, DOC(dai, node, StereoDepth, setDepthAlignmentUseSpecTranslation))
         .def("setAlphaScaling", &StereoDepth::setAlphaScaling, DOC(dai, node, StereoDepth, setAlphaScaling))
+        .def("setVerticalStereo", &StereoDepth::setVerticalStereo, DOC(dai, node, StereoDepth, setVerticalStereo))
+        .def("setRectificationInterpolation", &StereoDepth::setRectificationInterpolation, DOC(dai, node, StereoDepth, setRectificationInterpolation))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
