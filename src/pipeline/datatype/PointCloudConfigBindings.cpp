@@ -43,6 +43,7 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("maxHeight", &RawPointCloudConfig::maxHeight, DOC(dai, RawPointCloudConfig, maxHeight))
         .def_readwrite("numRings", &RawPointCloudConfig::numRings, DOC(dai, RawPointCloudConfig, numRings))
         .def_readwrite("numSectors", &RawPointCloudConfig::numSectors, DOC(dai, RawPointCloudConfig, numSectors))
+        .def_readwrite("numVoxels", &RawPointCloudConfig::numVoxels, DOC(dai, RawPointCloudConfig, numVoxels))
         .def_readwrite("occupancyThreshold", &RawPointCloudConfig::occupancyThreshold, DOC(dai, RawPointCloudConfig, occupancyThreshold))
         .def_readwrite("transformationMatrix", &RawPointCloudConfig::transformationMatrix, DOC(dai, RawPointCloudConfig, transformationMatrix))
         .def_readwrite("scale", &RawPointCloudConfig::scale, DOC(dai, RawPointCloudConfig, scale))
