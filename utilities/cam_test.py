@@ -82,6 +82,8 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
                     help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
+parser.add_argument('-show', '--show-meta', action='store_true',
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
 args = parser.parse_args()
 
 cam_list = []
@@ -349,6 +351,7 @@ with dai.Device() as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
+    show = args.show_meta
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -373,14 +376,26 @@ with dai.Device() as device:
                         frame = (frame.view(np.int16).astype(float))
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                if show:
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
+                    txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
+                    txt += f"ISO: {pkt.getSensitivity():4}, "
+                    txt += f"Lens pos: {pkt.getLensPosition():3}, "
+                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    txt += f", pix avg: {np.average(frame):.3f}"
+                    if needs_newline:
+                        print()
+                        needs_newline = False
+                    print(txt)
                 capture = c in capture_list
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
                          + '_' + str(width) + 'x' + str(height)
+                         + '_' + capture_time
                          + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
                          + '_iso_' + str(pkt.getSensitivity())
                          + '_lens_' + str(pkt.getLensPosition())
-                         + '_' + capture_time
+                         + '_' + str(pkt.getColorTemperature()) + 'K'
                          + '_' + str(pkt.getSequenceNum())
                         )
                     capture_list.remove(c)
@@ -418,10 +433,15 @@ with dai.Device() as device:
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
+        needs_newline = True
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('/'):
+            show = not show
+            # Print empty string as FPS status new-line separator
+            print("" if show else "Printing camera settings: OFF")
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
@@ -578,3 +598,5 @@ with dai.Device() as device:
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()
