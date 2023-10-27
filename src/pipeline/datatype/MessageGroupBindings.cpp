@@ -46,6 +46,9 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
         .def("__getitem__", [](MessageGroup& msg, const std::string& name) {
             return msg[name];
         })
+        .def("__setitem__", [](MessageGroup& msg, const std::string& name, std::shared_ptr<Buffer> data) {
+            return msg.add(name, data);
+        })
         .def("syncSuccessful", &MessageGroup::syncSuccessful, DOC(dai, MessageGroup, syncSuccessful))
         .def("getTimestamp", &MessageGroup::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &MessageGroup::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
