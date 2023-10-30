@@ -44,6 +44,7 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
     messageGroup
         .def(py::init<>())
         .def("__getitem__", [](MessageGroup& msg, const std::string& name) {
+            std::shared_ptr<ADatatype> data = nullptr;
             return msg[name];
         })
         .def("__setitem__", [](MessageGroup& msg, const std::string& name, std::shared_ptr<Buffer> data) {
