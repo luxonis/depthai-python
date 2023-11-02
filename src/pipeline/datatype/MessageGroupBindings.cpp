@@ -51,6 +51,7 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
             return msg.add(name, data);
         })
         .def("syncSuccessful", &MessageGroup::syncSuccessful, DOC(dai, MessageGroup, syncSuccessful))
+        .def("getIntervalNs", &MessageGroup::getIntervalNs, DOC(dai, MessageGroup, getIntervalNs))
         .def("getTimestamp", &MessageGroup::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &MessageGroup::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
         .def("getSequenceNum", &MessageGroup::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
