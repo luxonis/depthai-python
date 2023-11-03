@@ -24,6 +24,9 @@ Other controls:
 '0' - Select control: sharpness
 '[' - Select control: luma denoise
 ']' - Select control: chroma denoise
+'\' - Select control: scene mode
+';' - Select control: control mode
+''' - Select control: capture intent
 'a' 'd' - Increase/decrease dot projector intensity
 'w' 's' - Increase/decrease flood LED intensity
 
@@ -93,6 +96,8 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
                     help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
+parser.add_argument('-show', '--show-meta', action='store_true',
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
 
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
@@ -188,6 +193,22 @@ class FPS:
 
     def get(self):
         return self.fps
+
+class Cycle:
+    def __init__(self, enum_type, start_item=None):
+        self.items = [item for name, item in vars(enum_type).items() if name.isupper()]
+        # If start_item is provided, set the index to its position. Otherwise, default to 0
+        self.index = self.items.index(start_item) if start_item else 0
+
+    def step(self, n):
+        self.index = (self.index + n) % len(self.items)
+        return self.items[self.index]
+
+    def next(self):
+        return self.step(1)
+
+    def prev(self):
+        return self.step(-1)
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
@@ -354,12 +375,12 @@ with dai.Device(*dai_device_args) as device:
     dotIntensity = 0
     floodIntensity = 0
 
-    awb_mode = cycle([item for name, item in vars(
-        dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
-    anti_banding_mode = cycle([item for name, item in vars(
-        dai.CameraControl.AntiBandingMode).items() if name.isupper()])
-    effect_mode = cycle([item for name, item in vars(
-        dai.CameraControl.EffectMode).items() if name.isupper()])
+    awb_mode = Cycle(dai.CameraControl.AutoWhiteBalanceMode)
+    anti_banding_mode = Cycle(dai.CameraControl.AntiBandingMode)
+    effect_mode = Cycle(dai.CameraControl.EffectMode)
+    scene_mode = Cycle(dai.CameraControl.SceneMode)
+    control_mode = Cycle(dai.CameraControl.ControlMode)
+    capture_intent = Cycle(dai.CameraControl.CaptureIntent)
 
     ae_comp = 0
     ae_lock = False
@@ -371,7 +392,7 @@ with dai.Device(*dai_device_args) as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
-    show = False
+    show = args.show_meta
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -402,7 +423,7 @@ with dai.Device(*dai_device_args) as device:
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
-                    txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
@@ -415,10 +436,11 @@ with dai.Device(*dai_device_args) as device:
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
                          + '_' + str(width) + 'x' + str(height)
+                         + '_' + capture_time
                          + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
                          + '_iso_' + str(pkt.getSensitivity())
                          + '_lens_' + str(pkt.getLensPosition())
-                         + '_' + capture_time
+                         + '_' + str(pkt.getColorTemperature()) + 'K'
                          + '_' + str(pkt.getSequenceNum())
                         )
                     capture_list.remove(c)
@@ -535,22 +557,26 @@ with dai.Device(*dai_device_args) as device:
             if dotIntensity < 0:
                 dotIntensity = 0
             device.setIrLaserDotProjectorBrightness(dotIntensity)
+            print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('d'):
             dotIntensity = dotIntensity + DOT_STEP
             if dotIntensity > DOT_MAX:
                 dotIntensity = DOT_MAX
             device.setIrLaserDotProjectorBrightness(dotIntensity)
+            print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('w'):
             floodIntensity = floodIntensity + FLOOD_STEP
             if floodIntensity > FLOOD_MAX:
                 floodIntensity = FLOOD_MAX
             device.setIrFloodLightBrightness(floodIntensity)
+            print(f'IR Flood intensity:', floodIntensity)
         elif key == ord('s'):
             floodIntensity = floodIntensity - FLOOD_STEP
             if floodIntensity < 0:
                 floodIntensity = 0
             device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p':
+            print(f'IR Flood intensity:', floodIntensity)
+        elif key >= 0 and chr(key) in '34567890[]p\\;\'':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -567,6 +593,12 @@ with dai.Device(*dai_device_args) as device:
                 control = 'saturation'
             elif key == ord('0'):
                 control = 'sharpness'
+            elif key == ord('\\'):
+                control = 'scene_mode'
+            elif key == ord(';'):
+                control = 'control_mode'
+            elif key == ord('\''):
+                control = 'capture_intent'
             elif key == ord('['):
                 control = 'luma_denoise'
             elif key == ord(']'):
@@ -582,23 +614,35 @@ with dai.Device(*dai_device_args) as device:
                 change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ]")
+                print("Please select a control first using keys 3..9 0 [ ] \\ ; \'")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
                 ctrl.setAutoExposureCompensation(ae_comp)
             elif control == 'anti_banding_mode':
-                abm = next(anti_banding_mode)
+                abm = anti_banding_mode.step(change)
                 print("Anti-banding mode:", abm)
                 ctrl.setAntiBandingMode(abm)
             elif control == 'awb_mode':
-                awb = next(awb_mode)
+                awb = awb_mode.step(change)
                 print("Auto white balance mode:", awb)
                 ctrl.setAutoWhiteBalanceMode(awb)
             elif control == 'effect_mode':
-                eff = next(effect_mode)
+                eff = effect_mode.step(change)
                 print("Effect mode:", eff)
                 ctrl.setEffectMode(eff)
+            elif control == 'scene_mode':
+                sc = scene_mode.step(change)
+                print("Scene mode:", sc)
+                ctrl.setSceneMode(sc)
+            elif control == 'control_mode':
+                cm = control_mode.step(change)
+                print("Control mode:", cm)
+                ctrl.setControlMode(cm)
+            elif control == 'capture_intent':
+                ci = capture_intent.step(change)
+                print("Capture intent:", ci)
+                ctrl.setCaptureIntent(ci)
             elif control == 'brightness':
                 brightness = clamp(brightness + change, -10, 10)
                 print("Brightness:", brightness)
