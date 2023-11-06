@@ -24,6 +24,7 @@ Code Samples
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
    ../samples/SystemLogger/*
+   ../samples/ToF/*
    ../samples/VideoEncoder/*
    ../samples/Warp/*
    ../samples/Yolo/*
@@ -35,7 +36,8 @@ are presented with code.
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
-- :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`Flash Bootloader` - Flash factory bootloader to the device
+- :ref:`Flash User Bootloader` - Flash user bootloader to the device
 - :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
@@ -109,6 +111,7 @@ are presented with code.
 
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
+- :ref:`Mono preview - Alternate between dot projector and illumination LED` on OAK Pro devices
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
 .. rubric:: NeuralNetwork
@@ -157,6 +160,10 @@ are presented with code.
 .. rubric:: SystemLogger
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
+
+.. rubric:: ToF
+
+- :ref:`ToF depth` - Displays colorized ToF depth frames
 
 .. rubric:: VideoEncoder
 
