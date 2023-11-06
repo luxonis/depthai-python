@@ -43,8 +43,8 @@ streams = ['dot-left', 'dot-right', 'flood-left', 'flood-right']
 script = pipeline.create(dai.node.Script)
 script.setProcessor(dai.ProcessorType.LEON_CSS)
 script.setScript("""
-    dotBright = 500  # Note: recommended to not exceed 765, for max duty cycle
-    floodBright = 200
+    dotBright = 0.8
+    floodBright = 0.1
     LOGGING = False  # Set `True` for latency/timings debugging
 
     node.warn(f'IR drivers detected: {str(Device.getIrDrivers())}')
