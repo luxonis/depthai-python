@@ -184,7 +184,7 @@ are presented with code.
 
 - :ref:`UVC & Color Camera` - Displays RGB frames from a UVC camera
 - :ref:`UVC & Mono Camera` - Displays mono frames from a UVC camera
-- :ref:`UVC & Depth` - Displays disparity frames from a UVC camera
+- :ref:`UVC & Disparity` - Displays disparity frames from a UVC camera
 
 .. rubric:: Yolo
 
