@@ -556,25 +556,25 @@ with dai.Device(*dai_device_args) as device:
             dotIntensity = dotIntensity - DOT_STEP
             if dotIntensity < 0:
                 dotIntensity = 0
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
             print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('d'):
             dotIntensity = dotIntensity + DOT_STEP
             if dotIntensity > DOT_MAX:
                 dotIntensity = DOT_MAX
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
             print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('w'):
             floodIntensity = floodIntensity + FLOOD_STEP
             if floodIntensity > FLOOD_MAX:
                 floodIntensity = FLOOD_MAX
-            device.setIrFloodLightBrightness(floodIntensity)
+            device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
         elif key == ord('s'):
             floodIntensity = floodIntensity - FLOOD_STEP
             if floodIntensity < 0:
                 floodIntensity = 0
-            device.setIrFloodLightBrightness(floodIntensity)
+            device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
         elif key >= 0 and chr(key) in '34567890[]p\\;\'':
             if key == ord('3'):
