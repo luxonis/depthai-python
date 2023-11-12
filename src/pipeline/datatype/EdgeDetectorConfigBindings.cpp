@@ -50,6 +50,8 @@ void bind_edgedetectorconfig(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def("setSobelFilterKernels",  &EdgeDetectorConfig::setSobelFilterKernels, py::arg("horizontalKernel"), py::arg("verticalKernel"), DOC(dai, EdgeDetectorConfig, setSobelFilterKernels))
         .def("getConfigData",         &EdgeDetectorConfig::getConfigData, DOC(dai, EdgeDetectorConfig, getConfigData))
+        .def("get",         &EdgeDetectorConfig::get, DOC(dai, EdgeDetectorConfig, get))
+        .def("set",         &EdgeDetectorConfig::set, py::arg("config"), DOC(dai, EdgeDetectorConfig, set))
         ;
 
 }

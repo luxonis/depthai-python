@@ -30,41 +30,44 @@ Other controls:
 For the 'Select control: ...' options, use these keys to modify the value:
   '-' or '_' to decrease
   '+' or '=' to increase
+
+'/' to toggle printing camera settings: exposure, ISO, lens position, color temperature
 """
 
 import os
 #os.environ["DEPTHAI_LEVEL"] = "debug"
 
 import cv2
+import numpy as np
 import argparse
 import collections
 import time
 from itertools import cycle
 from pathlib import Path
 import sys
-import cam_test_gui
 import signal
 
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'camd']):
+    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
         raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color']):
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
         raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
-    return [socket, is_color]
+    is_tof = True if type in ['t', 'tof'] else False
+    return [socket, is_color, is_tof]
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True], ['left', False],
-                             ['right', False], ['camd', True]],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono]. "
+                    default=[['rgb', True, False], ['left', False, False],
+                             ['right', False, False], ['camd', True, False]],
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1200', '4k', '5mp', '12mp', '13mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '4k', '5mp', '12mp', '13mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -78,6 +81,19 @@ parser.add_argument('-rs', '--resizable-windows', action='store_true',
                     help="Make OpenCV windows resizable. Note: may introduce some artifacts")
 parser.add_argument('-tun', '--camera-tuning', type=Path,
                     help="Path to custom camera tuning database")
+parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
+                    help='Enable the RAW camera streams')
+parser.add_argument('-tofraw', '--tof-raw', action='store_true',
+                    help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
+                    help="Show also ToF amplitude output alongside depth")
+parser.add_argument('-tofcm', '--tof-cm', action='store_true',
+                    help="Show ToF depth output in centimeters, capped to 255")
+parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, type=int,
+                    help="ToF median filter kernel size")
+parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
+                    help="Show RGB `preview` stream instead of full size `isp`")
+
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
 
@@ -95,37 +111,39 @@ os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
 import depthai as dai
 
 if len(sys.argv) == 1:
+    import cam_test_gui
     cam_test_gui.main()
 
 cam_list = []
 cam_type_color = {}
+cam_type_tof = {}
 print("Enabled cameras:")
-for socket, is_color in args.cameras:
+for socket, is_color, is_tof in args.cameras:
     cam_list.append(socket)
     cam_type_color[socket] = is_color
-    print(socket.rjust(7), ':', 'color' if is_color else 'mono')
+    cam_type_tof[socket] = is_tof
+    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb': dai.CameraBoardSocket.RGB,   # Or CAM_A
-    'left': dai.CameraBoardSocket.LEFT,  # Or CAM_B
-    'right': dai.CameraBoardSocket.RIGHT,  # Or CAM_C
-    'camd': dai.CameraBoardSocket.CAM_D,
-}
-
-cam_socket_to_name = {
-    'RGB': 'rgb',
-    'LEFT': 'left',
-    'RIGHT': 'right',
-    'CAM_D': 'camd',
+    'rgb'  : dai.CameraBoardSocket.CAM_A,
+    'left' : dai.CameraBoardSocket.CAM_B,
+    'right': dai.CameraBoardSocket.CAM_C,
+    'cama' : dai.CameraBoardSocket.CAM_A,
+    'camb' : dai.CameraBoardSocket.CAM_B,
+    'camc' : dai.CameraBoardSocket.CAM_C,
+    'camd' : dai.CameraBoardSocket.CAM_D,
 }
 
 rotate = {
     'rgb': args.rotate in ['all', 'rgb'],
     'left': args.rotate in ['all', 'mono'],
     'right': args.rotate in ['all', 'mono'],
+    'cama': args.rotate in ['all', 'rgb'],
+    'camb': args.rotate in ['all', 'mono'],
+    'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
 }
 
@@ -141,7 +159,9 @@ color_res_opts = {
     '720':  dai.ColorCameraProperties.SensorResolution.THE_720_P,
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1012': dai.ColorCameraProperties.SensorResolution.THE_1352X1012,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
+    '1520': dai.ColorCameraProperties.SensorResolution.THE_2024X1520,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
@@ -177,17 +197,60 @@ pipeline = dai.Pipeline()
 control = pipeline.createXLinkIn()
 control.setStreamName('control')
 
+xinTofConfig = pipeline.createXLinkIn()
+xinTofConfig.setStreamName('tofConfig')
+
 cam = {}
+tof = {}
 xout = {}
+xout_raw = {}
+xout_tof_amp = {}
+streams = []
+tofConfig = {}
 for c in cam_list:
+    tofEnableRaw = False
     xout[c] = pipeline.createXLinkOut()
     xout[c].setStreamName(c)
-    if cam_type_color[c]:
+    streams.append(c)
+    if cam_type_tof[c]:
+        cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
+        if args.tof_raw:
+            tofEnableRaw = True
+        else:
+            tof[c] = pipeline.create(dai.node.ToF)
+            cam[c].raw.link(tof[c].input)
+            tof[c].depth.link(xout[c].input)
+            xinTofConfig.out.link(tof[c].inputConfig)
+            tofConfig = tof[c].initialConfig.get()
+            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            tofConfig.depthParams.avgPhaseShuffle = False
+            tofConfig.depthParams.minimumAmplitude = 3.0
+
+            if args.tof_median == 0:
+                tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+            elif args.tof_median == 3:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+            elif args.tof_median == 5:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+            elif args.tof_median == 7:
+                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
+
+            tof[c].initialConfig.set(tofConfig)
+            if args.tof_amplitude:
+                amp_name = 'tof_amplitude_' + c
+                xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
+                xout_tof_amp[c].setStreamName(amp_name)
+                streams.append(amp_name)
+                tof[c].amplitude.link(xout_tof_amp[c].input)
+    elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
         cam[c].setIspScale(1, args.isp_downscale)
         # cam[c].initialControl.setManualFocus(85) # TODO
-        cam[c].isp.link(xout[c].input)
+        if args.rgb_preview:
+            cam[c].preview.link(xout[c].input)
+        else:
+            cam[c].isp.link(xout[c].input)
     else:
         cam[c] = pipeline.createMonoCamera()
         cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -205,7 +268,16 @@ for c in cam_list:
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
-    cam[c].setIsp3aFps(args.isp3afps)
+    if args.isp3afps:
+        cam[c].setIsp3aFps(args.isp3afps)
+
+    if args.enable_raw or tofEnableRaw:
+        raw_name = 'raw_' + c
+        xout_raw[c] = pipeline.create(dai.node.XLinkOut)
+        xout_raw[c].setStreamName(raw_name)
+        streams.append(raw_name)
+        cam[c].raw.link(xout_raw[c].input)
+        cam[c].setRawOutputPacked(False)
 
 if args.camera_tuning:
     pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
@@ -232,7 +304,11 @@ with dai.Device(*dai_device_args) as device:
             f' -socket {p.socket.name:6}: {p.sensorName:6} {p.width:4} x {p.height:4} focus:', end='')
         print('auto ' if p.hasAutofocus else 'fixed', '- ', end='')
         print(*[type.name for type in p.supportedTypes])
-        cam_name[cam_socket_to_name[p.socket.name]] = p.sensorName
+        cam_name[p.socket.name] = p.sensorName
+        if args.enable_raw:
+            cam_name['raw_'+p.socket.name] = p.sensorName
+        if args.tof_amplitude:
+            cam_name['tof_amplitude_'+p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -241,7 +317,7 @@ with dai.Device(*dai_device_args) as device:
     q = {}
     fps_host = {}  # FPS computed based on the time we receive frames in app
     fps_capt = {}  # FPS computed based on capture timestamps from device
-    for c in cam_list:
+    for c in streams:
         q[c] = device.getOutputQueue(name=c, maxSize=4, blocking=False)
         # The OpenCV window resize may produce some artifacts
         if args.resizable_windows:
@@ -251,6 +327,7 @@ with dai.Device(*dai_device_args) as device:
         fps_capt[c] = FPS()
 
     controlQueue = device.getInputQueue('control')
+    tofCfgQueue = device.getInputQueue('tofConfig')
 
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
@@ -294,13 +371,17 @@ with dai.Device(*dai_device_args) as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
+    show = False
+
+    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom[0] = [0, 0, 0]
 
     print("Cam:", *['     ' + c.ljust(8)
           for c in cam_list], "[host | capture timestamp]")
 
     capture_list = []
     while True:
-        for c in cam_list:
+        for c in streams:
             try:
                 pkt = q[c].tryGet()
             except Exception as e:
@@ -309,37 +390,92 @@ with dai.Device(*dai_device_args) as device:
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
+                width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
-                if c in capture_list:
-                    width, height = pkt.getWidth(), pkt.getHeight()
-                    capture_file_name = ('capture_' + c + '_' + cam_name[c]
-                                         + '_' + str(width) + 'x' + str(height)
-                                         + '_exp_' +
-                                         str(int(
-                                             pkt.getExposureTime().total_seconds()*1e6))
-                                         + '_iso_' + str(pkt.getSensitivity())
-                                         + '_lens_' +
-                                         str(pkt.getLensPosition())
-                                         + '_' + capture_time
-                                         + '_' + str(pkt.getSequenceNum())
-                                         + ".png"
-                                         )
-                    print("\nSaving:", capture_file_name)
-                    cv2.imwrite(capture_file_name, frame)
+                cam_skt = c.split('_')[-1]
+                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+                    if args.tof_cm:
+                        # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
+                        frame = (frame // 10).clip(0, 255).astype(np.uint8)
+                    else:
+                        frame = (frame.view(np.int16).astype(float))
+                        frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        frame = cv2.applyColorMap(frame, jet_custom)
+                if show:
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
+                    txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
+                    txt += f"ISO: {pkt.getSensitivity():4}, "
+                    txt += f"Lens pos: {pkt.getLensPosition():3}, "
+                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    if needs_newline:
+                        print()
+                        needs_newline = False
+                    print(txt)
+                capture = c in capture_list
+                if capture:
+                    capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
+                         + '_' + str(width) + 'x' + str(height)
+                         + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                         + '_iso_' + str(pkt.getSensitivity())
+                         + '_lens_' + str(pkt.getLensPosition())
+                         + '_' + capture_time
+                         + '_' + str(pkt.getSequenceNum())
+                        )
                     capture_list.remove(c)
-
+                    print()
+                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
+                    if capture:
+                        filename = capture_file_info + '_10bit.bw'
+                        print('Saving:', filename)
+                        frame.tofile(filename)
+                    # Full range for display, use bits [15:6] of the 16-bit pixels
+                    type = pkt.getType()
+                    multiplier = 1
+                    if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
+                    if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
+                    frame = frame * multiplier
+                    # Debayer as color for preview/png
+                    if cam_type_color[cam_skt]:
+                        # See this for the ordering, at the end of page:
+                        # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
+                        # TODO add bayer order to ImgFrame getType()
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BayerGB2BGR)
+                else:
+                    # Save YUV too, but only when RAW is also enabled (for tuning purposes)
+                    if capture and args.enable_raw:
+                        payload = pkt.getData()
+                        filename = capture_file_info + '_P420.yuv'
+                        print('Saving:', filename)
+                        payload.tofile(filename)
+                if capture:
+                    filename = capture_file_info + '.png'
+                    print('Saving:', filename)
+                    cv2.imwrite(filename, frame)
                 cv2.imshow(c, frame)
         print("\rFPS:",
-              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(),
-                                         fps_capt[c].get()) for c in cam_list],
-              end='', flush=True)
+              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
+              end=' ', flush=True)
+        needs_newline = True
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('/'):
+            show = not show
+            # Print empty string as FPS status new-line separator
+            print("" if show else "Printing camera settings: OFF")
         elif key == ord('c'):
-            capture_list = cam_list.copy()
+            capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
+        elif key == ord('g') and tof:
+            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            print("ToF toggling f_mod value to:", f_mod)
+            tofConfig.depthParams.freqModUsed = f_mod
+            tofCfgQueue.send(tofConfig)
+        elif key == ord('h') and tof:
+            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
+            print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
+            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -414,7 +550,7 @@ with dai.Device(*dai_device_args) as device:
             if floodIntensity < 0:
                 floodIntensity = 0
             device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]':
+        elif key >= 0 and chr(key) in '34567890[]p':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -435,6 +571,8 @@ with dai.Device(*dai_device_args) as device:
                 control = 'luma_denoise'
             elif key == ord(']'):
                 control = 'chroma_denoise'
+            elif key == ord('p'):
+                control = 'tof_amplitude_min'
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -485,4 +623,11 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'tof_amplitude_min' and tof:
+                amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
+                print("Setting min amplitude(confidence) to:", amp_min)
+                tofConfig.depthParams.minimumAmplitude = amp_min
+                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()

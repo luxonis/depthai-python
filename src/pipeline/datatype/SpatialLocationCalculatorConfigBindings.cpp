@@ -64,6 +64,8 @@ void bind_spatiallocationcalculatorconfig(pybind11::module& m, void* pCallstack)
         .def("setROIs", &SpatialLocationCalculatorConfig::setROIs, py::arg("ROIs"), DOC(dai, SpatialLocationCalculatorConfig, setROIs))
         .def("addROI", &SpatialLocationCalculatorConfig::addROI, py::arg("ROI"), DOC(dai, SpatialLocationCalculatorConfig, addROI))
         .def("getConfigData", &SpatialLocationCalculatorConfig::getConfigData, DOC(dai, SpatialLocationCalculatorConfig, getConfigData))
+        .def("set",         &SpatialLocationCalculatorConfig::set, py::arg("config"), DOC(dai, SpatialLocationCalculatorConfig, set))
+        .def("get",         &SpatialLocationCalculatorConfig::get, DOC(dai, SpatialLocationCalculatorConfig, get))
         ;
 
 }

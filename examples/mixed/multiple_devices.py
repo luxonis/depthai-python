@@ -11,7 +11,7 @@ def createPipeline():
     camRgb = pipeline.create(dai.node.ColorCamera)
 
     camRgb.setPreviewSize(300, 300)
-    camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+    camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
     camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
     camRgb.setInterleaved(False)
 
@@ -47,7 +47,7 @@ with contextlib.ExitStack() as stack:
             print("   >>> Board name:", eepromData.boardName)
         if eepromData.productName != "":
             print("   >>> Product name:", eepromData.productName)
-        
+
         pipeline = createPipeline()
         device.startPipeline(pipeline)
 
@@ -55,7 +55,7 @@ with contextlib.ExitStack() as stack:
         q_rgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
         stream_name = "rgb-" + mxId + "-" + eepromData.productName
         qRgbMap.append((q_rgb, stream_name))
-    
+
     while True:
         for q_rgb, stream_name in qRgbMap:
             if q_rgb.has():

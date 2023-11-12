@@ -16,7 +16,7 @@ camRgb.preview.link(xoutRgb.input)
 
 camLeft = pipeline.create(dai.node.MonoCamera)
 camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+camLeft.setCamera("left")
 
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutLeft.setStreamName("left")

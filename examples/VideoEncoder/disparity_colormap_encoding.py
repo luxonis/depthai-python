@@ -8,11 +8,11 @@ pipeline = dai.Pipeline()
 # Create left/right mono cameras for Stereo depth
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 
 monoRight = pipeline.create(dai.node.MonoCamera)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # Create a node that will produce the depth map
 depth = pipeline.create(dai.node.StereoDepth)
@@ -59,4 +59,4 @@ with dai.Device(pipeline) as device:
             pass
 
     print("To view the encoded data, convert the stream file (.mjpeg) into a video file (.mp4) using a command below:")
-    print("ffmpeg -framerate 30 -i disparity.mjpeg -c copy video.mp4")
+    print("ffmpeg -framerate 30 -i disparity.h264 -c copy video.mp4")

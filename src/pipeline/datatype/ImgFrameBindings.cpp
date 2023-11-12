@@ -117,13 +117,13 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         imgFrame
         .def(py::init<>())
         // getters
-        .def("getTimestamp", py::overload_cast<>(&ImgFrame::getTimestamp, py::const_), DOC(dai, ImgFrame, getTimestamp))
-        .def("getTimestampDevice", py::overload_cast<>(&ImgFrame::getTimestampDevice, py::const_), DOC(dai, ImgFrame, getTimestampDevice))
+        .def("getTimestamp", py::overload_cast<>(&ImgFrame::Buffer::getTimestamp, py::const_), DOC(dai, Buffer, getTimestamp))
+        .def("getTimestampDevice", py::overload_cast<>(&ImgFrame::Buffer::getTimestampDevice, py::const_), DOC(dai, Buffer, getTimestampDevice))
         .def("getTimestamp", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestamp, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestamp))
         .def("getTimestampDevice", py::overload_cast<CameraExposureOffset>(&ImgFrame::getTimestampDevice, py::const_), py::arg("offset"), DOC(dai, ImgFrame, getTimestampDevice))
+        .def("getSequenceNum", &ImgFrame::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
         .def("getInstanceNum", &ImgFrame::getInstanceNum, DOC(dai, ImgFrame, getInstanceNum))
         .def("getCategory", &ImgFrame::getCategory, DOC(dai, ImgFrame, getCategory))
-        .def("getSequenceNum", &ImgFrame::getSequenceNum, DOC(dai, ImgFrame, getSequenceNum))
         .def("getWidth", &ImgFrame::getWidth, DOC(dai, ImgFrame, getWidth))
         .def("getHeight", &ImgFrame::getHeight, DOC(dai, ImgFrame, getHeight))
         .def("getType", &ImgFrame::getType, DOC(dai, ImgFrame, getType))
@@ -202,6 +202,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 break;
 
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                     shape = {img.getHeight(), img.getWidth()};
                     dtype = py::dtype::of<uint16_t>();
                 break;
@@ -234,7 +237,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                         + ", actual " + std::to_string(actualSize) + ". Maybe metadataOnly transfer was made?");
             } else if(actualSize > requiredSize) {
                 // FIXME check build on Windows
-                // spdlog::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
+                // logger::warn("ImgFrame has excess data: actual {}, expected {}", actualSize, requiredSize);
             }
             if(img.getWidth() <= 0 || img.getHeight() <= 0){
                 throw std::runtime_error("ImgFrame size invalid (width: " + std::to_string(img.getWidth()) + ", height: " + std::to_string(img.getHeight()) + ")");
@@ -303,6 +306,9 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
 
                 case ImgFrame::Type::RAW8:
                 case ImgFrame::Type::RAW16:
+                case ImgFrame::Type::RAW14:
+                case ImgFrame::Type::RAW12:
+                case ImgFrame::Type::RAW10:
                 case ImgFrame::Type::GRAY8:
                 case ImgFrame::Type::GRAYF16:
                 default:

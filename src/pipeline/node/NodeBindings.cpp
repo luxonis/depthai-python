@@ -114,6 +114,8 @@ void bind_edgedetector(pybind11::module& m, void* pCallstack);
 void bind_featuretracker(pybind11::module& m, void* pCallstack);
 void bind_apriltag(pybind11::module& m, void* pCallstack);
 void bind_detectionparser(pybind11::module& m, void* pCallstack);
+void bind_uvc(pybind11::module& m, void* pCallstack);
+void bind_tof(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -143,6 +145,8 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_featuretracker);
     callstack.push_front(bind_apriltag);
     callstack.push_front(bind_detectionparser);
+    callstack.push_front(bind_uvc);
+    callstack.push_front(bind_tof);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
@@ -209,6 +213,9 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("group", &Node::Input::group, DOC(dai, Node, Input, group))
         .def_readwrite("name", &Node::Input::name, DOC(dai, Node, Input, name))
         .def_readwrite("type", &Node::Input::type, DOC(dai, Node, Input, type))
+        .def_readwrite("possibleDatatypes", &Node::Input::possibleDatatypes, DOC(dai, Node, Input, possibleDatatypes))
+        .def("getParent", static_cast<const Node& (Node::Input::*)() const>(&Node::Input::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Input, getParent))
+        .def("getParent", static_cast<Node& (Node::Input::*)()>(&Node::Input::getParent), py::return_value_policy::reference_internal, DOC(dai, Node, Input, getParent))
         .def("setBlocking", &Node::Input::setBlocking, py::arg("blocking"), DOC(dai, Node, Input, setBlocking))
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))

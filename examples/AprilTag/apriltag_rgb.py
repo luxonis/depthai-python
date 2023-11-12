@@ -20,7 +20,7 @@ xoutAprilTagImage.setStreamName("aprilTagImage")
 
 # Properties
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
 manip.initialConfig.setResize(480, 270)
 manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)

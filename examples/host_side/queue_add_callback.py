@@ -17,9 +17,9 @@ xout.setStreamName("frames")
 
 # Properties
 camRgb.setPreviewSize(300, 300)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+left.setCamera("left")
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+right.setCamera("right")
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
 # Stream all the camera streams through the same XLink node

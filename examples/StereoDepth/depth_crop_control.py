@@ -32,8 +32,8 @@ topLeft = dai.Point2f(0.2, 0.2)
 bottomRight = dai.Point2f(0.8, 0.8)
 
 # Properties
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setCamera("right")
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 
@@ -64,7 +64,10 @@ with dai.Device(pipeline) as device:
 
         # Frame is transformed, the color map will be applied to highlight the depth info
         depth_downscaled = depthFrame[::4]
-        min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        if np.all(depth_downscaled == 0):
+            min_depth = 0  # Set a default minimum depth value when all elements are zero
+        else:
+            min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
         max_depth = np.percentile(depth_downscaled, 99)
         depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)

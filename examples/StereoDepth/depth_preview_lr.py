@@ -51,7 +51,7 @@ if enableRectified:
 
 # Properties
 left.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+left.setCamera("left")
 left.setIspScale(2, 3)
 
 center.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
@@ -59,7 +59,7 @@ center.setBoardSocket(dai.CameraBoardSocket.CENTER)
 center.setIspScale(2, 3)
 
 right.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+right.setCamera("right")
 right.setIspScale(2, 3)
 
 LC_depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
