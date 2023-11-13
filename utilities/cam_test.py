@@ -354,8 +354,8 @@ with dai.Device(*dai_device_args) as device:
     EXP_STEP = 500  # us
     ISO_STEP = 50
     LENS_STEP = 3
-    DOT_STEP = 1 / 12
-    FLOOD_STEP = 1 / 15
+    DOT_STEP = 0.05
+    FLOOD_STEP = 0.05
     DOT_MAX = 1
     FLOOD_MAX = 1
 
