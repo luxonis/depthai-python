@@ -57,8 +57,8 @@ script.setScript("""
 
         # Immediately reconfigure the IR driver.
         # Note the logic is inverted, as it applies for next frame
-        Device.setIrLaserDotProjectorBrightness(0 if flagDot else dotBright)
-        Device.setIrFloodLightBrightness(floodBright if flagDot else 0)
+        Device.setIrLaserDotProjectorIntensity(0 if flagDot else dotBright)
+        Device.setIrFloodLightIntensity(floodBright if flagDot else 0)
         if LOGGING: tIrSet = Clock.now()
 
         # Wait for the actual frames (after MIPI capture and ISP proc is done)
