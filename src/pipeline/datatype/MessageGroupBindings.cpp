@@ -37,7 +37,6 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
     rawMessageGroup
         .def(py::init<>())
         .def_readwrite("group", &RawMessageGroup::group)
-        .def_readwrite("success", &RawMessageGroup::success)
         ;
 
     // Message
@@ -47,10 +46,10 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
             std::shared_ptr<ADatatype> data = nullptr;
             return msg[name];
         })
-        .def("__setitem__", [](MessageGroup& msg, const std::string& name, std::shared_ptr<Buffer> data) {
+        .def("__setitem__", [](MessageGroup& msg, const std::string& name, std::shared_ptr<ADatatype> data) {
             return msg.add(name, data);
         })
-        .def("syncSuccessful", &MessageGroup::syncSuccessful, DOC(dai, MessageGroup, syncSuccessful))
+        .def("isSynced", &MessageGroup::isSynced, DOC(dai, MessageGroup, isSynced))
         .def("getIntervalNs", &MessageGroup::getIntervalNs, DOC(dai, MessageGroup, getIntervalNs))
         .def("getTimestamp", &MessageGroup::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &MessageGroup::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
