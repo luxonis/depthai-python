@@ -82,15 +82,15 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
       .def(py::init<>())
       // getters
       .def("getTimestamp",
-           py::overload_cast<>(&EncodedFrame::getTimestamp, py::const_),
-           DOC(dai, EncodedFrame, getTimestamp))
+           py::overload_cast<>(&EncodedFrame::Buffer::getTimestamp, py::const_),
+           DOC(dai, Buffer, getTimestamp))
       .def("getTimestampDevice",
-           py::overload_cast<>(&EncodedFrame::getTimestampDevice, py::const_),
-           DOC(dai, EncodedFrame, getTimestampDevice))
+           py::overload_cast<>(&EncodedFrame::Buffer::getTimestampDevice, py::const_),
+           DOC(dai, Buffer, getTimestampDevice))
       .def("getInstanceNum", &EncodedFrame::getInstanceNum,
            DOC(dai, EncodedFrame, getInstanceNum))
-      .def("getSequenceNum", &EncodedFrame::getSequenceNum,
-           DOC(dai, EncodedFrame, getSequenceNum))
+      .def("getSequenceNum", &EncodedFrame::Buffer::getSequenceNum,
+           DOC(dai, Buffer, getSequenceNum))
       .def("getExposureTime", &EncodedFrame::getExposureTime,
            DOC(dai, EncodedFrame, getExposureTime))
       .def("getSensitivity", &EncodedFrame::getSensitivity,
