@@ -1,7 +1,7 @@
 UVC & Color Camera
 ==================
 
-This example demonstrates how to use the RGB camera on your OAK device as a UVC webcam. The UVC feature allows you to use your OAK device as a regular webcam in applications like OpenCV's :code:`cv2.VideoCapture()`, native camera apps, and more.
+This example demonstrates how to use the RGB camera on your OAK device as a UVC webcam. The :ref:`UVC` feature allows you to use your OAK device as a regular webcam in applications like OpenCV's :code:`cv2.VideoCapture()`, native camera apps, and more.
 
 
 .. rubric:: Similar samples:
