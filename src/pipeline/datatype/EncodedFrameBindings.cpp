@@ -116,7 +116,7 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
       .def("setTimestampDevice", &EncodedFrame::setTimestampDevice,
            DOC(dai, EncodedFrame, setTimestampDevice))
       .def("setSequenceNum", &EncodedFrame::setSequenceNum,
-           DOC(dai, EncodedFrame, getSequenceNum))
+           DOC(dai, EncodedFrame, setSequenceNum))
       .def("setQuality", &EncodedFrame::setQuality,
            DOC(dai, EncodedFrame, getQuality))
       .def("setBitrate", &EncodedFrame::setBitrate,
