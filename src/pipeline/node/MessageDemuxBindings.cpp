@@ -36,10 +36,7 @@ void bind_messagedemux(pybind11::module &m, void *pCallstack) {
       .def_readonly("outputs", &MessageDemux::outputs,
                     DOC(dai, node, MessageDemux, outputs))
       .def_readonly("input", &MessageDemux::input,
-                    DOC(dai, node, MessageDemux, input))
-      .def("setDemuxOnlyOnSuccessful", &MessageDemux::setDemuxOnlyOnSuccessful,
-           py::arg("demuxOnlyOnSuccessful"),
-           DOC(dai, node, MessageDemux, setDemuxOnlyOnSuccessful));
+                    DOC(dai, node, MessageDemux, input));
   daiNodeModule.attr("MessageDemux").attr("Properties") =
       messageDemuxProperties;
 }
