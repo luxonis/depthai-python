@@ -73,7 +73,7 @@ are presented with code.
 
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
-- :ref:`Feature motion estimation` - Camera movement estimation based on feature tracking
+- :ref:`Feature Tracker with Motion Estimation` - Camera movement estimation based on feature tracking
 
 .. rubric:: Host side
 
