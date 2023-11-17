@@ -43,7 +43,7 @@ def getPipeline():
     config = dai.Device.Config()
     # config.board.uvc = dai.BoardConfig.UVC()  # enable default 1920x1080 NV12
     config.board.uvc = dai.BoardConfig.UVC(1920, 1080)
-    config.board.uvc.frameType = dai.ImgFrame.Type.RGB
+    config.board.uvc.frameType = dai.ImgFrame.Type.NV12
     # config.board.uvc.cameraName = "My Custom Cam"
     pipeline.setBoardConfig(config.board)
 
