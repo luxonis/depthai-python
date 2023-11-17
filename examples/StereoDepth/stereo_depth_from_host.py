@@ -333,8 +333,8 @@ class StereoConfigHandler:
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trCenterAlignmentShift:
             tr.set(value)
-    
-    def trackbarInvalidateEdgePixels(value):    
+
+    def trackbarInvalidateEdgePixels(value):
         StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels = value
         print(f"numInvalidateEdgePixels: {StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels:.2f}")
         StereoConfigHandler.newConfig = True
@@ -694,17 +694,17 @@ class DatasetManager:
         self.names = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
         if len(self.names) == 0:
             raise RuntimeError("No dataset found at {}".format(path))
-    
+
     def get(self):
         return os.path.join(self.path, self.names[self.index])
-    
+
     def get_name(self):
         return self.names[self.index]
 
     def next(self):
         self.index = (self.index + 1) % len(self.names)
         return self.get()
-    
+
     def prev(self):
         self.index = (self.index - 1) % len(self.names)
         return self.get()
@@ -712,7 +712,7 @@ class DatasetManager:
 
 def read_pfm(file):
     file = open(file, "rb")
-    
+
     color = None
     width = None
     height = None
@@ -721,7 +721,7 @@ def read_pfm(file):
 
     header = file.readline().rstrip()
     if header.decode("ascii") == "PF":
-        color = True    
+        color = True
     elif header.decode("ascii") == "Pf":
         color = False
     else:
@@ -840,7 +840,7 @@ def show_debug_disparity(gt_img, oak_img):
         img[img == np.inf] = 0.
         img = cv2.resize(img, (1280, 800), interpolation=cv2.INTER_AREA)
         return img.astype(np.uint16)
-    
+
     gt_img = rescale_img(gt_img)
     oak_img = rescale_img(oak_img)
     maxv = max(gt_img.max(), oak_img.max())
