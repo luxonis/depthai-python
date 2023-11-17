@@ -55,6 +55,115 @@ subnet, you can specify the device (either with MxID, IP, or USB port name) you 
   with depthai.Device(pipeline, device_info) as device:
       # ...
 
+
+Watchdog
+########
+
+Understanding the Watchdog Mechanism in POE Devices
+----------------------------------------------------
+
+The watchdog is a crucial component in the operation of POE (Power over Ethernet) devices with DepthAI. When DepthAI disconnects from a POE device, the watchdog mechanism is the first to respond, initiating a reset of the camera. This reset is followed by a complete system reboot, which includes the loading of the DepthAI bootloader and the initialization of the entire networking stack. 
+
+.. note::
+    This process is necessary to make the camera available for reconnection and typically takes about 10 seconds, which means the fastest possible reconnection time is 10 seconds.
+Customizing the Watchdog Timeout
+--------------------------------
+
+.. tabs::
+
+  .. tab:: **Linux/MacOS**
+
+    Set the environment variables `DEPTHAI_WATCHDOG_INITIAL_DELAY` and `DEPTHAI_BOOTUP_TIMEOUT` to your desired timeout values (in milliseconds) as follows:
+
+    .. code-block:: bash
+
+      DEPTHAI_WATCHDOG_INITIAL_DELAY=<my_value> DEPTHAI_BOOTUP_TIMEOUT=<my_value> python3 script.py
+
+  .. tab:: **Windows PowerShell**
+
+    For Windows PowerShell, set the environment variables like this:
+
+    .. code-block:: powershell
+
+      $env:DEPTHAI_WATCHDOG_INITIAL_DELAY=<my_value>
+      $env:DEPTHAI_BOOTUP_TIMEOUT=<my_value>
+      python3 script.py
+
+  .. tab:: **Windows CMD**
+
+    In Windows CMD, you can set the environment variables as follows:
+
+    .. code-block:: guess
+
+      set DEPTHAI_WATCHDOG_INITIAL_DELAY=<my_value>
+      set DEPTHAI_BOOTUP_TIMEOUT=<my_value>
+      python3 script.py
+
+Code-Based Configuration
+------------------------
+
+Alternatively, you can set the timeout directly in your code:
+
+.. code-block:: python
+
+  pipeline = depthai.Pipeline()
+
+  # Create a BoardConfig object
+  config = depthai.BoardConfig()
+
+  # Set the parameters
+  config.watchdogInitialDelayMs = <my_value>
+  config.watchdogTimeoutMs = <my_value>
+
+  pipeline.setBoardConfig(config)
+
+By adjusting these settings, you can tailor the watchdog functionality to better suit your specific requirements.
+
+
+Environment Variables
+#####################
+
+The following table lists various environment variables used in the system, along with their descriptions:
+
+.. list-table::
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Environment Variable
+     - Description
+   * - `DEPTHAI_LEVEL`
+     - Sets logging verbosity, options: 'trace', 'debug', 'warn', 'error', 'off'
+   * - `XLINK_LEVEL`
+     - Sets logging verbosity of XLink library, options: 'debug', 'info', 'warn', 'error', 'fatal', 'off'
+   * - `DEPTHAI_INSTALL_SIGNAL_HANDLER`
+     - Set to 0 to disable installing Backward signal handler for stack trace printing
+   * - `DEPTHAI_WATCHDOG`
+     - Sets device watchdog timeout. Useful for debugging (DEPTHAI_WATCHDOG=0), to prevent device reset while the process is paused.
+   * - `DEPTHAI_WATCHDOG_INITIAL_DELAY`
+     - Specifies delay after which the device watchdog starts.
+   * - `DEPTHAI_SEARCH_TIMEOUT`
+     - Specifies timeout in milliseconds for device searching in blocking functions.
+   * - `DEPTHAI_CONNECT_TIMEOUT`
+     - Specifies timeout in milliseconds for establishing a connection to a given device.
+   * - `DEPTHAI_BOOTUP_TIMEOUT`
+     - Specifies timeout in milliseconds for waiting the device to boot after sending the binary.
+   * - `DEPTHAI_PROTOCOL`
+     - Restricts default search to the specified protocol. Options: any, usb, tcpip.
+   * - `DEPTHAI_DEVICE_MXID_LIST`
+     - Restricts default search to the specified MXIDs. Accepts comma separated list of MXIDs. Lists filter results in an "AND" manner and not "OR"
+   * - `DEPTHAI_DEVICE_ID_LIST`
+     - Alias to MXID list. Lists filter results in an "AND" manner and not "OR"
+   * - `DEPTHAI_DEVICE_NAME_LIST`
+     - Restricts default search to the specified NAMEs. Accepts comma separated list of NAMEs. Lists filter results in an "AND" manner and not "OR"
+   * - `DEPTHAI_DEVICE_BINARY`
+     - Overrides device Firmware binary. Mostly for internal debugging purposes.
+   * - `DEPTHAI_BOOTLOADER_BINARY_USB`
+     - Overrides device USB Bootloader binary. Mostly for internal debugging purposes.
+   * - `DEPTHAI_BOOTLOADER_BINARY_ETH`
+     - Overrides device Network Bootloader binary. Mostly for internal debugging purposes.
+
+
+
 Multiple devices
 ################
 
