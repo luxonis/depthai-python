@@ -159,6 +159,21 @@ def stress_test(mxid: str = ""):
                             frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                         last_frame[queue.getName()] = frame
+                    elif queue.getName() == "stereo depth":
+                        frame = packet.getFrame()
+                        depth_downscaled = frame[::4]
+                        try:
+                            min_depth = np.percentile(
+                                depth_downscaled[depth_downscaled != 0], 1)
+                            max_depth = np.percentile(depth_downscaled, 99)
+                        except IndexError:
+                            continue
+                        frame = np.interp(
+                            frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+                        frame = cv2.applyColorMap(
+                        frame, jet_custom)
+                        frame = cv2.applyColorMap(frame, jet_custom)
+                        last_frame[queue.getName()] = frame
                     elif isinstance(packet, dai.ImgFrame):
                         # Skip encoded frames as decoding is heavy on the host machine
                         if packet.getType() == dai.ImgFrame.Type.BITSTREAM:
@@ -283,7 +298,10 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
     for cam in camera_features:
         print(f"{cam.socket} Supported Sensor Resolutions:", [(conf.width, conf.height) for conf in cam.configs], "Supported Types:", cam.supportedTypes)
         sorted_configs = sorted(cam.configs, key=lambda conf: conf.width * conf.height)
-        max_sensor_size = (sorted_configs[-1].width, sorted_configs[-1].height)
+        if len(sorted_configs) == 0:
+            max_sensor_size = (1920, 1080)
+        else:
+            max_sensor_size = (sorted_configs[-1].width, sorted_configs[-1].height)
         node = None
         cam_kind = cam.supportedTypes[0]
         if cam_kind == dai.CameraSensorType.MONO:
@@ -426,7 +444,7 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 stereo.depth.link(yolo.inputDepth)
 
                 xout_depth = pipeline.createXLinkOut()
-                depth_q_name = "depth"
+                depth_q_name = "stereo depth"
                 xout_depth.setStreamName(depth_q_name)
                 yolo.passthroughDepth.link(xout_depth.input)
                 xlink_outs.append((depth_q_name, 4))
@@ -465,7 +483,6 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
             print("Skipping YOLO detection network creation...")
     else:
         print("No color camera found, skipping YOLO detection network creation...")
-    print("XLINK OUTS:; ", xlink_outs)
     return (pipeline, xlink_outs, context)
 
 

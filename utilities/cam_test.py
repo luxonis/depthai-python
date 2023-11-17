@@ -106,8 +106,8 @@ parser.add_argument('-btimeout', '--boot-timeout', default=30000,
 parser.add_argument('--stress', action='store_true',
                     help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
 
-parser.add_argument("--no-stereo", action="store_true",
-                    help="Don't create a stereo depth node if the device has a stereo pair.")
+parser.add_argument("--stereo", action="store_true", default=False,
+                    help="Create a stereo depth node if the device has a stereo pair.")
 
 parser.add_argument("--gui", action="store_true",
                     help="Use GUI instead of CLI")
@@ -329,9 +329,7 @@ with dai.Device(*dai_device_args) as device:
 
     stereo = None
 
-    if args.no_stereo:
-        print("--no-stereo specified, skipping stereo depth creation")
-    else:
+    if args.stereo:
         try:
             try:
                 calib = device.readCalibration2()
@@ -339,7 +337,6 @@ with dai.Device(*dai_device_args) as device:
                 raise Exception("Device is not calibrated.")
             eeprom = calib.getEepromData()
             left, right = eeprom.stereoRectificationData.leftCameraSocket, eeprom.stereoRectificationData.rightCameraSocket
-
             # Get the actual camera nodes
             # The cameras may have been specified with -cams rgb,c left,m right,m kind of names, so we need to handle these edge cases
             left_sock_opt = socket_to_socket_opt(left)
@@ -398,9 +395,12 @@ with dai.Device(*dai_device_args) as device:
                 xout_stereo.setStreamName(depth_stream)
                 stereo.depth.link(xout_stereo.input)
                 streams.append(depth_stream)
+            else:
+                print("Couldn't create stereo depth node. Device has invalid calibration.")
         except Exception as e:
             print("Couldn't create depth:", e)
-
+    else:
+        print("--stereo not found in args, skipping stereo depth node creation.")
     # Pipeline is defined, now we can start it
     device.startPipeline(pipeline)
 
@@ -514,7 +514,7 @@ with dai.Device(*dai_device_args) as device:
                     depth_frame_color = np.interp(
                         frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
                     depth_frame_color = cv2.applyColorMap(
-                        depth_frame_color, cv2.COLORMAP_HOT)
+                        depth_frame_color, jet_custom)
                     cv2.imshow(c, depth_frame_color)
                     continue
 
