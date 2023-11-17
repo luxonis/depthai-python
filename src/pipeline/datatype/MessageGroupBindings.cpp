@@ -43,12 +43,13 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
     messageGroup
         .def(py::init<>())
         .def("__getitem__", [](MessageGroup& msg, const std::string& name) {
-            std::shared_ptr<ADatatype> data = nullptr;
             return msg[name];
         })
         .def("__setitem__", [](MessageGroup& msg, const std::string& name, std::shared_ptr<ADatatype> data) {
             return msg.add(name, data);
         })
+        .def("__iter__", [](MessageGroup& msg) { return py::make_iterator(msg.begin(), msg.end()); },
+                         py::keep_alive<0, 1>() /* Essential: keep object alive while iterator exists */)
         .def("isSynced", &MessageGroup::isSynced, DOC(dai, MessageGroup, isSynced))
         .def("getIntervalNs", &MessageGroup::getIntervalNs, DOC(dai, MessageGroup, getIntervalNs))
         .def("getNumMessages", &MessageGroup::getNumMessages, DOC(dai, MessageGroup, getNumMessages))

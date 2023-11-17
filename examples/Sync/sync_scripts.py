@@ -45,8 +45,8 @@ with dai.Device(pipeline) as device:
     q = device.getOutputQueue("xout", maxSize=10, blocking=True)
     while True:
         grp = q.get()
-        print(f"Buffer 1 timestamp: {grp["s1"].getTimestamp()}")
-        print(f"Buffer 2 timestamp: {grp["s2"].getTimestamp()}")
+        for name, msg in grp:
+            print(f"Received {name} with timestamp {msg.getTimestamp()}")
         print(f"Time interval between messages: {grp.getIntervalNs() / 1e6}ms")
         print("----------")
         time.sleep(0.2)
