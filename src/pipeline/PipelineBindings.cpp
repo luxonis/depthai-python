@@ -29,6 +29,7 @@
 #include "depthai/pipeline/node/AprilTag.hpp"
 #include "depthai/pipeline/node/DetectionParser.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
+#include "depthai/pipeline/node/Warp.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
