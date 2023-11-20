@@ -58,4 +58,5 @@ Reference
       :private-members:
       :undoc-members:
 
-.. include:: /pages/includes/footer-short.rst
+
+.. include:: ../../includes/footer-short.rst
