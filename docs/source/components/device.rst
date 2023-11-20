@@ -66,6 +66,8 @@ The watchdog is a crucial component in the operation of POE (Power over Ethernet
 
 .. note::
     This process is necessary to make the camera available for reconnection and typically takes about 10 seconds, which means the fastest possible reconnection time is 10 seconds.
+
+
 Customizing the Watchdog Timeout
 --------------------------------
 
@@ -229,7 +231,7 @@ Two examples would be:
 - encoding (most prominently H264/H265 as frame drops can lead to artifacts).
 
 Blocking behaviour
-******************
+------------------
 
 By default, queues are **blocking** and their size is **30**, so when the device fills up a queue and when the limit is
 reached, any additional messages from the device will be blocked and the library will wait until it can add new messages to the queue.
@@ -242,7 +244,8 @@ It will wait for the host to consume (eg. :code:`queue.get()`) a message before 
     to be empty again.
 
 Non-Blocking behaviour
-**********************
+----------------------
+
 Making the queue non-blocking will change the behavior in the situation described above - instead of waiting, the library will discard
 the oldest message and add the new one to the queue, and then continue its processing loop (so it won't get blocked).
 :code:`maxSize` determines the size of the queue and it also helps to control memory usage.
@@ -251,7 +254,7 @@ For example, if a message has 5MB of data, and the queue size is 30, this queue 
 up to 150MB of data in the memory on the host (the messages can also get really big, for instance, a single 4K NV12 encoded frame takes about ~12MB).
 
 Some additional information
-***************************
+---------------------------
 
 - Decreasing the queue size to 1 and setting non-blocking behavior will effectively mean "I only want the latest packet from the queue".
 - Queues are thread-safe - they can be accessed from any thread.
