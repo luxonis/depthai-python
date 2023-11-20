@@ -30,7 +30,7 @@ void bind_sync(pybind11::module& m, void* pCallstack){
 
     // Properties
     syncProperties
-        .def_readwrite("syncIntervalMs", &SyncProperties::syncIntervalMs)
+        .def_readwrite("syncThresholdNs", &SyncProperties::syncThresholdNs)
         .def_readwrite("syncAttempts", &SyncProperties::syncAttempts)
         ;
 
@@ -38,9 +38,9 @@ void bind_sync(pybind11::module& m, void* pCallstack){
     sync
         .def_readonly("out", &Sync::out, DOC(dai, node, Sync, out))
         .def_readonly("inputs", &Sync::inputs, DOC(dai, node, Sync, inputs))
-        .def("setSyncThresholdMs", &Sync::setSyncThresholdMs, py::arg("syncInterval"), DOC(dai, node, Sync, setSyncThresholdMs))
+        .def("setSyncThreshold", &Sync::setSyncThreshold, py::arg("syncThreshold"), DOC(dai, node, Sync, setSyncThreshold))
         .def("setSyncAttempts", &Sync::setSyncAttempts, py::arg("maxDataSize"), DOC(dai, node, Sync, setSyncAttempts))
-        .def("getSyncThresholdMs", &Sync::getSyncThresholdMs, DOC(dai, node, Sync, getSyncThresholdMs))
+        .def("getSyncThreshold", &Sync::getSyncThreshold, DOC(dai, node, Sync, getSyncThreshold))
         .def("getSyncAttempts", &Sync::getSyncAttempts, DOC(dai, node, Sync, getSyncAttempts))
         ;
     daiNodeModule.attr("Sync").attr("Properties") = syncProperties;

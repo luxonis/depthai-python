@@ -1,6 +1,7 @@
 import depthai as dai
 import numpy as np
 import cv2
+from datetime import timedelta
 
 pipeline = dai.Pipeline()
 
@@ -23,7 +24,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
 
 color.setCamera("color")
 
-sync.setSyncThresholdMs(50)
+sync.setSyncThreshold(timedelta(milliseconds=50))
 
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)

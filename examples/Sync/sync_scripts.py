@@ -1,5 +1,6 @@
 import depthai as dai
 import time
+from datetime import timedelta
 
 pipeline = dai.Pipeline()
 
@@ -28,7 +29,7 @@ while True:
 """)
 
 sync = pipeline.create(dai.node.Sync)
-sync.setSyncThresholdMs(100)
+sync.setSyncThreshold(timedelta(milliseconds=100))
 
 xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName("xout")
