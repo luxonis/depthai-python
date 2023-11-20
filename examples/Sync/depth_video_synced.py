@@ -23,25 +23,26 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
 
 color.setCamera("color")
 
-sync.setSyncThresholdMs(100)
+sync.setSyncThresholdMs(50)
 
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-stereo.depth.link(sync.inputs["depth"])
+stereo.disparity.link(sync.inputs["disparity"])
 color.video.link(sync.inputs["video"])
 
 sync.out.link(xoutGrp.input)
 
+disparityMultiplier = 255.0 / stereo.initialConfig.getMaxDisparity()
 with dai.Device(pipeline) as device:
     queue = device.getOutputQueue("xout", 10, False)
     while True:
         msgGrp = queue.get()
         for name, msg in msgGrp:
             frame = msg.getCvFrame()
-            if name == "depth":
-                frame = frame.astype(np.uint16)
+            if name == "disparity":
+                frame = (frame * disparityMultiplier).astype(np.uint8)
+                frame = cv2.applyColorMap(frame, cv2.COLORMAP_JET)
             cv2.imshow(name, frame)
-        if cv2.waitKey(100) == ord("q"):
+        if cv2.waitKey(1) == ord("q"):
             break
-
