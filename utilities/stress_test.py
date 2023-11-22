@@ -42,14 +42,6 @@ YOLO_LABELS = [
     "teddy bear",     "hair drier", "toothbrush"
 ]
 
-# Parse args
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("-ne", "--n-edge-detectors", default=0, type=int, help="Number of edge detectors to create.")
-parser.add_argument("--no-nnet", action="store_true", default=False, help="Don't create a neural network.")
-
-# May have some unknown args
-args, _ = parser.parse_known_args()
 def print_system_information(info: dai.SystemInformation):
     print(
         "Ddr: used / total - %.2f / %.2f MiB"
@@ -110,6 +102,33 @@ def get_or_download_yolo_blob() -> str:
     return str(Path.resolve(blob_path))
 
 
+def create_yolo(pipeline: dai.Pipeline, camera: dai.node.ColorCamera) -> Tuple[str, str]:
+    """Create a yolo detection network and return a tuple of (passthrough_q_name, yolo_q_name)"""
+    camera.setInterleaved(False)
+    camera.setPreviewSize(416, 416)
+    nn_blob_path = get_or_download_yolo_blob()
+    yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
+    yoloDet.setBlobPath(nn_blob_path)
+    # Yolo specific parameters
+    yoloDet.setConfidenceThreshold(0.5)
+    yoloDet.setNumClasses(80)
+    yoloDet.setCoordinateSize(4)
+    yoloDet.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+    yoloDet.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+    yoloDet.setIouThreshold(0.5)
+    yoloDet.input.setBlocking(False)
+    camera.preview.link(yoloDet.input)
+    xoutColor = pipeline.createXLinkOut()
+    passthrough_q_name = f"preview_{camera.getBoardSocket()}"
+    xoutColor.setStreamName(passthrough_q_name)
+    yoloDet.passthrough.link(xoutColor.input)
+    xout_yolo = pipeline.createXLinkOut()
+    yolo_q_name = "yolo"
+    xout_yolo.setStreamName(yolo_q_name)
+    yoloDet.out.link(xout_yolo.input)
+    return (passthrough_q_name, yolo_q_name)
+
+
 last_frame = {} # Store latest frame for each queue
 jet_custom = cv2.applyColorMap(
     np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
@@ -123,11 +142,18 @@ class PipelineContext:
     """The name of the queue that the YOLO spatial detection network passthrough is connected to."""
 
 def stress_test(mxid: str = ""):
+    # Parse args
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-ne", "--n-edge-detectors", default=0, type=int, help="Number of edge detectors to create.")
+    parser.add_argument("--no-nnet", action="store_true", default=False, help="Don't create a neural network.")
+
+    # May have some unknown args
+    args, _ = parser.parse_known_args()
     dot_intensity = 500
     flood_intensity = 500
     iso = 800
     exp_time = 20000
-
 
     import time
     success, device_info = dai.Device.getDeviceByMxId(mxid)
@@ -139,7 +165,7 @@ def stress_test(mxid: str = ""):
         device.setIrLaserDotProjectorBrightness(dot_intensity)
         print("Setting default flood intensity to", flood_intensity)
         device.setIrFloodLightBrightness(flood_intensity)
-        pipeline, outputs, pipeline_context = build_pipeline(device)
+        pipeline, outputs, pipeline_context = build_pipeline(device, args)
         device.startPipeline(pipeline)
         start_time = time.time()
         queues = [device.getOutputQueue(name, size, False)
@@ -248,7 +274,7 @@ RGB_FPS = 20
 MONO_FPS = 20
 ENCODER_FPS = 10
 
-def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, int]], PipelineContext]:
+def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[str, int]], PipelineContext]:
     """
     Build a pipeline based on device capabilities. Return a tuple of (pipeline, output_queue_names, PipelineContext)
     """
@@ -456,28 +482,9 @@ def build_pipeline(device: dai.Device) -> Tuple[dai.Pipeline, List[Tuple[str, in
                 xlink_outs.append((yolo_q_name, 4))
             else:
                 print("Creating YOLO detection network...")
-                nn_blob_path = get_or_download_yolo_blob()
-                yoloDet = pipeline.create(dai.node.YoloDetectionNetwork)
-                yoloDet.setBlobPath(nn_blob_path)
-                # Yolo specific parameters
-                yoloDet.setConfidenceThreshold(0.5)
-                yoloDet.setNumClasses(80)
-                yoloDet.setCoordinateSize(4)
-                yoloDet.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-                yoloDet.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
-                yoloDet.setIouThreshold(0.5)
-                yoloDet.input.setBlocking(False)
-                color_cam.preview.link(yoloDet.input)
-                xoutColor = pipeline.createXLinkOut()
-                passthrough_q_name = f"preview_{color_cam.getBoardSocket()}"
-                xoutColor.setStreamName(passthrough_q_name)
-                yoloDet.passthrough.link(xoutColor.input)
+                passthrough_q_name, yolo_q_name = create_yolo(pipeline, color_cam)
                 xlink_outs.append((passthrough_q_name, 4))
                 context.q_name_yolo_passthrough = passthrough_q_name
-                xout_yolo = pipeline.createXLinkOut()
-                yolo_q_name = "yolo"
-                xout_yolo.setStreamName(yolo_q_name)
-                yoloDet.out.link(xout_yolo.input)
                 xlink_outs.append((yolo_q_name, 4))
         else:
             print("Skipping YOLO detection network creation...")

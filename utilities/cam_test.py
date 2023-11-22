@@ -47,11 +47,14 @@ from itertools import cycle
 from pathlib import Path
 import sys
 import signal
+from stress_test import stress_test, YOLO_LABELS, create_yolo
 
+
+ALL_SOCKETS = ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came', 'camf', 'camg', 'camh']
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came', 'camf', 'camg', 'camh']):
+    if not (socket in ALL_SOCKETS):
         raise ValueError("")
     if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
         raise ValueError("")
@@ -109,6 +112,9 @@ parser.add_argument('--stress', action='store_true',
 parser.add_argument("--stereo", action="store_true", default=False,
                     help="Create a stereo depth node if the device has a stereo pair.")
 
+parser.add_argument("--yolo", type=str, default="",
+                    help=f"Create a yolo detection network on the specified camera. Available cameras: {ALL_SOCKETS}")
+
 parser.add_argument("--gui", action="store_true",
                     help="Use GUI instead of CLI")
 parser.add_argument("-h", "--help", action="store_true", default=False,
@@ -121,7 +127,6 @@ os.environ["DEPTHAI_CONNECTION_TIMEOUT"] = str(args.connection_timeout)
 os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
 
 if args.stress:
-    from stress_test import stress_test
     stress_test(args.device)
     exit(0)
 
@@ -263,7 +268,9 @@ with dai.Device(*dai_device_args) as device:
     xout_tof_amp = {}
     streams = []
     tofConfig = {}
+    yolo_passthrough_q_name = None
     for c in cam_list:
+        print("CAM: ", c)
         tofEnableRaw = False
         xout[c] = pipeline.createXLinkOut()
         xout[c].setStreamName(c)
@@ -297,6 +304,9 @@ with dai.Device(*dai_device_args) as device:
                 cam[c].preview.link(xout[c].input)
             else:
                 cam[c].isp.link(xout[c].input)
+            if args.yolo == c:
+                yolo_passthrough_q_name, yolo_q_name = create_yolo(pipeline, cam[c])
+                streams.append(yolo_q_name)
         else:
             cam[c] = pipeline.createMonoCamera()
             cam[c].setResolution(mono_res_opts[args.mono_resolution])
@@ -491,6 +501,9 @@ with dai.Device(*dai_device_args) as device:
                     for c in cam_list], "[host | capture timestamp]")
 
     capture_list = []
+    yolo_passthrough_q = None
+    if yolo_passthrough_q_name is not None:
+        yolo_passthrough_q = device.getOutputQueue(yolo_passthrough_q_name, maxSize=1, blocking=False)
     while True:
         for c in streams:
             try:
@@ -501,6 +514,20 @@ with dai.Device(*dai_device_args) as device:
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
+                if args.yolo and isinstance(pkt, dai.ImgDetections):
+                    if yolo_passthrough_q is None:
+                        continue
+                    frame_pkt = yolo_passthrough_q.get()
+                    frame = frame_pkt.getCvFrame()
+                    if frame is None:
+                        continue # No frame to draw on
+                    for detection in pkt.detections:
+                        bbox = np.array([detection.xmin * frame.shape[1], detection.ymin * frame.shape[0], detection.xmax * frame.shape[1], detection.ymax * frame.shape[0]], dtype=np.int32)
+                        cv2.putText(frame, YOLO_LABELS[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                        cv2.putText(frame, f"{int(detection.confidence)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                        cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                    cv2.imshow(c, frame)
+                    continue
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
                 cam_skt = c.split('_')[-1]
@@ -519,8 +546,9 @@ with dai.Device(*dai_device_args) as device:
                         depth_frame_color, jet_custom)
                     cv2.imshow(c, depth_frame_color)
                     continue
-
-                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+                
+                
+                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
