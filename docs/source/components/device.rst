@@ -3,9 +3,9 @@
 Device
 ======
 
-Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful Robotics Vision Core
-(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference algorithms and
-for processing sensory inputs (eg. calculating stereo disparity from two cameras).
+Device is an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__ or a RAE robot. On all of our devices there's a powerful Robotics Vision Core
+(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference, CV operations, and
+for processing sensory inputs (eg. stereo depth, video encoders, etc.).
 
 Device API
 ##########
@@ -261,6 +261,34 @@ Some additional information
 - Queues are created such that each queue is its own thread which takes care of receiving, serializing/deserializing, and sending the messages forward (same for input/output queues).
 - The :code:`Device` object isn't fully thread-safe. Some RPC calls (eg. :code:`getLogLevel`, :code:`setLogLevel`, :code:`getDdrMemoryUsage`) will get thread-safe once the mutex is set in place (right now there could be races).
 
+Host clock syncing
+==================
+
+When depthai library connects to a device, it automatically syncs device's timestamp to host's timestamp. Timestamp syncing happens continuously at around 5 second intervals,
+and can be configured via API (example script below).
+
+.. image:: /_static/images/components/device_timesync.jpg
+
+Device clocks are synced at below 2.5ms accuracy for PoE cameras, and below 1ms accuracy for USB cameras at 1σ (standard deviation) with host clock.
+
+.. image:: /_static/images/components/clock-syncing.png
+
+A graph representing the accuracy of the device clock with respect to the host clock. We had 3 devices connected (OAK PoE cameras), all were hardware synchronized using `FSYNC Y-adapter <https://docs.luxonis.com/projects/hardware/en/latest/pages/FSYNC_Yadapter/>`__.
+Raspberry Pi (the host) had an interrupt pin connected to the FSYNC line, so at the start of each frame the interrupt happened and the host clock was recorded. Then we compared frame (synced) timestamps with
+host timestamps and computed the standard deviation. For the histogram above we ran this test for about 7 hours.
+
+.. code-block:: python
+
+    # Configure host clock syncing exmaple
+
+    import depthai as dai
+    from datetime import timedelta
+    # Configure pipeline
+    with dai.Device(pipeline) as device:
+        # 1st value: Interval between timesync runs
+        # 2nd value: Number of timesync samples per run which are used to compute a better value
+        # 3rd value: If true partial timesync requests will be performed at random intervals, otherwise at fixed intervals
+        device.setTimesync(timedelta(seconds=5), 10, True) # (These are default values)
 
 Reference
 #########
