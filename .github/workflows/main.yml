@@ -587,7 +587,7 @@ jobs:
     steps:
       - uses: tibdex/github-app-token@v1
         id: get_installation_token
-        with: 
+        with:
           app_id: 540180
           private_key: ${{ secrets.LUXONIS_HIL_APP_KEY }}
 
@@ -599,7 +599,7 @@ jobs:
           token: ${{ steps.get_installation_token.outputs.token }}
           repo: luxonis/depthai-python
           # token: ${{ github.token }}
-          name: notify_hil_workflow
+          name: HIL_Tests
           status: in_progress
 
       - name: Dispatch an action and get the run ID
@@ -624,5 +624,5 @@ jobs:
           token: ${{ steps.get_installation_token.outputs.token }}
           repo: luxonis/depthai-python
           # token: ${{ github.token }}
-          name: notify_hil_workflow
+          name: HIL_Tests
           conclusion: ${{ job.status }}
