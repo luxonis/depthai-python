@@ -3,9 +3,9 @@
 Device
 ======
 
-Device represents an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__. On all of our devices there's a powerful Robotics Vision Core
-(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference algorithms and
-for processing sensory inputs (eg. calculating stereo disparity from two cameras).
+Device is an `OAK camera <https://docs.luxonis.com/projects/hardware/en/latest/>`__ or a RAE robot. On all of our devices there's a powerful Robotics Vision Core
+(`RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__). The RVC is optimized for performing AI inference, CV operations, and
+for processing sensory inputs (eg. stereo depth, video encoders, etc.).
 
 Device API
 ##########
@@ -55,17 +55,107 @@ subnet, you can specify the device (either with MxID, IP, or USB port name) you 
   with depthai.Device(pipeline, device_info) as device:
       # ...
 
+Host clock syncing
+==================
+
+When depthai library connects to a device, it automatically syncs device's timestamp to host's timestamp. Timestamp syncing happens continuously at around 5 second intervals,
+and can be configured via API (example script below).
+
+.. image:: /_static/images/components/device_timesync.jpg
+
+Device clocks are synced at below 2.5ms accuracy for PoE cameras, and below 1ms accuracy for USB cameras at 1σ (standard deviation) with host clock.
+
+.. image:: /_static/images/components/clock-syncing.png
+
+A graph representing the accuracy of the device clock with respect to the host clock. We had 3 devices connected (OAK PoE cameras), all were hardware synchronized using `FSYNC Y-adapter <https://docs.luxonis.com/projects/hardware/en/latest/pages/FSYNC_Yadapter/>`__.
+Raspberry Pi (the host) had an interrupt pin connected to the FSYNC line, so at the start of each frame the interrupt happened and the host clock was recorded. Then we compared frame (synced) timestamps with
+host timestamps and computed the standard deviation. For the histogram above we ran this test for about 7 hours.
+
+.. code-block:: python
+
+    # Configure host clock syncing exmaple
+
+    import depthai as dai
+    from datetime import timedelta
+    # Configure pipeline
+    with dai.Device(pipeline) as device:
+        # 1st value: Interval between timesync runs
+        # 2nd value: Number of timesync samples per run which are used to compute a better value
+        # 3rd value: If true partial timesync requests will be performed at random intervals, otherwise at fixed intervals
+        device.setTimesync(timedelta(seconds=5), 10, True) # (These are default values)
+
+
+Multiple devices
+################
+
+If you want to use multiple devices on a host, check :ref:`Multiple DepthAI per Host`.
+
+Device queues
+#############
+
+After initializing the device, you can create input/output queues that match :ref:`XLinkIn`/:ref:`XLinkOut` nodes in the pipeline. These queues will be located on the host computer (in RAM).
+
+.. code-block:: python
+
+  pipeline = dai.Pipeline()
+
+  xout = pipeline.createXLinkOut()
+  xout.setStreamName("output_name")
+  # ...
+  xin = pipeline.createXLinkIn()
+  xin.setStreamName("input_name")
+  # ...
+  with dai.Device(pipeline) as device:
+
+    outputQueue = device.getOutputQueue("output_name", maxSize=5, blocking=False)
+    inputQueue = device.getInputQueue("input_name")
+
+    outputQueue.get() # Read from the queue, blocks until message arrives
+    outputQueue.tryGet() # Read from the queue, returns None if there's no msg (doesn't block)
+    if outputQueue.has(): # Check if there are any messages in the queue
+
+
+When you define an output queue, the device can push new messages to it at any time, and the host can read from it at any time.
+
+
+Output queue - `maxSize` and `blocking`
+#######################################
+
+When the host is reading very fast from the queue (inside `while True` loop), the queue, regardless of its size, will stay empty most of
+the time. But as we add things on the host side (additional processing, analysis, etc), it may happen that the device will be pushing messages to
+the queue faster than the host can read from it. And then the messages in the queue will start to increase - and both `maxSize` and `blocking`
+flags determine the behavior of the queue in this case. Two common configurations are:
+
+.. code-block:: python
+
+  with dai.Device(pipeline) as device:
+    # If you want only the latest message, and don't care about previous ones;
+    # When a new msg arrives to the host, it will overwrite the previous (oldest) one if it's still in the queue
+    q1 = device.getOutputQueue(name="name1", maxSize=1, blocking=False)
+
+
+    # If you care about every single message (eg. H264/5 encoded video; if you miss a frame, you will get artifacts);
+    # If the queue is full, the device will wait until the host reads a message from the queue
+    q2 = device.getOutputQueue(name="name2", maxSize=30, blocking=True) # Also default values (maxSize=30/blocking=True)
+
+We used `maxSize=30` just as an example, but it can be any `int16` number. Since device queues are on the host computer, memory (RAM) usually isn't that scarce, so `maxSize` wouldn't matter that much.
+But if you are using a small SBC like RPI Zero (512MB RAM), and are streaming large frames (eg. 4K unencoded), you could quickly run out of memory if you set `maxSize` to a high
+value (and don't read from the queue fast enough).
+
+Some additional information
+---------------------------
+
+- Queues are thread-safe - they can be accessed from any thread.
+- Queues are created such that each queue is its own thread which takes care of receiving, serializing/deserializing, and sending the messages forward (same for input/output queues).
+- The :code:`Device` object isn't fully thread-safe. Some RPC calls (eg. :code:`getLogLevel`, :code:`setLogLevel`, :code:`getDdrMemoryUsage`) will get thread-safe once the mutex is set in place (right now there could be races).
 
 Watchdog
 ########
 
-Understanding the Watchdog Mechanism in POE Devices
-----------------------------------------------------
+The watchdog is a crucial component in the operation of POE (Power over Ethernet) devices with DepthAI. When DepthAI disconnects from a POE device, the watchdog mechanism is the first to respond,
+initiating a reset of the camera. This reset is followed by a complete system reboot, which includes the loading of the DepthAI bootloader and the initialization of the entire networking stack.
 
-The watchdog is a crucial component in the operation of POE (Power over Ethernet) devices with DepthAI. When DepthAI disconnects from a POE device, the watchdog mechanism is the first to respond, initiating a reset of the camera. This reset is followed by a complete system reboot, which includes the loading of the DepthAI bootloader and the initialization of the entire networking stack. 
-
-.. note::
-    This process is necessary to make the camera available for reconnection and typically takes about 10 seconds, which means the fastest possible reconnection time is 10 seconds.
+The watchdog process is necessary to make the camera available for reconnection and **typically takes about 10 seconds**, which means the fastest possible reconnection time is 10 seconds.
 
 
 Customizing the Watchdog Timeout
@@ -100,9 +190,6 @@ Customizing the Watchdog Timeout
       set DEPTHAI_WATCHDOG_INITIAL_DELAY=<my_value>
       set DEPTHAI_BOOTUP_TIMEOUT=<my_value>
       python3 script.py
-
-Code-Based Configuration
-------------------------
 
 Alternatively, you can set the timeout directly in your code:
 
@@ -163,104 +250,6 @@ The following table lists various environment variables used in the system, alon
      - Overrides device USB Bootloader binary. Mostly for internal debugging purposes.
    * - `DEPTHAI_BOOTLOADER_BINARY_ETH`
      - Overrides device Network Bootloader binary. Mostly for internal debugging purposes.
-
-
-
-Multiple devices
-################
-
-If you want to use multiple devices on a host, check :ref:`Multiple DepthAI per Host`.
-
-Device queues
-#############
-
-After initializing the device, one has to initialize the input/output queues as well. These queues will be located on the host computer (in RAM).
-
-.. code-block:: python
-
-  outputQueue = device.getOutputQueue("output_name")
-  inputQueue = device.getInputQueue("input_name")
-
-When you define an output queue, the device can push new messages to it at any point in time, and the host can read from it at any point in time.
-Usually, when the host is reading very fast from the queue, the queue (regardless of its size) will stay empty most of
-the time. But as we add things on the host side (additional processing, analysis, etc), it may happen that the device will be writing to
-the queue faster than the host can read from it. And then the messages in the queue will start to add up - and both maxSize and blocking
-flags determine the behavior of the queue in this case. You can set these flags with:
-
-.. code-block:: python
-
-  # When initializing the queue
-  queue = device.getOutputQueue(name="name", maxSize=5, blocking=False)
-
-  # Or afterwards
-  queue.setMaxSize(10)
-  queue.setBlocking(True)
-
-Specifying arguments for :code:`getOutputQueue` method
-######################################################
-
-When obtaining the output queue (example code below), the :code:`maxSize` and :code:`blocking` arguments should be set depending on how
-the messages are intended to be used, where :code:`name` is the name of the outputting stream.
-
-Since queues are on the host computer, memory (RAM) usually isn't that scarce. But if you are using a small SBC like RPI Zero, where there's only 0.5GB RAM,
-you might need to specify max queue size as well.
-
-.. code-block:: python
-
-  with dai.Device(pipeline) as device:
-    queueLeft = device.getOutputQueue(name="manip_left", maxSize=8, blocking=False)
-
-If only the latest results are relevant and previous do not matter, one can set :code:`maxSize = 1` and :code:`blocking = False`.
-That way only latest message will be kept (:code:`maxSize = 1`) and it might also be overwritten in order to avoid waiting for
-the host to process every frame, thus providing only the latest data (:code:`blocking = False`).
-However, if there are a lot of dropped/overwritten frames, because the host isn't able to process them fast enough
-(eg. one-threaded environment which does some heavy computing), the :code:`maxSize` could be set to a higher
-number, which would increase the queue size and reduce the number of dropped frames.
-Specifically, at 30 FPS, a new frame is received every ~33ms, so if your host is able to process a frame in that time, the :code:`maxSize`
-could be set to :code:`1`, otherwise to :code:`2` for processing times up to 66ms and so on.
-
-If, however, there is a need to have some intervals of wait between retrieving messages, one could specify that differently.
-An example would be checking the results of :code:`DetectionNetwork` for the last 1 second based on some other event,
-in which case one could set :code:`maxSize = 30` and :code:`blocking = False`
-(assuming :code:`DetectionNetwork` produces messages at ~30FPS).
-
-The :code:`blocking = True` option is mostly used when correct order of messages is needed.
-Two examples would be:
-
-- matching passthrough frames and their original frames (eg. full 4K frames and smaller preview frames that went into NN),
-- encoding (most prominently H264/H265 as frame drops can lead to artifacts).
-
-Blocking behaviour
-------------------
-
-By default, queues are **blocking** and their size is **30**, so when the device fills up a queue and when the limit is
-reached, any additional messages from the device will be blocked and the library will wait until it can add new messages to the queue.
-It will wait for the host to consume (eg. :code:`queue.get()`) a message before putting a new one into the queue.
-
-.. note::
-    After the host queue gets filled up, the XLinkOut.input queue on the device will start filling up. If that queue is
-    set to blocking, other nodes that are sending messages to it will have to wait as well. This is a usual cause for a
-    blocked pipeline, where one of the queues isn't emptied in timely manner and the rest of the pipeline waits for it
-    to be empty again.
-
-Non-Blocking behaviour
-----------------------
-
-Making the queue non-blocking will change the behavior in the situation described above - instead of waiting, the library will discard
-the oldest message and add the new one to the queue, and then continue its processing loop (so it won't get blocked).
-:code:`maxSize` determines the size of the queue and it also helps to control memory usage.
-
-For example, if a message has 5MB of data, and the queue size is 30, this queue can effectively store
-up to 150MB of data in the memory on the host (the messages can also get really big, for instance, a single 4K NV12 encoded frame takes about ~12MB).
-
-Some additional information
----------------------------
-
-- Decreasing the queue size to 1 and setting non-blocking behavior will effectively mean "I only want the latest packet from the queue".
-- Queues are thread-safe - they can be accessed from any thread.
-- Queues are created such that each queue is its own thread which takes care of receiving, serializing/deserializing, and sending the messages forward (same for input/output queues).
-- The :code:`Device` object isn't fully thread-safe. Some RPC calls (eg. :code:`getLogLevel`, :code:`setLogLevel`, :code:`getDdrMemoryUsage`) will get thread-safe once the mutex is set in place (right now there could be races).
-
 
 Reference
 #########
