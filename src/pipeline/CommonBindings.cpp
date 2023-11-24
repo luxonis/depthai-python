@@ -5,6 +5,7 @@
 
 // depthai-shared
 #include "depthai-shared/common/CameraBoardSocket.hpp"
+#include "depthai-shared/common/Connectivity.hpp"
 #include "depthai-shared/common/EepromData.hpp"
 #include "depthai-shared/common/CameraImageOrientation.hpp"
 #include "depthai-shared/common/CameraSensorType.hpp"
@@ -40,6 +41,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Point3f> point3f(m, "Point3f", DOC(dai, Point3f));
     py::class_<Size2f> size2f(m, "Size2f", DOC(dai, Size2f));
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
+    py::enum_<Connectivity> connectivity(m, "Connectivity", DOC(dai, Connectivity));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
     py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
@@ -183,7 +185,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("TOF", CameraSensorType::TOF)
         .value("THERMAL", CameraSensorType::THERMAL)
     ;
-
+    // Connectivity enum bindings
+    connectivity
+        .value("USB", Connectivity::USB)
+        .value("ETHERNET", Connectivity::ETHERNET)
+        .value("WIFI", Connectivity::WIFI)
+    ;
     // CameraImageOrientation enum bindings
     cameraImageOrientation
         .value("AUTO", CameraImageOrientation::AUTO)
