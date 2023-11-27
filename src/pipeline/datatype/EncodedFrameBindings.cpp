@@ -89,7 +89,7 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            DOC(dai, Buffer, getTimestampDevice))
       .def("getInstanceNum", &EncodedFrame::getInstanceNum,
            DOC(dai, EncodedFrame, getInstanceNum))
-        .def("getSequenceNum", &EncodedFrame::Buffer::getSequenceNum,
+      .def("getSequenceNum", &EncodedFrame::Buffer::getSequenceNum,
            DOC(dai, Buffer, getSequenceNum))
       .def("getExposureTime", &EncodedFrame::getExposureTime,
            DOC(dai, EncodedFrame, getExposureTime))
