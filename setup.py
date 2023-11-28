@@ -14,6 +14,7 @@ from pathlib import Path
 
 ### NAME
 MODULE_NAME = 'depthai'
+BIND_NAME = 'depthai_bind'
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
@@ -205,7 +206,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
-    ext_modules=[CMakeExtension(MODULE_NAME)],
+    ext_modules=[CMakeExtension(BIND_NAME)],
+    packages=[MODULE_NAME],
     cmdclass={
         'build_ext': CMakeBuild
     },

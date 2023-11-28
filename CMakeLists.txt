@@ -34,8 +34,8 @@ if(WIN32)
 endif()
 
 # Pybindings project
-set(TARGET_NAME depthai)
-project(depthai VERSION "0") # revision of bindings [depthai-core].[rev]
+set(TARGET_NAME depthai_bind)
+project(depthai_bind VERSION "0") # revision of bindings [depthai-core].[rev]
 
 # Set default build type depending on context
 set(default_build_type "Release")

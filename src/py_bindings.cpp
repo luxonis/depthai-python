@@ -29,7 +29,7 @@
 #include "log/LogBindings.hpp"
 #include "VersionBindings.hpp"
 
-PYBIND11_MODULE(depthai, m)
+PYBIND11_MODULE(depthai_bind, m)
 {
 
     // Depthai python version consists of: (depthai-core).(bindings revision)[+bindings hash]
