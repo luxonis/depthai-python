@@ -129,6 +129,8 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/SyncBindings.cpp
+    src/pipeline/node/MessageDemuxBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -143,6 +145,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/ImgFrameBindings.cpp
     src/pipeline/datatype/EncodedFrameBindings.cpp
     src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/MessageGroupBindings.cpp
     src/pipeline/datatype/NNDataBindings.cpp
     src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
     src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
