@@ -47,6 +47,8 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("occupancyThreshold", &RawPointCloudConfig::occupancyThreshold, DOC(dai, RawPointCloudConfig, occupancyThreshold))
         .def_readwrite("transformationMatrix", &RawPointCloudConfig::transformationMatrix, DOC(dai, RawPointCloudConfig, transformationMatrix))
         .def_readwrite("scale", &RawPointCloudConfig::scale, DOC(dai, RawPointCloudConfig, scale))
+        .def_readwrite("width", &RawPointCloudConfig::width, DOC(dai, RawPointCloudConfig, width))
+        .def_readwrite("height", &RawPointCloudConfig::height, DOC(dai, RawPointCloudConfig, height))
         .def_readwrite("useFastMath", &RawPointCloudConfig::useFastMath, DOC(dai, RawPointCloudConfig, useFastMath))
         .def_readwrite("occupancy3d", &RawPointCloudConfig::occupancy3d, DOC(dai, RawPointCloudConfig, occupancy3d))
         ;
