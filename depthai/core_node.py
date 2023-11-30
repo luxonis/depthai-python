@@ -73,7 +73,10 @@ class CoreNode(Node):
         super().__init__(*args, **input_kwargs)
 
     def set_param(self, name, value):
-        typeguard.check_type(value, self.param_desc[name])
+        try:
+            typeguard.check_type(value, self.param_desc[name])
+        except typeguard.TypeCheckError as e:
+            raise TypeError(f"Parameter '{name}' type error") from e
         if not isinstance(value, tuple): value = (value,)
         getattr(self.core_node, self.param_name_map[name])(*value)
 
