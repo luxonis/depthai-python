@@ -1,6 +1,7 @@
 import depthai.global_state as global_state
 
 class Node:
+    default_output = None
 
     class OutputRef:
         def __init__(self, node, name):
@@ -22,6 +23,7 @@ class Node:
             self.def_stack.pop(0)
 
         # Link supplied inputs
+        assert len(args) <= len(self.input_desc), "Too much inputs"
         for arg, name in zip(args, self.input_desc):
             self.link(name, arg)
         for key, value in kwargs.items():
@@ -49,6 +51,8 @@ class Node:
         """
         Allows this syntax: NN(MonoCamera(...))
         """
+        if self.default_output is None and len(self.output_desc) == 1:
+            self.default_output ,= self.output_desc.keys()
         assert self.default_output, \
                 f"Node {self.__class__.__name__} has no default output"
         return Node.OutputRef(self, self.default_output)
@@ -64,4 +68,19 @@ class Node:
         """
         Allows this syntax: NN(MonoCamera(...).raw)
         """
+        if name not in self.output_desc:
+            raise AttributeError(f"'{self}' object has no attribute '{name}'",
+                                 name=name, obj=self)
         return Node.OutputRef(self, name)
+
+import typing
+T = typing.TypeVar("T")
+class Feedback(Node):
+    input_desc = {"input": T}
+    output_desc = {"output": T}
+
+    # Specify no arguments
+    def __init__(self): super().__init__()
+
+    def attach(self, output_ref):
+        self.link("input", output_ref)

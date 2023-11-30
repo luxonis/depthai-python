@@ -48,8 +48,6 @@ class CoreNode(Node):
                         cls.param_name_map[name] = core_name
                     assert name in cls.param_name_map, \
                             f"Unknown parameter {name}"
-        if len(cls.output_desc) == 1:
-            cls.default_output ,= cls.output_desc.keys()
 
     def __init__(self, *args, **kwargs):
         # Create core node
