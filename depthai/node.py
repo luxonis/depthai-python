@@ -2,6 +2,8 @@ import depthai.global_state as global_state
 
 class Node:
     default_output = None
+    input_desc = {}
+    output_desc = {}
 
     class OutputRef:
         def __init__(self, node, name):
@@ -74,10 +76,11 @@ class Node:
         return Node.OutputRef(self, name)
 
 import typing
-T = typing.TypeVar("T")
 class Feedback(Node):
-    input_desc = {"input": T}
-    output_desc = {"output": T}
+    # Type cannot be generic, the input is ignored and output-only generic
+    # nodes are disallowed
+    input_desc = {"input": typing.Any}
+    output_desc = {"output": typing.Any}
 
     # Specify no arguments
     def __init__(self): super().__init__()
