@@ -1,5 +1,6 @@
 import depthai.global_state as global_state
 import depthai_bind
+import typeguard
 from depthai.node import Node
 
 class CoreNode(Node):
@@ -72,10 +73,7 @@ class CoreNode(Node):
         super().__init__(*args, **input_kwargs)
 
     def set_param(self, name, value):
-        # TODO Proper type checking
-        #assert isinstance(value, self.param_desc[name]), \
-        #        f'Type mismatch at parameter "{name}":' \
-        #        ' Expected {self.param_desc[name]}, got {type(value)}'
+        typeguard.check_type(value, self.param_desc[name])
         if not isinstance(value, tuple): value = (value,)
         getattr(self.core_node, self.param_name_map[name])(*value)
 

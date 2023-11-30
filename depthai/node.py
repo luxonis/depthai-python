@@ -46,7 +46,6 @@ class Node:
         if isinstance(output_ref, Node):
             output_ref = output_ref.get_default_output()
         assert isinstance(output_ref, Node.OutputRef)
-        #TODO Check type
         self.inputs[input_name] = output_ref
 
     def get_default_output(self):
