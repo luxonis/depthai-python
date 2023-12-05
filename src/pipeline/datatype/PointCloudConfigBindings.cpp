@@ -51,6 +51,7 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("height", &RawPointCloudConfig::height, DOC(dai, RawPointCloudConfig, height))
         .def_readwrite("useFastMath", &RawPointCloudConfig::useFastMath, DOC(dai, RawPointCloudConfig, useFastMath))
         .def_readwrite("occupancy3d", &RawPointCloudConfig::occupancy3d, DOC(dai, RawPointCloudConfig, occupancy3d))
+        .def_readwrite("occupancy3dScale", &RawPointCloudConfig::occupancy3dScale, DOC(dai, RawPointCloudConfig, occupancy3dScale))
         ;
 
     // Message
