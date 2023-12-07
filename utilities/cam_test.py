@@ -285,6 +285,7 @@ for c in cam_list:
     # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
+    # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
@@ -354,10 +355,10 @@ with dai.Device(*dai_device_args) as device:
     EXP_STEP = 500  # us
     ISO_STEP = 50
     LENS_STEP = 3
-    DOT_STEP = 100
-    FLOOD_STEP = 100
-    DOT_MAX = 1200
-    FLOOD_MAX = 1500
+    DOT_STEP = 0.05
+    FLOOD_STEP = 0.05
+    DOT_MAX = 1
+    FLOOD_MAX = 1
 
     # Defaults and limits for manual focus/exposure controls
     lensPos = 150
@@ -556,25 +557,25 @@ with dai.Device(*dai_device_args) as device:
             dotIntensity = dotIntensity - DOT_STEP
             if dotIntensity < 0:
                 dotIntensity = 0
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
             print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('d'):
             dotIntensity = dotIntensity + DOT_STEP
             if dotIntensity > DOT_MAX:
                 dotIntensity = DOT_MAX
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
             print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('w'):
             floodIntensity = floodIntensity + FLOOD_STEP
             if floodIntensity > FLOOD_MAX:
                 floodIntensity = FLOOD_MAX
-            device.setIrFloodLightBrightness(floodIntensity)
+            device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
         elif key == ord('s'):
             floodIntensity = floodIntensity - FLOOD_STEP
             if floodIntensity < 0:
                 floodIntensity = 0
-            device.setIrFloodLightBrightness(floodIntensity)
+            device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
         elif key >= 0 and chr(key) in '34567890[]p\\;\'':
             if key == ord('3'):
