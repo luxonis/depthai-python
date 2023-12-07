@@ -258,6 +258,7 @@ for c in cam_list:
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     # cam[c].initialControl.setMisc("stride-align", 1)
     # cam[c].initialControl.setMisc("scanline-align", 1)
+    # cam[c].initialControl.setMisc('manual-exposure-handling', 'fast')
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
