@@ -69,7 +69,7 @@ Device clocks are synced at below 500µs accuracy for PoE cameras, and below 200
 
 A graph representing the accuracy of the device clock with respect to the host clock. We had 3 devices connected (OAK PoE cameras), all were hardware synchronized using `FSYNC Y-adapter <https://docs.luxonis.com/projects/hardware/en/latest/pages/FSYNC_Yadapter/>`__.
 Raspberry Pi (the host) had an interrupt pin connected to the FSYNC line, so at the start of each frame the interrupt happened and the host clock was recorded. Then we compared frame (synced) timestamps with
-host timestamps and computed the standard deviation. For the histogram above we ran this test for about 3 hours.
+host timestamps and computed the standard deviation. For the histogram above we ran this test for approximately 3 hours.
 
 .. code-block:: python
 
