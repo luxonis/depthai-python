@@ -63,17 +63,17 @@ and can be configured via API (example script below).
 
 .. image:: /_static/images/components/device_timesync.jpg
 
-Device clocks are synced at below 2.5ms accuracy for PoE cameras, and below 1ms accuracy for USB cameras at 1σ (standard deviation) with host clock.
+Device clocks are synced at below 500µs accuracy for PoE cameras, and below 200µs accuracy for USB cameras at 1σ (standard deviation) with host clock.
 
 .. image:: /_static/images/components/clock-syncing.png
 
 A graph representing the accuracy of the device clock with respect to the host clock. We had 3 devices connected (OAK PoE cameras), all were hardware synchronized using `FSYNC Y-adapter <https://docs.luxonis.com/projects/hardware/en/latest/pages/FSYNC_Yadapter/>`__.
 Raspberry Pi (the host) had an interrupt pin connected to the FSYNC line, so at the start of each frame the interrupt happened and the host clock was recorded. Then we compared frame (synced) timestamps with
-host timestamps and computed the standard deviation. For the histogram above we ran this test for about 7 hours.
+host timestamps and computed the standard deviation. For the histogram above we ran this test for approximately 3 hours.
 
 .. code-block:: python
 
-    # Configure host clock syncing exmaple
+    # Configure host clock syncing example
 
     import depthai as dai
     from datetime import timedelta
