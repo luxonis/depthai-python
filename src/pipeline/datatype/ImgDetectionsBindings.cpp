@@ -46,6 +46,7 @@ void bind_imgdetections(pybind11::module& m, void* pCallstack){
         .def_readwrite("yIndex", &ImgDetection::yIndex)
         .def_readwrite("headIndex", &ImgDetection::headIndex)
         .def_readwrite("anchorIndex", &ImgDetection::anchorIndex)
+        .def_readwrite("extraParams", &ImgDetection::extraParams)
         ;
 
     rawImgDetections
