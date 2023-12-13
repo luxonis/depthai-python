@@ -142,6 +142,11 @@ class CMakeBuild(build_ext):
                 freeMemory = 4000
 
         # Configure and build
+
+        # Add additional cmake build args from environment
+        if 'CMAKE_BUILD_ARGS' in os.environ:
+            build_args += [os.environ['CMAKE_BUILD_ARGS']]
+
         # Windows
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
