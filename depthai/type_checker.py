@@ -10,6 +10,8 @@ import re
 This module uses MyPy to check type information.
 """
 
+# TODO Double check how None and NoneType works
+
 MYPY_COMMAND = ["--follow-imports", "silent", "-c"]
 
 def construct_imports(*types):
@@ -17,6 +19,8 @@ def construct_imports(*types):
         if (subtypes := typing.get_args(type)) != ():
             yield "import typing"
             yield from construct_imports(*subtypes)
+            continue
+        if type is None:
             continue
         yield f"import {type.__module__}"
 
@@ -38,6 +42,8 @@ def type_repr(type):
             prefix = type_repr(typing.get_origin(type))
         case types.EllipsisType():
             return "..."
+        case None:
+            return "None"
         case _:
             raise NotImplementedError()
 
@@ -125,6 +131,7 @@ def check_pipeline(pipeline):
     pipeline = list(get_topological_order(pipeline))
     program = list(construct_imports(*get_types(pipeline))) 
     program += list(construct_functions(pipeline))
+
 
     # Run for the first time to detect problem with program construction
     logging.debug("Representation of nodes for MyPy")
