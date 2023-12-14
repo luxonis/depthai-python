@@ -44,7 +44,7 @@ with dai.Device() as device:
             min_val, max_val = frameRaw.min(), frameRaw.max()
             normalized_frame = (frameRaw - min_val) / (max_val - min_val)
             frame_8bit = np.uint8(normalized_frame * 255)
-            colored_frame = cv2.applyColorMap(frame_8bit, cv2.COLORMAP_JET)
+            colored_frame = cv2.applyColorMap(frame_8bit, cv2.COLORMAP_MAGMA)
             colored_frame = cv2.circle(
                 colored_frame, (mouse_x, mouse_y), 5, (0, 0, 0), -1
             )
