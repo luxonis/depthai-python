@@ -46,7 +46,7 @@ with dai.Device() as device:
             frame_8bit = np.uint8(normalized_frame * 255)
             colored_frame = cv2.applyColorMap(frame_8bit, cv2.COLORMAP_MAGMA)
             colored_frame = cv2.circle(
-                colored_frame, (mouse_x, mouse_y), 5, (0, 0, 0), -1
+                colored_frame, (mouse_x, mouse_y), 5, (255, 255, 255), -1
             )
             colored_frame = cv2.putText(
                 colored_frame,
@@ -54,7 +54,7 @@ with dai.Device() as device:
                 (mouse_x + 10, mouse_y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (0, 0, 0),
+                (255, 255, 255),
             )
             cv2.imshow(WINDOW_NAME_TEMP, colored_frame)
 
