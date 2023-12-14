@@ -161,12 +161,11 @@ void bind_nndata(pybind11::module& m, void* pCallstack){
             PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
             return obj.getFirstLayerInt32();
         }, DOC(dai, NNData, getFirstLayerInt32))
-        .def("getTimestamp", &NNData::getTimestamp, DOC(dai, NNData, getTimestamp))
-        .def("getTimestampDevice", &NNData::getTimestampDevice, DOC(dai, NNData, getTimestampDevice))
-        .def("getSequenceNum", &NNData::getSequenceNum, DOC(dai, NNData, getSequenceNum))
+        .def("getTimestamp", &NNData::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
+        .def("getTimestampDevice", &NNData::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
+        .def("getSequenceNum", &NNData::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
         .def("setTimestamp", &NNData::setTimestamp, DOC(dai, NNData, setTimestamp))
         .def("setTimestampDevice", &NNData::setTimestampDevice, DOC(dai, NNData, setTimestampDevice))
-        .def("setSequenceNum", &NNData::setSequenceNum, DOC(dai, NNData, setSequenceNum))
         .def("setSequenceNum", &NNData::setSequenceNum, DOC(dai, NNData, setSequenceNum))
         .def("addTensor", static_cast<NNData&(NNData::*)(const std::string&, const std::vector<int>&)>(&NNData::addTensor), py::arg("name"), py::arg("tensor"), DOC(dai, NNData, addTensor))
         .def("addTensor", static_cast<NNData&(NNData::*)(const std::string&, const std::vector<float>&)>(&NNData::addTensor), py::arg("name"), py::arg("tensor"), DOC(dai, NNData, addTensor))
