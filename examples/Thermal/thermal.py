@@ -50,7 +50,7 @@ with dai.Device() as device:
             )
             colored_frame = cv2.putText(
                 colored_frame,
-                f"{frameRaw[mouse_y, mouse_x]:.2f} °C",
+                f"{frameRaw[mouse_y, mouse_x]:.2f} deg C",
                 (mouse_x + 10, mouse_y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
