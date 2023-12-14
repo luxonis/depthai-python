@@ -27,6 +27,7 @@ Code Samples
    ../samples/ToF/*
    ../samples/VideoEncoder/*
    ../samples/Warp/*
+   ../samples/UVC/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -72,6 +73,7 @@ are presented with code.
 
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
+- :ref:`Feature Tracker with Motion Estimation` - Camera movement estimation based on feature tracking
 
 .. rubric:: Host side
 
@@ -177,6 +179,12 @@ are presented with code.
 
 - :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
 - :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
+
+.. rubric:: UVC
+
+- :ref:`UVC & Color Camera` - Displays RGB frames from a UVC camera
+- :ref:`UVC & Mono Camera` - Displays mono frames from a UVC camera
+- :ref:`UVC & Disparity` - Displays disparity frames from a UVC camera
 
 .. rubric:: Yolo
 
