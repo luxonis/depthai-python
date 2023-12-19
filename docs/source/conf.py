@@ -22,7 +22,7 @@ subprocess.check_call(['make', '-j'], cwd=tmpdir+'/libusb-1.0.24')
 subprocess.check_call(['make', 'install'], cwd=tmpdir+'/libusb-1.0.24')
 env['PATH'] = tmpdir+'/libusb/include:'+tmpdir+'/libusb/lib'+':'+env['PATH']
 
-# Not needed anymore, part of pip install that carries the binary itself also
+# Not needed since libclang usage in pip requirements (brings its own library)
 # # libclang
 # subprocess.check_call(['wget', 'https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/misc/libclang-11_manylinux2014_x86_64.tar.xz'], cwd=tmpdir)
 # subprocess.check_call(['mkdir', '-p', 'libclang'], cwd=tmpdir)
