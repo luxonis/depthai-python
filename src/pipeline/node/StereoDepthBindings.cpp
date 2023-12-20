@@ -186,6 +186,7 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .def("setRectificationUseSpecTranslation", &StereoDepth::setRectificationUseSpecTranslation, DOC(dai, node, StereoDepth, setRectificationUseSpecTranslation))
         .def("setDepthAlignmentUseSpecTranslation", &StereoDepth::setDepthAlignmentUseSpecTranslation, DOC(dai, node, StereoDepth, setDepthAlignmentUseSpecTranslation))
         .def("setAlphaScaling", &StereoDepth::setAlphaScaling, DOC(dai, node, StereoDepth, setAlphaScaling))
+        .def("setFrameSync", &StereoDepth::setFrameSync, DOC(dai, node, StereoDepth, setFrameSync))
         ;
     // ALIAS
     daiNodeModule.attr("StereoDepth").attr("Properties") = stereoDepthProperties;
