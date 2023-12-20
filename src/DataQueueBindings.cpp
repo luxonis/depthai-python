@@ -51,7 +51,7 @@ void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
     dataOutputQueue
         .def("getName", &DataOutputQueue::getName, DOC(dai, DataOutputQueue, getName))
         .def("isClosed", &DataOutputQueue::isClosed, DOC(dai, DataOutputQueue, isClosed))
-        .def("close", &DataOutputQueue::close, DOC(dai, DataOutputQueue, close))
+        .def("close", &DataOutputQueue::close, DOC(dai, DataOutputQueue, close), py::call_guard<py::gil_scoped_release>())
 
         .def("addCallback", addCallbackLambda, py::arg("callback"), DOC(dai, DataOutputQueue, addCallback))
         .def("addCallback", addCallbackLambda, py::arg("callback"), DOC(dai, DataOutputQueue, addCallback, 2))
@@ -114,7 +114,7 @@ void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind DataInputQueue
     dataInputQueue
         .def("isClosed", &DataInputQueue::isClosed, DOC(dai, DataInputQueue, isClosed))
-        .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close))
+        .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close), py::call_guard<py::gil_scoped_release>())
         .def("getName", &DataInputQueue::getName, DOC(dai, DataInputQueue, getName))
         .def("setBlocking", &DataInputQueue::setBlocking, py::arg("blocking"), DOC(dai, DataInputQueue, setBlocking))
         .def("getBlocking", &DataInputQueue::getBlocking, DOC(dai, DataInputQueue, getBlocking))

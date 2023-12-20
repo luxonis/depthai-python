@@ -123,7 +123,7 @@ with dai.Device(pipeline) as device:
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-    networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
+    networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
 
     startTime = time.monotonic()
     counter = 0
@@ -142,7 +142,7 @@ with dai.Device(pipeline) as device:
             for ten in inNN.getAllLayerNames():
                 toPrint = f'{toPrint} {ten},'
             print(toPrint)
-            printOutputLayersOnce = False;
+            printOutputLayersOnce = False
 
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame() # depthFrame values are in millimeters

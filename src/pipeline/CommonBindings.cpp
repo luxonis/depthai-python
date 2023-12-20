@@ -5,6 +5,7 @@
 
 // depthai-shared
 #include "depthai-shared/common/CameraBoardSocket.hpp"
+#include "depthai-shared/common/ConnectionInterface.hpp"
 #include "depthai-shared/common/EepromData.hpp"
 #include "depthai-shared/common/CameraImageOrientation.hpp"
 #include "depthai-shared/common/CameraSensorType.hpp"
@@ -24,6 +25,7 @@
 #include "depthai-shared/common/Rect.hpp"
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
+#include "depthai-shared/common/Interpolation.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -39,6 +41,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<Point3f> point3f(m, "Point3f", DOC(dai, Point3f));
     py::class_<Size2f> size2f(m, "Size2f", DOC(dai, Size2f));
     py::enum_<CameraBoardSocket> cameraBoardSocket(m, "CameraBoardSocket", DOC(dai, CameraBoardSocket));
+    py::enum_<ConnectionInterface> connectionInterface(m, "connectionInterface", DOC(dai, ConnectionInterface));
     py::enum_<CameraSensorType> cameraSensorType(m, "CameraSensorType", DOC(dai, CameraSensorType));
     py::enum_<CameraImageOrientation> cameraImageOrientation(m, "CameraImageOrientation", DOC(dai, CameraImageOrientation));
     py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
@@ -62,6 +65,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
+    py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -181,7 +185,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("TOF", CameraSensorType::TOF)
         .value("THERMAL", CameraSensorType::THERMAL)
     ;
-
+    // ConnectionInterface enum bindings
+    connectionInterface
+        .value("USB", ConnectionInterface::USB)
+        .value("ETHERNET", ConnectionInterface::ETHERNET)
+        .value("WIFI", ConnectionInterface::WIFI)
+    ;
     // CameraImageOrientation enum bindings
     cameraImageOrientation
         .value("AUTO", CameraImageOrientation::AUTO)
@@ -201,6 +210,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("orientation", &CameraFeatures::orientation)
         .def_readwrite("supportedTypes", &CameraFeatures::supportedTypes)
         .def_readwrite("hasAutofocus", &CameraFeatures::hasAutofocus)
+        .def_readwrite("hasAutofocusIC", &CameraFeatures::hasAutofocusIC)
         .def_readwrite("name", &CameraFeatures::name)
         .def_readwrite("configs", &CameraFeatures::configs)
         .def("__repr__", [](CameraFeatures& camera) {
@@ -293,12 +303,17 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("hardwareConf", &EepromData::hardwareConf)
         .def_readwrite("productName", &EepromData::productName)
         .def_readwrite("batchName", &EepromData::batchName)
+        .def_readwrite("deviceName", &EepromData::deviceName)
         .def_readwrite("batchTime", &EepromData::batchTime)
         .def_readwrite("boardOptions", &EepromData::boardOptions)
         .def_readwrite("cameraData", &EepromData::cameraData)
         .def_readwrite("stereoRectificationData", &EepromData::stereoRectificationData)
         .def_readwrite("imuExtrinsics", &EepromData::imuExtrinsics)
         .def_readwrite("miscellaneousData", &EepromData::miscellaneousData)
+        .def_readwrite("housingExtrinsics", &EepromData::housingExtrinsics)
+        .def_readwrite("stereoUseSpecTranslation", &EepromData::stereoUseSpecTranslation)
+        .def_readwrite("stereoEnableDistortionCorrection", &EepromData::stereoEnableDistortionCorrection)
+        .def_readwrite("verticalCameraSocket", &EepromData::verticalCameraSocket)
         ;
     // UsbSpeed
     usbSpeed
@@ -376,6 +391,18 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("READOUT_START", FrameEvent::READOUT_START)
         .value("READOUT_END", FrameEvent::READOUT_END)
     ;
+
+    interpolation
+        .value("BILINEAR", Interpolation::BILINEAR)
+        .value("BICUBIC", Interpolation::BICUBIC)
+        .value("NEAREST_NEIGHBOR", Interpolation::NEAREST_NEIGHBOR)
+        .value("BYPASS", Interpolation::BYPASS)
+        .value("DEFAULT", Interpolation::DEFAULT)
+        .value("DEFAULT_DISPARITY_DEPTH", Interpolation::DEFAULT_DISPARITY_DEPTH)
+    ;
+
+    //backward compatibility
+    m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
 
     profilingData
         .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))

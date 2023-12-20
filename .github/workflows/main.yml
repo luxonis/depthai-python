@@ -49,7 +49,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           sudo apt install libusb-1.0-0-dev
-          python -m pip install clang==14.0 --force-reinstall
           python -m pip install -r docs/requirements_mkdoc.txt
       - name: Configure project
         run: cmake -S . -B build -DDEPTHAI_PYTHON_FORCE_DOCSTRINGS=ON -DDEPTHAI_PYTHON_DOCSTRINGS_OUTPUT="$PWD/docstrings/depthai_python_docstring.hpp"
@@ -154,17 +153,18 @@ jobs:
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheel
         run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
-      - name: Auditing wheel
-        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
-      - name: Install tweaked auditwheel and add armv6l tag
+      - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
         run: |
-          python3 -m pip install git+https://github.com/luxonis/auditwheel@main
-          for whl in wheelhouse/*.whl; do python3 -m auditwheel addtag -t linux_armv7l linux_armv6l -w wheelhouse/postaudited/ "$whl"; done
+          python3 -m pip install -U wheel auditwheel
+          for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/preaudited/; done
+          for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
+          mkdir -p wheelhouse/audited/
+          for whl in wheelhouse/preaudited/*linux_armv6l*.whl; do cp "$whl" wheelhouse/audited/$(basename $whl); done
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v3
         with:
           name: audited-wheels
-          path: wheelhouse/postaudited/
+          path: wheelhouse/audited/
       - name: Deploy wheels to artifactory (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: bash ./ci/upload-artifactory.sh
