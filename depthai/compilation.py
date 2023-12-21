@@ -2,10 +2,9 @@ import logging
 import depthai.type_checker as type_checker
 from depthai.runtime import init_host_nodes
 from depthai.xlinks import create_xlinks
-from depthai.device import resolve_devices, start_devices
+from depthai.device import start_devices
 
 #TODO Consider context a class instead of dict
-#TODO Fix (or check) __eq__ and __hash__ on DeviceInfo
 
 def default_main_loop(pipeline, _):
     while True:
@@ -15,7 +14,6 @@ def default_main_loop(pipeline, _):
 # This list is part of read-only interface 
 default_compilation = [
     type_checker.check_pipeline,
-    resolve_devices,
     create_xlinks,
     start_devices,
     init_host_nodes]

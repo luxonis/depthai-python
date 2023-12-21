@@ -1,10 +1,10 @@
 import depthai_bind
 import typeguard
 from depthai.node import Node
-from depthai.device import DefaultDevice
+from depthai.device import DeviceRef
 
 class CoreNode(Node):
-    device = DefaultDevice()
+    device = DeviceRef()
 
     # TODO Is this fancy syntax worth it?
     def __init_subclass__(cls):

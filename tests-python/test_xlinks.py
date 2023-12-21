@@ -2,6 +2,7 @@ import unittest
 from collections import deque, defaultdict
 import depthai.compilation
 import depthai
+import collections
 
 class DeviceMock:
     """Sends everything from inputs to outputs"""
@@ -28,15 +29,13 @@ class DeviceMock:
 
 def start_devices_mock(pipeline, context):
     host_pipeline = depthai.Pipeline()
-    device_infos = set()
+    context["running_devices"] = {}
     for node in pipeline:
         if node.device is None:
             host_pipeline.append(node)
         else:
-            device_infos.add(node.device)
+            context["running_devices"][node.device] = DeviceMock()
 
-    context["running_devices"] = {device_info: DeviceMock()
-                                for device_info in device_infos}
     return host_pipeline
 
 mock_compilation = [start_devices_mock 
@@ -74,7 +73,7 @@ class TestXLinks(unittest.TestCase):
 
         with self.assertRaises(StopIteration):
             with (p := depthai.Pipeline()):
-                with depthai.DeviceInfo("device"):
+                with depthai.DeviceRef():
                     src = Src()
                 Dst(src, test_self = self)
             depthai.run(p, 
@@ -98,7 +97,7 @@ class TestXLinks(unittest.TestCase):
         with self.assertRaises(StopIteration):
             with (p := depthai.Pipeline()):
                 src = Src()
-                with depthai.DeviceInfo("device"):
+                with depthai.DeviceRef():
                     Dst(src, test_self = self)
             depthai.run(p, 
                         compilation=mock_compilation, 
@@ -114,9 +113,9 @@ class TestXLinks(unittest.TestCase):
         with self.assertRaises(StopIteration):
             with (p := depthai.Pipeline()):
                 src = Src()
-                with depthai.DeviceInfo("device1"): # TODO Double check that this creates two different devices
+                with depthai.DeviceRef("one"):
                     cross_link = depthai.node.Identity(src)
-                with depthai.DeviceInfo("device2"):
+                with depthai.DeviceRef("two"):
                     dst = depthai.node.Identity(cross_link)
                 Dst(dst, test_self = self)
             depthai.run(p, 
