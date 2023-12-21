@@ -19,7 +19,7 @@ with pipeline:
 
 # Pipeline is now finished, and we need to find an available device to run our pipeline
 # we are using context manager here that will dispose the device after we stop using it
-with depthai.Device(pipeline) as device:
+with depthai.deptha_bind.Device(pipeline) as device:
     # From this point, the Device will be in "running" mode and will start sending data via XLink
 
     # To consume the device results, we get two output queues from the device, with stream names we assigned earlier

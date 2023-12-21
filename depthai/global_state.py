@@ -1,2 +1,5 @@
-pipeline = None
-core_pipeline = None # TODO Remove -- it is unnecessary
+from depthai.pipeline import NoPipeline
+
+pipeline = NoPipeline()
+device = None
+

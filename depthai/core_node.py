@@ -1,10 +1,12 @@
-import depthai.global_state as global_state
 import depthai_bind
 import typeguard
 from depthai.node import Node
+from depthai.device import DefaultDevice
 
 class CoreNode(Node):
+    device = DefaultDevice()
 
+    # TODO Is this fancy syntax worth it?
     def __init_subclass__(cls):
         """
         Use annotations to construct input_desc and output_desc for Node.
@@ -51,39 +53,37 @@ class CoreNode(Node):
                             f"Unknown parameter {name}"
 
     def __init__(self, *args, **kwargs):
-        # Create core node
-        self.core_node = \
-                global_state.core_pipeline.create(self.__class__.core_node)
-
-        # Set defaults if exist
-        for name in self.param_desc.keys():
-            try:
-                value = getattr(self.__class__, name)
-            except AttributeError:
-                continue
-            self.set_param(name, value)
-
-        # Consume arguments for parameters and pass rest to super()
+        self.params = {}
         input_kwargs = {}
         for key, value in kwargs.items():
-            if key not in self.param_desc.keys():
+            if key in self.param_desc.keys():
+                self.params[key] = value
+            else:
                 input_kwargs[key] = value
-                continue
-            self.set_param(key, value)
         super().__init__(*args, **input_kwargs)
 
-    def set_param(self, name, value):
-        try:
-            typeguard.check_type(value, self.param_desc[name])
-        except typeguard.TypeCheckError as e:
-            raise TypeError(f"Parameter '{name}' type error") from e
-        if not isinstance(value, tuple): value = (value,)
-        getattr(self.core_node, self.param_name_map[name])(*value)
+    def emit_core_node(self, core_pipeline):
+        self.core_node = core_pipeline.create(self.__class__.core_node)
 
-    def create_links(self):
+        for name, value in self.param_desc.items():
+            try: value = self.params[name]
+            except KeyError:
+                try: value = getattr(self.__class__, name)
+                except AttributeError:
+                    raise LookupError(
+                          f"Parameter {name} is missing for node {self}.")
+            
+            try:
+                typeguard.check_type(value, self.param_desc[name])
+            except typeguard.TypeCheckError as e:
+                raise TypeError(f"Parameter '{name}' type error") from e
+            if not isinstance(value, tuple): value = (value,)
+            getattr(self.core_node, self.param_name_map[name])(*value)
+
+    def create_links(self, core_pipeline):
         for name, output in self.inputs.items():
             if output is None: continue
-            global_state.core_pipeline.link(
+            core_pipeline.link(
                     getattr(output.node.core_node, output.name),
                     getattr(self.core_node, name))
 

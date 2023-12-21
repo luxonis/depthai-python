@@ -46,7 +46,7 @@ class TestCustomNodes(unittest.TestCase):
             class Node(dai.Node):
                 def __run__(self, input): pass
             self.assertEqual(Node.input_desc["input"], typing.Any)
-            self.assertEqual(Node.output_desc["output"], typing.Any)
+            self.assertEqual(Node.output_desc["output"], None)
 
     def test_forget_superinit(self):
         with self.assertRaises(AssertionError):

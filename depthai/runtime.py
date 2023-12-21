@@ -5,9 +5,10 @@ import collections
 class Abort(Exception): pass
 
 def init_host_node(node):
+    if hasattr(node, "output_queues"): return #Already initialized
     def method(m):
+        if hasattr(node, m.__name__): return
         setattr(node, m.__name__, m.__get__(node, type(node)))
-
 
     node.output_queues = collections.defaultdict(list)
     node.input_queues = {name: queue.Queue() for name in node.inputs.keys()}
@@ -39,6 +40,7 @@ def init_host_node(node):
                 for outputs in self.output_queues.values()
                 for input_ref in outputs)
 
+    # TODO What if user doesn't connect synced input
     @method 
     def dispatch(self):
         if self.is_blocked(): return
@@ -64,28 +66,12 @@ def init_host_node(node):
             for input_ref in queues:
                 input_ref.node.input_queues[input_ref.name].put(value)
 
-def simple_main_loop(pipeline):
-    while True:
-        for node in pipeline:
-            node.dispatch()
+    @method
+    def __node_init__(self, context):
+        pass
 
-def run(pipeline, main_loop = simple_main_loop):
-    device_pipeline = []
-    host_pipeline = []
+def init_host_nodes(pipeline, context):
     for node in pipeline:
-        match node.side:
-            case "device": device_pipeline.append(node)
-            case "host":   
-                init_host_node(node)
-                host_pipeline.append(node)
-            case _:        
-                raise ValueError(f"Attribute side of {node}"
-                                 ' should be one of "device" or "host".')
-    if len(device_pipeline) == 0:
-        main_loop(host_pipeline)
-        return
-    with depthai_bind.Device(device_pipeline) as device:
-        # TODO Bind XLinks
-        main_loop(host_pipeline)
-
-
+        init_host_node(node)
+    for node in pipeline:
+        node.__node_init__(**node.init_kwargs, context=context)

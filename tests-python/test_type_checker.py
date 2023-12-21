@@ -84,30 +84,30 @@ class TestCheckPipeline(unittest.TestCase):
         with self.assertNoLogs(level="WARNING"):
             with (p := depthai.Pipeline()):
                 IntDst(IntSrc())
-            check_pipeline(depthai.global_state.pipeline)
+            check_pipeline(p, None)
 
     def test_not_fit(self):
         with self.assertNoLogs(level="WARNING"):
             with self.assertRaises(TypeError):
                 with (p := depthai.Pipeline()):
                     StrDst(IntSrc())
-                check_pipeline(depthai.global_state.pipeline)
+                check_pipeline(p, None)
 
     def test_any(self):
         with self.assertNoLogs(level="WARNING"):
             with (p := depthai.Pipeline()):
                 AnyDst(IntSrc())
-            check_pipeline(depthai.global_state.pipeline)
+            check_pipeline(p, None)
 
     def test_generic(self):
         with self.assertNoLogs(level="WARNING"):
             with (p := depthai.Pipeline()):
                 IntDst(GenericPipe(IntSrc()))
-            check_pipeline(depthai.global_state.pipeline)
+            check_pipeline(p, None)
 
     def test_not_generic(self):
         with self.assertNoLogs(level="WARNING"):
             with self.assertRaises(TypeError):
                 with (p := depthai.Pipeline()):
                     StrDst(GenericPipe(IntSrc()))
-                check_pipeline(depthai.global_state.pipeline)
+                check_pipeline(p, None)

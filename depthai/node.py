@@ -1,16 +1,19 @@
 import depthai.global_state as global_state
+import depthai.pipeline
 import inspect
 import typing
 import logging
+
+# TODO Unify "output" vs "out" output name ("in" is Python keyword)
 
 class Node:
 
     # TODO Use descriptors to specify and check dynamic and static values
 
     default_output = None
-    input_desc = {}
-    output_desc = {}
-    side = "host"
+    input_desc = {} # TODO Shouldn't this be removed? This is not reasonable default
+    output_desc = {} # TODO Shouldn't this be removed? This is not reasonable default
+    device = None
     sync = True
     queues = {
             "*-blocking": True,
@@ -51,18 +54,23 @@ class Node:
             cls.output_desc = {}
             return_annotation = sig.return_annotation
             if return_annotation == inspect.Signature.empty:
-                return_annotation = typing.Any
-                logging.warning(f"The __run__ method in {cls.__name__}" 
-                        f" has no annotation for return value"
-                        " -- assuming typing.Any")
+                return_annotation = None
             if not isinstance(return_annotation, dict):
                 return_annotation = {"output": return_annotation}
             cls.output_desc = return_annotation
 
-    def __init__(self, *args, **kwargs):
-        self.inputs = {key : None for key in self.input_desc}
+    # It would be more systematic to have pipeline as another node
+    # parameter. However, this would make it accessible to the user.
+    # This would be confusing since allegiance to a pipeline changes in
+    # compile time.
+    def __init__(self, *args, pipeline=None, **kwargs):
+        # Resolve global context
+        if pipeline is None: pipeline = global_state.pipeline
+        pipeline.append(self)
+        if global_state.device is not None and "device" not in kwargs:
+            kwargs["device"] = global_state.device
 
-        global_state.pipeline.append(self)
+        self.inputs = {key : None for key in self.input_desc}
 
         # Save relevant part of stack for identification of the node in
         # the code
@@ -71,10 +79,11 @@ class Node:
         while self.def_stack[0].function == "__init__":
             self.def_stack.pop(0)
 
-        # Link supplied inputs
+        # Link supplied inputs and set parameters
         assert len(args) <= len(self.input_desc), "Too much inputs"
         for arg, name in zip(args, self.input_desc):
             self.link(name, arg)
+        self.init_kwargs = {}
         for key, value in kwargs.items():
             if key in self.input_desc:
                 assert self.inputs[key] is None, \
@@ -82,10 +91,11 @@ class Node:
                         " was already specified with a positional argument."
                 self.link(key, value)
                 continue
-            assert hasattr(self.__class__, key), \
-                    f"Unknown input {key}. "\
-                    "Instance parameters can only overwrite class parameters."
-            setattr(self, key, value)
+            # TODO Think twice about this mechanism for setting parameters and relaying them to __node_init__
+            if hasattr(self.__class__, key):
+                setattr(self, key, value)
+                continue
+            self.init_kwargs[key] = value
 
     def __repr__(self):
         # Try block is here to avoid exception recursion with __getattr__
@@ -102,9 +112,10 @@ class Node:
         if isinstance(output_ref, Node):
             output_ref = output_ref.get_default_output()
         assert isinstance(output_ref, Node.PutRef)
-        assert output_ref.node in global_state.pipeline, \
-            f"Input {input_name} of {self} is set to a node that isn't "\
-            "in the pipeline. Perhaps you forgot to call super().__init__?"
+        if not isinstance(global_state.pipeline, depthai.pipeline.NoPipeline):
+            assert output_ref.node in global_state.pipeline, \
+                f"Input {input_name} of {self} is set to a node that isn't "\
+                "in the pipeline. Perhaps you forgot to call super().__init__?"
         self.inputs[input_name] = output_ref
 
     def get_default_output(self):
@@ -132,16 +143,3 @@ class Node:
             raise AttributeError(f"{self} has no attribute '{name}'",
                                  name=name, obj=self)
         return Node.PutRef(self, name)
-
-import typing
-class Feedback(Node):
-    # Type cannot be generic, the input is ignored and output-only generic
-    # nodes are disallowed
-    input_desc = {"input": typing.Any}
-    output_desc = {"output": typing.Any}
-
-    # Specify no arguments
-    def __init__(self): super().__init__()
-
-    def attach(self, output_ref):
-        self.link("input", output_ref)

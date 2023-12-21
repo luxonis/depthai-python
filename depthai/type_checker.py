@@ -1,4 +1,4 @@
-import depthai
+from depthai.nodes import Feedback
 import mypy.api
 import typing
 import types
@@ -80,7 +80,7 @@ def check_type(instance, type):
 
     raise TypeError(f"Type mismatch: instance '{instance}' and type '{type}'")
 
-def check_pipeline(pipeline):
+def check_pipeline(pipeline, _):
     """
     Check type correctness of the give pipeline. 
 
@@ -127,7 +127,7 @@ def check_pipeline(pipeline):
                     construct_return_type(node)) + \
                   " # type: ignore[empty-body, no-redef]"
 
-    pipeline = filter(lambda x: not isinstance(x, depthai.Feedback), pipeline)
+    pipeline = filter(lambda x: not isinstance(x, Feedback), pipeline)
     pipeline = list(get_topological_order(pipeline))
     program = list(construct_imports(*get_types(pipeline))) 
     program += list(construct_functions(pipeline))
@@ -159,7 +159,7 @@ def check_pipeline(pipeline):
         if len(outputs)  > 1: line = ",".join(outputs)
         line += node.__class__.__name__
         inputs = ["NoConn()" if input == None 
-                             or isinstance(input.node, depthai.Feedback)
+                             or isinstance(input.node, Feedback)
                                   else input.name + str(input.node.i)
                       for input in node.inputs.values()]
         line += "(" + ", ".join(inputs) + ")"
