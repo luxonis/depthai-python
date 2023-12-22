@@ -59,16 +59,20 @@ class TestCheckType(unittest.TestCase):
             check_type(X(), X)
 
 class IntSrc(depthai.Node):
+    input_desc = {}
     output_desc = {"output": int}
 
 class IntDst(depthai.Node):
     input_desc = {"input": int}
+    output_desc = {}
 
 class StrDst(depthai.Node):
     input_desc = {"input": str}
+    output_desc = {}
 
 class AnyDst(depthai.Node):
     input_desc = {"input": typing.Any}
+    output_desc = {}
 
 T = typing.TypeVar("T")
 class GenericPipe(depthai.Node):
@@ -76,6 +80,7 @@ class GenericPipe(depthai.Node):
     output_desc = {"output": T}
 
 class GenericSrc(depthai.Node):
+    input_desc = {}
     output_desc = {"output": T}
 
 class TestCheckPipeline(unittest.TestCase):

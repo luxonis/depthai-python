@@ -67,11 +67,14 @@ def init_host_node(node):
                 input_ref.node.input_queues[input_ref.name].put(value)
 
     @method
-    def __node_init__(self, context):
+    def __node_init__(self):
+        # Default
         pass
 
 def init_host_nodes(pipeline, context):
     for node in pipeline:
         init_host_node(node)
     for node in pipeline:
-        node.__node_init__(**node.init_kwargs, context=context)
+        if "__context__" in node.init_kwarg_names:
+            node.init_kwargs["__context__"] = context
+        node.__node_init__(**node.init_kwargs)

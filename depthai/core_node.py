@@ -54,13 +54,13 @@ class CoreNode(Node):
 
     def __init__(self, *args, **kwargs):
         self.params = {}
-        input_kwargs = {}
+        super_kwargs = {}
         for key, value in kwargs.items():
             if key in self.param_desc.keys():
                 self.params[key] = value
             else:
-                input_kwargs[key] = value
-        super().__init__(*args, **input_kwargs)
+                super_kwargs[key] = value
+        super().__init__(*args, **super_kwargs)
 
     def emit_core_node(self, core_pipeline):
         self.core_node = core_pipeline.create(self.__class__.core_node)

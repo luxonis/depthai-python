@@ -10,9 +10,8 @@ import re
 This module uses MyPy to check type information.
 """
 
-# TODO Double check how None and NoneType works
-
 MYPY_COMMAND = ["--follow-imports", "silent", "-c"]
+# TODO COnstruct MYPY path
 
 def construct_imports(*types):
     for type in types:

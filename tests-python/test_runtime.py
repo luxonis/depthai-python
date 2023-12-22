@@ -3,7 +3,7 @@ import depthai
 
 class Src(depthai.Node):
     actions = []
-    def __node_init__(self, context):
+    def __node_init__(self):
         self.i = 0
     def __run__(self) -> int:
         if self.i < 100: 
@@ -16,9 +16,10 @@ class Src(depthai.Node):
 
 class TestQueues(unittest.TestCase):
     def test_exists_default(self):
+        test_self = self
         class Node(depthai.Node):
-            def __node_init__(node_self, context):
-                self.node = node_self
+            def __node_init__(self):
+                test_self.node = self
             def __run__(self, input: int): pass
         with (pipeline := depthai.Pipeline()): 
             Node(Src())
@@ -27,10 +28,11 @@ class TestQueues(unittest.TestCase):
         self.node.get_queue_size("input")
         
     def test_class_settings(self):
+        test_self = self
         class Node(depthai.Node):
             queues = {"input-size": 42}
-            def __node_init__(node_self, context):
-                self.node = node_self
+            def __node_init__(self):
+                test_self.node = self
             def __run__(self, input: int) -> None: pass
         with (pipeline := depthai.Pipeline()): 
             Node(Src())
@@ -38,10 +40,11 @@ class TestQueues(unittest.TestCase):
         self.assertEqual(42, self.node.get_queue_size("input"))
 
     def test_instance(self):
+        test_self = self
         class Node(depthai.Node):
             queues = {"input-size": 100}
-            def __node_init__(node_self, context):
-                self.node = node_self
+            def __node_init__(self):
+                test_self.node = self
             def __run__(self, input: int) -> None: pass
         with (pipeline := depthai.Pipeline()): 
             Node(Src(), queues={"input-size": 42})
@@ -49,10 +52,11 @@ class TestQueues(unittest.TestCase):
         self.assertEqual(42, self.node.get_queue_size("input"))
  
     def test_star(self):
+        test_self = self
         class Node(depthai.Node):
             queues = {"input1-size": 43, "*-size": 42}
-            def __node_init__(node_self, context):
-                self.node = node_self
+            def __node_init__(self):
+                test_self.node = self
             def __run__(self, input0: int, input1: int) -> None: pass
         with (pipeline := depthai.Pipeline()): 
             Node(Src())
@@ -113,7 +117,7 @@ class TestRuntime(unittest.TestCase):
     def test_abort(self):
         test = self
         class AbortDst(depthai.Node):
-            def __node_init__(self, context):
+            def __node_init__(self):
                 self.last = None
 
             def __run__(self, input: int) -> None:

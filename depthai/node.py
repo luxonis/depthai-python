@@ -4,15 +4,13 @@ import inspect
 import typing
 import logging
 
-# TODO Unify "output" vs "out" output name ("in" is Python keyword)
+# TODO Access to fuctionality of Pipeline, Device and Bootloader (integration with RH)
 
 class Node:
 
-    # TODO Use descriptors to specify and check dynamic and static values
-
     default_output = None
-    input_desc = {} # TODO Shouldn't this be removed? This is not reasonable default
-    output_desc = {} # TODO Shouldn't this be removed? This is not reasonable default
+    input_desc = None
+    output_desc = None
     device = None
     sync = True
     queues = {
@@ -33,10 +31,10 @@ class Node:
             sig = inspect.signature(run) 
             assert list(sig.parameters.keys())[0] == "self", \
                 'Please use "self" as the first parameter for __run__ method'
-            assert cls.input_desc == {}, \
+            assert cls.input_desc is None, \
                 'Both __run__ method and "input_desc" dictionary are provided.'\
                 ' Avoiding conflict.'
-            assert cls.output_desc == {}, \
+            assert cls.output_desc is None, \
                 'Both __run__ method and "output_desc" dictionary are provided'\
                 ' Avoiding conflict.'
                 
@@ -58,6 +56,16 @@ class Node:
             if not isinstance(return_annotation, dict):
                 return_annotation = {"output": return_annotation}
             cls.output_desc = return_annotation
+
+        if "__node_init__" in cls.__dict__:
+            sig = inspect.signature(cls.__dict__["__node_init__"])
+            parameters = list(sig.parameters.keys())
+            assert parameters[0] == "self", 'Please use "self"'\
+                    ' as the first parameter for __node_init__ method'
+            cls.init_kwarg_names = set(parameters[1:])
+        else:
+            cls.init_kwarg_names = set()
+
 
     # It would be more systematic to have pipeline as another node
     # parameter. However, this would make it accessible to the user.
@@ -91,11 +99,13 @@ class Node:
                         " was already specified with a positional argument."
                 self.link(key, value)
                 continue
-            # TODO Think twice about this mechanism for setting parameters and relaying them to __node_init__
             if hasattr(self.__class__, key):
                 setattr(self, key, value)
                 continue
-            self.init_kwargs[key] = value
+            if key in self.init_kwarg_names:
+                self.init_kwargs[key] = value
+                continue
+            raise NameError(f"Unknown keyword argument {key}")
 
     def __repr__(self):
         # Try block is here to avoid exception recursion with __getattr__

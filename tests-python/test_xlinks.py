@@ -44,14 +44,14 @@ mock_compilation = [start_devices_mock
                     for step in depthai.compilation.default_compilation]
 
 class Src(depthai.Node):
-    def __node_init__(self, context):
+    def __node_init__(self):
         self.i = 0
     def __run__(self) -> int:
         self.i += 1 
         return self.i
 
 class Dst(depthai.Node):
-    def __node_init__(self, test_self, context):
+    def __node_init__(self, test_self):
         self.i = 0
         self.test_self = test_self
     def __run__(self, input: int) -> None:

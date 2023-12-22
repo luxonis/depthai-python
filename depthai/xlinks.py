@@ -7,8 +7,8 @@ import typing
 
 class XLinkHostIn(depthai.node.Node):
     sync = False
-    def __node_init__(self, context, stream_name, src_device):
-        self.queue = context["running_devices"][src_device]\
+    def __node_init__(self, __context__, stream_name, src_device):
+        self.queue = __context__["running_devices"][src_device]\
                         .getOutputQueue(stream_name)
     def __run__(self) -> typing.Any:
         rv = self.queue.tryGet()
@@ -17,8 +17,8 @@ class XLinkHostIn(depthai.node.Node):
 
 # TODO Sjednotit názvy
 class XLinkHostOut(depthai.node.Node):
-    def __node_init__(self, context, stream_name, dst_device):
-        self.queue = context["running_devices"][dst_device]\
+    def __node_init__(self, __context__, stream_name, dst_device):
+        self.queue = __context__["running_devices"][dst_device]\
                         .getInputQueue(stream_name)
     def __run__(self, input: typing.Any):
         #FIXME I need trySend method on which I can abort
