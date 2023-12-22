@@ -5,5 +5,3 @@ import depthai.nodes as node
 from depthai.pipeline import Pipeline
 from depthai.device import DeviceRef
 from depthai.compilation import run
-
-# TODO Check imports everywhere

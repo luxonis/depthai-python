@@ -9,10 +9,6 @@ class Feedback(depthai.Node):
     input_desc = {"input": typing.Any}
     output_desc = {"output": typing.Any}
 
-    # Specify no arguments
-    # TODO Shouldn't I still pass non"input" kw?
-    def __init__(self): super().__init__()
-
     def attach(self, output_ref):
         self.link("input", output_ref)
 

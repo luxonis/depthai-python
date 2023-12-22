@@ -4,8 +4,6 @@ import inspect
 import typing
 import logging
 
-# TODO Access to fuctionality of Pipeline, Device and Bootloader (integration with RH)
-
 class Node:
 
     default_output = None
@@ -15,7 +13,7 @@ class Node:
     sync = True
     queues = {
             "*-blocking": True,
-            "*-size": 64, # TODO Set reasonable default
+            "*-size": 8,
             }
 
     class PutRef:

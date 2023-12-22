@@ -1,9 +1,7 @@
 import depthai.node
 import typing
 
-# TODO Extend check
-
-# NOTE Neumožňovat plný přístup ke všem možnostem bind.Data*putQueue, ale nastavit nějak možnosti a věci jako blocking řešit na relevantním nodu
+# TODO Neumožňovat plný přístup ke všem možnostem bind.Data*putQueue, ale nastavit nějak možnosti a věci jako blocking řešit na relevantním nodu
 
 class XLinkHostIn(depthai.node.Node):
     sync = False
@@ -15,13 +13,12 @@ class XLinkHostIn(depthai.node.Node):
         if rv is None: raise depthai.Abort()
         return rv
 
-# TODO Sjednotit názvy
 class XLinkHostOut(depthai.node.Node):
     def __node_init__(self, __context__, stream_name, dst_device):
         self.queue = __context__["running_devices"][dst_device]\
                         .getInputQueue(stream_name)
     def __run__(self, input: typing.Any):
-        #FIXME I need trySend method on which I can abort
+        #FIXME I need trySend method on which I can abort to properly
         self.queue.send(input)
 
 def create_xlinks(pipeline, context):
@@ -37,7 +34,8 @@ def create_xlinks(pipeline, context):
             and src.device is not None \
             and src.device != dst.device:
                 # Change Dst(Src()) to Dst(Identity(device=None, Src()))
-                # Host node should be automatically added at the end of
+                #
+                # Host node should be automatically added to the end of
                 # pipeline and should be reprocessed later. Therefore,
                 # only Dst -> Identity needs to be processed now. And
                 # this already fits one of the later scenarios

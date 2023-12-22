@@ -20,7 +20,7 @@ class XLinkOut(CoreNode):
 XLinkDevOut = XLinkOut
 
 class XLinkIn(CoreNode):
-    out: Output(typing.Any) # TODO Rename out to output?
+    out: Output(typing.Any)
     stream_name: str
 XLinkDevIn = XLinkIn
 

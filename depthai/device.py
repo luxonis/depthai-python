@@ -27,10 +27,8 @@ def start_devices(pipeline, context):
         if node.device is not None: 
             node.create_links(device_pipelines[node.device])
 
-    context["running_devices"] = {}
     for device_ref, pipeline in device_pipelines.items():
-        # TODO Do default context in general
-        if "devices" in context and device_ref in context["devices"]:
+        if device_ref in context["devices"]:
             args = [context["devices"][device_ref]]
         else:
             args = []

@@ -40,7 +40,6 @@ def init_host_node(node):
                 for outputs in self.output_queues.values()
                 for input_ref in outputs)
 
-    # TODO What if user doesn't connect synced input
     @method 
     def dispatch(self):
         if self.is_blocked(): return
