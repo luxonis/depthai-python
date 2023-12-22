@@ -5,13 +5,18 @@ import types
 import builtins
 import logging
 import re
+import sys
+import os
+import os.path
 
 """
 This module uses MyPy to check type information.
 """
 
 MYPY_COMMAND = ["--follow-imports", "silent", "-c"]
-# TODO COnstruct MYPY path
+
+construct_path = "MYPYPATH" not in os.environ
+if construct_path: os.environ["MYPYPATH"] = ""
 
 def construct_imports(*types):
     for type in types:
@@ -22,6 +27,12 @@ def construct_imports(*types):
         if type is None:
             continue
         yield f"import {type.__module__}"
+        if construct_path:
+            if type.__module__ in sys.stdlib_module_names: continue
+            if os.environ["MYPYPATH"] != "":
+                os.environ["MYPYPATH"] += ":"
+            os.environ["MYPYPATH"] += os.path.dirname(
+                    sys.modules[type.__module__].__file__)
 
 def type_repr(type):
     """
