@@ -57,6 +57,13 @@ class CoreNode(Node):
     def create_links(self, core_pipeline):
         for name, output in self.inputs.items():
             if output is None: continue
-            core_pipeline.link(
-                    getattr(output.node.core_node, output.name),
-                    getattr(self.core_node, name))
+            if isinstance(output.node.core_node, depthai_bind.node.Script):
+                src = output.node.core_node.outputs[output.name]
+            else:
+                src = getattr(output.node.core_node, output.name)
+            if isinstance(self.core_node, depthai_bind.node.Script):
+                dst = self.core_node.inputs[name]
+            else:
+                dst = getattr(self.core_node, name)
+            core_pipeline.link(src, dst)
+                    
