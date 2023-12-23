@@ -24,7 +24,7 @@ class HelloWorld(depthai.Node):
 
 pipeline = depthai.Pipeline()
 with pipeline:
-    image = node.ColorCamera()
+    image = node.ColorCamera().preview
     detections = node.MobileNetDetectionNetwork(image,
             blob_path=blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
     HelloWorld(image, detections)
