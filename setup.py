@@ -202,12 +202,21 @@ setup(
     author='Luxonis',
     author_email='support@luxonis.com',
     description='DepthAI Python Library',
+    install_requires=[
+          'mypy',
+          'blobconverter',
+          'opencv-python',
+          'typeguard',
+      ],
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
     ext_modules=[CMakeExtension(BIND_NAME)],
     packages=[MODULE_NAME],
+    # This is just a hack to allow MyPy checking 3rd party lib
+    # Should be resolved with https://github.com/python/mypy/issues/8545
+    package_data={BIND_NAME: ["py.typed"]}, 
     cmdclass={
         'build_ext': CMakeBuild
     },
