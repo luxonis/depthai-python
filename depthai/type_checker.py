@@ -29,10 +29,11 @@ def construct_imports(*types):
         yield f"import {type.__module__}"
         if construct_path:
             if type.__module__ in sys.stdlib_module_names: continue
+            path = sys.modules[type.__module__].__file__
+            if "site-packages" in path: continue
             if os.environ["MYPYPATH"] != "":
                 os.environ["MYPYPATH"] += ":"
-            os.environ["MYPYPATH"] += os.path.dirname(
-                    sys.modules[type.__module__].__file__)
+            os.environ["MYPYPATH"] += os.path.dirname(path)
 
 def type_repr(type):
     """
@@ -166,7 +167,7 @@ def check_pipeline(pipeline, _):
         outputs = [out + str(i) for out in node.output_desc.keys()]
         if len(outputs) == 0: line = ""
         if len(outputs) == 1: line = outputs[0] + ",="
-        if len(outputs)  > 1: line = ",".join(outputs)
+        if len(outputs)  > 1: line = ",".join(outputs) + "="
         line += node.__class__.__name__
         inputs = ["NoConn()" if input == None 
                              or isinstance(input.node, Feedback)
