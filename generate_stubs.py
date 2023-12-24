@@ -5,6 +5,8 @@ import tempfile
 import os
 import textwrap
 
+exit()
+
 # Usage
 if len(sys.argv) < 3:
     print(f"Usage: {sys.argv[0]} [module_name] [library_dir]")
