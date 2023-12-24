@@ -5,8 +5,6 @@ import tempfile
 import os
 import textwrap
 
-exit()
-
 # Usage
 if len(sys.argv) < 3:
     print(f"Usage: {sys.argv[0]} [module_name] [library_dir]")
@@ -24,27 +22,27 @@ try:
     env = os.environ
     env['PYTHONPATH'] = f'{DIRECTORY}{os.pathsep}{env.get("PYTHONPATH", "")}'
 
-    # Test importing depthai after PYTHONPATH is specified
+    # Test importing depthai_bind after PYTHONPATH is specified
     try:
-        import depthai
+        import depthai_bind
     except Exception as ex:
-        print(f'Could not import depthai: {ex}')
+        print(f'Could not import depthai_bind: {ex}')
 
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
     subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
 
     # Add py.typed
-    open(f'{DIRECTORY}/depthai/py.typed', 'a').close()
+    open(f'{DIRECTORY}/{MODULE_NAME}/py.typed', 'a').close()
 
     # imports and overloads
-    with open(f'{DIRECTORY}/depthai/__init__.pyi' ,'r+') as file:
+    with open(f'{DIRECTORY}/{MODULE_NAME}/__init__.pyi' ,'r+') as file:
         # Read
         contents = file.read()
 
         # Add imports
         stubs_import = textwrap.dedent('''
             # Ensures that the stubs are picked up - thanks, numpy project
-            from depthai import (
+            from depthai_bind import (
                 node as node,
             )
 
@@ -67,7 +65,7 @@ try:
         file.write(final_stubs)
 
     # node fixes
-    with open(f'{DIRECTORY}/depthai/node.pyi' ,'r+') as file:
+    with open(f'{DIRECTORY}/{MODULE_NAME}/node.pyi' ,'r+') as file:
         # Read
         contents = file.read()
 
@@ -78,7 +76,7 @@ try:
         ''') + contents
 
         # Remove import depthai.*
-        final_stubs = re.sub(r"import depthai\.\S*", "", stubs_import)
+        final_stubs = re.sub(r"import depthai_bind\.\S*", "", stubs_import)
 
         # Writeout changes
         file.seek(0)
