@@ -1,11 +1,11 @@
 import blobconverter
 import cv2
 import depthai
-from depthai import node
+from depthai import node, message
 import numpy as np
 
 class HelloWorld(depthai.Node):
-    def __run__(self, image, detections):
+    def __run__(self, image: message.ImgFrame, detections: message.ImgDetections):
         def frameNorm(frame, bbox):
             normVals = np.full(len(bbox), frame.shape[0])
             normVals[::2] = frame.shape[1]
