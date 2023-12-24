@@ -69,7 +69,19 @@ class Node:
     # parameter. However, this would make it accessible to the user.
     # This would be confusing since allegiance to a pipeline changes in
     # compile time.
-    def __init__(self, *args, pipeline=None, **kwargs):
+    def __init__(self, *args, id=None, pipeline=None, **kwargs):
+        if id is None:
+            import inspect
+            self.def_stack = inspect.stack()
+            while self.def_stack[0].function == "__init__":
+                self.def_stack.pop(0)
+            self.id = "at {}, {}".format(
+                self.def_stack[0].positions.lineno,
+                self.def_stack[0].positions.col_offset)
+
+        else:
+            self.id = id
+
         # Resolve global context
         if pipeline is None: pipeline = global_state.pipeline
         pipeline.append(self)
@@ -77,13 +89,6 @@ class Node:
             kwargs["device"] = global_state.device
 
         self.inputs = {key : None for key in self.input_desc}
-
-        # Save relevant part of stack for identification of the node in
-        # the code
-        import inspect
-        self.def_stack = inspect.stack()
-        while self.def_stack[0].function == "__init__":
-            self.def_stack.pop(0)
 
         # Link supplied inputs and set parameters
         assert len(args) <= len(self.input_desc), "Too much inputs"
@@ -109,12 +114,10 @@ class Node:
         # Try block is here to avoid exception recursion with __getattr__
         # __getattr__ calls __repr__
         try:
-            position = "{}, {}".format(
-                self.def_stack[0].positions.lineno,
-                self.def_stack[0].positions.col_offset)
-        except:
-            position = "unknown position"
-        return f"<{self.__class__.__name__} at {position}>"
+            id = self.id
+        except AttributeError:
+            id = "of unknown"
+        return f"<{self.__class__.__name__} {id}>"
 
     def link(self, input_name, output_ref):
         if isinstance(output_ref, Node):

@@ -29,6 +29,10 @@ def create_xlinks(pipeline, context):
             src = put_ref.node
             output_name = put_ref.name
 
+            stream_name = str(put_ref)
+            while stream_name in stream_names: stream_name += "I"
+            stream_names.add(stream_name)
+
             # Cross-device link
             if dst.device is not None \
             and src.device is not None \
@@ -41,39 +45,40 @@ def create_xlinks(pipeline, context):
                 # this already fits one of the later scenarios
                 src = depthai.node.Identity(src, 
                                             pipeline=pipeline, 
+                                            id="cross-link for " + stream_name,
                                             device=None)
-                output_name ,= src.output_desc.values()
-
-            stream_name = str(put_ref)
-            while stream_name in stream_names: stream_name += "I"
-            stream_names.add(stream_name)
+                output_name ,= src.output_desc.keys()
+                put_ref = depthai.Node.PutRef(src, output_name)
+                dst.inputs[input_name] = put_ref
 
             # Device -> Host
             if dst.device is None \
             and src.device is not None:
-                depthai.node.XLinkDevOut(src,
+                depthai.node.XLinkDevOut(put_ref,
                         stream_name=stream_name,
                         pipeline=pipeline,
+                        id="for " + stream_name,
                         device=src.device)
                 host_in = depthai.node.XLinkHostIn(
                             stream_name=stream_name,
                             src_device=src.device,
                             pipeline=pipeline,
+                            id="for " + stream_name,
                             device=None)
                 dst.link(input_name, host_in)
 
             # Host -> Device
             if src.device is None \
             and dst.device is not None:
-                depthai.node.XLinkHostOut(src,
+                depthai.node.XLinkHostOut(put_ref,
                         stream_name=stream_name,
                         dst_device=dst.device,
                         pipeline=pipeline,
+                        id="for " + stream_name,
                         device=None)
                 dev_in = depthai.node.XLinkDevIn(
                             stream_name=stream_name,
                             pipeline=pipeline,
+                            id="for " + stream_name,
                             device=dst.device)
                 dst.link(input_name, dev_in)
-
-
