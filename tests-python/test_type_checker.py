@@ -116,3 +116,23 @@ class TestCheckPipeline(unittest.TestCase):
                 with (p := depthai.Pipeline()):
                     StrDst(GenericPipe(IntSrc()))
                 check_pipeline(p, None)
+
+class TestCoreMessages(unittest.TestCase):
+    def test_same_message(self): 
+        with self.assertNoLogs(level="WARNING"):
+            check_type(depthai.message.ImgFrame(), 
+                       depthai.message.ImgFrame)
+    def test_different_message(self):
+        with self.assertNoLogs(level="WARNING"):
+            with self.assertRaises(TypeError):
+                check_type(depthai.message.ImgFrame(), 
+                           depthai.message.ImgDetections)
+    def test_subclass_message(self):
+        with self.assertNoLogs(level="WARNING"):
+            check_type(depthai.message.ImgFrame(),
+                       depthai.message.Buffer)
+    def test_not_subclass_message(self):
+        with self.assertNoLogs(level="WARNING"):
+            with self.assertRaises(TypeError):
+                check_type(depthai.message.Buffer(),
+                           depthai.message.ImgFrame)
