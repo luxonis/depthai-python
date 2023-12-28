@@ -52,7 +52,6 @@ with dai.Device() as device:
             frame_raw = (
                 np.array(in_frame_raw.getCvFrame()).view(np.float32).reshape((192, 256))
             )
-            # frame_raw += 96
             min_val, max_val = frame_raw.min(), frame_raw.max()
             normalized_frame = (frame_raw - min_val) / (max_val - min_val)
             frame_8bit = np.uint8(normalized_frame * 255)
