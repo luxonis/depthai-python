@@ -12,15 +12,38 @@ This example demonstrates the use of the DepthAI Sync node in conjunction with t
 Demo
 ####
 
-TODO: Add demo
+
+.. code-block::
+
+    ~/depthai-python/examples/Sync $ python3 demux_message_group.py
+    Start
+    Buffer 1 timestamp: 0:00:03.581073
+    Buffer 2 timestamp: 0:00:03.591084
+    ----------
+    Buffer 1 timestamp: 0:00:04.583100
+    Buffer 2 timestamp: 0:00:04.497079
+    ----------
+    Buffer 1 timestamp: 0:00:06.587174
+    Buffer 2 timestamp: 0:00:06.611154
+    ----------
+    Buffer 1 timestamp: 0:00:07.589147
+    Buffer 2 timestamp: 0:00:07.517125
+    ----------
+    Buffer 1 timestamp: 0:00:09.593076
+    Buffer 2 timestamp: 0:00:09.631089
+    ----------
+    Buffer 1 timestamp: 0:00:10.595106
+    Buffer 2 timestamp: 0:00:10.537082
+
 
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
 
-Demuxing Synchronized Script Outputs
-####################################
+
+Source code
+###########
 
 .. tabs::
 

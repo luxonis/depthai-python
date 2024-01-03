@@ -11,15 +11,35 @@ This example illustrates the use of the DepthAI Sync node to synchronize outputs
 Demo
 ####
 
-TODO: Add demo
+.. code-block:: 
+
+    ~/depthai-python/examples/Sync $ python3 sync_scripts.py
+    Start
+    Received s1 with timestamp 0:00:02.420089
+    Received s2 with timestamp 0:00:02.461076
+    Time interval between messages: 40.987ms
+    ----------
+    Received s1 with timestamp 0:00:03.422108
+    Received s2 with timestamp 0:00:03.367069
+    Time interval between messages: 55.039ms
+    ----------
+    Received s1 with timestamp 0:00:05.426088
+    Received s2 with timestamp 0:00:05.481086
+    Time interval between messages: 54.998ms
+    ----------
+    Received s1 with timestamp 0:00:06.428106
+    Received s2 with timestamp 0:00:06.387129
+    Time interval between messages: 40.977ms
+    ----------
 
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
 
-Synchronized Script Outputs
-###########################
+
+Source code
+###########
 
 .. tabs::
 

@@ -11,15 +11,44 @@ This example demonstrates the use of the DepthAI Sync node to synchronize IMU (I
 Demo
 ####
 
-TODO: Add demo
+.. code-block:: 
+
+    ~/depthai-python/examples/Sync $ python3 imu_video_synced.py
+    IMU type: BNO086, firmware version: 3.9.7
+
+    Device timestamp imu: 0:00:05.379914
+    Device timestamp video:0:00:05.385096
+    Quaternion: i: -0.0549 j: -0.0335 k: 0.0018 real: 0.9979
+
+
+    Device timestamp imu: 0:00:05.410274
+    Device timestamp video:0:00:05.418425
+    Quaternion: i: -0.0549 j: -0.0334 k: 0.0018 real: 0.9979
+
+
+    Device timestamp imu: 0:00:05.445439
+    Device timestamp video:0:00:05.451753
+    Quaternion: i: -0.0548 j: -0.0334 k: 0.0018 real: 0.9979
+
+
+    Device timestamp imu: 0:00:05.475084
+    Device timestamp video:0:00:05.485082
+    Quaternion: i: -0.0547 j: -0.0334 k: 0.0018 real: 0.9979
+
+
+    Device timestamp imu: 0:00:05.510046
+    Device timestamp video:0:00:05.518411
+    Quaternion: i: -0.0546 j: -0.0334 k: 0.0018 real: 0.9979
+
 
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
 
-IMU and Video Synchronization
-#############################
+
+Source code
+###########
 
 .. tabs::
 

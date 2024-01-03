@@ -13,15 +13,20 @@ This example demonstrates the use of the DepthAI Sync node to synchronize output
 Demo
 ####
 
-TODO: Add demo
+.. image:: ../../../../docs/source/_static/images/examples/depth_video_synced.gif
+    :alt: Depth and Video Sync Demo
+    :width: 100%
+    :align: center
+
 
 Setup
 #####
 
 .. include::  /includes/install_from_pypi.rst
 
-Depth and Video Sync
-####################
+
+Source code
+###########
 
 .. tabs::
     

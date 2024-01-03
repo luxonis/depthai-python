@@ -1,7 +1,8 @@
-Sync Node
-=========
+Sync
+====
 
 The Sync node is used for synchronizing multiple input streams based on their timestamps. It outputs a grouped message containing synchronized frames from the input streams.
+The output message is a :ref:`MessageGroup` containing synchronized messages from all the input streams. These can be demultiplexed using the :ref:`Demux` node.
 
 How to Use
 ##########
@@ -11,7 +12,7 @@ How to Use
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    sync = pipeline.create(dai.node.Sync)
+    sync = pipeline.create(dai.node.MessageDemux)
 
     # Configure threshold for timestamp alignment
     sync.setSyncThreshold(timedelta(milliseconds=50))
@@ -25,7 +26,7 @@ How to Use
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto sync = pipeline.create<dai::node::Sync>();
+    auto sync = pipeline.create<dai::node::MessageDemux>();
 
     // Configure threshold for timestamp alignment
     sync->setSyncThreshold(std::chrono::milliseconds(50));
@@ -61,16 +62,8 @@ Inputs and Outputs
 Message Synchronization
 ########################
 
-The Sync node aligns incoming messages based on their timestamps. The synchronization criteria and behavior can be configured using the :code:`depthai.node.Sync.setSyncThreshold` method.
+The Sync node aligns incoming messages based on their timestamps. The synchronization criteria and behavior can be configured using the :code:`depthai.node.Sync.setSyncThreshold` and :code:`depthai.node.Sync.setSyncAttempts`  method. More info in the :ref:`API Reference <reference>`.
 
-Limitations
-###########
-
-There are several limitations and considerations when using the Sync node:
-
-- Timestamp precision and drift between different sources
-- Handling of missed or delayed frames
-- Behavior under different frame rate conditions
 
 Examples of Functionality
 ##########################
