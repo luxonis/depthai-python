@@ -113,11 +113,10 @@ Reference
 
   .. tab:: C++
       
-      .. autoclass:: dai::node::MessageDemux
-        :members:
-        :inherited-members:
-        :noindex:
-
-  
+    .. doxygenclass:: dai::node::MessageDemux
+      :project: depthai-core
+      :members:
+      :private-members:
+      :undoc-members:
 
 .. include::  ../../includes/footer-short.rst
