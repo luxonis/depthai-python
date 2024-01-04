@@ -32,5 +32,9 @@ files:
     size: 5647272
     sha256: 82fe09ad02799c00e6a2b8814015969ae5d4479c952c4c0b5b4977e630bdc675
     source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/yolov6n_416x416_openvino2022.1_vpux.blob
+  - name: yolov6n_640x640.dlc
+    size: 9758859
+    sha256: 48b70bc077b7a1d1c878c712ec25fda373ab342ca8c844fdfc82d55f89615a4b
+    source: https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/yolov6n_640x640.dlc
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
