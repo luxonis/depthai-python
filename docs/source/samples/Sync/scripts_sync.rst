@@ -47,7 +47,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-python/examples/sync_scripts.py>`__
 
-        .. literalinclude:: ../../../../depthai-python/examples/sync_scripts.py
+        .. literalinclude:: ../../../../examples/Sync/sync_scripts.py
            :language: python
            :linenos:
 

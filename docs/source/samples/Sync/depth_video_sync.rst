@@ -34,7 +34,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/depth_video_synced.py>`__
 
-        .. literalinclude:: ../../../../depthai-core/examples/Sync/depth_video_synced.py
+        .. literalinclude:: ../../../../examples/Sync/depth_video_synced.py
            :language: python
            :linenos:
 

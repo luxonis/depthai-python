@@ -51,7 +51,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-python/examples/demux_message_group.py>`__
 
-        .. literalinclude:: ../../../../depthai-python/examples/demux_message_group.py
+        .. literalinclude:: ../../../../examples/Sync/demux_message_group.py
            :language: python
            :linenos:
 

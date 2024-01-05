@@ -56,7 +56,7 @@ Source code
 
         Also `available on GitHub <https://github.com/luxonis/depthai-python/examples/imu_video_synced.py>`__
 
-        .. literalinclude:: ../../../../depthai-python/examples/imu_video_synced.py
+        .. literalinclude:: ../../../../examples/Sync/imu_video_synced.py
            :language: python
            :linenos:
 
