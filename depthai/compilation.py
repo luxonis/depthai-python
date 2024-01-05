@@ -3,6 +3,7 @@ import depthai.type_checker as type_checker
 from depthai.runtime import init_host_nodes
 from depthai.xlinks import create_xlinks
 from depthai.device import start_devices
+from depthai.nodes import resolve_feedback_nodes
 
 # TODO If renamed to RH
     # Rename running_devices to depthai_devices
@@ -28,6 +29,7 @@ default_context = {
 default_compilation = [
     type_checker.check_pipeline,
     create_xlinks,
+    resolve_feedback_nodes,
     start_devices,
     init_host_nodes]
 

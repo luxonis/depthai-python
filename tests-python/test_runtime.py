@@ -132,3 +132,11 @@ class TestRuntime(unittest.TestCase):
                 queues={"input-blocking": True, "input-size": 50})
         depthai.run(pipeline, main_loop=finite_main_loop)
 
+    def test_feedback(self):
+        with (pipeline := depthai.Pipeline()):
+            feedback = depthai.node.Feedback()
+            Dst(feedback)
+            feedback.attach(Src())
+        depthai.run(pipeline, main_loop=finite_main_loop)
+        self.assertEqual(Dst.received, list(range(100)))
+        self.assertEqual(Src.actions[:100], [f"run {i}" for i in range(100)])
