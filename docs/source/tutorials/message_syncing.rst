@@ -67,6 +67,11 @@ As opposed to sequence number syncing, **timestamp syncing** can sync:
 - **IMU** results with other messages
 - messages with **other devices connected to the computer**, as timestamps are :ref:`synced to the host computer clock <Host clock syncing>`
 
+
+.. note::
+    DepthAI 2.24 introduces **Sync node** which can be used to sync messages from different streams, or messages from different sensors (eg. IMU and color frames). See :ref:`Sync node <Sync>` for more details.
+    The sync node does not currently support multiple device syncing, so if you want to sync messages from multiple devices, you should use the manual approach.
+
 Feel free to check the `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-syncing#imu--rgb--depth-timestamp-syncing>`__
 which uses timestamps to sync IMU, color and disparity frames together, with all of these streams producing messages at different FPS.
 
