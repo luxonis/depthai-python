@@ -26,6 +26,7 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack);
 void bind_tofconfig(pybind11::module& m, void* pCallstack);
 void bind_tracklets(pybind11::module& m, void* pCallstack);
 void bind_pointcloudconfig(pybind11::module& m, void* pCallstack);
+void bind_pointclouddata(pybind11::module& m, void* pCallstack);
 
 void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
      // Bind common datatypebindings
@@ -55,6 +56,7 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_tofconfig);
     callstack.push_front(bind_tracklets);
     callstack.push_front(bind_pointcloudconfig);
+    callstack.push_front(bind_pointclouddata);
 }
 
 void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
@@ -97,6 +99,8 @@ void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("StereoDepthConfig", DatatypeEnum::StereoDepthConfig)
         .value("FeatureTrackerConfig", DatatypeEnum::FeatureTrackerConfig)
         .value("TrackedFeatures", DatatypeEnum::TrackedFeatures)
+        .value("PointCloudConfig", DatatypeEnum::PointCloudConfig)
+        .value("PointCloudData", DatatypeEnum::PointCloudData)
     ;
 
 }
