@@ -33,7 +33,7 @@ The pipeline consists of the following nodes:
 
 ## Running the Application
 ```bash
-python testing/face_detection/app.py
+python testing/face-detection/app.py
 ```
 
 ### Setup
