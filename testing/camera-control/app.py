@@ -53,8 +53,8 @@ class CameraParametersControlNode(dai.Node):
     The adjusted settings are then applied to the camera, influencing the captured image's exposure and brightness.
     """
 
-    def __init__(self, *args, id=None, pipeline=None, **kwargs):
-        super().__init__(*args, id=id, pipeline=pipeline, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.camera_settings_manager = CameraSettingsManager()
 
     def __run__(self, image: dai.message.ImgFrame) -> dai.message.CameraControl:
