@@ -26,9 +26,10 @@ class ObjectTrackingNode(depthai.Node):
 #Creat pipeline
 pipeline = depthai.Pipeline()
 with pipeline:
-    image = node.ColorCamera().preview
-    detections, passtrought = node.MobileNetDetectionNetwork(image,
-            blob_path=blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
-    tracklets = node.ObjectTracker(inputTrackerFrame=image,inputDetectionFrame=passtrought,inputDetections = detections)
-    ObjectTrackingNode(img_frame = image, tracklets_data = tracklets)
+    image = node.ColorCamera()
+    detections, passtrought = node.MobileNetDetectionNetwork(
+        image.preview,blob_path=blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
+    tracklets = node.ObjectTracker(
+        inputTrackerFrame=image.preview,inputDetectionFrame=passtrought,inputDetections = detections)
+    ObjectTrackingNode(img_frame = image.preview, tracklets_data = tracklets)
 depthai.run(pipeline)
