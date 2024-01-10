@@ -78,11 +78,11 @@ logger = logging.getLogger(__name__)
 pipeline = dai.Pipeline()
 
 with pipeline:
-    preview = dai.node.ColorCamera().preview
+    color_camera = dai.node.ColorCamera()
     nn_detections = dai.node.MobileNetDetectionNetwork(
-        preview, blob_path=blobconverter.from_zoo(name="face-detection-retail-0004", shaves=6)
+        input=color_camera.preview, blob_path=blobconverter.from_zoo(name="face-detection-retail-0004", shaves=6)
     )
-    FaceDetectionNode(image=preview, detections=nn_detections)
+    FaceDetectionNode(image=color_camera.preview, detections=nn_detections)
 
 logger.info("Pipeline created successfully %s", pipeline)
 
