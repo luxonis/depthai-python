@@ -13,7 +13,7 @@
 
 // #include "spdlog/spdlog.h"
 
-void bind_message_group(pybind11::module& m, void* pCallstack){
+void bind_pointclouddata(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
@@ -50,7 +50,19 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
     // Message
     pointCloudData
         .def(py::init<>())
-        .def_property("points", [](PointCloudData& data) { return &data.points; }, [](PointCloudData& data, std::vector<Point3f> points) {data.points = points})
+        .def_property("points", [](PointCloudData& data) { return &data.points; }, [](PointCloudData& data, std::vector<Point3f> points) {data.points = points;})
+        .def("getPoints", [](py::object &obj){
+            // creates numpy array (zero-copy) which holds correct information such as shape, ...
+            dai::PointCloudData& data = obj.cast<dai::PointCloudData&>();
+            py::array_t<float> arr({data.points.size(), 3UL});
+            auto ra = arr.mutable_unchecked();
+            for (int i = 0; i < data.points.size(); i++) {
+                ra(i, 0) = data.points[i].x;
+                ra(i, 1) = data.points[i].y;
+                ra(i, 2) = data.points[i].z;
+            }
+            return arr;
+        })
         .def("getWidth", &PointCloudData::getWidth, DOC(dai, PointCloudData, getWidth))
         .def("getHeight", &PointCloudData::getHeight, DOC(dai, PointCloudData, getHeight))
         .def("getMinX", &PointCloudData::getMinX, DOC(dai, PointCloudData, getMinX))
@@ -63,8 +75,8 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
         .def("getTimestamp", &PointCloudData::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &PointCloudData::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
         .def("getSequenceNum", &PointCloudData::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
-        .def("setWidth", &PointCloudData::Buffer::setWidth, DOC(dai, Buffer, setWidth))
-        .def("setHeight", &PointCloudData::Buffer::setHeight, DOC(dai, Buffer, setHeight))
+        .def("setWidth", &PointCloudData::setWidth, DOC(dai, PointCloudData, setWidth))
+        .def("setHeight", &PointCloudData::setHeight, DOC(dai, PointCloudData, setHeight))
         .def("setSize", static_cast<PointCloudData&(PointCloudData::*)(unsigned int, unsigned int)>(&PointCloudData::setSize), py::arg("width"), py::arg("height"), DOC(dai, PointCloudData, setSize))
         .def("setSize", static_cast<PointCloudData&(PointCloudData::*)(std::tuple<unsigned int, unsigned int>)>(&PointCloudData::setSize), py::arg("size"), DOC(dai, PointCloudData, setSize, 2))
         .def("setMinX", &PointCloudData::setMinX, DOC(dai, PointCloudData, setMinX))
@@ -73,7 +85,7 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
         .def("setMaxX", &PointCloudData::setMaxX, DOC(dai, PointCloudData, setMaxX))
         .def("setMaxY", &PointCloudData::setMaxY, DOC(dai, PointCloudData, setMaxY))
         .def("setMaxZ", &PointCloudData::setMaxZ, DOC(dai, PointCloudData, setMaxZ))
-        .def("setInstanceNum", &PointCloudData::Buffer::setInstanceNum, DOC(dai, Buffer, setInstanceNum))
+        .def("setInstanceNum", &PointCloudData::setInstanceNum, DOC(dai, PointCloudData, setInstanceNum))
         .def("setTimestamp", &PointCloudData::setTimestamp, DOC(dai, PointCloudData, setTimestamp))
         .def("setTimestampDevice", &PointCloudData::setTimestampDevice, DOC(dai, PointCloudData, setTimestampDevice))
         .def("setSequenceNum", &PointCloudData::setSequenceNum, DOC(dai, PointCloudData, setSequenceNum))
