@@ -557,8 +557,7 @@ jobs:
   #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   notify_hil_workflow:
-    if: '!cancelled() && success()' # run when jobs are skipped, but don't run when one fails
-    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-macos-arm64, build-linux-x86_64, build-linux-arm64, deploy]
+    needs: [build-linux-armhf, build-linux-x86_64]
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch an action and get the run ID
