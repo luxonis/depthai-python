@@ -53,20 +53,21 @@ import signal
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
+    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came']):
         raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof', 'th', 'thermal']):
         raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     is_tof = True if type in ['t', 'tof'] else False
-    return [socket, is_color, is_tof]
+    is_thermal = True if type in ['th', 'thermal'] else False
+    return [socket, is_color, is_tof, is_thermal]
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     default=[['rgb', True, False], ['left', False, False],
                              ['right', False, False], ['camd', True, False]],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of] / th[ermal]."
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
@@ -122,12 +123,14 @@ if len(sys.argv) == 1:
 cam_list = []
 cam_type_color = {}
 cam_type_tof = {}
+cam_type_thermal = {}
 print("Enabled cameras:")
-for socket, is_color, is_tof in args.cameras:
+for socket, is_color, is_tof, is_thermal in args.cameras:
     cam_list.append(socket)
     cam_type_color[socket] = is_color
     cam_type_tof[socket] = is_tof
-    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
+    cam_type_thermal[socket] = is_thermal
+    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'thermal' if is_thermal else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
@@ -140,6 +143,7 @@ cam_socket_opts = {
     'camb' : dai.CameraBoardSocket.CAM_B,
     'camc' : dai.CameraBoardSocket.CAM_C,
     'camd' : dai.CameraBoardSocket.CAM_D,
+    'came' : dai.CameraBoardSocket.CAM_E,
 }
 
 rotate = {
@@ -150,6 +154,7 @@ rotate = {
     'camb': args.rotate in ['all', 'mono'],
     'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
+    'came': args.rotate in ['all', 'mono'],
 }
 
 mono_res_opts = {
@@ -263,6 +268,16 @@ for c in cam_list:
                 xout_tof_amp[c].setStreamName(amp_name)
                 streams.append(amp_name)
                 tof[c].amplitude.link(xout_tof_amp[c].input)
+    elif cam_type_thermal[c]:
+        cam[c] = pipeline.create(dai.node.Camera)
+        cam[c].setBoardSocket(cam_socket_opts[c])
+        cam[c].setPreviewSize(256, 192)
+        cam[c].raw.link(xout[c].input)
+        xout_preview = pipeline.create(dai.node.XLinkOut)
+        xout_preview.setStreamName('preview_' + c)
+        cam[c].preview.link(xout_preview.input)
+        streams.append('preview_' + c)
+
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -286,7 +301,8 @@ for c in cam_list:
     # When set, takes effect after the first 2 frames
     # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
-    control.out.link(cam[c].inputControl)
+    if not cam_type_thermal[c]:
+        control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
@@ -423,6 +439,10 @@ with dai.Device(*dai_device_args) as device:
                         frame = (frame.view(np.int16).astype(float))
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                elif cam_type_thermal[cam_skt] and c.startswith('cam'):
+                    frame = frame.view(np.float16).astype(np.float32)
+                    frame = cv2.normalize(frame, frame, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                    frame = cv2.applyColorMap(frame, cv2.COLORMAP_MAGMA)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
