@@ -440,7 +440,7 @@ with dai.Device(*dai_device_args) as device:
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 elif cam_type_thermal[cam_skt] and c.startswith('cam'):
-                    frame = frame.view(np.float16).astype(np.float32)
+                    frame = frame.astype(np.float32)
                     frame = cv2.normalize(frame, frame, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                     frame = cv2.applyColorMap(frame, cv2.COLORMAP_MAGMA)
                 if show:
