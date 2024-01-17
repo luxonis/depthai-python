@@ -142,11 +142,12 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack);
 void bind_imu(pybind11::module& m, void* pCallstack);
 void bind_edgedetector(pybind11::module& m, void* pCallstack);
 void bind_featuretracker(pybind11::module& m, void* pCallstack);
-void bind_tof(pybind11::module& m, void* pCallstack);
 void bind_apriltag(pybind11::module& m, void* pCallstack);
 void bind_detectionparser(pybind11::module& m, void* pCallstack);
-void bind_sync(pybind11::module& m, void* pCallstack);
 void bind_uvc(pybind11::module& m, void* pCallstack);
+void bind_tof(pybind11::module& m, void* pCallstack);
+void bind_sync(pybind11::module& m, void* pCallstack);
+void bind_messagedemux(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -175,11 +176,12 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_imu);
     callstack.push_front(bind_edgedetector);
     callstack.push_front(bind_featuretracker);
-    callstack.push_front(bind_tof);
     callstack.push_front(bind_apriltag);
     callstack.push_front(bind_detectionparser);
-    callstack.push_front(bind_sync);
     callstack.push_front(bind_uvc);
+    callstack.push_front(bind_tof);
+    callstack.push_front(bind_sync);
+    callstack.push_front(bind_messagedemux);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){

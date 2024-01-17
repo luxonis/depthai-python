@@ -17,6 +17,9 @@ parser.add_argument("-d", "--debug", action="store_true", help="Enable debug out
 parser.add_argument("-e", "--evaluate", help="Evaluate the disparity calculation.", default=None)
 parser.add_argument("-dumpdispcost", "--dumpdisparitycostvalues", action="store_true", help="Dumps the disparity cost values for each disparity range. 96 byte for each pixel.")
 parser.add_argument("--download", action="store_true", help="Downloads the 2014 Middlebury dataset.")
+parser.add_argument("--calibration", help="Path to calibration file", default=None)
+parser.add_argument("--rectify", action="store_true", help="Enable rectified streams")
+parser.add_argument("--swapLR", action="store_true", help="Swap left and right cameras.")
 args = parser.parse_args()
 
 if args.evaluate is not None and args.dataset is not None:
@@ -616,8 +619,12 @@ stereo.setSubpixel(subpixel)
 stereo.setRuntimeModeSwitch(True)
 
 # Linking
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+if(args.swapLR):
+    monoLeft.out.link(stereo.right)
+    monoRight.out.link(stereo.left)
+else:
+    monoLeft.out.link(stereo.left)
+    monoRight.out.link(stereo.right)
 xinStereoDepthConfig.out.link(stereo.inputConfig)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
@@ -649,9 +656,11 @@ StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow("Stereo control panel")
 
 # stereo.setPostProcessingHardwareResources(3, 3)
-
+if(args.calibration):
+    calibrationHandler = dai.CalibrationHandler(args.calibration)
+    pipeline.setCalibrationData(calibrationHandler)
 stereo.setInputResolution(width, height)
-stereo.setRectification(False)
+stereo.setRectification(args.rectify)
 baseline = 75
 fov = 71.86
 focal = width / (2 * math.tan(fov / 2 / 180 * math.pi))
