@@ -127,7 +127,7 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
             s.setConfidenceThreshold(confThr);
             HEDLEY_DIAGNOSTIC_POP
         }, DOC(dai, node, StereoDepth, setConfidenceThreshold))
-        .def("setMedianFilter", [](StereoDepth& s, dai::MedianFilter median) {
+        .def("setMedianFilter", [](StereoDepth& s, dai::StereoDepthConfig::MedianFilter median) {
             // Issue an deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setMedianFilter() is deprecated, Use 'initialConfig.setMedianFilter()' instead", 1);
             HEDLEY_DIAGNOSTIC_PUSH

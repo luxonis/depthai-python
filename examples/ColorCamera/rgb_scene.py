@@ -2,8 +2,8 @@ import cv2
 import depthai as dai
 from itertools import cycle
 
-scenes = cycle([item for name, item in vars(dai.RawCameraControl.SceneMode).items() if name != "UNSUPPORTED" and name.isupper()])
-effects = cycle([item for name, item in vars(dai.RawCameraControl.EffectMode).items() if name.isupper()])
+scenes = cycle([item for name, item in vars(dai.CameraControl.SceneMode).items() if name != "UNSUPPORTED" and name.isupper()])
+effects = cycle([item for name, item in vars(dai.CameraControl.EffectMode).items() if name.isupper()])
 curr_scene = "OFF"
 curr_effect = "OFF"
 

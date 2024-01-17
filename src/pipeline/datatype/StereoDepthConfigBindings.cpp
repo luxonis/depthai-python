@@ -16,28 +16,28 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
-    py::enum_<MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
-    py::class_<RawStereoDepthConfig::AlgorithmControl> algorithmControl(rawStereoDepthConfig, "AlgorithmControl", DOC(dai, RawStereoDepthConfig, AlgorithmControl));
-    py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign));
-    py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthUnit> depthUnit(algorithmControl, "DepthUnit", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit));
-    py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
-    py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
-    py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
-    py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
-    py::class_<RawStereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter));
-    py::class_<RawStereoDepthConfig::PostProcessing::BrightnessFilter> brightnessFilter(postProcessing, "BrightnessFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter));
-    py::class_<RawStereoDepthConfig::PostProcessing::SpeckleFilter> speckleFilter(postProcessing, "SpeckleFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter));
-    py::class_<RawStereoDepthConfig::PostProcessing::DecimationFilter> decimationFilter(postProcessing, "DecimationFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter));
-    py::enum_<RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode> decimationMode(decimationFilter, "DecimationMode", DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode));
-    py::class_<RawStereoDepthConfig::CostAggregation> costAggregation(rawStereoDepthConfig, "CostAggregation", DOC(dai, RawStereoDepthConfig, CostAggregation));
-    py::enum_<RawStereoDepthConfig::CostAggregation::LocalAggregationMode> localAggregationMode(costAggregation, "LocalAggregationMode", DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode));
-    py::class_<RawStereoDepthConfig::CostMatching> costMatching(rawStereoDepthConfig, "CostMatching", DOC(dai, RawStereoDepthConfig, CostMatching));
-    py::class_<RawStereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters));
-    py::enum_<RawStereoDepthConfig::CostMatching::DisparityWidth> costMatchingDisparityWidth(costMatching, "DisparityWidth", DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth));
-    py::class_<RawStereoDepthConfig::CensusTransform> censusTransform(rawStereoDepthConfig, "CensusTransform", DOC(dai, RawStereoDepthConfig, CensusTransform));
-    py::enum_<RawStereoDepthConfig::CensusTransform::KernelSize> censusTransformKernelSize(censusTransform, "KernelSize", DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize));
+    // py::class_<RawStereoDepthConfig, RawBuffer, std::shared_ptr<RawStereoDepthConfig>> rawStereoDepthConfig(m, "RawStereoDepthConfig", DOC(dai, RawStereoDepthConfig));
     py::class_<StereoDepthConfig, Buffer, std::shared_ptr<StereoDepthConfig>> stereoDepthConfig(m, "StereoDepthConfig", DOC(dai, StereoDepthConfig));
+    py::enum_<StereoDepthConfig::MedianFilter> medianFilter(m, "MedianFilter", DOC(dai, MedianFilter));
+    py::class_<StereoDepthConfig::AlgorithmControl> algorithmControl(stereoDepthConfig, "AlgorithmControl", DOC(dai, StereoDepthConfig, AlgorithmControl));
+    py::enum_<StereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign));
+    py::enum_<StereoDepthConfig::AlgorithmControl::DepthUnit> depthUnit(algorithmControl, "DepthUnit", DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit));
+    py::class_<StereoDepthConfig::PostProcessing> postProcessing(stereoDepthConfig, "PostProcessing", DOC(dai, StereoDepthConfig, PostProcessing));
+    py::class_<StereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter));
+    py::class_<StereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter));
+    py::enum_<StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
+    py::class_<StereoDepthConfig::PostProcessing::ThresholdFilter> thresholdFilter(postProcessing, "ThresholdFilter", DOC(dai, StereoDepthConfig, PostProcessing, ThresholdFilter));
+    py::class_<StereoDepthConfig::PostProcessing::BrightnessFilter> brightnessFilter(postProcessing, "BrightnessFilter", DOC(dai, StereoDepthConfig, PostProcessing, BrightnessFilter));
+    py::class_<StereoDepthConfig::PostProcessing::SpeckleFilter> speckleFilter(postProcessing, "SpeckleFilter", DOC(dai, StereoDepthConfig, PostProcessing, SpeckleFilter));
+    py::class_<StereoDepthConfig::PostProcessing::DecimationFilter> decimationFilter(postProcessing, "DecimationFilter", DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter));
+    py::enum_<StereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode> decimationMode(decimationFilter, "DecimationMode", DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode));
+    py::class_<StereoDepthConfig::CostAggregation> costAggregation(stereoDepthConfig, "CostAggregation", DOC(dai, StereoDepthConfig, CostAggregation));
+    py::enum_<StereoDepthConfig::CostAggregation::LocalAggregationMode> localAggregationMode(costAggregation, "LocalAggregationMode", DOC(dai, StereoDepthConfig, CostAggregation, LocalAggregationMode));
+    py::class_<StereoDepthConfig::CostMatching> costMatching(stereoDepthConfig, "CostMatching", DOC(dai, StereoDepthConfig, CostMatching));
+    py::class_<StereoDepthConfig::CostMatching::LinearEquationParameters> costMatchingLinearEquationParameters(costMatching, "LinearEquationParameters", DOC(dai, StereoDepthConfig, CostMatching, LinearEquationParameters));
+    py::enum_<StereoDepthConfig::CostMatching::DisparityWidth> costMatchingDisparityWidth(costMatching, "DisparityWidth", DOC(dai, StereoDepthConfig, CostMatching, DisparityWidth));
+    py::class_<StereoDepthConfig::CensusTransform> censusTransform(stereoDepthConfig, "CensusTransform", DOC(dai, StereoDepthConfig, CensusTransform));
+    py::enum_<StereoDepthConfig::CensusTransform::KernelSize> censusTransformKernelSize(censusTransform, "KernelSize", DOC(dai, StereoDepthConfig, CensusTransform, KernelSize));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -54,185 +54,185 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
 
     // Metadata / raw
     medianFilter
-        .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
-        .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
-        .value("KERNEL_5x5", MedianFilter::KERNEL_5x5)
-        .value("KERNEL_7x7", MedianFilter::KERNEL_7x7)
+        .value("MEDIAN_OFF", StereoDepthConfig::MedianFilter::MEDIAN_OFF)
+        .value("KERNEL_3x3", StereoDepthConfig::MedianFilter::KERNEL_3x3)
+        .value("KERNEL_5x5", StereoDepthConfig::MedianFilter::KERNEL_5x5)
+        .value("KERNEL_7x7", StereoDepthConfig::MedianFilter::KERNEL_7x7)
         ;
     m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
 
 
     depthAlign
-        .value("RECTIFIED_RIGHT", RawStereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_RIGHT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_RIGHT))
-        .value("RECTIFIED_LEFT", RawStereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_LEFT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_LEFT))
-        .value("CENTER", RawStereoDepthConfig::AlgorithmControl::DepthAlign::CENTER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign, CENTER));
+        .value("RECTIFIED_RIGHT", StereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_RIGHT, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_RIGHT))
+        .value("RECTIFIED_LEFT", StereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_LEFT, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_LEFT))
+        .value("CENTER", StereoDepthConfig::AlgorithmControl::DepthAlign::CENTER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign, CENTER));
 
     m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
 
     depthUnit
-        .value("METER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, METER))
-        .value("CENTIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETER))
-        .value("MILLIMETER", RawStereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETER, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETER))
-        .value("INCH", RawStereoDepthConfig::AlgorithmControl::DepthUnit::INCH, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, INCH))
-        .value("FOOT", RawStereoDepthConfig::AlgorithmControl::DepthUnit::FOOT, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, FOOT))
-        .value("CUSTOM", RawStereoDepthConfig::AlgorithmControl::DepthUnit::CUSTOM, DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit, CUSTOM))
+        .value("METER", StereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, METER))
+        .value("CENTIMETER", StereoDepthConfig::AlgorithmControl::DepthUnit::CENTIMETER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, CENTIMETER))
+        .value("MILLIMETER", StereoDepthConfig::AlgorithmControl::DepthUnit::MILLIMETER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, MILLIMETER))
+        .value("INCH", StereoDepthConfig::AlgorithmControl::DepthUnit::INCH, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, INCH))
+        .value("FOOT", StereoDepthConfig::AlgorithmControl::DepthUnit::FOOT, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, FOOT))
+        .value("CUSTOM", StereoDepthConfig::AlgorithmControl::DepthUnit::CUSTOM, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, CUSTOM))
         ;
 
     algorithmControl
         .def(py::init<>())
-        .def_readwrite("depthAlign", &RawStereoDepthConfig::AlgorithmControl::depthAlign, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthAlign))
-        .def_readwrite("depthUnit", &RawStereoDepthConfig::AlgorithmControl::depthUnit, DOC(dai, RawStereoDepthConfig, AlgorithmControl, depthUnit))
-        .def_readwrite("customDepthUnitMultiplier", &RawStereoDepthConfig::AlgorithmControl::customDepthUnitMultiplier, DOC(dai, RawStereoDepthConfig, AlgorithmControl, customDepthUnitMultiplier))
-        .def_readwrite("enableLeftRightCheck", &RawStereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
-        .def_readwrite("enableExtended", &RawStereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableExtended))
-        .def_readwrite("enableSubpixel", &RawStereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, RawStereoDepthConfig, AlgorithmControl, enableSubpixel))
-        .def_readwrite("leftRightCheckThreshold", &RawStereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
-        .def_readwrite("subpixelFractionalBits", &RawStereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, RawStereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
-        .def_readwrite("disparityShift", &RawStereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, RawStereoDepthConfig, AlgorithmControl, disparityShift))
-        .def_readwrite("replaceInvalidDisparity", &RawStereoDepthConfig::AlgorithmControl::replaceInvalidDisparity, DOC(dai, RawStereoDepthConfig, AlgorithmControl, replaceInvalidDisparity))
-        .def_readwrite("outlierRemoveThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierRemoveThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierRemoveThreshold))
-        .def_readwrite("outlierCensusThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierCensusThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierCensusThreshold))
-        .def_readwrite("outlierDiffThreshold", &RawStereoDepthConfig::AlgorithmControl::outlierDiffThreshold, DOC(dai, RawStereoDepthConfig, AlgorithmControl, outlierDiffThreshold))
-        .def_readwrite("centerAlignmentShiftFactor", &RawStereoDepthConfig::AlgorithmControl::centerAlignmentShiftFactor, DOC(dai, RawStereoDepthConfig, AlgorithmControl, centerAlignmentShiftFactor))
-        .def_readwrite("numInvalidateEdgePixels", &RawStereoDepthConfig::AlgorithmControl::numInvalidateEdgePixels, DOC(dai, RawStereoDepthConfig, AlgorithmControl, numInvalidateEdgePixels))
+        .def_readwrite("depthAlign", &StereoDepthConfig::AlgorithmControl::depthAlign, DOC(dai, StereoDepthConfig, AlgorithmControl, depthAlign))
+        .def_readwrite("depthUnit", &StereoDepthConfig::AlgorithmControl::depthUnit, DOC(dai, StereoDepthConfig, AlgorithmControl, depthUnit))
+        .def_readwrite("customDepthUnitMultiplier", &StereoDepthConfig::AlgorithmControl::customDepthUnitMultiplier, DOC(dai, StereoDepthConfig, AlgorithmControl, customDepthUnitMultiplier))
+        .def_readwrite("enableLeftRightCheck", &StereoDepthConfig::AlgorithmControl::enableLeftRightCheck, DOC(dai, StereoDepthConfig, AlgorithmControl, enableLeftRightCheck))
+        .def_readwrite("enableExtended", &StereoDepthConfig::AlgorithmControl::enableExtended, DOC(dai, StereoDepthConfig, AlgorithmControl, enableExtended))
+        .def_readwrite("enableSubpixel", &StereoDepthConfig::AlgorithmControl::enableSubpixel, DOC(dai, StereoDepthConfig, AlgorithmControl, enableSubpixel))
+        .def_readwrite("leftRightCheckThreshold", &StereoDepthConfig::AlgorithmControl::leftRightCheckThreshold, DOC(dai, StereoDepthConfig, AlgorithmControl, leftRightCheckThreshold))
+        .def_readwrite("subpixelFractionalBits", &StereoDepthConfig::AlgorithmControl::subpixelFractionalBits, DOC(dai, StereoDepthConfig, AlgorithmControl, subpixelFractionalBits))
+        .def_readwrite("disparityShift", &StereoDepthConfig::AlgorithmControl::disparityShift, DOC(dai, StereoDepthConfig, AlgorithmControl, disparityShift))
+        .def_readwrite("replaceInvalidDisparity", &StereoDepthConfig::AlgorithmControl::replaceInvalidDisparity, DOC(dai, StereoDepthConfig, AlgorithmControl, replaceInvalidDisparity))
+        .def_readwrite("outlierRemoveThreshold", &StereoDepthConfig::AlgorithmControl::outlierRemoveThreshold, DOC(dai, StereoDepthConfig, AlgorithmControl, outlierRemoveThreshold))
+        .def_readwrite("outlierCensusThreshold", &StereoDepthConfig::AlgorithmControl::outlierCensusThreshold, DOC(dai, StereoDepthConfig, AlgorithmControl, outlierCensusThreshold))
+        .def_readwrite("outlierDiffThreshold", &StereoDepthConfig::AlgorithmControl::outlierDiffThreshold, DOC(dai, StereoDepthConfig, AlgorithmControl, outlierDiffThreshold))
+        .def_readwrite("centerAlignmentShiftFactor", &StereoDepthConfig::AlgorithmControl::centerAlignmentShiftFactor, DOC(dai, StereoDepthConfig, AlgorithmControl, centerAlignmentShiftFactor))
+        .def_readwrite("numInvalidateEdgePixels", &StereoDepthConfig::AlgorithmControl::numInvalidateEdgePixels, DOC(dai, StereoDepthConfig, AlgorithmControl, numInvalidateEdgePixels))
         ;
 
     spatialFilter
         .def(py::init<>())
-        .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::SpatialFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, enable))
-        .def_readwrite("holeFillingRadius", &RawStereoDepthConfig::PostProcessing::SpatialFilter::holeFillingRadius, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, holeFillingRadius))
-        .def_readwrite("alpha", &RawStereoDepthConfig::PostProcessing::SpatialFilter::alpha, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, alpha))
-        .def_readwrite("delta", &RawStereoDepthConfig::PostProcessing::SpatialFilter::delta, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, delta))
-        .def_readwrite("numIterations", &RawStereoDepthConfig::PostProcessing::SpatialFilter::numIterations, DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter, numIterations))
+        .def_readwrite("enable", &StereoDepthConfig::PostProcessing::SpatialFilter::enable, DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter, enable))
+        .def_readwrite("holeFillingRadius", &StereoDepthConfig::PostProcessing::SpatialFilter::holeFillingRadius, DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter, holeFillingRadius))
+        .def_readwrite("alpha", &StereoDepthConfig::PostProcessing::SpatialFilter::alpha, DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter, alpha))
+        .def_readwrite("delta", &StereoDepthConfig::PostProcessing::SpatialFilter::delta, DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter, delta))
+        .def_readwrite("numIterations", &StereoDepthConfig::PostProcessing::SpatialFilter::numIterations, DOC(dai, StereoDepthConfig, PostProcessing, SpatialFilter, numIterations))
         ;
 
     persistencyMode
-        .value("PERSISTENCY_OFF", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_OFF, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_OFF))
-        .value("VALID_8_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_8_OUT_OF_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_8_OUT_OF_8))
-        .value("VALID_2_IN_LAST_3", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_3, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_3))
-        .value("VALID_2_IN_LAST_4", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_4, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_4))
-        .value("VALID_2_OUT_OF_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_OUT_OF_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_OUT_OF_8))
-        .value("VALID_1_IN_LAST_2", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_2, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_2))
-        .value("VALID_1_IN_LAST_5", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_5, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_5))
-        .value("VALID_1_IN_LAST_8", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_8, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_8))
-        .value("PERSISTENCY_INDEFINITELY", RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_INDEFINITELY, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_INDEFINITELY))
+        .value("PERSISTENCY_OFF", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_OFF, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_OFF))
+        .value("VALID_8_OUT_OF_8", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_8_OUT_OF_8, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_8_OUT_OF_8))
+        .value("VALID_2_IN_LAST_3", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_3, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_3))
+        .value("VALID_2_IN_LAST_4", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_IN_LAST_4, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_IN_LAST_4))
+        .value("VALID_2_OUT_OF_8", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_2_OUT_OF_8, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_2_OUT_OF_8))
+        .value("VALID_1_IN_LAST_2", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_2, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_2))
+        .value("VALID_1_IN_LAST_5", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_5, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_5))
+        .value("VALID_1_IN_LAST_8", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::VALID_1_IN_LAST_8, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, VALID_1_IN_LAST_8))
+        .value("PERSISTENCY_INDEFINITELY", StereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode::PERSISTENCY_INDEFINITELY, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode, PERSISTENCY_INDEFINITELY))
         ;
 
     temporalFilter
         .def(py::init<>())
-        .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::TemporalFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, enable))
-        .def_readwrite("persistencyMode", &RawStereoDepthConfig::PostProcessing::TemporalFilter::persistencyMode, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, persistencyMode))
-        .def_readwrite("alpha", &RawStereoDepthConfig::PostProcessing::TemporalFilter::alpha, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, alpha))
-        .def_readwrite("delta", &RawStereoDepthConfig::PostProcessing::TemporalFilter::delta, DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, delta))
+        .def_readwrite("enable", &StereoDepthConfig::PostProcessing::TemporalFilter::enable, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, enable))
+        .def_readwrite("persistencyMode", &StereoDepthConfig::PostProcessing::TemporalFilter::persistencyMode, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, persistencyMode))
+        .def_readwrite("alpha", &StereoDepthConfig::PostProcessing::TemporalFilter::alpha, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, alpha))
+        .def_readwrite("delta", &StereoDepthConfig::PostProcessing::TemporalFilter::delta, DOC(dai, StereoDepthConfig, PostProcessing, TemporalFilter, delta))
         ;
 
     thresholdFilter
         .def(py::init<>())
-        .def_readwrite("minRange", &RawStereoDepthConfig::PostProcessing::ThresholdFilter::minRange, DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter, minRange))
-        .def_readwrite("maxRange", &RawStereoDepthConfig::PostProcessing::ThresholdFilter::maxRange, DOC(dai, RawStereoDepthConfig, PostProcessing, ThresholdFilter, maxRange))
+        .def_readwrite("minRange", &StereoDepthConfig::PostProcessing::ThresholdFilter::minRange, DOC(dai, StereoDepthConfig, PostProcessing, ThresholdFilter, minRange))
+        .def_readwrite("maxRange", &StereoDepthConfig::PostProcessing::ThresholdFilter::maxRange, DOC(dai, StereoDepthConfig, PostProcessing, ThresholdFilter, maxRange))
         ;
 
     brightnessFilter
         .def(py::init<>())
-        .def_readwrite("minBrightness", &RawStereoDepthConfig::PostProcessing::BrightnessFilter::minBrightness, DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter, minBrightness))
-        .def_readwrite("maxBrightness", &RawStereoDepthConfig::PostProcessing::BrightnessFilter::maxBrightness, DOC(dai, RawStereoDepthConfig, PostProcessing, BrightnessFilter, maxBrightness))
+        .def_readwrite("minBrightness", &StereoDepthConfig::PostProcessing::BrightnessFilter::minBrightness, DOC(dai, StereoDepthConfig, PostProcessing, BrightnessFilter, minBrightness))
+        .def_readwrite("maxBrightness", &StereoDepthConfig::PostProcessing::BrightnessFilter::maxBrightness, DOC(dai, StereoDepthConfig, PostProcessing, BrightnessFilter, maxBrightness))
         ;
 
     speckleFilter
         .def(py::init<>())
-        .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, enable))
-        .def_readwrite("speckleRange", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::speckleRange, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, speckleRange))
+        .def_readwrite("enable", &StereoDepthConfig::PostProcessing::SpeckleFilter::enable, DOC(dai, StereoDepthConfig, PostProcessing, SpeckleFilter, enable))
+        .def_readwrite("speckleRange", &StereoDepthConfig::PostProcessing::SpeckleFilter::speckleRange, DOC(dai, StereoDepthConfig, PostProcessing, SpeckleFilter, speckleRange))
         ;
 
     decimationMode
-        .value("PIXEL_SKIPPING", RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::PIXEL_SKIPPING, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, PIXEL_SKIPPING))
-        .value("NON_ZERO_MEDIAN", RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::NON_ZERO_MEDIAN, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, NON_ZERO_MEDIAN))
-        .value("NON_ZERO_MEAN", RawStereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::NON_ZERO_MEAN, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, NON_ZERO_MEAN))
+        .value("PIXEL_SKIPPING", StereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::PIXEL_SKIPPING, DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, PIXEL_SKIPPING))
+        .value("NON_ZERO_MEDIAN", StereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::NON_ZERO_MEDIAN, DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, NON_ZERO_MEDIAN))
+        .value("NON_ZERO_MEAN", StereoDepthConfig::PostProcessing::DecimationFilter::DecimationMode::NON_ZERO_MEAN, DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, DecimationMode, NON_ZERO_MEAN))
         ;
 
     decimationFilter
         .def(py::init<>())
-        .def_readwrite("decimationFactor", &RawStereoDepthConfig::PostProcessing::DecimationFilter::decimationFactor, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, decimationFactor))
-        .def_readwrite("decimationMode", &RawStereoDepthConfig::PostProcessing::DecimationFilter::decimationMode, DOC(dai, RawStereoDepthConfig, PostProcessing, DecimationFilter, decimationMode))
+        .def_readwrite("decimationFactor", &StereoDepthConfig::PostProcessing::DecimationFilter::decimationFactor, DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, decimationFactor))
+        .def_readwrite("decimationMode", &StereoDepthConfig::PostProcessing::DecimationFilter::decimationMode, DOC(dai, StereoDepthConfig, PostProcessing, DecimationFilter, decimationMode))
         ;
 
     postProcessing
         .def(py::init<>())
-        .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
-        .def_readwrite("bilateralSigmaValue", &RawStereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, RawStereoDepthConfig, PostProcessing, bilateralSigmaValue))
-        .def_readwrite("spatialFilter", &RawStereoDepthConfig::PostProcessing::spatialFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, spatialFilter))
-        .def_readwrite("temporalFilter", &RawStereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, temporalFilter))
-        .def_readwrite("thresholdFilter", &RawStereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, thresholdFilter))
-        .def_readwrite("brightnessFilter", &RawStereoDepthConfig::PostProcessing::brightnessFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, brightnessFilter))
-        .def_readwrite("speckleFilter", &RawStereoDepthConfig::PostProcessing::speckleFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, speckleFilter))
-        .def_readwrite("decimationFilter", &RawStereoDepthConfig::PostProcessing::decimationFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, decimationFilter))
+        .def_readwrite("median", &StereoDepthConfig::PostProcessing::median, DOC(dai, StereoDepthConfig, PostProcessing, median))
+        .def_readwrite("bilateralSigmaValue", &StereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, StereoDepthConfig, PostProcessing, bilateralSigmaValue))
+        .def_readwrite("spatialFilter", &StereoDepthConfig::PostProcessing::spatialFilter, DOC(dai, StereoDepthConfig, PostProcessing, spatialFilter))
+        .def_readwrite("temporalFilter", &StereoDepthConfig::PostProcessing::temporalFilter, DOC(dai, StereoDepthConfig, PostProcessing, temporalFilter))
+        .def_readwrite("thresholdFilter", &StereoDepthConfig::PostProcessing::thresholdFilter, DOC(dai, StereoDepthConfig, PostProcessing, thresholdFilter))
+        .def_readwrite("brightnessFilter", &StereoDepthConfig::PostProcessing::brightnessFilter, DOC(dai, StereoDepthConfig, PostProcessing, brightnessFilter))
+        .def_readwrite("speckleFilter", &StereoDepthConfig::PostProcessing::speckleFilter, DOC(dai, StereoDepthConfig, PostProcessing, speckleFilter))
+        .def_readwrite("decimationFilter", &StereoDepthConfig::PostProcessing::decimationFilter, DOC(dai, StereoDepthConfig, PostProcessing, decimationFilter))
         ;
 
     // KernelSize
     censusTransformKernelSize
-        .value("AUTO", RawStereoDepthConfig::CensusTransform::KernelSize::AUTO, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, AUTO))
-        .value("KERNEL_5x5", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_5x5, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_5x5))
-        .value("KERNEL_7x7", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x7, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x7))
-        .value("KERNEL_7x9", RawStereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x9, DOC(dai, RawStereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x9))
+        .value("AUTO", StereoDepthConfig::CensusTransform::KernelSize::AUTO, DOC(dai, StereoDepthConfig, CensusTransform, KernelSize, AUTO))
+        .value("KERNEL_5x5", StereoDepthConfig::CensusTransform::KernelSize::KERNEL_5x5, DOC(dai, StereoDepthConfig, CensusTransform, KernelSize, KERNEL_5x5))
+        .value("KERNEL_7x7", StereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x7, DOC(dai, StereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x7))
+        .value("KERNEL_7x9", StereoDepthConfig::CensusTransform::KernelSize::KERNEL_7x9, DOC(dai, StereoDepthConfig, CensusTransform, KernelSize, KERNEL_7x9))
         ;
 
     censusTransform
         .def(py::init<>())
-        .def_readwrite("kernelSize", &RawStereoDepthConfig::CensusTransform::kernelSize, DOC(dai, RawStereoDepthConfig, CensusTransform, kernelSize))
-        .def_readwrite("kernelMask", &RawStereoDepthConfig::CensusTransform::kernelMask, DOC(dai, RawStereoDepthConfig, CensusTransform, kernelMask))
-        .def_readwrite("enableMeanMode", &RawStereoDepthConfig::CensusTransform::enableMeanMode, DOC(dai, RawStereoDepthConfig, CensusTransform, enableMeanMode))
-        .def_readwrite("threshold", &RawStereoDepthConfig::CensusTransform::threshold, DOC(dai, RawStereoDepthConfig, CensusTransform, threshold))
+        .def_readwrite("kernelSize", &StereoDepthConfig::CensusTransform::kernelSize, DOC(dai, StereoDepthConfig, CensusTransform, kernelSize))
+        .def_readwrite("kernelMask", &StereoDepthConfig::CensusTransform::kernelMask, DOC(dai, StereoDepthConfig, CensusTransform, kernelMask))
+        .def_readwrite("enableMeanMode", &StereoDepthConfig::CensusTransform::enableMeanMode, DOC(dai, StereoDepthConfig, CensusTransform, enableMeanMode))
+        .def_readwrite("threshold", &StereoDepthConfig::CensusTransform::threshold, DOC(dai, StereoDepthConfig, CensusTransform, threshold))
         ;
 
     costMatchingLinearEquationParameters
         .def(py::init<>())
-        .def_readwrite("alpha", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::alpha, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, alpha))
-        .def_readwrite("beta", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::beta, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, beta))
-        .def_readwrite("threshold", &RawStereoDepthConfig::CostMatching::LinearEquationParameters::threshold, DOC(dai, RawStereoDepthConfig, CostMatching, LinearEquationParameters, threshold))
+        .def_readwrite("alpha", &StereoDepthConfig::CostMatching::LinearEquationParameters::alpha, DOC(dai, StereoDepthConfig, CostMatching, LinearEquationParameters, alpha))
+        .def_readwrite("beta", &StereoDepthConfig::CostMatching::LinearEquationParameters::beta, DOC(dai, StereoDepthConfig, CostMatching, LinearEquationParameters, beta))
+        .def_readwrite("threshold", &StereoDepthConfig::CostMatching::LinearEquationParameters::threshold, DOC(dai, StereoDepthConfig, CostMatching, LinearEquationParameters, threshold))
         ;
 
     // Disparity width
     costMatchingDisparityWidth
-        .value("DISPARITY_64", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_64, DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_64))
-        .value("DISPARITY_96", RawStereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_96, DOC(dai, RawStereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_96))
+        .value("DISPARITY_64", StereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_64, DOC(dai, StereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_64))
+        .value("DISPARITY_96", StereoDepthConfig::CostMatching::DisparityWidth::DISPARITY_96, DOC(dai, StereoDepthConfig, CostMatching, DisparityWidth, DISPARITY_96))
         ;
 
     costMatching
         .def(py::init<>())
-        .def_readwrite("disparityWidth", &RawStereoDepthConfig::CostMatching::disparityWidth, DOC(dai, RawStereoDepthConfig, CostMatching, disparityWidth))
-        .def_readwrite("enableCompanding", &RawStereoDepthConfig::CostMatching::enableCompanding, DOC(dai, RawStereoDepthConfig, CostMatching, enableCompanding))
-        .def_readwrite("invalidDisparityValue", &RawStereoDepthConfig::CostMatching::invalidDisparityValue, DOC(dai, RawStereoDepthConfig, CostMatching, invalidDisparityValue))
-        .def_readwrite("confidenceThreshold", &RawStereoDepthConfig::CostMatching::confidenceThreshold, DOC(dai, RawStereoDepthConfig, CostMatching, confidenceThreshold))
-        .def_readwrite("linearEquationParameters", &RawStereoDepthConfig::CostMatching::linearEquationParameters, DOC(dai, RawStereoDepthConfig, CostMatching, linearEquationParameters))
+        .def_readwrite("disparityWidth", &StereoDepthConfig::CostMatching::disparityWidth, DOC(dai, StereoDepthConfig, CostMatching, disparityWidth))
+        .def_readwrite("enableCompanding", &StereoDepthConfig::CostMatching::enableCompanding, DOC(dai, StereoDepthConfig, CostMatching, enableCompanding))
+        .def_readwrite("invalidDisparityValue", &StereoDepthConfig::CostMatching::invalidDisparityValue, DOC(dai, StereoDepthConfig, CostMatching, invalidDisparityValue))
+        .def_readwrite("confidenceThreshold", &StereoDepthConfig::CostMatching::confidenceThreshold, DOC(dai, StereoDepthConfig, CostMatching, confidenceThreshold))
+        .def_readwrite("linearEquationParameters", &StereoDepthConfig::CostMatching::linearEquationParameters, DOC(dai, StereoDepthConfig, CostMatching, linearEquationParameters))
         ;
 
     // KernelSize
     localAggregationMode
-        .value("AVG3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::AVG3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, AVG3x3))
-        .value("CLAMP3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::CLAMP3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, CLAMP3x3))
-        .value("PASS3x3", RawStereoDepthConfig::CostAggregation::LocalAggregationMode::PASS3x3, DOC(dai, RawStereoDepthConfig, CostAggregation, LocalAggregationMode, PASS3x3))
+        .value("AVG3x3", StereoDepthConfig::CostAggregation::LocalAggregationMode::AVG3x3, DOC(dai, StereoDepthConfig, CostAggregation, LocalAggregationMode, AVG3x3))
+        .value("CLAMP3x3", StereoDepthConfig::CostAggregation::LocalAggregationMode::CLAMP3x3, DOC(dai, StereoDepthConfig, CostAggregation, LocalAggregationMode, CLAMP3x3))
+        .value("PASS3x3", StereoDepthConfig::CostAggregation::LocalAggregationMode::PASS3x3, DOC(dai, StereoDepthConfig, CostAggregation, LocalAggregationMode, PASS3x3))
         ;
 
     costAggregation
         .def(py::init<>())
-        .def_readwrite("divisionFactor", &RawStereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, RawStereoDepthConfig, CostAggregation, divisionFactor))
-        .def_readwrite("horizontalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP1))
-        .def_readwrite("horizontalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
-        .def_readwrite("verticalPenaltyCostP1", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
-        .def_readwrite("verticalPenaltyCostP2", &RawStereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, RawStereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
-        .def_readwrite("localAggregationMode", &RawStereoDepthConfig::CostAggregation::localAggregationMode, DOC(dai, RawStereoDepthConfig, CostAggregation, localAggregationMode))
+        .def_readwrite("divisionFactor", &StereoDepthConfig::CostAggregation::divisionFactor, DOC(dai, StereoDepthConfig, CostAggregation, divisionFactor))
+        .def_readwrite("horizontalPenaltyCostP1", &StereoDepthConfig::CostAggregation::horizontalPenaltyCostP1, DOC(dai, StereoDepthConfig, CostAggregation, horizontalPenaltyCostP1))
+        .def_readwrite("horizontalPenaltyCostP2", &StereoDepthConfig::CostAggregation::horizontalPenaltyCostP2, DOC(dai, StereoDepthConfig, CostAggregation, horizontalPenaltyCostP2))
+        .def_readwrite("verticalPenaltyCostP1", &StereoDepthConfig::CostAggregation::verticalPenaltyCostP1, DOC(dai, StereoDepthConfig, CostAggregation, verticalPenaltyCostP1))
+        .def_readwrite("verticalPenaltyCostP2", &StereoDepthConfig::CostAggregation::verticalPenaltyCostP2, DOC(dai, StereoDepthConfig, CostAggregation, verticalPenaltyCostP2))
+        .def_readwrite("localAggregationMode", &StereoDepthConfig::CostAggregation::localAggregationMode, DOC(dai, StereoDepthConfig, CostAggregation, localAggregationMode))
         ;
 
-    rawStereoDepthConfig
+    stereoDepthConfig
         .def(py::init<>())
-        .def_readwrite("algorithmControl", &RawStereoDepthConfig::algorithmControl,  DOC(dai, RawStereoDepthConfig, algorithmControl))
-        .def_readwrite("postProcessing", &RawStereoDepthConfig::postProcessing,  DOC(dai, RawStereoDepthConfig, postProcessing))
-        .def_readwrite("censusTransform", &RawStereoDepthConfig::censusTransform,  DOC(dai, RawStereoDepthConfig, censusTransform))
-        .def_readwrite("costMatching", &RawStereoDepthConfig::costMatching,  DOC(dai, RawStereoDepthConfig, costMatching))
-        .def_readwrite("costAggregation", &RawStereoDepthConfig::costAggregation,  DOC(dai, RawStereoDepthConfig, costAggregation))
+        .def_readwrite("algorithmControl", &StereoDepthConfig::algorithmControl,  DOC(dai, StereoDepthConfig, algorithmControl))
+        .def_readwrite("postProcessing", &StereoDepthConfig::postProcessing,  DOC(dai, StereoDepthConfig, postProcessing))
+        .def_readwrite("censusTransform", &StereoDepthConfig::censusTransform,  DOC(dai, StereoDepthConfig, censusTransform))
+        .def_readwrite("costMatching", &StereoDepthConfig::costMatching,  DOC(dai, StereoDepthConfig, costMatching))
+        .def_readwrite("costAggregation", &StereoDepthConfig::costAggregation,  DOC(dai, StereoDepthConfig, costAggregation))
         ;
     // legacy
-    m.attr("RawStereoDepthConfig").attr("MedianFilter") = medianFilter;
+    m.attr("StereoDepthConfig").attr("MedianFilter") = medianFilter;
 
 
     // Message
@@ -256,8 +256,8 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def("getDepthUnit",            &StereoDepthConfig::getDepthUnit, DOC(dai, StereoDepthConfig, getDepthUnit))
         .def("setDisparityShift",       &StereoDepthConfig::setDisparityShift, DOC(dai, StereoDepthConfig, setDisparityShift))
         .def("setNumInvalidateEdgePixels",       &StereoDepthConfig::setNumInvalidateEdgePixels, DOC(dai, StereoDepthConfig, setNumInvalidateEdgePixels))
-        .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
-        .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
+        // .def("set",                     &StereoDepthConfig::set, py::arg("config"), DOC(dai, StereoDepthConfig, set))
+        // .def("get",                     &StereoDepthConfig::get, DOC(dai, StereoDepthConfig, get))
         ;
     m.attr("StereoDepthConfig").attr("MedianFilter") = medianFilter;
     m.attr("StereoDepthConfig").attr("AlgorithmControl") = algorithmControl;

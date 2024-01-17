@@ -113,34 +113,43 @@ void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
 
     // Bind DataInputQueue
     dataInputQueue
-        .def("isClosed", &DataInputQueue::isClosed, DOC(dai, DataInputQueue, isClosed))
-        .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close), py::call_guard<py::gil_scoped_release>())
-        .def("getName", &DataInputQueue::getName, DOC(dai, DataInputQueue, getName))
-        .def("setBlocking", &DataInputQueue::setBlocking, py::arg("blocking"), DOC(dai, DataInputQueue, setBlocking))
-        .def("getBlocking", &DataInputQueue::getBlocking, DOC(dai, DataInputQueue, getBlocking))
-        .def("setMaxSize", &DataInputQueue::setMaxSize, py::arg("maxSize"), DOC(dai, DataInputQueue, setMaxSize))
-        .def("getMaxSize", &DataInputQueue::getMaxSize, DOC(dai, DataInputQueue, getMaxSize))
-        .def("send", [](DataInputQueue& obj, std::shared_ptr<ADatatype> d){
-
-            bool sent = false;
-            do {
+        .def("isClosed", &DataInputQueue::isClosed,
+             DOC(dai, DataInputQueue, isClosed))
+        .def("close", &DataInputQueue::close, DOC(dai, DataInputQueue, close),
+             py::call_guard<py::gil_scoped_release>())
+        .def("getName", &DataInputQueue::getName,
+             DOC(dai, DataInputQueue, getName))
+        .def("setBlocking", &DataInputQueue::setBlocking, py::arg("blocking"),
+             DOC(dai, DataInputQueue, setBlocking))
+        .def("getBlocking", &DataInputQueue::getBlocking,
+             DOC(dai, DataInputQueue, getBlocking))
+        .def("setMaxSize", &DataInputQueue::setMaxSize, py::arg("maxSize"),
+             DOC(dai, DataInputQueue, setMaxSize))
+        .def("getMaxSize", &DataInputQueue::getMaxSize,
+             DOC(dai, DataInputQueue, getMaxSize))
+        .def(
+            "send",
+            [](DataInputQueue &obj, std::shared_ptr<ADatatype> d) {
+              bool sent = false;
+              do {
 
                 // block for 100ms
                 {
-                    // Release GIL, then block
-                    py::gil_scoped_release release;
-                    sent = obj.send(d, milliseconds(100));
+                  // Release GIL, then block
+                  py::gil_scoped_release release;
+                  sent = obj.send(d, milliseconds(100));
                 }
 
                 // reacquires GIL as PyErr_CheckSignals requires GIL
 
                 // check if interrupt triggered in between
-                if (PyErr_CheckSignals() != 0) throw py::error_already_set();
+                if (PyErr_CheckSignals() != 0)
+                  throw py::error_already_set();
 
-            } while(!sent);
-
-        }, py::arg("msg"), DOC(dai, DataInputQueue, send, 2))
-        // .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::RawBuffer> d){
+              } while (!sent);
+            },
+            py::arg("msg"), DOC(dai, DataInputQueue, send, 2))
+        // .def("send", [](DataInputQueue& obj, std::shared_ptr<dai::Buffer> d){
 
         //     bool sent = false;
         //     do {
@@ -159,5 +168,4 @@ void DataQueueBindings::bind(pybind11::module& m, void* pCallstack){
 
         // }, py::arg("rawMsg"), DOC(dai, DataInputQueue, send))
         ;
-
 }

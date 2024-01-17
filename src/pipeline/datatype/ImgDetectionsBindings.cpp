@@ -16,7 +16,7 @@ void bind_imgdetections(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> rawImgDetections(m, "RawImgDetections", DOC(dai, RawImgDetections));
+    // py::class_<RawImgDetections, RawBuffer, std::shared_ptr<RawImgDetections>> rawImgDetections(m, "RawImgDetections", DOC(dai, RawImgDetections));
     py::class_<ImgDetections, Buffer, std::shared_ptr<ImgDetections>> imgDetections(m, "ImgDetections", DOC(dai, ImgDetections));
     py::class_<ImgDetection> imgDetection(m, "ImgDetection", DOC(dai, ImgDetection));
 
@@ -44,31 +44,31 @@ void bind_imgdetections(pybind11::module& m, void* pCallstack){
         .def_readwrite("ymax", &ImgDetection::ymax)
         ;
 
-    rawImgDetections
-        .def(py::init<>())
-        .def_readwrite("detections", &RawImgDetections::detections)
-        .def_property("ts",
-            [](const RawImgDetections& o){
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawImgDetections& o, double ts){
-                o.ts.sec = ts;
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
-            }
-        )
-        .def_property("tsDevice",
-            [](const RawImgDetections& o){
-                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawImgDetections& o, double ts){
-                o.tsDevice.sec = ts;
-                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
-            }
-        )
-        .def_readwrite("sequenceNum", &RawImgDetections::sequenceNum)
-        ;
+    // rawImgDetections
+    //     .def(py::init<>())
+    //     .def_readwrite("detections", &RawImgDetections::detections)
+    //     .def_property("ts",
+    //         [](const RawImgDetections& o){
+    //             double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawImgDetections& o, double ts){
+    //             o.ts.sec = ts;
+    //             o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_property("tsDevice",
+    //         [](const RawImgDetections& o){
+    //             double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawImgDetections& o, double ts){
+    //             o.tsDevice.sec = ts;
+    //             o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_readwrite("sequenceNum", &RawImgDetections::sequenceNum)
+    //     ;
 
     // Message
     imgDetections

@@ -1,5 +1,5 @@
 #include "DatatypeBindings.hpp"
-#include "depthai-shared/datatype/RawEncodedFrame.hpp"
+#include "depthai/pipeline/datatype/EncodedFrame.hpp"
 #include "pipeline/CommonBindings.hpp"
 #include <memory>
 #include <unordered_map>
@@ -15,14 +15,12 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
 
   using namespace dai;
 
-  py::class_<RawEncodedFrame, RawBuffer, std::shared_ptr<RawEncodedFrame>>
-      rawEncodedFrame(m, "RawEncodedFrame", DOC(dai, RawEncodedFrame));
-  py::enum_<RawEncodedFrame::Profile> rawEncodedFrameProfile(rawEncodedFrame,
-                                                             "Profile");
-  py::enum_<RawEncodedFrame::FrameType> rawEncodedFrameType(
-      rawEncodedFrame, "FrameType", DOC(dai, RawEncodedFrame, FrameType));
   py::class_<EncodedFrame, Buffer, std::shared_ptr<EncodedFrame>> encodedFrame(
       m, "EncodedFrame", DOC(dai, EncodedFrame));
+  py::enum_<EncodedFrame::Profile> encodedFrameProfile(encodedFrame,
+                                                             "Profile");
+  py::enum_<EncodedFrame::FrameType> encodedFrameType(
+      encodedFrame, "FrameType", DOC(dai, EncodedFrame, FrameType));
 
   ///////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
@@ -39,40 +37,40 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
 
   // Metadata / raw
 
-  rawEncodedFrame.def(py::init<>())
-      .def_readwrite("quality", &RawEncodedFrame::quality)
-      .def_readwrite("bitrate", &RawEncodedFrame::bitrate)
-      .def_readwrite("profile", &RawEncodedFrame::profile)
-      .def_readwrite("lossless", &RawEncodedFrame::lossless)
-      .def_readwrite("type", &RawEncodedFrame::type)
-      .def_readwrite("instanceNum", &RawEncodedFrame::instanceNum)
-      .def_readwrite("sequenceNum", &RawEncodedFrame::sequenceNum)
-      .def_property(
-          "ts",
-          [](const RawEncodedFrame &o) {
-            double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
-            return ts;
-          },
-          [](RawEncodedFrame &o, double ts) {
-            o.ts.sec = ts;
-            o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
-          })
-      .def_property(
-          "tsDevice",
-          [](const RawEncodedFrame &o) {
-            double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
-            return ts;
-          },
-          [](RawEncodedFrame &o, double ts) {
-            o.tsDevice.sec = ts;
-            o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
-          });
+//   rawEncodedFrame.def(py::init<>())
+//       .def_readwrite("quality", &RawEncodedFrame::quality)
+//       .def_readwrite("bitrate", &RawEncodedFrame::bitrate)
+//       .def_readwrite("profile", &RawEncodedFrame::profile)
+//       .def_readwrite("lossless", &RawEncodedFrame::lossless)
+//       .def_readwrite("type", &RawEncodedFrame::type)
+//       .def_readwrite("instanceNum", &RawEncodedFrame::instanceNum)
+//       .def_readwrite("sequenceNum", &RawEncodedFrame::sequenceNum)
+//       .def_property(
+//           "ts",
+//           [](const RawEncodedFrame &o) {
+//             double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+//             return ts;
+//           },
+//           [](RawEncodedFrame &o, double ts) {
+//             o.ts.sec = ts;
+//             o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+//           })
+//       .def_property(
+//           "tsDevice",
+//           [](const RawEncodedFrame &o) {
+//             double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+//             return ts;
+//           },
+//           [](RawEncodedFrame &o, double ts) {
+//             o.tsDevice.sec = ts;
+//             o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+//           });
 
-  rawEncodedFrameProfile.value("JPEG", EncodedFrame::Profile::JPEG)
+  encodedFrameProfile.value("JPEG", EncodedFrame::Profile::JPEG)
       .value("AVC", EncodedFrame::Profile::AVC)
       .value("HEVC", EncodedFrame::Profile::HEVC);
 
-  rawEncodedFrameType.value("I", EncodedFrame::FrameType::I)
+  encodedFrameType.value("I", EncodedFrame::FrameType::I)
       .value("P", EncodedFrame::FrameType::P)
       .value("B", EncodedFrame::FrameType::B)
       .value("Unknown", EncodedFrame::FrameType::Unknown);
@@ -127,9 +125,9 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            DOC(dai, EncodedFrame, getLossless))
       .def("setProfile", &EncodedFrame::setProfile,
            DOC(dai, EncodedFrame, getProfile));
-  // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
-  m.attr("EncodedFrame").attr("FrameType") =
-      m.attr("RawEncodedFrame").attr("FrameType");
-  m.attr("EncodedFrame").attr("Profile") =
-      m.attr("RawEncodedFrame").attr("Profile");
+//   // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
+//   m.attr("EncodedFrame").attr("FrameType") =
+//       m.attr("RawEncodedFrame").attr("FrameType");
+//   m.attr("EncodedFrame").attr("Profile") =
+//       m.attr("RawEncodedFrame").attr("Profile");
 }

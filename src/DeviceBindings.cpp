@@ -1,12 +1,12 @@
 #include "DeviceBindings.hpp"
 
 // depthai
+#include "depthai/device/CrashDump.hpp"
 #include "depthai/device/Device.hpp"
 #include "depthai/device/EepromError.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
-#include "depthai-shared/device/CrashDump.hpp"
 
 // std::chrono bindings
 #include <pybind11/chrono.h>

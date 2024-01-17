@@ -14,8 +14,8 @@ tof = pipeline.create(dai.node.ToF)
 
 # Configure the ToF node
 tofConfig = tof.initialConfig.get()
-# tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MAX
+# tofConfig.depthParams.freqModUsed = dai.ToFConfig.DepthParams.TypeFMod.MIN
+tofConfig.depthParams.freqModUsed = dai.ToFConfig.DepthParams.TypeFMod.MAX
 tofConfig.depthParams.avgPhaseShuffle = False
 tofConfig.depthParams.minimumAmplitude = 3.0
 tof.initialConfig.set(tofConfig)

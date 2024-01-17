@@ -32,7 +32,7 @@ void bind_adatatype(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // Message
-    adatatype
-        .def("getRaw", &ADatatype::getRaw);
+    // adatatype
+        // .def("getRaw", &ADatatype::getRaw);
 
 }

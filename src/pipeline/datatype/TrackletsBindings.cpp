@@ -16,7 +16,7 @@ void bind_tracklets(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
+    // py::class_<RawTracklets, RawBuffer, std::shared_ptr<RawTracklets>> rawTacklets(m, "RawTracklets", DOC(dai, RawTracklets));
     py::class_<Tracklet> tracklet(m, "Tracklet", DOC(dai, Tracklet));
     py::enum_<Tracklet::TrackingStatus> trackletTrackingStatus(tracklet, "TrackingStatus", DOC(dai, Tracklet, TrackingStatus));
     py::class_<Tracklets, Buffer, std::shared_ptr<Tracklets>> tracklets(m, "Tracklets", DOC(dai, Tracklets));
@@ -53,10 +53,10 @@ void bind_tracklets(pybind11::module& m, void* pCallstack){
         .value("REMOVED", Tracklet::TrackingStatus::REMOVED)
         ;
 
-    rawTacklets
-        .def(py::init<>())
-        .def_readwrite("tracklets", &RawTracklets::tracklets)
-        ;
+    // rawTacklets
+    //     .def(py::init<>())
+    //     .def_readwrite("tracklets", &RawTracklets::tracklets)
+    //     ;
 
     // Message
     tracklets

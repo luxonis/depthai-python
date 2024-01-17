@@ -1,8 +1,8 @@
 #include "LogBindings.hpp"
 
 // depthai
-#include "depthai-shared/log/LogLevel.hpp"
-#include "depthai-shared/log/LogMessage.hpp"
+#include "depthai/log/LogLevel.hpp"
+#include "depthai/log/LogMessage.hpp"
 
 void LogBindings::bind(pybind11::module& m, void* pCallstack){
 

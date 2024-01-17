@@ -1,7 +1,7 @@
 #include "DatatypeBindings.hpp"
 
+#include "depthai/pipeline/datatype/DatatypeEnum.hpp"
 #include "pipeline/CommonBindings.hpp"
-#include "depthai-shared/datatype/DatatypeEnum.hpp"
 
 void bind_adatatype(pybind11::module& m, void* pCallstack);
 void bind_apriltagconfig(pybind11::module& m, void* pCallstack);

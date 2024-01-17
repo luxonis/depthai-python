@@ -33,8 +33,8 @@
 #include "depthai/pipeline/node/UVC.hpp"
 #include "depthai/pipeline/node/Warp.hpp"
 
-// depthai-shared
-#include "depthai-shared/properties/GlobalProperties.hpp"
+// depthai/
+#include "depthai/properties/GlobalProperties.hpp"
 
 std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
     auto nodeCreateMap = NodeBindings::getNodeCreateMap();

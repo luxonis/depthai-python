@@ -1,10 +1,10 @@
 #include "Common.hpp"
 #include "NodeBindings.hpp"
 
-#include "depthai-shared/properties/MessageDemuxProperties.hpp"
 #include "depthai/pipeline/Node.hpp"
 #include "depthai/pipeline/Pipeline.hpp"
 #include "depthai/pipeline/node/MessageDemux.hpp"
+#include "depthai/properties/MessageDemuxProperties.hpp"
 
 void bind_messagedemux(pybind11::module &m, void *pCallstack) {
 

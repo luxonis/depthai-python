@@ -23,7 +23,7 @@ void bind_imudata(pybind11::module& m, void* pCallstack){
     py::class_<IMUReportMagneticField, IMUReport, std::shared_ptr<IMUReportMagneticField>> imuReportMagneticField(m, "IMUReportMagneticField", DOC(dai, IMUReportMagneticField));
     py::class_<IMUReportRotationVectorWAcc, IMUReport, std::shared_ptr<IMUReportRotationVectorWAcc>> imuReportRotationVectorWAcc(m, "IMUReportRotationVectorWAcc", DOC(dai, IMUReportRotationVectorWAcc));
     py::class_<IMUPacket> imuPacket(m, "IMUPacket", DOC(dai, IMUPacket));
-    py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
+    // py::class_<RawIMUData, RawBuffer, std::shared_ptr<RawIMUData>> rawIMUPackets(m, "RawIMUData", DOC(dai, RawIMUData));
     py::class_<IMUData, Buffer, std::shared_ptr<IMUData>> imuData(m, "IMUData", DOC(dai, IMUData));
 
     ///////////////////////////////////////////////////////////////////////
@@ -152,10 +152,10 @@ void bind_imudata(pybind11::module& m, void* pCallstack){
 #endif
         ;
 
-    rawIMUPackets
-        .def(py::init<>())
-        .def_readwrite("packets", &RawIMUData::packets)
-        ;
+    // rawIMUPackets
+    //     .def(py::init<>())
+    //     .def_readwrite("packets", &RawIMUData::packets)
+    //     ;
 
     // Message
     imuData

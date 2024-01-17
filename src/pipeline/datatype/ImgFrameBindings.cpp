@@ -14,10 +14,10 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
-    py::enum_<RawImgFrame::Type> rawImgFrameType(rawImgFrame, "Type");
-    py::class_<RawImgFrame::Specs> rawImgFrameSpecs(rawImgFrame, "Specs", DOC(dai, RawImgFrame, Specs));
+    // py::class_<RawImgFrame, RawBuffer, std::shared_ptr<RawImgFrame>> rawImgFrame(m, "RawImgFrame", DOC(dai, RawImgFrame));
     py::class_<ImgFrame, Buffer, std::shared_ptr<ImgFrame>> imgFrame(m, "ImgFrame", DOC(dai, ImgFrame));
+    py::enum_<ImgFrame::Type> imgFrameType(imgFrame, "Type");
+    py::class_<ImgFrame::Specs> imgFrameSpecs(imgFrame, "Specs", DOC(dai, ImgFrame, Specs));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -34,82 +34,82 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
 
     // Metadata / raw
 
-    rawImgFrame
-        .def(py::init<>())
-        .def_readwrite("fb", &RawImgFrame::fb)
-        .def_readwrite("category", &RawImgFrame::category)
-        .def_readwrite("instanceNum", &RawImgFrame::instanceNum)
-        .def_readwrite("sequenceNum", &RawImgFrame::sequenceNum)
-        .def_property("ts",
-            [](const RawImgFrame& o){
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawImgFrame& o, double ts){
-                o.ts.sec = ts;
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
-            }
-        )
-        .def_property("tsDevice",
-            [](const RawImgFrame& o){
-                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawImgFrame& o, double ts){
-                o.tsDevice.sec = ts;
-                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
-            }
-        )
+    // rawImgFrame
+    //     .def(py::init<>())
+    //     .def_readwrite("fb", &RawImgFrame::fb)
+    //     .def_readwrite("category", &RawImgFrame::category)
+    //     .def_readwrite("instanceNum", &RawImgFrame::instanceNum)
+    //     .def_readwrite("sequenceNum", &RawImgFrame::sequenceNum)
+    //     .def_property("ts",
+    //         [](const RawImgFrame& o){
+    //             double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawImgFrame& o, double ts){
+    //             o.ts.sec = ts;
+    //             o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_property("tsDevice",
+    //         [](const RawImgFrame& o){
+    //             double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawImgFrame& o, double ts){
+    //             o.tsDevice.sec = ts;
+    //             o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     ;
+
+
+    imgFrameType
+        .value("YUV422i", ImgFrame::Type::YUV422i)
+        .value("YUV444p", ImgFrame::Type::YUV444p)
+        .value("YUV420p", ImgFrame::Type::YUV420p)
+        .value("YUV422p", ImgFrame::Type::YUV422p)
+        .value("YUV400p", ImgFrame::Type::YUV400p)
+        .value("RGBA8888", ImgFrame::Type::RGBA8888)
+        .value("RGB161616", ImgFrame::Type::RGB161616)
+        .value("RGB888p", ImgFrame::Type::RGB888p)
+        .value("BGR888p", ImgFrame::Type::BGR888p)
+        .value("RGB888i", ImgFrame::Type::RGB888i)
+        .value("BGR888i", ImgFrame::Type::BGR888i)
+        .value("RGBF16F16F16p", ImgFrame::Type::RGBF16F16F16p)
+        .value("BGRF16F16F16p", ImgFrame::Type::BGRF16F16F16p)
+        .value("RGBF16F16F16i", ImgFrame::Type::RGBF16F16F16i)
+        .value("BGRF16F16F16i", ImgFrame::Type::BGRF16F16F16i)
+        .value("GRAY8", ImgFrame::Type::GRAY8)
+        .value("GRAYF16", ImgFrame::Type::GRAYF16)
+        .value("LUT2", ImgFrame::Type::LUT2)
+        .value("LUT4", ImgFrame::Type::LUT4)
+        .value("LUT16", ImgFrame::Type::LUT16)
+        .value("RAW16", ImgFrame::Type::RAW16)
+        .value("RAW14", ImgFrame::Type::RAW14)
+        .value("RAW12", ImgFrame::Type::RAW12)
+        .value("RAW10", ImgFrame::Type::RAW10)
+        .value("RAW8", ImgFrame::Type::RAW8)
+        .value("PACK10", ImgFrame::Type::PACK10)
+        .value("PACK12", ImgFrame::Type::PACK12)
+        .value("YUV444i", ImgFrame::Type::YUV444i)
+        .value("NV12", ImgFrame::Type::NV12)
+        .value("NV21", ImgFrame::Type::NV21)
+        .value("BITSTREAM", ImgFrame::Type::BITSTREAM)
+        .value("HDR", ImgFrame::Type::HDR)
+        .value("RAW32", ImgFrame::Type::RAW32)
+        .value("NONE", ImgFrame::Type::NONE)
         ;
 
-
-    rawImgFrameType
-        .value("YUV422i", RawImgFrame::Type::YUV422i)
-        .value("YUV444p", RawImgFrame::Type::YUV444p)
-        .value("YUV420p", RawImgFrame::Type::YUV420p)
-        .value("YUV422p", RawImgFrame::Type::YUV422p)
-        .value("YUV400p", RawImgFrame::Type::YUV400p)
-        .value("RGBA8888", RawImgFrame::Type::RGBA8888)
-        .value("RGB161616", RawImgFrame::Type::RGB161616)
-        .value("RGB888p", RawImgFrame::Type::RGB888p)
-        .value("BGR888p", RawImgFrame::Type::BGR888p)
-        .value("RGB888i", RawImgFrame::Type::RGB888i)
-        .value("BGR888i", RawImgFrame::Type::BGR888i)
-        .value("RGBF16F16F16p", RawImgFrame::Type::RGBF16F16F16p)
-        .value("BGRF16F16F16p", RawImgFrame::Type::BGRF16F16F16p)
-        .value("RGBF16F16F16i", RawImgFrame::Type::RGBF16F16F16i)
-        .value("BGRF16F16F16i", RawImgFrame::Type::BGRF16F16F16i)
-        .value("GRAY8", RawImgFrame::Type::GRAY8)
-        .value("GRAYF16", RawImgFrame::Type::GRAYF16)
-        .value("LUT2", RawImgFrame::Type::LUT2)
-        .value("LUT4", RawImgFrame::Type::LUT4)
-        .value("LUT16", RawImgFrame::Type::LUT16)
-        .value("RAW16", RawImgFrame::Type::RAW16)
-        .value("RAW14", RawImgFrame::Type::RAW14)
-        .value("RAW12", RawImgFrame::Type::RAW12)
-        .value("RAW10", RawImgFrame::Type::RAW10)
-        .value("RAW8", RawImgFrame::Type::RAW8)
-        .value("PACK10", RawImgFrame::Type::PACK10)
-        .value("PACK12", RawImgFrame::Type::PACK12)
-        .value("YUV444i", RawImgFrame::Type::YUV444i)
-        .value("NV12", RawImgFrame::Type::NV12)
-        .value("NV21", RawImgFrame::Type::NV21)
-        .value("BITSTREAM", RawImgFrame::Type::BITSTREAM)
-        .value("HDR", RawImgFrame::Type::HDR)
-        .value("RAW32", RawImgFrame::Type::RAW32)
-        .value("NONE", RawImgFrame::Type::NONE)
-        ;
-
-    rawImgFrameSpecs
+    imgFrameSpecs
         .def(py::init<>())
-        .def_readwrite("type", &RawImgFrame::Specs::type)
-        .def_readwrite("width", &RawImgFrame::Specs::width)
-        .def_readwrite("height", &RawImgFrame::Specs::height)
-        .def_readwrite("stride", &RawImgFrame::Specs::stride)
-        .def_readwrite("bytesPP", &RawImgFrame::Specs::bytesPP)
-        .def_readwrite("p1Offset", &RawImgFrame::Specs::p1Offset)
-        .def_readwrite("p2Offset", &RawImgFrame::Specs::p2Offset)
-        .def_readwrite("p3Offset", &RawImgFrame::Specs::p3Offset)
+        .def_readwrite("type", &ImgFrame::Specs::type)
+        .def_readwrite("width", &ImgFrame::Specs::width)
+        .def_readwrite("height", &ImgFrame::Specs::height)
+        .def_readwrite("stride", &ImgFrame::Specs::stride)
+        .def_readwrite("bytesPP", &ImgFrame::Specs::bytesPP)
+        .def_readwrite("p1Offset", &ImgFrame::Specs::p1Offset)
+        .def_readwrite("p2Offset", &ImgFrame::Specs::p2Offset)
+        .def_readwrite("p3Offset", &ImgFrame::Specs::p3Offset)
         ;
 
     // TODO add RawImgFrame::CameraSettings
@@ -137,7 +137,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getSensitivity", &ImgFrame::getSensitivity, DOC(dai, ImgFrame, getSensitivity))
         .def("getColorTemperature", &ImgFrame::getColorTemperature, DOC(dai, ImgFrame, getColorTemperature))
         .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
-        .def("get", &ImgFrame::get, DOC(dai, ImgFrame, get))
+        // .def("get", &ImgFrame::get, DOC(dai, ImgFrame, get))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
@@ -351,10 +351,10 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("setSize", static_cast<ImgFrame&(ImgFrame::*)(unsigned int, unsigned int)>(&ImgFrame::setSize), py::arg("width"), py::arg("height"), DOC(dai, ImgFrame, setSize))
         .def("setSize", static_cast<ImgFrame&(ImgFrame::*)(std::tuple<unsigned int, unsigned int>)>(&ImgFrame::setSize), py::arg("sizer"), DOC(dai, ImgFrame, setSize, 2))
         .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
-        .def("set", &ImgFrame::set, py::arg("type"), DOC(dai, ImgFrame, set))
+        // .def("set", &ImgFrame::set, py::arg("type"), DOC(dai, ImgFrame, set))
         ;
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
-    m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
-    m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
+    // m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
+    // m.attr("ImgFrame").attr("Specs") = m.attr("RawImgFrame").attr("Specs");
 
 }

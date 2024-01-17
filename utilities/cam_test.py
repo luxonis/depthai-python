@@ -244,7 +244,7 @@ for c in cam_list:
             xinTofConfig.out.link(tof[c].inputConfig)
             tofConfig = tof[c].initialConfig.get()
             if 0:  # From RVC2, TODO implement
-                tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
+                tofConfig.depthParams.freqModUsed = dai.ToFConfig.DepthParams.TypeFMod.MIN
                 tofConfig.depthParams.avgPhaseShuffle = False
                 tofConfig.depthParams.minimumAmplitude = 3.0
 
@@ -475,7 +475,7 @@ with dai.Device() as device:
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
         elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+            f_mod = dai.ToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.ToFConfig.DepthParams.TypeFMod.MIN else dai.ToFConfig.DepthParams.TypeFMod.MIN
             print("ToF toggling f_mod value to:", f_mod)
             tofConfig.depthParams.freqModUsed = f_mod
             tofCfgQueue.send(tofConfig)

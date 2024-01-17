@@ -32,7 +32,7 @@ def create_mono(p, socket):
     # ImageManip for cropping (face detection NN requires input image of 300x300) and to change frame type
     manip = p.create(dai.node.ImageManip)
     manip.initialConfig.setResize(300, 300)
-    manip.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+    manip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
     mono.out.link(manip.inputImage)
     return manip.out
 

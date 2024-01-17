@@ -1,6 +1,6 @@
 #include "CalibrationHandlerBindings.hpp"
+#include "depthai/common/Point2f.hpp"
 #include "depthai/device/CalibrationHandler.hpp"
-#include "depthai-shared/common/Point2f.hpp"
 #include <vector>
 
 void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){

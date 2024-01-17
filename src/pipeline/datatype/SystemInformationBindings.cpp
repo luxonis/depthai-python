@@ -17,7 +17,7 @@ void bind_systeminformation(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation", DOC(dai, RawSystemInformation));
+    // py::class_<RawSystemInformation, RawBuffer, std::shared_ptr<RawSystemInformation>> rawSystemInformation(m, "RawSystemInformation", DOC(dai, RawSystemInformation));
     py::class_<SystemInformation, Buffer, std::shared_ptr<SystemInformation>> systemInformation(m, "SystemInformation", DOC(dai, SystemInformation));
 
     ///////////////////////////////////////////////////////////////////////
@@ -33,17 +33,17 @@ void bind_systeminformation(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // Metadata / raw
-    rawSystemInformation
-        .def(py::init<>())
-        .def_readwrite("ddrMemoryUsage", &RawSystemInformation::ddrMemoryUsage)
-        .def_readwrite("cmxMemoryUsage", &RawSystemInformation::cmxMemoryUsage)
-        .def_readwrite("leonCssMemoryUsage", &RawSystemInformation::leonCssMemoryUsage)
-        .def_readwrite("leonMssMemoryUsage", &RawSystemInformation::leonMssMemoryUsage)
-        .def_readwrite("leonCssCpuUsage", &RawSystemInformation::leonCssCpuUsage)
-        .def_readwrite("leonMssCpuUsage", &RawSystemInformation::leonMssCpuUsage)
-        .def_readwrite("chipTemperature", &RawSystemInformation::chipTemperature)
-        ;
+    // // Metadata / raw
+    // rawSystemInformation
+    //     .def(py::init<>())
+    //     .def_readwrite("ddrMemoryUsage", &RawSystemInformation::ddrMemoryUsage)
+    //     .def_readwrite("cmxMemoryUsage", &RawSystemInformation::cmxMemoryUsage)
+    //     .def_readwrite("leonCssMemoryUsage", &RawSystemInformation::leonCssMemoryUsage)
+    //     .def_readwrite("leonMssMemoryUsage", &RawSystemInformation::leonMssMemoryUsage)
+    //     .def_readwrite("leonCssCpuUsage", &RawSystemInformation::leonCssCpuUsage)
+    //     .def_readwrite("leonMssCpuUsage", &RawSystemInformation::leonMssCpuUsage)
+    //     .def_readwrite("chipTemperature", &RawSystemInformation::chipTemperature)
+    //     ;
 
     // Message
     systemInformation
@@ -62,8 +62,8 @@ void bind_systeminformation(pybind11::module& m, void* pCallstack){
 void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
     using namespace dai;
 
-    py::class_<RawSystemInformationS3, RawBuffer, std::shared_ptr<RawSystemInformationS3>> rawSystemInformationS3(
-        m, "RawSystemInformationS3", DOC(dai, RawSystemInformationS3));
+    // py::class_<RawSystemInformationS3, RawBuffer, std::shared_ptr<RawSystemInformationS3>> rawSystemInformationS3(
+        // m, "RawSystemInformationS3", DOC(dai, RawSystemInformationS3));
     py::class_<SystemInformationS3, Buffer, std::shared_ptr<SystemInformationS3>> systemInformationS3(m, "SystemInformationS3", DOC(dai, SystemInformationS3));
 
     ///////////////////////////////////////////////////////////////////////
@@ -79,12 +79,12 @@ void bind_systeminformationS3(pybind11::module& m, void* pCallstack) {
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // Metadata / raw
-    rawSystemInformationS3.def(py::init<>())
-        .def_readwrite("ddrMemoryUsage", &RawSystemInformationS3::ddrMemoryUsage)
-        .def_readwrite("cpuAvgUsage", &RawSystemInformationS3::cpuAvgUsage)
-        .def_readwrite("chipTemperature", &RawSystemInformationS3::chipTemperature)
-        .def_readwrite("cpuUsages", &RawSystemInformationS3::cpuUsages);
+    // // Metadata / raw
+    // rawSystemInformationS3.def(py::init<>())
+    //     .def_readwrite("ddrMemoryUsage", &RawSystemInformationS3::ddrMemoryUsage)
+    //     .def_readwrite("cpuAvgUsage", &RawSystemInformationS3::cpuAvgUsage)
+    //     .def_readwrite("chipTemperature", &RawSystemInformationS3::chipTemperature)
+    //     .def_readwrite("cpuUsages", &RawSystemInformationS3::cpuUsages);
 
     // Message
     systemInformationS3.def(py::init<>())

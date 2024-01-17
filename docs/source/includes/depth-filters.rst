@@ -14,7 +14,7 @@
         **Speckle Filter** is used to reduce the speckle noise. Speckle noise is a region with huge
         variance between neighboring disparity/depth pixels, and speckle filter tries to filter this region.
 
-        .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::SpeckleFilter
+        .. doxygenstruct:: dai::StereoDepthConfig::PostProcessing::SpeckleFilter
             :project: depthai-core
             :no-link:
             :members:
@@ -28,7 +28,7 @@
         rectified with stored data. Note that due to its reliance on historic data the filter may introduce
         visible blurring/smearing artifacts, and therefore is best-suited for static scenes.
 
-        .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::TemporalFilter
+        .. doxygenstruct:: dai::StereoDepthConfig::PostProcessing::TemporalFilter
             :project: depthai-core
             :no-link:
             :members:
@@ -39,7 +39,7 @@
         It performs a series of 1D horizontal and vertical passes or iterations, to enhance the smoothness of
         the reconstructed data. It is based on `this research paper <https://www.inf.ufrgs.br/~eslgastal/DomainTransform/>`__.
 
-        .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::SpatialFilter
+        .. doxygenstruct:: dai::StereoDepthConfig::PostProcessing::SpatialFilter
             :project: depthai-core
             :no-link:
             :members:
@@ -49,7 +49,7 @@
         **Threshold Filter** filters out all disparity/depth pixels outside the configured min/max
         threshold values.
 
-        .. autoclass:: depthai.RawStereoDepthConfig.PostProcessing.ThresholdFilter
+        .. autoclass:: depthai.StereoDepthConfig.PostProcessing.ThresholdFilter
             :members:
             :inherited-members:
             :noindex:
@@ -59,7 +59,7 @@
         **Decimation Filter** will sub-samples the depth map, which means it reduces the depth scene complexity and allows
         other filters to run faster. Setting :code:`decimationFactor` to 2 will downscale 1280x800 depth map to 640x400.
 
-        .. doxygenstruct:: dai::RawStereoDepthConfig::PostProcessing::DecimationFilter
+        .. doxygenstruct:: dai::StereoDepthConfig::PostProcessing::DecimationFilter
             :members:
             :project: depthai-core
             :no-link:

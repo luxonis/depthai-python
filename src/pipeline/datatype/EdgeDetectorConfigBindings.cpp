@@ -16,8 +16,8 @@ void bind_edgedetectorconfig(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<EdgeDetectorConfigData> edgeDetectorConfigData(m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData));
-    py::class_<RawEdgeDetectorConfig, RawBuffer, std::shared_ptr<RawEdgeDetectorConfig>> rawEdgeDetectorConfig(m, "RawEdgeDetectorConfig", DOC(dai, RawEdgeDetectorConfig));
+    py::class_<EdgeDetectorConfig::EdgeDetectorConfigData> edgeDetectorConfigData(m, "EdgeDetectorConfigData", DOC(dai, EdgeDetectorConfigData));
+    // py::class_<RawEdgeDetectorConfig, RawBuffer, std::shared_ptr<RawEdgeDetectorConfig>> rawEdgeDetectorConfig(m, "RawEdgeDetectorConfig", DOC(dai, RawEdgeDetectorConfig));
     py::class_<EdgeDetectorConfig, Buffer, std::shared_ptr<EdgeDetectorConfig>> edgeDetectorConfig(m, "EdgeDetectorConfig", DOC(dai, EdgeDetectorConfig));
 
     ///////////////////////////////////////////////////////////////////////
@@ -36,22 +36,22 @@ void bind_edgedetectorconfig(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     edgeDetectorConfigData
         .def(py::init<>())
-        .def_readwrite("sobelFilterHorizontalKernel", &EdgeDetectorConfigData::sobelFilterHorizontalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterHorizontalKernel))
-        .def_readwrite("sobelFilterVerticalKernel", &EdgeDetectorConfigData::sobelFilterVerticalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterVerticalKernel))
+        .def_readwrite("sobelFilterHorizontalKernel", &EdgeDetectorConfig::EdgeDetectorConfigData::sobelFilterHorizontalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterHorizontalKernel))
+        .def_readwrite("sobelFilterVerticalKernel", &EdgeDetectorConfig::EdgeDetectorConfigData::sobelFilterVerticalKernel, DOC(dai, EdgeDetectorConfigData, sobelFilterVerticalKernel))
         ;
 
-    rawEdgeDetectorConfig
-        .def(py::init<>())
-        .def_readwrite("config", &RawEdgeDetectorConfig::config)
-        ;
+    // rawEdgeDetectorConfig
+    //     .def(py::init<>())
+    //     .def_readwrite("config", &RawEdgeDetectorConfig::config)
+    //     ;
 
     // Message
     edgeDetectorConfig
         .def(py::init<>())
         .def("setSobelFilterKernels",  &EdgeDetectorConfig::setSobelFilterKernels, py::arg("horizontalKernel"), py::arg("verticalKernel"), DOC(dai, EdgeDetectorConfig, setSobelFilterKernels))
         .def("getConfigData",         &EdgeDetectorConfig::getConfigData, DOC(dai, EdgeDetectorConfig, getConfigData))
-        .def("get",         &EdgeDetectorConfig::get, DOC(dai, EdgeDetectorConfig, get))
-        .def("set",         &EdgeDetectorConfig::set, py::arg("config"), DOC(dai, EdgeDetectorConfig, set))
+        // .def("get",         &EdgeDetectorConfig::get, DOC(dai, EdgeDetectorConfig, get))
+        // .def("set",         &EdgeDetectorConfig::set, py::arg("config"), DOC(dai, EdgeDetectorConfig, set))
         ;
 
 }

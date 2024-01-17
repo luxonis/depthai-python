@@ -1,8 +1,8 @@
 #include "DatatypeBindings.hpp"
-#include "depthai-shared/datatype/RawMessageGroup.hpp"
+#include "depthai/pipeline/datatype/MessageGroup.hpp"
 #include "pipeline/CommonBindings.hpp"
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 // depthai
 #include "depthai/pipeline/datatype/MessageGroup.hpp"
@@ -17,7 +17,6 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawMessageGroup, RawBuffer, std::shared_ptr<RawMessageGroup>> rawMessageGroup(m, "RawMessageGroup", DOC(dai, RawMessageGroup));
     py::class_<MessageGroup, Buffer, std::shared_ptr<MessageGroup>> messageGroup(m, "MessageGroup", DOC(dai, MessageGroup));
 
     ///////////////////////////////////////////////////////////////////////
@@ -33,11 +32,11 @@ void bind_message_group(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // Metadata / raw
-    rawMessageGroup
-        .def(py::init<>())
-        .def_readwrite("group", &RawMessageGroup::group)
-        ;
+    // // Metadata / raw
+    // rawMessageGroup
+    //     .def(py::init<>())
+    //     .def_readwrite("group", &RawMessageGroup::group)
+    //     ;
 
     // Message
     messageGroup

@@ -69,7 +69,7 @@ void bind_imagemanip(pybind11::module& m, void* pCallstack){
             HEDLEY_DIAGNOSTIC_POP
         })
 
-        .def("setFrameType", [](ImageManip& im, dai::RawImgFrame::Type name) {
+        .def("setFrameType", [](ImageManip& im, dai::ImgFrame::Type name) {
             // Issue a deprecation warning
             PyErr_WarnEx(PyExc_DeprecationWarning, "setFrameType() is deprecated, use initialConfig.setFrameType() instead.", 1);
             HEDLEY_DIAGNOSTIC_PUSH

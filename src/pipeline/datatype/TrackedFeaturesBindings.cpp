@@ -16,7 +16,7 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawTrackedFeatures, RawBuffer, std::shared_ptr<RawTrackedFeatures>> rawTrackedFeatures(m, "RawTrackedFeatures", DOC(dai, RawTrackedFeatures));
+    // py::class_<RawTrackedFeatures, RawBuffer, std::shared_ptr<RawTrackedFeatures>> rawTrackedFeatures(m, "RawTrackedFeatures", DOC(dai, RawTrackedFeatures));
     py::class_<TrackedFeature> trackedFeature(m, "TrackedFeature", DOC(dai, TrackedFeature));
     py::class_<TrackedFeatures, Buffer, std::shared_ptr<TrackedFeatures>> trackedFeatures(m, "TrackedFeatures", DOC(dai, TrackedFeatures));
 
@@ -34,10 +34,10 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // Metadata / raw
-    rawTrackedFeatures
-        .def(py::init<>())
-        .def_readwrite("trackedFeatures", &RawTrackedFeatures::trackedFeatures)
-        ;
+    // rawTrackedFeatures
+    //     .def(py::init<>())
+    //     .def_readwrite("trackedFeatures", &RawTrackedFeatures::trackedFeatures)
+    //     ;
 
     trackedFeature
         .def(py::init<>())

@@ -16,12 +16,12 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig", DOC(dai, RawImageManipConfig));
-    py::class_<RawImageManipConfig::CropRect> rawImageManipConfigCropRect(rawImageManipConfig, "CropRect", DOC(dai, RawImageManipConfig, CropRect));
-    py::class_<RawImageManipConfig::CropConfig> rawImageManipCropConfig(rawImageManipConfig, "CropConfig", DOC(dai, RawImageManipConfig, CropConfig));
-    py::class_<RawImageManipConfig::ResizeConfig>rawImageManipConfigResizeConfig(rawImageManipConfig, "ResizeConfig", DOC(dai, RawImageManipConfig, ResizeConfig));
-    py::class_<RawImageManipConfig::FormatConfig> rawImageManipConfigFormatConfig(rawImageManipConfig, "FormatConfig", DOC(dai, RawImageManipConfig, FormatConfig));
+    // py::class_<RawImageManipConfig, RawBuffer, std::shared_ptr<RawImageManipConfig>> rawImageManipConfig(m, "RawImageManipConfig", DOC(dai, RawImageManipConfig));
     py::class_<ImageManipConfig, Buffer, std::shared_ptr<ImageManipConfig>> imageManipConfig(m, "ImageManipConfig", DOC(dai, ImageManipConfig));
+    py::class_<ImageManipConfig::CropRect> imageManipConfigCropRect(imageManipConfig, "CropRect", DOC(dai, ImageManipConfig, CropRect));
+    py::class_<ImageManipConfig::CropConfig> imageManipConfigCrop(imageManipConfig, "CropConfig", DOC(dai, ImageManipConfig, CropConfig));
+    py::class_<ImageManipConfig::ResizeConfig>imageManipConfigResizeConfig(imageManipConfig, "ResizeConfig", DOC(dai, ImageManipConfig, ResizeConfig));
+    py::class_<ImageManipConfig::FormatConfig> imageManipConfigFormatConfig(imageManipConfig, "FormatConfig", DOC(dai, ImageManipConfig, FormatConfig));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -37,60 +37,60 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // Metadata / raw
-    rawImageManipConfig
+    imageManipConfig
         .def(py::init<>())
-        .def_readwrite("enableFormat", &RawImageManipConfig::enableFormat)
-        .def_readwrite("enableResize", &RawImageManipConfig::enableResize)
-        .def_readwrite("enableCrop", &RawImageManipConfig::enableCrop)
-        .def_readwrite("cropConfig", &RawImageManipConfig::cropConfig)
-        .def_readwrite("resizeConfig", &RawImageManipConfig::resizeConfig)
-        .def_readwrite("formatConfig", &RawImageManipConfig::formatConfig)
-        .def_readwrite("interpolation", &RawImageManipConfig::interpolation)
+        .def_readwrite("enableFormat", &ImageManipConfig::enableFormat)
+        .def_readwrite("enableResize", &ImageManipConfig::enableResize)
+        .def_readwrite("enableCrop", &ImageManipConfig::enableCrop)
+        .def_readwrite("cropConfig", &ImageManipConfig::cropConfig)
+        .def_readwrite("resizeConfig", &ImageManipConfig::resizeConfig)
+        .def_readwrite("formatConfig", &ImageManipConfig::formatConfig)
+        .def_readwrite("interpolation", &ImageManipConfig::interpolation)
         ;
 
-    rawImageManipConfigCropRect
+    imageManipConfigCropRect
         .def(py::init<>())
-        .def_readwrite("xmin", &RawImageManipConfig::CropRect::xmin)
-        .def_readwrite("ymin", &RawImageManipConfig::CropRect::ymin)
-        .def_readwrite("xmax", &RawImageManipConfig::CropRect::xmax)
-        .def_readwrite("ymax", &RawImageManipConfig::CropRect::ymax)
+        .def_readwrite("xmin", &ImageManipConfig::CropRect::xmin)
+        .def_readwrite("ymin", &ImageManipConfig::CropRect::ymin)
+        .def_readwrite("xmax", &ImageManipConfig::CropRect::xmax)
+        .def_readwrite("ymax", &ImageManipConfig::CropRect::ymax)
         ;
 
-    rawImageManipCropConfig
+    imageManipConfigCrop
         .def(py::init<>())
-        .def_readwrite("cropRect", &RawImageManipConfig::CropConfig::cropRect)
-        .def_readwrite("cropRotatedRect", &RawImageManipConfig::CropConfig::cropRotatedRect)
-        .def_readwrite("enableCenterCropRectangle", &RawImageManipConfig::CropConfig::enableCenterCropRectangle)
-        .def_readwrite("cropRatio", &RawImageManipConfig::CropConfig::cropRatio)
-        .def_readwrite("widthHeightAspectRatio", &RawImageManipConfig::CropConfig::widthHeightAspectRatio)
-        .def_readwrite("enableRotatedRect", &RawImageManipConfig::CropConfig::enableRotatedRect)
-        .def_readwrite("normalizedCoords", &RawImageManipConfig::CropConfig::normalizedCoords)
+        .def_readwrite("cropRect", &ImageManipConfig::CropConfig::cropRect)
+        .def_readwrite("cropRotatedRect", &ImageManipConfig::CropConfig::cropRotatedRect)
+        .def_readwrite("enableCenterCropRectangle", &ImageManipConfig::CropConfig::enableCenterCropRectangle)
+        .def_readwrite("cropRatio", &ImageManipConfig::CropConfig::cropRatio)
+        .def_readwrite("widthHeightAspectRatio", &ImageManipConfig::CropConfig::widthHeightAspectRatio)
+        .def_readwrite("enableRotatedRect", &ImageManipConfig::CropConfig::enableRotatedRect)
+        .def_readwrite("normalizedCoords", &ImageManipConfig::CropConfig::normalizedCoords)
         ;
 
-    rawImageManipConfigResizeConfig
+    imageManipConfigResizeConfig
         .def(py::init<>())
-        .def_readwrite("width", &RawImageManipConfig::ResizeConfig::width)
-        .def_readwrite("height", &RawImageManipConfig::ResizeConfig::height)
-        .def_readwrite("lockAspectRatioFill", &RawImageManipConfig::ResizeConfig::lockAspectRatioFill)
-        .def_readwrite("bgRed", &RawImageManipConfig::ResizeConfig::bgRed)
-        .def_readwrite("bgGreen", &RawImageManipConfig::ResizeConfig::bgGreen)
-        .def_readwrite("bgBlue", &RawImageManipConfig::ResizeConfig::bgBlue)
-        .def_readwrite("warpFourPoints", &RawImageManipConfig::ResizeConfig::warpFourPoints)
-        .def_readwrite("normalizedCoords", &RawImageManipConfig::ResizeConfig::normalizedCoords)
-        .def_readwrite("enableWarp4pt", &RawImageManipConfig::ResizeConfig::enableWarp4pt)
-        .def_readwrite("warpMatrix3x3", &RawImageManipConfig::ResizeConfig::warpMatrix3x3)
-        .def_readwrite("enableWarpMatrix", &RawImageManipConfig::ResizeConfig::enableWarpMatrix)
-        .def_readwrite("warpBorderReplicate", &RawImageManipConfig::ResizeConfig::warpBorderReplicate)
-        .def_readwrite("rotationAngleDeg", &RawImageManipConfig::ResizeConfig::rotationAngleDeg)
-        .def_readwrite("enableRotation", &RawImageManipConfig::ResizeConfig::enableRotation)
-        .def_readwrite("keepAspectRatio", &RawImageManipConfig::ResizeConfig::keepAspectRatio)
+        .def_readwrite("width", &ImageManipConfig::ResizeConfig::width)
+        .def_readwrite("height", &ImageManipConfig::ResizeConfig::height)
+        .def_readwrite("lockAspectRatioFill", &ImageManipConfig::ResizeConfig::lockAspectRatioFill)
+        .def_readwrite("bgRed", &ImageManipConfig::ResizeConfig::bgRed)
+        .def_readwrite("bgGreen", &ImageManipConfig::ResizeConfig::bgGreen)
+        .def_readwrite("bgBlue", &ImageManipConfig::ResizeConfig::bgBlue)
+        .def_readwrite("warpFourPoints", &ImageManipConfig::ResizeConfig::warpFourPoints)
+        .def_readwrite("normalizedCoords", &ImageManipConfig::ResizeConfig::normalizedCoords)
+        .def_readwrite("enableWarp4pt", &ImageManipConfig::ResizeConfig::enableWarp4pt)
+        .def_readwrite("warpMatrix3x3", &ImageManipConfig::ResizeConfig::warpMatrix3x3)
+        .def_readwrite("enableWarpMatrix", &ImageManipConfig::ResizeConfig::enableWarpMatrix)
+        .def_readwrite("warpBorderReplicate", &ImageManipConfig::ResizeConfig::warpBorderReplicate)
+        .def_readwrite("rotationAngleDeg", &ImageManipConfig::ResizeConfig::rotationAngleDeg)
+        .def_readwrite("enableRotation", &ImageManipConfig::ResizeConfig::enableRotation)
+        .def_readwrite("keepAspectRatio", &ImageManipConfig::ResizeConfig::keepAspectRatio)
         ;
 
-    rawImageManipConfigFormatConfig
+    imageManipConfigFormatConfig
         .def(py::init<>())
-        .def_readwrite("type", &RawImageManipConfig::FormatConfig::type)
-        .def_readwrite("flipHorizontal", &RawImageManipConfig::FormatConfig::flipHorizontal)
-        .def_readwrite("flipVertical", &RawImageManipConfig::FormatConfig::flipVertical)
+        .def_readwrite("type", &ImageManipConfig::FormatConfig::type)
+        .def_readwrite("flipHorizontal", &ImageManipConfig::FormatConfig::flipHorizontal)
+        .def_readwrite("flipVertical", &ImageManipConfig::FormatConfig::flipVertical)
         ;
 
     // Message
@@ -121,7 +121,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("setReusePreviousImage", &ImageManipConfig::setReusePreviousImage, py::arg("reuse"), DOC(dai, ImageManipConfig, setReusePreviousImage))
         .def("setSkipCurrentImage", &ImageManipConfig::setSkipCurrentImage, py::arg("skip"), DOC(dai, ImageManipConfig, setSkipCurrentImage))
         .def("setKeepAspectRatio", &ImageManipConfig::setKeepAspectRatio, py::arg("keep"), DOC(dai, ImageManipConfig, setKeepAspectRatio))
-        .def("set", &ImageManipConfig::set, py::arg("config"), DOC(dai, ImageManipConfig, set))
+        // .def("set", &ImageManipConfig::set, py::arg("config"), DOC(dai, ImageManipConfig, set))
         .def("setInterpolation", &ImageManipConfig::setInterpolation, py::arg("interpolation"), DOC(dai, ImageManipConfig, setInterpolation))
 
         // getters
@@ -136,7 +136,7 @@ void bind_imagemanipconfig(pybind11::module& m, void* pCallstack){
         .def("getFormatConfig", &ImageManipConfig::getFormatConfig, DOC(dai, ImageManipConfig, getFormatConfig))
         .def("isResizeThumbnail", &ImageManipConfig::isResizeThumbnail, DOC(dai, ImageManipConfig, isResizeThumbnail))
         .def("getColormap", &ImageManipConfig::getColormap, DOC(dai, ImageManipConfig, getColormap))
-        .def("get", &ImageManipConfig::get, DOC(dai, ImageManipConfig, get))
+        // .def("get", &ImageManipConfig::get, DOC(dai, ImageManipConfig, get))
         .def("getInterpolation", &ImageManipConfig::getInterpolation, DOC(dai, ImageManipConfig, getInterpolation))
         ;
 

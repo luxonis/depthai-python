@@ -29,7 +29,7 @@ uvc = pipeline.createUVC()
 # Manip for frame type conversion
 manip = pipeline.createImageManip()
 manip.initialConfig.setResize(1280, 720)
-manip.initialConfig.setFrameType(dai.RawImgFrame.Type.NV12)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.NV12)
 manip.initialConfig.setColormap(dai.Colormap.STEREO_TURBO, stereo.initialConfig.getMaxDisparity())
 manip.setMaxOutputFrameSize(int(1280*720*1.5))
 

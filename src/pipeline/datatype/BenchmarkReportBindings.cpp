@@ -9,7 +9,7 @@
 void bind_benchmarkreport(pybind11::module& m, void* pCallstack) {
     using namespace dai;
 
-    py::class_<RawBenchmarkReport, RawBuffer, std::shared_ptr<RawBenchmarkReport>> rawBenchmarkReport(m, "RawBenchmarkReport", DOC(dai, RawBenchmarkReport));
+    // py::class_<RawBenchmarkReport, RawBuffer, std::shared_ptr<RawBenchmarkReport>> rawBenchmarkReport(m, "RawBenchmarkReport", DOC(dai, RawBenchmarkReport));
     py::class_<BenchmarkReport, Buffer, std::shared_ptr<BenchmarkReport>> benchmarkReport(m, "BenchmarkReport", DOC(dai, BenchmarkReport));
 
     ///////////////////////////////////////////////////////////////////////
@@ -24,14 +24,6 @@ void bind_benchmarkreport(pybind11::module& m, void* pCallstack) {
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
-
-    // Metadata / raw
-    rawBenchmarkReport.def(py::init<>())
-        .def_readwrite("fps", &RawBenchmarkReport::fps)
-        .def_readwrite("timeTotal", &RawBenchmarkReport::timeTotal)
-        .def_readwrite("numMessagesReceived", &RawBenchmarkReport::numMessagesReceived)
-        .def_readwrite("latencies", &RawBenchmarkReport::latencies)
-        .def_readwrite("averageLatency", &RawBenchmarkReport::averageLatency);
 
     // Message
     benchmarkReport.def(py::init<>())

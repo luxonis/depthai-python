@@ -16,10 +16,11 @@ void bind_apriltagconfig(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawAprilTagConfig, RawBuffer, std::shared_ptr<RawAprilTagConfig>> rawAprilTagConfig(m, "RawAprilTagConfig", DOC(dai, RawAprilTagConfig));
-    py::enum_<RawAprilTagConfig::Family> aprilTagFamily(rawAprilTagConfig, "Family", DOC(dai, RawAprilTagConfig, Family));
-    py::class_<RawAprilTagConfig::QuadThresholds> quadThresholds(rawAprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
+    // py::class_<AprilTagConfig, RawBuffer, std::shared_ptr<RawAprilTagConfig>>
+    //     rawAprilTagConfig(m, "RawAprilTagConfig", DOC(dai, RawAprilTagConfig));
     py::class_<AprilTagConfig, Buffer, std::shared_ptr<AprilTagConfig>> aprilTagConfig(m, "AprilTagConfig", DOC(dai, AprilTagConfig));
+    py::enum_<AprilTagConfig::Family> aprilTagFamily(aprilTagConfig, "Family", DOC(dai, RawAprilTagConfig, Family));
+    py::class_<AprilTagConfig::QuadThresholds> quadThresholds(aprilTagConfig, "QuadThresholds", DOC(dai, RawAprilTagConfig, QuadThresholds));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -36,44 +37,44 @@ void bind_apriltagconfig(pybind11::module& m, void* pCallstack){
 
     // Metadata / raw
     aprilTagFamily
-        .value("TAG_36H11", RawAprilTagConfig::Family::TAG_36H11)
-        .value("TAG_36H10", RawAprilTagConfig::Family::TAG_36H10)
-        .value("TAG_25H9", RawAprilTagConfig::Family::TAG_25H9)
-        .value("TAG_16H5", RawAprilTagConfig::Family::TAG_16H5)
-        .value("TAG_CIR21H7", RawAprilTagConfig::Family::TAG_CIR21H7)
-        .value("TAG_STAND41H12", RawAprilTagConfig::Family::TAG_STAND41H12)
+        .value("TAG_36H11", AprilTagConfig::Family::TAG_36H11)
+        .value("TAG_36H10", AprilTagConfig::Family::TAG_36H10)
+        .value("TAG_25H9", AprilTagConfig::Family::TAG_25H9)
+        .value("TAG_16H5", AprilTagConfig::Family::TAG_16H5)
+        .value("TAG_CIR21H7", AprilTagConfig::Family::TAG_CIR21H7)
+        .value("TAG_STAND41H12", AprilTagConfig::Family::TAG_STAND41H12)
         ;
 
     quadThresholds
         .def(py::init<>())
-        .def_readwrite("minClusterPixels", &RawAprilTagConfig::QuadThresholds::minClusterPixels, DOC(dai, RawAprilTagConfig, QuadThresholds, minClusterPixels))
-        .def_readwrite("maxNmaxima", &RawAprilTagConfig::QuadThresholds::maxNmaxima, DOC(dai, RawAprilTagConfig, QuadThresholds, maxNmaxima))
-        .def_readwrite("criticalDegree", &RawAprilTagConfig::QuadThresholds::criticalDegree, DOC(dai, RawAprilTagConfig, QuadThresholds, criticalDegree))
-        .def_readwrite("maxLineFitMse", &RawAprilTagConfig::QuadThresholds::maxLineFitMse, DOC(dai, RawAprilTagConfig, QuadThresholds, maxLineFitMse))
-        .def_readwrite("minWhiteBlackDiff", &RawAprilTagConfig::QuadThresholds::minWhiteBlackDiff, DOC(dai, RawAprilTagConfig, QuadThresholds, minWhiteBlackDiff))
-        .def_readwrite("deglitch", &RawAprilTagConfig::QuadThresholds::deglitch, DOC(dai, RawAprilTagConfig, QuadThresholds, deglitch))
+        .def_readwrite("minClusterPixels", &AprilTagConfig::QuadThresholds::minClusterPixels, DOC(dai, AprilTagConfig, QuadThresholds, minClusterPixels))
+        .def_readwrite("maxNmaxima", &AprilTagConfig::QuadThresholds::maxNmaxima, DOC(dai, AprilTagConfig, QuadThresholds, maxNmaxima))
+        .def_readwrite("criticalDegree", &AprilTagConfig::QuadThresholds::criticalDegree, DOC(dai, AprilTagConfig, QuadThresholds, criticalDegree))
+        .def_readwrite("maxLineFitMse", &AprilTagConfig::QuadThresholds::maxLineFitMse, DOC(dai, AprilTagConfig, QuadThresholds, maxLineFitMse))
+        .def_readwrite("minWhiteBlackDiff", &AprilTagConfig::QuadThresholds::minWhiteBlackDiff, DOC(dai, AprilTagConfig, QuadThresholds, minWhiteBlackDiff))
+        .def_readwrite("deglitch", &AprilTagConfig::QuadThresholds::deglitch, DOC(dai, AprilTagConfig, QuadThresholds, deglitch))
         ;
 
 
-    rawAprilTagConfig
+    aprilTagConfig
         .def(py::init<>())
-        .def_readwrite("family", &RawAprilTagConfig::family, DOC(dai, RawAprilTagConfig, family))
-        .def_readwrite("quadDecimate", &RawAprilTagConfig::quadDecimate, DOC(dai, RawAprilTagConfig, quadDecimate))
-        .def_readwrite("quadSigma", &RawAprilTagConfig::quadSigma, DOC(dai, RawAprilTagConfig, quadSigma))
-        .def_readwrite("refineEdges", &RawAprilTagConfig::refineEdges, DOC(dai, RawAprilTagConfig, refineEdges))
-        .def_readwrite("decodeSharpening", &RawAprilTagConfig::decodeSharpening, DOC(dai, RawAprilTagConfig, decodeSharpening))
-        .def_readwrite("maxHammingDistance", &RawAprilTagConfig::maxHammingDistance, DOC(dai, RawAprilTagConfig, maxHammingDistance))
-        .def_readwrite("quadThresholds", &RawAprilTagConfig::quadThresholds, DOC(dai, RawAprilTagConfig, quadThresholds))
+        .def_readwrite("family", &AprilTagConfig::family, DOC(dai, AprilTagConfig, family))
+        .def_readwrite("quadDecimate", &AprilTagConfig::quadDecimate, DOC(dai, AprilTagConfig, quadDecimate))
+        .def_readwrite("quadSigma", &AprilTagConfig::quadSigma, DOC(dai, AprilTagConfig, quadSigma))
+        .def_readwrite("refineEdges", &AprilTagConfig::refineEdges, DOC(dai, AprilTagConfig, refineEdges))
+        .def_readwrite("decodeSharpening", &AprilTagConfig::decodeSharpening, DOC(dai, AprilTagConfig, decodeSharpening))
+        .def_readwrite("maxHammingDistance", &AprilTagConfig::maxHammingDistance, DOC(dai, AprilTagConfig, maxHammingDistance))
+        .def_readwrite("quadThresholds", &AprilTagConfig::quadThresholds, DOC(dai, AprilTagConfig, quadThresholds))
         ;
 
     // Message
     aprilTagConfig
         .def(py::init<>())
         .def("setFamily", &AprilTagConfig::setFamily, py::arg("family"), DOC(dai, AprilTagConfig, setFamily))
-        .def("set", &AprilTagConfig::set, DOC(dai, AprilTagConfig, set))
-        .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
+        // .def("set", &AprilTagConfig::set, DOC(dai, AprilTagConfig, set))
+        // .def("get", &AprilTagConfig::get, DOC(dai, AprilTagConfig, get))
         ;
-    m.attr("AprilTagConfig").attr("Family") = m.attr("RawAprilTagConfig").attr("Family");
-    m.attr("AprilTagConfig").attr("QuadThresholds") = m.attr("RawAprilTagConfig").attr("QuadThresholds");
+    m.attr("AprilTagConfig").attr("Family") = m.attr("AprilTagConfig").attr("Family");
+    m.attr("AprilTagConfig").attr("QuadThresholds") = m.attr("AprilTagConfig").attr("QuadThresholds");
 
 }

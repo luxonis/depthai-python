@@ -20,7 +20,7 @@ void bind_nndata(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
+    // py::class_<RawNNData, RawBuffer, std::shared_ptr<RawNNData>> rawNnData(m, "RawNNData", DOC(dai, RawNNData));
     py::class_<TensorInfo> tensorInfo(m, "TensorInfo", DOC(dai, TensorInfo));
     py::enum_<TensorInfo::DataType>tensorInfoDataType(tensorInfo, "DataType");
     py::enum_<TensorInfo::StorageOrder>tensorInfoStorageOrder(tensorInfo, "StorageOrder");
@@ -42,32 +42,32 @@ void bind_nndata(pybind11::module& m, void* pCallstack){
 
     // Metadata / raw
 
-    rawNnData
-        .def(py::init<>())
-        .def_readwrite("tensors", &RawNNData::tensors)
-        .def_readwrite("batchSize", &RawNNData::batchSize)
-        .def_property("ts",
-            [](const RawNNData& o){
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawNNData& o, double ts){
-                o.ts.sec = ts;
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
-            }
-        )
-        .def_property("tsDevice",
-            [](const RawNNData& o){
-                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawNNData& o, double ts){
-                o.tsDevice.sec = ts;
-                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
-            }
-        )
-        .def_readwrite("sequenceNum", &RawNNData::sequenceNum)
-        ;
+    // rawNnData
+    //     .def(py::init<>())
+    //     .def_readwrite("tensors", &RawNNData::tensors)
+    //     .def_readwrite("batchSize", &RawNNData::batchSize)
+    //     .def_property("ts",
+    //         [](const RawNNData& o){
+    //             double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawNNData& o, double ts){
+    //             o.ts.sec = ts;
+    //             o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_property("tsDevice",
+    //         [](const RawNNData& o){
+    //             double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawNNData& o, double ts){
+    //             o.tsDevice.sec = ts;
+    //             o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_readwrite("sequenceNum", &RawNNData::sequenceNum)
+    //     ;
 
     tensorInfo
         .def(py::init<>())
@@ -108,59 +108,69 @@ void bind_nndata(pybind11::module& m, void* pCallstack){
 
     // Message
 
-    nnData
-        .def(py::init<>(), DOC(dai, NNData, NNData))
+    nnData.def(py::init<>(), DOC(dai, NNData, NNData))
         .def(py::init<size_t>(), DOC(dai, NNData, NNData, 2))
-        // setters
-        .def("setLayer", [](NNData& obj, const std::string& name, py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast> data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()' instead", 1);
-            std::vector<std::uint8_t> vec(data.data(), data.data() + data.size());
-            obj.setLayer(name, std::move(vec));
-        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
-        .def("setLayer", [](NNData& obj, const std::string& name, const std::vector<int>& data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()' instead", 1);
-            return obj.setLayer(name, data);
-        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
-        .def("setLayer", [](NNData& obj, const std::string& name, std::vector<float> data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()' instead", 1);
-            return obj.setLayer(name, data);
-        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
-        .def("setLayer", [](NNData& obj, const std::string& name, std::vector<double> data){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()' instead", 1);
-            return obj.setLayer(name, data);
-        }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
-        .def("getLayer", [](NNData& obj, const std::string& name, TensorInfo& tensor){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getLayer(name, tensor);
-        }, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
-        .def("hasLayer", &NNData::hasLayer, py::arg("name"), DOC(dai, NNData, hasLayer))
-        .def("getAllLayerNames", &NNData::getAllLayerNames, DOC(dai, NNData, getAllLayerNames))
-        .def("getAllLayers", &NNData::getAllLayers, DOC(dai, NNData, getAllLayers))
-        .def("getLayerDatatype", &NNData::getLayerDatatype, py::arg("name"), py::arg("datatype"), DOC(dai, NNData, getLayerDatatype))
-        .def("getLayerUInt8", [](NNData& obj, const std::string& name){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getLayerUInt8(name);
-        }, py::arg("name"), DOC(dai, NNData, getLayerUInt8))
-        .def("getLayerFp16", [](NNData& obj, const std::string& name){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getLayerFp16(name);
-        }, py::arg("name"), DOC(dai, NNData, getLayerFp16))
-        .def("getLayerInt32", [](NNData& obj, const std::string& name){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getLayerInt32(name);
-        }, py::arg("name"), DOC(dai, NNData, getLayerInt32))
-        .def("getFirstLayerUInt8", [](NNData& obj){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getFirstLayerUInt8();
-        }, DOC(dai, NNData, getFirstLayerUInt8))
-        .def("getFirstLayerFp16", [](NNData& obj){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getFirstLayerFp16();
-        }, DOC(dai, NNData, getFirstLayerFp16))
-        .def("getFirstLayerInt32", [](NNData& obj){
-            PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()' instead", 1);
-            return obj.getFirstLayerInt32();
-        }, DOC(dai, NNData, getFirstLayerInt32))
+        // // setters
+        // .def("setLayer", [](NNData& obj, const std::string& name,
+        // py::array_t<std::uint8_t, py::array::c_style | py::array::forcecast>
+        // data){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()'
+        //     instead", 1); std::vector<std::uint8_t> vec(data.data(),
+        //     data.data() + data.size()); obj.setLayer(name, std::move(vec));
+        // }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer))
+        // .def("setLayer", [](NNData& obj, const std::string& name, const
+        // std::vector<int>& data){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()'
+        //     instead", 1); return obj.setLayer(name, data);
+        // }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 2))
+        // .def("setLayer", [](NNData& obj, const std::string& name,
+        // std::vector<float> data){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()'
+        //     instead", 1); return obj.setLayer(name, data);
+        // }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 3))
+        // .def("setLayer", [](NNData& obj, const std::string& name,
+        // std::vector<double> data){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'addTensor()'
+        //     instead", 1); return obj.setLayer(name, data);
+        // }, py::arg("name"), py::arg("data"), DOC(dai, NNData, setLayer, 4))
+        // .def("getLayer", [](NNData& obj, const std::string& name, TensorInfo&
+        // tensor){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getLayer(name, tensor);
+        // }, py::arg("name"), py::arg("tensor"), DOC(dai, NNData, getLayer))
+        .def("hasLayer", &NNData::hasLayer, py::arg("name"),
+             DOC(dai, NNData, hasLayer))
+        .def("getAllLayerNames", &NNData::getAllLayerNames,
+             DOC(dai, NNData, getAllLayerNames))
+        .def("getAllLayers", &NNData::getAllLayers,
+             DOC(dai, NNData, getAllLayers))
+        .def("getLayerDatatype", &NNData::getLayerDatatype, py::arg("name"),
+             py::arg("datatype"), DOC(dai, NNData, getLayerDatatype))
+        // .def("getLayerUInt8", [](NNData& obj, const std::string& name){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getLayerUInt8(name);
+        // }, py::arg("name"), DOC(dai, NNData, getLayerUInt8))
+        // .def("getLayerFp16", [](NNData& obj, const std::string& name){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getLayerFp16(name);
+        // }, py::arg("name"), DOC(dai, NNData, getLayerFp16))
+        // .def("getLayerInt32", [](NNData& obj, const std::string& name){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getLayerInt32(name);
+        // }, py::arg("name"), DOC(dai, NNData, getLayerInt32))
+        // .def("getFirstLayerUInt8", [](NNData& obj){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getFirstLayerUInt8();
+        // }, DOC(dai, NNData, getFirstLayerUInt8))
+        // .def("getFirstLayerFp16", [](NNData& obj){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getFirstLayerFp16();
+        // }, DOC(dai, NNData, getFirstLayerFp16))
+        // .def("getFirstLayerInt32", [](NNData& obj){
+        //     PyErr_WarnEx(PyExc_DeprecationWarning, "Use 'getTensor()'
+        //     instead", 1); return obj.getFirstLayerInt32();
+        // }, DOC(dai, NNData, getFirstLayerInt32))
+        // TODO(Morato) - is this needed - doesn't get inherited from Buffer?
         .def("getTimestamp", &NNData::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &NNData::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
         .def("getSequenceNum", &NNData::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))

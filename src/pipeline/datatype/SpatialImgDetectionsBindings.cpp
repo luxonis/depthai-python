@@ -16,7 +16,7 @@ void bind_spatialimgdetections(pybind11::module& m, void* pCallstack){
 
     using namespace dai;
 
-    py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> rawSpatialImgDetections(m, "RawSpatialImgDetections", DOC(dai, RawSpatialImgDetections));
+    // py::class_<RawSpatialImgDetections, RawBuffer, std::shared_ptr<RawSpatialImgDetections>> rawSpatialImgDetections(m, "RawSpatialImgDetections", DOC(dai, RawSpatialImgDetections));
     py::class_<SpatialImgDetection, ImgDetection> spatialImgDetection(m, "SpatialImgDetection", DOC(dai, SpatialImgDetection));
     py::class_<SpatialImgDetections, Buffer, std::shared_ptr<SpatialImgDetections>> spatialImgDetections(m, "SpatialImgDetections", DOC(dai, SpatialImgDetections));
 
@@ -40,31 +40,31 @@ void bind_spatialimgdetections(pybind11::module& m, void* pCallstack){
         .def_readwrite("boundingBoxMapping", &SpatialImgDetection::boundingBoxMapping)
         ;
 
-    rawSpatialImgDetections
-        .def(py::init<>())
-        .def_readwrite("detections", &RawSpatialImgDetections::detections)
-        .def_property("ts",
-            [](const RawSpatialImgDetections& o){
-                double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawSpatialImgDetections& o, double ts){
-                o.ts.sec = ts;
-                o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
-            }
-        )
-        .def_property("tsDevice",
-            [](const RawSpatialImgDetections& o){
-                double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
-                return ts;
-            },
-            [](RawSpatialImgDetections& o, double ts){
-                o.tsDevice.sec = ts;
-                o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
-            }
-        )
-        .def_readwrite("sequenceNum", &RawSpatialImgDetections::sequenceNum)
-        ;
+    // rawSpatialImgDetections
+    //     .def(py::init<>())
+    //     .def_readwrite("detections", &RawSpatialImgDetections::detections)
+    //     .def_property("ts",
+    //         [](const RawSpatialImgDetections& o){
+    //             double ts = o.ts.sec + o.ts.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawSpatialImgDetections& o, double ts){
+    //             o.ts.sec = ts;
+    //             o.ts.nsec = (ts - o.ts.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_property("tsDevice",
+    //         [](const RawSpatialImgDetections& o){
+    //             double ts = o.tsDevice.sec + o.tsDevice.nsec / 1000000000.0;
+    //             return ts;
+    //         },
+    //         [](RawSpatialImgDetections& o, double ts){
+    //             o.tsDevice.sec = ts;
+    //             o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
+    //         }
+    //     )
+    //     .def_readwrite("sequenceNum", &RawSpatialImgDetections::sequenceNum)
+    //     ;
 
     // Message
     spatialImgDetections
