@@ -52,6 +52,7 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
     // Node
     monoCamera
         .def_readonly("inputControl", &MonoCamera::inputControl, DOC(dai, node, MonoCamera, inputControl))
+        .def_readonly("mockIsp",  &MonoCamera::mockIsp, DOC(dai, node, monoCamera, mockIsp))
         .def_readonly("out",  &MonoCamera::out, DOC(dai, node, MonoCamera, out))
         .def_readonly("raw",  &MonoCamera::raw, DOC(dai, node, MonoCamera, raw))
         .def_readonly("frameEvent",  &MonoCamera::frameEvent, DOC(dai, node, MonoCamera, frameEvent))
