@@ -45,3 +45,5 @@ venv.bak/
 
 # PyCharm
 .idea/
+#Clang
+.cache/
