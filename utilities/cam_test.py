@@ -301,8 +301,7 @@ for c in cam_list:
     # When set, takes effect after the first 2 frames
     # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
-    if not cam_type_thermal[c]:
-        control.out.link(cam[c].inputControl)
+    control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam[c].setFps(args.fps)
