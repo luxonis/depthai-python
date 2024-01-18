@@ -37,7 +37,7 @@ void bind_pointcloud(pybind11::module& m, void* pCallstack){
     node
         .def_readonly("inputConfig", &PointCloud::inputConfig, DOC(dai, node, PointCloud, inputConfig), DOC(dai, node, PointCloud, inputConfig))
         .def_readonly("inputDepth", &PointCloud::inputDepth, DOC(dai, node, PointCloud, inputDepth), DOC(dai, node, PointCloud, inputDepth))
-        .def_readonly("out", &PointCloud::out, DOC(dai, node, PointCloud, out), DOC(dai, node, PointCloud, out))
+        .def_readonly("outputPointCloud", &PointCloud::outputPointCloud, DOC(dai, node, PointCloud, outputPointCloud), DOC(dai, node, PointCloud, outputPointCloud))
         .def_readonly("passthroughDepth", &PointCloud::passthroughDepth, DOC(dai, node, PointCloud, passthroughDepth), DOC(dai, node, PointCloud, passthroughDepth))
         .def_readonly("initialConfig", &PointCloud::initialConfig, DOC(dai, node, PointCloud, initialConfig), DOC(dai, node, PointCloud, initialConfig))
     ;
