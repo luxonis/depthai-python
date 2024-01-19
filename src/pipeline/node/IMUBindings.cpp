@@ -68,6 +68,7 @@ void bind_imu(pybind11::module& m, void* pCallstack){
     // Node
     imu
         .def_readonly("out", &IMU::out, DOC(dai, node, IMU, out))
+        .def_readonly("mockIn", &IMU::mockIn, DOC(dai, node, IMU, mockIn))
         .def("enableIMUSensor", static_cast<void(IMU::*)(IMUSensorConfig imuSensor)>(&IMU::enableIMUSensor), py::arg("sensorConfig"), DOC(dai, node, IMU, enableIMUSensor))
         .def("enableIMUSensor", static_cast<void(IMU::*)(const std::vector<IMUSensorConfig>& imuSensors)>(&IMU::enableIMUSensor), py::arg("sensorConfigs"), DOC(dai, node, IMU, enableIMUSensor, 2))
         .def("enableIMUSensor", static_cast<void(IMU::*)(IMUSensor sensor, uint32_t reportRate)>(&IMU::enableIMUSensor), py::arg("sensor"), py::arg("reportRate"), DOC(dai, node, IMU, enableIMUSensor, 3))
