@@ -60,6 +60,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
             }
         )
+        .def_readwrite("disp2DepthMultiplier", &RawImgFrame::disp2DepthMultiplier)
         ;
 
 
