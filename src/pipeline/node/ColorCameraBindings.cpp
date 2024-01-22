@@ -85,6 +85,7 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def_readonly("inputConfig", &ColorCamera::inputConfig, DOC(dai, node, ColorCamera, inputConfig))
         .def_readonly("inputControl", &ColorCamera::inputControl, DOC(dai, node, ColorCamera, inputControl))
         .def_readonly("initialControl", &ColorCamera::initialControl, DOC(dai, node, ColorCamera, initialControl))
+        .def_readonly("mockIsp",  &ColorCamera::mockIsp, DOC(dai, node, ColorCamera, mockIsp))
         .def_readonly("video", &ColorCamera::video, DOC(dai, node, ColorCamera, video))
         .def_readonly("preview", &ColorCamera::preview, DOC(dai, node, ColorCamera, preview))
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
