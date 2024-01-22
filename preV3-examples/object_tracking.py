@@ -31,11 +31,14 @@ class Viewer(dai.Node):
 pipeline = dai.Pipeline()
 with pipeline:
     image = dai.node.ColorCamera().preview
+
     detections, passtrough = dai.node.MobileNetDetectionNetwork(image,
         blob_path = blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
+
     tracklets = dai.node.ObjectTracker(
         input_tracker_frame = image,
         input_detection_frame = passtrough,
         input_detections = detections)
+
     Viewer(image, tracklets)
 dai.run(pipeline)

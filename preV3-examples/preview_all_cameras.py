@@ -9,7 +9,7 @@ class Viewer(dai.Node):
         if cv2.waitKey(1) == ord('q'): raise KeyboardInterrupt()
 
         cv2.imshow("right", right.getCvFrame())
-        cv2.imshow("left", right.getCvFrame())
+        cv2.imshow("left", left.getCvFrame())
         cv2.imshow("color", color.getCvFrame())
 
 pipeline = dai.Pipeline()

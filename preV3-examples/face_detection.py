@@ -24,7 +24,7 @@ pipeline = dai.Pipeline()
 with pipeline:
     image = dai.node.ColorCamera().preview
     detections = dai.node.MobileNetDetectionNetwork(image,
-        blob_path=blobconverter.from_zoo(name="face-detection-retail-0004", shaves=6)
+        blob_path = blobconverter.from_zoo(name="face-detection-retail-0004", shaves=6)
     )
     Viewer(image, detections)
 dai.run(pipeline)

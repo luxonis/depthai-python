@@ -3,13 +3,12 @@ import cv2
 import numpy as np
 import typing
 
-class BooleanControl(dai.Node):
+class KeyboardControl(dai.Node):
     def __node_init__(self):
         self.state = False
     def __run__(self) -> dai.message.Buffer:
         key = cv2.waitKey(1)
         if key == -1: return
-
         match chr(key):
             case "q": raise KeyboardInterrupt()
             case "t": self.state = not self.state
@@ -48,11 +47,12 @@ def TWIN_MONO(**kwargs):
 pipeline = dai.Pipeline()
 with pipeline:
     stereo = dai.node.StereoDepth(
-            *TWIN_MONO(resolution=dai.MonoCameraProperties.SensorResolution.THE_400_P, fps=30),
-            default_profile_preset=dai.PresetMode.HIGH_DENSITY,
-            median_filter=dai.MedianFilter.KERNEL_7x7,
-            left_right_check=True,
-            extended_disparity=False,
-            subpixel=False)
-    Viewer(Switch(stereo.depth, stereo.disparity, BooleanControl()))
+            *TWIN_MONO(resolution = dai.MonoCameraProperties.SensorResolution.THE_400_P, 
+                       fps=30),
+            default_profile_preset = dai.PresetMode.HIGH_DENSITY,
+            median_filter = dai.MedianFilter.KERNEL_7x7,
+            left_right_check = True,
+            extended_disparity = False,
+            subpixel = False)
+    Viewer(Switch(stereo.depth, stereo.disparity, KeyboardControl()))
 dai.run(pipeline)

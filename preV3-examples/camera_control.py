@@ -9,7 +9,6 @@ class KeyboardControl(dai.Node):
     def __run__(self) -> dai.message.CameraControl:
         key = cv2.waitKey(1)
         if key == -1: return
-        
         match chr(key):
             case "q": raise KeyboardInterrupt()
             case "i": self.exp_time -= 500
@@ -21,8 +20,8 @@ class KeyboardControl(dai.Node):
         self.sens_iso = max(100, min(1600, self.sens_iso))
 
         return dai.message.CameraControl().setManualExposure(
-                exposureTimeUs=self.exp_time,
-                sensitivityIso=self.sens_iso)
+                exposureTimeUs = self.exp_time,
+                sensitivityIso = self.sens_iso)
 
 class Viewer(dai.Node):
     def __run__(self, image: dai.message.ImgFrame):
@@ -31,6 +30,6 @@ class Viewer(dai.Node):
 pipeline = dai.Pipeline()
 with pipeline:
     camera_control = KeyboardControl()
-    video = dai.node.ColorCamera(input_control=camera_control).video
+    video = dai.node.ColorCamera(input_control = camera_control).video
     Viewer(video)
 dai.run(pipeline)
