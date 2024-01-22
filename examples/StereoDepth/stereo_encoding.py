@@ -24,7 +24,10 @@ def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
         for j in range(0, width, 2):  # Processing two pixels at a time
             # Process first pixel
             px1 = inDepth[i, j]
-            disparity1 = 0 if px1 == 0 else int(disp2DepthMultiplier / px1 + 0.5)
+            if disp2DepthMultiplier == 0:
+                disparity1 = px1
+            else:
+                disparity1 = 0 if px1 == 0 else int(disp2DepthMultiplier / px1 + 0.5)
             disparity1 = 0 if disparity1 >= MAX_LUT_SIZE else disparity1
 
             r1, g1, b1 = lutR[disparity1], lutG[disparity1], lutB[disparity1]
@@ -33,7 +36,10 @@ def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
             y_plane[i, j] = y1  # Storing Y component
 
             px2 = inDepth[i, j + 1]
-            disparity2 = 0 if px2 == 0 else int(disp2DepthMultiplier / px2 + 0.5)
+            if disp2DepthMultiplier == 0:
+                disparity2 = px2
+            else:
+                disparity2 = 0 if px2 == 0 else int(disp2DepthMultiplier / px2 + 0.5)
             disparity2 = 0 if disparity2 >= MAX_LUT_SIZE else disparity2
 
             r2, g2, b2 = lutR[disparity2], lutG[disparity2], lutB[disparity2]
@@ -71,8 +77,11 @@ def depthToRgb(inDepth, lutR, lutG, lutB, disp2DepthMultiplier):
         for j in range(width):
             px = inDepth[i, j]
 
-            # Compute disparity
-            disparity = int(disp2DepthMultiplier / px + 0.5) if px != 0 else 0
+            if disp2DepthMultiplier == 0:
+                disparity = px
+            else:
+                # Compute disparity
+                disparity = int(disp2DepthMultiplier / px + 0.5) if px != 0 else 0
             disparity = 0 if disparity >= MAX_LUT_SIZE else disparity
 
             # Lookup RGB values
@@ -136,7 +145,7 @@ monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.rectifiedRight.link(xoutRight.input)
-stereo.depth.link(xoutDepth.input)
+stereo.disparity.link(xoutDepth.input)
 stereo.setInputResolution(width,height) # set input resolution specifically
 
 stereo.setRectification(False) #disable rectification, frames are pre-rectified
@@ -149,7 +158,7 @@ stereo.setConfidenceThreshold(230)
 
 depthEncoder = pipeline.create(dai.node.DepthEncoder)
 
-stereo.depth.link(depthEncoder.input)
+stereo.disparity.link(depthEncoder.input)
 
 depthEncoderOut = pipeline.create(dai.node.XLinkOut)
 depthEncoderOut.setStreamName("depthEnc")
