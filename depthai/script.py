@@ -11,7 +11,7 @@ class Script(CoreNode):
                 "mapping input/output name to its message type."
         script = getattr(cls, "__script__", None)
         assert script is not None, \
-                "Please provide the script in __sciprt__ function"
+                "Please provide the script in __script__ function"
         signature = inspect.signature(script)
         assert tuple(signature.parameters) == ("node",), \
                 "The __script__ function must have exactly one parameter"\
@@ -31,3 +31,5 @@ class Script(CoreNode):
     def __init__(self, *args, **kwargs):
         kwargs |= {"script": self.source}
         super().__init__(*args, **kwargs)
+    def emit_core_node(self, core_pipeline):
+        super().emit_core_node(core_pipeline, name = "Script")

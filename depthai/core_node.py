@@ -33,9 +33,9 @@ class CoreNode(Node):
                 f"Cannot find a setter method for parameter {name}"
         return list(candidates)[0]
 
-    def emit_core_node(self, core_pipeline):
-        self.core_node = core_pipeline.create(
-                            getattr(depthai_bind.node, self.__class__.__name__))
+    def emit_core_node(self, core_pipeline, name = None):
+        if name is None: name = self.__class__.__name__
+        self.core_node = core_pipeline.create(getattr(depthai_bind.node, name))
 
         for name, desc in self.param_desc.items():
             if isinstance(desc, tuple):
