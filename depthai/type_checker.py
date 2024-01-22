@@ -26,14 +26,20 @@ def construct_imports(*types):
             continue
         if type is None:
             continue
-        yield f"import {type.__module__}"
-        if construct_path:
-            if type.__module__ in sys.stdlib_module_names: continue
-            path = sys.modules[type.__module__].__file__
-            if "site-packages" in path: continue
-            if os.environ["MYPYPATH"] != "":
-                os.environ["MYPYPATH"] += ":"
-            os.environ["MYPYPATH"] += os.path.dirname(path)
+        try:
+            if construct_path:
+                if type.__module__ in sys.stdlib_module_names: continue
+                path = sys.modules[type.__module__].__file__
+                if "site-packages" in path: continue
+                if os.environ["MYPYPATH"] != "":
+                    os.environ["MYPYPATH"] += ":"
+                os.environ["MYPYPATH"] += os.path.dirname(path)
+        finally:
+            if type.__module__ == "__main__":
+                yield "import {} as __main__".format(
+                        os.path.basename(path).removesuffix(".py"))
+            else:
+                yield f"import {type.__module__}"
 
 def type_repr(type):
     """
