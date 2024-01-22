@@ -35,7 +35,7 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     rawConfig
         .def(py::init<>())
-        .def_readwrite("config", &RawPointCloudConfig::config, DOC(dai, RawPointCloudConfig, config))
+        .def_readwrite("sparse", &RawPointCloudConfig::sparse, DOC(dai, RawPointCloudConfig, sparse))
         ;
 
     // Message
@@ -45,6 +45,7 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
         
         .def("set", &PointCloudConfig::set, py::arg("config"), DOC(dai, PointCloudConfig, set))
         .def("get", &PointCloudConfig::get, DOC(dai, PointCloudConfig, get))
+        .def("setSparse", &PointCloudConfig::setSparse, py::arg("enable"), DOC(dai, PointCloudConfig, setSparse))
         ;
 
     // add aliases
