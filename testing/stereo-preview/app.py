@@ -71,7 +71,7 @@ with pipeline:
         extended_disparity=False,
         subpixel=False,
     )
-    StereoPreviewNode(disparity=stereo.disparity, config=stereo.outConfig)
+    StereoPreviewNode(disparity=stereo.disparity, config=stereo.out_config)
 
 logger.info("Pipeline created successfully %s", pipeline)
 

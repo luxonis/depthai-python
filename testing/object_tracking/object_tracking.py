@@ -30,6 +30,6 @@ with pipeline:
     detections, passtrought = node.MobileNetDetectionNetwork(
         image.preview,blob_path=blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
     tracklets = node.ObjectTracker(
-        inputTrackerFrame=image.preview,inputDetectionFrame=passtrought,inputDetections = detections)
+        input_tracker_frame=image.preview,input_detection_frame=passtrought,input_detections = detections)
     ObjectTrackingNode(img_frame = image.preview, tracklets_data = tracklets)
 depthai.run(pipeline)

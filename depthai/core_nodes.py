@@ -24,8 +24,8 @@ mono_color_camera_param_desc = common_camera_param_desc | {
 
 class Camera(CoreNode):
     input_desc = {
-        "inputConfig": ImageManipConfig,
-        "inputControl": CameraControl,
+        "input_config": ImageManipConfig,
+        "input_control": CameraControl,
         }
     output_desc = {
         "raw": ImgFrame,
@@ -47,8 +47,8 @@ class Camera(CoreNode):
 
 class ColorCamera(CoreNode):
     input_desc = {
-        "inputConfig": ImageManipConfig,
-        "inputControl": CameraControl,
+        "input_config": ImageManipConfig,
+        "input_control": CameraControl,
         }
     output_desc = {
         "raw": ImgFrame,
@@ -78,8 +78,9 @@ class ColorCamera(CoreNode):
 
 
 class MonoCamera(CoreNode):
+    default_output = "out"
     input_desc = {
-        "inputControl": CameraControl,
+        "input_control": CameraControl,
         }
     output_desc = {
         "raw": ImgFrame,
@@ -92,11 +93,11 @@ class MonoCamera(CoreNode):
 
 class EdgeDetector(CoreNode):
     input_desc = {
-        "inputImage": ImgFrame,
-        "inputConfig": EdgeDetectorConfig,
+        "input_image": ImgFrame,
+        "input_config": EdgeDetectorConfig,
         }
     output_desc = {
-        "outputImage": ImgFrame,
+        "output_image": ImgFrame,
         }
     param_desc = {
         "max_output_frame_size": int,
@@ -105,14 +106,14 @@ class EdgeDetector(CoreNode):
         }
 
 class FeatureTracker(CoreNode):
-    default_output = "outputFeatures"
+    default_output = "output_features"
     input_desc = {
-        "inputImage": ImgFrame,
-        "inputConfig": FeatureTrackerConfig,
+        "input_image": ImgFrame,
+        "input_config": FeatureTrackerConfig,
         }
     output_desc = {
-        "outputFeatures": TrackedFeatures,
-        "passthroughInputImage": ImgFrame,
+        "output_features": TrackedFeatures,
+        "passthrough_input_image": ImgFrame,
         }
     param_desc = {
         "hardware_resources": tuple[int, int],
@@ -121,8 +122,8 @@ class FeatureTracker(CoreNode):
 
 class ImageManip(CoreNode):
     input_desc = {
-        "inputImage": ImgFrame,
-        "inputConfig": ImageManipConfig,
+        "input_image": ImgFrame,
+        "input_config": ImageManipConfig,
         }
     output_desc = {
         "out": ImgFrame,
@@ -162,7 +163,7 @@ class NeuralNetwork(CoreNode):
         }
     param_desc = {
         "blob": misc.OpenVINO.Blob,
-        "blob_path": str,
+        "blob_path": Any, # TODO FIXME
         "num_inference_threads": int,
         "num_NCE_per_inference_thread": int,
         "num_pool_frames": int,
@@ -194,13 +195,13 @@ spatial_network_params = {
 class MobileNetSpatialDetectionNetwork(CoreNode):
     input_desc = {
         "input": ImgFrame,
-        "inputDepth": ImgFrame,
+        "input_depth": ImgFrame,
         }
     output_desc = {
         "out": SpatialImgDetections,
-        "boundingBoxMapping": SpatialLocationCalculatorData, #Doesn't match doc -- suspected error in doc
+        "bounding_box_mapping": SpatialLocationCalculatorData, #Doesn't match doc -- suspected error in doc
         "passthrough": ImgFrame,
-        "passthroughDepth": ImgFrame,
+        "passthrough_depth": ImgFrame,
         }
     param_desc = MobileNetDetectionNetwork.param_desc | spatial_network_params
 
@@ -223,30 +224,31 @@ class YoloDetectionNetwork(CoreNode):
         }
 
 class YoloSpatialDetectionNetwork(CoreNode):
+    default_output="out"
     input_desc = {
         "input": ImgFrame,
-        "inputDepth": ImgFrame,
+        "input_depth": ImgFrame,
         }
     output_desc = {
         "out": SpatialImgDetections,
-        "boundingBoxMapping": SpatialLocationCalculatorData, #Doesn't match doc -- suspected error in doc
+        "bounding_box_mapping": SpatialLocationCalculatorData, #Doesn't match doc -- suspected error in doc
         "passthrough": ImgFrame,
-        "passthroughDepth": ImgFrame,
+        "passthrough_depth": ImgFrame,
         }
     param_desc = YoloDetectionNetwork.param_desc | spatial_network_params
 
 class ObjectTracker(CoreNode):
     default_output = "out"
     input_desc = {
-        "inputDetectionFrame": ImgFrame,
-        "inputTrackerFrame": ImgFrame,
-        "inputDetections": ImgDetections,
+        "input_detection_frame": ImgFrame,
+        "input_tracker_frame": ImgFrame,
+        "input_detections": ImgDetections,
         }
     output_desc = {
         "out": Tracklets,
-        "passthroughDetectionFrame": ImgFrame,
-        "passthroughTrackerFrame": ImgFrame,
-        "passthroughDetections": ImgDetections,
+        "passthrough_detection_frame": ImgFrame,
+        "passthrough_tracker_frame": ImgFrame,
+        "passthrough_detections": ImgDetections,
         }
     param_desc = {
         "detection_labels_to_track": list[int],
@@ -260,12 +262,12 @@ class ObjectTracker(CoreNode):
 class SpatialLocationCalculator(CoreNode):
     default_output = "out"
     input_desc = {
-        "inputConfig": SpatialLocationCalculatorConfig,
-        "inputDepth": ImgFrame,
+        "input_config": SpatialLocationCalculatorConfig,
+        "input_depth": ImgFrame,
         }
     output_desc = {
         "out": SpatialLocationCalculatorData,
-        "passthroughDepth": ImgFrame,
+        "passthrough_depth": ImgFrame,
         }
     param_desc = {
         "wait_for_config_input": bool
@@ -295,17 +297,17 @@ class StereoDepth(CoreNode):
     input_desc = {
         "left": ImgFrame,
         "right": ImgFrame,
-        "inputConfig": StereoDepthConfig,
+        "input_config": StereoDepthConfig,
         }
     output_desc = {
-        "confidenceMap": ImgFrame,
-        "rectifiedLeft": ImgFrame,
-        "syncedLeft": ImgFrame,
+        "confidence_map": ImgFrame,
+        "rectified_left": ImgFrame,
+        "synced_left": ImgFrame,
         "depth": ImgFrame,
         "disparity": ImgFrame,
-        "rectifiedRight": ImgFrame,
-        "syncedRight": ImgFrame,
-        "outConfig": StereoDepthConfig,
+        "rectified_right": ImgFrame,
+        "synced_right": ImgFrame,
+        "out_config": StereoDepthConfig,
         }
     param_desc = {
         "alpha_scaling": float,
@@ -350,7 +352,7 @@ class SystemLogger(CoreNode):
 
 class ToF(CoreNode):
     input_desc = {
-        "inputConfig": ToFConfig,
+        "input_config": ToFConfig,
         "input": ImgFrame,
         }
     output_desc = {
@@ -401,7 +403,7 @@ class VideoEncoder(CoreNode):
 
 class Warp(CoreNode): 
     input_desc = {
-        "inputImage": ImgFrame
+        "input_image": ImgFrame
         }
     output_desc = {
         "out": ImgFrame

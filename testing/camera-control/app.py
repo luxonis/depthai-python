@@ -89,7 +89,7 @@ pipeline = dai.Pipeline()
 
 with pipeline:
     feedback = dai.node.Feedback()
-    camera_control = CameraParametersControlNode(image=dai.node.ColorCamera(inputControl=feedback).video)
+    camera_control = CameraParametersControlNode(image=dai.node.ColorCamera(input_control=feedback).video)
     feedback.attach(camera_control)
 
 logger.info("Pipeline created successfully %s", pipeline)

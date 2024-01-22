@@ -50,7 +50,7 @@ class PipelineFlowChangerNode(dai.Node):
 pipeline = dai.Pipeline()
 with pipeline:
     feedback = dai.node.Feedback()
-    camera_control = dai.node.ColorCamera(inputControl=feedback, default_output="preview")
+    camera_control = dai.node.ColorCamera(input_control=feedback, default_output="preview")
     nn_detections = dai.node.MobileNetDetectionNetwork(
         input=camera_control.preview,
         blob_path=blobconverter.from_zoo(name="mobilenet-ssd", shaves=6)

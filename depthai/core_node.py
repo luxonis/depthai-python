@@ -55,15 +55,20 @@ class CoreNode(Node):
             getattr(self.core_node, self.get_setter_method(name))(*value)
 
     def create_links(self, core_pipeline):
+        def snake_to_camel(s):
+            it = iter(s)
+            return "".join(next(it).upper() if c == "_" else c
+                           for c in it)
+
         for name, output in self.inputs.items():
             if output is None: continue
             if isinstance(output.node.core_node, depthai_bind.node.Script):
                 src = output.node.core_node.outputs[output.name]
             else:
-                src = getattr(output.node.core_node, output.name)
+                src = getattr(output.node.core_node, snake_to_camel(output.name))
             if isinstance(self.core_node, depthai_bind.node.Script):
                 dst = self.core_node.inputs[name]
             else:
-                dst = getattr(self.core_node, name)
+                dst = getattr(self.core_node, snake_to_camel(name))
             core_pipeline.link(src, dst)
                     
