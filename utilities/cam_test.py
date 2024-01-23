@@ -146,7 +146,7 @@ color_res_opts = {
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
     '13mp': dai.ColorCameraProperties.SensorResolution.THE_13_MP,
-    '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
+    '48mp': dai.ColorCameraProperties.SensorResolution.THE_5312X6000,
 }
 
 def clamp(num, v0, v1):
@@ -254,8 +254,8 @@ for c in cam_list:
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
-    # cam[c].initialControl.setMisc("stride-align", 1)
-    # cam[c].initialControl.setMisc("scanline-align", 1)
+    cam[c].initialControl.setMisc("stride-align", 1)
+    cam[c].initialControl.setMisc("scanline-align", 1)
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
