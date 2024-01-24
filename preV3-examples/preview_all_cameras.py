@@ -15,7 +15,7 @@ class Viewer(dai.Node):
 pipeline = dai.Pipeline()
 with pipeline:
     Viewer(
-        dai.node.MonoCamera(),
-        dai.node.MonoCamera(),
+        dai.node.MonoCamera(camera="right"),
+        dai.node.MonoCamera(camera="left"),
         dai.node.ColorCamera().video)
 dai.run(pipeline)
