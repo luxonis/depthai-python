@@ -43,6 +43,7 @@ void bind_depthencoder(pybind11::module& m, void* pCallstack){
         .def_readonly("output", &DepthEncoder::output, DOC(dai, node, DepthEncoder, output))
         .def_readonly("passthroughInput", &DepthEncoder::passthroughInput, DOC(dai, node, DepthEncoder, passthroughInput))
         .def("setLut", &DepthEncoder::setLut, DOC(dai, node, DepthEncoder, setLut))
+        .def("setHueLut", &DepthEncoder::setHueLut, py::arg("minIn"), py::arg("maxIn"), py::arg("scaleFactor") = 1, py::arg("bufferPercentage") = 0.0f, DOC(dai, node, DepthEncoder, setHueLut))
         .def("setOutputType", &DepthEncoder::setOutputType, DOC(dai, node, DepthEncoder, setOutputType))
         .def("setNumFramesPool", &DepthEncoder::setNumFramesPool, DOC(dai, node, DepthEncoder, setNumFramesPool))
         ;

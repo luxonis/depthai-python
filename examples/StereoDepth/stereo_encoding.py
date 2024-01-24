@@ -10,7 +10,7 @@ from numba import njit, prange
 import numpy as np
 
 MAX_LUT_SIZE = 96 * 32 * 2
-
+USE_CAMERAS = False
 @njit(parallel=True)
 def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
 
@@ -107,8 +107,8 @@ left = datasetDefault + '/' + '0' + '/' + 'in_left' + '.png'
 right = datasetDefault + '/' + '0' + '/' + 'in_right' + '.png'
 
 
-inW = 640
-inH = 400
+inW = 1280
+inH = 800
 
 leftImg = cv2.imread(left, cv2.IMREAD_GRAYSCALE)
 rightImg = cv2.imread(right, cv2.IMREAD_GRAYSCALE)
@@ -124,28 +124,44 @@ pipeline = dai.Pipeline()
 
 # Define sources and outputs
 
-monoLeft = pipeline.create(dai.node.XLinkIn)
-monoRight = pipeline.create(dai.node.XLinkIn)
+leftOut = None
+rightOut = None
+if USE_CAMERAS:
+    colorLeft = pipeline.create(dai.node.ColorCamera)
+    colorLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+    colorLeft.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
+    colorRight = pipeline.create(dai.node.ColorCamera)
+    colorRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+    colorRight.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1200_P)
+    colorLeft.setVideoSize(inW, inH)
+    colorRight.setVideoSize(inW, inH)
+    leftOut = colorLeft.video
+    rightOut = colorRight.video
+else:
+    colorLeft = pipeline.create(dai.node.XLinkIn)
+    colorRight = pipeline.create(dai.node.XLinkIn)
+    leftOut = colorLeft.out
+    rightOut = colorRight.out
+    colorLeft.setStreamName("inLeft")
+    colorRight.setStreamName("inRight")
+    colorLeft.setMaxDataSize(width * height)
+    colorRight.setMaxDataSize(width * height)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 stereo = pipeline.create(dai.node.StereoDepth)
 
-monoLeft.setStreamName("inLeft")
-monoRight.setStreamName("inRight")
 xoutLeft.setStreamName("left")
 xoutRight.setStreamName("right")
 xoutDepth.setStreamName("depth")
 
-monoLeft.setMaxDataSize(width * height)
-monoRight.setMaxDataSize(width * height)
 
 # Linking
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+leftOut.link(stereo.left)
+rightOut.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.rectifiedRight.link(xoutRight.input)
-stereo.disparity.link(xoutDepth.input)
+stereo.depth.link(xoutDepth.input)
 stereo.setInputResolution(width,height) # set input resolution specifically
 
 stereo.setRectification(False) #disable rectification, frames are pre-rectified
@@ -158,7 +174,7 @@ stereo.setConfidenceThreshold(230)
 
 depthEncoder = pipeline.create(dai.node.DepthEncoder)
 
-stereo.disparity.link(depthEncoder.input)
+stereo.depth.link(depthEncoder.input)
 
 depthEncoderOut = pipeline.create(dai.node.XLinkOut)
 depthEncoderOut.setStreamName("depthEnc")
@@ -169,7 +185,8 @@ lutR = np.arange(6144, dtype=np.uint8) % 256
 lutG = np.arange(6144, dtype=np.uint8) % 256
 lutB = np.arange(6144, dtype=np.uint8) % 256
 
-depthEncoder.setLut(lutR, lutG, lutB)
+# depthEncoder.setLut(lutR, lutG, lutB)
+depthEncoder.setHueLut(0, 96 * 32, 1, 0.45)
 
 outType = dai.ImgFrame.Type.NV12 if 1 else dai.ImgFrame.Type.RGB888p
 
@@ -178,9 +195,9 @@ depthEncoder.setOutputType(outType)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
-
-    qInLeft = device.getInputQueue("inLeft")
-    qInRight = device.getInputQueue("inRight")
+    if not USE_CAMERAS:
+        qInLeft = device.getInputQueue("inLeft")
+        qInRight = device.getInputQueue("inRight")
     qLeft = device.getOutputQueue("left", 4, False)
     qRight = device.getOutputQueue("right", 4, False)
     qDepth = device.getOutputQueue("depth", 4, False)
@@ -190,28 +207,28 @@ with dai.Device(pipeline) as device:
     cnt = 0
 
     while True:
+        if not USE_CAMERAS:
+            data = cv2.resize(leftImg, (width, height), interpolation = cv2.INTER_AREA)
 
-        data = cv2.resize(leftImg, (width, height), interpolation = cv2.INTER_AREA)
+            data = data.reshape(height*width)
+            img = dai.ImgFrame()
+            img.setData(data)
+            img.setInstanceNum(1)
+            img.setType(dai.ImgFrame.Type.RAW8)
+            img.setWidth(width)
+            img.setHeight(height)
+            # print("left send")
+            qInLeft.send(img)
 
-        data = data.reshape(height*width)
-        img = dai.ImgFrame()
-        img.setData(data)
-        img.setInstanceNum(1)
-        img.setType(dai.ImgFrame.Type.RAW8)
-        img.setWidth(width)
-        img.setHeight(height)
-        # print("left send")
-        qInLeft.send(img)
-
-        data = cv2.resize(rightImg, (width, height), interpolation = cv2.INTER_AREA)
-        data = data.reshape(height*width)
-        img = dai.ImgFrame()
-        img.setData(data)
-        img.setInstanceNum(2)
-        img.setType(dai.ImgFrame.Type.RAW8)
-        img.setWidth(width)
-        img.setHeight(height)
-        qInRight.send(img)
+            data = cv2.resize(rightImg, (width, height), interpolation = cv2.INTER_AREA)
+            data = data.reshape(height*width)
+            img = dai.ImgFrame()
+            img.setData(data)
+            img.setInstanceNum(2)
+            img.setType(dai.ImgFrame.Type.RAW8)
+            img.setWidth(width)
+            img.setHeight(height)
+            qInRight.send(img)
 
         inLeft = qLeft.get()
         frameLeft = inLeft.getCvFrame()
