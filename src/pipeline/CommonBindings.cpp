@@ -23,12 +23,14 @@
 #include "depthai-shared/common/DetectionParserOptions.hpp"
 #include "depthai-shared/common/RotatedRect.hpp"
 #include "depthai-shared/common/Rect.hpp"
+#include "depthai-shared/common/StereoPair.hpp"
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
 #include "depthai/common/CameraExposureOffset.hpp"
+#include "depthai/common/StereoPair.hpp"
 #include "depthai/utility/ProfilingData.hpp"
 
 void CommonBindings::bind(pybind11::module& m, void* pCallstack){
@@ -60,6 +62,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<DetectionParserOptions> detectionParserOptions(m, "DetectionParserOptions", DOC(dai, DetectionParserOptions));
     py::class_<RotatedRect> rotatedRect(m, "RotatedRect", DOC(dai, RotatedRect));
     py::class_<Rect> rect(m, "Rect", DOC(dai, Rect));
+    py::class_<StereoPair> stereoPair(m, "StereoPair", DOC(dai, StereoPair));
     py::enum_<CameraExposureOffset> cameraExposureOffset(m, "CameraExposureOffset");
     py::enum_<Colormap> colormap(m, "Colormap", DOC(dai, Colormap));
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
@@ -104,6 +107,19 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("y", &Rect::y)
         .def_readwrite("width", &Rect::width)
         .def_readwrite("height", &Rect::height)
+        ;
+
+    stereoPair
+        .def(py::init<>())
+        .def_readwrite("left", &StereoPair::left)
+        .def_readwrite("right", &StereoPair::right)
+        .def_readwrite("baseline", &StereoPair::baseline)
+        .def_readwrite("isVertical", &StereoPair::isVertical)
+        .def("__repr__", [](StereoPair& stereoPair) {
+            std::stringstream stream;
+            stream << stereoPair;
+            return stream.str();
+        })
         ;
 
     timestamp
