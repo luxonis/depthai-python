@@ -9,6 +9,7 @@ Compared to :ref:`ColorCamera` node, Camera node:
 - Supports **cam.setSize()**, which replaces both ``cam.setResolution()`` and ``cam.setIspScale()``. Camera node will automatically find resolution that fits best, and apply correct scaling to achieve user-selected size
 - Supports **cam.setCalibrationAlpha()**, example here: :ref:`Undistort camera stream`
 - Supports **cam.loadMeshData()** and **cam.setMeshStep()**, which can be used for custom image warping (undistortion, perspective correction, etc.)
+- Automatically undistorts camera stream if HFOV of the camera is greater than 85°. You can disable this with: ``cam.setMeshSource(dai.CameraProperties.WarpMeshSource.NONE)``.
 
 Besides points above, compared to :ref:`MonoCamera` node, Camera node:
 
