@@ -354,7 +354,7 @@ with dai.Device(*dai_device_args) as device:
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
     ISO_STEP = 50
-    LENS_STEP = 3
+    LENS_STEP = 1
     DOT_STEP = 0.05
     FLOOD_STEP = 0.05
     DOT_MAX = 1
