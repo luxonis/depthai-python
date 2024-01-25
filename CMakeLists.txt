@@ -133,6 +133,7 @@ set(SOURCE_LIST
     src/pipeline/node/PointCloudBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/DepthEncoderBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp

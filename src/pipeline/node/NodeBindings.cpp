@@ -148,6 +148,7 @@ void bind_detectionparser(pybind11::module& m, void* pCallstack);
 void bind_sync(pybind11::module& m, void* pCallstack);
 void bind_pointcloud(pybind11::module& m, void* pCallstack);
 void bind_uvc(pybind11::module& m, void* pCallstack);
+void bind_depthencoder(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -182,6 +183,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_sync);
     callstack.push_front(bind_pointcloud);
     callstack.push_front(bind_uvc);
+    callstack.push_front(bind_depthencoder);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
