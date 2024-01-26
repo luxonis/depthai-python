@@ -367,6 +367,7 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
             color.setColorOrder(
                 dai.ColorCameraProperties.ColorOrder.BGR)
             color.setInterleaved(False)
+            color.setNumFramesPool(2)
 
             # Only create a preview here if we're not creating a detection network
             # And create a preview for other color cameras, that are not used for yolo
@@ -375,7 +376,6 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
                 stream_name = "preview_" + cam.socket.name
                 xlink_preview.setStreamName(stream_name)
                 color.preview.link(xlink_preview.input)
-                color.setNumFramesPool(2)
                 xlink_outs.append((stream_name, 2))
 
         elif cam_kind == dai.CameraSensorType.TOF:
