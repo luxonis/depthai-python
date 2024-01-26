@@ -280,25 +280,29 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
     """
     camera_features = device.getConnectedCameraFeatures()
     context = PipelineContext()
+    calib = None
+    left_socket = None
+    right_socket = None
+    align_socket = None
     try:
         calib = device.readCalibration2()
     except:
-        print("Couln't read calibration data from device, exiting...")
-        exit(-1)
+        print("Couln't read calibration data from device, continue without it...")
 
-    eeprom = calib.getEepromData()
-    left_socket = eeprom.stereoRectificationData.leftCameraSocket
-    right_socket = eeprom.stereoRectificationData.rightCameraSocket
-    align_socket = [
-        cam.socket
-        for cam in camera_features
-        if cam.supportedTypes[0] == dai.CameraSensorType.COLOR
-    ]
-    is_align_socket_color = len(align_socket) != 0
-    if not is_align_socket_color:
-        print(f"No color camera found, aligning depth with {left_socket}")
-        align_socket = [left_socket]
-    align_socket = align_socket[0]
+    if calib:
+        eeprom = calib.getEepromData()
+        left_socket = eeprom.stereoRectificationData.leftCameraSocket
+        right_socket = eeprom.stereoRectificationData.rightCameraSocket
+        align_socket = [
+            cam.socket
+            for cam in camera_features
+            if cam.supportedTypes[0] == dai.CameraSensorType.COLOR
+        ]
+        is_align_socket_color = len(align_socket) != 0
+        if not is_align_socket_color:
+            print(f"No color camera found, aligning depth with {left_socket}")
+            align_socket = [left_socket]
+        align_socket = align_socket[0]
 
     xlink_outs: List[Tuple[str, int]] = []  # [(name, size), ...]
 
