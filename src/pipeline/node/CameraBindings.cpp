@@ -13,7 +13,6 @@ void bind_camera(pybind11::module& m, void* pCallstack){
     // Node and Properties declare upfront
     py::class_<CameraProperties> cameraProperties(m, "CameraProperties", DOC(dai, CameraProperties));
     py::enum_<CameraProperties::WarpMeshSource> cameraPropertiesWarpMeshSource(cameraProperties, "WarpMeshSource", DOC(dai, CameraProperties, WarpMeshSource));
-    py::enum_<CameraProperties::ColorOrder> cameraPropertiesColorOrder(cameraProperties, "ColorOrder", DOC(dai, CameraProperties, ColorOrder));
     auto camera = ADD_NODE(Camera);
 
     ///////////////////////////////////////////////////////////////////////
@@ -52,22 +51,17 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .value("URI", CameraProperties::WarpMeshSource::URI)
         ;
 
-    cameraPropertiesColorOrder
-        .value("BGR", CameraProperties::ColorOrder::BGR)
-        .value("RGB", CameraProperties::ColorOrder::RGB)
-        ;
 
     cameraProperties
         .def_readwrite("initialControl", &CameraProperties::initialControl)
         .def_readwrite("boardSocket", &CameraProperties::boardSocket)
         .def_readwrite("imageOrientation", &CameraProperties::imageOrientation)
-        .def_readwrite("colorOrder", &CameraProperties::colorOrder)
-        .def_readwrite("interleaved", &CameraProperties::interleaved)
-        .def_readwrite("fp16", &CameraProperties::fp16)
         .def_readwrite("previewHeight", &CameraProperties::previewHeight)
         .def_readwrite("previewWidth", &CameraProperties::previewWidth)
+        .def_readwrite("previewType", &CameraProperties::previewType)
         .def_readwrite("videoHeight", &CameraProperties::videoHeight)
         .def_readwrite("videoWidth", &CameraProperties::videoWidth)
+        .def_readwrite("videoType", &CameraProperties::videoType)
         .def_readwrite("stillHeight", &CameraProperties::stillHeight)
         .def_readwrite("stillWidth", &CameraProperties::stillWidth)
         // .def_readwrite("resolution", &CameraProperties::resolution)
@@ -111,8 +105,10 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("getImageOrientation", &Camera::getImageOrientation, DOC(dai, node, Camera, getImageOrientation))
         .def("setPreviewSize", static_cast<void(Camera::*)(int,int)>(&Camera::setPreviewSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setPreviewSize))
         .def("setPreviewSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setPreviewSize), py::arg("size"), DOC(dai, node, Camera, setPreviewSize, 2))
+        .def("setPreviewType", static_cast<void(Camera::*)(ImgFrame::Type)>(&Camera::setPreviewType), py::arg("type"), DOC(dai, node, Camera, setPreviewType))
         .def("setVideoSize", static_cast<void(Camera::*)(int,int)>(&Camera::setVideoSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setVideoSize))
         .def("setVideoSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setVideoSize), py::arg("size"), DOC(dai, node, Camera, setVideoSize, 2))
+        .def("setPreviewType", static_cast<void(Camera::*)(ImgFrame::Type)>(&Camera::setVideoType), py::arg("type"), DOC(dai, node, Camera, setVideoType))
         .def("setStillSize", static_cast<void(Camera::*)(int,int)>(&Camera::setStillSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setStillSize))
         .def("setStillSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setStillSize), py::arg("size"), DOC(dai, node, Camera, setStillSize, 2))
         // .def("setResolution", &Camera::setResolution, py::arg("resolution"), DOC(dai, node, Camera, setResolution))
@@ -123,9 +119,11 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("getPreviewSize", &Camera::getPreviewSize, DOC(dai, node, Camera, getPreviewSize))
         .def("getPreviewWidth", &Camera::getPreviewWidth, DOC(dai, node, Camera, getPreviewWidth))
         .def("getPreviewHeight", &Camera::getPreviewHeight, DOC(dai, node, Camera, getPreviewHeight))
+        .def("getPreviewType", &Camera::getPreviewType, DOC(dai, node, Camera, getPreviewType))
         .def("getVideoSize", &Camera::getVideoSize, DOC(dai, node, Camera, getVideoSize))
         .def("getVideoWidth", &Camera::getVideoWidth, DOC(dai, node, Camera, getVideoWidth))
         .def("getVideoHeight", &Camera::getVideoHeight, DOC(dai, node, Camera, getVideoHeight))
+        .def("getVideoType", &Camera::getVideoType, DOC(dai, node, Camera, getVideoType))
         .def("getStillSize", &Camera::getStillSize, DOC(dai, node, Camera, getStillSize))
         .def("getStillWidth", &Camera::getStillWidth, DOC(dai, node, Camera, getStillWidth))
         .def("getStillHeight", &Camera::getStillHeight, DOC(dai, node, Camera, getStillHeight))
