@@ -24,9 +24,9 @@ class Node:
             return f"<{self.name} of {self.node}>"
 
     def __init_subclass__(cls):
-        if "__run__" in cls.__dict__:
-            run = cls.__dict__["__run__"]
-            sig = inspect.signature(run) 
+        members = dict(inspect.getmembers(cls))
+        if "__run__" in members:
+            sig = inspect.signature(members["__run__"])
             assert list(sig.parameters.keys())[0] == "self", \
                 'Please use "self" as the first parameter for __run__ method'
             assert cls.input_desc is None, \
@@ -55,8 +55,8 @@ class Node:
                 return_annotation = {"output": return_annotation}
             cls.output_desc = return_annotation
 
-        if "__node_init__" in cls.__dict__:
-            sig = inspect.signature(cls.__dict__["__node_init__"])
+        if "__node_init__" in members:
+            sig = inspect.signature(members["__node_init__"])
             parameters = list(sig.parameters.keys())
             assert parameters[0] == "self", 'Please use "self"'\
                     ' as the first parameter for __node_init__ method'
