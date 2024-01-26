@@ -375,7 +375,8 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
                 stream_name = "preview_" + cam.socket.name
                 xlink_preview.setStreamName(stream_name)
                 color.preview.link(xlink_preview.input)
-                xlink_outs.append((stream_name, 4))
+                color.setNumFramesPool(2)
+                xlink_outs.append((stream_name, 2))
 
         elif cam_kind == dai.CameraSensorType.TOF:
             xin_tof_config = pipeline.createXLinkIn()
