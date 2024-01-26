@@ -32,7 +32,8 @@ def start_devices(pipeline, context):
             args = [context["devices"][device_ref]]
         else:
             args = []
-        context["running_devices"][device_ref] = \
-                depthai_bind.Device(pipeline, *args)
+        device = depthai_bind.Device(pipeline, *args)
+        context["running_devices"][device_ref] = device
+        context["exit_routines"].append(lambda: device.__exit__(*(3*[None])))
 
     return host_pipeline

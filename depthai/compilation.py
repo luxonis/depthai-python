@@ -1,5 +1,6 @@
 import logging
 import depthai.type_checker as type_checker
+import depthai.agent_node as agent_node
 from depthai.runtime import init_host_nodes
 from depthai.xlinks import create_xlinks
 from depthai.device import start_devices
@@ -22,11 +23,16 @@ default_context = {
 
         # After starting devices I still need access to them
         # I keep them here
-        "running_devices" : {} # DeviceRef (str) -> Device
+        "running_devices" : {}, # DeviceRef (str) -> Device
+
+        "pipe_path": "fifo",
+
+        "exit_routines": [],
     }
 
 # This list is part of read-only interface 
 default_compilation = [
+    agent_node.manage_service_communication,
     type_checker.check_pipeline,
     create_xlinks,
     resolve_feedback_nodes,
@@ -45,10 +51,8 @@ def run(pipeline,
         logging.info(f"Running step {step}")
         rv = step(pipeline, context)
         pipeline = pipeline if rv is None else rv
-    class DeviceHandler:
-        def __enter__(self): pass
-        def __exit__(self, *args):
-            for device in context["running_devices"].values():
-                device.__exit__(*args)
-    with DeviceHandler():
+    try:
         main_loop(pipeline, context)
+    finally:
+        for exit_routine in context["exit_routines"]:
+            exit_routine()
