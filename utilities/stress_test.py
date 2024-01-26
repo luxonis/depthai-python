@@ -367,7 +367,7 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
             color.setColorOrder(
                 dai.ColorCameraProperties.ColorOrder.BGR)
             color.setInterleaved(False)
-            color.setNumFramesPool(2)
+            color.setNumFramesPool(2, 2, 2, 2, 2);
 
             # Only create a preview here if we're not creating a detection network
             # And create a preview for other color cameras, that are not used for yolo
