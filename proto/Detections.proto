@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package depthai;
+
+message Detection {
+    uint32 label = 1;
+    float confidence = 2;
+    float xmin = 3;
+    float ymin = 4;
+    float xmax = 5;
+    float ymax = 6;
+    optional float spatial_x = 7;
+    optional float spatial_y = 8;
+    optional float spatial_z = 9;
+    optional float roi_x = 10;
+    optional float roi_y = 11;
+    optional float roi_width = 12;
+    optional float roi_height = 13;
+    optional uint32 low_threshold = 14;
+    optional uint32 high_threshold = 15;
+}
+
+message Detections {
+    repeated Detection detections = 1;
+}

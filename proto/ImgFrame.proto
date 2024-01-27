@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package depthai;
+
+message ImgFrame {
+    repeated uint32 red = 1;
+    repeated uint32 green = 2;
+    repeated uint32 blue = 3;
+    uint32 width  = 4;
+    uint32 height = 5;
+}

@@ -1,6 +1,7 @@
 import depthai
 from depthai.core_nodes import *
 from depthai.xlinks import *
+from depthai.interface_node import OutNode, InNode
 import typing
 
 class Feedback(depthai.Node):

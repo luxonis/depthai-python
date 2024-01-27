@@ -1,6 +1,6 @@
 import logging
 import depthai.type_checker as type_checker
-import depthai.agent_node as agent_node
+import depthai.interface_node as interface_node
 from depthai.runtime import init_host_nodes
 from depthai.xlinks import create_xlinks
 from depthai.device import start_devices
@@ -32,7 +32,7 @@ default_context = {
 
 # This list is part of read-only interface 
 default_compilation = [
-    agent_node.manage_service_communication,
+    interface_node.manage_service_communication,
     type_checker.check_pipeline,
     create_xlinks,
     resolve_feedback_nodes,
