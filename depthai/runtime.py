@@ -62,6 +62,7 @@ def init_host_node(node):
         if len(self.output_queues) == 1: output = (output,)
         for value, queues in zip(output, self.output_queues.values(), 
                                  strict=True):
+            if value is None: continue
             for input_ref in queues:
                 input_ref.node.input_queues[input_ref.name].put(value)
 
