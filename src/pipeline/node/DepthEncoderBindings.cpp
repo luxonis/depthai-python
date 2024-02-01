@@ -32,6 +32,7 @@ void bind_depthencoder(pybind11::module& m, void* pCallstack){
     depthEncoderProperties
         .def_readwrite("outputType", &DepthEncoderProperties::outputType, DOC(dai, DepthEncoderProperties, outputType))
         .def_readwrite("numFramesPool", &DepthEncoderProperties::numFramesPool, DOC(dai, DepthEncoderProperties, numFramesPool))
+        .def_readwrite("numShaves", &DepthEncoderProperties::numShaves, DOC(dai, DepthEncoderProperties, numShaves))
         .def_readwrite("lutR", &DepthEncoderProperties::lutR, DOC(dai, DepthEncoderProperties, lutR))
         .def_readwrite("lutG", &DepthEncoderProperties::lutG, DOC(dai, DepthEncoderProperties, lutG))
         .def_readwrite("lutB", &DepthEncoderProperties::lutB, DOC(dai, DepthEncoderProperties, lutB))
@@ -46,6 +47,7 @@ void bind_depthencoder(pybind11::module& m, void* pCallstack){
         .def("setHueLut", &DepthEncoder::setHueLut, py::arg("minIn"), py::arg("maxIn"), py::arg("scaleFactor") = 1, py::arg("bufferPercentage") = 0.0f, DOC(dai, node, DepthEncoder, setHueLut))
         .def("setOutputType", &DepthEncoder::setOutputType, DOC(dai, node, DepthEncoder, setOutputType))
         .def("setNumFramesPool", &DepthEncoder::setNumFramesPool, DOC(dai, node, DepthEncoder, setNumFramesPool))
+        .def("setNumShaves", &DepthEncoder::setNumShaves, DOC(dai, node, DepthEncoder, setNumShaves), DOC(dai, node, DepthEncoder, setNumShaves))
         ;
     daiNodeModule.attr("DepthEncoder").attr("Properties") = depthEncoderProperties;
 
