@@ -11,6 +11,8 @@ import numpy as np
 
 MAX_LUT_SIZE = 96 * 32 * 2
 USE_CAMERAS = False
+USE_DEPTH = True
+NV12_OUTPUT = True
 @njit(parallel=True)
 def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
 
@@ -19,6 +21,29 @@ def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
 
     y_plane = np.zeros((height, width), dtype=np.uint8)  # For Y output
     uv_plane = np.zeros((height//2, width), dtype=np.uint8)  # For NV12 output
+
+    lutY = np.zeros(MAX_LUT_SIZE, dtype=np.uint8)
+    lutU = np.zeros(MAX_LUT_SIZE, dtype=np.uint8)
+    lutV = np.zeros(MAX_LUT_SIZE, dtype=np.uint8)
+
+    for i in range(MAX_LUT_SIZE):
+        r = lutR[i]
+        g = lutG[i]
+        b = lutB[i]
+
+        _y = int(0.299 * r + 0.587 * g + 0.114 * b)
+        y = min(max(_y, 0), 255)
+        lutY[i] = y
+
+        _u = int(-0.14713 * r - 0.28886 * g + 0.436 * b) + 128
+        _v = int(0.615 * r - 0.51499 * g - 0.10001 * b) + 128
+
+        u = min(max(_u, 0), 255)
+        v = min(max(_v, 0), 255)
+
+        lutU[i] = u
+        lutV[i] = v
+
 
     for i in range(height):
         for j in range(0, width, 2):  # Processing two pixels at a time
@@ -30,9 +55,7 @@ def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
                 disparity1 = 0 if px1 == 0 else int(disp2DepthMultiplier / px1 + 0.5)
             disparity1 = 0 if disparity1 >= MAX_LUT_SIZE else disparity1
 
-            r1, g1, b1 = lutR[disparity1], lutG[disparity1], lutB[disparity1]
-            _y1 = int(0.299 * r1 + 0.587 * g1 + 0.114 * b1)
-            y1 = min(255, max(0, _y1))
+            y1 = lutY[disparity1]
             y_plane[i, j] = y1  # Storing Y component
 
             px2 = inDepth[i, j + 1]
@@ -42,19 +65,16 @@ def depthToNv12(inDepth, lutR, lutG, lutB, disp2DepthMultiplier:float):
                 disparity2 = 0 if px2 == 0 else int(disp2DepthMultiplier / px2 + 0.5)
             disparity2 = 0 if disparity2 >= MAX_LUT_SIZE else disparity2
 
-            r2, g2, b2 = lutR[disparity2], lutG[disparity2], lutB[disparity2]
-            _y2 = int(0.299 * r2 + 0.587 * g2 + 0.114 * b2)
-            y2 = min(255, max(0, _y2))
+            y2 = lutY[disparity2]
             y_plane[i, j + 1] = y2  # Storing Y component
 
             # Compute U and V for NV12 format
             if i % 2 == 0:
-                _u1, _v1 = int((b1 - _y1) * 0.564) + 128, int((r1 - _y1) * 0.713) + 128
-                _u2, _v2 = int((b2 - _y2) * 0.564) + 128, int((r2 - _y2) * 0.713) + 128
+                _u1, _v1 = np.uint8(lutU[disparity1]), np.uint8(lutV[disparity1])
+                _u2, _v2 = np.uint8(lutU[disparity2]), np.uint8(lutV[disparity2])
 
-                _u, _v = (_u1 + _u2) // 2, (_v1 + _v2) // 2
-                u = min(255, max(0, _u))
-                v = min(255, max(0, _v))
+                u = (_u1 + _u2) // 2
+                v = (_v1 + _v2) // 2
 
                 uv_plane[i//2, j] = u
                 uv_plane[i//2, j + 1] = v
@@ -161,7 +181,6 @@ leftOut.link(stereo.left)
 rightOut.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.rectifiedRight.link(xoutRight.input)
-stereo.depth.link(xoutDepth.input)
 stereo.setInputResolution(width,height) # set input resolution specifically
 
 stereo.setRectification(False) #disable rectification, frames are pre-rectified
@@ -174,21 +193,28 @@ stereo.setConfidenceThreshold(230)
 
 depthEncoder = pipeline.create(dai.node.DepthEncoder)
 
-stereo.depth.link(depthEncoder.input)
+if USE_DEPTH:
+    stereo.depth.link(depthEncoder.input)
+    stereo.depth.link(xoutDepth.input)
+else:
+    stereo.disparity.link(depthEncoder.input)
+    stereo.disparity.link(xoutDepth.input)
 
 depthEncoderOut = pipeline.create(dai.node.XLinkOut)
 depthEncoderOut.setStreamName("depthEnc")
 
 depthEncoder.output.link(depthEncoderOut.input)
 
-lutR = np.arange(6144, dtype=np.uint8) % 256
-lutG = np.arange(6144, dtype=np.uint8) % 256
-lutB = np.arange(6144, dtype=np.uint8) % 256
+lutR = np.random.randint(0, 256, 6144, dtype=np.uint8)
+lutG = np.random.randint(0, 256, 6144, dtype=np.uint8)
+lutB = np.random.randint(0, 256, 6144, dtype=np.uint8)
 
-# depthEncoder.setLut(lutR, lutG, lutB)
-depthEncoder.setHueLut(0, 96 * 32, 1, 0.45)
+depthEncoder.setLut(lutR, lutG, lutB)
+# depthEncoder.setHueLut(0, 96 * 32, 1, 0.45)
 
-outType = dai.ImgFrame.Type.NV12 if 1 else dai.ImgFrame.Type.RGB888p
+depthEncoder.setNumShaves(1)
+
+outType = dai.ImgFrame.Type.NV12 if NV12_OUTPUT else dai.ImgFrame.Type.RGB888p
 
 depthEncoder.setOutputType(outType)
 # depthEncoder.setOutputType(dai.ImgFrame.Type.RGB888p)
@@ -272,8 +298,9 @@ with dai.Device(pipeline) as device:
 
         else:
             encoded_depth_raw = depthToRgb(frameDepth, lutR, lutG, lutB, disp2DepthMultiplier)
+            bgr_array = encoded_depth_raw[:, :, [2, 1, 0]]
 
-            encoded_depth_host = encoded_depth_raw #todo
+            encoded_depth_host = bgr_array #todo
 
         cv2.imshow("host_encoded", encoded_depth_host)
 
