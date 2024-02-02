@@ -127,9 +127,6 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("getStillSize", &Camera::getStillSize, DOC(dai, node, Camera, getStillSize))
         .def("getStillWidth", &Camera::getStillWidth, DOC(dai, node, Camera, getStillWidth))
         .def("getStillHeight", &Camera::getStillHeight, DOC(dai, node, Camera, getStillHeight))
-        .def("getSize", &Camera::getSize, DOC(dai, node, Camera, getSize))
-        .def("getWidth", &Camera::getWidth, DOC(dai, node, Camera, getWidth))
-        .def("getHeight", &Camera::getHeight, DOC(dai, node, Camera, getHeight))
         // .def("sensorCenterCrop", &Camera::sensorCenterCrop, DOC(dai, node, Camera, sensorCenterCrop))
         // .def("setSensorCrop", &Camera::setSensorCrop, py::arg("x"), py::arg("y"), DOC(dai, node, Camera, setSensorCrop))
         // .def("getSensorCrop", &Camera::getSensorCrop, DOC(dai, node, Camera, getSensorCrop))
@@ -143,10 +140,6 @@ void bind_camera(pybind11::module& m, void* pCallstack){
 
         .def("setCamera", &Camera::setCamera, py::arg("name"), DOC(dai, node, Camera, setCamera))
         .def("getCamera", &Camera::getCamera, DOC(dai, node, Camera, getCamera))
-
-        .def("setSize", static_cast<void(Camera::*)(int,int)>(&Camera::setSize), py::arg("width"), py::arg("height"), DOC(dai, node, Camera, setSize))
-        .def("setSize", static_cast<void(Camera::*)(std::tuple<int,int>)>(&Camera::setSize), py::arg("size"), DOC(dai, node, Camera, setSize, 2))
-
 
         .def("setMeshSource", &Camera::setMeshSource, py::arg("source"), DOC(dai, node, Camera, setMeshSource))
         .def("getMeshSource", &Camera::getMeshSource, DOC(dai, node, Camera, getMeshSource))
