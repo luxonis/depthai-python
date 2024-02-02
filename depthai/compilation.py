@@ -16,8 +16,8 @@ def default_main_loop(pipeline, _):
         for node in pipeline:
             node.dispatch()
 
-# Context
-default_context = {
+def get_default_context():
+    return {
         # Used by user to specify on which devices to run
         "devices" : {}, # str (DeviceRef) -> DeviceInfo
 
@@ -44,7 +44,7 @@ def run(pipeline,
         preprocessor = [],
         main_loop = default_main_loop,
         **context):
-    context = default_context | context
+    context = get_default_context() | context
     if not isinstance(preprocessor, list): preprocessor = [preprocessor]
     process = preprocessor + compilation
     for step in process:
