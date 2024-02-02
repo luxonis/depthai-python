@@ -56,14 +56,24 @@ def init_host_node(node):
             if arg is not None: queue.get()
 
         if len(self.output_queues) == 0:
-            assert output == None, \
-                    f"Node {self} has no outputs and didn't return None"
+            assert output == None or output == {}, \
+                    f"Node {self} has no outputs but returned something"
             return
-        if len(self.output_queues) == 1: output = (output,)
-        for value, queues in zip(output, self.output_queues.values(), 
-                                 strict=True):
+        if len(self.output_queues) == 1:
+            output_name, = self.output_queues.keys()
+            if not isinstance(output, dict):
+                output = {output_name: output}
+            elif output == {}:
+                pass
+            elif output.keys() == self.output_queues.keys():
+                pass
+            else:
+                output = {output_name: output}
+
+        for name, value in output.items():
             if value is None: continue
-            for input_ref in queues:
+            assert name in self.output_queues, "Unknown output name"
+            for input_ref in self.output_queues[name]:
                 input_ref.node.input_queues[input_ref.name].put(value)
 
     @method
