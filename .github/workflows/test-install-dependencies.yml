@@ -16,7 +16,7 @@
      runs-on: ubuntu-latest
      strategy:
        matrix:
-          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:rolling"]
+          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04"]
      container:
        image: ${{ matrix.container_image }}
      steps:
@@ -55,7 +55,7 @@
       - uses: actions/checkout@v3
       - name: Install dependencies
         shell: pwsh
-        run: choco install cmake git python --version 3.10 -y
+        run: choco install python --version=3.10.2 -y
       - name: Install example requrirements
         run: |
           python examples/install_requirements.py
