@@ -62,7 +62,7 @@
       - name: Install pycharm-community dependency
         shell: pwsh
         run: choco install pycharm-community -y
-      - name: Install requrirements
+      - name: Install example requirements
         run: |
-          python install_requirements.py
+          python examples/install_requirements.py
              
