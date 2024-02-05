@@ -56,6 +56,13 @@
       - uses: actions/setup-python@v4
         with:
            python-version: "3.10"
-      - name: Install example requirements
+      - name: Download chocolatey
+        shell: pwsh
+        run: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+      - name: Install pycharm-community dependency
+        shell: pwsh
+        run: choco install pycharm-community -y
+      - name: Install requrirements
         run: |
-          python examples/install_requirements.py
+          python install_requirements.py
+             
