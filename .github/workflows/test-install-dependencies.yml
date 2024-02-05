@@ -16,7 +16,7 @@
      runs-on: ubuntu-latest
      strategy:
        matrix:
-          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:22.10"]
+          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:rolling"]
      container:
        image: ${{ matrix.container_image }}
      steps:
@@ -38,7 +38,7 @@
    test_macos:
       strategy:
         matrix:
-          os: ["macos-11", "macos-12"]
+          os: ["macos-11", "macos-12", "macos-13", "macos-14"]
       runs-on: ${{ matrix.os }}
       steps:
        - uses: actions/checkout@v3
@@ -53,9 +53,6 @@
       runs-on: windows-latest
       steps:
       - uses: actions/checkout@v3
-      - name: Download chocolatey
-        shell: pwsh
-        run: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
       - name: Install dependencies
         shell: pwsh
         run: choco install cmake git python --version 3.10 -y
