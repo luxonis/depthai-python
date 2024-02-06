@@ -92,7 +92,6 @@ print_and_exec () {
     $*
 }
 
-# Version comparison function
 version_lte() {
     [[ "$1" == "$(echo -e "$1\n$2" | sort -V | head -n1)" ]]
 }
@@ -115,77 +114,79 @@ elif [ -f /etc/os-release ]; then
 
     # Correctly determine if the architecture is ARM or aarch64
     IS_ARM=false
-    if [[ $(uname -m) =~ ^arm || $(uname -m) == "aarch64" ]]; then
+    if [[ $(uname -m) =~ ^arm* || $(uname -m) == "aarch64" ]]; then
         IS_ARM=true
     fi
 
-    # Assuming debian_pkgs_pre22_04, debian_pkgs_post22_04, ubuntu_pkgs_pre22_04, and ubuntu_pkgs_post22_04 are defined
-
-    source /etc/os-release
-
-    IS_ARM=false
-    if [[ $(uname -m) =~ ^arm || $(uname -m) == "aarch64" ]]; then
-        IS_ARM=true
+    # Determine if ubuntu or debian based
+    OS_BASE=""
+    if [[ "$ID" == "ubuntu" || "$ID_LIKE" == "ubuntu" ]]; then
+        OS_BASE="ubuntu"
+    elif [[ "$ID" == "debian" || "$ID_LIKE" == "debian" ]]; then
+        OS_BASE="debian"
     fi
 
-    # Check if the version is less than or equal to 22.04 (Ubuntu) or 11 (Debian)
-    if { [[ "$ID" == "debian" ]] && version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" ]] && version_lte "$VERSION_ID" "21.10"; }; then
+    # Check if the version is less than or equal to the thresholds
+    if { [[ "$OS_BASE" == "debian" ]] && version_lte "$VERSION_ID" "11"; } || 
+    { [[ "$OS_BASE" == "ubuntu" ]] && version_lte "$VERSION_ID" "21.10"; }; then
+
+        echo "Using pre-22.04 package list"
         if $IS_ARM; then
-            echo "Using pre-22.04 package list for ARM"
-            debian_arm_pkgs=("${debian_arm_pkgs[@]}")
+            echo "For ARM architecture"
             # Add libjasper-dev for ARM but not aarch64
-            [[ $(uname -m) =~ ^arm ]] && { debian_arm_pkgs+=("libjasper-dev"); }
-
+            [[ $(uname -m) =~ ^arm* ]] && { debian_arm_pkgs+=("libjasper-dev"); }
             sudo apt-get install -y ${debian_arm_pkgs[@]/${debian_pkgs[@]}/${debian_pkgs_pre22_04[@]}}
-
         else
-            echo "Using pre-22.04 package list"
-
-            sudo apt-get install -y ${debian_pkgs_pre22_04[@]}
+            # Install pre-22.04 packages for Debian or Ubuntu
+            sudo apt-get install -y "${debian_pkgs_pre22_04[@]}"
         fi
-        
+
         python3 -m pip install --upgrade pip
 
-        # As set -e is set, retrieve the return value without exiting
-        RET=0
-        dpkg -s uvcdynctrl > /dev/null 2>&1 || RET=$? || true
-        # is uvcdynctrl installed
-        if [[ "$RET" == "0" ]]; then
-            echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
-            echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
-            echo -e "\033[33mYou can do so by running the following commands:\033[0m"
+        # Check for uvcdynctrl package and recommend removal if found
+        if dpkg -s uvcdynctrl &> /dev/null; then
+            echo -e "\033[33mWe detected 'uvcdynctrl' installed on your system.\033[0m"
+            # Instructions for removal
             echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
             echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
-            echo ""
         fi
 
-    # Check if the version is greater than 22.04 (Ubuntu) or 11 (Debian)
-    elif { [[ "$ID" == "debian" ]] && ! version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" ]] && ! version_lte "$VERSION_ID" "21.10"; }; then
-        if $IS_ARM; then
-            echo "Using post-22.04 package list for ARM"
-            debian_arm_pkgs=("${debian_arm_pkgs[@]}")
-            # Add libjasper-dev for ARM but not aarch64
-            [[ $(uname -m) =~ ^arm ]] && { debian_arm_pkgs+=("libjasper-dev"); }
-            # Switching libbtbb2 to libtbbmalloc2
-            debian_arm_pkgs=("${debian_arm_pkgs[@]/libtbb2/libtbbmalloc2}")
-
-            sudo apt-get install -y ${debian_arm_pkgs[@]/${debian_pkgs[@]}/${debian_pkgs_post22_04[@]}}
-
-        else
-            echo "Using post-22.04 package list"
-            
-            sudo apt-get install -y ${debian_pkgs_post22_04[@]}
-        fi 
         
-        python3 -m pip install --upgrade pip
-
-        OS_VERSION=$(lsb_release -r |cut -f2)
-        if [ "$OS_VERSION" == "21.04" ]; then
+        if [ "$VERSION_ID" == "21.04" ]; then
             echo -e "\033[33mThere are known issues with running our demo script on Ubuntu 21.04, due to package \"python3-pyqt5.sip\" not being in a correct version (>=12.9)\033[0m"
             echo -e "\033[33mWe recommend installing the updated version manually using the following commands\033[0m"
             echo -e "\033[33m$ wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pyqt5-sip/python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
             echo -e "\033[33m$ sudo dpkg -i python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
             echo ""
+        fi
+
+    # Check if the version is greater than the thresholds
+    elif { [[ "$OS_BASE" == "debian" ]] && ! version_lte "$VERSION_ID" "11"; } || 
+        { [[ "$OS_BASE" == "ubuntu" ]] && ! version_lte "$VERSION_ID" "21.10"; }; then
+
+        echo "Using post-22.04 package list"
+        if $IS_ARM; then
+            echo "For ARM architecture"
+            debian_arm_pkgs=("${debian_arm_pkgs[@]}")
+            # Add libjasper-dev for ARM but not aarch64
+            [[ $(uname -m) =~ ^arm* ]] && { debian_arm_pkgs+=("libjasper-dev"); }
+            # Switching libbtbb2 to libtbbmalloc2
+            debian_arm_pkgs=("${debian_arm_pkgs[@]/libtbb2/libtbbmalloc2}")
+
+            sudo apt-get install -y ${debian_arm_pkgs[@]/${debian_pkgs[@]}/${debian_pkgs_post22_04[@]}}
+        else
+            # Install post-22.04 packages for Debian or Ubuntu
+            sudo apt-get install -y "${debian_pkgs_post22_04[@]}"
+        fi
+
+        python3 -m pip install --upgrade pip
+
+        # Check for uvcdynctrl package and recommend removal if found
+        if dpkg -s uvcdynctrl &> /dev/null; then
+            echo -e "\033[33mWe detected 'uvcdynctrl' installed on your system.\033[0m"
+            # Instructions for removal
+            echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
+            echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
         fi
 
     elif [[ "$ID" == "fedora" ]]; then
