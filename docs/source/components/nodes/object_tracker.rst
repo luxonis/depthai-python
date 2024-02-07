@@ -73,7 +73,7 @@ A similar comparison of object trackers with more information can be found `here
 Maximum number of tracked objects
 #################################
 
-:code:`SHORT_TERM_KCF` can track up to 60 objects at once, while all other trackers can (theoretically) track up to 1000 objects at once.
+**ObjectTracker** node can track up to 60 objects at once. At the moment the firmware crashes if there are more than 60 objects to track.
 
 Usage
 #####

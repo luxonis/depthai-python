@@ -43,6 +43,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
         .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
         .value("THE_1440X1080", ColorCameraProperties::SensorResolution::THE_1440X1080)
+        .value("THE_1352X1012", ColorCameraProperties::SensorResolution::THE_1352X1012)
+        .value("THE_2024X1520", ColorCameraProperties::SensorResolution::THE_2024X1520)
         ;
 
     colorCameraPropertiesColorOrder
@@ -188,6 +190,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getIspNumFramesPool", &ColorCamera::getIspNumFramesPool, DOC(dai, node, ColorCamera, getIspNumFramesPool))
         .def("setCamera", &ColorCamera::setCamera, py::arg("name"), DOC(dai, node, ColorCamera, setCamera))
         .def("getCamera", &ColorCamera::getCamera, DOC(dai, node, ColorCamera, getCamera))
+
+        .def("setRawOutputPacked", &ColorCamera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, ColorCamera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;

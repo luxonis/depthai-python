@@ -60,23 +60,28 @@ void bind_camera(pybind11::module& m, void* pCallstack){
     cameraProperties
         .def_readwrite("initialControl", &CameraProperties::initialControl)
         .def_readwrite("boardSocket", &CameraProperties::boardSocket)
+        .def_readwrite("cameraName", &CameraProperties::cameraName)
         .def_readwrite("imageOrientation", &CameraProperties::imageOrientation)
         .def_readwrite("colorOrder", &CameraProperties::colorOrder)
         .def_readwrite("interleaved", &CameraProperties::interleaved)
         .def_readwrite("fp16", &CameraProperties::fp16)
+
         .def_readwrite("previewHeight", &CameraProperties::previewHeight)
         .def_readwrite("previewWidth", &CameraProperties::previewWidth)
         .def_readwrite("videoHeight", &CameraProperties::videoHeight)
         .def_readwrite("videoWidth", &CameraProperties::videoWidth)
         .def_readwrite("stillHeight", &CameraProperties::stillHeight)
         .def_readwrite("stillWidth", &CameraProperties::stillWidth)
-        // .def_readwrite("resolution", &CameraProperties::resolution)
+        .def_readwrite("resolutionHeight", &CameraProperties::resolutionHeight)
+        .def_readwrite("resolutionWidth", &CameraProperties::resolutionWidth)
+
         .def_readwrite("fps", &CameraProperties::fps)
         .def_readwrite("isp3aFps", &CameraProperties::isp3aFps)
         .def_readwrite("sensorCropX", &CameraProperties::sensorCropX)
         .def_readwrite("sensorCropY", &CameraProperties::sensorCropY)
         .def_readwrite("previewKeepAspectRatio", &CameraProperties::previewKeepAspectRatio)
         .def_readwrite("ispScale", &CameraProperties::ispScale)
+        .def_readwrite("sensorType", &CameraProperties::sensorType)
 
         .def_readwrite("numFramesPoolRaw", &CameraProperties::numFramesPoolRaw)
         .def_readwrite("numFramesPoolIsp", &CameraProperties::numFramesPoolIsp)
@@ -91,6 +96,7 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def_readwrite("calibAlpha", &CameraProperties::calibAlpha)
         .def_readwrite("warpMeshStepWidth", &CameraProperties::warpMeshStepWidth)
         .def_readwrite("warpMeshStepHeight", &CameraProperties::warpMeshStepHeight)
+        .def_readwrite("rawPacked", &CameraProperties::rawPacked)
     ;
 
     // Camera node
@@ -159,6 +165,7 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         .def("setCalibrationAlpha", &Camera::setCalibrationAlpha, py::arg("alpha"), DOC(dai, node, Camera, setCalibrationAlpha))
         .def("getCalibrationAlpha", &Camera::getCalibrationAlpha, DOC(dai, node, Camera, getCalibrationAlpha))
 
+        .def("setRawOutputPacked", &Camera::setRawOutputPacked, py::arg("packed"), DOC(dai, node, Camera, setRawOutputPacked))
         ;
     // ALIAS
     daiNodeModule.attr("Camera").attr("Properties") = cameraProperties;

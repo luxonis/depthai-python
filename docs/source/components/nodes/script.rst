@@ -138,6 +138,31 @@ GPIO 40 drives FSYNC signal for both 4-lane cameras, and we have used the code b
     toggleVal = not toggleVal
     ret = GPIO.write(MX_PIN, toggleVal)  # Toggle the GPIO
 
+Time synchronization
+####################
+
+Script node has access to both device (internal) clock and also synchronized host clock. Host clock is synchronized with device clock at below 2.5ms precision at 1σ, :ref:`more information here <Host clock syncing>`.
+
+.. code-block:: python
+
+    import time
+    interval = 60
+    ctrl = CameraControl()
+    ctrl.setCaptureStill(True)
+    previous = 0
+    while True:
+        time.sleep(0.001)
+
+        tnow_full = Clock.nowHost() # Synced clock with host
+        # Clock.now() -> internal/device clock
+        # Clock.offsetToHost() -> Offset between internal/device clock and host clock
+
+        now = tnow_full.seconds
+        if now % interval == 0 and now != previous:
+            previous = now
+            node.warn(f'{tnow_full}')
+            node.io['out'].send(ctrl)
+
 Using DepthAI :ref:`Messages <components_messages>`
 ###################################################
 
