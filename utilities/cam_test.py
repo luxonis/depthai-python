@@ -137,6 +137,7 @@ color_res_opts = {
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '962': dai.ColorCameraProperties.SensorResolution.THE_1280X962,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1012': dai.ColorCameraProperties.SensorResolution.THE_1352X1012,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
     '1500': dai.ColorCameraProperties.SensorResolution.THE_2000X1500,
     '1520': dai.ColorCameraProperties.SensorResolution.THE_2028X1520,
@@ -590,3 +591,5 @@ with dai.Device() as device:
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()
