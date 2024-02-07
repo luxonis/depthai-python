@@ -297,6 +297,7 @@ for c in cam_list:
     # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
     # cam[c].initialControl.setMisc("hdr-exposure-ratio", 4)  # enables HDR when set `> 1`, current options: 2, 4, 8
     # cam[c].initialControl.setMisc("hdr-local-tone-weight", 75)  # default 75, range 0..100
+    # cam[c].initialControl.setMisc("high-conversion-gain", 0)  # 1 to enable (default on supported sensors)
     for kvPair in args.misc_controls:
         cam[c].initialControl.setMisc(*kvPair)
     control.out.link(cam[c].inputControl)
@@ -407,6 +408,7 @@ with dai.Device(*dai_device_args) as device:
     chroma_denoise = 0
     control = 'none'
     show = args.show_meta
+    high_conversion_gain = 1
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -508,10 +510,17 @@ with dai.Device(*dai_device_args) as device:
             print("ToF toggling f_mod value to:", f_mod)
             tofConfig.depthParams.freqModUsed = f_mod
             tofCfgQueue.send(tofConfig)
-        elif key == ord('h') and tof:
-            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
-            print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
-            tofCfgQueue.send(tofConfig)
+        elif key == ord('h'):
+            if tof:
+                tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
+                print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
+                tofCfgQueue.send(tofConfig)
+            else:
+                high_conversion_gain = 1 - high_conversion_gain
+                print("High conversion gain:", high_conversion_gain)
+                ctrl = dai.CameraControl()
+                ctrl.setMisc("high-conversion-gain", high_conversion_gain)
+                controlQueue.send(ctrl)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
