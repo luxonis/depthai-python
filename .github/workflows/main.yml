@@ -15,6 +15,7 @@ on:
     - develop
     - rvc3_support
     - rvc3_develop
+    - rvc3_custom_segmentation
     tags:
     - 'v*'
 
