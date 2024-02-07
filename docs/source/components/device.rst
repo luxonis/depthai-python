@@ -56,7 +56,7 @@ subnet, you can specify the device (either with MxID, IP, or USB port name) you 
       # ...
 
 Host clock syncing
-==================
+##################
 
 When depthai library connects to a device, it automatically syncs device's timestamp to host's timestamp. Timestamp syncing happens continuously at around 5 second intervals,
 and can be configured via API (example script below).
