@@ -74,9 +74,9 @@ void bind_imgdetections(pybind11::module& m, void* pCallstack){
     imgDetections
         .def(py::init<>(), DOC(dai, ImgDetections, ImgDetections))
         .def_property("detections", [](ImgDetections& det) { return &det.detections; }, [](ImgDetections& det, std::vector<ImgDetection> val) { det.detections = val; }, DOC(dai, ImgDetections, detections))
-        .def("getTimestamp", &ImgDetections::getTimestamp, DOC(dai, ImgDetections, getTimestamp))
-        .def("getTimestampDevice", &ImgDetections::getTimestampDevice, DOC(dai, ImgDetections, getTimestampDevice))
-        .def("getSequenceNum", &ImgDetections::getSequenceNum, DOC(dai, ImgDetections, getSequenceNum))
+        .def("getTimestamp", &ImgDetections::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
+        .def("getTimestampDevice", &ImgDetections::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
+        .def("getSequenceNum", &ImgDetections::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
         .def("setTimestamp", &ImgDetections::setTimestamp, DOC(dai, ImgDetections, setTimestamp))
         .def("setTimestampDevice", &ImgDetections::setTimestampDevice, DOC(dai, ImgDetections, setTimestampDevice))
         .def("setSequenceNum", &ImgDetections::setSequenceNum, DOC(dai, ImgDetections, setSequenceNum))

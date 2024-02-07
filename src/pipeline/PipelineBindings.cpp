@@ -93,8 +93,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getNode", static_cast<std::shared_ptr<Node> (Pipeline::*)(Node::Id)>(&Pipeline::getNode), DOC(dai, Pipeline, getNode))
         // .def("getNode", static_cast<std::shared_ptr<Node> (Pipeline::*)(Node::Id) const>(&Pipeline::getNode), DOC(dai, Pipeline, getNode))
         // .def("getNode", static_cast<std::shared_ptr<Node> (Pipeline::*)(Node::Id)>(&Pipeline::getNode), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getNode))
-        // .def("getConnections", &Pipeline::getConnections, DOC(dai, Pipeline, getConnections), DOC(dai, Pipeline, getConnections))
-        // .def("getConnectionMap", &Pipeline::getConnectionMap, DOC(dai, Pipeline, getConnectionMap), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getConnectionMap))
+        .def("getConnections", &Pipeline::getConnections, DOC(dai, Pipeline, getConnections), DOC(dai, Pipeline, getConnections))
+        .def("getConnectionMap", &Pipeline::getConnectionMap, DOC(dai, Pipeline, getConnectionMap), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getConnectionMap))
         // .def("getNodeMap", &Pipeline::getNodeMap, DOC(dai, Pipeline, getNodeMap), py::return_value_policy::reference_internal, DOC(dai, Pipeline, getNodeMap))
         // .def("link", &Pipeline::link, DOC(dai, Pipeline, link), DOC(dai, Pipeline, link))
         // .def("unlink", &Pipeline::unlink, DOC(dai, Pipeline, unlink), DOC(dai, Pipeline, unlink))
@@ -147,6 +147,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
         .def("createUVC", &Pipeline::create<node::UVC>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
         ;
 
 
