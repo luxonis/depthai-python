@@ -154,8 +154,13 @@ jobs:
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheel
         run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
-      - name: Auditing wheel
-        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/audited/; done
+      - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
+        run: |
+          python3 -m pip install -U wheel auditwheel
+          for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/preaudited/; done
+          for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
+          mkdir -p wheelhouse/audited/
+          for whl in wheelhouse/preaudited/*linux_armv6l*.whl; do cp "$whl" wheelhouse/audited/$(basename $whl); done
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -560,13 +565,13 @@ jobs:
         uses: codex-/return-dispatch@v1
         id: return_dispatch
         with:
-          token: ${{ secrets.HIL_CORE_DISPATCH_TOKEN }} # Note this is NOT GITHUB_TOKEN but a PAT 
+          token: ${{ secrets.HIL_CORE_DISPATCH_TOKEN }} # Note this is NOT GITHUB_TOKEN but a PAT
           ref: main # or refs/heads/target_branch
           repo: depthai-core-hil-tests
           owner: luxonis
           workflow: regression_test.yml
-          workflow_inputs: '{"commit": "${{ github.ref }}", "sha": "${{ github.sha }}", "parent_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' 
-          workflow_timeout_seconds: 120 # Default: 300
+          workflow_inputs: '{"commit": "${{ github.ref }}", "parent_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+          workflow_timeout_seconds: 300 # was 120  Default: 300
 
       - name: Release
         run: echo "https://github.com/luxonis/depthai-core-hil-tests/actions/runs/${{steps.return_dispatch.outputs.run_id}}" >> $GITHUB_STEP_SUMMARY

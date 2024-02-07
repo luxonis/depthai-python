@@ -149,6 +149,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
         .def("createPointCloud", &Pipeline::create<node::PointCloud>)
         .def("createUVC", &Pipeline::create<node::UVC>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
         ;
 
 
