@@ -49,7 +49,7 @@ from itertools import cycle
 from pathlib import Path
 import sys
 import signal
-
+import math
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -409,6 +409,12 @@ with dai.Device(*dai_device_args) as device:
     control = 'none'
     show = args.show_meta
     high_conversion_gain = 1
+    print(args.misc_controls)
+    args_misc_dict = dict(args.misc_controls)
+    
+    hdr_exp_ratio = int(math.log2(float(args_misc_dict.get('hdr-exposure-ratio', 1))))
+    hdr_local_tone_weight = int(32 * float(args_misc_dict.get('hdr-local-tone-weight', 0.75)))
+    hdr_on = (hdr_exp_ratio > 0)
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -505,11 +511,18 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            print("ToF toggling f_mod value to:", f_mod)
-            tofConfig.depthParams.freqModUsed = f_mod
-            tofCfgQueue.send(tofConfig)
+        elif key == ord('g'):
+            if tof:
+                f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+                print("ToF toggling f_mod value to:", f_mod)
+                tofConfig.depthParams.freqModUsed = f_mod
+                tofCfgQueue.send(tofConfig)
+            else:
+                if hdr_on:
+                    control = 'hdr_local_tone_weight'
+                    print("Selected control:", control)
+                else:
+                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
         elif key == ord('h'):
             if tof:
                 tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
@@ -599,7 +612,7 @@ with dai.Device(*dai_device_args) as device:
                 floodIntensity = 0
             device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p\\;\'':
+        elif key >= 0 and chr(key) in '34567890[]p\\;\'r':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -628,6 +641,11 @@ with dai.Device(*dai_device_args) as device:
                 control = 'chroma_denoise'
             elif key == ord('p'):
                 control = 'tof_amplitude_min'
+            elif key == ord('r'):
+                if hdr_on:
+                    control = 'hdr_exp_ratio'
+                else:
+                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -637,7 +655,7 @@ with dai.Device(*dai_device_args) as device:
                 change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ] \\ ; \'")
+                print("Please select a control first using keys 3..9 0 [ ] \\ ; \' r g p")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
@@ -690,6 +708,16 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'hdr_exp_ratio':
+                hdr_exp_ratio = clamp(hdr_exp_ratio + change, 0, 3)
+                value = pow(2, hdr_exp_ratio)
+                print("HDR exposure ratio:", value)
+                ctrl.setMisc("hdr-exposure-ratio", value)
+            elif control == 'hdr_local_tone_weight':
+                hdr_local_tone_weight = clamp(hdr_local_tone_weight + change, 0, 32)
+                value = hdr_local_tone_weight / 32
+                print(f"HDR local tone weight (normalized): {value:.2f}")
+                ctrl.setMisc("hdr-local-tone-weight", value)
             elif control == 'tof_amplitude_min' and tof:
                 amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
                 print("Setting min amplitude(confidence) to:", amp_min)
