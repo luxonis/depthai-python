@@ -137,6 +137,7 @@ color_res_opts = {
     '800':  dai.ColorCameraProperties.SensorResolution.THE_800_P,
     '962': dai.ColorCameraProperties.SensorResolution.THE_1280X962,
     '1080': dai.ColorCameraProperties.SensorResolution.THE_1080_P,
+    '1012': dai.ColorCameraProperties.SensorResolution.THE_1352X1012,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
     '1500': dai.ColorCameraProperties.SensorResolution.THE_2000X1500,
     '1520': dai.ColorCameraProperties.SensorResolution.THE_2028X1520,
@@ -146,7 +147,7 @@ color_res_opts = {
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
     '13mp': dai.ColorCameraProperties.SensorResolution.THE_13_MP,
-    '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
+    '48mp': dai.ColorCameraProperties.SensorResolution.THE_5312X6000,
 }
 
 def clamp(num, v0, v1):
@@ -186,6 +187,7 @@ tof = {}
 xout = {}
 xout_raw = {}
 xout_tof_amp = {}
+xout_tof_int = {}
 xout_tof_isp = {}  # TMP dummy, raw-only seems to hang on ColorCamera
 streams = []
 tofConfig = {}
@@ -203,6 +205,8 @@ for c in cam_list:
             xout_tof_isp[c].setStreamName(name)
             streams.append(name)
             cam[c].isp.link(xout_tof_isp[c].input)
+            # Temporarily this may be needed if streaming doesn't work
+            #cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
         if args.tof_raw:
             tofEnableRaw = True
         else:
@@ -232,6 +236,11 @@ for c in cam_list:
                 xout_tof_amp[c].setStreamName(amp_name)
                 streams.append(amp_name)
                 tof[c].amplitude.link(xout_tof_amp[c].input)
+                int_name = 'tof_intensity_' + c
+                xout_tof_int[c] = pipeline.create(dai.node.XLinkOut)
+                xout_tof_int[c].setStreamName(int_name)
+                streams.append(int_name)
+                tof[c].intensity.link(xout_tof_int[c].input)
     elif cam_type_color[c]:
         cam[c] = pipeline.createColorCamera()
         cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -254,8 +263,8 @@ for c in cam_list:
     #cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
     # When set, takes effect after the first 2 frames
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
-    # cam[c].initialControl.setMisc("stride-align", 1)
-    # cam[c].initialControl.setMisc("scanline-align", 1)
+    cam[c].initialControl.setMisc("stride-align", 1)
+    cam[c].initialControl.setMisc("scanline-align", 1)
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
@@ -365,7 +374,7 @@ with dai.Device() as device:
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
                 cam_skt = c.split('_')[-1]
-                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('dummy')):
+                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_') or c.startswith('dummy')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
@@ -385,7 +394,7 @@ with dai.Device() as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_'):
                     # Resize is done to skip the +50 black lines we get with RVC3.
                     # TODO: handle RAW10/RAW12 to work with getFrame/getCvFrame
                     payload = pkt.getData().view(np.uint16).copy()
@@ -396,7 +405,11 @@ with dai.Device() as device:
                         print('Saving:', filename)
                         payload.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
-                    frame = payload * (1 << 6)
+                    type = pkt.getType()
+                    multiplier = 1
+                    if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
+                    if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
+                    frame = frame * multiplier
                     # Debayer color for preview/png
                     if cam_type_color[cam_skt]:
                         # See this for the ordering, at the end of page:
@@ -578,3 +591,5 @@ with dai.Device() as device:
                 tofConfig.depthParams.minimumAmplitude = amp_min
                 tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
+
+    print()
