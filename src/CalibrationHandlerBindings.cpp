@@ -63,6 +63,9 @@ void CalibrationHandlerBindings::bind(pybind11::module& m, void* pCallstack){
 
         .def("setBoardInfo", py::overload_cast<std::string, std::string>(&CalibrationHandler::setBoardInfo), py::arg("boardName"), py::arg("boardRev"), DOC(dai, CalibrationHandler, setBoardInfo))
         .def("setBoardInfo", py::overload_cast<std::string, std::string, std::string, std::string, std::string, std::string, uint64_t, uint32_t, std::string>(&CalibrationHandler::setBoardInfo), py::arg("productName"), py::arg("boardName"), py::arg("boardRev"), py::arg("boardConf"), py::arg("hardwareConf"), py::arg("batchName"), py::arg("batchTime"), py::arg("boardOptions"), py::arg("boardCustom") = "", DOC(dai, CalibrationHandler, setBoardInfo, 2))
+        .def("setBoardInfo", py::overload_cast<std::string, std::string, std::string, std::string, std::string, std::string, std::string, uint64_t, uint32_t, std::string>(&CalibrationHandler::setBoardInfo), py::arg("deviceName"), py::arg("productName"), py::arg("boardName"), py::arg("boardRev"), py::arg("boardConf"), py::arg("hardwareConf"), py::arg("batchName"), py::arg("batchTime"), py::arg("boardOptions"), py::arg("boardCustom") = "", DOC(dai, CalibrationHandler, setBoardInfo, 3))
+
+        .def("setDeviceName", &CalibrationHandler::setDeviceName, py::arg("deviceName"), DOC(dai, CalibrationHandler, setDeviceName))
         .def("setProductName", &CalibrationHandler::setProductName, py::arg("productName"), DOC(dai, CalibrationHandler, setProductName))
 
         .def("setCameraIntrinsics", py::overload_cast<CameraBoardSocket, std::vector<std::vector<float>>, Size2f>(&CalibrationHandler::setCameraIntrinsics), py::arg("cameraId"), py::arg("intrinsics"), py::arg("frameSize"), DOC(dai, CalibrationHandler, setCameraIntrinsics))
