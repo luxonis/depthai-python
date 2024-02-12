@@ -65,8 +65,8 @@ def socket_type_pair(arg):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True, False], ['left', False, False],
-                             ['right', False, False], ['camd', True, False]],
+                    default=[['rgb', True, False, False], ['left', False, False, False],
+                             ['right', False, False, False], ['camd', True, False, False]],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of] / th[ermal]."
                     "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
