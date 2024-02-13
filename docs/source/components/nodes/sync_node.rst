@@ -2,40 +2,22 @@ Sync
 ====
 
 The Sync node is used for synchronizing multiple input streams based on their timestamps. It outputs a grouped message containing synchronized frames from the input streams.
-The output message is a :ref:`MessageGroup` containing synchronized messages from all the input streams. These can be demultiplexed using the :ref:`Demux` node.
+The output message is a :ref:`MessageGroup` containing synchronized messages from all the input streams. These can be demultiplexed using the :ref:`MessageDemux` node.
 
-How to Use
-##########
+How to Place it
+###############
 
 .. tabs::
 
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    sync = pipeline.create(dai.node.MessageDemux)
-
-    # Configure threshold for timestamp alignment
-    sync.setSyncThreshold(timedelta(milliseconds=50))
-
-    # Configure inputs to be synchronized
-    sync.inputs["input1"]
-    sync.inputs["input2"]
-
-    # ...
+    sync = pipeline.create(dai.node.Sync)
 
   .. code-tab:: c++
 
     dai::Pipeline pipeline;
-    auto sync = pipeline.create<dai::node::MessageDemux>();
-
-    // Configure threshold for timestamp alignment
-    sync->setSyncThreshold(std::chrono::milliseconds(50));
-
-    // Configure inputs to be synchronized
-    sync->inputs["input1"];
-    sync->inputs["input2"];
-
-    // ...
+    auto sync = pipeline.create<dai::node::Sync>();
 
 
 Inputs and Outputs
@@ -63,6 +45,43 @@ Message Synchronization
 ########################
 
 The Sync node aligns incoming messages based on their timestamps. The synchronization criteria and behavior can be configured using the :code:`depthai.node.Sync.setSyncThreshold` and :code:`depthai.node.Sync.setSyncAttempts`  method. More info in the :ref:`API Reference <reference>`.
+
+
+Usage
+#####
+
+.. tabs::
+
+  .. code-tab:: py
+
+    pipeline = dai.Pipeline()
+    sync = pipeline.create(dai.node.Sync)
+
+    # Configure threshold for timestamp alignment
+    sync.setSyncThreshold(timedelta(milliseconds=50))
+
+    # Configure inputs to be synchronized
+    camRgb.video.link(sync.inputs["input1"])
+    stereo.depth.link(sync.inputs["input2"])
+
+    sync.output.link(xout.input)
+    # ...
+
+  .. code-tab:: c++
+
+    dai::Pipeline pipeline;
+    auto sync = pipeline.create<dai::node::Sync>();
+
+    // Configure threshold for timestamp alignment
+    sync->setSyncThreshold(std::chrono::milliseconds(50));
+
+    // Configure inputs to be synchronized
+    camRgb.video.link(sync->input["input1"]);
+    stereo.depth.link(sync->input["input2"]);
+
+    sync->out.link(xout.input);
+    // ...
+
 
 
 Examples of Functionality

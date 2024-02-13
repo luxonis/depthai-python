@@ -1,8 +1,8 @@
-Demux
-=====
+MessageDemux
+============
 
 
-The Demux (Demultiplexer) node is used to separate a `MessageGroup` into individual outputs. It currently serves as way to demultiplex the output of :ref:`Sync` node. 
+The MessageDemux (Demultiplexer) node is used to separate a :ref:`MessageGroup` into individual outputs. It currently serves as way to demultiplex the output of :ref:`Sync` node. 
 
 How to Place It
 ###############
@@ -28,7 +28,7 @@ Inputs and Outputs
                  ┌───────────────────┐
   input          │                   │
   ──────────────►│                   │
-                 │       Demux       │        output1
+                 │    MessageDemux   │        output1
                  │                   ├───────────►
                  │                   │        output2
                  │                   ├───────────►
@@ -43,7 +43,7 @@ Inputs and Outputs
 Usage
 #####
 
-The Demux node is particularly useful for handling different types of data coming from a single source. 
+The MessageDemux node is particularly useful for handling different types of data coming from a single source. 
 For example, when the :ref:`Sync` node is used to synchronize the outputs of multiple nodes, the output of the Sync node is a :ref:`MessageGroup` containing all the messages from the synchronized nodes. The Demux node can be used to separate the messages into individual streams.
 
 .. tabs::
