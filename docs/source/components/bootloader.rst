@@ -4,9 +4,9 @@ Bootloader
 ==========
 
 DepthAI bootloader is a small program which handles the booting process, either by **booting the flashed application** (see :ref:`Standalone mode`),
-or by **initializing the OAK PoE camera** so DepthAI API can connect to it. OAK PoE cameras already come with bootloader flashed at the factory.
+or by **initializing the OAK PoE camera** so DepthAI API can connect to it. OAK PoE cameras already come with factory bootloader flashed at the factory.
 
-Bootloader is part of the ``depthai`` library, so to eg. flash the newest bootloader, you should use the newest ``depthai`` library.
+Bootloader is bundled inside with the ``depthai`` library, so to eg. flash the newest bootloader, you should use the newest ``depthai`` library.
 
 Device Manager
 ##############
@@ -80,6 +80,16 @@ Device Manager will try to flash the user bootloader first, if flashed (factory)
 * **Flash Factory Bootloader**: If you want to flash the factory bootloader, you can use this button. It will flash the factory bootloader, even if the user bootloader is already flashed.
 * **Factory reset** will erase the whole flash content and re-flash it with only the USB or NETWORK bootloader. Flashed application (pipeline, assets) and bootloader configurations will be lost.
 * **Boot into USB recovery mode** will force eg. OAK PoE camera to be available through the USB connector, even if its boot pins are set to PoE booting. It is mostly used by our firmware developers.
+
+Factory and User bootloader
+###########################
+
+There are two types of bootloaders:
+
+- **Factory bootloader**: bootloader that is flashed in the factory. We don't recommend re-flashing this bootloader, as it is not meant to be edited by end users.
+- **User bootloader**: bootloader that can be flashed by the user. If booting is unsuccessful (eg. gets corrupted when flashing), it will fallback to factory bootloader.
+
+USB devices don't support user bootloader. If device has User bootloader, it will be used by default. If user bootloader is not flashed, it will fallback to Factory bootloader.
 
 Boot switches
 #############
