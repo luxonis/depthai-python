@@ -29,8 +29,8 @@ void bind_depthencoder(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    hueEncodingType.value("LINEAR", HueEncodingType::LINEAR, DOC(dai, DepthEncoderProperties, HueEncodingType, LINEAR))
-        .value("LOGARITHMIC", HueEncodingType::LOGARITHMIC, DOC(dai, DepthEncoderProperties, HueEncodingType, LOGARITHMIC));
+    hueEncodingType.value("LINEAR", HueEncodingType::LINEAR)
+        .value("LOGARITHMIC", HueEncodingType::LOGARITHMIC);
     // DepthEncoder properties
     depthEncoderProperties.def_readwrite("outputType", &DepthEncoderProperties::outputType, DOC(dai, DepthEncoderProperties, outputType))
         .def_readwrite("numFramesPool", &DepthEncoderProperties::numFramesPool, DOC(dai, DepthEncoderProperties, numFramesPool))
