@@ -558,7 +558,7 @@ jobs:
   #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   notify_hil_workflow_linux_x86_64:
-    needs: [build-linux-x86_64]
+    needs: [build-linux-armhf, build-linux-x86_64]
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch an action and get the run ID
