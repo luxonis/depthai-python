@@ -16,15 +16,24 @@ pipeline = dai.Pipeline()
 
 # Thermal camera
 thermal_cam = pipeline.create(dai.node.Camera)
-thermal_cam.setBoardSocket(dai.CameraBoardSocket.CAM_E)
-thermal_cam.setPreviewSize(256, 192)
+width, height = -1, -1
+thermal_found = False
+for features in device.getConnectedCameraFeatures():
+    if dai.CameraSensorType.THERMAL in features.supportedTypes:
+        thermal_found = True
+        thermal_cam.setBoardSocket(features.socket)
+        width, height = features.width, features.height
+        break
+if not thermal_found:
+    raise RuntimeError("No thermal camera found!")
+thermal_cam.setPreviewSize(width, height)
 
-# XLinkOut
+# Output raw: FP16 temperature data (degrees Celsius)
 xout_raw = pipeline.create(dai.node.XLinkOut)
 xout_raw.setStreamName("thermal_raw")
 thermal_cam.raw.link(xout_raw.input)
 
-# XLinkOut
+# Output preview,video, isp: RGB or NV12 or YUV420 thermal image.
 xout_image = pipeline.create(dai.node.XLinkOut)
 xout_image.setStreamName("image")
 thermal_cam.preview.link(xout_image.input)
@@ -40,9 +49,9 @@ IMAGE_WINDOW_NAME = "image"
 cv2.namedWindow(RAW_WINDOW_NAME, cv2.WINDOW_NORMAL)
 cv2.namedWindow(IMAGE_WINDOW_NAME, cv2.WINDOW_NORMAL)
 cv2.moveWindow(RAW_WINDOW_NAME, 0, 0)
-cv2.resizeWindow(RAW_WINDOW_NAME, 256 * 4, 192 * 4)
-cv2.moveWindow(IMAGE_WINDOW_NAME, 256 * 4, 0)
-cv2.resizeWindow(IMAGE_WINDOW_NAME, 256 * 4, 192 * 4)
+cv2.resizeWindow(RAW_WINDOW_NAME, width * 4, height * 4)
+cv2.moveWindow(IMAGE_WINDOW_NAME, width * 4, 0)
+cv2.resizeWindow(IMAGE_WINDOW_NAME, width * 4, height * 4)
 cv2.setMouseCallback(RAW_WINDOW_NAME, on_mouse)
 cv2.setMouseCallback(IMAGE_WINDOW_NAME, on_mouse)
 
