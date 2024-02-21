@@ -11,6 +11,14 @@ inside the code:
 #. `extended`: suitable for short range objects. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity-depth-mode>`__
 #. `subpixel`: suitable for long range. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#subpixel-disparity-depth-mode>`__
 
+Stereo Alpha Param
+##################
+
+With `--alpha` you can select how much cropping will be done when rectifying the image, which is useful with Wide FOV OAK cameras. By default it's 0.0, which is cropping the most, so all points have valid disparity.
+If you set it to 1.0, there will be no cropping, but the disparity will be valid only in the center and corners of the image (invalid at the sides).
+
+
+
 .. rubric:: Similar samples:
 
 - :ref:`Depth Preview`
