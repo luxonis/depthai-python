@@ -17,7 +17,7 @@ Stereo Alpha Param
 With `--alpha` you can select how much cropping will be done when rectifying the image, which is useful with Wide FOV OAK cameras. By default it's 0.0, which is cropping the most, so all points have valid disparity.
 If you set it to 1.0, there will be no cropping, but the disparity will be valid only in the center and corners of the image (invalid at the sides).
 
-
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/887d489a-6bf6-41ac-9b8f-06ab7b0cd488
 
 .. rubric:: Similar samples:
 
