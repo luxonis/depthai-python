@@ -649,6 +649,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("readCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibrationRaw(); }, DOC(dai, DeviceBase, readCalibrationRaw))
         .def("readFactoryCalibrationRaw", [](DeviceBase& d) { py::gil_scoped_release release; return d.readFactoryCalibrationRaw(); }, DOC(dai, DeviceBase, readFactoryCalibrationRaw))
         .def("readCcmEepromRaw", [](DeviceBase& d, CameraBoardSocket s, int sz, int o) { py::gil_scoped_release release; return d.readCcmEepromRaw(s, sz, o); }, py::arg("socket"), py::arg("size"), py::arg("offset") = 0, DOC(dai, DeviceBase, readCcmEepromRaw))
+        .def("writeCcmEepromRaw", [](DeviceBase& d, CameraBoardSocket s, std::vector<uint8_t> data, int o) { py::gil_scoped_release release; return d.writeCcmEepromRaw(s, data, o); }, py::arg("socket"), py::arg("data"), py::arg("offset") = 0, DOC(dai, DeviceBase, writeCcmEepromRaw))
         .def("flashEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashEepromClear(); }, DOC(dai, DeviceBase, flashEepromClear))
         .def("flashFactoryEepromClear", [](DeviceBase& d) { py::gil_scoped_release release; d.flashFactoryEepromClear(); }, DOC(dai, DeviceBase, flashFactoryEepromClear))
         .def("setTimesync", [](DeviceBase& d, std::chrono::milliseconds p, int s, bool r) { py::gil_scoped_release release; return d.setTimesync(p,s,r); }, DOC(dai, DeviceBase, setTimesync))
