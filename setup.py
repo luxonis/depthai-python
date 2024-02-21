@@ -209,6 +209,7 @@ setup(
     cmdclass={
         'build_ext': CMakeBuild
     },
+    packages=["depthai_cli"],
     zip_safe=False,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -234,4 +235,9 @@ setup(
         "Topic :: Software Development",
     ],
     python_requires='>=3.6',
+    entry_points={
+        "console_scripts": [
+            'depthai=depthai_cli.depthai:cli'
+        ]
+    }
 )

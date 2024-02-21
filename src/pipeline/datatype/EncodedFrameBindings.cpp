@@ -99,6 +99,8 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            DOC(dai, EncodedFrame, getColorTemperature))
       .def("getLensPosition", &EncodedFrame::getLensPosition,
            DOC(dai, EncodedFrame, getLensPosition))
+      .def("getLensPositionRaw", &EncodedFrame::getLensPositionRaw, 
+           DOC(dai, EncodedFrame, getLensPositionRaw))
       .def("getQuality", &EncodedFrame::getQuality,
            DOC(dai, EncodedFrame, getQuality))
       .def("getBitrate", &EncodedFrame::getBitrate,
