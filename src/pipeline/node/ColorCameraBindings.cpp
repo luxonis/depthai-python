@@ -12,9 +12,9 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
 
     // Node and Properties declare upfront
     py::class_<ColorCameraProperties> colorCameraProperties(m, "ColorCameraProperties", DOC(dai, ColorCameraProperties));
-    py::enum_<ColorCameraProperties::SensorResolution> colorCameraPropertiesSensorResolution(colorCameraProperties, "SensorResolution", DOC(dai, ColorCameraProperties, SensorResolution));
-    py::enum_<ColorCameraProperties::ColorOrder> colorCameraPropertiesColorOrder(colorCameraProperties, "ColorOrder", DOC(dai, ColorCameraProperties, ColorOrder));
-    py::enum_<ColorCameraProperties::WarpMeshSource> colorCameraPropertiesWarpMeshSource(colorCameraProperties, "WarpMeshSource", DOC(dai, ColorCameraProperties, WarpMeshSource));
+    py::enum_<ColorCamera::SensorResolution> colorCameraSensorResolution(m, "SensorResolution", DOC(dai, node, ColorCamera, SensorResolution));
+    py::enum_<ColorCamera::ColorOrder> colorCameraColorOrder(m, "ColorOrder", DOC(dai, node, ColorCamera, ColorOrder));
+    py::enum_<ColorCamera::WarpMeshSource> colorCameraWarpMeshSource(m, "WarpMeshSource", DOC(dai, node, ColorCamera, WarpMeshSource));
     auto colorCamera = ADD_NODE(ColorCamera);
 
     ///////////////////////////////////////////////////////////////////////
@@ -31,77 +31,73 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
 
     // ColorCamera Properties
-    colorCameraPropertiesSensorResolution
-        .value("THE_1080_P", ColorCameraProperties::SensorResolution::THE_1080_P)
-        .value("THE_1200_P", ColorCameraProperties::SensorResolution::THE_1200_P)
-        .value("THE_4_K", ColorCameraProperties::SensorResolution::THE_4_K)
-        .value("THE_5_MP", ColorCameraProperties::SensorResolution::THE_5_MP)
-        .value("THE_12_MP", ColorCameraProperties::SensorResolution::THE_12_MP)
-        .value("THE_4000X3000", ColorCameraProperties::SensorResolution::THE_4000X3000)
-        .value("THE_13_MP", ColorCameraProperties::SensorResolution::THE_13_MP)
-        .value("THE_5312X6000", ColorCameraProperties::SensorResolution::THE_5312X6000)
-        .value("THE_48_MP", ColorCameraProperties::SensorResolution::THE_48_MP)
-        .value("THE_720_P", ColorCameraProperties::SensorResolution::THE_720_P)
-        .value("THE_800_P", ColorCameraProperties::SensorResolution::THE_800_P)
-        .value("THE_240X180", ColorCameraProperties::SensorResolution::THE_240X180)
-        .value("THE_1280X962", ColorCameraProperties::SensorResolution::THE_1280X962)
-        .value("THE_2000X1500", ColorCameraProperties::SensorResolution::THE_2000X1500)
-        .value("THE_2028X1520", ColorCameraProperties::SensorResolution::THE_2028X1520)
-        .value("THE_2104X1560", ColorCameraProperties::SensorResolution::THE_2104X1560)
-        .value("THE_1440X1080", ColorCameraProperties::SensorResolution::THE_1440X1080)
-        .value("THE_1352X1012", ColorCameraProperties::SensorResolution::THE_1352X1012)
-        .value("THE_2024X1520", ColorCameraProperties::SensorResolution::THE_2024X1520)
+    colorCameraSensorResolution
+        .value("THE_1080_P", ColorCamera::SensorResolution::THE_1080_P)
+        .value("THE_1200_P", ColorCamera::SensorResolution::THE_1200_P)
+        .value("THE_4_K", ColorCamera::SensorResolution::THE_4_K)
+        .value("THE_5_MP", ColorCamera::SensorResolution::THE_5_MP)
+        .value("THE_12_MP", ColorCamera::SensorResolution::THE_12_MP)
+        .value("THE_4000X3000", ColorCamera::SensorResolution::THE_4000X3000)
+        .value("THE_13_MP", ColorCamera::SensorResolution::THE_13_MP)
+        .value("THE_5312X6000", ColorCamera::SensorResolution::THE_5312X6000)
+        .value("THE_48_MP", ColorCamera::SensorResolution::THE_48_MP)
+        .value("THE_720_P", ColorCamera::SensorResolution::THE_720_P)
+        .value("THE_800_P", ColorCamera::SensorResolution::THE_800_P)
+        .value("THE_240X180", ColorCamera::SensorResolution::THE_240X180)
+        .value("THE_1280X962", ColorCamera::SensorResolution::THE_1280X962)
+        .value("THE_2000X1500", ColorCamera::SensorResolution::THE_2000X1500)
+        .value("THE_2028X1520", ColorCamera::SensorResolution::THE_2028X1520)
+        .value("THE_2104X1560", ColorCamera::SensorResolution::THE_2104X1560)
+        .value("THE_1440X1080", ColorCamera::SensorResolution::THE_1440X1080)
+        .value("THE_1352X1012", ColorCamera::SensorResolution::THE_1352X1012)
+        .value("THE_2024X1520", ColorCamera::SensorResolution::THE_2024X1520)
         ;
 
-    colorCameraPropertiesColorOrder
-        .value("BGR", ColorCameraProperties::ColorOrder::BGR)
-        .value("RGB", ColorCameraProperties::ColorOrder::RGB)
+    colorCameraColorOrder
+        .value("BGR", ColorCamera::ColorOrder::BGR)
+        .value("RGB", ColorCamera::ColorOrder::RGB)
         ;
 
-    colorCameraPropertiesWarpMeshSource
-        .value("AUTO", ColorCameraProperties::WarpMeshSource::AUTO)
-        .value("NONE", ColorCameraProperties::WarpMeshSource::NONE)
-        .value("CALIBRATION", ColorCameraProperties::WarpMeshSource::CALIBRATION)
-        .value("URI", ColorCameraProperties::WarpMeshSource::URI)
+    colorCameraWarpMeshSource
+        .value("AUTO", ColorCamera::WarpMeshSource::AUTO)
+        .value("NONE", ColorCamera::WarpMeshSource::NONE)
+        .value("CALIBRATION", ColorCamera::WarpMeshSource::CALIBRATION)
+        .value("URI", ColorCamera::WarpMeshSource::URI)
         ;
-
-    colorCameraProperties
-        .def_readwrite("initialControl", &ColorCameraProperties::initialControl)
-        .def_readwrite("boardSocket", &ColorCameraProperties::boardSocket)
-        .def_readwrite("imageOrientation", &ColorCameraProperties::imageOrientation)
-        .def_readwrite("previewHeight", &ColorCameraProperties::previewHeight)
-        .def_readwrite("previewWidth", &ColorCameraProperties::previewWidth)
-        .def_readwrite("videoHeight", &ColorCameraProperties::videoHeight)
-        .def_readwrite("videoWidth", &ColorCameraProperties::videoWidth)
-        .def_readwrite("stillHeight", &ColorCameraProperties::stillHeight)
-        .def_readwrite("stillWidth", &ColorCameraProperties::stillWidth)
-        .def_readwrite("resolution", &ColorCameraProperties::resolution)
-        .def_readwrite("fps", &ColorCameraProperties::fps)
-        .def_readwrite("isp3aFps", &ColorCameraProperties::isp3aFps)
-        .def_readwrite("sensorCropX", &ColorCameraProperties::sensorCropX)
-        .def_readwrite("sensorCropY", &ColorCameraProperties::sensorCropY)
-        .def_readwrite("previewKeepAspectRatio", &ColorCameraProperties::previewKeepAspectRatio)
-        .def_readwrite("ispScale", &ColorCameraProperties::ispScale)
-        .def_readwrite("numFramesPoolRaw", &ColorCameraProperties::numFramesPoolRaw)
-        .def_readwrite("numFramesPoolIsp", &ColorCameraProperties::numFramesPoolIsp)
-        .def_readwrite("numFramesPoolVideo", &ColorCameraProperties::numFramesPoolVideo)
-        .def_readwrite("numFramesPoolPreview", &ColorCameraProperties::numFramesPoolPreview)
-        .def_readwrite("numFramesPoolStill", &ColorCameraProperties::numFramesPoolStill)
-        .def_readwrite("warpMeshSource", &ColorCameraProperties::warpMeshSource)
-        .def_readwrite("warpMeshUri", &ColorCameraProperties::warpMeshUri)
-        .def_readwrite("warpMeshWidth", &ColorCameraProperties::warpMeshWidth)
-        .def_readwrite("warpMeshHeight", &ColorCameraProperties::warpMeshHeight)
-        .def_readwrite("calibAlpha", &ColorCameraProperties::calibAlpha)
-        .def_readwrite("warpMeshStepWidth", &ColorCameraProperties::warpMeshStepWidth)
-        .def_readwrite("warpMeshStepHeight", &ColorCameraProperties::warpMeshStepHeight)
-        .def_readwrite("eventFilter", &ColorCameraProperties::eventFilter)
-    ;
 
     // ColorCamera node
     colorCamera
+        .def_readwrite("initialControl", &ColorCamera::initialControl)
+        .def_readwrite("boardSocket", &ColorCamera::boardSocket)
+        .def_readwrite("imageOrientation", &ColorCamera::imageOrientation)
+        .def_readwrite("previewHeight", &ColorCamera::previewHeight)
+        .def_readwrite("previewWidth", &ColorCamera::previewWidth)
+        .def_readwrite("videoHeight", &ColorCamera::videoHeight)
+        .def_readwrite("videoWidth", &ColorCamera::videoWidth)
+        .def_readwrite("stillHeight", &ColorCamera::stillHeight)
+        .def_readwrite("stillWidth", &ColorCamera::stillWidth)
+        .def_readwrite("resolution", &ColorCamera::resolution)
+        .def_readwrite("fps", &ColorCamera::fps)
+        .def_readwrite("isp3aFps", &ColorCamera::isp3aFps)
+        .def_readwrite("sensorCropX", &ColorCamera::sensorCropX)
+        .def_readwrite("sensorCropY", &ColorCamera::sensorCropY)
+        .def_readwrite("previewKeepAspectRatio", &ColorCamera::previewKeepAspectRatio)
+        .def_readwrite("ispScale", &ColorCamera::ispScale)
+        .def_readwrite("numFramesPoolRaw", &ColorCamera::numFramesPoolRaw)
+        .def_readwrite("numFramesPoolIsp", &ColorCamera::numFramesPoolIsp)
+        .def_readwrite("numFramesPoolVideo", &ColorCamera::numFramesPoolVideo)
+        .def_readwrite("numFramesPoolPreview", &ColorCamera::numFramesPoolPreview)
+        .def_readwrite("numFramesPoolStill", &ColorCamera::numFramesPoolStill)
+        .def_readwrite("warpMeshSource", &ColorCamera::warpMeshSource)
+        .def_readwrite("warpMeshUri", &ColorCamera::warpMeshUri)
+        .def_readwrite("warpMeshWidth", &ColorCamera::warpMeshWidth)
+        .def_readwrite("warpMeshHeight", &ColorCamera::warpMeshHeight)
+        .def_readwrite("calibAlpha", &ColorCamera::calibAlpha)
+        .def_readwrite("warpMeshStepWidth", &ColorCamera::warpMeshStepWidth)
+        .def_readwrite("warpMeshStepHeight", &ColorCamera::warpMeshStepHeight)
+        .def_readwrite("eventFilter", &ColorCamera::eventFilter)
         .def_readonly("inputConfig", &ColorCamera::inputConfig, DOC(dai, node, ColorCamera, inputConfig))
         .def_readonly("inputControl", &ColorCamera::inputControl, DOC(dai, node, ColorCamera, inputControl))
-        .def_readonly("initialControl", &ColorCamera::initialControl, DOC(dai, node, ColorCamera, initialControl))
         .def_readonly("video", &ColorCamera::video, DOC(dai, node, ColorCamera, video))
         .def_readonly("preview", &ColorCamera::preview, DOC(dai, node, ColorCamera, preview))
         .def_readonly("still", &ColorCamera::still, DOC(dai, node, ColorCamera, still))
@@ -224,5 +220,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         ;
     // ALIAS
     daiNodeModule.attr("ColorCamera").attr("Properties") = colorCameraProperties;
+    daiNodeModule.attr("ColorCamera").attr("SensorResolution") = colorCameraSensorResolution;
+    daiNodeModule.attr("ColorCamera").attr("ColorOrder") = colorCameraColorOrder;
+    daiNodeModule.attr("ColorCamera").attr("WarpMeshSource") = colorCameraWarpMeshSource;
 
 }
