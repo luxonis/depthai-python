@@ -43,8 +43,8 @@ streams = ['dot-left', 'dot-right', 'flood-left', 'flood-right']
 script = pipeline.create(dai.node.Script)
 script.setProcessor(dai.ProcessorType.LEON_CSS)
 script.setScript("""
-    dotBright = 500  # Note: recommended to not exceed 765, for max duty cycle
-    floodBright = 200
+    dotBright = 0.8
+    floodBright = 0.1
     LOGGING = False  # Set `True` for latency/timings debugging
 
     node.warn(f'IR drivers detected: {str(Device.getIrDrivers())}')
@@ -57,8 +57,8 @@ script.setScript("""
 
         # Immediately reconfigure the IR driver.
         # Note the logic is inverted, as it applies for next frame
-        Device.setIrLaserDotProjectorBrightness(0 if flagDot else dotBright)
-        Device.setIrFloodLightBrightness(floodBright if flagDot else 0)
+        Device.setIrLaserDotProjectorIntensity(0 if flagDot else dotBright)
+        Device.setIrFloodLightIntensity(floodBright if flagDot else 0)
         if LOGGING: tIrSet = Clock.now()
 
         # Wait for the actual frames (after MIPI capture and ISP proc is done)
