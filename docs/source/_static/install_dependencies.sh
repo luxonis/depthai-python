@@ -144,7 +144,15 @@ elif [ -f /etc/os-release ]; then
             sudo apt-get install -y ${debian_pkgs_pre22_04[@]}
         fi
         
-        python3 -m pip install --upgrade pip
+        # upgrade pip depending on whether it's externally managed (i.e., by the OS), or not
+        echo "Upgrading pip"
+        # if the "EXTERNALLY-MANAGED" file exists in the Python installation's stdlib directory,
+        # pip needs to be upgraded using the OS means
+        if [ -f $(python3 -c 'import sysconfig; print(sysconfig.get_paths()["stdlib"] + "/EXTERNALLY-MANAGED")') ]; then
+            sudo apt-get --only-upgrade install -y pip
+        else
+            python3 -m pip install --upgrade pip
+        fi
 
         # As set -e is set, retrieve the return value without exiting
         RET=0
@@ -174,10 +182,22 @@ elif [ -f /etc/os-release ]; then
         else
             echo "Using post-22.04 package list"
             
-            sudo apt-get install -y ${debian_pkgs_post22_04[@]}
+            packages_to_install=("${debian_pkgs_post22_04[@]}")
+            # Switching libbtbb2 to libtbbmalloc2
+            packages_to_install=("${packages_to_install[@]/libtbb2/libtbbmalloc2}")
+
+            sudo apt-get install -y ${packages_to_install[@]}
         fi 
         
-        python3 -m pip install --upgrade pip
+        # upgrade pip depending on whether it's externally managed (i.e., by the OS), or not
+        echo "Upgrading pip"
+        # if the "EXTERNALLY-MANAGED" file exists in the Python installation's stdlib directory,
+        # pip needs to be upgraded using the OS means
+        if [ -f $(python3 -c 'import sysconfig; print(sysconfig.get_paths()["stdlib"] + "/EXTERNALLY-MANAGED")') ]; then
+            sudo apt-get --only-upgrade install -y pip
+        else
+            python3 -m pip install --upgrade pip
+        fi
 
         OS_VERSION=$(lsb_release -r |cut -f2)
         if [ "$OS_VERSION" == "21.04" ]; then
