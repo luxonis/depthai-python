@@ -39,6 +39,7 @@ void bind_tof(pybind11::module& m, void* pCallstack){
         .def_readonly("depth", &ToF::depth, DOC(dai, node, ToF, depth), DOC(dai, node, ToF, depth))
         .def_readonly("amplitude", &ToF::amplitude, DOC(dai, node, ToF, amplitude), DOC(dai, node, ToF, amplitude))
         .def_readonly("intensity", &ToF::intensity, DOC(dai, node, ToF, intensity), DOC(dai, node, ToF, intensity))
+        .def_readonly("phase", &ToF::phase, DOC(dai, node, ToF, phase), DOC(dai, node, ToF, phase))
         .def_readonly("error", &ToF::error, DOC(dai, node, ToF, error), DOC(dai, node, ToF, error))
         .def_readonly("initialConfig", &ToF::initialConfig, DOC(dai, node, ToF, initialConfig), DOC(dai, node, ToF, initialConfig))
     ;
