@@ -397,15 +397,17 @@ with dai.Device(*dai_device_args) as device:
                     "Device is calibrated and has a stereo pair, creating StereoDepth node.")
                 stereo = pipeline.createStereoDepth()
                 stereo.setDefaultProfilePreset(
-                    dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+                    dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+                stereo.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
                 stereo.setLeftRightCheck(True)
                 stereo.setSubpixel(True)
+                stereo.setLeftRightCheck(True)
                 getattr(left_cam, left_out).link(stereo.left)
                 getattr(right_cam, right_out).link(stereo.right)
                 xout_stereo = pipeline.createXLinkOut()
                 depth_stream = "stereo_depth"
                 xout_stereo.setStreamName(depth_stream)
-                stereo.depth.link(xout_stereo.input)
+                stereo.disparity.link(xout_stereo.input)
                 streams.append(depth_stream)
             else:
                 print("Couldn't create stereo depth node. Device has invalid calibration.")
@@ -532,19 +534,11 @@ with dai.Device(*dai_device_args) as device:
                 frame = pkt.getCvFrame()
                 cam_skt = c.split('_')[-1]
 
-                if c == "stereo_depth":
-                    depth_downscaled = frame[::4]
-                    try:
-                        min_depth = np.percentile(
-                            depth_downscaled[depth_downscaled != 0], 1)
-                        max_depth = np.percentile(depth_downscaled, 99)
-                    except IndexError:
-                        continue
-                    depth_frame_color = np.interp(
-                        frame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
-                    depth_frame_color = cv2.applyColorMap(
-                        depth_frame_color, jet_custom)
-                    cv2.imshow(c, depth_frame_color)
+                if c == "stereo_depth" and stereo is not None:
+                    maxDisp = stereo.initialConfig.getMaxDisparity()
+                    disp = (pkt.getCvFrame() * (255.0 / maxDisp)).astype(np.uint8)
+                    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+                    cv2.imshow(c, disp)
                     continue
                 
                 
