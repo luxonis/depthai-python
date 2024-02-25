@@ -319,8 +319,8 @@ class Application(QtWidgets.QMainWindow):
             started_successfully, self.test_process_pid = self.test_process.startDetached(
                 sys.executable, args, "")
         else:
-            if "--gui" in sys.argv:
-                sys.argv.remove("--gui")
+            if "-gui" in sys.argv:
+                sys.argv.remove("-gui")
             started_successfully, self.test_process_pid = self.test_process.startDetached(
                 sys.executable, sys.argv + args, "")
         if not started_successfully:

@@ -70,7 +70,7 @@ def socket_type_pair(arg):
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     default=[],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of] / th[ermal]. "
                     "E.g: -cams rgb,m right,c . If not specified, all connected cameras will be used.")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
@@ -112,16 +112,16 @@ parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
 parser.add_argument('-btimeout', '--boot-timeout', default=30000,
                     help="Boot timeout in ms. Default: %(default)s (sets DEPTHAI_BOOT_TIMEOUT environment variable)")
 
-parser.add_argument('--stress', action='store_true',
+parser.add_argument('-stress', action='store_true',
                     help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
 
-parser.add_argument("--stereo", action="store_true", default=False,
+parser.add_argument("-stereo", action="store_true", default=False,
                     help="Create a stereo depth node if the device has a stereo pair.")
 
-parser.add_argument("--yolo", type=str, default="",
-                    help=f"Create a yolo detection network on the specified camera. Available cameras: {ALL_SOCKETS}")
+parser.add_argument("-yolo", type=str, default="",
+                    help=f"Create a yolo detection network on the specified camera. E.g: -yolo cama. Available cameras: {ALL_SOCKETS}")
 
-parser.add_argument("--gui", action="store_true",
+parser.add_argument("-gui", action="store_true",
                     help="Use GUI instead of CLI")
 parser.add_argument("-h", "--help", action="store_true", default=False,
                     help="Show this help message and exit") # So you can forward --help to stress test, without it being consumed by cam_test.py
@@ -251,14 +251,18 @@ with dai.Device(*dai_device_args) as device:
     cam_list = []
     cam_type_color = {}
     cam_type_tof = {}
-    print("Enabled cameras:")
+    cam_type_thermal = {}
 
     if not args.cameras:
         connected_cameras = device.getConnectedCameraFeatures()
         args.cameras = [(socket_to_socket_opt(cam.socket), cam.supportedTypes[0] ==
-                         dai.CameraSensorType.COLOR, cam.supportedTypes[0] == dai.CameraSensorType.TOF) for cam in connected_cameras]
+                         dai.CameraSensorType.COLOR, cam.supportedTypes[0] == dai.CameraSensorType.TOF, cam.supportedTypes[0] == dai.CameraSensorType.THERMAL) for cam in connected_cameras]
+        if not args.cameras:
+            print("No cameras found!")
+            exit(1)
 
-    for socket, is_color, is_tof in args.cameras:
+    print("Enabled cameras:")
+    for socket, is_color, is_tof, is_thermal in args.cameras:
         cam_list.append(socket)
         cam_type_color[socket] = is_color
         cam_type_tof[socket] = is_tof
@@ -447,12 +451,10 @@ with dai.Device(*dai_device_args) as device:
                 print("Couldn't create stereo depth node. Device has invalid calibration.")
         except Exception as e:
             print("Couldn't create depth:", e)
-    else:
-        print("--stereo not found in args, skipping stereo depth node creation.")
+
     # Pipeline is defined, now we can start it
     device.startPipeline(pipeline)
 
-    # print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
     print('Connected cameras:')
     cam_name = {}
     for p in device.getConnectedCameraFeatures():
