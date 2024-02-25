@@ -17,28 +17,28 @@ def cli():
     import argparse
     import sys
     import depthai as dai
+    parser = argparse.ArgumentParser(description="DepthAI CLI", add_help=False)
+    parser.add_argument("-v", "--version", action="store_true", help="Print version and exit.")
+    parser.add_argument("-l", "--list-devices", action="store_true", help="List connected devices.")
+    parser.add_argument("commands", nargs=argparse.REMAINDER, help="Commands and options for cam_test")
 
-    parser = argparse.ArgumentParser(description="DepthAI CLI")
-    parser.add_argument(
-        "-v", "--version", action="store_true", help="Print version and exit."
-    )
-    parser.add_argument(
-        "-l", "--list-devices", action="store_true", help="List connected devices."
-    )
-    parser.add_argument("cam_test", nargs="?", help="Run camera test.", default=False)
-
-    args, _unknown_args = parser.parse_known_args()
+    args = parser.parse_args()
     if args.version:
         print(dai.__version__)
-    elif args.list_devices:
+        return
+    if args.list_devices:
         print(dai.Device.getAllConnectedDevices())
-    elif args.cam_test:
-        print("sysargs:", sys.argv, len(sys.argv))
-        print("SYSARGS[2:], ", sys.argv[2:])
-        subprocess.run([sys.executable, CAM_TEST_PATH, *sys.argv[2:]])
-    elif len(sys.argv) == 1:
-        parser.print_help()
+        return
 
+    # Handle cam_test command
+    if args.commands and args.commands[0] == "cam_test":
+        cam_test_path = CAM_TEST_PATH
+        # Forward the arguments to cam_test.py, excluding the "cam_test" command itself
+        subprocess.run([sys.executable, cam_test_path] + args.commands[1:])
+    else:
+        # No recognized commands, print help
+        parser.print_help()
+        print("To run cam_test, use: depthai cam_test [options for cam_test]")
 
 if __name__ == "__main__":
     cli()
