@@ -611,8 +611,11 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getCrashDump", [](DeviceBase& d, bool clearCrashDump) { py::gil_scoped_release release; return d.getCrashDump(clearCrashDump); }, py::arg("clearCrashDump") = true, DOC(dai, DeviceBase, getCrashDump))
         .def("hasCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.hasCrashDump(); }, DOC(dai, DeviceBase, hasCrashDump))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
+        .def("getConnectionInterfaces", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectionInterfaces(); }, DOC(dai, DeviceBase, getConnectionInterfaces))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
+        .def("getStereoPairs", [](DeviceBase& d) { py::gil_scoped_release release; return d.getStereoPairs(); }, DOC(dai, DeviceBase, getStereoPairs))
+        .def("getAvailableStereoPairs", [](DeviceBase& d) { py::gil_scoped_release release; return d.getAvailableStereoPairs(); }, DOC(dai, DeviceBase, getAvailableStereoPairs))
         .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
         .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))
         .def("getEmbeddedIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmbeddedIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getEmbeddedIMUFirmwareVersion))
@@ -635,8 +638,26 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
-        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrLaserDotProjectorBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
-        .def("setIrFloodLightBrightness", [](DeviceBase& d, float m, int mask) { py::gil_scoped_release release; return d.setIrFloodLightBrightness(m, mask); }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float mA, int mask) { 
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use setIrLaserDotProjectorIntensity() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            py::gil_scoped_release release;
+            bool result = d.setIrLaserDotProjectorBrightness(mA, mask);
+            HEDLEY_DIAGNOSTIC_POP
+            return result;
+        }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorBrightness))
+        .def("setIrFloodLightBrightness", [](DeviceBase& d, float mA, int mask) {
+            PyErr_WarnEx(PyExc_DeprecationWarning, "Use setIrFloodLightIntensity() instead.", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            py::gil_scoped_release release;
+            bool result = d.setIrFloodLightBrightness(mA, mask);
+            HEDLEY_DIAGNOSTIC_POP
+            return result;
+        }, py::arg("mA"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightBrightness))
+        .def("setIrLaserDotProjectorIntensity", [](DeviceBase& d, float intensity, int mask) { py::gil_scoped_release release; return d.setIrLaserDotProjectorIntensity(intensity, mask); }, py::arg("intensity"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrLaserDotProjectorIntensity))
+        .def("setIrFloodLightIntensity", [](DeviceBase& d, float intensity, int mask) { py::gil_scoped_release release; return d.setIrFloodLightIntensity(intensity, mask); }, py::arg("intensity"), py::arg("mask") = -1, DOC(dai, DeviceBase, setIrFloodLightIntensity))
         .def("getIrDrivers", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIrDrivers(); }, DOC(dai, DeviceBase, getIrDrivers))
         .def("isEepromAvailable", [](DeviceBase& d) { py::gil_scoped_release release; return d.isEepromAvailable(); }, DOC(dai, DeviceBase, isEepromAvailable))
         .def("flashCalibration2", [](DeviceBase& d, CalibrationHandler ch) { py::gil_scoped_release release; return d.flashCalibration2(ch); }, DOC(dai, DeviceBase, flashCalibration2))

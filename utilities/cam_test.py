@@ -24,6 +24,9 @@ Other controls:
 '0' - Select control: sharpness
 '[' - Select control: luma denoise
 ']' - Select control: chroma denoise
+'\' - Select control: scene mode
+';' - Select control: control mode
+''' - Select control: capture intent
 'a' 'd' - Increase/decrease dot projector intensity
 'w' 's' - Increase/decrease flood LED intensity
 
@@ -50,17 +53,18 @@ import signal
 from stress_test import stress_test, YOLO_LABELS, create_yolo
 
 
-ALL_SOCKETS = ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came', 'camf', 'camg', 'camh']
+ALL_SOCKETS = ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came']
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
     if not (socket in ALL_SOCKETS):
         raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof', 'th', 'thermal']):
         raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     is_tof = True if type in ['t', 'tof'] else False
-    return [socket, is_color, is_tof]
+    is_thermal = True if type in ['th', 'thermal'] else False
+    return [socket, is_color, is_tof, is_thermal]
 
 
 parser = argparse.ArgumentParser(add_help=False)
@@ -96,6 +100,8 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
                     help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
+parser.add_argument('-show', '--show-meta', action='store_true',
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
 
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
@@ -150,9 +156,6 @@ cam_socket_opts = {
     'camc': dai.CameraBoardSocket.CAM_C,
     'camd': dai.CameraBoardSocket.CAM_D,
     'came': dai.CameraBoardSocket.CAM_E,
-    'camf': dai.CameraBoardSocket.CAM_F,
-    'camg': dai.CameraBoardSocket.CAM_G,
-    'camh': dai.CameraBoardSocket.CAM_H,
 }
 
 rotate = {
@@ -164,9 +167,6 @@ rotate = {
     'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
     'came': args.rotate in ['all', 'mono'],
-    'camf': args.rotate in ['all', 'mono'],
-    'camg': args.rotate in ['all', 'mono'],
-    'camh': args.rotate in ['all', 'mono'],
 }
 
 mono_res_opts = {
@@ -214,6 +214,21 @@ class FPS:
     def get(self):
         return self.fps
 
+class Cycle:
+    def __init__(self, enum_type, start_item=None):
+        self.items = [item for name, item in vars(enum_type).items() if name.isupper()]
+        # If start_item is provided, set the index to its position. Otherwise, default to 0
+        self.index = self.items.index(start_item) if start_item else 0
+
+    def step(self, n):
+        self.index = (self.index + n) % len(self.items)
+        return self.items[self.index]
+
+    def next(self):
+        return self.step(1)
+
+    def prev(self):
+        return self.step(-1)
 
 def exit_cleanly(signum, frame):
     print("Exiting cleanly")
@@ -247,8 +262,8 @@ with dai.Device(*dai_device_args) as device:
         cam_list.append(socket)
         cam_type_color[socket] = is_color
         cam_type_tof[socket] = is_tof
-        print((socket).rjust(7), ':',
-              'tof' if is_tof else 'color' if is_color else 'mono')
+        cam_type_thermal[socket] = is_thermal
+        print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'thermal' if is_thermal else 'mono')
 
     # Start defining a pipeline
     pipeline = dai.Pipeline()
@@ -289,12 +304,31 @@ with dai.Device(*dai_device_args) as device:
                 tofConfig.depthParams.avgPhaseShuffle = False
                 tofConfig.depthParams.minimumAmplitude = 3.0
                 tof[c].initialConfig.set(tofConfig)
+
+                if args.tof_median == 0:
+                    tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+                elif args.tof_median == 3:
+                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+                elif args.tof_median == 5:
+                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+                elif args.tof_median == 7:
+                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
+                tof[c].initialConfig.set(tofConfig)
                 if args.tof_amplitude:
                     amp_name = 'tof_amplitude_' + c
                     xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
                     xout_tof_amp[c].setStreamName(amp_name)
                     streams.append(amp_name)
                     tof[c].amplitude.link(xout_tof_amp[c].input)
+        elif cam_type_thermal[c]:
+            cam[c] = pipeline.create(dai.node.Camera)
+            cam[c].setBoardSocket(cam_socket_opts[c])
+            cam[c].setPreviewSize(256, 192)
+            cam[c].raw.link(xout[c].input)
+            xout_preview = pipeline.create(dai.node.XLinkOut)
+            xout_preview.setStreamName('preview_' + c)
+            cam[c].preview.link(xout_preview.input)
+            streams.append('preview_' + c)
         elif cam_type_color[c]:
             cam[c] = pipeline.createColorCamera()
             cam[c].setResolution(color_res_opts[args.color_resolution])
@@ -454,16 +488,16 @@ with dai.Device(*dai_device_args) as device:
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
     ISO_STEP = 50
-    LENS_STEP = 3
-    DOT_STEP = 100
-    FLOOD_STEP = 100
-    DOT_MAX = 1200
-    FLOOD_MAX = 1500
+    LENS_STEP = 1 / 1024
+    DOT_STEP = 0.05
+    FLOOD_STEP = 0.05
+    DOT_MAX = 1
+    FLOOD_MAX = 1
 
     # Defaults and limits for manual focus/exposure controls
-    lensPos = 150
-    lensMin = 0
-    lensMax = 255
+    lensPos = 0.59
+    lensMin = 0.0
+    lensMax = 1.0
 
     expTime = 20000
     expMin = 1
@@ -476,12 +510,12 @@ with dai.Device(*dai_device_args) as device:
     dotIntensity = 0
     floodIntensity = 0
 
-    awb_mode = cycle([item for name, item in vars(
-        dai.CameraControl.AutoWhiteBalanceMode).items() if name.isupper()])
-    anti_banding_mode = cycle([item for name, item in vars(
-        dai.CameraControl.AntiBandingMode).items() if name.isupper()])
-    effect_mode = cycle([item for name, item in vars(
-        dai.CameraControl.EffectMode).items() if name.isupper()])
+    awb_mode = Cycle(dai.CameraControl.AutoWhiteBalanceMode)
+    anti_banding_mode = Cycle(dai.CameraControl.AntiBandingMode)
+    effect_mode = Cycle(dai.CameraControl.EffectMode)
+    scene_mode = Cycle(dai.CameraControl.SceneMode)
+    control_mode = Cycle(dai.CameraControl.ControlMode)
+    capture_intent = Cycle(dai.CameraControl.CaptureIntent)
 
     ae_comp = 0
     ae_lock = False
@@ -493,7 +527,7 @@ with dai.Device(*dai_device_args) as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
-    show = False
+    show = args.show_meta
 
     jet_custom = cv2.applyColorMap(
         np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
@@ -551,8 +585,12 @@ with dai.Device(*dai_device_args) as device:
                         frame = cv2.normalize(
                             frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                elif cam_type_thermal[cam_skt] and c.startswith('cam'):
+                    frame = frame.astype(np.float32)
+                    frame = cv2.normalize(frame, frame, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                    frame = cv2.applyColorMap(frame, cv2.COLORMAP_MAGMA)
                 if show:
-                    txt = f"[{c:5}, {pkt.getSequenceNum():4}] "
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
@@ -564,16 +602,14 @@ with dai.Device(*dai_device_args) as device:
                 capture = c in capture_list
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
-                                         + '_' + str(width) + 'x' + str(height)
-                                         + '_exp_' +
-                                         str(int(
-                                             pkt.getExposureTime().total_seconds()*1e6))
-                                         + '_iso_' + str(pkt.getSensitivity())
-                                         + '_lens_' +
-                                         str(pkt.getLensPosition())
-                                         + '_' + capture_time
-                                         + '_' + str(pkt.getSequenceNum())
-                                         )
+                         + '_' + str(width) + 'x' + str(height)
+                         + '_' + capture_time
+                         + '_exp_' + str(int(pkt.getExposureTime().total_seconds()*1e6))
+                         + '_iso_' + str(pkt.getSensitivity())
+                         + '_lens_' + str(pkt.getLensPosition())
+                         + '_' + str(pkt.getColorTemperature()) + 'K'
+                         + '_' + str(pkt.getSequenceNum())
+                        )
                     capture_list.remove(c)
                     print()
                 if c.startswith('raw_') or c.startswith('tof_amplitude_'):
@@ -658,7 +694,7 @@ with dai.Device(*dai_device_args) as device:
             lensPos = clamp(lensPos, lensMin, lensMax)
             print("Setting manual focus, lens position: ", lensPos)
             ctrl = dai.CameraControl()
-            ctrl.setManualFocus(lensPos)
+            ctrl.setManualFocusRaw(lensPos)
             controlQueue.send(ctrl)
         elif key in [ord('i'), ord('o'), ord('k'), ord('l')]:
             if key == ord('i'):
@@ -691,27 +727,27 @@ with dai.Device(*dai_device_args) as device:
             dotIntensity = dotIntensity - DOT_STEP
             if dotIntensity < 0:
                 dotIntensity = 0
-            print("Setting dot projector brightness: ", dotIntensity)
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
+            print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('d'):
             dotIntensity = dotIntensity + DOT_STEP
             if dotIntensity > DOT_MAX:
                 dotIntensity = DOT_MAX
-            print("Setting dot projector brightness: ", dotIntensity)
-            device.setIrLaserDotProjectorBrightness(dotIntensity)
+            device.setIrLaserDotProjectorIntensity(dotIntensity)
+            print(f'IR Dot intensity:', dotIntensity)
         elif key == ord('w'):
             floodIntensity = floodIntensity + FLOOD_STEP
             if floodIntensity > FLOOD_MAX:
                 floodIntensity = FLOOD_MAX
-            print("Setting flood light brightness: ", floodIntensity)
-            device.setIrFloodLightBrightness(floodIntensity)
+            device.setIrFloodLightIntensity(floodIntensity)
+            print(f'IR Flood intensity:', floodIntensity)
         elif key == ord('s'):
             floodIntensity = floodIntensity - FLOOD_STEP
             if floodIntensity < 0:
                 floodIntensity = 0
-            print("Setting flood light brightness: ", floodIntensity)
-            device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p':
+            device.setIrFloodLightIntensity(floodIntensity)
+            print(f'IR Flood intensity:', floodIntensity)
+        elif key >= 0 and chr(key) in '34567890[]p\\;\'':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -728,6 +764,12 @@ with dai.Device(*dai_device_args) as device:
                 control = 'saturation'
             elif key == ord('0'):
                 control = 'sharpness'
+            elif key == ord('\\'):
+                control = 'scene_mode'
+            elif key == ord(';'):
+                control = 'control_mode'
+            elif key == ord('\''):
+                control = 'capture_intent'
             elif key == ord('['):
                 control = 'luma_denoise'
             elif key == ord(']'):
@@ -743,23 +785,35 @@ with dai.Device(*dai_device_args) as device:
                 change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ]")
+                print("Please select a control first using keys 3..9 0 [ ] \\ ; \'")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
                 ctrl.setAutoExposureCompensation(ae_comp)
             elif control == 'anti_banding_mode':
-                abm = next(anti_banding_mode)
+                abm = anti_banding_mode.step(change)
                 print("Anti-banding mode:", abm)
                 ctrl.setAntiBandingMode(abm)
             elif control == 'awb_mode':
-                awb = next(awb_mode)
+                awb = awb_mode.step(change)
                 print("Auto white balance mode:", awb)
                 ctrl.setAutoWhiteBalanceMode(awb)
             elif control == 'effect_mode':
-                eff = next(effect_mode)
+                eff = effect_mode.step(change)
                 print("Effect mode:", eff)
                 ctrl.setEffectMode(eff)
+            elif control == 'scene_mode':
+                sc = scene_mode.step(change)
+                print("Scene mode:", sc)
+                ctrl.setSceneMode(sc)
+            elif control == 'control_mode':
+                cm = control_mode.step(change)
+                print("Control mode:", cm)
+                ctrl.setControlMode(cm)
+            elif control == 'capture_intent':
+                ci = capture_intent.step(change)
+                print("Capture intent:", ci)
+                ctrl.setCaptureIntent(ci)
             elif control == 'brightness':
                 brightness = clamp(brightness + change, -10, 10)
                 print("Brightness:", brightness)

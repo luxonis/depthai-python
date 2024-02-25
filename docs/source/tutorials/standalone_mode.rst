@@ -130,7 +130,7 @@ the flashed pipeline, use the code snippet below.
 
     with dai.DeviceBootloader(bl) as bootloader:
         bootloader.flashClear()
-
+        print('Successfully cleared bootloader flash')
 
 Factory reset
 #############
