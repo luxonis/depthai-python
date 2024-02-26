@@ -51,16 +51,16 @@ void bind_pointclouddata(pybind11::module& m, void* pCallstack){
     // Message
     pointCloudData
         .def(py::init<>())
-        .def_property("points", [](PointCloudData& data) { return &data.points; }, [](PointCloudData& data, std::vector<Point3f> points) {data.points = points;})
+        .def_property("points", [](PointCloudData& data) { return &data.getPoints(); }, [](PointCloudData& data, std::vector<Point3f> points) {data.getPoints() = points;})
         .def("getPoints", [](py::object &obj){
             // creates numpy array (zero-copy) which holds correct information such as shape, ...
             dai::PointCloudData& data = obj.cast<dai::PointCloudData&>();
-            py::array_t<float> arr({data.points.size(), 3UL});
+            py::array_t<float> arr({data.getPoints().size(), 3UL});
             auto ra = arr.mutable_unchecked();
-            for (int i = 0; i < data.points.size(); i++) {
-                ra(i, 0) = data.points[i].x;
-                ra(i, 1) = -data.points[i].y;
-                ra(i, 2) = data.points[i].z;
+            for (int i = 0; i < data.getPoints().size(); i++) {
+                ra(i, 0) = data.getPoints()[i].x;
+                ra(i, 1) = -data.getPoints()[i].y;
+                ra(i, 2) = data.getPoints()[i].z;
             }
             return arr;
         })
