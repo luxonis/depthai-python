@@ -29,7 +29,7 @@ try:
         print(f'Could not import depthai: {ex}')
 
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
-    subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
+    subprocess.check_call(['stubgen', '--include-docstrings', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
 
     # Add py.typed
     open(f'{DIRECTORY}/depthai/py.typed', 'a').close()
