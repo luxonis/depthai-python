@@ -126,7 +126,7 @@ parser.add_argument("-gui", action="store_true",
 parser.add_argument("-h", "--help", action="store_true", default=False,
                     help="Show this help message and exit") # So you can forward --help to stress test, without it being consumed by cam_test.py
 
-args, _unknown = parser.parse_known_args()
+args = parser.parse_args()
 
 # Set timeouts before importing depthai
 os.environ["DEPTHAI_CONNECTION_TIMEOUT"] = str(args.connection_timeout)
