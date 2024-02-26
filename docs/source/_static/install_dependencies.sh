@@ -160,7 +160,7 @@ elif [ -f /etc/os-release ]; then
         fi
 
     # Check if the version is greater than 22.04 (Ubuntu) or 11 (Debian)
-    elif { [[ "$ID" == "debian" ]] && ! version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" ]] && ! version_lte "$VERSION_ID" "21.10"; }; then
+    elif { [[ "$ID" == "debian" ]] && ! version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" || "$ID" == "pop" ]] && ! version_lte "$VERSION_ID" "21.10"; }; then
         if $IS_ARM; then
             echo "Using post-22.04 package list for ARM"
             debian_arm_pkgs=("${debian_arm_pkgs[@]}")
