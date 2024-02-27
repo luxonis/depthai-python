@@ -1,7 +1,7 @@
 MessageGroup
 ============
 
-The MessageGroup message type is a versatile container used in DepthAI pipelines to group together a map of arbitrary DepthAI messages. It serves as the primary output of the :ref:`Sync` node, effectively synchronizing various input streams, and acts as the input to the :ref:`Demux` node for subsequent disaggregation and processing. 
+The MessageGroup message type is a versatile container used in DepthAI pipelines to group together a map of arbitrary DepthAI messages. It serves as the primary output of the :ref:`Sync` node, effectively synchronizing various input streams, and acts as the input to the :ref:`MessageDemux` node for subsequent disaggregation and processing. 
 
 Creating MessageGroup
 #####################
