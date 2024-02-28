@@ -1,34 +1,51 @@
 import depthai as dai
 import open3d as o3d
 from time import sleep
+import numpy as np
+import cv2
+
+FPS = 20
 
 pipeline = dai.Pipeline()
-monoLeft = pipeline.create(dai.node.MonoCamera);
-monoRight = pipeline.create(dai.node.MonoCamera);
-depth = pipeline.create(dai.node.StereoDepth);
-pointcloud = pipeline.create(dai.node.PointCloud);
-xout = pipeline.create(dai.node.XLinkOut);
-xoutDepth = pipeline.create(dai.node.XLinkOut);
+camRgb = pipeline.create(dai.node.ColorCamera)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+depth = pipeline.create(dai.node.StereoDepth)
+pointcloud = pipeline.create(dai.node.PointCloud)
+sync = pipeline.create(dai.node.Sync)
+xOut = pipeline.create(dai.node.XLinkOut)
+xOut.input.setBlocking(False)
+
+
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+camRgb.setIspScale(1,3)
+camRgb.setFps(FPS)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
+monoLeft.setFps(FPS)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
+monoRight.setFps(FPS)
 
 depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 depth.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
 depth.setLeftRightCheck(True)
 depth.setExtendedDisparity(False)
 depth.setSubpixel(True)
-
-xout.setStreamName("out")
-xoutDepth.setStreamName("depth")
+depth.setDepthAlign(dai.CameraBoardSocket.CAM_A)
 
 monoLeft.out.link(depth.left)
 monoRight.out.link(depth.right)
 depth.depth.link(pointcloud.inputDepth)
-pointcloud.passthroughDepth.link(xoutDepth.input)
-pointcloud.outputPointCloud.link(xout.input)
+camRgb.isp.link(sync.inputs["rgb"])
+pointcloud.outputPointCloud.link(sync.inputs["pcl"])
+sync.out.link(xOut.input)
+xOut.setStreamName("out")
+
+
+
 
 with dai.Device(pipeline) as device:
     isRunning = True
@@ -38,8 +55,6 @@ with dai.Device(pipeline) as device:
             isRunning = False
 
     q = device.getOutputQueue(name="out", maxSize=4, blocking=False)
-    qDepth = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-
     pc = o3d.geometry.PointCloud()
     vis = o3d.visualization.VisualizerWithKeyCallback()
     vis.create_window()
@@ -48,10 +63,20 @@ with dai.Device(pipeline) as device:
 
     first = True
     while isRunning:
-        inDepth = qDepth.get()
-        inPointCloud = q.get()
+        inMessage = q.get()
+        inColor = inMessage["rgb"]
+        inPointCloud = inMessage["pcl"]
+        cvColorFrame = inColor.getCvFrame()
+        # Convert the frame to RGB
+        cvRGBFrame = cv2.cvtColor(cvColorFrame, cv2.COLOR_BGR2RGB)
+        cv2.imshow("color", cvColorFrame)
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
         if inPointCloud:
             pcd.points = o3d.utility.Vector3dVector(inPointCloud.getPoints())
+            colors = (cvRGBFrame.reshape(-1, 3) / 255.0).astype(np.float64)
+            pcd.colors = o3d.utility.Vector3dVector(colors)
             if first:
                 vis.add_geometry(pcd)
                 first = False
