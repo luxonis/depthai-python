@@ -36,6 +36,7 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
     rawConfig
         .def(py::init<>())
         .def_readwrite("sparse", &RawPointCloudConfig::sparse, DOC(dai, RawPointCloudConfig, sparse))
+        .def_readwrite("transformationMatrix", &RawPointCloudConfig::transformationMatrix, DOC(dai, RawPointCloudConfig, transformationMatrix))
         ;
 
     // Message
@@ -45,7 +46,16 @@ void bind_pointcloudconfig(pybind11::module& m, void* pCallstack){
         
         .def("set", &PointCloudConfig::set, py::arg("config"), DOC(dai, PointCloudConfig, set))
         .def("get", &PointCloudConfig::get, DOC(dai, PointCloudConfig, get))
-        .def("setSparse", &PointCloudConfig::setSparse, py::arg("enable"), DOC(dai, PointCloudConfig, setSparse))
+        .def("getSparse", &PointCloudConfig::getSparse, DOC(dai, PointCloudConfig, getSparse))
+        .def("getTransformationMatrix", &PointCloudConfig::getTransformationMatrix, DOC(dai, PointCloudConfig, getTransformationMatrix))
+        .def("setSparse", &PointCloudConfig::setSparse, DOC(dai, PointCloudConfig, setSparse))
+        .def("setTransformationMatrix", [](PointCloudConfig& cfg, std::array<std::array<float, 3>, 3> mat) {
+            return cfg.setTransformationMatrix(mat);
+        }, DOC(dai, PointCloudConfig, setTransformationMatrix))
+
+        .def("setTransformationMatrix", [](PointCloudConfig& cfg, std::array<std::array<float, 4>, 4> mat) {
+            return cfg.setTransformationMatrix(mat);
+        }, DOC(dai, PointCloudConfig, setTransformationMatrix))
         ;
 
     // add aliases
