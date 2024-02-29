@@ -22,7 +22,6 @@ readonly debian_pkgs=(
     libavformat-dev
     libswscale-dev
     python3-dev
-    libtbb2
     libtbb-dev
     libjpeg-dev
     libpng-dev
@@ -31,7 +30,6 @@ readonly debian_pkgs=(
     ffmpeg
     libsm6
     libxext6
-    libgl1-mesa-glx
     python3-pyqt5
     python3-pyqt5.qtquick
     qml-module-qtquick-controls2
@@ -46,18 +44,36 @@ readonly debian_pkgs=(
     qml-module-qtquick-window2
 )
 
-readonly debian_pkgs_pre22_04=(
-    "${debian_pkgs[@]}"
-    libdc1394-22-dev
-)
-
-readonly debian_pkgs_post22_04=(
-    "${debian_pkgs[@]}"
-    libdc1394-dev
-)
-
-debian_arm_pkgs=(
-    "${debian_pkgs[@]}"
+readonly debian_arm_pkgs=(
+    ${linux_pkgs[@]}
+    # https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
+    build-essential
+    libgtk2.0-dev
+    pkg-config
+    libavcodec-dev
+    libavformat-dev
+    libswscale-dev
+    python3-dev
+    libtbb-dev
+    libjpeg-dev
+    libpng-dev
+    libtiff-dev
+    # https://stackoverflow.com/questions/55313610
+    ffmpeg
+    libsm6
+    libxext6
+    python3-pyqt5
+    python3-pyqt5.qtquick
+    qml-module-qtquick-controls2
+    qml-module-qt-labs-platform
+    qtdeclarative5-dev
+    qml-module-qtquick2
+    qtbase5-dev
+    qtchooser
+    qt5-qmake
+    qtbase5-dev-tools
+    qml-module-qtquick-layouts
+    qml-module-qtquick-window2
     # https://stackoverflow.com/a/53402396/5494277
     libhdf5-dev
     libhdf5-dev
@@ -67,6 +83,25 @@ debian_arm_pkgs=(
     libopenexr-dev
     libgstreamer1.0-dev
 )
+
+readonly debian_pkgs_pre22_04=(
+    libdc1394-22-dev
+    libgl1-mesa-glx
+    libtbb2
+
+)
+readonly debian_pkgs_post22_04=(
+    libdc1394-dev
+    libgl1-mesa-glx
+    libtbbmalloc2
+
+)
+readonly debian_pkgs_23=(
+    libdc1394-dev
+    libgl1-mesa-dev
+    libtbbmalloc2
+)
+
 
 readonly fedora_pkgs=(
     ${linux_pkgs[@]}
@@ -92,11 +127,32 @@ print_and_exec () {
     $*
 }
 
-# Version comparison function
 version_lte() {
     [[ "$1" == "$(echo -e "$1\n$2" | sort -V | head -n1)" ]]
 }
 
+declare -A debian_versions=(
+  ["trixie/sid"]="13"
+  ["bookworm/sid"]="12"
+  ["bullseye/sid"]="11"
+  ["buster/sid"]="10"
+  ["stretch/sid"]="9"
+  ["jessie/sid"]="8"
+  ["wheezy/sid"]="7"
+  ["squeeze/sid"]="6"
+)
+
+# Function to lookup and print Debian version number
+lookup_debian_version_number() {
+  debian_version_string="$1"
+  version_number="${debian_versions[$debian_version_string]}"
+  
+  if [ -n "$version_number" ]; then
+    echo "$version_number"
+  else
+    echo "None"
+  fi
+}
 
 if [[ $(uname) == "Darwin" ]]; then
     echo "During Homebrew install, certain commands need 'sudo'. Requesting access..."
@@ -109,84 +165,86 @@ if [[ $(uname) == "Darwin" ]]; then
     echo
     echo "=== Installed successfully!  IMPORTANT: For changes to take effect,"
     echo "please close and reopen the terminal window, or run:  exec \$SHELL"
+
 elif [ -f /etc/os-release ]; then
-    # shellcheck source=/etc/os-release
     source /etc/os-release
+    if [ -f /etc/debian_version ]; then
+        output=$(cat /etc/debian_version)
+        echo $output
+        if [[ $output == *sid ]]; then
+            version=$(lookup_debian_version_number $output)
+        else 
+            version=$output
+        fi
 
-    # Correctly determine if the architecture is ARM or aarch64
-    IS_ARM=false
-    if [[ $(uname -m) =~ ^arm || $(uname -m) == "aarch64" ]]; then
-        IS_ARM=true
-    fi
+        # Correctly determine if the architecture is ARM or aarch64
+        IS_ARM=false
+        if [[ $(uname -m) =~ ^arm* || $(uname -m) == "aarch64" ]]; then
+            IS_ARM=true
+        fi
 
-    # Assuming debian_pkgs_pre22_04, debian_pkgs_post22_04, ubuntu_pkgs_pre22_04, and ubuntu_pkgs_post22_04 are defined
+        echo "$version"
+        echo "$IS_ARM"
 
-    source /etc/os-release
+        if [ $IS_ARM ]; then
+            sudo DEBIAN_FRONTEND=noninteractive apt install -y "${debian_arm_pkgs[@]}"
+            if [ "$version" == "13" ]; then
+                echo "Detected ARM Debian 13"
+                sudo apt install -y "${debian_pkgs_23[@]}"
+            elif version_lte "$version" "11"; then
+                echo "Using pre-22.04 ARM package list"
+                sudo apt-get install -y ${debian_pkgs_pre22_04[@]}
 
-    IS_ARM=false
-    if [[ $(uname -m) =~ ^arm || $(uname -m) == "aarch64" ]]; then
-        IS_ARM=true
-    fi
+                # Check for uvcdynctrl package and recommend removal if found
+                if dpkg -s uvcdynctrl &> /dev/null; then
+                    echo -e "\033[33mWe detected 'uvcdynctrl' installed on your system.\033[0m"
+                    # Instructions for removal
+                    echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
+                    echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
+                fi
 
-    # Check if the version is less than or equal to 22.04 (Ubuntu) or 11 (Debian)
-    if { [[ "$ID" == "debian" ]] && version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" ]] && version_lte "$VERSION_ID" "21.10"; }; then
-        if $IS_ARM; then
-            echo "Using pre-22.04 package list for ARM"
-            debian_arm_pkgs=("${debian_arm_pkgs[@]}")
+
+            else
+                echo "Using post-22.04 ARM package list"
+                sudo apt-get install -y ${debian_pkgs_post22_04[@]}
+            fi
+
             # Add libjasper-dev for ARM but not aarch64
-            [[ $(uname -m) =~ ^arm ]] && { debian_arm_pkgs+=("libjasper-dev"); }
-
-            sudo apt-get install -y ${debian_arm_pkgs[@]/${debian_pkgs[@]}/${debian_pkgs_pre22_04[@]}}
+            [[ $(uname -m) =~ ^arm* ]] && { sudo apt install -y libjasper-dev; }
 
         else
-            echo "Using pre-22.04 package list"
-
-            sudo apt-get install -y ${debian_pkgs_pre22_04[@]}
+            sudo DEBIAN_FRONTEND=noninteractive apt install -y "${debian_pkgs[@]}"
+            if [ $version == "13" ]; then
+                echo "Detected Debian 13"
+                sudo apt install -y "${debian_pkgs_23[@]}"
+            elif version_lte "$version" "11"; then
+                echo "Using pre-22.04 package list"
+                sudo apt-get install -y "${debian_pkgs_pre22_04[@]}"
+                
+            else
+                echo "Using post-22.04 package list"
+                sudo apt-get install -y "${debian_pkgs_post22_04[@]}"
+            fi
         fi
-        
-        python3 -m pip install --upgrade pip
 
-        # As set -e is set, retrieve the return value without exiting
-        RET=0
-        dpkg -s uvcdynctrl > /dev/null 2>&1 || RET=$? || true
-        # is uvcdynctrl installed
-        if [[ "$RET" == "0" ]]; then
-            echo -e "\033[33mWe detected \"uvcdynctrl\" installed on your system. \033[0m"
-            echo -e "\033[33mWe recommend removing this package, as it creates a huge log files if a camera is used in UVC mode (webcam)\033[0m"
-            echo -e "\033[33mYou can do so by running the following commands:\033[0m"
+        # Check for uvcdynctrl package and recommend removal if found
+        if dpkg -s uvcdynctrl &> /dev/null; then
+            echo -e "\033[33mWe detected 'uvcdynctrl' installed on your system.\033[0m"
+            # Instructions for removal
             echo -e "\033[33m$ sudo apt remove uvcdynctrl uvcdynctrl-data\033[0m"
             echo -e "\033[33m$ sudo rm -f /var/log/uvcdynctrl-udev.log\033[0m"
-            echo ""
         fi
 
-    # Check if the version is greater than 22.04 (Ubuntu) or 11 (Debian)
-    elif { [[ "$ID" == "debian" ]] && ! version_lte "$VERSION_ID" "11"; } || { [[ "$ID" == "ubuntu" ]] && ! version_lte "$VERSION_ID" "21.10"; }; then
-        if $IS_ARM; then
-            echo "Using post-22.04 package list for ARM"
-            debian_arm_pkgs=("${debian_arm_pkgs[@]}")
-            # Add libjasper-dev for ARM but not aarch64
-            [[ $(uname -m) =~ ^arm ]] && { debian_arm_pkgs+=("libjasper-dev"); }
-            # Switching libbtbb2 to libtbbmalloc2
-            debian_arm_pkgs=("${debian_arm_pkgs[@]/libtbb2/libtbbmalloc2}")
-
-            sudo apt-get install -y ${debian_arm_pkgs[@]/${debian_pkgs[@]}/${debian_pkgs_post22_04[@]}}
-
-        else
-            echo "Using post-22.04 package list"
-            
-            sudo apt-get install -y ${debian_pkgs_post22_04[@]}
-        fi 
         
-        python3 -m pip install --upgrade pip
-
-        OS_VERSION=$(lsb_release -r |cut -f2)
-        if [ "$OS_VERSION" == "21.04" ]; then
+            
+        if [ "$VERSION_ID" == "21.04" ]; then
             echo -e "\033[33mThere are known issues with running our demo script on Ubuntu 21.04, due to package \"python3-pyqt5.sip\" not being in a correct version (>=12.9)\033[0m"
             echo -e "\033[33mWe recommend installing the updated version manually using the following commands\033[0m"
             echo -e "\033[33m$ wget http://mirrors.kernel.org/ubuntu/pool/universe/p/pyqt5-sip/python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
             echo -e "\033[33m$ sudo dpkg -i python3-pyqt5.sip_12.9.0-1_amd64.deb\033[0m"
             echo ""
         fi
+
 
     elif [[ "$ID" == "fedora" ]]; then
         sudo dnf update -y
@@ -197,7 +255,6 @@ elif [ -f /etc/os-release ]; then
         echo "ERROR: Distribution not supported"
         exit 99
     fi
-
     # Allow all users to read and write to Myriad X devices
     echo "Installing udev rules..."
     echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules > /dev/null
