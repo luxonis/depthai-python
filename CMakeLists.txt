@@ -129,6 +129,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/PointCloudBindings.cpp
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/MessageDemuxBindings.cpp
 
@@ -154,7 +155,8 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
-
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
+    src/pipeline/datatype/PointCloudDataBindings.cpp
 )
 
 if(WIN32)
