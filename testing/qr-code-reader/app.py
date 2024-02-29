@@ -73,13 +73,14 @@ class QrDetectionNode(dai.Node):
 
     KEY_QUIT = ord("q")
 
+    qr_detector = QrCodeDetector()
+
     def __run__(self, image: dai.message.ImgFrame, detections: dai.message.ImgDetections):
         if cv2.waitKey(1) == self.KEY_QUIT:
             raise KeyboardInterrupt()
 
         frame = image.getCvFrame()
-        qr_detector = QrCodeDetector()
-        qr_detector.annotate_frame(
+        self.qr_detector.annotate_frame(
             frame=frame, detections=[(det.xmin, det.ymin, det.xmax, det.ymax) for det in detections.detections]
         )
         cv2.imshow("QR Detection", frame)
