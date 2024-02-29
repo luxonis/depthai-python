@@ -27,7 +27,7 @@ Here's theoretical calculation of the focal length in pixels:
 
 .. math::
 
-  f_x = \text{width}_x \cdot \frac{1}{\tan \left(\frac{\text{HFOV}_x}{2}\frac{\pi}{180}\right)}
+  f_x = \text{width}_x \cdot \frac{1}{2 \cdot \tan \left(\frac{\text{HFOV}_x}{2}\frac{\pi}{180}\right)}
 
 To get the HFOV you can use `this script <https://gist.github.com/Erol444/4aff71f4576637624d56dce4a60ad62e>`__, which also works for wide-FOV cameras and allows you to
 specif alpha parameter.
@@ -36,13 +36,13 @@ With 400P (640x400) camera resolution where HFOV=71.9 degrees:
 
 .. math::
 
-  f_x = 640 \cdot \frac{1}{\tan \left(\frac{71.9}{2}\frac{\pi}{180}\right)} = 441.25
+  f_x = 640 \cdot \frac{1}{2 \cdot \tan \left(\frac{71.9}{2}\frac{\pi}{180}\right)} = 441.25
 
 And for 800P (1280x800) camera resolution where HFOV=71.9 degrees:
 
 .. math::
 
-  f_x = 1280 \cdot \frac{1}{\tan \left(\frac{71.9}{2}\frac{\pi}{180}\right)} = 882.5
+  f_x = 1280 \cdot \frac{1}{2 \cdot \tan \left(\frac{71.9}{2}\frac{\pi}{180}\right)} = 882.5
 
 
 
