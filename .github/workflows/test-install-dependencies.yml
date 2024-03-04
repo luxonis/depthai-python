@@ -33,13 +33,16 @@
            sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
            bash tmp_script.sh
        - name: Create a virtual environment
-         if : endsWith(matrix.container_image, 'rolling') == true
+         if: endsWith(matrix.container_image, 'rolling') == true
          run: |
            sudo apt-get install -y python3-venv
            python3 -m venv venv
            . venv/bin/activate
            pip install --upgrade pip 
+           python3 examples/install_requirements.py
+         shell: bash
        - name: Install example requirements
+         if: endsWith(matrix.container_image, 'rolling') == false
          run: |
            python3 examples/install_requirements.py
    test_macos:
