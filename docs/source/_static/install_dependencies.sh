@@ -188,10 +188,10 @@ elif [ -f /etc/os-release ]; then
 
         if [ $IS_ARM ]; then
             sudo DEBIAN_FRONTEND=noninteractive apt install -y "${debian_arm_pkgs[@]}"
-            if [ "$version" == "13" ]; then
+            if [[ $version == 13* ]]; then
                 echo "Detected ARM Debian 13"
                 sudo apt install -y "${debian_pkgs_23[@]}"
-            elif version_lte "$version" "11"; then
+            elif version_lte "$version" "11.99"; then
                 echo "Using pre-22.04 ARM package list"
                 sudo apt-get install -y ${debian_pkgs_pre22_04[@]}
 
@@ -214,10 +214,10 @@ elif [ -f /etc/os-release ]; then
 
         else
             sudo DEBIAN_FRONTEND=noninteractive apt install -y "${debian_pkgs[@]}"
-            if [ $version == "13" ]; then
+            if [[ $version == 13* ]]; then
                 echo "Detected Debian 13"
                 sudo apt install -y "${debian_pkgs_23[@]}"
-            elif version_lte "$version" "11"; then
+            elif version_lte "$version" "11.99"; then
                 echo "Using pre-22.04 package list"
                 sudo apt-get install -y "${debian_pkgs_pre22_04[@]}"
                 

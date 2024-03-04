@@ -16,7 +16,7 @@
      runs-on: ubuntu-latest
      strategy:
        matrix:
-          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04"]
+          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:rolling"]
      container:
        image: ${{ matrix.container_image }}
      steps:
@@ -32,7 +32,17 @@
            ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone # Otherwise tzdata installer prompts for user input
            sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
            bash tmp_script.sh
+       - name: Create a virtual environment
+         if: endsWith(matrix.container_image, 'rolling') == true
+         run: |
+           sudo apt-get install -y python3-venv
+           python3 -m venv venv
+           . venv/bin/activate
+           pip install --upgrade pip 
+           python3 examples/install_requirements.py
+         shell: bash
        - name: Install example requirements
+         if: endsWith(matrix.container_image, 'rolling') == false
          run: |
            python3 examples/install_requirements.py
    test_macos:
