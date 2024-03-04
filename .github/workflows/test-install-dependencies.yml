@@ -32,6 +32,12 @@
            ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone # Otherwise tzdata installer prompts for user input
            sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
            bash tmp_script.sh
+       - name: Create a virtual environment
+         if : endsWith(matrix.container_image, 'rolling') == true
+         run: |
+           python3 -m venv venv
+           source venv/bin/activate
+           pip install --upgrade pip 
        - name: Install example requirements
          run: |
            python3 examples/install_requirements.py
