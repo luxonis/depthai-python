@@ -74,7 +74,7 @@ def create_pipeline(mesh):
     camRgb.preview.link(warp.inputImage)
 
     warp.setHwIds([1])
-    warp.setInterpolation(dai.node.Warp.Properties.Interpolation.BYPASS)
+    warp.setInterpolation(dai.Interpolation.NEAREST_NEIGHBOR)
     # Output warped
     xout_warped = pipeline.create(dai.node.XLinkOut)
     xout_warped.setStreamName('warped')

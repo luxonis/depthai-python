@@ -7,6 +7,7 @@ Code Samples
 
    ../samples/bootloader/*
    ../samples/calibration/*
+   ../samples/Camera/*
    ../samples/ColorCamera/*
    ../samples/crash_report/*
    ../samples/EdgeDetector/*
@@ -23,8 +24,10 @@ Code Samples
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
    ../samples/SystemLogger/*
+   ../samples/ToF/*
    ../samples/VideoEncoder/*
    ../samples/Warp/*
+   ../samples/UVC/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -34,7 +37,8 @@ are presented with code.
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
-- :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`Flash Bootloader` - Flash factory bootloader to the device
+- :ref:`Flash User Bootloader` - Flash user bootloader to the device
 - :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
@@ -43,6 +47,11 @@ are presented with code.
 - :ref:`Calibration Flash` - Flashes calibration data of version 6 (gen2 calibration data) to the device
 - :ref:`Calibration Reader` - Reads calibration data stored on device over XLink
 - :ref:`Calibration Load` - Loads and uses calibration data of version 6 (gen2 calibration data) in a pipeline
+
+
+.. rubric:: Camera
+
+- :ref:`Undistort camera stream` - Showcases how Camera node undistorts camera streams
 
 .. rubric:: ColorCamera
 
@@ -64,6 +73,7 @@ are presented with code.
 
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
+- :ref:`Feature Tracker with Motion Estimation` - Camera movement estimation based on feature tracking
 
 .. rubric:: Host side
 
@@ -103,6 +113,7 @@ are presented with code.
 
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
+- :ref:`Mono preview - Alternate between dot projector and illumination LED` on OAK Pro devices
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
 .. rubric:: NeuralNetwork
@@ -128,6 +139,7 @@ are presented with code.
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
 - :ref:`Script UART communication` - UART communication with Script node
+- :ref:`Script EMMC access` - Access EMMC memory from the Script node
 
 .. rubric:: SpatialDetection
 
@@ -151,6 +163,10 @@ are presented with code.
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
 
+.. rubric:: ToF
+
+- :ref:`ToF depth` - Displays colorized ToF depth frames
+
 .. rubric:: VideoEncoder
 
 - :ref:`Disparity encoding` - Encodes stereo disparity into :code:`.mjpeg`
@@ -163,6 +179,12 @@ are presented with code.
 
 - :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
 - :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
+
+.. rubric:: UVC
+
+- :ref:`UVC & Color Camera` - Displays RGB frames from a UVC camera
+- :ref:`UVC & Mono Camera` - Displays mono frames from a UVC camera
+- :ref:`UVC & Disparity` - Displays disparity frames from a UVC camera
 
 .. rubric:: Yolo
 

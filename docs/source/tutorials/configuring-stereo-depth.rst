@@ -34,13 +34,13 @@ Let's first look at how the depth is calculated:
 
 .. math::
 
-   depth [mm] = focalLength [pix] * baseline [mm] / disparity [pix]
+   \text{depth[mm]} =f_{x}\text{[px]} \cdot \frac{\text{baseline[mm]}}{\text{disparity[px]}}
 
 Examples for calculating the depth value, using the OAK-D (7.5cm baseline OV9282), for 400P resolution and disparity of 50 pixels:
 
 .. math::
 
-  depth = 441.25 * 7.5 / 50 = 66.19 cm
+  \text{depth} = 441.25 \cdot \frac{7.5}{50} = 66.19 \text{ cm}
 
 `RVC2 <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html>`__-based cameras have a **0..95 disparity search** range,
 which limits the minimal depth perception. Baseline is the distance between two cameras of the

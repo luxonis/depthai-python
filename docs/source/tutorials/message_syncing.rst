@@ -11,11 +11,11 @@ Software syncing
 
 This documentation page focuses on software syncing. There are two approaches for it:
 
-- :ref:`Sequece number syncing` - for streams set to the same FPS, sub-ms accuracy can be achieved
+- :ref:`Sequence number syncing` - for streams set to the same FPS, sub-ms accuracy can be achieved
 - :ref:`Timestamp syncing` - for streams with different FPS, syncing with other sensors either onboard (eg. IMU) or also connected to the host computer (eg. USB ToF sensor)
 
-Sequece number syncing
-======================
+Sequence number syncing
+=======================
 
 If we want to synchronize multiple messages from the same OAK, such as:
 
@@ -65,17 +65,16 @@ As opposed to sequence number syncing, **timestamp syncing** can sync:
 
 - **streams** with **different FPS**
 - **IMU** results with other messages
-- messages with **other devices connected to the computer**, as timestamps are synced to the host computer clock
+- messages with **other devices connected to the computer**, as timestamps are :ref:`synced to the host computer clock <Host clock syncing>`
 
 Feel free to check the `demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-syncing#imu--rgb--depth-timestamp-syncing>`__
 which uses timestamps to sync IMU, color and disparity frames together, with all of these streams producing messages at different FPS.
 
-In case of **multiple streams having different FPS**, there are 2 options on how to sync them:
+In case of multiple streams having different FPS, there are 2 options on how to sync them:
 
 #. **Removing some messages** from faster streams to get the synced FPS of the slower stream
 #. **Duplicating some messages** from slower streams to get the synced FPS of the fastest stream
 
-**Timestamps are assigned** to the frame at the **MIPI Start-of-Frame** (SoF) events,
-`more details here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/sync_frames.html#frame-capture-graphs>`__.
+**Timestamps are assigned** to the frame at the **MIPI Start-of-Frame** (SoF) events, `more details here <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/sync_frames.html#frame-capture-graphs>`__.
 
 .. include::  /includes/footer-short.rst

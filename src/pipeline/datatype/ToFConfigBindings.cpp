@@ -48,10 +48,10 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
 
     depthParams
         .def(py::init<>())
-        .def_readwrite("enable", &RawToFConfig::DepthParams::enable, DOC(dai, RawToFConfig, DepthParams, enable))
         .def_readwrite("freqModUsed", &RawToFConfig::DepthParams::freqModUsed, DOC(dai, RawToFConfig, DepthParams, freqModUsed))
         .def_readwrite("avgPhaseShuffle", &RawToFConfig::DepthParams::avgPhaseShuffle, DOC(dai, RawToFConfig, DepthParams, avgPhaseShuffle))
         .def_readwrite("minimumAmplitude", &RawToFConfig::DepthParams::minimumAmplitude, DOC(dai, RawToFConfig, DepthParams, minimumAmplitude))
+        .def_readwrite("median", &RawToFConfig::DepthParams::median, DOC(dai, RawToFConfig, DepthParams, median))
         ;
 
     // Message
@@ -63,6 +63,7 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
         .def("setFreqModUsed", static_cast<ToFConfig&(ToFConfig::*)(dai::ToFConfig::DepthParams::TypeFMod)>(&ToFConfig::setFreqModUsed), DOC(dai, ToFConfig, setFreqModUsed))
         .def("setAvgPhaseShuffle", &ToFConfig::setAvgPhaseShuffle, DOC(dai, ToFConfig, setAvgPhaseShuffle))
         .def("setMinAmplitude", &ToFConfig::setMinAmplitude, DOC(dai, ToFConfig, setMinAmplitude))
+        .def("setMedianFilter", &ToFConfig::setMedianFilter, DOC(dai, ToFConfig, setMedianFilter))
 
         .def("set", &ToFConfig::set, py::arg("config"), DOC(dai, ToFConfig, set))
         .def("get", &ToFConfig::get, DOC(dai, ToFConfig, get))

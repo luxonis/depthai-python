@@ -53,9 +53,9 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack){
     trackedFeatures
         .def(py::init<>())
         .def_property("trackedFeatures", [](TrackedFeatures& feat) { return &feat.trackedFeatures; }, [](TrackedFeatures& feat, std::vector<TrackedFeature> val) { feat.trackedFeatures = val; }, DOC(dai, TrackedFeatures, trackedFeatures))
-        .def("getTimestamp", &TrackedFeatures::getTimestamp, DOC(dai, TrackedFeatures, getTimestamp))
-        .def("getTimestampDevice", &TrackedFeatures::getTimestampDevice, DOC(dai, TrackedFeatures, getTimestampDevice))
-        .def("getSequenceNum", &TrackedFeatures::getSequenceNum, DOC(dai, TrackedFeatures, getSequenceNum))
+        .def("getTimestamp", &TrackedFeatures::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
+        .def("getTimestampDevice", &TrackedFeatures::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
+        .def("getSequenceNum", &TrackedFeatures::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
         .def("setTimestamp", &TrackedFeatures::setTimestamp, DOC(dai, TrackedFeatures, setTimestamp))
         .def("setTimestampDevice", &TrackedFeatures::setTimestampDevice, DOC(dai, TrackedFeatures, setTimestampDevice))
         .def("setSequenceNum", &TrackedFeatures::setSequenceNum, DOC(dai, TrackedFeatures, setSequenceNum))

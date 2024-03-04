@@ -129,6 +129,9 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/PointCloudBindings.cpp
+    src/pipeline/node/SyncBindings.cpp
+    src/pipeline/node/MessageDemuxBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -141,7 +144,9 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/ImageManipConfigBindings.cpp
     src/pipeline/datatype/ImgDetectionsBindings.cpp
     src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/EncodedFrameBindings.cpp
     src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/MessageGroupBindings.cpp
     src/pipeline/datatype/NNDataBindings.cpp
     src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
     src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
@@ -150,7 +155,8 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
-
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
+    src/pipeline/datatype/PointCloudDataBindings.cpp
 )
 
 if(WIN32)
@@ -162,8 +168,9 @@ if(WIN32)
         set(depthai_dll_libraries "$<TARGET_RUNTIME_DLLS:${TARGET_NAME}>")
     endif()
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
-        ${CMAKE_COMMAND} -E copy ${depthai_dll_libraries} $<TARGET_FILE_DIR:${TARGET_NAME}>
+        "$<$<BOOL:${depthai_dll_libraries}>:${CMAKE_COMMAND};-E;copy_if_different;${depthai_dll_libraries};$<TARGET_FILE_DIR:${TARGET_NAME}>>"
         COMMAND_EXPAND_LISTS
+        VERBATIM
     )
 
     # Disable "d" postfix, so python can import the library as is
@@ -172,8 +179,8 @@ endif()
 
 # Add stubs (pyi) generation step after building bindings
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
-if(error)
-    message(WARNING "Mypy not available - stubs won't be generated or checked")
+if(error OR CMAKE_CROSSCOMPILING)
+    message(WARNING "Mypy not available or cross compiling - stubs won't be generated or checked")
 else()
     get_target_property(bindings_directory ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
     if(NOT bindings_directory)

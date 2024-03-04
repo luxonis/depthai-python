@@ -21,6 +21,8 @@ void bind_cameracontrol(pybind11::module& m, void* pCallstack){
     py::enum_<RawCameraControl::AutoFocusMode> rawCameraControlAutoFocusMode(rawCameraControl, "AutoFocusMode", DOC(dai, RawCameraControl, AutoFocusMode));
     py::enum_<RawCameraControl::AutoWhiteBalanceMode> rawCameraControlAutoWhiteBalanceMode(rawCameraControl, "AutoWhiteBalanceMode", DOC(dai, RawCameraControl, AutoWhiteBalanceMode));
     py::enum_<RawCameraControl::SceneMode> rawCameraControlSceneMode(rawCameraControl, "SceneMode", DOC(dai, RawCameraControl, SceneMode));
+    py::enum_<RawCameraControl::ControlMode> rawCameraControlControlMode(rawCameraControl, "ControlMode", DOC(dai, RawCameraControl, ControlMode));
+    py::enum_<RawCameraControl::CaptureIntent> rawCameraControlCaptureIntent(rawCameraControl, "CaptureIntent", DOC(dai, RawCameraControl, CaptureIntent));
     py::enum_<RawCameraControl::AntiBandingMode> rawCameraControlAntiBandingMode(rawCameraControl, "AntiBandingMode", DOC(dai, RawCameraControl, AntiBandingMode));
     py::enum_<RawCameraControl::EffectMode> rawCameraControlEffectMode(rawCameraControl, "EffectMode", DOC(dai, RawCameraControl, EffectMode));
     py::enum_<RawCameraControl::FrameSyncMode> rawCameraControlFrameSyncMode(rawCameraControl, "FrameSyncMode", DOC(dai, RawCameraControl, FrameSyncMode));
@@ -125,6 +127,23 @@ std::vector<const char *> camCtrlAttr;
         .value("BARCODE", RawCameraControl::SceneMode::BARCODE)
     ;
 
+    camCtrlAttr.push_back("ControlMode");
+    rawCameraControlControlMode
+        .value("OFF", RawCameraControl::ControlMode::OFF)
+        .value("AUTO", RawCameraControl::ControlMode::AUTO)
+        .value("USE_SCENE_MODE", RawCameraControl::ControlMode::USE_SCENE_MODE)
+    ;
+
+    camCtrlAttr.push_back("CaptureIntent");
+    rawCameraControlCaptureIntent
+        .value("CUSTOM", RawCameraControl::CaptureIntent::CUSTOM)
+        .value("PREVIEW", RawCameraControl::CaptureIntent::PREVIEW)
+        .value("STILL_CAPTURE", RawCameraControl::CaptureIntent::STILL_CAPTURE)
+        .value("VIDEO_RECORD", RawCameraControl::CaptureIntent::VIDEO_RECORD)
+        .value("VIDEO_SNAPSHOT", RawCameraControl::CaptureIntent::VIDEO_SNAPSHOT)
+        .value("ZERO_SHUTTER_LAG", RawCameraControl::CaptureIntent::ZERO_SHUTTER_LAG)
+    ;
+
     camCtrlAttr.push_back("AntiBandingMode");
     rawCameraControlAntiBandingMode
         .value("OFF", RawCameraControl::AntiBandingMode::OFF)
@@ -158,12 +177,16 @@ std::vector<const char *> camCtrlAttr;
         .def_readwrite("cmdMask", &RawCameraControl::cmdMask)
         .def_readwrite("autoFocusMode", &RawCameraControl::autoFocusMode)
         .def_readwrite("lensPosition", &RawCameraControl::lensPosition)
+        .def_readwrite("lensPositionRaw", &RawCameraControl::lensPositionRaw)
         .def_readwrite("expManual", &RawCameraControl::expManual)
         .def_readwrite("afRegion", &RawCameraControl::afRegion)
         .def_readwrite("awbMode", &RawCameraControl::awbMode)
         .def_readwrite("sceneMode", &RawCameraControl::sceneMode)
         .def_readwrite("antiBandingMode", &RawCameraControl::antiBandingMode)
+        .def_readwrite("captureIntent", &RawCameraControl::captureIntent)
+        .def_readwrite("controlMode", &RawCameraControl::controlMode)
         .def_readwrite("effectMode", &RawCameraControl::effectMode)
+        .def_readwrite("aeMaxExposureTimeUs", &RawCameraControl::aeMaxExposureTimeUs)
         .def_readwrite("aeLockMode", &RawCameraControl::aeLockMode)
         .def_readwrite("awbLockMode", &RawCameraControl::awbLockMode)
         .def_readwrite("expCompensation", &RawCameraControl::expCompensation)
@@ -196,10 +219,13 @@ std::vector<const char *> camCtrlAttr;
         .def("setAutoFocusLensRange", &CameraControl::setAutoFocusLensRange, py::arg("infinityPosition"), py::arg("macroPosition"), DOC(dai, CameraControl, setAutoFocusLensRange))
         .def("setAutoFocusRegion", &CameraControl::setAutoFocusRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoFocusRegion))
         .def("setManualFocus", &CameraControl::setManualFocus, py::arg("lensPosition"), DOC(dai, CameraControl, setManualFocus))
+        .def("setManualFocusRaw", &CameraControl::setManualFocusRaw, py::arg("lensPositionRaw"), DOC(dai, CameraControl, setManualFocusRaw))
         .def("setAutoExposureEnable", &CameraControl::setAutoExposureEnable, DOC(dai, CameraControl, setAutoExposureEnable))
         .def("setAutoExposureLock", &CameraControl::setAutoExposureLock, py::arg("lock"), DOC(dai, CameraControl, setAutoExposureLock))
         .def("setAutoExposureRegion", &CameraControl::setAutoExposureRegion, py::arg("startX"), py::arg("startY"), py::arg("width"), py::arg("height"), DOC(dai, CameraControl, setAutoExposureRegion))
         .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation, py::arg("compensation"), DOC(dai, CameraControl, setAutoExposureCompensation))
+        .def("setAutoExposureLimit", py::overload_cast<uint32_t>(&CameraControl::setAutoExposureLimit), py::arg("maxExposureTimeUs"), DOC(dai, CameraControl, setAutoExposureLimit))
+        .def("setAutoExposureLimit", py::overload_cast<std::chrono::microseconds>(&CameraControl::setAutoExposureLimit), py::arg("maxExposureTime"), DOC(dai, CameraControl, setAutoExposureLimit, 2))
         .def("setAntiBandingMode", &CameraControl::setAntiBandingMode, py::arg("mode"), DOC(dai, CameraControl, setAntiBandingMode))
         .def("setManualExposure", py::overload_cast<uint32_t, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
         .def("setManualExposure", py::overload_cast<std::chrono::microseconds, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTime"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure, 2))
@@ -214,12 +240,15 @@ std::vector<const char *> camCtrlAttr;
         .def("setChromaDenoise", &CameraControl::setChromaDenoise, py::arg("value"), DOC(dai, CameraControl, setChromaDenoise))
         .def("setSceneMode", &CameraControl::setSceneMode, py::arg("mode"), DOC(dai, CameraControl, setSceneMode))
         .def("setEffectMode", &CameraControl::setEffectMode, py::arg("mode"), DOC(dai, CameraControl, setEffectMode))
+        .def("setControlMode", &CameraControl::setControlMode, py::arg("mode"), DOC(dai, CameraControl, setControlMode))
+        .def("setCaptureIntent", &CameraControl::setCaptureIntent, py::arg("mode"), DOC(dai, CameraControl, setCaptureIntent))
         .def("set",         &CameraControl::set, py::arg("config"), DOC(dai, CameraControl, set))
         // getters
         .def("getCaptureStill", &CameraControl::getCaptureStill, DOC(dai, CameraControl, getCaptureStill))
         .def("getExposureTime", &CameraControl::getExposureTime, DOC(dai, CameraControl, getExposureTime))
         .def("getSensitivity", &CameraControl::getSensitivity, DOC(dai, CameraControl, getSensitivity))
         .def("getLensPosition", &CameraControl::getLensPosition, DOC(dai, CameraControl, getLensPosition))
+        .def("getLensPositionRaw", &CameraControl::getLensPositionRaw, DOC(dai, CameraControl, getLensPositionRaw))
         .def("get",         &CameraControl::get, DOC(dai, CameraControl, get))
         ;
     // Add also enum attributes from RawCameraControl

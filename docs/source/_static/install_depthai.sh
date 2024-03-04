@@ -53,7 +53,7 @@ do
   if [[ "$python_version" == "" ]]; then
     echo "No python version found."
     echo "Input path for python binary, version 3.8 or higher, or leave empty and python 3.10 will be installed for you."
-    echo "Press any key to continue"
+    echo "Press ENTER key to continue"
     read -e python_binary_path < /dev/tty
     # python not found and user wants to install python 3.10
     if [ "$python_binary_path" = "" ]; then
@@ -66,8 +66,8 @@ do
     nr_2=$(echo "${python_version:9:2}" | tr -d -c 0-9)
     echo "Python version: $python_version found."
     if [ "$nr_1" -gt 2 ] && [ "$nr_2" -gt 7 ]; then  # first two digits of python version greater then 3.7 -> python version 3.8 or greater is allowed.
-      echo "If you want to use it for installation, press ANY key, otherwise input path to python binary."
-      echo "Press any key to continue"
+      echo "If you want to use it for installation, press ENTER key, otherwise input path to python binary."
+      echo "Press ENTER key to continue"
       read -e python_binary_path < /dev/tty
       # user wants to use already installed python whose version is high enough
       if [ "$python_binary_path" = "" ]; then
@@ -75,7 +75,7 @@ do
     fi
     else
       echo "This python version is not supported by depthai. Enter path to python binary version et least 3.8, or leave empty and python 3.10 will be installed automatically."
-      echo "Press any key to continue"
+      echo "Press ENTER key to continue"
       read -e python_binary_path < /dev/tty
       # python version is too low and user wants to install python 3.10
       if [ "$python_binary_path" = "" ]; then
@@ -210,7 +210,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
   # install python 3.10
   if [ "$install_python" == "true" ]; then
     echo "installing python 3.10"
-  
+
     sudo yes "" | sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt -y install python3.10
     sudo apt -y install python3.10-venv
@@ -219,13 +219,21 @@ elif [[ $(uname -s) == "Linux" ]]; then
 
   echo "Creating python virtual environment in $VENV_DIR"
 
-  "$python_executable" -m venv "$VENV_DIR"
+  machine=$(uname -m)
+  if [[ $machine != 'armv6l' && $machine != 'armv7l' && $machine != 'aarch64' && $machine != 'arm64' ]]; then
+    "$python_executable" -m venv "$VENV_DIR"
+  else
+    "$python_executable" -m venv "$VENV_DIR" --system-site-packages
+  fi
 
   source "$VENV_DIR/bin/activate"
   python -m pip install --upgrade pip
 
   pip install packaging
-  pip install pyqt5
+
+  if [[ $machine != 'armv6l' && $machine != 'armv7l' && $machine != 'aarch64' && $machine != 'arm64' ]]; then
+    pip install pyqt5
+  fi
 else
   echo "Error: Host $(uname -s) not supported."
   exit 99
@@ -233,7 +241,7 @@ fi
 
 echo -e '\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
 echo -e '\nTo run demo app write <depthai_launcher> in terminal.'
-echo "Press ANY KEY to finish and run the demo app..."
+echo "Press ENTER KEY to finish and run the demo app..."
 read -n1 key < /dev/tty
 echo "STARTING DEMO APP."
 python "$DEPTHAI_DIR/launcher/launcher.py" -r "$DEPTHAI_DIR"

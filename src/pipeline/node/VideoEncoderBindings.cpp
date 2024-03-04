@@ -59,6 +59,7 @@ void bind_videoencoder(pybind11::module& m, void* pCallstack){
     videoEncoder
         .def_readonly("input", &VideoEncoder::input, DOC(dai, node, VideoEncoder, input), DOC(dai, node, VideoEncoder, input))
         .def_readonly("bitstream", &VideoEncoder::bitstream, DOC(dai, node, VideoEncoder, bitstream), DOC(dai, node, VideoEncoder, bitstream))
+        .def_readonly("out", &VideoEncoder::out, DOC(dai, node, VideoEncoder, out), DOC(dai, node, VideoEncoder, out))
         .def("setDefaultProfilePreset", static_cast<void(VideoEncoder::*)(float, VideoEncoderProperties::Profile)>(&VideoEncoder::setDefaultProfilePreset), py::arg("fps"), py::arg("profile"), DOC(dai, node, VideoEncoder, setDefaultProfilePreset))
         .def("setDefaultProfilePreset", [](VideoEncoder& v, int width, int height, float fps, VideoEncoderProperties::Profile profile){
             PyErr_WarnEx(PyExc_DeprecationWarning, "Input width/height no longer needed, automatically determined from first frame", 1);

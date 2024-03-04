@@ -70,9 +70,9 @@ void bind_spatialimgdetections(pybind11::module& m, void* pCallstack){
     spatialImgDetections
         .def(py::init<>())
         .def_property("detections", [](SpatialImgDetections& det) { return &det.detections; }, [](SpatialImgDetections& det, std::vector<SpatialImgDetection> val) { det.detections = val; })
-        .def("getTimestamp", &SpatialImgDetections::getTimestamp, DOC(dai, SpatialImgDetections, getTimestamp))
-        .def("getTimestampDevice", &SpatialImgDetections::getTimestampDevice, DOC(dai, SpatialImgDetections, getTimestampDevice))
-        .def("getSequenceNum", &SpatialImgDetections::getSequenceNum, DOC(dai, SpatialImgDetections, getSequenceNum))
+        .def("getTimestamp", &SpatialImgDetections::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
+        .def("getTimestampDevice", &SpatialImgDetections::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
+        .def("getSequenceNum", &SpatialImgDetections::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))
         .def("setTimestamp", &SpatialImgDetections::setTimestamp, DOC(dai, SpatialImgDetections, setTimestamp))
         .def("setTimestampDevice", &SpatialImgDetections::setTimestampDevice, DOC(dai, SpatialImgDetections, setTimestampDevice))
         .def("setSequenceNum", &SpatialImgDetections::setSequenceNum, DOC(dai, SpatialImgDetections, setSequenceNum))

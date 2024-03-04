@@ -59,4 +59,4 @@ with dai.Device(pipeline) as device:
             pass
 
     print("To view the encoded data, convert the stream file (.mjpeg) into a video file (.mp4) using a command below:")
-    print("ffmpeg -framerate 30 -i disparity.mjpeg -c copy video.mp4")
+    print("ffmpeg -framerate 30 -i disparity.h264 -c copy video.mp4")

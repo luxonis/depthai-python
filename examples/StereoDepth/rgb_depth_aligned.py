@@ -3,11 +3,16 @@
 import cv2
 import numpy as np
 import depthai as dai
+import argparse
 
 # Weights to use when blending depth/rgb image (should equal 1.0)
 rgbWeight = 0.4
 depthWeight = 0.6
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-alpha', type=float, default=None, help="Alpha scaling parameter to increase float. [0,1] valid interval.")
+args = parser.parse_args()
+alpha = args.alpha
 
 def updateBlendWeights(percent_rgb):
     """
@@ -21,9 +26,6 @@ def updateBlendWeights(percent_rgb):
     depthWeight = 1.0 - rgbWeight
 
 
-# Optional. If set (True), the ColorCamera is downscaled from 1080p to 720p.
-# Otherwise (False), the aligned depth is automatically upscaled to 1080p
-downscaleColor = True
 fps = 30
 # The disparity is computed at this resolution, then upscaled to RGB resolution
 monoResolution = dai.MonoCameraProperties.SensorResolution.THE_720_P
@@ -34,7 +36,7 @@ device = dai.Device()
 queueNames = []
 
 # Define sources and outputs
-camRgb = pipeline.create(dai.node.ColorCamera)
+camRgb = pipeline.create(dai.node.Camera)
 left = pipeline.create(dai.node.MonoCamera)
 right = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
@@ -48,15 +50,17 @@ disparityOut.setStreamName("disp")
 queueNames.append("disp")
 
 #Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+rgbCamSocket = dai.CameraBoardSocket.CAM_A
+
+camRgb.setBoardSocket(rgbCamSocket)
+camRgb.setSize(1280, 720)
 camRgb.setFps(fps)
-if downscaleColor: camRgb.setIspScale(2, 3)
+
 # For now, RGB needs fixed focus to properly align with depth.
 # This value was used during calibration
 try:
     calibData = device.readCalibration2()
-    lensPosition = calibData.getLensPosition(dai.CameraBoardSocket.CAM_A)
+    lensPosition = calibData.getLensPosition(rgbCamSocket)
     if lensPosition:
         camRgb.initialControl.setManualFocus(lensPosition)
 except:
@@ -71,13 +75,18 @@ right.setFps(fps)
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 # LR-check is required for depth alignment
 stereo.setLeftRightCheck(True)
-stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
+stereo.setDepthAlign(rgbCamSocket)
 
 # Linking
-camRgb.isp.link(rgbOut.input)
+camRgb.video.link(rgbOut.input)
 left.out.link(stereo.left)
 right.out.link(stereo.right)
 stereo.disparity.link(disparityOut.input)
+
+camRgb.setMeshSource(dai.CameraProperties.WarpMeshSource.CALIBRATION)
+if alpha is not None:
+    camRgb.setCalibrationAlpha(alpha)
+    stereo.setAlphaScaling(alpha)
 
 # Connect to device and start pipeline
 with device:
