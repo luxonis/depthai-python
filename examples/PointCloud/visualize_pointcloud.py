@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import time
 
-FPS = 15
+FPS = 30
 class FPSCounter:
     def __init__(self):
         self.frameCount = 0
@@ -37,10 +37,10 @@ camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setIspScale(1,3)
 camRgb.setFps(FPS)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setCamera("left")
 monoLeft.setFps(FPS)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setCamera("right")
 monoRight.setFps(FPS)
 
