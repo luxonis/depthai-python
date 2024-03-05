@@ -1,9 +1,13 @@
 import depthai as dai
-import open3d as o3d
 from time import sleep
 import numpy as np
 import cv2
 import time
+try:
+    import open3d as o3d
+except ImportError:
+    print("Open3D not installed, to be able to run the example install Open3D with: python3 -m pip install open3d")
+    exit(1)
 
 FPS = 30
 class FPSCounter:
