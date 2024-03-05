@@ -29,7 +29,7 @@ while True:
 """)
 
 sync = pipeline.create(dai.node.Sync)
-sync.setSyncThresholdMs(timedelta(milliseconds=100))
+sync.setSyncThreshold(timedelta(milliseconds=100))
 
 demux = pipeline.create(dai.node.MessageDemux)
 

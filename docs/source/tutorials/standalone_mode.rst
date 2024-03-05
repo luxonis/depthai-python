@@ -27,6 +27,9 @@ To "communicate" with the outside world (eg. a server), POE cameras can use :ref
 - `HTTP client <https://docs.luxonis.com/projects/api/en/latest/samples/Script/script_http_client/>`__
 - `MQTT client <https://github.com/luxonis/depthai-experiments/tree/master/gen2-poe-mqtt>`__
 
+.. note::
+    Standalone mode is missing a DNS resolver, so you will need to use IP addresses instead of domain names.
+
 
 Converting a demo to standalone mode
 ####################################
