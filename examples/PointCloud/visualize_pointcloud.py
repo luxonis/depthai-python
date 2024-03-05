@@ -3,8 +3,23 @@ import open3d as o3d
 from time import sleep
 import numpy as np
 import cv2
+import time
 
-FPS = 20
+FPS = 30
+class FPSCounter:
+    def __init__(self):
+        self.frame_count = 0
+        self.fps = 0
+        self.start_time = time.time()
+
+    def tick(self):
+        self.frame_count += 1
+        if self.frame_count % 10 == 0:
+            elapsed_time = time.time() - self.start_time
+            self.fps = self.frame_count / elapsed_time
+            self.frame_count = 0
+            self.start_time = time.time()
+        return self.fps
 
 pipeline = dai.Pipeline()
 camRgb = pipeline.create(dai.node.ColorCamera)
@@ -60,8 +75,11 @@ with dai.Device(pipeline) as device:
     vis.create_window()
     vis.register_key_action_callback(81, key_callback)
     pcd = o3d.geometry.PointCloud()
+    coordinateFrame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1000, origin=[0,0,0])
+    vis.add_geometry(coordinateFrame)
 
     first = True
+    fpsCounter = FPSCounter()
     while isRunning:
         inMessage = q.get()
         inColor = inMessage["rgb"]
@@ -69,12 +87,17 @@ with dai.Device(pipeline) as device:
         cvColorFrame = inColor.getCvFrame()
         # Convert the frame to RGB
         cvRGBFrame = cv2.cvtColor(cvColorFrame, cv2.COLOR_BGR2RGB)
+        fps = fpsCounter.tick()
+        # Display the FPS on the frame
+        cv2.putText(cvColorFrame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         cv2.imshow("color", cvColorFrame)
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
         if inPointCloud:
-            pcd.points = o3d.utility.Vector3dVector(inPointCloud.getPoints())
+            t_before = time.time()
+            points = inPointCloud.getPoints().astype(np.float64)
+            pcd.points = o3d.utility.Vector3dVector(points)
             colors = (cvRGBFrame.reshape(-1, 3) / 255.0).astype(np.float64)
             pcd.colors = o3d.utility.Vector3dVector(colors)
             if first:
@@ -84,5 +107,4 @@ with dai.Device(pipeline) as device:
                 vis.update_geometry(pcd)
         vis.poll_events()
         vis.update_renderer()
-        sleep(0.01)
     vis.destroy_window()
