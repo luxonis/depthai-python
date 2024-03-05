@@ -5,20 +5,20 @@ import numpy as np
 import cv2
 import time
 
-FPS = 30
+FPS = 15
 class FPSCounter:
     def __init__(self):
-        self.frame_count = 0
+        self.frameCount = 0
         self.fps = 0
-        self.start_time = time.time()
+        self.startTime = time.time()
 
     def tick(self):
-        self.frame_count += 1
-        if self.frame_count % 10 == 0:
-            elapsed_time = time.time() - self.start_time
-            self.fps = self.frame_count / elapsed_time
-            self.frame_count = 0
-            self.start_time = time.time()
+        self.frameCount += 1
+        if self.frameCount % 10 == 0:
+            elapsedTime = time.time() - self.startTime
+            self.fps = self.frameCount / elapsedTime
+            self.frameCount = 0
+            self.startTime = time.time()
         return self.fps
 
 pipeline = dai.Pipeline()
@@ -37,10 +37,10 @@ camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setIspScale(1,3)
 camRgb.setFps(FPS)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
 monoLeft.setCamera("left")
 monoLeft.setFps(FPS)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_800_P)
 monoRight.setCamera("right")
 monoRight.setFps(FPS)
 
