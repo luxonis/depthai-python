@@ -10,6 +10,7 @@ import json
 import os
 import os.path
 import numpy as np
+import queue
 
 # TODO Check name collision
 
@@ -173,23 +174,37 @@ class OutNode(InOutNode):
             self.buffer = self.buffer[count:]
 
 class ServiceOutNode(Node):
+    sync = False
+    def __node_init__(self):
+        self.buffer = bytearray()
     def enqueue_message(self, message: dict):
         self.input_queues["input"].put(message)
     def __run__(self, input: typing.Any):
-        self.pipe.write(json.dumps(input) + "\n")
-        # TODO Understand why this is needed
-        # COnsider switching to using OS level handles directly
-        self.pipe.flush() 
+        if input is not None:
+            self.buffer += (json.dumps(input) + "\n").encode("ascii")
+        try:
+            count = os.write(self.pipe, self.buffer)
+        except OSError as e:
+            pass
+        self.buffer = self.buffer[count:]
 
 class ServiceInNode(Node):
+    sync = False
+    def __node_init__(self):
+        self.buffer = bytearray()
     def __run__(self) -> typing.Any:
-        data = self.pipe.readline()
-        if data == "": raise Abort()
-        return json.loads(data.strip())
+        try:
+            self.buffer += os.read(self.pipe, 1000)
+        except OSError as e:
+            pass
+        if (pos := self.buffer.find(b"\n")) >= 0:
+            line = self.buffer[:pos]
+            self.buffer = self.buffer[pos+1:]
+            return json.loads(line.decode("ascii").strip())
 
 def manage_service_communication(pipeline, context):
-    for ServiceNode, pipe_name, rw in [(ServiceInNode, "service.in", "r"),
-                                       (ServiceOutNode, "service.out", "w")]:
+    for ServiceNode, pipe_name in [(ServiceInNode, "service.in"),
+                                   (ServiceOutNode, "service.out")]:
         candidates = list(filter(
                         lambda x: isinstance(x, ServiceNode), 
                         pipeline))
@@ -202,5 +217,5 @@ def manage_service_communication(pipeline, context):
                 raise Exception(
                     "Only one service node in each direction is allowed."
                     " Found these: " + ", ".join(map(str, candidates)))
-        candidate.pipe = os.fdopen(create_pipe(pipe_name, context), rw)
+        candidate.pipe = create_pipe(pipe_name, context)
     context["service_out_node"] = candidate
