@@ -207,6 +207,7 @@ setup(
           'blobconverter',
           'opencv-python',
           'typeguard',
+          'protobuf'
       ],
     license="MIT",
     long_description=long_description,
