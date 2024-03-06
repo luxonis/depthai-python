@@ -468,9 +468,66 @@ jobs:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
+  # This job builds wheels for ARM32 arch
+  build-linux-armv7l:
+    needs: build-docstrings
+    runs-on: [self-hosted, linux, ARM]
+    container:
+      image: quay.io/pypa/manylinux2014_armv7l:2024-01-08-eb135ed
+      env:
+        PLAT: manylinux2014_armv7l
+      # Mount local hunter cache directory, instead of transfering to Github and back
+      volumes:
+        - /.hunter:/github/home/.hunter
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Installing libusb1-devel dependency
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+      - name: Installing cmake dependency
+        run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          ln -s /opt/python/cp38-cp38/bin/cmake /bin/
+      - name: Create folder structure
+        run: mkdir -p wheelhouse/audited/
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: 'docstrings'
+          path: docstrings
+      - name: Specify docstring to use while building the wheel
+        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
+
+      - name: Build and install depthai-core
+        run: |
+          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          cmake --build build_core --target install --parallel 4
+          echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
+
+      - name: Append build hash if not a tagged commit
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
+      - name: Building wheels
+        run: for PYBIN in /opt/python/cp3{6..12}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+      - name: Auditing wheels
+        run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
+      - name: Archive wheel artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: audited-wheels
+          path: wheelhouse/audited/
+      - name: Deploy wheels to artifactory (if not a release)
+        if: startsWith(github.ref, 'refs/tags/v') != true
+        run: bash ./ci/upload-artifactory.sh
+        env:
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-macos-arm64, build-linux-x86_64, build-linux-arm64]
+    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos-x86_64, build-macos-arm64, build-linux-x86_64, build-linux-arm64, build-linux-armv7l]
     runs-on: ubuntu-latest
 
     steps:
