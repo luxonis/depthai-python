@@ -155,7 +155,7 @@ jobs:
         run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
         run: |
-          python3 -m pip install -U wheel auditwheel
+          # python3 -m pip install -U wheel auditwheel # Called once when setting up the runner
           for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/preaudited/; done
           for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
           mkdir -p wheelhouse/audited/
