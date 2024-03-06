@@ -70,6 +70,8 @@ def init_host_node(node):
             else:
                 output = {output_name: output}
 
+        assert isinstance(output, dict), \
+                "Returned value must be dict when multiple outputs are present"
         for name, value in output.items():
             if value is None: continue
             assert name in self.output_queues, "Unknown output name"
