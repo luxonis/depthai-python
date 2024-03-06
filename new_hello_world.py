@@ -4,7 +4,7 @@ import depthai
 from depthai import node, message
 import numpy as np
 
-class HelloWorld(depthai.Node):
+class VisualizeDetectionsNode(depthai.Node):
     def __run__(self, image: message.ImgFrame, detections: message.ImgDetections):
         def frameNorm(frame, bbox):
             normVals = np.full(len(bbox), frame.shape[0])
@@ -13,6 +13,7 @@ class HelloWorld(depthai.Node):
 
         frame = image.getCvFrame()
         for detection in detections.detections:
+            print(detection)
             # for each bounding box, we first normalize it to match the frame size
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
             # and then draw a rectangle on the frame to show the actual result
@@ -27,5 +28,5 @@ with pipeline:
     image = node.ColorCamera().preview
     detections = node.MobileNetDetectionNetwork(image,
             blob_path=blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
-    HelloWorld(image, detections)
+    VisualizeDetectionsNode(image, detections)
 depthai.run(pipeline)
