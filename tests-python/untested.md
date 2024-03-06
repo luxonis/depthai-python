@@ -1,1 +1,2 @@
-* Feedback
+* nepřipojené vstupy
+
