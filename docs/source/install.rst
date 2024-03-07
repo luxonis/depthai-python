@@ -16,7 +16,7 @@ Follow the steps below to just install depthai api library dependencies for your
 
     .. code-block:: bash
 
-      bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+      curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
     Please refer to :ref:`documentation below <macOS>` if any issues occur.
 
