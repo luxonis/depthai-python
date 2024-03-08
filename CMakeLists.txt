@@ -107,33 +107,33 @@ set(SOURCE_LIST
     src/pipeline/node/XLinkInBindings.cpp
     src/pipeline/node/XLinkOutBindings.cpp
     src/pipeline/node/ColorCameraBindings.cpp
-    src/pipeline/node/CameraBindings.cpp
-    src/pipeline/node/MonoCameraBindings.cpp
-    src/pipeline/node/StereoDepthBindings.cpp
-    src/pipeline/node/NeuralNetworkBindings.cpp
-    src/pipeline/node/VideoEncoderBindings.cpp
-    src/pipeline/node/ImageManipBindings.cpp
-    src/pipeline/node/SPIOutBindings.cpp
-    src/pipeline/node/SPIInBindings.cpp
-    src/pipeline/node/DetectionNetworkBindings.cpp
-    src/pipeline/node/SystemLoggerBindings.cpp
-    src/pipeline/node/ScriptBindings.cpp
-    src/pipeline/node/SpatialLocationCalculatorBindings.cpp
-    src/pipeline/node/SpatialDetectionNetworkBindings.cpp
-    src/pipeline/node/ObjectTrackerBindings.cpp
-    src/pipeline/node/IMUBindings.cpp
-    src/pipeline/node/EdgeDetectorBindings.cpp
-    src/pipeline/node/FeatureTrackerBindings.cpp
-    src/pipeline/node/ToFBindings.cpp
-    src/pipeline/node/AprilTagBindings.cpp
-    src/pipeline/node/DetectionParserBindings.cpp
-    src/pipeline/node/WarpBindings.cpp
-    src/pipeline/node/SyncBindings.cpp
-    src/pipeline/node/BenchmarkBindings.cpp
-    src/pipeline/node/UVCBindings.cpp
-    src/pipeline/node/ToFBindings.cpp
-    src/pipeline/node/SyncBindings.cpp
-    src/pipeline/node/MessageDemuxBindings.cpp
+    # src/pipeline/node/CameraBindings.cpp
+    # src/pipeline/node/MonoCameraBindings.cpp
+    # src/pipeline/node/StereoDepthBindings.cpp
+    # src/pipeline/node/NeuralNetworkBindings.cpp
+    # src/pipeline/node/VideoEncoderBindings.cpp
+    # src/pipeline/node/ImageManipBindings.cpp
+    # src/pipeline/node/SPIOutBindings.cpp
+    # src/pipeline/node/SPIInBindings.cpp
+    # src/pipeline/node/DetectionNetworkBindings.cpp
+    # src/pipeline/node/SystemLoggerBindings.cpp
+    # src/pipeline/node/ScriptBindings.cpp
+    # src/pipeline/node/SpatialLocationCalculatorBindings.cpp
+    # src/pipeline/node/SpatialDetectionNetworkBindings.cpp
+    # src/pipeline/node/ObjectTrackerBindings.cpp
+    # src/pipeline/node/IMUBindings.cpp
+    # src/pipeline/node/EdgeDetectorBindings.cpp
+    # src/pipeline/node/FeatureTrackerBindings.cpp
+    # src/pipeline/node/ToFBindings.cpp
+    # src/pipeline/node/AprilTagBindings.cpp
+    # src/pipeline/node/DetectionParserBindings.cpp
+    # src/pipeline/node/WarpBindings.cpp
+    # src/pipeline/node/SyncBindings.cpp
+    # src/pipeline/node/BenchmarkBindings.cpp
+    # src/pipeline/node/UVCBindings.cpp
+    # src/pipeline/node/ToFBindings.cpp
+    # src/pipeline/node/SyncBindings.cpp
+    # src/pipeline/node/MessageDemuxBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp

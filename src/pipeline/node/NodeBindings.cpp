@@ -122,32 +122,32 @@ py::class_<Map, holder_type> bindNodeMap(py::handle scope, const std::string &na
 
 void bind_xlinkin(pybind11::module& m, void* pCallstack);
 void bind_xlinkout(pybind11::module& m, void* pCallstack);
-void bind_benchmark(pybind11::module& m, void* pCallstack);
+// void bind_benchmark(pybind11::module& m, void* pCallstack);
 void bind_colorcamera(pybind11::module& m, void* pCallstack);
 void bind_camera(pybind11::module& m, void* pCallstack);
-void bind_monocamera(pybind11::module& m, void* pCallstack);
-void bind_stereodepth(pybind11::module& m, void* pCallstack);
-void bind_neuralnetwork(pybind11::module& m, void* pCallstack);
-void bind_videoencoder(pybind11::module& m, void* pCallstack);
-void bind_imagemanip(pybind11::module& m, void* pCallstack);
-void bind_warp(pybind11::module& m, void* pCallstack);
-void bind_spiout(pybind11::module& m, void* pCallstack);
-void bind_spiin(pybind11::module& m, void* pCallstack);
-void bind_detectionnetwork(pybind11::module& m, void* pCallstack);
-void bind_systemlogger(pybind11::module& m, void* pCallstack);
-void bind_script(pybind11::module& m, void* pCallstack);
-void bind_spatiallocationcalculator(pybind11::module& m, void* pCallstack);
-void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack);
-void bind_objecttracker(pybind11::module& m, void* pCallstack);
-void bind_imu(pybind11::module& m, void* pCallstack);
-void bind_edgedetector(pybind11::module& m, void* pCallstack);
-void bind_featuretracker(pybind11::module& m, void* pCallstack);
-void bind_apriltag(pybind11::module& m, void* pCallstack);
-void bind_detectionparser(pybind11::module& m, void* pCallstack);
-void bind_uvc(pybind11::module& m, void* pCallstack);
-void bind_tof(pybind11::module& m, void* pCallstack);
-void bind_sync(pybind11::module& m, void* pCallstack);
-void bind_messagedemux(pybind11::module& m, void* pCallstack);
+// void bind_monocamera(pybind11::module& m, void* pCallstack);
+// void bind_stereodepth(pybind11::module& m, void* pCallstack);
+// void bind_neuralnetwork(pybind11::module& m, void* pCallstack);
+// void bind_videoencoder(pybind11::module& m, void* pCallstack);
+// void bind_imagemanip(pybind11::module& m, void* pCallstack);
+// void bind_warp(pybind11::module& m, void* pCallstack);
+// void bind_spiout(pybind11::module& m, void* pCallstack);
+// void bind_spiin(pybind11::module& m, void* pCallstack);
+// void bind_detectionnetwork(pybind11::module& m, void* pCallstack);
+// void bind_systemlogger(pybind11::module& m, void* pCallstack);
+// void bind_script(pybind11::module& m, void* pCallstack);
+// void bind_spatiallocationcalculator(pybind11::module& m, void* pCallstack);
+// void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack);
+// void bind_objecttracker(pybind11::module& m, void* pCallstack);
+// void bind_imu(pybind11::module& m, void* pCallstack);
+// void bind_edgedetector(pybind11::module& m, void* pCallstack);
+// void bind_featuretracker(pybind11::module& m, void* pCallstack);
+// void bind_apriltag(pybind11::module& m, void* pCallstack);
+// void bind_detectionparser(pybind11::module& m, void* pCallstack);
+// void bind_uvc(pybind11::module& m, void* pCallstack);
+// void bind_tof(pybind11::module& m, void* pCallstack);
+// void bind_sync(pybind11::module& m, void* pCallstack);
+// void bind_messagedemux(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -156,32 +156,32 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind all other nodes
     callstack.push_front(bind_xlinkin);
     callstack.push_front(bind_xlinkout);
-    callstack.push_front(bind_benchmark);
+    // callstack.push_front(bind_benchmark);
     callstack.push_front(bind_colorcamera);
-    callstack.push_front(bind_camera);
-    callstack.push_front(bind_monocamera);
-    callstack.push_front(bind_stereodepth);
-    callstack.push_front(bind_neuralnetwork);
-    callstack.push_front(bind_videoencoder);
-    callstack.push_front(bind_imagemanip);
-    callstack.push_front(bind_warp);
-    callstack.push_front(bind_spiout);
-    callstack.push_front(bind_spiin);
-    callstack.push_front(bind_detectionnetwork);
-    callstack.push_front(bind_systemlogger);
-    callstack.push_front(bind_script);
-    callstack.push_front(bind_spatiallocationcalculator);
-    callstack.push_front(bind_spatialdetectionnetwork);
-    callstack.push_front(bind_objecttracker);
-    callstack.push_front(bind_imu);
-    callstack.push_front(bind_edgedetector);
-    callstack.push_front(bind_featuretracker);
-    callstack.push_front(bind_apriltag);
-    callstack.push_front(bind_detectionparser);
-    callstack.push_front(bind_uvc);
-    callstack.push_front(bind_tof);
-    callstack.push_front(bind_sync);
-    callstack.push_front(bind_messagedemux);
+    // callstack.push_front(bind_camera);
+    // callstack.push_front(bind_monocamera);
+    // callstack.push_front(bind_stereodepth);
+    // callstack.push_front(bind_neuralnetwork);
+    // callstack.push_front(bind_videoencoder);
+    // callstack.push_front(bind_imagemanip);
+    // callstack.push_front(bind_warp);
+    // callstack.push_front(bind_spiout);
+    // callstack.push_front(bind_spiin);
+    // callstack.push_front(bind_detectionnetwork);
+    // callstack.push_front(bind_systemlogger);
+    // callstack.push_front(bind_script);
+    // callstack.push_front(bind_spatiallocationcalculator);
+    // callstack.push_front(bind_spatialdetectionnetwork);
+    // callstack.push_front(bind_objecttracker);
+    // callstack.push_front(bind_imu);
+    // callstack.push_front(bind_edgedetector);
+    // callstack.push_front(bind_featuretracker);
+    // callstack.push_front(bind_apriltag);
+    // callstack.push_front(bind_detectionparser);
+    // callstack.push_front(bind_uvc);
+    // callstack.push_front(bind_tof);
+    // callstack.push_front(bind_sync);
+    // callstack.push_front(bind_messagedemux);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
@@ -261,7 +261,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getBlocking", &Node::Input::getBlocking, DOC(dai, Node, Input, getBlocking))
         .def("setQueueSize", &Node::Input::setQueueSize, py::arg("size"), DOC(dai, Node, Input, setQueueSize))
         .def("getQueueSize", &Node::Input::getQueueSize, DOC(dai, Node, Input, getQueueSize))
-        .def_readwrite("waitForMessage", &Node::Input::waitForMessage, DOC(dai, Node, Input, waitForMessage))
+        // .def_readwrite("waitForMessage", &Node::Input::waitForMessage, DOC(dai, Node, Input, waitForMessage))
         .def("setWaitForMessage", &Node::Input::setWaitForMessage, py::arg("waitForMessage"), DOC(dai, Node, Input, setWaitForMessage))
         .def("getWaitForMessage", &Node::Input::getWaitForMessage, DOC(dai, Node, Input, getWaitForMessage))
         .def("setReusePreviousMessage", &Node::Input::setReusePreviousMessage, py::arg("reusePreviousMessage"), DOC(dai, Node, Input, setReusePreviousMessage))

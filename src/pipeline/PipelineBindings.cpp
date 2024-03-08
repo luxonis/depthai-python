@@ -8,30 +8,30 @@
 // depthai - nodes
 #include "depthai/pipeline/node/XLinkIn.hpp"
 #include "depthai/pipeline/node/XLinkOut.hpp"
-#include "depthai/pipeline/node/BenchmarkOut.hpp"
-#include "depthai/pipeline/node/BenchmarkIn.hpp"
-#include "depthai/pipeline/node/NeuralNetwork.hpp"
+// #include "depthai/pipeline/node/BenchmarkOut.hpp"
+// #include "depthai/pipeline/node/BenchmarkIn.hpp"
+// #include "depthai/pipeline/node/NeuralNetwork.hpp"
 #include "depthai/pipeline/node/ColorCamera.hpp"
-#include "depthai/pipeline/node/Camera.hpp"
-#include "depthai/pipeline/node/VideoEncoder.hpp"
-#include "depthai/pipeline/node/SPIOut.hpp"
-#include "depthai/pipeline/node/SPIIn.hpp"
-#include "depthai/pipeline/node/ImageManip.hpp"
-#include "depthai/pipeline/node/MonoCamera.hpp"
-#include "depthai/pipeline/node/StereoDepth.hpp"
-#include "depthai/pipeline/node/DetectionNetwork.hpp"
-#include "depthai/pipeline/node/Script.hpp"
-#include "depthai/pipeline/node/SystemLogger.hpp"
-#include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
-#include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
-#include "depthai/pipeline/node/ObjectTracker.hpp"
-#include "depthai/pipeline/node/IMU.hpp"
-#include "depthai/pipeline/node/EdgeDetector.hpp"
-#include "depthai/pipeline/node/FeatureTracker.hpp"
-#include "depthai/pipeline/node/AprilTag.hpp"
-#include "depthai/pipeline/node/DetectionParser.hpp"
-#include "depthai/pipeline/node/UVC.hpp"
-#include "depthai/pipeline/node/Warp.hpp"
+// #include "depthai/pipeline/node/Camera.hpp"
+// #include "depthai/pipeline/node/VideoEncoder.hpp"
+// #include "depthai/pipeline/node/SPIOut.hpp"
+// #include "depthai/pipeline/node/SPIIn.hpp"
+// #include "depthai/pipeline/node/ImageManip.hpp"
+// #include "depthai/pipeline/node/MonoCamera.hpp"
+// #include "depthai/pipeline/node/StereoDepth.hpp"
+// #include "depthai/pipeline/node/DetectionNetwork.hpp"
+// #include "depthai/pipeline/node/Script.hpp"
+// #include "depthai/pipeline/node/SystemLogger.hpp"
+// #include "depthai/pipeline/node/SpatialLocationCalculator.hpp"
+// #include "depthai/pipeline/node/SpatialDetectionNetwork.hpp"
+// #include "depthai/pipeline/node/ObjectTracker.hpp"
+// #include "depthai/pipeline/node/IMU.hpp"
+// #include "depthai/pipeline/node/EdgeDetector.hpp"
+// #include "depthai/pipeline/node/FeatureTracker.hpp"
+// #include "depthai/pipeline/node/AprilTag.hpp"
+// #include "depthai/pipeline/node/DetectionParser.hpp"
+// #include "depthai/pipeline/node/UVC.hpp"
+// #include "depthai/pipeline/node/Warp.hpp"
 
 // depthai/
 #include "depthai/properties/GlobalProperties.hpp"
@@ -126,30 +126,30 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         // templated create<NODE> function
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
         .def("createXLinkOut", &Pipeline::create<node::XLinkOut>)
-        .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
+        // .def("createNeuralNetwork", &Pipeline::create<node::NeuralNetwork>)
         .def("createColorCamera", &Pipeline::create<node::ColorCamera>)
-        .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
-        .def("createScript", &Pipeline::create<node::Script>)
-        .def("createSPIOut", &Pipeline::create<node::SPIOut>)
-        .def("createSPIIn", &Pipeline::create<node::SPIIn>)
-        .def("createImageManip", &Pipeline::create<node::ImageManip>)
-        .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
-        .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
-        .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
-        .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
-        .def("createSystemLogger", &Pipeline::create<node::SystemLogger>)
-        .def("createSpatialLocationCalculator", &Pipeline::create<node::SpatialLocationCalculator>)
-        .def("createMobileNetSpatialDetectionNetwork", &Pipeline::create<node::MobileNetSpatialDetectionNetwork>)
-        .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
-        .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
-        .def("createIMU", &Pipeline::create<node::IMU>)
-        .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
-        .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
-        .def("createAprilTag", &Pipeline::create<node::AprilTag>)
-        .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
-        .def("createUVC", &Pipeline::create<node::UVC>)
-        .def("createCamera", &Pipeline::create<node::Camera>)
-        .def("createWarp", &Pipeline::create<node::Warp>)
+        // .def("createVideoEncoder", &Pipeline::create<node::VideoEncoder>)
+        // .def("createScript", &Pipeline::create<node::Script>)
+        // .def("createSPIOut", &Pipeline::create<node::SPIOut>)
+        // .def("createSPIIn", &Pipeline::create<node::SPIIn>)
+        // .def("createImageManip", &Pipeline::create<node::ImageManip>)
+        // .def("createMonoCamera", &Pipeline::create<node::MonoCamera>)
+        // .def("createStereoDepth", &Pipeline::create<node::StereoDepth>)
+        // .def("createMobileNetDetectionNetwork", &Pipeline::create<node::MobileNetDetectionNetwork>)
+        // .def("createYoloDetectionNetwork", &Pipeline::create<node::YoloDetectionNetwork>)
+        // .def("createSystemLogger", &Pipeline::create<node::SystemLogger>)
+        // .def("createSpatialLocationCalculator", &Pipeline::create<node::SpatialLocationCalculator>)
+        // .def("createMobileNetSpatialDetectionNetwork", &Pipeline::create<node::MobileNetSpatialDetectionNetwork>)
+        // .def("createYoloSpatialDetectionNetwork", &Pipeline::create<node::YoloSpatialDetectionNetwork>)
+        // .def("createObjectTracker", &Pipeline::create<node::ObjectTracker>)
+        // .def("createIMU", &Pipeline::create<node::IMU>)
+        // .def("createEdgeDetector", &Pipeline::create<node::EdgeDetector>)
+        // .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
+        // .def("createAprilTag", &Pipeline::create<node::AprilTag>)
+        // .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
+        // .def("createUVC", &Pipeline::create<node::UVC>)
+        // .def("createCamera", &Pipeline::create<node::Camera>)
+        // .def("createWarp", &Pipeline::create<node::Warp>)
         ;
 
 
