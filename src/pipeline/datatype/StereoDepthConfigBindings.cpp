@@ -59,7 +59,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .value("KERNEL_5x5", StereoDepthConfig::MedianFilter::KERNEL_5x5)
         .value("KERNEL_7x7", StereoDepthConfig::MedianFilter::KERNEL_7x7)
         ;
-    m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
+    //m.attr("StereoDepthProperties").attr("MedianFilter") = medianFilter;
 
 
     depthAlign
@@ -67,7 +67,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .value("RECTIFIED_LEFT", StereoDepthConfig::AlgorithmControl::DepthAlign::RECTIFIED_LEFT, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign, RECTIFIED_LEFT))
         .value("CENTER", StereoDepthConfig::AlgorithmControl::DepthAlign::CENTER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthAlign, CENTER));
 
-    m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
+    //m.attr("StereoDepthProperties").attr("DepthAlign") = depthAlign;
 
     depthUnit
         .value("METER", StereoDepthConfig::AlgorithmControl::DepthUnit::METER, DOC(dai, StereoDepthConfig, AlgorithmControl, DepthUnit, METER))

@@ -414,7 +414,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     ;
 
     //backward compatibility
-    m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
+    //m.attr("node").attr("Warp").attr("Properties").attr("Interpolation") = interpolation;
 
     profilingData
         .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))
