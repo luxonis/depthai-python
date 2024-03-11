@@ -50,22 +50,22 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
         // Detection specific properties
         .def_property_readonly(
             "input",
-            [](const DetectionNetwork n) { return &n.neuralNetwork->input; },
+            [](const DetectionNetwork& n) { return &n.neuralNetwork->input; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, NeuralNetwork, input))
         .def_property_readonly(
             "out",
-            [](const DetectionNetwork n) { return &n.detectionParser->out; },
+            [](const DetectionNetwork& n) { return &n.detectionParser->out; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, DetectionNetwork, out))
         .def_property_readonly(
             "outNetwork",
-            [](const DetectionNetwork n) { return &n.neuralNetwork->out; },
+            [](const DetectionNetwork& n) { return &n.neuralNetwork->out; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, DetectionNetwork, outNetwork))
         .def_property_readonly(
             "passthrough",
-            [](const DetectionNetwork n) { return &n.neuralNetwork->passthrough; },
+            [](const DetectionNetwork& n) { return &n.neuralNetwork->passthrough; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, NeuralNetwork, passthrough))
         .def("setConfidenceThreshold",
@@ -83,7 +83,10 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
              &YoloDetectionNetwork::setCoordinateSize,
              py::arg("coordinates"),
              DOC(dai, node, YoloDetectionNetwork, setCoordinateSize))
-        .def("setAnchors", &YoloDetectionNetwork::setAnchors, py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors))
+        /*
+        .def("setAnchors", py::overload_cast<const std::vector<std::vector<std::vector<float>>>&>(&YoloDetectionNetwork::setAnchors), py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors))
+        .def("setAnchors", py::overload_cast<std::vector<float>>(&YoloDetectionNetwork::setAnchors), py::arg("anchors"), DOC(dai, node, YoloDetectionNetwork, setAnchors, 2))
+        */
         .def("setAnchorMasks", &YoloDetectionNetwork::setAnchorMasks, py::arg("anchorMasks"), DOC(dai, node, YoloDetectionNetwork, setAnchorMasks))
         .def("setIouThreshold", &YoloDetectionNetwork::setIouThreshold, py::arg("thresh"), DOC(dai, node, YoloDetectionNetwork, setIouThreshold))
         .def("getNumClasses", &YoloDetectionNetwork::getNumClasses, DOC(dai, node, YoloDetectionNetwork, getNumClasses))
