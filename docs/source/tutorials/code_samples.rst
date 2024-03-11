@@ -23,6 +23,7 @@ Code Samples
    ../samples/Script/*
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
+   ../samples/PointCloud/*
    ../samples/Sync/*
    ../samples/SystemLogger/*
    ../samples/ToF/*
@@ -159,6 +160,11 @@ are presented with code.
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
+
+
+.. rubric:: PointCloud
+
+- :ref:`PointCloud Visualization` - Creates point cloud from depth frames and displays it using Open3D
 
 
 .. rubric:: Sync Node

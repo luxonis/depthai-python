@@ -14,36 +14,57 @@ Usage
 
 Configuring `PointCloudConfig` allows for precise control over the generation of point cloud data. Here's an example of how to configure and apply `PointCloudConfig` in a DepthAI application:
 
-.. code-block:: c++
+.. tabs:: 
 
-    #include "depthai/depthai.hpp"
+    .. code-tab:: py
 
-    int main() {
-        dai::Pipeline pipeline;
-        
-        // Create PointCloud node
-        auto pointCloud = pipeline.create<dai::node::PointCloud>();
-        
-        // Configure point cloud settings
-        dai::PointCloudConfig config;
-        config.setSparse(true); // Enable sparse point cloud generation
-        
-        // Define a transformation matrix
-        std::array<std::array<float, 4>, 4> transformationMatrix = {{
-            {1.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 1.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 1.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 1.0f}
-        }};
-        config.setTransformationMatrix(transformationMatrix); // Apply transformation matrix
-        
-        // Apply configuration to the PointCloud node
-        pointCloud->setConfig(config);
-        
-        // Further pipeline setup and execution...
-        
-        return 0;
-    }
+        import depthai as dai
+
+        # Create pipeline
+        pipeline = dai.Pipeline()
+
+        # Create PointCloud node
+        pointCloud = pipeline.create(dai.node.PointCloud)
+
+        pointCloud.initialConfig.setSparse(True) # Enable sparse point cloud generation
+
+        # Define a transformation matrix
+        transformationMatrix = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+        pointCloud.initialConfig.setTransformationMatrix(transformationMatrix) # Apply transformation matrix
+
+        # Further pipeline setup and execution...
+
+    .. code-tab:: c++
+
+        #include "depthai/depthai.hpp"
+
+        int main() {
+            // Create pipeline
+            dai::Pipeline pipeline;
+
+            // Create PointCloud node
+            auto pointCloud = pipeline.create<dai::node::PointCloud>();
+
+            pointCloud->initialConfig.setSparse(true); // Enable sparse point cloud generation
+
+            // Define a transformation matrix
+            std::vector<std::vector<float>> transformationMatrix = {
+                {1.0, 0.0, 0.0, 0.0},
+                {0.0, 1.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0, 0.0},
+                {0.0, 0.0, 0.0, 1.0}
+            };
+            pointCloud->initialConfig.setTransformationMatrix(transformationMatrix); // Apply transformation matrix
+
+            // Further pipeline setup and execution...
+
+            return 0;
+        }
 
 This example demonstrates initializing `PointCloudConfig`, setting it to generate sparse point clouds, and applying a transformation matrix. This configuration is then applied to a `PointCloud` node within the DepthAI pipeline.
 
@@ -53,8 +74,6 @@ Examples of Functionality
 - **3D Object Localization**: Adjusting the transformation matrix to align point clouds with a known coordinate system for precise object placement.
 - **Scene Optimization**: Utilizing sparse point clouds for efficient processing in large-scale or complex scenes.
 - **Data Alignment**: Applying transformation matrices for seamless integration of point cloud data with other sensor data or pre-existing 3D models.
-
-Understanding and utilizing `PointCloudConfig` is essential for developers working with 3D spatial data, offering the tools needed to optimize and align point cloud generation with specific project goals and constraints.
 
 Reference
 #########
