@@ -126,7 +126,8 @@ Example visualization with Open3D
 Examples using PointCloud
 #########################
 
-- :ref:`depthai_pointcloud_example`
+- :ref:`PointCloud Visualization`
+- :ref:`PointCloud Control`
 
 
 Reference

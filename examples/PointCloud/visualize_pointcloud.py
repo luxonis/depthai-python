@@ -74,7 +74,6 @@ with dai.Device(pipeline) as device:
             isRunning = False
 
     q = device.getOutputQueue(name="out", maxSize=4, blocking=False)
-    pc = o3d.geometry.PointCloud()
     vis = o3d.visualization.VisualizerWithKeyCallback()
     vis.create_window()
     vis.register_key_action_callback(81, key_callback)
