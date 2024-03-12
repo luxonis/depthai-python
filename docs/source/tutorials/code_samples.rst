@@ -165,6 +165,7 @@ are presented with code.
 .. rubric:: PointCloud
 
 - :ref:`PointCloud Visualization` - Creates point cloud from depth frames and displays it using Open3D
+- :ref:`PointCloud Control` - Demonstrates how to control point cloud from the host
 
 
 .. rubric:: Sync Node

@@ -15,9 +15,8 @@ Key Concepts
 Demo
 ####
 
-.. code-block:: bash
-
-    python3 visualize_pointcloud.py
+.. image:: /_static/images/examples/visualize_pointcloud.png
+  :alt: Visualizing pointcloud
 
 Setup
 #####
