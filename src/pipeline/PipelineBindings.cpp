@@ -36,6 +36,7 @@
 
 // depthai/
 #include "depthai/properties/GlobalProperties.hpp"
+#include <memory>
 
 std::shared_ptr<dai::Node> createNode(dai::Pipeline& p, py::object class_){
     auto nodeCreateMap = NodeBindings::getNodeCreateMap();
@@ -87,7 +88,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
     pipeline
         .def(py::init<>(), DOC(dai, Pipeline, Pipeline))
         //.def(py::init<const Pipeline&>())
-        .def("getGlobalProperties", &Pipeline::getGlobalProperties, DOC(dai, Pipeline, getGlobalProperties))
+        .def("getGlobalProperties", &Pipeline::getGlobalProperties,
+             DOC(dai, Pipeline, getGlobalProperties))
         //.def("create", &Pipeline::create<node::XLinkIn>)
         .def("remove", &Pipeline::remove, py::arg("node"), DOC(dai, Pipeline, remove))
         .def("getAllNodes", static_cast<std::vector<std::shared_ptr<Node>> (Pipeline::*)() const>(&Pipeline::getAllNodes), DOC(dai, Pipeline, getAllNodes))
@@ -116,27 +118,47 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBoardConfig", &Pipeline::setBoardConfig, DOC(dai, Pipeline, setBoardConfig))
         .def("getBoardConfig", &Pipeline::getBoardConfig, DOC(dai, Pipeline, getBoardConfig))
         // 'Template' create function
-        .def("create", [](dai::Pipeline& p, py::object class_) {
-	    if (py::cast<std::string>(class_.attr("__base__").attr("__name__")) == "HostNode") {
-#if 0
-	        py::cast<std::shared_ptr<HostNode>>(class_())->run();
-#else
-	        auto host_node = py::cast<std::shared_ptr<HostNode>>(class_());
-	        //std::shared_ptr<HostNode> host_node = py::cast<std::shared_ptr<HostNode>>(class_());
-	        //std::shared_ptr<HostNode> host_node = class_().cast<std::shared_ptr<HostNode>>();
-		host_node->run();
-#endif
-		
-		//p.add(host_node);
-		//return (std::shared_ptr<Node>) host_node;
-		return (std::shared_ptr<Node>) nullptr;
-	    }
-            auto node = createNode(p, class_);
-            if(node == nullptr){
-                throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.node");
-            }
-            return node;
-        })
+        .def("add",
+             [](Pipeline &p, std::shared_ptr<Node> hostNode) {
+               p.add(hostNode);
+               // TODO(Morato) TMP TMP only a test
+               if (std::dynamic_pointer_cast<HostNode>(hostNode) != nullptr) {
+                 std::dynamic_pointer_cast<HostNode>(hostNode)->run();
+               }
+             })
+        // 'Template' create function
+        .def("create",
+             [](dai::Pipeline &p, py::object class_) {
+               // TODO(zimen) re-introduce create function for custom host nodes
+               // if
+               // (py::cast<std::string>(class_.attr("__base__").attr("__name__"))
+               // == "HostNode") { Call the constructor of the class auto
+               // host_node =
+               // py::cast<std::shared_ptr<Node>>(class_.attr("__new__")(class_));
+               // std::cout << py::str(class_.attr("a")) << std::endl;
+               // class_().attr("run")();
+               // auto host_node = py::cast<std::shared_ptr<Node>>(class_());
+               // std::shared_ptr<HostNode> host_node =
+               // py::cast<std::shared_ptr<HostNode>>(class_());
+               // std::shared_ptr<HostNode> host_node =
+               // class_().cast<std::shared_ptr<HostNode>>();
+               //  host_node->run();
+               // return class_();
+
+               // p.add(host_node);
+               // return (std::shared_ptr<Node>) host_node;
+               // return (std::shared_ptr<Node>) nullptr;
+               // }
+               auto node = createNode(p, class_);
+               if (node == nullptr) {
+                 throw std::invalid_argument(
+                     std::string(py::str(class_)) +
+                     " is not a subclass of depthai.node");
+               }
+               // Cast the node to a py::object
+               py::object obj = py::cast(node);
+               return obj;
+             })
         // TODO(themarpe) DEPRECATE, use pipeline.create([class name])
         // templated create<NODE> function
         .def("createXLinkIn", &Pipeline::create<node::XLinkIn>)
@@ -166,8 +188,11 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         // .def("createCamera", &Pipeline::create<node::Camera>)
         // .def("createWarp", &Pipeline::create<node::Warp>)
 	.def("start", &Pipeline::start)
-	.def("wait", &Pipeline::wait)
-        ;
+     .def("wait", [](Pipeline &p) {
+          py::gil_scoped_release release;
+          p.wait();
+     });
+     ;
 
 
 }
