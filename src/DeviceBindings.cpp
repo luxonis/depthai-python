@@ -23,135 +23,135 @@ PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 // Patch for bind_map naming
 // Remove if it gets mainlined in pybind11
 namespace pybind11 {
+// TODO(Morato) - check if fixed, doesn't compile on v2.11.1
+// template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
+// class_<Map, holder_type> bind_map_patched(handle scope, const std::string &name, Args &&...args) {
+//     using KeyType = typename Map::key_type;
+//     using MappedType = typename Map::mapped_type;
+//     using KeysView = detail::keys_view<Map>;
+//     using ValuesView = detail::values_view<Map>;
+//     using ItemsView = detail::items_view<Map>;
+//     using Class_ = class_<Map, holder_type>;
 
-template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
-class_<Map, holder_type> bind_map_patched(handle scope, const std::string &name, Args &&...args) {
-    using KeyType = typename Map::key_type;
-    using MappedType = typename Map::mapped_type;
-    using KeysView = detail::keys_view<Map>;
-    using ValuesView = detail::values_view<Map>;
-    using ItemsView = detail::items_view<Map>;
-    using Class_ = class_<Map, holder_type>;
+//     // If either type is a non-module-local bound type then make the map binding non-local as well;
+//     // otherwise (e.g. both types are either module-local or converting) the map will be
+//     // module-local.
+//     auto *tinfo = detail::get_type_info(typeid(MappedType));
+//     bool local = !tinfo || tinfo->module_local;
+//     if (local) {
+//         tinfo = detail::get_type_info(typeid(KeyType));
+//         local = !tinfo || tinfo->module_local;
+//     }
 
-    // If either type is a non-module-local bound type then make the map binding non-local as well;
-    // otherwise (e.g. both types are either module-local or converting) the map will be
-    // module-local.
-    auto *tinfo = detail::get_type_info(typeid(MappedType));
-    bool local = !tinfo || tinfo->module_local;
-    if (local) {
-        tinfo = detail::get_type_info(typeid(KeyType));
-        local = !tinfo || tinfo->module_local;
-    }
+//     Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
+//     class_<KeysView> keys_view(
+//         scope, ("KeysView_" + name).c_str(), pybind11::module_local(local));
+//     class_<ValuesView> values_view(
+//         scope, ("ValuesView_" + name).c_str(), pybind11::module_local(local));
+//     class_<ItemsView> items_view(
+//         scope, ("ItemsView_" + name).c_str(), pybind11::module_local(local));
 
-    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
-    class_<KeysView> keys_view(
-        scope, ("KeysView_" + name).c_str(), pybind11::module_local(local));
-    class_<ValuesView> values_view(
-        scope, ("ValuesView_" + name).c_str(), pybind11::module_local(local));
-    class_<ItemsView> items_view(
-        scope, ("ItemsView_" + name).c_str(), pybind11::module_local(local));
+//     cl.def(init<>());
 
-    cl.def(init<>());
+//     // Register stream insertion operator (if possible)
+//     detail::map_if_insertion_operator<Map, Class_>(cl, name);
 
-    // Register stream insertion operator (if possible)
-    detail::map_if_insertion_operator<Map, Class_>(cl, name);
+//     cl.def(
+//         "__bool__",
+//         [](const Map &m) -> bool { return !m.empty(); },
+//         "Check whether the map is nonempty");
 
-    cl.def(
-        "__bool__",
-        [](const Map &m) -> bool { return !m.empty(); },
-        "Check whether the map is nonempty");
+//     cl.def(
+//         "__iter__",
+//         [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
+//         keep_alive<0, 1>() /* Essential: keep map alive while iterator exists */
+//     );
 
-    cl.def(
-        "__iter__",
-        [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
-        keep_alive<0, 1>() /* Essential: keep map alive while iterator exists */
-    );
+//     cl.def(
+//         "keys",
+//         [](Map &m) { return KeysView{m}; },
+//         keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+//     );
 
-    cl.def(
-        "keys",
-        [](Map &m) { return KeysView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
+//     cl.def(
+//         "values",
+//         [](Map &m) { return ValuesView{m}; },
+//         keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+//     );
 
-    cl.def(
-        "values",
-        [](Map &m) { return ValuesView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
+//     cl.def(
+//         "items",
+//         [](Map &m) { return ItemsView{m}; },
+//         keep_alive<0, 1>() /* Essential: keep map alive while view exists */
+//     );
 
-    cl.def(
-        "items",
-        [](Map &m) { return ItemsView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
+//     cl.def(
+//         "__getitem__",
+//         [](Map &m, const KeyType &k) -> MappedType & {
+//             auto it = m.find(k);
+//             if (it == m.end()) {
+//                 throw key_error();
+//             }
+//             return it->second;
+//         },
+//         return_value_policy::reference_internal // ref + keepalive
+//     );
 
-    cl.def(
-        "__getitem__",
-        [](Map &m, const KeyType &k) -> MappedType & {
-            auto it = m.find(k);
-            if (it == m.end()) {
-                throw key_error();
-            }
-            return it->second;
-        },
-        return_value_policy::reference_internal // ref + keepalive
-    );
+//     cl.def("__contains__", [](Map &m, const KeyType &k) -> bool {
+//         auto it = m.find(k);
+//         if (it == m.end()) {
+//             return false;
+//         }
+//         return true;
+//     });
+//     // Fallback for when the object is not of the key type
+//     cl.def("__contains__", [](Map &, const object &) -> bool { return false; });
 
-    cl.def("__contains__", [](Map &m, const KeyType &k) -> bool {
-        auto it = m.find(k);
-        if (it == m.end()) {
-            return false;
-        }
-        return true;
-    });
-    // Fallback for when the object is not of the key type
-    cl.def("__contains__", [](Map &, const object &) -> bool { return false; });
+//     // Assignment provided only if the type is copyable
+//     detail::map_assignment<Map, Class_>(cl);
 
-    // Assignment provided only if the type is copyable
-    detail::map_assignment<Map, Class_>(cl);
+//     cl.def("__delitem__", [](Map &m, const KeyType &k) {
+//         auto it = m.find(k);
+//         if (it == m.end()) {
+//             throw key_error();
+//         }
+//         m.erase(it);
+//     });
 
-    cl.def("__delitem__", [](Map &m, const KeyType &k) {
-        auto it = m.find(k);
-        if (it == m.end()) {
-            throw key_error();
-        }
-        m.erase(it);
-    });
+//     cl.def("__len__", &Map::size);
 
-    cl.def("__len__", &Map::size);
+//     keys_view.def("__len__", [](KeysView &view) { return view.map.size(); });
+//     keys_view.def(
+//         "__iter__",
+//         [](KeysView &view) { return make_key_iterator(view.map.begin(), view.map.end()); },
+//         keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+//     );
+//     keys_view.def("__contains__", [](KeysView &view, const KeyType &k) -> bool {
+//         auto it = view.map.find(k);
+//         if (it == view.map.end()) {
+//             return false;
+//         }
+//         return true;
+//     });
+//     // Fallback for when the object is not of the key type
+//     keys_view.def("__contains__", [](KeysView &, const object &) -> bool { return false; });
 
-    keys_view.def("__len__", [](KeysView &view) { return view.map.size(); });
-    keys_view.def(
-        "__iter__",
-        [](KeysView &view) { return make_key_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
-    keys_view.def("__contains__", [](KeysView &view, const KeyType &k) -> bool {
-        auto it = view.map.find(k);
-        if (it == view.map.end()) {
-            return false;
-        }
-        return true;
-    });
-    // Fallback for when the object is not of the key type
-    keys_view.def("__contains__", [](KeysView &, const object &) -> bool { return false; });
+//     values_view.def("__len__", [](ValuesView &view) { return view.map.size(); });
+//     values_view.def(
+//         "__iter__",
+//         [](ValuesView &view) { return make_value_iterator(view.map.begin(), view.map.end()); },
+//         keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+//     );
 
-    values_view.def("__len__", [](ValuesView &view) { return view.map.size(); });
-    values_view.def(
-        "__iter__",
-        [](ValuesView &view) { return make_value_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
+//     items_view.def("__len__", [](ItemsView &view) { return view.map.size(); });
+//     items_view.def(
+//         "__iter__",
+//         [](ItemsView &view) { return make_iterator(view.map.begin(), view.map.end()); },
+//         keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
+//     );
 
-    items_view.def("__len__", [](ItemsView &view) { return view.map.size(); });
-    items_view.def(
-        "__iter__",
-        [](ItemsView &view) { return make_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
-
-    return cl;
-}
+//     return cl;
+// }
 
 } // namespace pybind11
 
@@ -348,9 +348,10 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<PyClock> clock(m, "Clock");
 
 
-    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
-    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
-
+    // py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    // py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
     // pybind11 limitation of having actual classes as exceptions
     // Possible but requires a larger workaround

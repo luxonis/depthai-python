@@ -10,7 +10,7 @@ class Printer(dai.HostNode):
         print("hello world")
 
 p = dai.Pipeline()
-printer = Printer()
-a = p.add(printer)
+p.create(Printer)
+a = p.add(Printer())
 p.start()
 p.wait()

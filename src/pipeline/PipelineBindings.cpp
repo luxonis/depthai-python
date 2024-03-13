@@ -121,34 +121,16 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("add",
              [](Pipeline &p, std::shared_ptr<Node> hostNode) {
                p.add(hostNode);
-               // TODO(Morato) TMP TMP only a test
-               if (std::dynamic_pointer_cast<HostNode>(hostNode) != nullptr) {
-                 std::dynamic_pointer_cast<HostNode>(hostNode)->run();
-               }
              })
         // 'Template' create function
         .def("create",
              [](dai::Pipeline &p, py::object class_) {
-               // TODO(zimen) re-introduce create function for custom host nodes
-               // if
-               // (py::cast<std::string>(class_.attr("__base__").attr("__name__"))
-               // == "HostNode") { Call the constructor of the class auto
-               // host_node =
-               // py::cast<std::shared_ptr<Node>>(class_.attr("__new__")(class_));
-               // std::cout << py::str(class_.attr("a")) << std::endl;
-               // class_().attr("run")();
-               // auto host_node = py::cast<std::shared_ptr<Node>>(class_());
-               // std::shared_ptr<HostNode> host_node =
-               // py::cast<std::shared_ptr<HostNode>>(class_());
-               // std::shared_ptr<HostNode> host_node =
-               // class_().cast<std::shared_ptr<HostNode>>();
-               //  host_node->run();
-               // return class_();
 
-               // p.add(host_node);
-               // return (std::shared_ptr<Node>) host_node;
-               // return (std::shared_ptr<Node>) nullptr;
-               // }
+               if(py::cast<std::string>(class_.attr("__base__").attr("__name__")) == "HostNode") {
+                    std::shared_ptr<Node> host_node = py::cast<std::shared_ptr<Node>>(class_());
+                    p.add(host_node);
+                    return host_node;
+               }
                auto node = createNode(p, class_);
                if (node == nullptr) {
                  throw std::invalid_argument(
@@ -156,8 +138,7 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
                      " is not a subclass of depthai.node");
                }
                // Cast the node to a py::object
-               py::object obj = py::cast(node);
-               return obj;
+               return node;
              })
         // TODO(themarpe) DEPRECATE, use pipeline.create([class name])
         // templated create<NODE> function
