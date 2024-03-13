@@ -116,29 +116,21 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBoardConfig", &Pipeline::setBoardConfig, DOC(dai, Pipeline, setBoardConfig))
         .def("getBoardConfig", &Pipeline::getBoardConfig, DOC(dai, Pipeline, getBoardConfig))
         // 'Template' create function
-        //.def("create", &Pipeline::create<HostNode>)
-        /*
-        .def("test", [](py::object class_){
-             return py::module_::import("builtins").attr("issubclass")(
-                     class_.attr("__base__"),
-                     py::cast(HostNode)
-                     );
-            //return dynamic_cast<HostNode&>(py::cast(&class_)) == nullptr;
-            })*/
         .def("create", [](dai::Pipeline& p, py::object class_) {
-            //if (class_.attr("__base__")
-            //if (dynamic_cast<HostNode>(py::cast(class_)) != nullptr) {
-	    //if (py::cast<std::string>(class_.attr("__base__").attr("__name__")) == "HostNode") {
-	    	py::print("Detected HostNode");
+	    if (py::cast<std::string>(class_.attr("__base__").attr("__name__")) == "HostNode") {
+#if 0
 	        py::cast<std::shared_ptr<HostNode>>(class_())->run();
+#else
 	        auto host_node = py::cast<std::shared_ptr<HostNode>>(class_());
-		//Test
+	        //std::shared_ptr<HostNode> host_node = py::cast<std::shared_ptr<HostNode>>(class_());
+	        //std::shared_ptr<HostNode> host_node = class_().cast<std::shared_ptr<HostNode>>();
 		host_node->run();
-	    	py::print("Created HostNode");
-		p.add(host_node);
-	    	py::print("pipeline add");
-		return (std::shared_ptr<Node>) host_node;
-	    //}
+#endif
+		
+		//p.add(host_node);
+		//return (std::shared_ptr<Node>) host_node;
+		return (std::shared_ptr<Node>) nullptr;
+	    }
             auto node = createNode(p, class_);
             if(node == nullptr){
                 throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.node");
