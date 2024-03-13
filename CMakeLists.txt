@@ -134,6 +134,7 @@ set(SOURCE_LIST
     # src/pipeline/node/ToFBindings.cpp
     # src/pipeline/node/SyncBindings.cpp
     # src/pipeline/node/MessageDemuxBindings.cpp
+    src/pipeline/node/HostNodeBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp

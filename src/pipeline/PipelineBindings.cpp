@@ -4,6 +4,7 @@
 
 // depthai
 #include "depthai/pipeline/Pipeline.hpp"
+#include "depthai/pipeline/HostNode.hpp"
 
 // depthai - nodes
 #include "depthai/pipeline/node/XLinkIn.hpp"
@@ -115,7 +116,29 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("setBoardConfig", &Pipeline::setBoardConfig, DOC(dai, Pipeline, setBoardConfig))
         .def("getBoardConfig", &Pipeline::getBoardConfig, DOC(dai, Pipeline, getBoardConfig))
         // 'Template' create function
+        //.def("create", &Pipeline::create<HostNode>)
+        /*
+        .def("test", [](py::object class_){
+             return py::module_::import("builtins").attr("issubclass")(
+                     class_.attr("__base__"),
+                     py::cast(HostNode)
+                     );
+            //return dynamic_cast<HostNode&>(py::cast(&class_)) == nullptr;
+            })*/
         .def("create", [](dai::Pipeline& p, py::object class_) {
+            //if (class_.attr("__base__")
+            //if (dynamic_cast<HostNode>(py::cast(class_)) != nullptr) {
+	    //if (py::cast<std::string>(class_.attr("__base__").attr("__name__")) == "HostNode") {
+	    	py::print("Detected HostNode");
+	        py::cast<std::shared_ptr<HostNode>>(class_())->run();
+	        auto host_node = py::cast<std::shared_ptr<HostNode>>(class_());
+		//Test
+		host_node->run();
+	    	py::print("Created HostNode");
+		p.add(host_node);
+	    	py::print("pipeline add");
+		return (std::shared_ptr<Node>) host_node;
+	    //}
             auto node = createNode(p, class_);
             if(node == nullptr){
                 throw std::invalid_argument(std::string(py::str(class_)) + " is not a subclass of depthai.node");
@@ -150,6 +173,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         // .def("createUVC", &Pipeline::create<node::UVC>)
         // .def("createCamera", &Pipeline::create<node::Camera>)
         // .def("createWarp", &Pipeline::create<node::Warp>)
+	.def("start", &Pipeline::start)
+	.def("wait", &Pipeline::wait)
         ;
 
 

@@ -148,6 +148,7 @@ void bind_camera(pybind11::module& m, void* pCallstack);
 // void bind_tof(pybind11::module& m, void* pCallstack);
 // void bind_sync(pybind11::module& m, void* pCallstack);
 // void bind_messagedemux(pybind11::module& m, void* pCallstack);
+void bind_hostnode(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // Bind Node et al
@@ -182,6 +183,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     // callstack.push_front(bind_tof);
     // callstack.push_front(bind_sync);
     // callstack.push_front(bind_messagedemux);
+    callstack.push_front(bind_hostnode);
 }
 
 void NodeBindings::bind(pybind11::module& m, void* pCallstack){
