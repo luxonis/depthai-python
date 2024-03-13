@@ -35,6 +35,7 @@ Source code
 
 The example initializes the DepthAI pipeline with color and mono cameras and a stereo depth node to generate depth information. It then creates a point cloud node and configures it for sparse point cloud generation. The script visualizes this point cloud using Open3D, with each point's color corresponding to the color image captured by the RGB camera.
 
+
 .. tabs::
 
     .. tab:: Python
@@ -52,6 +53,6 @@ The example initializes the DepthAI pipeline with color and mono cameras and a s
         .. literalinclude:: ../../../../depthai-core/examples/PointCloud/visualize_pointcloud.cpp
            :language: cpp
            :linenos:
-the full scene and observe how the point cloud updates in real-time to reflect the environment.
+
 
 .. include::  /includes/footer-short.rst

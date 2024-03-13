@@ -1,9 +1,9 @@
 PointCloud
 ==========
 
-The PointCloud node is essential for 3D spatial data processing, transforming depth maps into point clouds. This node, combined with visualization libraries such as Open3D, facilitates advanced 3D modeling and analysis, supporting applications in robotics, AR/VR, and environmental scanning.
+The PointCloud node enables on-device point cloud generation from depth map. 
 
-How to Place it
+How to place it
 ###############
 
 .. tabs::
@@ -24,13 +24,13 @@ Inputs and Outputs
 
 .. code-block::
 
-                 ┌─────────────────────┐
-  inputDepth     │                     │
+                 ┌─────────────────────┐  
+                 │                     │        
+  inputConfig    │     PointCloud      │
   ──────────────►│                     │        outputPointCloud
-  inputConfig    │     PointCloud      ├────────────────►
-  ──────────────►│                     │
-                 │                     │        passthroughDepth
                  │                     ├────────────────►
+  inputDepth     │                     │        passthroughDepth
+  ──────────────►│---------------------├────────────────►        
                  └─────────────────────┘
 
 **Message types**
