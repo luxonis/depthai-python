@@ -42,6 +42,7 @@ import depthai as dai
 import collections
 import time
 from itertools import cycle
+import math
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
@@ -51,6 +52,8 @@ def socket_type_pair(arg):
     is_tof = True if type in ['t', 'tof'] else False
     return [socket, is_color, is_tof]
 
+def string_pair(arg):
+    return arg.split('=')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
@@ -84,6 +87,10 @@ parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 parser.add_argument('-show', '--show-meta', action='store_true',
                     help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
+parser.add_argument('-misc', '--misc-controls', type=string_pair, nargs='+',
+                    default=[],
+                    help="List of miscellaneous camera controls to set initially, "
+                    "as pairs: key1=value1 key2=value2 ...")
 args = parser.parse_args()
 
 cam_list = []
@@ -268,6 +275,8 @@ for c in cam_list:
     # cam[c].initialControl.setMisc("stride-align", 1)
     # cam[c].initialControl.setMisc("scanline-align", 1)
     # cam[c].initialControl.setMisc('manual-exposure-handling', 'fast')
+    for kvPair in args.misc_controls:
+        cam[c].initialControl.setMisc(*kvPair)
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
@@ -362,6 +371,12 @@ with dai.Device() as device:
     chroma_denoise = 0
     control = 'none'
     show = args.show_meta
+    print(args.misc_controls)
+    args_misc_dict = dict(args.misc_controls)
+    
+    hdr_exp_ratio = int(math.log2(float(args_misc_dict.get('hdr-exposure-ratio', 1))))
+    hdr_local_tone_weight = int(32 * float(args_misc_dict.get('hdr-local-tone-weight', 0.75)))
+    hdr_on = (hdr_exp_ratio > 0)
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -459,11 +474,18 @@ with dai.Device() as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            print("ToF toggling f_mod value to:", f_mod)
-            tofConfig.depthParams.freqModUsed = f_mod
-            tofCfgQueue.send(tofConfig)
+        elif key == ord('g'):
+            if tof:
+                f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
+                print("ToF toggling f_mod value to:", f_mod)
+                tofConfig.depthParams.freqModUsed = f_mod
+                tofCfgQueue.send(tofConfig)
+            else:
+                if hdr_on:
+                    control = 'hdr_local_tone_weight'
+                    print("Selected control:", control)
+                else:
+                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
         elif key == ord('h') and tof:
             tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
             print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
@@ -535,7 +557,7 @@ with dai.Device() as device:
             if floodIntensity < 0:
                 floodIntensity = 0
             device.setIrFloodLightBrightness(floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p':
+        elif key >= 0 and chr(key) in '34567890[]pr':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -558,6 +580,11 @@ with dai.Device() as device:
                 control = 'chroma_denoise'
             elif key == ord('p'):
                 control = 'tof_amplitude_min'
+            elif key == ord('r'):
+                if hdr_on:
+                    control = 'hdr_exp_ratio'
+                else:
+                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -565,7 +592,7 @@ with dai.Device() as device:
             if key in [ord('+'), ord('=')]: change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ]")
+                print("Please select a control first using keys 3..9 0 [ ] r g")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
@@ -606,6 +633,16 @@ with dai.Device() as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'hdr_exp_ratio':
+                hdr_exp_ratio = clamp(hdr_exp_ratio + change, 0, 3)
+                value = pow(2, hdr_exp_ratio)
+                print("HDR exposure ratio:", value)
+                ctrl.setMisc("hdr-exposure-ratio", value)
+            elif control == 'hdr_local_tone_weight':
+                hdr_local_tone_weight = clamp(hdr_local_tone_weight + change, 0, 32)
+                value = hdr_local_tone_weight / 32
+                print(f"HDR local tone weight (normalized): {value:.2f}")
+                ctrl.setMisc("hdr-local-tone-weight", value)
             elif control == 'tof_amplitude_min' and tof:
                 amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
                 print("Setting min amplitude(confidence) to:", amp_min)
