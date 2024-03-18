@@ -253,6 +253,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("MReceiver", Node::Input::Type::MReceiver)
     ;
     pyInput
+        .def(py::init([](Node &parent){return Node::Input{parent};}))
         .def_readwrite("group", &Node::Input::group, DOC(dai, Node, Input, group))
         .def_readwrite("name", &Node::Input::name, DOC(dai, Node, Input, name))
         .def_readwrite("type", &Node::Input::type, DOC(dai, Node, Input, type))
@@ -324,6 +325,7 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SSender", Node::Output::Type::SSender)
     ;
     pyOutput
+        .def(py::init([](Node &parent){return Node::Output{parent};}))
         .def_readwrite("group", &Node::Output::group, DOC(dai, Node, Output, group))
         .def_readwrite("name", &Node::Output::name, DOC(dai, Node, Output, name))
         .def_readwrite("type", &Node::Output::type, DOC(dai, Node, Output, type))
