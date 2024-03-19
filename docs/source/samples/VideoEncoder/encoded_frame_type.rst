@@ -36,12 +36,4 @@ Source code
            :language: python
            :linenos:
 
-    .. tab:: C++
-
-        Also `available on GitHub <https://github.com/luxonis/depthai-core/blob/main/examples/VideoEncoder/rgb_encoding_encodedframe.cpp>`__
-
-        .. literalinclude:: ../../../../depthai-core/examples/VideoEncoder/rgb_encoding_encodedframe.cpp
-           :language: cpp
-           :linenos:
-
 .. include::  /includes/footer-short.rst
