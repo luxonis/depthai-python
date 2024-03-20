@@ -17,7 +17,7 @@ How to place it
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatialCalc = pipeline.SpatialLocationCalculator()
+    spatialCalc = pipeline.create(dai.node.SpatialLocationCalculator)
 
   .. code-tab:: c++
 
@@ -55,7 +55,7 @@ Usage
   .. code-tab:: py
 
     pipeline = dai.Pipeline()
-    spatialCalc = pipeline.SpatialLocationCalculator()
+    spatialCalc = pipeline.create(dai.node.SpatialLocationCalculator)
     spatialCalc.setWaitForConfigInput(False)
 
     # Set initial config
@@ -69,7 +69,7 @@ Usage
 
     spatial_calc.initialConfig.addROI(config)
 
-    # You can later send configs from the host (XLinkIn) / scripting node to the InputConfig
+    # You can later send configs from the host (XLinkIn) / Script node to the InputConfig
 
 
   .. code-tab:: c++
@@ -95,6 +95,8 @@ Examples of functionality
 #########################
 
 - :ref:`Spatial location calculator`
+
+.. include::  /includes/spatial-coords.rst
 
 Reference
 #########

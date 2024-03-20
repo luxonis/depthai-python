@@ -107,7 +107,7 @@ with dai.Device(pipeline) as device:
     cap = cv2.VideoCapture(args.videoPath)
     baseTs = time.monotonic()
     simulatedFps = 30
-    inputFrameShape = (1280, 720)
+    inputFrameShape = (1920, 1080)
 
     while cap.isOpened():
         read_correctly, frame = cap.read()

@@ -22,7 +22,7 @@ depthai-core/build/
 
 # builds
 _builds/
-
+.cache/
 #git
 *.orig
 *_REMOTE_*
@@ -32,3 +32,16 @@ _builds/
 
 #ci
 wheelhouse/
+
+# Environments
+.env
+.venv
+env/
+venv/
+venv_*/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/

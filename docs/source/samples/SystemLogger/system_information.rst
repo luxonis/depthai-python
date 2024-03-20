@@ -40,7 +40,7 @@ Example script output
   ----------------------------------------
 
 - :code:`upa` represents the temperature of the SHAVE block
-- :code:`dss` represents the temperature od the DDR subsystem
+- :code:`dss` represents the temperature of the DDR subsystem
 
 Setup
 #####

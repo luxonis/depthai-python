@@ -15,7 +15,7 @@ xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutRight.setStreamName("right")
 
 # Properties
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
 # Linking

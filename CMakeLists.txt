@@ -9,6 +9,12 @@ if(NOT WIN32)
     set(HUNTER_CONFIGURATION_TYPES "Release" CACHE STRING "Hunter dependencies list of build configurations")
 endif()
 
+# Specify path separator
+set(SYS_PATH_SEPARATOR ";")
+if(UNIX)
+    set(SYS_PATH_SEPARATOR ":")
+endif()
+
 # Generate combined Hunter config
 file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
 file(READ cmake/Hunter/config.cmake hunter_config)
@@ -17,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.320.tar.gz"
-    SHA1 "9b4e732afd22f40482c11ad6342f7d336634226f"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
+    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -90,17 +96,91 @@ pybind11_add_module(${TARGET_NAME}
     src/DatatypeBindings.cpp
     src/DataQueueBindings.cpp
     src/pipeline/PipelineBindings.cpp
-    src/pipeline/NodeBindings.cpp
     src/pipeline/CommonBindings.cpp
     src/pipeline/AssetManagerBindings.cpp
     src/openvino/OpenVINOBindings.cpp
     src/log/LogBindings.cpp
+    src/VersionBindings.cpp
+
+    src/pipeline/node/NodeBindings.cpp
+
+    src/pipeline/node/XLinkInBindings.cpp
+    src/pipeline/node/XLinkOutBindings.cpp
+    src/pipeline/node/ColorCameraBindings.cpp
+    src/pipeline/node/CameraBindings.cpp
+    src/pipeline/node/MonoCameraBindings.cpp
+    src/pipeline/node/StereoDepthBindings.cpp
+    src/pipeline/node/NeuralNetworkBindings.cpp
+    src/pipeline/node/VideoEncoderBindings.cpp
+    src/pipeline/node/ImageManipBindings.cpp
+    src/pipeline/node/SPIOutBindings.cpp
+    src/pipeline/node/SPIInBindings.cpp
+    src/pipeline/node/DetectionNetworkBindings.cpp
+    src/pipeline/node/SystemLoggerBindings.cpp
+    src/pipeline/node/ScriptBindings.cpp
+    src/pipeline/node/SpatialLocationCalculatorBindings.cpp
+    src/pipeline/node/SpatialDetectionNetworkBindings.cpp
+    src/pipeline/node/ObjectTrackerBindings.cpp
+    src/pipeline/node/IMUBindings.cpp
+    src/pipeline/node/EdgeDetectorBindings.cpp
+    src/pipeline/node/FeatureTrackerBindings.cpp
+    src/pipeline/node/AprilTagBindings.cpp
+    src/pipeline/node/DetectionParserBindings.cpp
+    src/pipeline/node/WarpBindings.cpp
+    src/pipeline/node/UVCBindings.cpp
+    src/pipeline/node/ToFBindings.cpp
+    src/pipeline/node/PointCloudBindings.cpp
+    src/pipeline/node/SyncBindings.cpp
+    src/pipeline/node/MessageDemuxBindings.cpp
+
+    src/pipeline/datatype/ADatatypeBindings.cpp
+    src/pipeline/datatype/AprilTagConfigBindings.cpp
+    src/pipeline/datatype/AprilTagsBindings.cpp
+    src/pipeline/datatype/BufferBindings.cpp
+    src/pipeline/datatype/CameraControlBindings.cpp
+    src/pipeline/datatype/EdgeDetectorConfigBindings.cpp
+    src/pipeline/datatype/FeatureTrackerConfigBindings.cpp
+    src/pipeline/datatype/ToFConfigBindings.cpp
+    src/pipeline/datatype/ImageManipConfigBindings.cpp
+    src/pipeline/datatype/ImgDetectionsBindings.cpp
+    src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/EncodedFrameBindings.cpp
+    src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/MessageGroupBindings.cpp
+    src/pipeline/datatype/NNDataBindings.cpp
+    src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
+    src/pipeline/datatype/SpatialLocationCalculatorDataBindings.cpp
+    src/pipeline/datatype/StereoDepthConfigBindings.cpp
+    src/pipeline/datatype/SystemInformationBindings.cpp
+    src/pipeline/datatype/TrackedFeaturesBindings.cpp
+    src/pipeline/datatype/TrackletsBindings.cpp
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
+    src/pipeline/datatype/PointCloudDataBindings.cpp
 )
+
+if(WIN32)
+    # Copy dlls to target directory - Windows only
+    # TARGET_RUNTIME_DLLS generator expression available since CMake 3.21
+    if(CMAKE_VERSION VERSION_LESS "3.21")
+        file(GLOB depthai_dll_libraries "${HUNTER_INSTALL_PREFIX}/bin/*.dll")
+    else()
+        set(depthai_dll_libraries "$<TARGET_RUNTIME_DLLS:${TARGET_NAME}>")
+    endif()
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
+        "$<$<BOOL:${depthai_dll_libraries}>:${CMAKE_COMMAND};-E;copy_if_different;${depthai_dll_libraries};$<TARGET_FILE_DIR:${TARGET_NAME}>>"
+        COMMAND_EXPAND_LISTS
+        VERBATIM
+    )
+
+    # Disable "d" postfix, so python can import the library as is
+    set_target_properties(${TARGET_NAME} PROPERTIES DEBUG_POSTFIX "")
+endif()
 
 # Add stubs (pyi) generation step after building bindings
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
-if(error)
-    message(WARNING "Mypy not available - stubs won't be generated or checked")
+if(error OR CMAKE_CROSSCOMPILING)
+    message(WARNING "Mypy not available or cross compiling - stubs won't be generated or checked")
 else()
     get_target_property(bindings_directory ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
     if(NOT bindings_directory)
@@ -108,7 +188,10 @@ else()
     endif()
     message(STATUS "Mypy available, creating and checking stubs. Running with generate_stubs.py ${TARGET_NAME} ${bindings_directory}")
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND
-        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "${bindings_directory}"
+        ${CMAKE_COMMAND} -E env
+        # Python path (to find compiled module)
+        "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
+        ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py" "${TARGET_NAME}" "$<TARGET_FILE_DIR:${TARGET_NAME}>"
         DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_stubs.py"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )

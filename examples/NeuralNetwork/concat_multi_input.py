@@ -42,8 +42,8 @@ nn.setBlobPath(nnPath)
 nn.setNumInferenceThreads(2)
 
 camRgb.preview.link(nn.inputs['img2'])
-create_mono(p, dai.CameraBoardSocket.LEFT).link(nn.inputs['img1'])
-create_mono(p, dai.CameraBoardSocket.RIGHT).link(nn.inputs['img3'])
+create_mono(p, dai.CameraBoardSocket.CAM_B).link(nn.inputs['img1'])
+create_mono(p, dai.CameraBoardSocket.CAM_C).link(nn.inputs['img3'])
 
 # Send bouding box from the NN to the host via XLink
 nn_xout = p.createXLinkOut()
@@ -56,8 +56,9 @@ with dai.Device(p) as device:
     shape = (3, SHAPE, SHAPE * 3)
 
     while True:
-        inNn = np.array(qNn.get().getData())
-        frame = inNn.view(np.float16).reshape(shape).transpose(1, 2, 0).astype(np.uint8).copy()
+        inNn = np.array(qNn.get().getFirstLayerFp16())
+        # Planar INT8 frame
+        frame = inNn.reshape(shape).astype(np.uint8).transpose(1, 2, 0)
 
         cv2.imshow("Concat", frame)
 

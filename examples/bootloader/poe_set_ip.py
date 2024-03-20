@@ -12,7 +12,7 @@ def check_str(s: str):
     return s
 
 if found:
-    print(f'Found device with name: {info.desc.name}')
+    print(f'Found device with name: {info.name}')
     print('-------------------------------------')
     print('"1" to set a static IPv4 address')
     print('"2" to set a dynamic IPv4 address')

@@ -15,6 +15,8 @@ you could fill up your storage on your host.
 - :ref:`RGB Encoding`
 - :ref:`RGB & Mono Encoding`
 
+.. include::  /includes/container-encoding.rst
+
 Demo
 ####
 

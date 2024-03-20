@@ -1,10 +1,13 @@
 #include "XLinkBindings.hpp"
 
+// std
+#include <cmath>
+#include <cstring>
+
+// depthai
 #include "depthai/xlink/XLinkConnection.hpp"
 #include "depthai/xlink/XLinkStream.hpp"
 
-#include <cmath>
-#include <cstring>
 
 void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
 {
@@ -17,6 +20,7 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
     py::enum_<XLinkDeviceState_t> xLinkDeviceState(m, "XLinkDeviceState");
     py::enum_<XLinkProtocol_t> xLinkProtocol(m, "XLinkProtocol");
     py::enum_<XLinkPlatform_t> xLinkPlatform(m, "XLinkPlatform");
+    py::enum_<XLinkError_t> xLinkError(m, "XLinkError_t");
     py::class_<XLinkConnection, std::shared_ptr<XLinkConnection> > xLinkConnection(m, "XLinkConnection", DOC(dai, XLinkConnection));
 
     // pybind11 limitation of having actual classes as exceptions
@@ -47,22 +51,55 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
 
     // Bindings
     deviceInfo
-        .def(py::init<>())
-        .def_readwrite("desc", &DeviceInfo::desc)
-        .def_readwrite("state", &DeviceInfo::state)
+        .def(py::init<>(), DOC(dai, DeviceInfo, DeviceInfo))
+        .def(py::init<std::string, std::string, XLinkDeviceState_t, XLinkProtocol_t, XLinkPlatform_t, XLinkError_t>(), py::arg("name"), py::arg("mxid"), py::arg("state"), py::arg("protocol"), py::arg("platform"), py::arg("status"), DOC(dai, DeviceInfo, DeviceInfo, 2))
+        .def(py::init<std::string>(), py::arg("mxidOrName"), DOC(dai, DeviceInfo, DeviceInfo, 3))
+        .def(py::init<const deviceDesc_t&>(), DOC(dai, DeviceInfo, DeviceInfo, 4))
         .def("getMxId", &DeviceInfo::getMxId)
+        .def("getXLinkDeviceDesc", &DeviceInfo::getXLinkDeviceDesc)
+        .def_readwrite("name", &DeviceInfo::name)
+        .def_readwrite("mxid", &DeviceInfo::mxid)
+        .def_readwrite("state", &DeviceInfo::state)
+        .def_readwrite("protocol", &DeviceInfo::protocol)
+        .def_readwrite("platform", &DeviceInfo::platform)
+        .def_readwrite("status", &DeviceInfo::status)
+        .def("__repr__", &DeviceInfo::toString)
+        // deprecated
+        .def_property("desc", [](py::object& self) {
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "desc field is deprecated, use name/mxid and others instead.", 1);
+            return self;
+        },[](DeviceInfo& i, DeviceInfo di){
+            // Issue an deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "desc field is deprecated, use name/mxid and others instead.", 1);
+            i = di;
+        })
         ;
 
     deviceDesc
         .def(py::init<>())
         .def_readwrite("protocol", &deviceDesc_t::protocol)
         .def_readwrite("platform", &deviceDesc_t::platform)
+        .def_readwrite("state", &deviceDesc_t::state)
+        .def_readwrite("status", &deviceDesc_t::status)
         .def_property(
             "name",
             [](deviceDesc_t &o)
             { return std::string(o.name); },
             [](deviceDesc_t &o, std::string n)
-            { std::strncpy(o.name, n.c_str(), std::min(XLINK_MAX_NAME_SIZE, (int)n.size())); })
+            {
+                memset(o.name, 0, sizeof(o.name));
+                std::strncpy(o.name, n.c_str(), sizeof(o.name));
+            })
+        .def_property(
+            "mxid",
+            [](deviceDesc_t &o)
+            { return std::string(o.mxid); },
+            [](deviceDesc_t &o, std::string n)
+            {
+                memset(o.mxid, 0, sizeof(o.mxid));
+                std::strncpy(o.mxid, n.c_str(), sizeof(o.mxid));
+            })
         ;
 
     xLinkDeviceState
@@ -100,7 +137,28 @@ void XLinkBindings::bind(pybind11::module &m, void *pCallstack)
         .def_static("getFirstDevice", &XLinkConnection::getFirstDevice, py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
         .def_static("getDeviceByMxId", &XLinkConnection::getDeviceByMxId, py::arg("mxId"), py::arg("state") = X_LINK_ANY_STATE, py::arg("skipInvalidDevice") = true)
         .def_static("bootBootloader", &XLinkConnection::bootBootloader, py::arg("devInfo"))
+        .def_static("getGlobalProfilingData", &XLinkConnection::getGlobalProfilingData, DOC(dai, XLinkConnection, getGlobalProfilingData))
         ;
+
+    xLinkError
+        .value("X_LINK_SUCCESS", X_LINK_SUCCESS)
+        .value("X_LINK_ALREADY_OPEN", X_LINK_ALREADY_OPEN)
+        .value("X_LINK_COMMUNICATION_NOT_OPEN", X_LINK_COMMUNICATION_NOT_OPEN)
+        .value("X_LINK_COMMUNICATION_FAIL", X_LINK_COMMUNICATION_FAIL)
+        .value("X_LINK_COMMUNICATION_UNKNOWN_ERROR", X_LINK_COMMUNICATION_UNKNOWN_ERROR)
+        .value("X_LINK_DEVICE_NOT_FOUND", X_LINK_DEVICE_NOT_FOUND)
+        .value("X_LINK_TIMEOUT", X_LINK_TIMEOUT)
+        .value("X_LINK_ERROR", X_LINK_ERROR)
+        .value("X_LINK_OUT_OF_MEMORY", X_LINK_OUT_OF_MEMORY)
+        .value("X_LINK_INSUFFICIENT_PERMISSIONS", X_LINK_INSUFFICIENT_PERMISSIONS)
+        .value("X_LINK_DEVICE_ALREADY_IN_USE", X_LINK_DEVICE_ALREADY_IN_USE)
+        .value("X_LINK_NOT_IMPLEMENTED", X_LINK_NOT_IMPLEMENTED)
+        .value("X_LINK_INIT_USB_ERROR", X_LINK_INIT_USB_ERROR)
+        .value("X_LINK_INIT_TCP_IP_ERROR", X_LINK_INIT_TCP_IP_ERROR)
+        .value("X_LINK_INIT_PCIE_ERROR", X_LINK_INIT_PCIE_ERROR)
+        .export_values()
+        ;
+
 
     //// Exceptions
 

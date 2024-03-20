@@ -39,12 +39,10 @@ stereo = pipeline.create(dai.node.StereoDepth)
 
 xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutNN = pipeline.create(dai.node.XLinkOut)
-xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
-xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
 # Properties
@@ -54,12 +52,16 @@ camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # Setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+# Align depth map to the perspective of RGB camera, on which inference is done
+stereo.setDepthAlign(dai.CameraBoardSocket.CAM_A)
+stereo.setSubpixel(True)
+stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -79,7 +81,6 @@ else:
     camRgb.preview.link(xoutRgb.input)
 
 spatialDetectionNetwork.out.link(xoutNN.input)
-spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
@@ -90,12 +91,12 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    xoutBoundingBoxDepthMapping = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     startTime = time.monotonic()
     counter = 0
     fps = 0
+    color = (255, 255, 255)
 
     while True:
         inPreview = previewQueue.get()
@@ -113,31 +114,32 @@ with dai.Device(pipeline) as device:
 
         depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depth_downscaled = depthFrame[::4]
+        if np.all(depth_downscaled == 0):
+            min_depth = 0  # Set a default minimum depth value when all elements are zero
+        else:
+            min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        max_depth = np.percentile(depth_downscaled, 99)
+        depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         detections = inDet.detections
-        if len(detections) != 0:
-            boundingBoxMapping = xoutBoundingBoxDepthMapping.get()
-            roiDatas = boundingBoxMapping.getConfigData()
-
-            for roiData in roiDatas:
-                roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
-                topLeft = roi.topLeft()
-                bottomRight = roi.bottomRight()
-                xmin = int(topLeft.x)
-                ymin = int(topLeft.y)
-                xmax = int(bottomRight.x)
-                ymax = int(bottomRight.y)
-
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), 255, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
         # If the frame is available, draw bounding boxes on it and show the frame
         height = frame.shape[0]
         width  = frame.shape[1]
         for detection in detections:
+            roiData = detection.boundingBoxMapping
+            roi = roiData.roi
+            roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+            topLeft = roi.topLeft()
+            bottomRight = roi.bottomRight()
+            xmin = int(topLeft.x)
+            ymin = int(topLeft.y)
+            xmax = int(bottomRight.x)
+            ymax = int(bottomRight.y)
+            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, 1)
+
             # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)

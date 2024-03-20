@@ -49,7 +49,7 @@ void AssetManagerBindings::bind(pybind11::module& m, void* pCallstack){
         .def("addExisting", &AssetManager::addExisting, py::arg("assets"), DOC(dai, AssetManager, addExisting))
         .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(Asset)>(&AssetManager::set), py::arg("asset"), DOC(dai, AssetManager, set))
         .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(const std::string&, Asset)>(&AssetManager::set), py::arg("key"), py::arg("asset"), DOC(dai, AssetManager, set, 2))
-        .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(const std::string& key, const std::string& path, int alignment)>(&AssetManager::set), py::arg("key"), py::arg("path"), py::arg("alignment") = 64, DOC(dai, AssetManager, set, 3))
+        .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(const std::string& key, const dai::Path& path, int alignment)>(&AssetManager::set), py::arg("key"), py::arg("path"), py::arg("alignment") = 64, DOC(dai, AssetManager, set, 3))
         .def("set", static_cast<std::shared_ptr<dai::Asset> (AssetManager::*)(const std::string& key, const std::vector<std::uint8_t>& data, int alignment)>(&AssetManager::set), py::arg("key"), py::arg("data"), py::arg("alignment") = 64, DOC(dai, AssetManager, set, 4))
         .def("get", static_cast<std::shared_ptr<const Asset> (AssetManager::*)(const std::string&) const>(&AssetManager::get), py::arg("key"), DOC(dai, AssetManager, get))
         .def("get", static_cast<std::shared_ptr<Asset> (AssetManager::*)(const std::string&)>(&AssetManager::get), py::arg("key"), DOC(dai, AssetManager, get, 2))

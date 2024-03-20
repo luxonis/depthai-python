@@ -27,8 +27,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires MobilenetSDD blob (:code:`mobilenet-ssd_openvino_2021.2_5shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_5shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

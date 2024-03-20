@@ -59,7 +59,23 @@ Click `here <https://en.wikipedia.org/wiki/Image_processor>`__ for more informat
 
 **Image Post-Processing** converts YUV420 planar frames from the **ISP** into :code:`video`/:code:`preview`/:code:`still` frames.
 
-When setting sensor resolution to 12MP and using :code:`video`, you will get 4K video output. 4K frames are cropped from 12MP frames (not downsampled).
+``still`` (when a capture is triggered) and ``isp`` work at the max camera resolution, while ``video`` and ``preview`` are
+limited to max 4K (3840 x 2160) resolution, which is cropped from ``isp``.
+For IMX378 (12MP), the **post-processing** works like this:
+
+.. code-block::
+
+    ┌─────┐   Cropping to   ┌─────────┐  Downscaling   ┌──────────┐
+    │ ISP ├────────────────►│  video  ├───────────────►│ preview  │
+    └─────┘  max 3840x2160  └─────────┘  and cropping  └──────────┘
+
+.. image:: /_static/images/tutorials/isp.jpg
+
+The image above is the ``isp`` output from the ColorCamera (12MP resolution from IMX378). If you aren't downscaling ISP,
+the ``video`` output is cropped to 4k (max 3840x2160 due to the limitation of the ``video`` output) as represented by
+the blue rectangle. The Yellow rectangle represents a cropped ``preview`` output when the preview size is set to a 1:1 aspect
+ratio (eg. when using a 300x300 preview size for the MobileNet-SSD NN model) because the ``preview`` output is derived from
+the ``video`` output.
 
 Usage
 #####
@@ -71,7 +87,7 @@ Usage
       pipeline = dai.Pipeline()
       cam = pipeline.create(dai.node.ColorCamera)
       cam.setPreviewSize(300, 300)
-      cam.setBoardSocket(dai.CameraBoardSocket.RGB)
+      cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
       cam.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
       cam.setInterleaved(False)
       cam.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
@@ -81,10 +97,19 @@ Usage
       dai::Pipeline pipeline;
       auto cam = pipeline.create<dai::node::ColorCamera>();
       cam->setPreviewSize(300, 300);
-      cam->setBoardSocket(dai::CameraBoardSocket::RGB);
+      cam->setBoardSocket(dai::CameraBoardSocket::CAM_A);
       cam->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
       cam->setInterleaved(false);
       cam->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
+
+Limitations
+###########
+
+Here are known camera limitations for the `RVC2 <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__:
+
+- **ISP can process about 600 MP/s**, and about **500 MP/s** when the pipeline is also running NNs and video encoder in parallel
+- **3A algorithms** can process about **200..250 FPS overall** (for all camera streams). This is a current limitation of our implementation, and we have plans for a workaround to run 3A algorithms on every Xth frame, no ETA yet
+- **ISP Scaling** numerator value can be 1..16 and denominator value 1..32 for both vertical and horizontal scaling. So you can downscale eg. 12MP (4056x3040) only to resolutions `calculated here <https://docs.google.com/spreadsheets/d/153yTstShkJqsPbkPOQjsVRmM8ZO3A6sCqm7uayGF-EE/edit#gid=0>`__
 
 Examples of functionality
 #########################

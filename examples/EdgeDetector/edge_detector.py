@@ -32,13 +32,13 @@ xoutEdgeRgb.setStreamName(edgeRgbStr)
 xinEdgeCfg.setStreamName(edgeCfgStr)
 
 # Properties
-camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 edgeDetectorRgb.setMaxOutputFrameSize(camRgb.getVideoWidth() * camRgb.getVideoHeight())
 

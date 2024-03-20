@@ -1,35 +1,22 @@
 Multiple DepthAI per Host
 =========================
 
-Learn how to discover DepthAI devices connected to your system, and use them individually.
+You can find `Demo scripts here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-multiple-devices>`__.
+Learn how to discover multiple OAK cameras connected to your system, and use them individually.
 
 .. image:: /_static/images/tutorials/multiple/setup.jpg
   :alt: face
 
-Shown on the left is Luxonis `uAI (BW1093) <https://shop.luxonis.com/products/bw1093>`__ which is actually plugged into
-a `Raspberry Pi Compute Module Edition (BW1097) <https://shop.luxonis.com/products/depthai-rpi-compute-module-edition>`__.
+Shown on the left is Luxonis `OAK-1 <https://shop.luxonis.com/products/bw1093>`__ which is actually plugged into
+an `OAK-D-CM3 <https://shop.luxonis.com/products/depthai-rpi-compute-module-edition>`__.
 
-So in this case, everything is running on the (single) Raspberry Pi 3B+ which is in the back of the BW1097.
+So in this case, everything is running on the (single) Raspberry Pi 3B+ host which is in the back of the OAK-D-CM3.
 
-Demo code
-#########
+Discovering OAK cameras
+#######################
 
-You can find demo code `here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-multiple-devices>`__. The demo will find all devices connected to the host and display an RGB preview from each of them.
-
-Dependencies
-############
-
-You have already set up the Python API on your system (if you have a Raspberry Pi Compute Module it came pre-setup).
-See :ref:`here <Python API Reference>` if you have not yet installed the DepthAI Python API on your system.
-
-Discover DepthAI-USB Port Mapping
-#################################
-
-The DepthAI multi-device support is currently done by selecting the device mx_id (serial number) of a connected DepthAI
-device.
-
-If you'd like to associate a given DepthAI device with specific code (e.g. neural model) to be run on it, it is recommended
-to plug in one device at a time, and then use the following code to determine which device is on which port:
+You can use DepthAI to discover all connected OAK cameras, either via USB or through the LAN (OAK POE cameras).
+The code snippet below finds all OAK cameras and prints their MxIDs (unique identifier) and their XLink state.
 
 .. code-block:: python
 
@@ -52,29 +39,22 @@ For example, if the first device is desirable from above use the following code:
 
 .. code-block:: python
 
-  found, device_info = depthai.Device.getDeviceByMxId("14442C10D13EABCE00")
-
-  if not found:
-      raise RuntimeError("Device not found!")
-
-You can then use the `device_info` to specify on which device you want to run your pipeline:
-
-.. code-block:: python
-
+  # Specify MXID, IP Address or USB path
+  device_info = depthai.DeviceInfo("14442C108144F1D000") # MXID
+  #device_info = depthai.DeviceInfo("192.168.1.44") # IP Address
+  #device_info = depthai.DeviceInfo("3.3.3") # USB port name
   with depthai.Device(pipeline, device_info) as device:
+      # ...
 
 And you can use this code as a basis for your own use cases, such that you can run differing neural models
-on different DepthAI/uAI models.
+on different OAK models.
 
 Specifying POE device to be used
 ********************************
 
-You can specify the POE device to be used by the IP address as well. Here's the `code snippet <https://docs.luxonis.com/en/latest/pages/tutorials/getting-started-with-poe/#manually-specify-device-ip>`__.
+You can specify the POE device to be used by the IP address as well, as shown in the code snippet above.
 
-
-Now use as many DepthAI devices as you need!
-
-And since DepthAI does all the heavy lifting, you can usually use quite a
-few of them with very little burden to the host.
+Now use as many OAK cameras as you need!
+And since DepthAI does all the heavy lifting, you can usually use quite a few of them with very little burden to the host.
 
 .. include::  /includes/footer-short.rst

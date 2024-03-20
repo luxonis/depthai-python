@@ -33,6 +33,8 @@ function(add_python_example example_name python_script_path)
     add_custom_target(${example_name}
         ${CMAKE_COMMAND} -E env
         # Environment variables
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
@@ -49,6 +51,8 @@ function(add_python_example example_name python_script_path)
         # Adds test with 5 seconds timeout and bumps all python warnings to errors
         add_test(NAME ${example_name} COMMAND
             ${CMAKE_COMMAND} -E env
+            # PATH (dlls)
+            "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
             # Python path (to find compiled module)
             "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
             # ASAN in case of sanitizers
@@ -70,6 +74,8 @@ if(DEPTHAI_PYTHON_TEST_EXAMPLES)
     # Adds install requirements test with 5 minute timeout
     add_test(NAME install_requirements COMMAND
         ${CMAKE_COMMAND} -E env
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled module)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers
@@ -103,6 +109,7 @@ add_python_example(rgb_camera_control ColorCamera/rgb_camera_control.py)
 add_python_example(rgb_preview ColorCamera/rgb_preview.py)
 add_python_example(rgb_scene ColorCamera/rgb_scene.py)
 add_python_example(rgb_video ColorCamera/rgb_video.py)
+add_python_example(rgb_isp_scale ColorCamera/rgb_isp_scale.py)
 
 ## EdgeDetector
 add_python_example(edge_detector EdgeDetector/edge_detector.py)
@@ -121,6 +128,8 @@ add_python_example(queue_add_callback host_side/queue_add_callback.py)
 add_python_example(image_manip_rotate ImageManip/image_manip_rotate.py)
 add_python_example(image_manip_tiling ImageManip/image_manip_tiling.py)
 add_python_example(rgb_rotate_warp ImageManip/rgb_rotate_warp.py)
+add_python_example(image_manip_warp_mesh ImageManip/image_manip_warp_mesh.py)
+add_python_example(crop_input_chunck_oom issue_solved/crop_input_chunck_oom.py)
 
 ## IMU
 add_python_example(imu_gyroscope_accelerometer IMU/imu_gyroscope_accelerometer.py)
@@ -155,6 +164,8 @@ add_python_example(spatial_object_tracker ObjectTracker/spatial_object_tracker.p
 
 ## Script
 add_python_example(script_camera_control Script/script_camera_control.py)
+add_python_example(script_json_communication Script/script_json_communication.py)
+add_python_example(script_get_device_info Script/script_get_device_info.py)
 
 ## SpatialDetection
 add_python_example(spatial_tiny_yolo_v3 SpatialDetection/spatial_tiny_yolo.py yolo3)
@@ -168,6 +179,7 @@ add_python_example(depth_crop_control StereoDepth/depth_crop_control.py)
 add_python_example(depth_preview StereoDepth/depth_preview.py)
 add_python_example(depth_post_processing StereoDepth/depth_post_processing.py)
 add_python_example(rgb_depth_aligned StereoDepth/rgb_depth_aligned.py)
+add_python_example(rgb_depth_confidence_aligned StereoDepth/rgb_depth_confidence_aligned.py)
 add_python_example(stereo_depth_from_host StereoDepth/stereo_depth_from_host.py)
 add_python_example(stereo_depth_video StereoDepth/stereo_depth_video.py)
 

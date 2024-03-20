@@ -9,6 +9,8 @@ endif()
 
 set(PYBIND11_TEST_FILES
     "xlink_exceptions_test.cpp"
+    "utf8_support_test.py"
+    "dai_path_conversion_test.py"
 )
 
 string(REPLACE ".cpp" ".py" PYBIND11_PYTEST_FILES "${PYBIND11_TEST_FILES}")
@@ -20,6 +22,8 @@ pybind11_add_module(${TARGET_TEST_MODULE} THIN_LTO ${TARGET_TEST_MODULE}.cpp ${P
 add_custom_target(
     pytest COMMAND
         ${CMAKE_COMMAND} -E env
+        # PATH (dlls)
+        "PATH=${HUNTER_INSTALL_PREFIX}/bin${SYS_PATH_SEPARATOR}$ENV{PATH}"
         # Python path (to find compiled modules)
         "PYTHONPATH=$<TARGET_FILE_DIR:${TARGET_NAME}>${SYS_PATH_SEPARATOR}$<TARGET_FILE_DIR:${TARGET_TEST_MODULE}>${SYS_PATH_SEPARATOR}$ENV{PYTHONPATH}"
         # ASAN in case of sanitizers

@@ -104,7 +104,7 @@ Let's start off with an empty :class:`Pipeline` object
   pipeline = depthai.Pipeline()
 
 Now, first node we will add is a :class:`ColorCamera`. We will use the :code:`preview` output, resized to 300x300 to fit the
-`mobilenet-ssd input size <https://docs.openvinotoolkit.org/latest/omz_models_public_mobilenet_ssd_mobilenet_ssd.html>`__ (which we will define later)
+`mobilenet-ssd input size <https://docs.openvino.ai/2021.4/omz_models_model_mobilenet_ssd.html>`__ (which we will define later)
 
 .. code-block:: python
 

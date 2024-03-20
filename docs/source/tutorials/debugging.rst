@@ -2,7 +2,7 @@ Debugging DepthAI pipeline
 ##########################
 
 Currently, tools for debugging the DepthAI pipeline are limited. We plan on creating a software that would track all messages and queues,
-which would allow users to debug a "frozen" pipeline much easier, which is usually caused by a filled up :ref:`blocking queue <Blocking behaviour>`.
+which would allow users to debug a "frozen" pipeline much easier, which is usually caused by a filled up :ref:`blocking queue <Device queues>`.
 
 .. _depthai_logging:
 
@@ -103,5 +103,63 @@ Code above will print the following values to the user:
     [Script(0)] [warning] Number of layers: 2
     [Script(0)] [warning] FP16 values: [1.2001953125, 1.2001953125, 3.900390625, 5.5]
     [Script(0)] [warning] UINT8 values: [6, 9, 4, 2, 0]
+
+Resource Debugging
+==================
+
+By enabling ``info`` log level (or lower), depthai will print usage of `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__,
+specifically SHAVE core and CMX memory usage:
+
+.. code-block:: bash
+
+    NeuralNetwork allocated resources: shaves: [0-11] cmx slices: [0-11] # 12 SHAVES/CMXs allocated to NN
+    ColorCamera allocated resources: no shaves; cmx slices: [13-15] # 3 CMXs allocated to Color an Mono cameras (ISP)
+    MonoCamera allocated resources: no shaves; cmx slices: [13-15]
+    StereoDepth allocated resources: shaves: [12-12] cmx slices: [12-12] # StereoDepth node consumes 1 CMX and 1 SHAVE core
+    ImageManip allocated resources: shaves: [15-15] no cmx slices. # ImageManip node(s) consume 1 SHAVE core
+    SpatialLocationCalculator allocated resources: shaves: [14-14] no cmx slices. # SLC consumes 1 SHAVE core
+
+In total, this pipeline consumes 15 SHAVE cores and 16 CMX slices. The pipeline is running an object detection model compiled for 6 SHAVE cores.
+
+CPU usage
+=========
+
+When setting the :ref:`DepthAI debugging level` to debug (or lower), depthai will also print our CPU usage for LeonOS and LeonRT. CPU usage
+at 100% (or close to it) can cause many undesirable effects, such as higher frame latency, lower FPS, and in some cases even firmware crash.
+
+Compared to OAK USB cameras, OAK PoE cameras will have increased CPU consumption, as the networking stack is running on the LeonOS core. Besides
+reducing pipeline (doing less processing), a good alternative is to reduce 3A FPS (ISP). This means that 3A algorithms (auto exposure, auto white balance
+and auto focus) won't be run every frame, but every N frames. When updating DepthAI SDK's `camera_preview.py <https://github.com/luxonis/depthai/blob/main/depthai_sdk/examples/CameraComponent/camera_preview.py>`__
+example (code change below), the LeonOS CPU usage decreased from 100% to ~46%:
+
+.. code-block:: bash
+
+    # Without 3A FPS limit on OAK PoE camera:
+    Cpu Usage - LeonOS 99.99%, LeonRT: 6.91%
+
+    # Limiting 3A to 15 FPS on OAK PoE camera:
+    Cpu Usage - LeonOS 46.24%, LeonRT: 3.90%
+
+Not having 100% CPU usage also drastically decreased frame latency, in the example for the script below it went from ~710 ms to ~110ms:
+
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/84ec8de8-58ce-49c7-b882-048141d284e0
+
+.. code-block:: diff
+
+    from depthai_sdk import OakCamera
+
+    with OakCamera() as oak:
+        color = oak.create_camera('color')
+        left = oak.create_camera('left')
+        right = oak.create_camera('right')
+
+  +     # Limiting 3A to 15 FPS
+  +     for node in [color.node, left.node, right.node]:
+  +         node.setIsp3aFps(15)
+
+        oak.visualize([color, left, right], fps=True, scale=2/3)
+        oak.start(blocking=True)
+
+Limiting 3A FPS can be achieved by calling :code:`setIsp3aFps()` function on the camera node (either :ref:`ColorCamera` or :ref:`MonoCamera`).
 
 .. include::  /includes/footer-short.rst

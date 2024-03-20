@@ -1,61 +1,102 @@
 Installation
 ============
 
-Please install the necessary dependencies for your platform by :ref:`referring to the table below <Supported Platforms>`.
-Once installed, you can :ref:`install the DepthAI library <Install from PyPI>`.
+.. note::
 
-We are constantly striving to improve how we release our software to keep up
-with countless platforms and the numerous ways to package it.  If you do not
-see a particular platform or package format listed below please reach out to
-us on `Discord <https://discord.com/channels/790680891252932659/794255653870370857>`__
-or on `Github <https://github.com/luxonis/depthai>`__.
+  Refer to `DepthAI installer documentation <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__ to install
+  full `DepthAI demo <https://github.com/luxonis/depthai#depthai-api-demo-program>`__ and its dependencies and requirements.
+
+Follow the steps below to just install depthai api library dependencies for your platform.
+
+.. tabs::
+
+  .. tab:: **macOS**
+
+    Execute the script below to install macOS dependencies:
+
+    .. code-block:: bash
+
+      curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
+
+    Please refer to :ref:`documentation below <macOS>` if any issues occur.
+
+  .. tab:: **Windows 10/11**
+
+    Windows 10/11 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__,
+    or follow :ref:`instructions below <Windows 10>`.
+
+  .. tab:: **Linux**
+
+    Execute the script below to install Linux dependencies:
+
+    .. code-block:: bash
+
+      sudo wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+
+    Please refer to :ref:`Supported Platforms` if any issues occur.
+
+Once installed, you can :ref:`install the DepthAI library <Install from PyPI>` from PyPI.
 
 Supported Platforms
 ###################
 
-======================== ============================================== ================================================================================
-Platform                 Instructions                                   Support
-======================== ============================================== ================================================================================
-Windows 10               :ref:`Platform dependencies <Windows 10>`      `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-macOS                    :ref:`Platform dependencies <macOS>`           `Discord <https://discord.com/channels/790680891252932659/798283911989690368>`__
-Ubuntu                   :ref:`Platform dependencies <Ubuntu>`          `Discord <https://discord.com/channels/790680891252932659/798302162160451594>`__
-Raspberry Pi OS          :ref:`Platform dependencies <Raspberry Pi OS>` `Discord <https://discord.com/channels/790680891252932659/798302708070350859>`__
-Jestson Nano/Xavier      :ref:`Platform dependencies <Jetson>`          `Discord <https://discord.com/channels/790680891252932659/795742008119132250>`__
-======================== ============================================== ================================================================================
+See documentation below for other platforms or additional information.
 
-The following platforms are also supported by a combination of the community and Luxonis:
+.. list-table::
+   :header-rows: 1
 
-====================== =========================================================================== ================================================================================
-Platform               Instructions                                                                Support
-====================== =========================================================================== ================================================================================
-Fedora                                                                                             `Discord <https://discord.com/channels/790680891252932659/798592589905264650>`__
-Robot Operating System Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__ `Discord <https://discord.com/channels/790680891252932659/795749142793420861>`__
-Windows 7              :ref:`WinUSB driver <Windows 7>`                                            `Discord <https://discord.com/channels/790680891252932659/798284448323731456>`__
-Docker                 :ref:`Pull and run official images <Docker>`                                `Discord <https://discord.com/channels/790680891252932659/796794747275837520>`__
-Kernel Virtual Machine :ref:`Run on KVM <Kernel Virtual Machine>`                                  `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-VMware                 :ref:`Run on VMware <vmware>`                                               `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-Virtual Box            :ref:`Run on Virtual Box <Virtual Box>`                                     `Discord <https://discord.com/channels/790680891252932659/819663531003346994>`__
-====================== =========================================================================== ================================================================================
+   * - Platform
+     - Instructions
+   * - Windows 10/11
+     - :ref:`Platform dependencies <Windows 10>`
+   * - macOS
+     - :ref:`Platform dependencies <macOS>`
+   * - Ubuntu
+     - :ref:`Platform dependencies <Ubuntu>`
+   * - Raspberry Pi OS
+     - :ref:`Platform dependencies <Raspberry Pi OS>`
+   * - Jetson Nano/Xavier
+     - :ref:`Platform dependencies <Jetson>`
+   * - ROS
+     - Follow tutorial at `depthai-ros <https://github.com/luxonis/depthai-ros>`__
+   * - Windows 7
+     - :ref:`WinUSB driver <Windows 7>`
+   * - Docker
+     - :ref:`Pull and run official images <Docker>`
+   * - Kernel Virtual Machine
+     - :ref:`Run on KVM <Kernel Virtual Machine>`
+   * - VMware
+     - :ref:`Run on VMware <vmware>`
+   * - Virtual Box
+     - :ref:`Run on Virtual Box <Virtual Box>`
+   * - WSL2
+     - :ref:`Run on WSL2 <WSL 2>`
+
+If you do not see a particular platform or package format listed below please reach out to us on `Discord <luxonis.com/discord>`__
+or on `Github <https://github.com/luxonis/depthai>`__.
 
 macOS
 *****
 
 .. code-block:: bash
 
-  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+  bash -c "$(curl -fL https://docs.luxonis.com/install_depthai.sh)"
 
 Close and re-open the terminal window after this command.
 
-The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1 support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__ for some additional troubleshooting steps.
+The script also works on M1 Macs, Homebrew being installed under Rosetta 2, as some Python packages are still missing native M1
+support.  In case you already have Homebrew installed natively and things don't work, see `here <https://github.com/luxonis/depthai/issues/299#issuecomment-757110966>`__
+for some additional troubleshooting steps.
 
-Note that if the video streaming window does not appear consider running the
-following:
+Note that if the video streaming window does not appear consider running the following:
 
 .. code-block:: bash
 
     python3 -m pip install opencv-python --force-reinstall --no-cache-dir
 
 See the `Video preview window fails to appear on macOS <https://discuss.luxonis.com/d/95-video-preview-window-fails-to-appear-on-macos>`_ thread on our forum for more information.
+
+We provide **Mac M1 prebuilt Python wheels** for depthai since the version ``2.17.3.1``.
 
 Ubuntu
 ******
@@ -75,11 +116,12 @@ Note! If opencv fails with illegal instruction after installing from PyPi, add:
 
 Raspberry Pi OS
 ***************
-  
+
   .. code-block:: bash
-  
+
     sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
+We have also prepared `pre-configured RPi images <https://docs.luxonis.com/projects/hardware/en/latest/pages/guides/raspberrypi.html>`__ so you can get up & running faster.
 
 Jetson
 ******
@@ -90,7 +132,7 @@ perform the following steps, after completing a fresh install and setup. On the 
 This first step is optional: go to the *Software* (App Store) and delete the apps or software that you probably will not use. 
 
 Open a terminal window and run the following commands:
-  
+
   .. code-block:: bash
 
     sudo apt update && sudo apt upgrade
@@ -179,8 +221,7 @@ For openSUSE, available `in this official article <https://en.opensuse.org/SDB:I
 Windows 10
 **********
 
-We recommend using the Chocolatey package manager to install DepthAI's
-dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
+For Windows 10/11, we recommend using the Chocolatey package manager to install DepthAI's dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
 
 To `install Chocolatey <https://docs.chocolatey.org/en-us/choco/setup>`__ and
 use it to install DepthAI's dependencies do the following:
@@ -208,6 +249,37 @@ had success <https://discuss.luxonis.com/d/105-run-on-win7-sp1-x64-manual-instal
 device with :code:`USB ID: 03E7 2485` and install the WinUSB driver by
 selecting `WinUSB(v6.1.7600.16385)` and then `Install WCID Driver`.
 
+WSL 2
+*****
+
+Steps below were performed on WSL 2 running Ubuntu 20.04, while host machine was running Win10 20H2 (OS build 19042.1586).
+Original tutorial `written here <https://discuss.luxonis.com/d/693-i-got-depthai-demo-to-run-in-wsl>`__ by SputTheBot.
+
+To get an OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (2.3.0)
+for that. Inside WSL 2 you also need to install :ref:`depthai dependencies <Ubuntu>` and `USB/IP client tool <https://github.com/dorssel/usbipd-win/wiki/WSL-support#usbip-client-tools>`__ (2 commands).
+
+To attach the OAK camera to WSL 2, we have prepared a Python script below that you need to execute on the host computer (in Admin mode).
+
+.. code-block:: python
+
+  import time
+  import os
+  while True:
+      output = os.popen('usbipd wsl list').read() # List all USB devices
+      rows = output.split('\n')
+      for row in rows:
+          if ('Movidius MyriadX' in row or 'Luxonis Device' in row) and 'Not attached' in row: # Check for OAK cameras that aren't attached
+              busid = row.split(' ')[0]
+              out = os.popen(f'usbipd wsl attach --busid {busid}').read() # Attach an OAK camera
+              print(out)
+              print(f'Usbipd attached Myriad X on bus {busid}') # Log
+      time.sleep(.5)
+
+After that, you can check ``lsusb`` command inside the WLS 2 and you should be able to see ``Movidius MyriadX``.
+
+.. note::
+  Examples that don't show any frames (eg. IMU example) should work. We haven't spent enough time to get OpenCV display frames inside WSL 2, but you could try it out yourself, some ideas `here <https://stackoverflow.com/questions/65453763/python3-9-on-wsl2-ubuntu-20-04-how-to-display-image-using-cv2-opencv-python-4>`__.
+
 Docker
 ******
 
@@ -229,7 +301,7 @@ Run the :code:`rgb_preview.py` example inside a Docker container on a Linux host
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        luxonis/depthai-library:latest \
-       python3 /depthai-python/examples/rgb_preview.py
+       python3 /depthai-python/examples/ColorCamera/rgb_preview.py
 
 To allow the container to update X11 you may need to run :code:`xhost local:root` on the host.
 
@@ -361,7 +433,8 @@ And then for each additional depthai/OAK device you would like to pass through, 
 Install from PyPI
 #################
 
-Our packages are distributed `via PyPi <https://pypi.org/project/depthai/>`__, to install it in your environment use
+After installing depthai dependencies, you can either refer to depthai-core for C++ development, or download the depthai **Python library**
+`via PyPi <https://pypi.org/project/depthai/>`__:
 
 .. code-block:: bash
 
@@ -429,102 +502,100 @@ Other installation methods
 
 To get the latest and yet unreleased features from our source code, you can go ahead and compile depthai package manually.
 
-Dependencies to build from source
-*********************************
+.. tabs::
 
-- CMake > 3.2.0
-- Generation tool (Ninja, make, ...)
-- C/C++ compiler
-- libusb1 development package
+  .. tab:: **Build from source**
 
-.. _raspbian:
+      **Dependencies to build from source**
 
-Ubuntu, Raspberry Pi OS, ... (Debian based systems)
----------------------------------------------------
+      - CMake > 3.2.0
+      - Generation tool (Ninja, make, ...)
+      - C/C++ compiler
+      - libusb1 development package
 
-On Debian based systems (Raspberry Pi OS, Ubuntu, ...) these can be acquired by running:
+      .. tabs::
 
-.. code-block:: bash
+        .. tab:: Debian/Ubuntu/RPi OS
 
-  sudo apt-get -y install cmake libusb-1.0-0-dev build-essential
+          On Debian based systems (Raspberry Pi OS, Ubuntu, ...) these can be acquired by running:
 
-macOS (Mac OS X)
-----------------
+          .. code-block:: bash
 
-Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/depthai-python>`__ library needs following dependencies
+            sudo apt-get -y install cmake libusb-1.0-0-dev build-essential
 
-- Homebrew (If it's not installed already)
+        .. tab:: maxOS
 
-  .. code-block:: bash
+          Assuming a stock Mac OS X install, `depthai-python <https://github.com/luxonis/depthai-python>`__ library needs following dependencies
 
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+          - Homebrew (If it's not installed already)
 
-- Python, :code:`libusb`, CMake, :code:`wget`
+            .. code-block:: bash
 
-  .. code-block:: bash
+              /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
-      brew install coreutils python3 cmake libusb wget
+          - Python, :code:`libusb`, CMake, :code:`wget`
 
-And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python>`__ from Github and build it for Mac OS X.
+            .. code-block:: bash
 
-Install using GitHub commit
-***************************
+                brew install coreutils python3 cmake libusb wget
 
-Pip allows users to install the packages from specific commits, even if they are not yet released on PyPi.
+          And now you're ready to clone the `depthai-python <https://github.com/luxonis/depthai-python>`__ from Github and build it for Mac OS X.
 
-To do so, use the command below - and be sure to replace the :code:`<commit_sha>` with the correct commit hash `from here <https://github.com/luxonis/depthai-python/commits>`__
+  .. tab:: **Install from commit**
 
-.. code-block:: bash
+    Pip allows users to install the packages from specific commits, even if they are not yet released on PyPi.
 
-    python3 -m pip install git+https://github.com/luxonis/depthai-python.git@<commit_sha>
+    To do so, use the command below - and be sure to replace the :code:`<commit_sha>` with the correct commit hash `from here <https://github.com/luxonis/depthai-python/commits>`__
 
-Using/Testing a Specific Branch/PR
-**********************************
+    .. code-block:: bash
 
-From time to time, it may be of interest to use a specific branch.  This may occur, for example,
-because we have listened to your feature request and implemented a quick implementation in a branch.
-Or it could be to get early access to a feature that is soaking in our :code:`develop` for stability purposes before being merged into :code:`main`
-(:code:`develop` is the branch we use to soak new features before merging them into :code:`main`):
+        python3 -m pip install git+https://github.com/luxonis/depthai-python.git@<commit_sha>
 
-So when working in the `depthai-python <https://github.com/luxonis/depthai-python>`__ repository, using a branch can be accomplished
-with the following commands.
+  .. tab:: **Using specific branch/PR**
 
-Prior to running the following, you can either clone the repository independently
-(for not over-writing any of your local changes) or simply do a :code:`git pull` first.
+    From time to time, it may be of interest to use a specific branch.  This may occur, for example,
+    because we have listened to your feature request and implemented a quick implementation in a branch.
+    Or it could be to get early access to a feature that is soaking in our :code:`develop` for stability purposes before being merged into :code:`main`
+    (:code:`develop` is the branch we use to soak new features before merging them into :code:`main`):
 
-.. code-block:: bash
+    So when working in the `depthai-python <https://github.com/luxonis/depthai-python>`__ repository, using a branch can be accomplished
+    with the following commands.
 
-  git checkout <branch>
-  git submodule update --init --recursive
-  python3 setup.py develop
+    Prior to running the following, you can either clone the repository independently
+    (for not over-writing any of your local changes) or simply do a :code:`git pull` first.
 
-Install from source
-*******************
+    .. code-block:: bash
 
-If desired, you can also install the package from the source code itself - it will allow you to make the changes
-to the API and see them live in action.
+      git checkout <branch>
+      git submodule update --init --recursive
+      python3 setup.py develop
 
-To do so, first download the repository and then add the package to your python interpreter in development mode
+  .. tab:: **Install from source**
 
-.. code-block:: bash
+    If desired, you can also install the package from the source code itself - it will allow you to make the changes
+    to the API and see them live in action.
 
-  git clone https://github.com/luxonis/depthai-python.git
-  cd depthai-python
-  git submodule update --init --recursive
-  python3 setup.py develop  # you may need to add sudo if using system interpreter instead of virtual environment
+    To do so, first download the repository and then add the package to your python interpreter in development mode
 
-If you want to use other branch (e.g. :code:`develop`) than default (:code:`main`), you can do so by typing
+    .. code-block:: bash
 
-.. code-block:: bash
+      git clone https://github.com/luxonis/depthai-python.git
+      cd depthai-python
+      git submodule update --init --recursive
+      python3 setup.py develop  # you may need to add sudo if using system interpreter instead of virtual environment
 
-  git checkout develop  # replace the "develop" with a desired branch name
-  git submodule update --recursive
-  python3 setup.py develop
+    If you want to use other branch (e.g. :code:`develop`) than default (:code:`main`), you can do so by typing
 
-Or, if you want to checkout a specific commit, type
+    .. code-block:: bash
 
-.. code-block:: bash
+      git checkout develop  # replace the "develop" with a desired branch name
+      git submodule update --recursive
+      python3 setup.py develop
 
-  git checkout <commit_sha>
-  git submodule update --recursive
-  python3 setup.py develop
+    Or, if you want to checkout a specific commit, type
+
+    .. code-block:: bash
+
+      git checkout <commit_sha>
+      git submodule update --recursive
+      python3 setup.py develop

@@ -24,9 +24,9 @@ xout.setStreamName("disparity")
 
 # Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # Create a node that will produce the depth map (using disparity output as it's easier to visualize depth this way)
 depth.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)

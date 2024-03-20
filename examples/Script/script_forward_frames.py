@@ -6,7 +6,6 @@ import depthai as dai
 pipeline = dai.Pipeline()
 
 cam = pipeline.create(dai.node.ColorCamera)
-cam.initialControl.setManualFocus(130)
 # Not needed, you can display 1080P frames as well
 cam.setIspScale(1,2)
 

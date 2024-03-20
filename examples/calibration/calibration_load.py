@@ -10,7 +10,7 @@ import cv2
 calibJsonFile = str((Path(__file__).parent / Path('../models/depthai_calib.json')).resolve().absolute())
 
 parser = argparse.ArgumentParser()
-parser.add_argument('calibJsonFile', nargs='?', help="Path to V6 calibration file in json", default=calibJsonFile)
+parser.add_argument('calibJsonFile', nargs='?', help="Path to calibration file in json", default=calibJsonFile)
 args = parser.parse_args()
 
 calibData = dai.CalibrationHandler(args.calibJsonFile)
@@ -28,10 +28,10 @@ xoutDepth.setStreamName("depth")
 
 # MonoCamera
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 # monoLeft.setFps(5.0)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 # monoRight.setFps(5.0)
 
 # Linking

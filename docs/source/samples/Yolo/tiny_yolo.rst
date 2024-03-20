@@ -1,8 +1,9 @@
 RGB & Tiny YOLO
 ===============
 
-This example shows how to run Tiny YOLOv4 or YOLOv3 on the RGB input frame, and how to display both the RGB
-preview and the metadata results from the YOLO model on the preview. Decoding is done on the VPU (Myriad X) instead on the host.
+This example shows how to run YOLO on the RGB input frame, and how to display both the RGB
+preview and the metadata results from the YOLO model on the preview. Decoding is done on the `RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__
+instead on the host computer.
 
 Configurable, network dependent parameters are required for correct decoding:
 
@@ -29,8 +30,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2_6shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import depthai as dai
 
-# MAKE SURE U HAVE LATEST BOOTLOADER KTNXBAI
 # Start defining a pipeline
 pipeline = dai.Pipeline()
 
@@ -23,7 +22,7 @@ def get_ip_address(ifname):
 
 ip = get_ip_address('re0')  # '192.168.0.110'
 node.warn(f'IP of the device: {ip}')
-node.io['end'].send(Buffer())
+node.io['end'].send(Buffer(32))
 """)
 
 xout = pipeline.create(dai.node.XLinkOut)

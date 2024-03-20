@@ -1,7 +1,7 @@
 RGB & TinyYolo with spatial data
 ================================
 
-This example shows how to run TinyYoloV3 and v4 on the RGB input frame, and how to display both the RGB
+This example shows how to run Yolo on the RGB input frame, and how to display both the RGB
 preview, detections, depth map and spatial information (X,Y,Z). It's similar to example
 :ref:`RGB & MobilenetSSD with spatial data` except it is running TinyYolo network.
 X,Y,Z coordinates are relative to the center of depth map.
@@ -35,11 +35,7 @@ Setup
 
 .. include::  /includes/install_from_pypi.rst
 
-This example also requires YOLOv4-tiny blob (:code:`tiny-yolo-v4_openvino_2021.2_6shave.blob` file) to work - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v4_openvino_2021.2_6shave.blob>`__
-
-YOLOv3-tiny blob (:code:`tiny-yolo-v3_openvino_2021.2_6shave.blob` file) can be used too - you can download it from
-`here <https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/tiny-yolo-v3_openvino_2021.2_6shave.blob>`__
+.. include:: /includes/install_req.rst
 
 Source code
 ###########

@@ -1,1 +1,2 @@
-git+https://github.com/luxonis/pybind11_mkdoc.git@47a353ae22a3ca2fe1ca47f47b38613dcfb1043b
+git+https://github.com/luxonis/pybind11_mkdoc.git@da6c64251a0ebbc3ffc007477a0b9c9f20cac165
+libclang==16.0.6

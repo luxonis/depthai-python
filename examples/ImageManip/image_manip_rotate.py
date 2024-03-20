@@ -27,7 +27,7 @@ manipRgb.out.link(manipRgbOut.input)
 # Rotate mono frames
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 
 manipLeft = pipeline.create(dai.node.ImageManip)
 rr = dai.RotatedRect()

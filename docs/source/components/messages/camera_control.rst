@@ -2,7 +2,7 @@ CameraControl
 =============
 
 This message is used for controlling the :ref:`color camera <ColorCamera>` as well as the :ref:`mono camera <MonoCamera>`.
-The message handles things like capturing still images, confifguring auto focus, anti banding, white balance,
+The message handles things like capturing still images, configuring auto focus, anti banding, white balance,
 scenes, effects etc.
 
 Examples of functionality

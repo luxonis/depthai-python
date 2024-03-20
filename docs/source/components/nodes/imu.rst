@@ -1,10 +1,14 @@
 IMU
 ===
 
-IMU (`intertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data from the IMU chip on the device.
-Our DepthAI devices use `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ 9-axis sensor (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__)
-that supports sensor fusion on the (IMU) chip itself. The IMU chip is connected to the Myriad X (VPU) over SPI (we have integrated
-`this driver <https://github.com/hcrest/bno080-driver>`__ to the DepthAI).
+IMU (`inertial measurement unit <https://en.wikipedia.org/wiki/Inertial_measurement_unit>`__) node can be used to receive data
+from the IMU chip on the device. Our OAK devices use either:
+
+- `BNO085 <https://www.ceva-dsp.com/product/bno080-085/>`__ (`datasheet here <https://www.ceva-dsp.com/wp-content/uploads/2019/10/BNO080_085-Datasheet.pdf>`__) 9-axis sensor, combining accelerometer, gyroscope, and magnetometer. It also does sensor fusion on the (IMU) chip itself. We have efficiently integrated `this driver <https://github.com/hcrest/bno080-driver>`__ into the DepthAI.
+- `BMI270 <https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi270/>`__ 6-axis sensor, combining accelerometer and gyroscope.
+
+The IMU chip is connected to the `RVC <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#rvc2>`__
+over SPI. See `OAK Hardware documentation <https://docs.luxonis.com/projects/hardware/en/latest/>`__ to check whether your OAK camera has IMU integrated.
 
 
 How to place it
@@ -40,11 +44,66 @@ Inputs and Outputs
 
 - :code:`out` - :ref:`IMUData`
 
-Maximum frequencies
-###################
+Limitations
+###########
 
-Maximum output frequencies are 500 Hz raw accelerometer, 1000 Hz raw gyroscope values individually, and 500 Hz combined (synced) output.
-You can obtain the combined (synced) 500 Hz output with :code:`imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 500)`.
+- For BNO086, gyroscope frequency above 400Hz can produce some jitter from time to time due to sensor HW limitation.
+
+IMU sensor frequencies
+######################
+
+Below are the discrete **stable frequencies** available for each (raw) IMU sensor. Some maximum IMU frequencies are higher, eg.
+for BNO086, maximum frequency for gyroscope is 1000Hz, but up to 400Hz is stable (due to driver limitation).
+
+**BNO086:**
+
+Note that BNO IMU "rounds up" the input frequency to the next available frequency. For example, if you set the frequency to 101 it will round it to 200Hz.
+
+- Accelerometer: 15Hz, 31Hz, 62Hz, 125Hz, 250Hz 500Hz
+- Gyroscope: 25Hz, 33Hz, 50Hz, 100Hz, 200Hz, 400Hz
+- Magnetometer: 100Hz
+
+**BNO086 max frequency:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - BNO086 Sensor
+     - Max Frequency
+   * - ``ACCELEROMETER_RAW``
+     - 512 Hz
+   * - ``ACCELEROMETER``
+     - 512 Hz
+   * - ``LINEAR_ACCELERATION``
+     - 400 Hz
+   * - ``GRAVITY``
+     - 400 Hz
+   * - ``GYROSCOPE_RAW``
+     - 1000 Hz
+   * - ``GYROSCOPE_CALIBRATED`` / ``GYROSCOPE_UNCALIBRATED``
+     - 100 Hz
+   * - ``MAGNETOMETER_RAW``
+     - 100 Hz
+   * - ``MAGNETOMETER_CALIBRATED`` / ``MAGNETOMETER_UNCALIBRATED``
+     - 100 Hz
+   * - ``ROTATION_VECTOR``
+     - 400 Hz
+   * - ``GAME_ROTATION_VECTOR``
+     - 400 Hz
+   * - ``GEOMAGNETIC_ROTATION_VECTOR``
+     - 100 Hz
+   * - ``ARVR_STABILIZED_ROTATION_VECTOR``
+     - 100 Hz
+   * - ``ARVR_STABILIZED_GAME_ROTATION_VECTOR``
+     - 100 Hz
+
+**BMI270:**
+
+Note that BMI279 "rounds down" the input frequency to the next available frequency. For example, if you set the frequency to 99 it will round it to 50Hz.
+Additionally, the current max frequency of ~250 Hz is set when the input is >400Hz.
+
+- Accelerometer: 25Hz, 50Hz, 100Hz, 200Hz, 250Hz
+- Gyroscope: 25Hz, 50Hz, 100Hz, 200Hz, 250Hz
 
 Usage
 #####
@@ -56,8 +115,8 @@ Usage
     pipeline = dai.Pipeline()
     imu = pipeline.create(dai.node.IMU)
 
-    # enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu.enableIMUSensor([dai.IMUSensor.RAW_ACCELEROMETER, dai.IMUSensor.RAW_GYROSCOPE], 100)
+    # enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu.enableIMUSensor([dai.IMUSensor.ACCELEROMETER_RAW, dai.IMUSensor.GYROSCOPE_RAW], 100)
     # above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu.setBatchReportThreshold(1)
     # maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
@@ -70,29 +129,14 @@ Usage
     dai::Pipeline pipeline;
     auto imu = pipeline.create<dai::node::IMU>();
 
-    // enable RAW_ACCELEROMETER and RAW_GYROSCOPE at 100 hz rate
-    imu->enableIMUSensor({dai::IMUSensor::RAW_ACCELEROMETER, dai::IMUSensor::RAW_GYROSCOPE}, 100);
+    // enable ACCELEROMETER_RAW and GYROSCOPE_RAW at 100 hz rate
+    imu->enableIMUSensor({dai::IMUSensor::ACCELEROMETER_RAW, dai::IMUSensor::GYROSCOPE_RAW}, 100);
     // above this threshold packets will be sent in batch of X, if the host is not blocked and USB bandwidth is available
     imu->setBatchReportThreshold(1);
     // maximum number of IMU packets in a batch, if it's reached device will block sending until host can receive it
     // if lower or equal to batchReportThreshold then the sending is always blocking on device
     // useful to reduce device's CPU load  and number of lost packets, if CPU load is high on device side due to multiple nodes
     imu->setMaxBatchReports(10);
-
-IMU devices
-###########
-
-List of devices that have an IMU sensor on-board:
-
-* `OAK-D <https://docs.luxonis.com/projects/hardware/en/latest/pages/BW1098OAK.html>`__
-* `OAK-D-IoT-40 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1092.html>`__
-* `OAK-D-IoT-75 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1098OBC.html>`__
-* `OAK-D-CM4 <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1097.html>`__
-* `OAK-D-PoE <https://docs.luxonis.com/projects/hardware/en/latest/pages/SJ2088POE.html>`__
-* `OAK-FFC-3P <https://docs.luxonis.com/projects/hardware/en/latest/pages/DM1090.html>`__
-* OAK-D-Pro
-* OAK-WD-Pro
-
 
 IMU sensors
 ###########

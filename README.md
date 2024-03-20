@@ -96,8 +96,8 @@ If `TEST_TIMEOUT=0`, the test will run until stopped or it ends.
 
 ## Tested platforms
 
-- Windows 10
-- Ubuntu 16.04, 18.04;
+- Windows 10, Windows 11
+- Ubuntu 18.04, 20.04, 22.04;
 - Raspbian 10;
 - macOS 10.14.6, 10.15.4;
 

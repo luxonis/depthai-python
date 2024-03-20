@@ -41,12 +41,10 @@ imageManip = pipeline.create(dai.node.ImageManip)
 
 xoutManip = pipeline.create(dai.node.XLinkOut)
 nnOut = pipeline.create(dai.node.XLinkOut)
-depthRoiMap = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 
 xoutManip.setStreamName("right")
 nnOut.setStreamName("detections")
-depthRoiMap.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
 
 # Properties
@@ -55,12 +53,13 @@ imageManip.initialConfig.setResize(300, 300)
 imageManip.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoLeft.setCamera("left")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+monoRight.setCamera("right")
 
 # StereoDepth
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+stereo.setSubpixel(True)
 
 # Define a neural network that will make predictions based on the source frames
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -81,7 +80,6 @@ else:
     imageManip.out.link(xoutManip.input)
 
 spatialDetectionNetwork.out.link(nnOut.input)
-spatialDetectionNetwork.boundingBoxMapping.link(depthRoiMap.input)
 
 stereo.rectifiedRight.link(imageManip.inputImage)
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
@@ -93,7 +91,6 @@ with dai.Device(pipeline) as device:
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="right", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    depthRoiMapQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 
     rectifiedRight = None
@@ -120,30 +117,32 @@ with dai.Device(pipeline) as device:
 
         depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depth_downscaled = depthFrame[::4]
+        if np.all(depth_downscaled == 0):
+            min_depth = 0  # Set a default minimum depth value when all elements are zero
+        else:
+            min_depth = np.percentile(depth_downscaled[depth_downscaled != 0], 1)
+        max_depth = np.percentile(depth_downscaled, 99)
+        depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
         detections = inDet.detections
-        if len(detections) != 0:
-            boundingBoxMapping = depthRoiMapQueue.get()
-            roiDatas = boundingBoxMapping.getConfigData()
-
-            for roiData in roiDatas:
-                roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
-                topLeft = roi.topLeft()
-                bottomRight = roi.bottomRight()
-                xmin = int(topLeft.x)
-                ymin = int(topLeft.y)
-                xmax = int(bottomRight.x)
-                ymax = int(bottomRight.y)
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
         # If the rectifiedRight is available, draw bounding boxes on it and show the rectifiedRight
         height = rectifiedRight.shape[0]
         width = rectifiedRight.shape[1]
         for detection in detections:
+            roiData = detection.boundingBoxMapping
+            roi = roiData.roi
+            roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+            topLeft = roi.topLeft()
+            bottomRight = roi.bottomRight()
+            xmin = int(topLeft.x)
+            ymin = int(topLeft.y)
+            xmax = int(bottomRight.x)
+            ymax = int(bottomRight.y)
+            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+
             # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)

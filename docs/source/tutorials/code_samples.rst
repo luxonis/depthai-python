@@ -7,7 +7,9 @@ Code Samples
 
    ../samples/bootloader/*
    ../samples/calibration/*
+   ../samples/Camera/*
    ../samples/ColorCamera/*
+   ../samples/crash_report/*
    ../samples/EdgeDetector/*
    ../samples/FeatureTracker/*
    ../samples/host_side/*
@@ -21,8 +23,12 @@ Code Samples
    ../samples/Script/*
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
+   ../samples/Sync/*
    ../samples/SystemLogger/*
+   ../samples/ToF/*
    ../samples/VideoEncoder/*
+   ../samples/Warp/*
+   ../samples/UVC/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -32,7 +38,8 @@ are presented with code.
 
 - :ref:`Bootloader Config` - Read/Flash/Clear bootloader on the device
 - :ref:`Bootloader Version` - Retrieves Version of Bootloader on the device
-- :ref:`Flash Bootloader` - Flash the bootloader to the device
+- :ref:`Flash Bootloader` - Flash factory bootloader to the device
+- :ref:`Flash User Bootloader` - Flash user bootloader to the device
 - :ref:`POE set IP` - Sets IP of the POE device
 
 .. rubric:: Calibration
@@ -42,6 +49,11 @@ are presented with code.
 - :ref:`Calibration Reader` - Reads calibration data stored on device over XLink
 - :ref:`Calibration Load` - Loads and uses calibration data of version 6 (gen2 calibration data) in a pipeline
 
+
+.. rubric:: Camera
+
+- :ref:`Undistort camera stream` - Showcases how Camera node undistorts camera streams
+
 .. rubric:: ColorCamera
 
 - :ref:`Auto Exposure on ROI` - Demonstrates how to use auto exposure based on the selected ROI
@@ -49,6 +61,10 @@ are presented with code.
 - :ref:`RGB Preview` - Displays a small preview of the RGB camera
 - :ref:`RGB scene` - Shows how to select ColorCamera's scene and effect
 - :ref:`RGB video` - Displays high resolution frames of the RGB camera
+
+.. rubric:: Crash report
+
+- :ref:`Crash report` - In case of a firmware crash, example reads it from the device and saves it to a json file
 
 .. rubric:: EdgeDetector
 
@@ -58,9 +74,11 @@ are presented with code.
 
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
+- :ref:`Feature Tracker with Motion Estimation` - Camera movement estimation based on feature tracking
 
 .. rubric:: Host side
 
+- :ref:`Latency measurement` - Measure frame latency from capturing to the host
 - :ref:`OpenCV support` - Demonstrates how to retrieve an image frame as an OpenCV frame
 - :ref:`Device Queue Event` - Demonstrates how to use device queue events
 - :ref:`Queue add callback` - Demonstrates how to use queue callbacks
@@ -79,9 +97,11 @@ are presented with code.
 .. rubric:: Mixed
 
 - :ref:`Mono & MobilenetSSD & Depth` - Runs MobileNetSSD on mono frames and displays detections on mono/disparity frames
+- :ref:`Multiple Devices` - Run multiple OAK cameras from the same host computer
 - :ref:`RGB Encoding & MobilenetSSD` - Runs MobileNetSSD on RGB frames and encodes FUll-HD RGB into :code:`.h265` and saves it on the host
 - :ref:`RGB Encoding & Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame + encodes RGB to :code:`.h265`
 - :ref:`RGB Encoding & Mono with MobilenetSSD & Depth` - A combination of **RGB Encoding** and **Mono & MobilenetSSD & Depth** code samples
+- :ref:`Spatial detections on rotated OAK` - Spatail detections on upside down OAK camera
 
 .. rubric:: MobileNet
 
@@ -94,6 +114,7 @@ are presented with code.
 
 - :ref:`Mono Preview` - Displays right/left mono cameras
 - :ref:`Mono Camera Control` - Demonstrates how to control the mono camera (crop, exposure, sensitivity) from the host
+- :ref:`Mono preview - Alternate between dot projector and illumination LED` on OAK Pro devices
 - :ref:`Mono Full Resolution Saver` - Saves mono (720P) images to the host (:code:`.png`)
 
 .. rubric:: NeuralNetwork
@@ -110,6 +131,7 @@ are presented with code.
 .. rubric:: Script
 
 - :ref:`Script camera control` - Controlling the camera with the Script node
+- :ref:`Script change pipeline flow` - Change the flow of data inside your pipeline in runtime with :ref:`Script` node
 - :ref:`Script forward frames` - Forward incoming image stream to two different output streams (demuxing)
 - :ref:`Script get local IP` - Get local IP of the device (only OAK-POE devices)
 - :ref:`Script HTTP client` - Send HTTP request to a server (only OAK-POE devices)
@@ -117,9 +139,12 @@ are presented with code.
 - :ref:`Script HTTP server` - Serve still image over HTTP response (only OAK-POE devices)
 - :ref:`Script MJPEG server` - Serve MJPEG video stream over HTTP response (only OAK-POE devices)
 - :ref:`Script NNData example` - Constructs :ref:`NNData` in Script node and sends it to the host
+- :ref:`Script UART communication` - UART communication with Script node
+- :ref:`Script EMMC access` - Access EMMC memory from the Script node
 
 .. rubric:: SpatialDetection
 
+- :ref:`Spatial Calculator Multi-ROI` - Selects multiple ROIs and calculates spatial coordinates for each of them
 - :ref:`Spatial location calculator` - Demonstrates how to use the spatial location calculator
 - :ref:`RGB & MobilenetSSD with spatial data` - Displays RGB frames with MobileNet detections and spatial coordinates on them
 - :ref:`Mono & MobilenetSSD with spatial data` - Displays mono frames with MobileNet detections and spatial coordinates on them
@@ -130,13 +155,27 @@ are presented with code.
 - :ref:`Depth Crop Control` - Demonstrates how to control cropping of depth frames from the host
 - :ref:`Depth Post-Processing` - Depth post-processing filters
 - :ref:`Depth Preview` - Displays colorized stereo disparity
+- :ref:`Stereo Depth custom Mesh` - Calculate and load custom mesh for stereo depth calculation
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
 
+
+.. rubric:: Sync Node
+
+- :ref:`Depth and Video Sync` - Synchronizes depth and video streams for real-time processing and display.
+- :ref:`IMU and Video Sync` - Aligns IMU data with video frames, showcasing real-time rotation vector display alongside video.
+- :ref:`Multiple Scripts Sync` - Demonstrates synchronization of data from two script nodes emitting data at different intervals.
+- :ref:`Demuxing Synchronized Script Outputs` - Features synchronization of script outputs followed by demultiplexing for distinct processing streams.
+
+
 .. rubric:: SystemLogger
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
+
+.. rubric:: ToF
+
+- :ref:`ToF depth` - Displays colorized ToF depth frames
 
 .. rubric:: VideoEncoder
 
@@ -145,6 +184,17 @@ are presented with code.
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`RGB Full Resolution Saver` - Saves full resolution RGB images (4k) on the host (:code:`.jpeg`)
+
+.. rubric:: Warp
+
+- :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
+- :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
+
+.. rubric:: UVC
+
+- :ref:`UVC & Color Camera` - Displays RGB frames from a UVC camera
+- :ref:`UVC & Mono Camera` - Displays mono frames from a UVC camera
+- :ref:`UVC & Disparity` - Displays disparity frames from a UVC camera
 
 .. rubric:: Yolo
 

@@ -19,6 +19,8 @@ you could fill up your storage on your host.
 - :ref:`RGB Encoding & Mono & MobilenetSSD`
 - :ref:`RGB Encoding & Mono with MobilenetSSD & Depth`
 
+.. include::  /includes/container-encoding.rst
+
 Demo
 ####
 

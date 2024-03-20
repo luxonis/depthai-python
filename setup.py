@@ -10,9 +10,11 @@ import multiprocessing
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+from pathlib import Path
 
 ### NAME
 MODULE_NAME = 'depthai'
+DEPTHAI_CLI_MODULE_NAME = 'depthai_cli'
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
@@ -62,6 +64,11 @@ if len(__version__.split("+")) > 1 :
 ## Read description (README.md)
 long_description = io.open("README.md", encoding="utf-8").read()
 
+## Early settings
+MACOS_ARM64_WHEEL_NAME_OVERRIDE = 'macosx-11.0-arm64'
+if sys.platform == 'darwin' and platform.machine() == 'arm64':
+    os.environ['_PYTHON_HOST_PLATFORM'] = MACOS_ARM64_WHEEL_NAME_OVERRIDE
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -86,6 +93,20 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
+        if ext.name == DEPTHAI_CLI_MODULE_NAME:
+            # Copy cam_test.py and it's dependencies to depthai_cli/
+            cam_test_path = os.path.join(here, "utilities", "cam_test.py")
+            cam_test_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "cam_test.py")
+            cam_test_gui_path = os.path.join(here, "utilities", "cam_test_gui.py")
+            cam_test_gui_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "cam_test_gui.py")
+            stress_test_path = os.path.join(here, "utilities", "stress_test.py")
+            stress_test_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "stress_test.py")
+            files_to_copy = [(cam_test_path, cam_test_dest), (cam_test_gui_path, cam_test_gui_dest), (stress_test_path, stress_test_dest)]
+            for src, dst in files_to_copy:
+                with open(src, "r") as f:
+                    with open(dst, "w") as f2:
+                        f2.write(f.read())
+            return
 
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         # required for auto-detection of auxiliary "native" libs
@@ -95,9 +116,16 @@ class CMakeBuild(build_ext):
         # initialize cmake_args and build_args
         cmake_args = []
         build_args = []
+        env = os.environ.copy()
 
         # Specify output directory and python executable
         cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
+        # Specify dir of python executable (pybind11)
+        if platform.system() == "Windows":
+            # Windows - remove case insensitive variants
+            env = {key:env[key] for key in env if key.upper() != 'pythonLocation'.upper()}
+        env['pythonLocation'] = str(Path(sys.executable).parent.absolute())
+
 
         # Pass a commit hash
         if buildCommitHash != None :
@@ -127,10 +155,13 @@ class CMakeBuild(build_ext):
                 raise
             except:
                 freeMemory = 4000
-        # Memcheck (guard if it fails)
-
 
         # Configure and build
+
+        # Add additional cmake build args from environment
+        if 'CMAKE_BUILD_ARGS' in os.environ:
+            build_args += [os.environ['CMAKE_BUILD_ARGS']]
+
         # Windows
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
@@ -149,8 +180,13 @@ class CMakeBuild(build_ext):
             # if macos add some additional env vars
             if sys.platform == 'darwin':
                 from distutils import util
-                os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
-                os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
+                if platform.machine() == 'arm64':
+                    # Build ARM64 wheels explicitly instead of universal2
+                    env['MACOSX_DEPLOYMENT_TARGET'] = '11.0'
+                    env['_PYTHON_HOST_PLATFORM'] = MACOS_ARM64_WHEEL_NAME_OVERRIDE
+                else:
+                    env['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
+                    env['_PYTHON_HOST_PLATFORM'] = re.sub(r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1', util.get_platform())
 
             # Specify how many threads to use when building, depending on available memory
             max_threads = multiprocessing.cpu_count()
@@ -161,7 +197,6 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j' + str(num_threads)]
             cmake_args += ['-DHUNTER_JOBS_NUMBER=' + str(num_threads)]
 
-        env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''), self.distribution.get_version())
 
         # Add additional cmake args from environment
@@ -170,8 +205,10 @@ class CMakeBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+
+        # Configure and build
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp, env=env)
 
 setup(
     name=MODULE_NAME,
@@ -183,10 +220,11 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
-    ext_modules=[CMakeExtension(MODULE_NAME)],
+    ext_modules=[CMakeExtension(MODULE_NAME), Extension(DEPTHAI_CLI_MODULE_NAME, sources=[])],
     cmdclass={
-        'build_ext': CMakeBuild
+        'build_ext': CMakeBuild,
     },
+    packages=[DEPTHAI_CLI_MODULE_NAME],
     zip_safe=False,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -205,10 +243,17 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development",
     ],
     python_requires='>=3.6',
+    entry_points={
+        "console_scripts": [
+            f'depthai={DEPTHAI_CLI_MODULE_NAME}.depthai_cli:cli'
+        ]
+    }
 )
