@@ -134,7 +134,7 @@ if not args.skip_depthai:
         # Get package version if in git context
         final_version = find_version.get_package_dev_version(git_commit)
         # Install latest built wheels from artifactory (0.0.0.0+[hash] or [version]+[hash])
-        commands = [[*pip_package_install, "--extra-index-url", ARTIFACTORY_URL, "depthai"],
+        commands = [[*pip_package_install, "--extra-index-url", ARTIFACTORY_URL, "depthai=="+final_version],
                     [*pip_package_install, "."]]
         success = False
         for command in commands:
@@ -160,7 +160,7 @@ if args.dry_run:
 else:
     subprocess.check_call(downloader_cmd)
 
-if True:
+if args.convert != convert_default:
 
     nn_model_configs = {
         "mobilenet-ssd": {
