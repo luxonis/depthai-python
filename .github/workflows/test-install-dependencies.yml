@@ -55,6 +55,7 @@
        - name: Install dependencies
          run: |
            sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh
+           export HOMEBREW_NO_AUTO_UPDATE=1
            bash tmp_script.sh
        - name: Create a virtual environment
          run: |
