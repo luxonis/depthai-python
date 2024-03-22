@@ -134,7 +134,7 @@ if not args.skip_depthai:
         # Get package version if in git context
         final_version = find_version.get_package_dev_version(git_commit)
         # Install latest built wheels from artifactory (0.0.0.0+[hash] or [version]+[hash])
-        commands = [[*pip_package_install, "--extra-index-url", ARTIFACTORY_URL, "depthai=="+final_version],
+        commands = [[*pip_package_install, "--extra-index-url", ARTIFACTORY_URL, "depthai"],
                     [*pip_package_install, "."]]
         success = False
         for command in commands:
@@ -160,7 +160,7 @@ if args.dry_run:
 else:
     subprocess.check_call(downloader_cmd)
 
-if args.convert != convert_default:
+if True:
 
     nn_model_configs = {
         "mobilenet-ssd": {
@@ -207,7 +207,6 @@ if args.convert != convert_default:
         for nn_name in nn_model_configs
         for nn_shave in nn_model_configs[nn_name]["shaves"]
     ]
-    print(str(blobconverter_cmds))
     install_blobconverter_cmd = [*pip_package_install, "blobconverter"]
     for cmd in [install_blobconverter_cmd] + blobconverter_cmds:
         if args.dry_run:
