@@ -154,30 +154,59 @@ if not args.skip_depthai:
             print("Couldn't install dependencies as wheels and trying to compile from sources failed")
             print("Check https://github.com/luxonis/depthai-python#dependencies on retrieving dependencies for compiling from sources")
 
-downloader_cmd = [sys.executable, f"{examples_dir}/downloader/downloader.py", "--all", "--cache_dir", f"{examples_dir}/downloader/", "--num_attempts", "5", "-o", f"{examples_dir}/models"]
-if args.dry_run:
-    prettyPrint(downloader_cmd)
-else:
-    subprocess.check_call(downloader_cmd)
 
-if args.convert != convert_default:
-    nn_models_shaves = {
-        "mobilenet-ssd": [5, 6, 8],
-        "person-detection-retail-0013": [7],
-        "yolo-v4-tiny-tf": [6],
-        "yolo-v3-tiny-tf": [6],
-    }
-    blobconverter_cmds = [
-        [sys.executable, "-m", "blobconverter", "-zn", nn_name, "-sh", str(nn_shave), "-o", f"{examples_dir}/models", *(["-v", args.convert] if args.convert is not None else [])]
-        for nn_name in nn_models_shaves
-        for nn_shave in nn_models_shaves[nn_name]
-    ]
-    install_blobconverter_cmd = [*pip_package_install, "blobconverter"]
-    for cmd in [install_blobconverter_cmd] + blobconverter_cmds:
-        if args.dry_run:
-            prettyPrint(cmd)
-        else:
-            subprocess.check_call(cmd)
+nn_model_configs = {
+    "mobilenet-ssd": {
+        "shaves": [5, 6, 8],
+        "compile_params": ["-ip U8"],
+        "zoo_type": "intel",
+        "default_ov_version": "2021.4"
+    },
+    "person-detection-retail-0013": {
+        "shaves": [7],
+        "compile_params": ["-ip U8"],
+        "zoo_type": "intel",
+        "default_ov_version": "2021.4"
+    },
+    "yolo-v4-tiny-tf": {
+        "shaves": [6],
+        "compile_params": ["-ip U8"],
+        "zoo_type": "intel",
+        "default_ov_version": "2021.4"
+    },
+    "yolo-v3-tiny-tf": {
+        "shaves": [6],
+        "compile_params": ["-ip U8"],
+        "zoo_type": "intel",
+        "default_ov_version": "2021.4"
+    },
+    "yolov6n_thermal_people_256x192": {
+        "shaves": [6],
+        "compile_params": ["-ip FP16"],
+        "zoo_type": "depthai",
+        "default_ov_version": "2022.1"
+    },
+}
+
+blobconverter_cmds = [
+    [sys.executable, 
+    "-m", "blobconverter", 
+    "-zn", nn_name, 
+    "-sh", str(nn_shave), 
+    "-o", f"{examples_dir}/models", 
+    "-zt", nn_model_configs[nn_name]["zoo_type"],
+    *(["--compile-params", " ".join(nn_model_configs[nn_name]["compile_params"])] if nn_model_configs[nn_name]["compile_params"] else []),
+    *(["-v", args.convert] if args.convert != convert_default else ["-v", nn_model_configs[nn_name]["default_ov_version"]])]
+    for nn_name in nn_model_configs
+    for nn_shave in nn_model_configs[nn_name]["shaves"]
+]
+print(str(blobconverter_cmds))
+install_blobconverter_cmd = [*pip_package_install, "blobconverter"]
+for cmd in [install_blobconverter_cmd] + blobconverter_cmds:
+    if args.dry_run:
+        prettyPrint(cmd)
+    else:
+        subprocess.check_call(cmd)
 
 if requireOpenCv and thisPlatform == "aarch64":
     from os import environ

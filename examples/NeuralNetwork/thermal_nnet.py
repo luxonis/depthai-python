@@ -2,6 +2,16 @@ import depthai as dai
 import cv2
 from pathlib import Path
 import numpy as np
+import sys
+
+
+nnPath = str((Path(__file__).parent / Path('../models/yolov6n_thermal_people_256x192_openvino_2022.1_6shave.blob')).resolve().absolute())
+if len(sys.argv) > 1:
+    nnPath = sys.argv[1]
+
+if not Path(nnPath).exists():
+    import sys
+    raise FileNotFoundError(f'Required file/s not found, please run "{sys.executable} install_requirements.py"')
 
 labels = ["person"]
 
@@ -9,7 +19,7 @@ device = dai.Device()
 
 pipeline = dai.Pipeline()
 nnet = pipeline.create(dai.node.YoloDetectionNetwork)
-nnet.setBlobPath(Path("./yolov6n_thermal_people_256x192.blob").expanduser())
+nnet.setBlobPath(nnPath)
 nnet.setConfidenceThreshold(0.5)
 nnet.setNumClasses(1)
 nnet.setCoordinateSize(4)
