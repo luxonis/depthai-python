@@ -132,6 +132,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/PointCloudBindings.cpp
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/MessageDemuxBindings.cpp
+    src/pipeline/node/CastBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
