@@ -134,6 +134,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("getInterleaved", &ColorCamera::getInterleaved, DOC(dai, node, ColorCamera, getInterleaved))
         .def("setFp16", &ColorCamera::setFp16, py::arg("fp16"), DOC(dai, node, ColorCamera, setFp16))
         .def("getFp16", &ColorCamera::getFp16, DOC(dai, node, ColorCamera, getFp16))
+        .def("setPreviewType", &ColorCamera::setPreviewType, py::arg("type"), DOC(dai, node, ColorCamera, setPreviewType))
+        .def("getPreviewType", &ColorCamera::getPreviewType, DOC(dai, node, ColorCamera, getPreviewType))
         .def("setPreviewSize", static_cast<void(ColorCamera::*)(int,int)>(&ColorCamera::setPreviewSize), py::arg("width"), py::arg("height"), DOC(dai, node, ColorCamera, setPreviewSize))
         .def("setPreviewSize", static_cast<void(ColorCamera::*)(std::tuple<int,int>)>(&ColorCamera::setPreviewSize), py::arg("size"), DOC(dai, node, ColorCamera, setPreviewSize, 2))
         .def("setVideoSize", static_cast<void(ColorCamera::*)(int,int)>(&ColorCamera::setVideoSize), py::arg("width"), py::arg("height"), DOC(dai, node, ColorCamera, setVideoSize))
