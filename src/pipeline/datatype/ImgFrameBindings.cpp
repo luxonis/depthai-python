@@ -353,6 +353,8 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("setSize", static_cast<ImgFrame&(ImgFrame::*)(std::tuple<unsigned int, unsigned int>)>(&ImgFrame::setSize), py::arg("sizer"), DOC(dai, ImgFrame, setSize, 2))
         .def("setType", &ImgFrame::setType, py::arg("type"), DOC(dai, ImgFrame, setType))
         .def("set", &ImgFrame::set, py::arg("type"), DOC(dai, ImgFrame, set))
+        .def("getIntrinsicMatrix", &ImgFrame::getIntrinsicMatrix, DOC(dai, ImgFrame, getIntrinsicMatrix))
+        .def("setIntrinsicMatrix", static_cast<ImgFrame&(ImgFrame::*)(const std::vector<std::vector<float>>&)>(&ImgFrame::setIntrinsicMatrix), py::arg("intrinsicMatrix"), DOC(dai, ImgFrame, setIntrinsicMatrix))
         ;
     // add aliases dai.ImgFrame.Type and dai.ImgFrame.Specs
     m.attr("ImgFrame").attr("Type") = m.attr("RawImgFrame").attr("Type");
