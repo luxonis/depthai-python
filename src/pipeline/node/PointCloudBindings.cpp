@@ -40,6 +40,7 @@ void bind_pointcloud(pybind11::module& m, void* pCallstack){
         .def_readonly("outputPointCloud", &PointCloud::outputPointCloud, DOC(dai, node, PointCloud, outputPointCloud), DOC(dai, node, PointCloud, outputPointCloud))
         .def_readonly("passthroughDepth", &PointCloud::passthroughDepth, DOC(dai, node, PointCloud, passthroughDepth), DOC(dai, node, PointCloud, passthroughDepth))
         .def_readonly("initialConfig", &PointCloud::initialConfig, DOC(dai, node, PointCloud, initialConfig), DOC(dai, node, PointCloud, initialConfig))
+        .def("setNumFramesPool", &PointCloud::setNumFramesPool, DOC(dai, node, PointCloud, setNumFramesPool))
     ;
     // ALIAS
     daiNodeModule.attr("PointCloud").attr("Properties") = properties;
