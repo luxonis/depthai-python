@@ -38,9 +38,10 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
     rawToFConfig
         .def(py::init<>())
         .def_readwrite("depthParams", &RawToFConfig::depthParams, DOC(dai, RawToFConfig, depthParams))
-        .def_readwrite("enableFPPN", &RawToFConfig::enableFPPN, DOC(dai, RawToFConfig, enableFPPN))
-        .def_readwrite("enableDistanceToDepth", &RawToFConfig::enableDistanceToDepth, DOC(dai, RawToFConfig, enableDistanceToDepth))
+        .def_readwrite("enableFPPNCorrection", &RawToFConfig::enableFPPNCorrection, DOC(dai, RawToFConfig, enableFPPNCorrection))
+        .def_readwrite("enableOpticalCorrection", &RawToFConfig::enableOpticalCorrection, DOC(dai, RawToFConfig, enableOpticalCorrection))
         .def_readwrite("enableTemperatureCorrection", &RawToFConfig::enableTemperatureCorrection, DOC(dai, RawToFConfig, enableTemperatureCorrection))
+        .def_readwrite("enableWiggleCorrection", &RawToFConfig::enableWiggleCorrection, DOC(dai, RawToFConfig, enableWiggleCorrection))
         ;
 
     depthParamsTypeFMod
@@ -55,8 +56,6 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("avgPhaseShuffle", &RawToFConfig::DepthParams::avgPhaseShuffle, DOC(dai, RawToFConfig, DepthParams, avgPhaseShuffle))
         .def_readwrite("minimumAmplitude", &RawToFConfig::DepthParams::minimumAmplitude, DOC(dai, RawToFConfig, DepthParams, minimumAmplitude))
         .def_readwrite("median", &RawToFConfig::DepthParams::median, DOC(dai, RawToFConfig, DepthParams, median))
-        .def_readwrite("temperatureCoefficientA", &RawToFConfig::DepthParams::temperatureCoefficientA, DOC(dai, RawToFConfig, DepthParams, temperatureCoefficientA))
-        .def_readwrite("temperatureCoefficientB", &RawToFConfig::DepthParams::temperatureCoefficientB, DOC(dai, RawToFConfig, DepthParams, temperatureCoefficientB))
         ;
 
     // Message
@@ -69,7 +68,6 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
         .def("setAvgPhaseShuffle", &ToFConfig::setAvgPhaseShuffle, DOC(dai, ToFConfig, setAvgPhaseShuffle))
         .def("setMinAmplitude", &ToFConfig::setMinAmplitude, DOC(dai, ToFConfig, setMinAmplitude))
         .def("setMedianFilter", &ToFConfig::setMedianFilter, DOC(dai, ToFConfig, setMedianFilter))
-        .def("setTemperatureCoefficients", &ToFConfig::setTemperatureCoefficients, DOC(dai, ToFConfig, setTemperatureCoefficients))
 
         .def("set", &ToFConfig::set, py::arg("config"), DOC(dai, ToFConfig, set))
         .def("get", &ToFConfig::get, DOC(dai, ToFConfig, get))
