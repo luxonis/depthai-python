@@ -65,16 +65,9 @@ The Sync node aligns incoming messages based on their timestamps. The synchroniz
                               └──────────────────────┘                 |
                                           |                            |
   ┌────────────────────┐                  |                  ┌──────────────────────┐
-  │       Compile      │     if synced    |   if not synced  │  Get message with    │
-  │   and send it out  │<-----------------+----------------->│ the oldest timestamp │
+  │      Compile       │     if synced    |   if not synced  │  Get message with    │
+  │    MessageGroup    │<-----------------+----------------->│ the oldest timestamp │
   └────────────────────┘                                     └──────────────────────┘           
-            |                          
-            v                           
-  ┌────────────────────┐       
-  │       Compile      │       
-  │    MessageGroup    │       
-  │   and send it out  │       
-  └────────────────────┘
             |
             v
     ┌───────────────┐
