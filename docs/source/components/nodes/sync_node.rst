@@ -47,6 +47,36 @@ Message Synchronization
 The Sync node aligns incoming messages based on their timestamps. The synchronization criteria and behavior can be configured using the :code:`depthai.node.Sync.setSyncThreshold` and :code:`depthai.node.Sync.setSyncAttempts`  method. More info in the :ref:`API Reference <reference>`.
 
 
+
+.. code-block::
+
+                              ┌──────────────────────┐
+                              │  Get all messages    │
+                              │  connected to the    │
+                              │     Sync node        │
+                              └──────────────────────┘
+                                          |
+                                          v
+                              ┌──────────────────────┐
+                              │ Check if messages    │
+                              │ are synced (min and  │
+                              │ max timestamp diff   │<----------------+
+                              │ < threshold)         │                 |
+                              └──────────────────────┘                 |
+                                          |                            |
+  ┌────────────────────┐                  |                  ┌──────────────────────┐
+  │    Combine into    │     if synced    |   if not synced  │  Get message with    │
+  │    MessageGroup    │<-----------------+----------------->│ the oldest timestamp │
+  └────────────────────┘                                     └──────────────────────┘           
+            |
+            v
+    ┌───────────────┐
+    │      Out      │
+    └───────────────┘
+
+
+
+
 Usage
 #####
 
