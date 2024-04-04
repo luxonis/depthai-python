@@ -4,6 +4,9 @@ import sys, os, subprocess
 import argparse
 import re
 import platform
+from subprocess import CalledProcessError, DEVNULL
+import textwrap
+
 
 convert_default = "empty"
 parser = argparse.ArgumentParser()
@@ -46,7 +49,7 @@ if thisPlatform == "aarch64":
     # try to import opencv, numpy in a subprocess, since it might fail with illegal instruction
     # if it was previously installed w/ pip without setting OPENBLAS_CORE_TYPE=ARMV8 env variable
     try:
-        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"])
+        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"], stderr=DEVNULL)
         requireOpenCv = False
     except subprocess.CalledProcessError as ex:
         requireOpenCv = True
@@ -94,10 +97,38 @@ if not in_venv:
 
 # Update pip
 pip_update_cmd = [*pip_install, "pip"]
+
 if args.dry_run:
     prettyPrint(pip_update_cmd)
 else:
-    subprocess.check_call(pip_update_cmd)
+    try:
+        subprocess.check_call(pip_update_cmd)
+    except CalledProcessError as e:
+        print(f"\n\n\033[31m\033[1m[Warning]\033[0m An error occurred while trying to update pip: {e}\n")
+        print("This likely stems from the fact that you're not using a Python virtual environment.")
+        venv_creation_instructions = textwrap.dedent(f"""\
+            \033[94m\033[1m
+            Here's how you can create and activate a virtual environment:
+            
+            1. Create a virtual environment:
+               - For Linux or MacOS, use: python3 -m venv {parent_dir}/.env
+               - For Windows, use: python -m venv {parent_dir}/.env
+            
+            2. Activate the virtual environment:
+               - For Linux or MacOS, use: source {parent_dir}/.env/bin/activate
+               - For Windows, use: {parent_dir}/.env/Scripts/activate
+            
+            Once activated, you'll be working within the virtual environment. You can then attempt to re-run this script.
+            To exit the virtual environment when you're done, simply use the command: deactivate
+            
+            For more detailed instructions, please refer to the official Python documentation on virtual environments: https://docs.python.org/3/tutorial/venv.html
+            \033[0m
+            """)
+        
+        print(textwrap.indent(venv_creation_instructions, '    '))
+        exit(0)
+
+
 # Install python dependencies
 python_dependencies_cmd = [*pip_package_install, *DEPENDENCIES]
 if args.dry_run:
