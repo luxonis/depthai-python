@@ -11,6 +11,16 @@ inside the code:
 #. `extended`: suitable for short range objects. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#extended-disparity-depth-mode>`__
 #. `subpixel`: suitable for long range. For more information `click here <https://docs.luxonis.com/en/latest/pages/faq/#subpixel-disparity-depth-mode>`__
 
+Stereo Alpha Param
+##################
+
+With `--alpha` you can select scaling during the rectification. Values between 0 and 1:
+
+- 0.0 (default value) means that the rectified images are zoomed and shifted so that only valid pixels are visible (no black areas after rectification)
+- 1.0 means that the rectified image is decimated and shifted so that all the pixels from the original images from the cameras are retained in the rectified images (no source image pixels are lost).
+
+.. image:: https://github.com/luxonis/depthai-python/assets/18037362/887d489a-6bf6-41ac-9b8f-06ab7b0cd488
+
 .. rubric:: Similar samples:
 
 - :ref:`Depth Preview`

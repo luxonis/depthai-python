@@ -1,7 +1,7 @@
 Standalone mode
 ===============
 
-**Standalone / Hostless / On-The-Edge mode** means that the camera starts the (:ref:`flashed <Flash the pipeline>`) application as soon as it gets power, without being connected to any particular host computer.
+**Standalone** mode means that the camera starts the (:ref:`flashed <Flash the pipeline>`) application as soon as it gets power, without being connected to any particular host computer.
 This is useful for applications where camera is stationary and just inspecting the world and providing analytics (eg. people/vehicle counting, LPR, fall detection, etc.)
 
 Usually, this mode is also more robust to any instabilities (eg. networking issues, where connection between camera and host computer would drop), as application will restart automatically.
@@ -15,7 +15,7 @@ Standalone mode is **only possible on OAKs that have on-board flash** memory, wh
 - License Plate Recognition (LPR) camera (`demo here <https://github.com/luxonis/depthai-experiments/tree/master/gen2-license-plate-recognition>`__). Each camera does vehicle detection, license plate detection and LPR, and only reports license plate (in string) to a server.
 - Fall detection for elderly people (`demo here <https://www.youtube.com/watch?v=npiG-Dy7yQ4>`__). Each camera tracks people and checks their poses for any anomalies (eg. person falling down). If anomaly is detected, it sends an alert to a server.
 
-In case you already have a computer on-board (eg. a robot/drone), standalone mode isn't as useful, and just adds extra complexity.
+In case you already have a computer on-board (eg. a robot/drone), standalone mode isn't as useful, and adds extra complexity.
 
 Communication with the camera
 #############################
@@ -27,40 +27,51 @@ To "communicate" with the outside world (eg. a server), POE cameras can use :ref
 - `HTTP client <https://docs.luxonis.com/projects/api/en/latest/samples/Script/script_http_client/>`__
 - `MQTT client <https://github.com/luxonis/depthai-experiments/tree/master/gen2-poe-mqtt>`__
 
+.. note::
+    Standalone mode is missing a DNS resolver, so you will need to use IP addresses instead of domain names.
+
 
 Converting a demo to standalone mode
 ####################################
 
 Since there won't be any communication between the host and the device, you first need to remove all
-:ref:`XLinkOut` and :ref:`XLinkIn` nodes. This means that the device will only communicate with the "outside world"
+:ref:`XLinkOut` and :ref:`XLinkIn` nodes.
+
+This means that the device will only communicate with the "outside world"
 via either SPI (:ref:`SPIOut`/:ref:`SPIIn`) or :ref:`Script` node (GPIO/UART or network protocols if you have
 OAK POE mode; HTTP/TCP/UDP...).
 
-Next thing you can also remove the host-side code, which usually looks something like this:
-
-.. code-block:: python
-
-    with dai.Device(pipeline) as device:
-        videoQ = device.getOutputQueue("video")
-        faceDetQ = device.getOutputQueue("face_det")
-        nnQ = device.getOutputQueue("nn")
-
-        while True:
-            frame = videoQ.get().getCvFrame()
-            # ...
+**Example**: Let's update `PoE TCP Streaming <https://github.com/luxonis/depthai-experiments/tree/master/gen2-poe-tcp-streaming>`__ ``oak.py`` script to standalone mode.
+We'll remove the ``dai.Device(pipeline)`` part, and replace it with :ref:`Flash the pipeline`.
 
 
-After you remove all host-side code, you would only be left with the :ref:`Pipeline` definition (with nodes/links).
-Since device no longer communicates with the host, you need to "route" your program's output through either SPI
-or script node, as mentioned above.
+.. code-block:: diff
+
+                  conn.send(bytes(header, encoding='ascii'))
+                  conn.send(data)
+          except Exception as e:
+              node.warn("Client disconnected")
+      """)
+    -  # Connect to the device (via host computer)
+    -  with dai.Device(pipeline) as device:
+    -      print("Connected")
+    -      while True:
+    -          time.sleep(1)
+    +  # Flash the app to the device
+    +  (f, bl) = dai.DeviceBootloader.getFirstAvailableDevice()
+    +  bootloader = dai.DeviceBootloader(bl)
+    +  progress = lambda p : print(f'Flashing progress: {p*100:.1f}%')
+    +  bootloader.flash(progress, pipeline)
+
+
+Now, whenever the device gets power, it will start the application which starts the TCP server. You can connect to it with any TCP client (eg. `host.py script <https://github.com/luxonis/depthai-experiments/blob/master/gen2-poe-tcp-streaming/host.py>`__)
+and start receiving the video stream.
 
 Flash the bootloader
 ####################
 
 To run the application on the camera, a `Bootloader` is required. Note that bootloader is already flashed on all POE cameras, as it's also required for network booting.
-The :ref:`Bootloader` is packaged together with the depthai, so if you have the latest depthai version, you can flash the
-latest bootloader version. To flash the latest bootloader, we suggest using the :ref:`Device Manager`. To view the API code behind
-it, see :ref:`Flash Bootloader` example code.
+To flash the latest bootloader, we suggest using the :ref:`Device Manager`. To view the API code behind it, see :ref:`Flash Bootloader` example code.
 
 Flash the pipeline
 ##################
@@ -87,6 +98,9 @@ can flash the pipeline to the device, along with its assests (eg. AI models). Yo
 
 After successfully flashing the pipeline, it will get started automatically when you power up the device.
 If you would like to change the flashed pipeline, simply re-flash it again.
+
+DepthAI Application Package (.dap)
+##################################
 
 Alternatively, you can also flash the pipeline with the :ref:`Device Manager`. For this approach, you will need a Depthai Application Package (.dap), which you
 can create with the following script:
