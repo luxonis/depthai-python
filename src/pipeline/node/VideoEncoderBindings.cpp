@@ -134,11 +134,11 @@ void bind_videoencoder(pybind11::module& m, void* pCallstack){
         .def("getFrameRate", &VideoEncoder::getFrameRate, DOC(dai, node, VideoEncoder, getFrameRate))
         .def("getLossless", &VideoEncoder::getLossless, DOC(dai, node, VideoEncoder, getLossless))
         .def("getMaxOutputFrameSize", &VideoEncoder::getMaxOutputFrameSize, DOC(dai, node, VideoEncoder, getMaxOutputFrameSize))
-        .def("setMisc", py::overload_cast<std::string, std::string>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, VideoEncoder, setMisc))
-        .def("setMisc", py::overload_cast<std::string, int>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, VideoEncoder, setMisc, 2))
-        .def("setMisc", py::overload_cast<std::string, float>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, VideoEncoder, setMisc, 3))
-        .def("clearMiscProperties", &VideoEncoder::clearMiscProperties, DOC(dai, VideoEncoder, clearMiscProperties))
-        .def("getMiscProperties", &VideoEncoder::getMiscProperties, DOC(dai, VideoEncoder, getMiscProperties))
+        .def("setMisc", py::overload_cast<std::string, std::string>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, node, VideoEncoder, setMisc))
+        .def("setMisc", py::overload_cast<std::string, int>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, node,  VideoEncoder, setMisc, 2))
+        .def("setMisc", py::overload_cast<std::string, float>(&VideoEncoder::setMisc), py::arg("property"), py::arg("value"), DOC(dai, node,  VideoEncoder, setMisc, 3))
+        .def("clearMiscProperties", &VideoEncoder::clearMiscProperties, DOC(dai, node,  VideoEncoder, clearMiscProperties))
+        .def("getMiscProperties", &VideoEncoder::getMiscProperties, DOC(dai, node,  VideoEncoder, getMiscProperties))
     ;
     // ALIAS
     daiNodeModule.attr("VideoEncoder").attr("Properties") = videoEncoderProperties;
