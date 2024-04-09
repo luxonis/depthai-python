@@ -36,6 +36,7 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
     rawToFConfig
         .def(py::init<>())
         .def_readwrite("median", &RawToFConfig::median, DOC(dai, RawToFConfig, median))
+        .def_readwrite("maxPhaseUnwrappingLevel", &RawToFConfig::maxPhaseUnwrappingLevel, DOC(dai, RawToFConfig, maxPhaseUnwrappingLevel))
         .def_readwrite("enableFPPNCorrection", &RawToFConfig::enableFPPNCorrection, DOC(dai, RawToFConfig, enableFPPNCorrection))
         .def_readwrite("enableOpticalCorrection", &RawToFConfig::enableOpticalCorrection, DOC(dai, RawToFConfig, enableOpticalCorrection))
         .def_readwrite("enableTemperatureCorrection", &RawToFConfig::enableTemperatureCorrection, DOC(dai, RawToFConfig, enableTemperatureCorrection))
