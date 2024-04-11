@@ -61,7 +61,7 @@ void bind_pointclouddata(pybind11::module& m, void* pCallstack){
             auto ra = arr.mutable_unchecked();
             for (int i = 0; i < size; i++) {
                 ra(i, 0) = points[i].x;
-                ra(i, 1) = -points[i].y;
+                ra(i, 1) = points[i].y;
                 ra(i, 2) = points[i].z;
             }
             return arr;
