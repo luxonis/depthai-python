@@ -150,6 +150,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createPointCloud", &Pipeline::create<node::PointCloud>)
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createCamera", &Pipeline::create<node::Camera>)
+        .def("createBenchmarkOut", &Pipeline::create<node::BenchmarkOut>)
+        .def("createBenchmarkIn", &Pipeline::create<node::BenchmarkIn>)
         ;
 
 
