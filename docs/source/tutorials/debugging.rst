@@ -2,7 +2,7 @@ Debugging DepthAI pipeline
 ##########################
 
 Currently, tools for debugging the DepthAI pipeline are limited. We plan on creating a software that would track all messages and queues,
-which would allow users to debug a "frozen" pipeline much easier, which is usually caused by a filled up :ref:`blocking queue <Blocking behaviour>`.
+which would allow users to debug a "frozen" pipeline much easier, which is usually caused by a filled up :ref:`blocking queue <Device queues>`.
 
 .. _depthai_logging:
 

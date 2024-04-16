@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-import cv2
-import numpy as np
-import depthai as dai
-from time import sleep
-import datetime
 import argparse
-from pathlib import Path
+import datetime
 import math
-import os, re
+import os
+import re
+from pathlib import Path
+from time import sleep
+
+import cv2
+import depthai as dai
+import numpy as np
 
 datasetDefault = str((Path(__file__).parent / Path("../models/dataset")).resolve().absolute())
 parser = argparse.ArgumentParser()
@@ -17,6 +19,9 @@ parser.add_argument("-d", "--debug", action="store_true", help="Enable debug out
 parser.add_argument("-e", "--evaluate", help="Evaluate the disparity calculation.", default=None)
 parser.add_argument("-dumpdispcost", "--dumpdisparitycostvalues", action="store_true", help="Dumps the disparity cost values for each disparity range. 96 byte for each pixel.")
 parser.add_argument("--download", action="store_true", help="Downloads the 2014 Middlebury dataset.")
+parser.add_argument("--calibration", help="Path to calibration file", default=None)
+parser.add_argument("--rectify", action="store_true", help="Enable rectified streams")
+parser.add_argument("--swapLR", action="store_true", help="Swap left and right cameras.")
 args = parser.parse_args()
 
 if args.evaluate is not None and args.dataset is not None:
@@ -42,7 +47,10 @@ if args.evaluate is not None and args.download and not Path(args.evaluate).exist
     os.makedirs(args.evaluate)
 
 def download_2014_middlebury(data_path):
-    import requests, zipfile, io
+    import io
+    import zipfile
+
+    import requests
     url = "https://vision.middlebury.edu/stereo/data/scenes2014/zip/"
     r = requests.get(url)
     c = r.content
@@ -333,8 +341,8 @@ class StereoConfigHandler:
         StereoConfigHandler.newConfig = True
         for tr in StereoConfigHandler.trCenterAlignmentShift:
             tr.set(value)
-    
-    def trackbarInvalidateEdgePixels(value):    
+
+    def trackbarInvalidateEdgePixels(value):
         StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels = value
         print(f"numInvalidateEdgePixels: {StereoConfigHandler.config.algorithmControl.numInvalidateEdgePixels:.2f}")
         StereoConfigHandler.newConfig = True
@@ -603,8 +611,12 @@ stereo.setSubpixel(subpixel)
 stereo.setRuntimeModeSwitch(True)
 
 # Linking
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+if(args.swapLR):
+    monoLeft.out.link(stereo.right)
+    monoRight.out.link(stereo.left)
+else:
+    monoLeft.out.link(stereo.left)
+    monoRight.out.link(stereo.right)
 xinStereoDepthConfig.out.link(stereo.inputConfig)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
@@ -630,9 +642,11 @@ StereoConfigHandler(stereo.initialConfig.get())
 StereoConfigHandler.registerWindow("Stereo control panel")
 
 # stereo.setPostProcessingHardwareResources(3, 3)
-
+if(args.calibration):
+    calibrationHandler = dai.CalibrationHandler(args.calibration)
+    pipeline.setCalibrationData(calibrationHandler)
 stereo.setInputResolution(width, height)
-stereo.setRectification(False)
+stereo.setRectification(args.rectify)
 baseline = 75
 fov = 71.86
 focal = width / (2 * math.tan(fov / 2 / 180 * math.pi))
@@ -691,17 +705,16 @@ class DatasetManager:
         self.names = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
         if len(self.names) == 0:
             raise RuntimeError("No dataset found at {}".format(path))
-    
+
     def get(self):
         return os.path.join(self.path, self.names[self.index])
-    
+
     def get_name(self):
         return self.names[self.index]
 
     def next(self):
         self.index = (self.index + 1) % len(self.names)
         return self.get()
-    
     def prev(self):
         self.index = (self.index - 1) % len(self.names)
         return self.get()
@@ -709,7 +722,6 @@ class DatasetManager:
 
 def read_pfm(file):
     file = open(file, "rb")
-    
     color = None
     width = None
     height = None
@@ -718,7 +730,7 @@ def read_pfm(file):
 
     header = file.readline().rstrip()
     if header.decode("ascii") == "PF":
-        color = True    
+        color = True
     elif header.decode("ascii") == "Pf":
         color = False
     else:
@@ -837,7 +849,6 @@ def show_debug_disparity(gt_img, oak_img):
         img[img == np.inf] = 0.
         img = cv2.resize(img, (1280, 800), interpolation=cv2.INTER_AREA)
         return img.astype(np.uint16)
-    
     gt_img = rescale_img(gt_img)
     oak_img = rescale_img(oak_img)
     maxv = max(gt_img.max(), oak_img.max())

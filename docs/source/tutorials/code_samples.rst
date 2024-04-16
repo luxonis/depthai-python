@@ -23,10 +23,12 @@ Code Samples
    ../samples/Script/*
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
+   ../samples/Sync/*
    ../samples/SystemLogger/*
    ../samples/ToF/*
    ../samples/VideoEncoder/*
    ../samples/Warp/*
+   ../samples/UVC/*
    ../samples/Yolo/*
 
 Code samples are used for automated testing. They are also a great starting point for the DepthAI API, as different node functionalities
@@ -72,6 +74,7 @@ are presented with code.
 
 - :ref:`Feature Detector` - Feature detection on input frame
 - :ref:`Feature Tracker` - Feature detection and tracking on input frame
+- :ref:`Feature Tracker with Motion Estimation` - Camera movement estimation based on feature tracking
 
 .. rubric:: Host side
 
@@ -157,6 +160,15 @@ are presented with code.
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
 
+
+.. rubric:: Sync Node
+
+- :ref:`Depth and Video Sync` - Synchronizes depth and video streams for real-time processing and display.
+- :ref:`IMU and Video Sync` - Aligns IMU data with video frames, showcasing real-time rotation vector display alongside video.
+- :ref:`Multiple Scripts Sync` - Demonstrates synchronization of data from two script nodes emitting data at different intervals.
+- :ref:`Demuxing Synchronized Script Outputs` - Features synchronization of script outputs followed by demultiplexing for distinct processing streams.
+
+
 .. rubric:: SystemLogger
 
 - :ref:`System information` - Displays device system information (memory/cpu usage, temperature)
@@ -177,6 +189,12 @@ are presented with code.
 
 - :ref:`Warp Mesh` - Displays an image warped with 2 different meshes
 - :ref:`Interactive Warp Mesh` - Interactively change the warp mesh
+
+.. rubric:: UVC
+
+- :ref:`UVC & Color Camera` - Displays RGB frames from a UVC camera
+- :ref:`UVC & Mono Camera` - Displays mono frames from a UVC camera
+- :ref:`UVC & Disparity` - Displays disparity frames from a UVC camera
 
 .. rubric:: Yolo
 
