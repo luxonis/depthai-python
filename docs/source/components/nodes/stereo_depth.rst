@@ -171,6 +171,7 @@ Limitations
 
 - Median filtering is disabled when subpixel mode is set to 4 or 5 bits.
 - For RGB-depth alignment the RGB camera has to be placed on the same horizontal line as the stereo camera pair.
+- RGB-depth alignment doesn't work when using disparity shift.
 
 Stereo depth FPS
 ================

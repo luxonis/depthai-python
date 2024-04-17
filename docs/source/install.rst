@@ -16,13 +16,13 @@ Follow the steps below to just install depthai api library dependencies for your
 
     .. code-block:: bash
 
-      bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+      curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 
     Please refer to :ref:`documentation below <macOS>` if any issues occur.
 
-  .. tab:: **Windows 10**
+  .. tab:: **Windows 10/11**
 
-    Windows 10 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__,
+    Windows 10/11 users can either **install DepthAI dependencies** via `Windows Installer <https://docs.luxonis.com/en/latest/pages/tutorials/first_steps>`__,
     or follow :ref:`instructions below <Windows 10>`.
 
   .. tab:: **Linux**
@@ -47,7 +47,7 @@ See documentation below for other platforms or additional information.
 
    * - Platform
      - Instructions
-   * - Windows 10
+   * - Windows 10/11
      - :ref:`Platform dependencies <Windows 10>`
    * - macOS
      - :ref:`Platform dependencies <macOS>`
@@ -221,8 +221,7 @@ For openSUSE, available `in this official article <https://en.opensuse.org/SDB:I
 Windows 10
 **********
 
-We recommend using the Chocolatey package manager to install DepthAI's
-dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
+For Windows 10/11, we recommend using the Chocolatey package manager to install DepthAI's dependencies on Windows. Chocolatey is very similar to Homebrew for macOS.
 
 To `install Chocolatey <https://docs.chocolatey.org/en-us/choco/setup>`__ and
 use it to install DepthAI's dependencies do the following:

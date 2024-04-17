@@ -29,6 +29,7 @@
 #include "depthai/pipeline/node/AprilTag.hpp"
 #include "depthai/pipeline/node/DetectionParser.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
+#include "depthai/pipeline/node/Warp.hpp"
 
 // depthai-shared
 #include "depthai-shared/properties/GlobalProperties.hpp"
@@ -144,6 +145,8 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
         .def("createUVC", &Pipeline::create<node::UVC>)
+        .def("createCamera", &Pipeline::create<node::Camera>)
+        .def("createWarp", &Pipeline::create<node::Warp>)
         ;
 
 

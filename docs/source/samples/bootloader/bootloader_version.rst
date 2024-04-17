@@ -16,8 +16,10 @@ Example script output
 .. code-block:: bash
 
     ~/depthai-python/examples$ python3 bootloader_version.py
-    Found device with name: 14442C10D1789ACD00-ma2480
-    Version: 0.0.15
+    Found device with name: 1.1
+    Version: 0.0.26
+    USB Bootloader - supports only Flash memory
+    Memory 'Memory.FLASH' size: 33554432, info: JEDEC ID: 01 02 19
 
 Setup
 #####
