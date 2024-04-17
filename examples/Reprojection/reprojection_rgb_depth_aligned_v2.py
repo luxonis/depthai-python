@@ -74,6 +74,11 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setExtendedDisparity(True)
 stereo.setLeftRightCheck(True)
 stereo.setDepthAlign(LEFT_SOCKET)
+stereo.enableDistortionCorrection(True)
+stereo.setDepthAlignmentUseSpecTranslation(False)
+stereo.setRectificationUseSpecTranslation(False)
+stereo.setFocalLengthFromCalibration(True)
+stereo.setDisparityToDepthUseSpecTranslation(False)
 
 out.setStreamName("out")
 
@@ -89,7 +94,11 @@ sync.out.link(out.input)
 
 def colorizeDepth(frameDepth, minDepth=MIN_DEPTH, maxDepth=MAX_DEPTH):
     invalidMask = frameDepth == 0
-    depthFrameColor = np.interp(frameDepth, (minDepth, maxDepth), (0, 255)).astype(
+    # Log the depth, minDepth and maxDepth
+    logDepth = np.log(frameDepth, where=frameDepth != 0)
+    logMinDepth = np.log(minDepth)
+    logMaxDepth = np.log(maxDepth)
+    depthFrameColor = np.interp(logDepth, (logMinDepth, logMaxDepth), (0, 255)).astype(
         np.uint8
     )
     depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
@@ -104,7 +113,6 @@ def getAlignedDepth(frameDepth):
     depthRect = cv2.remap(frameDepth, leftMapX, leftMapY, cv2.INTER_LINEAR)
     newR = np.dot(R2, np.dot(R, R1.T))  # Should be very close to identity
     newT = np.dot(R2, T)
-    newT[0] = T[0]  # TODO(Morato) - this doesn't make intuitive sense, but seems to work better
     combinedExtrinsics = np.eye(4)
     combinedExtrinsics[0:3, 0:3] = newR
     combinedExtrinsics[0:3, 3] = newT

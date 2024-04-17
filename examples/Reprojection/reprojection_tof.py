@@ -109,7 +109,6 @@ def getAlignedDepth(frameDepth):
     newT = np.dot(R2, T)
     print("newT", newT)
     print("T", T)
-    newT[0] = T[0]  # TODO(Morato) - this doesn't make intuitive sense, but seems to work better
     combinedExtrinsics = np.eye(4)
     combinedExtrinsics[0:3, 0:3] = newR
     combinedExtrinsics[0:3, 3] = newT
