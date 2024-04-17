@@ -9,6 +9,10 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
         image = np.zeros((height, width), np.uint8)
     else:
         image = np.zeros((height, width), np.uint16)
+    if(camera_extrinsics[0][3] > 0):
+        sign = 1
+    else:
+        sign = -1
     for i in prange(0, height):
         for j in prange(0, width):
             d = depth_image[i][j]
@@ -33,11 +37,8 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             if int_u >= 0 and int_u < len(image[0]) and int_v >= 0 and int_v < len(image):
                 if depth_image_show is not None:
                     image[int_v][int_u] = depth_image_show[i][j][0]
-                    # image[int_v][int_u - 1] = depth_image_show[i][j][0]
-                    image[int_v][int_u + 1] = depth_image_show[i][j][0]
-                    # if int_u < len(image[0]) - 2:
-                    #     image[int_v][int_u + 1] = depth_image_show[i][j][0] # Do the same for the next pixel due to the rounding
-                    #     image[int_v][int_u + 2] = depth_image_show[i][j][0] # Do the same for the next pixel due to the rounding
+                    image[int_v][int_u + sign] = depth_image_show[i][j][0]
                 else:
                     image[int_v][int_u] = z1
+                    image[int_v][int_u + sign] = z1
     return image
