@@ -1,9 +1,10 @@
 import numpy as np
 import cv2
 import depthai as dai
+from projector_3d import PointCloudVisualizer
 import reprojection
 
-FPS = 30
+FPS = 10
 
 RGB_SOCKET = dai.CameraBoardSocket.RGB
 LEFT_SOCKET = dai.CameraBoardSocket.LEFT
@@ -17,10 +18,6 @@ rgbSize = (1920, 1080)
 # Used for colorizing the depth map
 MIN_DEPTH = 500  # mm
 MAX_DEPTH = 10000  # mm
-
-
-outputWidth = 1280
-outputHeight = 800
 
 device = dai.Device()
 
@@ -58,17 +55,14 @@ out = pipeline.create(dai.node.XLinkOut)
 left.setResolution(LEFT_RIGHT_RESOLUTION)
 left.setBoardSocket(LEFT_SOCKET)
 left.setFps(FPS)
-left.initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
 right.setResolution(LEFT_RIGHT_RESOLUTION)
 right.setBoardSocket(RIGHT_SOCKET)
 right.setFps(FPS)
-right.initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.OUTPUT)
 
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
-camRgb.initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setExtendedDisparity(True)
@@ -110,7 +104,7 @@ def colorizeDepth(frameDepth, minDepth=MIN_DEPTH, maxDepth=MAX_DEPTH):
 def getAlignedDepth(frameDepth):
     R1, R2, _, _, _, _, _ = cv2.stereoRectify(M1, D1, M2, D2, (100, 100), R, T)  # The (100,100) doesn't matter as it is not used for calculating the rotation matrices
     leftMapX, leftMapY = cv2.initUndistortRectifyMap(M1, None, R1, TARGET_MATRIX, depthSize, cv2.CV_32FC1)
-    depthRect = cv2.remap(frameDepth, leftMapX, leftMapY, cv2.INTER_LINEAR)
+    depthRect = cv2.remap(frameDepth, leftMapX, leftMapY, cv2.INTER_NEAREST)
     newR = np.dot(R2, np.dot(R, R1.T))  # Should be very close to identity
     newT = np.dot(R2, T)
     combinedExtrinsics = np.eye(4)
@@ -120,7 +114,7 @@ def getAlignedDepth(frameDepth):
     # Rotate the depth to the RGB frame
     R_back = R2.T
     mapX, mapY = cv2.initUndistortRectifyMap(TARGET_MATRIX, None, R_back, M2, rgbSize, cv2.CV_32FC1)
-    outputAligned = cv2.remap(depthAligned, mapX, mapY, cv2.INTER_LINEAR)
+    outputAligned = cv2.remap(depthAligned, mapX, mapY, cv2.INTER_NEAREST)
     return outputAligned
 
 
@@ -156,7 +150,7 @@ with device:
         100,
         updateBlendWeights,
     )
-
+    vis = PointCloudVisualizer(M2, *rgbSize)
     while True:
         messageGroup: dai.MessageGroup = queue.get()
         frameRgb: dai.ImgFrame = messageGroup["rgb"]
@@ -168,8 +162,12 @@ with device:
             cv2.imshow("depth", colorizeDepth(frameDepth.getCvFrame()))
 
             alignedDepth = getAlignedDepth(frameDepth.getFrame())
+            pclDepth = alignedDepth.copy()
+            rgb = cv2.cvtColor(frameRgb, cv2.COLOR_BGR2RGB)
+            vis.rgbd_to_projection(pclDepth, rgb)
+            vis.visualize_pcd()
             # Colorize the aligned depth
-            alignedDepth = colorizeDepth(alignedDepth)
+            alignedDepthColorized = colorizeDepth(alignedDepth)
 
             # Undistort the RGB frame
             mapX, mapY = cv2.initUndistortRectifyMap(
@@ -177,7 +175,7 @@ with device:
             )
             frameRgb = cv2.remap(frameRgb, mapX, mapY, cv2.INTER_LINEAR)
 
-            blended = cv2.addWeighted(frameRgb, rgbWeight, alignedDepth, depthWeight, 0)
+            blended = cv2.addWeighted(frameRgb, rgbWeight, alignedDepthColorized, depthWeight, 0)
             cv2.imshow(rgb_depth_window_name, blended)
 
         key = cv2.waitKey(1)
