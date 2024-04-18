@@ -42,6 +42,7 @@ void bind_tofconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("enableTemperatureCorrection", &RawToFConfig::enableTemperatureCorrection, DOC(dai, RawToFConfig, enableTemperatureCorrection))
         .def_readwrite("enableWiggleCorrection", &RawToFConfig::enableWiggleCorrection, DOC(dai, RawToFConfig, enableWiggleCorrection))
         .def_readwrite("enablePhaseUnwrapping", &RawToFConfig::enablePhaseUnwrapping, DOC(dai, RawToFConfig, enablePhaseUnwrapping))
+        .def_readwrite("phaseUnwrapErrorThreshold", &RawToFConfig::phaseUnwrapErrorThreshold, DOC(dai, RawToFConfig, phaseUnwrapErrorThreshold))
         ;
 
     // Message
