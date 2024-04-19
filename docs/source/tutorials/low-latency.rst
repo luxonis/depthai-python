@@ -4,6 +4,15 @@ Low Latency
 These tables show what performance you can expect from **USB 3.2** Gen 1 (5 Gbps) connection with an OAK camera. XLink chunking was
 disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example code, see :ref:`Latency measurement`.
 
+.. note::
+
+  To enable 10Gbps USB3 mode (when using a **USB 3.2 Gen 2** compliant cable), you has to explicitly set it in :code:`Device` constructor:
+
+  .. code-block:: python
+
+      with dai.Device(pipeline, maxUsbSpeed=dai.UsbSpeed.SUPER_PLUS) as device:
+
+
 .. list-table:: USB 5gbps latency
    :header-rows: 1
 
