@@ -531,18 +531,6 @@ jobs:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
-  notify_robothub:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: luxonis/robothub-apps
-          event-type: depthai-python-release
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   # notify_hil_workflow_linux_x86_64:
   #   needs: [build-linux-x86_64]
