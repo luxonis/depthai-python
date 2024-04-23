@@ -9,6 +9,7 @@ FPS = 10
 RGB_SOCKET = dai.CameraBoardSocket.RGB
 LEFT_SOCKET = dai.CameraBoardSocket.LEFT
 RIGHT_SOCKET = dai.CameraBoardSocket.RIGHT
+ALIGN_SOCKET = RIGHT_SOCKET
 
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
 LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_800_P
@@ -23,16 +24,16 @@ device = dai.Device()
 
 try:
     calibData = device.readCalibration2()
-    M1 = np.array(calibData.getCameraIntrinsics(LEFT_SOCKET, *depthSize))
-    D1 = np.array(calibData.getDistortionCoefficients(LEFT_SOCKET))
+    M1 = np.array(calibData.getCameraIntrinsics(ALIGN_SOCKET, *depthSize))
+    D1 = np.array(calibData.getDistortionCoefficients(ALIGN_SOCKET))
     M2 = np.array(calibData.getCameraIntrinsics(RGB_SOCKET, *rgbSize))
     D2 = np.array(calibData.getDistortionCoefficients(RGB_SOCKET))
 
     T = (
-        np.array(calibData.getCameraTranslationVector(LEFT_SOCKET, RGB_SOCKET, False))
+        np.array(calibData.getCameraTranslationVector(ALIGN_SOCKET, RGB_SOCKET, False))
         * 10
     )  # to mm for matching the depth
-    R = np.array(calibData.getCameraExtrinsics(LEFT_SOCKET, RGB_SOCKET, False))[
+    R = np.array(calibData.getCameraExtrinsics(ALIGN_SOCKET, RGB_SOCKET, False))[
         0:3, 0:3
     ]
     TARGET_MATRIX = M1
@@ -67,7 +68,7 @@ camRgb.setFps(FPS)
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setExtendedDisparity(True)
 stereo.setLeftRightCheck(True)
-stereo.setDepthAlign(LEFT_SOCKET)
+stereo.setDepthAlign(ALIGN_SOCKET)
 stereo.enableDistortionCorrection(True)
 stereo.setDepthAlignmentUseSpecTranslation(False)
 stereo.setRectificationUseSpecTranslation(False)
