@@ -1,52 +1,125 @@
 #!/usr/bin/env python3
 
+import time
 import cv2
 import depthai as dai
 import numpy as np
 
-pipeline = dai.Pipeline()
+print(dai.__version__)
 
-cam_a = pipeline.create(dai.node.Camera)
-# We assume the ToF camera sensor is on port CAM_A
-cam_a.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+def create_pipeline():
+    pipeline = dai.Pipeline()
 
-tof = pipeline.create(dai.node.ToF)
+    tof = pipeline.create(dai.node.ToF)
+    tof.setNumShaves(3)
 
-# Configure the ToF node
-tofConfig = tof.initialConfig.get()
-# tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MAX
-tofConfig.depthParams.avgPhaseShuffle = False
-tofConfig.depthParams.minimumAmplitude = 3.0
-tof.initialConfig.set(tofConfig)
-# Link the ToF sensor to the ToF node
-cam_a.raw.link(tof.input)
+    # Configure the ToF node
+    tofConfig = tof.initialConfig.get()
+    tofConfig.enableFPPNCorrection = True
+    tofConfig.enableOpticalCorrection = True
+    tofConfig.enableWiggleCorrection = True
+    tofConfig.enableTemperatureCorrection = False
+    tofConfig.phaseUnwrappingLevel = 4
+    tofConfig.phaseUnwrapErrorThreshold = 300
+    xinTofConfig = pipeline.create(dai.node.XLinkIn)
+    xinTofConfig.setStreamName("tofConfig")
+    xinTofConfig.out.link(tof.inputConfig)
 
-xout = pipeline.create(dai.node.XLinkOut)
-xout.setStreamName("depth")
-tof.depth.link(xout.input)
+    tof.initialConfig.set(tofConfig)
 
-# Connect to device and start pipeline
-with dai.Device(pipeline) as device:
-    print('Connected cameras:', device.getConnectedCameraFeatures())
-    q = device.getOutputQueue(name="depth")
+    cam_tof = pipeline.create(dai.node.Camera)
+    cam_tof.properties.numFramesPoolRaw = 5
+    cam_tof.setFps(60)
+    cam_tof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+    cam_tof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+    cam_tof.raw.link(tof.input)
 
-    while True:
-        imgFrame = q.get()  # blocking call, will wait until a new data has arrived
-        depth_map = imgFrame.getFrame()
+    xout = pipeline.create(dai.node.XLinkOut)
+    xout.setStreamName("depth")
+    tof.depth.link(xout.input)
 
-        # Colorize the depth frame to jet colormap
-        depth_downscaled = depth_map[::4]
-        non_zero_depth = depth_downscaled[depth_downscaled != 0] # Remove invalid depth values
-        if len(non_zero_depth) == 0:
-            min_depth, max_depth = 0, 0
-        else:
-            min_depth = np.percentile(non_zero_depth, 3)
-            max_depth = np.percentile(non_zero_depth, 97)
-        depth_colorized = np.interp(depth_map, (min_depth, max_depth), (0, 255)).astype(np.uint8)
-        depth_colorized = cv2.applyColorMap(depth_colorized, cv2.COLORMAP_JET)
 
-        cv2.imshow("Colorized depth", depth_colorized)
+    tofConfig = tof.initialConfig.get()
 
-        if cv2.waitKey(1) == ord('q'):
-            break
+    return pipeline, tofConfig
+
+
+if __name__ == '__main__':
+    pipeline, tofConfig = create_pipeline()
+
+    with dai.Device(pipeline) as device:
+        print('Connected cameras:', device.getConnectedCameraFeatures())
+        qDepth = device.getOutputQueue(name="depth")
+
+        tofConfigInQueue = device.getInputQueue("tofConfig")
+
+        counter = 0
+        while True:
+            start = time.time()
+            key = cv2.waitKey(1)
+            if key == ord('f'):
+                tofConfig.enableFPPNCorrection = not tofConfig.enableFPPNCorrection
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('o'):
+                tofConfig.enableOpticalCorrection = not tofConfig.enableOpticalCorrection
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('w'):
+                tofConfig.enableWiggleCorrection = not tofConfig.enableWiggleCorrection
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('t'):
+                tofConfig.enableTemperatureCorrection = not tofConfig.enableTemperatureCorrection
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('q'):
+                break
+            elif key == ord('0'):
+                tofConfig.enablePhaseUnwrapping = False
+                tofConfig.phaseUnwrappingLevel = 4
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('1'):
+                tofConfig.enablePhaseUnwrapping = True
+                tofConfig.phaseUnwrappingLevel = 1
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('2'):
+                tofConfig.enablePhaseUnwrapping = True
+                tofConfig.phaseUnwrappingLevel = 2
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('3'):
+                tofConfig.enablePhaseUnwrapping = True
+                tofConfig.phaseUnwrappingLevel = 3
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('4'):
+                tofConfig.enablePhaseUnwrapping = True
+                tofConfig.phaseUnwrappingLevel = 4
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('m'):
+                medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5,
+                                  dai.MedianFilter.KERNEL_7x7]
+                currentMedian = tofConfig.median
+                nextMedian = medianSettings[(medianSettings.index(currentMedian) + 1) % len(medianSettings)]
+                print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
+                tofConfig.median = nextMedian
+                tofConfigInQueue.send(tofConfig)
+            elif key == ord('l'):
+                treshold = input("Enter treshold: ")
+                treshold = int(treshold)
+                tofConfig.phaseUnwrapErrorThreshold = treshold
+                tofConfigInQueue.send(tofConfig)
+
+            imgFrame = qDepth.get()  # blocking call, will wait until a new data has arrived
+            depth_map = imgFrame.getFrame()
+
+            depth_downscaled = depth_map[::4]
+            non_zero_depth = depth_downscaled[depth_downscaled != 0]  # Remove invalid depth values
+            if len(non_zero_depth) == 0:
+                min_depth, max_depth = 0, 0
+            else:
+                min_depth = 200
+                max_depth = 6000
+            depth_colorized = np.interp(depth_map, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+            depth_colorized = cv2.applyColorMap(depth_colorized, cv2.COLORMAP_JET)
+
+
+            cv2.imshow("Colorized depth", depth_colorized)
+            counter += 1
+
+    device.close()

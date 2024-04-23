@@ -45,6 +45,24 @@ Inputs and Outputs
 - ``amplitude`` - :ref:`ImgFrame`
 - ``error`` - :ref:`ImgFrame`
 
+ToF Settings
+############
+
+In :ref:`ToF depth` example we allow users to quickly configure the following ToF settings:
+
+- FFPN Correction; It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. It's enabled by default for best performance.
+- Wiggle Correction: It's a process that corrects the wiggle effect of the ToF sensor. It's enabled by default for best performance.
+- Temperature Correction: It's a process that corrects the temperature effect of the ToF sensor. It's enabled by default for best performance.
+- Optical Correction: It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches :ref:`StereoDepth` depth reporting.
+- Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..4]. The higher the number, the longer the ToF range, but it also increases the noise.
+    - `0` - Disabled.
+    - `1` - Up to 1.5 meters
+    - `2` - Up to 3 meters
+    - `3` - Up to 4.5 meters
+    - `4` - Up to 6 meters
+
+.. image:: /_static/images/components/tof-optical-correction.png
+
 Usage
 #####
 
