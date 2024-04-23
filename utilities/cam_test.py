@@ -286,7 +286,6 @@ with dai.Device(*dai_device_args) as device:
     xout_raw = {}
     xout_tof_amp = {}
     streams = []
-    tofConfig = {}
     yolo_passthrough_q_name = None
     for c in cam_list:
         print("CAM: ", c)
@@ -303,21 +302,14 @@ with dai.Device(*dai_device_args) as device:
                 cam[c].raw.link(tof[c].input)
                 tof[c].depth.link(xout[c].input)
                 xinTofConfig.out.link(tof[c].inputConfig)
-                tofConfig = tof[c].initialConfig.get()
-                tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-                tofConfig.depthParams.avgPhaseShuffle = False
-                tofConfig.depthParams.minimumAmplitude = 3.0
-                tof[c].initialConfig.set(tofConfig)
-
                 if args.tof_median == 0:
-                    tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.MEDIAN_OFF)
                 elif args.tof_median == 3:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_3x3)
                 elif args.tof_median == 5:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
                 elif args.tof_median == 7:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
-                tof[c].initialConfig.set(tofConfig)
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
                 if args.tof_amplitude:
                     amp_name = 'tof_amplitude_' + c
                     xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
@@ -661,16 +653,6 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            print("ToF toggling f_mod value to:", f_mod)
-            tofConfig.depthParams.freqModUsed = f_mod
-            tofCfgQueue.send(tofConfig)
-        elif key == ord('h') and tof:
-            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
-            print("ToF toggling avgPhaseShuffle value to:",
-                  tofConfig.depthParams.avgPhaseShuffle)
-            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -840,12 +822,6 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
-            elif control == 'tof_amplitude_min' and tof:
-                amp_min = clamp(
-                    tofConfig.depthParams.minimumAmplitude + change, 0, 50)
-                print("Setting min amplitude(confidence) to:", amp_min)
-                tofConfig.depthParams.minimumAmplitude = amp_min
-                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
 
     print()

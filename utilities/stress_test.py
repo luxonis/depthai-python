@@ -390,11 +390,6 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
             tof_xout = pipeline.createXLinkOut()
             tof_xout.setStreamName("tof")
             tof.depth.link(tof_xout.input)
-            tofConfig = tof.initialConfig.get()
-            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            tofConfig.depthParams.avgPhaseShuffle = False
-            tofConfig.depthParams.minimumAmplitude = 3.0
-            tof.initialConfig.set(tofConfig)
             xlink_outs.append(("tof", 4))
             continue  # No video encoder and edge detector for TOF
         else:
