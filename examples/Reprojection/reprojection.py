@@ -37,7 +37,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             int_v = round(v)
             if(int_v != i):
                 print(f'v -> {v} and i -> {i}') # This should never be printed
-            if int_u >= 0 and int_u < len(image[0]) and int_v >= 0 and int_v < len(image):
+            if int_u >= 0 and int_u < (len(image[0]) - 1) and int_v >= 0 and int_v < len(image):
                 if depth_image_show is not None:
                     image[int_v][int_u] = depth_image_show[i][j][0]
                     image[int_v][int_u + sign] = depth_image_show[i][j][0]
