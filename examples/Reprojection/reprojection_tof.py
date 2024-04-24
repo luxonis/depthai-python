@@ -2,11 +2,12 @@ import numpy as np
 import cv2
 import depthai as dai
 import reprojection
+from projector_3d import PointCloudVisualizer
 from datetime import timedelta
 
 FPS = 20
 
-RGB_SOCKET = dai.CameraBoardSocket.CAM_B
+RGB_SOCKET = dai.CameraBoardSocket.CAM_C
 LEFT_SOCKET = dai.CameraBoardSocket.CAM_A
 
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_800_P
@@ -70,6 +71,7 @@ tofConfig.enableFPPNCorrection = FPPN_ENABLE
 tofConfig.enableOpticalCorrection = OPTICAL_ENABLE
 tofConfig.enableWiggleCorrection = WIGGLE_ENABLE
 tofConfig.enableTemperatureCorrection = TEMPERATURE_ENABLE
+tofConfig.median = dai.MedianFilter.KERNEL_5x5
 
 tofConfig.enablePhaseUnwrapping = True
 tofConfig.phaseUnwrappingLevel = 4
@@ -150,7 +152,7 @@ with device:
         100,
         updateBlendWeights,
     )
-
+    vis = PointCloudVisualizer(M2, *rgbSize)
     while True:
         messageGroup: dai.MessageGroup = queue.get()
         frameRgb: dai.ImgFrame = messageGroup["rgb"]
@@ -162,6 +164,11 @@ with device:
             cv2.imshow("depth", colorizeDepth(frameDepth.getCvFrame()))
 
             alignedDepth = getAlignedDepth(frameDepth.getFrame())
+            # visualise Point Cloud
+            rgb = cv2.cvtColor(frameRgb, cv2.COLOR_BGR2RGB)
+            vis.rgbd_to_projection(alignedDepth, rgb)
+            vis.visualize_pcd()
+
             # Colorize the aligned depth
             alignedDepth = colorizeDepth(alignedDepth)
 
@@ -170,7 +177,6 @@ with device:
                 M2, D2, None, M2, rgbSize, cv2.CV_32FC1
             )
             frameRgb = cv2.remap(frameRgb, mapX, mapY, cv2.INTER_LINEAR)
-
             blended = cv2.addWeighted(frameRgb, rgbWeight, alignedDepth, depthWeight, 0)
             cv2.imshow(rgb_depth_window_name, blended)
 
