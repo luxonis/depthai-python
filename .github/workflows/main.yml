@@ -132,7 +132,7 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        rpi-os: [rpi-buster, rpi-bullseye]
+        rpi-os: [rpi-buster, rpi-bullseye, rpi-bookworm]
     runs-on: ${{ matrix.rpi-os }}
     steps:
       - name: Print home directory
@@ -155,7 +155,7 @@ jobs:
         run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
         run: |
-          python3 -m pip install -U wheel auditwheel
+          # python3 -m pip install -U wheel auditwheel # Called once when setting up the runner
           for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat linux_armv7l -w wheelhouse/preaudited/; done
           for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
           mkdir -p wheelhouse/audited/
@@ -180,7 +180,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11']
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
         python-architecture: [x64, x86]
       fail-fast: false
     steps:
@@ -235,7 +235,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11']
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
       fail-fast: false
     steps:
       - name: Cache .hunter folder
@@ -329,7 +329,7 @@ jobs:
       #     echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Build wheels
-        run: for PYBIN in {9..11}; do "python3.${PYBIN}" -m pip wheel . -w wheelhouse/ --verbose; done
+        run: for PYBIN in {9..12}; do "python3.${PYBIN}" -m pip wheel . -w wheelhouse/ --verbose; done
 
       - name: Auditing wheels
         run: delocate-wheel -v -w wheelhouse/audited wheelhouse/*.whl
@@ -352,7 +352,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux2014_x86_64:2022-10-30-402504a
+      image: quay.io/pypa/manylinux2014_x86_64:2024-01-08-eb135ed
       env:
         PLAT: manylinux2014_x86_64
     steps:
@@ -395,7 +395,7 @@ jobs:
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar
           mv dist/* wheelhouse/audited/
       - name: Build wheels
-        run: for PYBIN in /opt/python/cp3{6..11}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+        run: for PYBIN in /opt/python/cp3{8..12}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Audit wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
@@ -416,7 +416,7 @@ jobs:
     needs: build-docstrings
     runs-on: [self-hosted, linux, ARM64]
     container:
-      image: quay.io/pypa/manylinux2014_aarch64:2022-10-30-402504a
+      image: quay.io/pypa/manylinux2014_aarch64:2024-01-08-eb135ed
       env:
         PLAT: manylinux2014_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
@@ -452,7 +452,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheels
-        run: for PYBIN in /opt/python/cp3{6..11}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+        run: for PYBIN in /opt/python/cp3{6..12}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Auditing wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
@@ -531,18 +531,6 @@ jobs:
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
           ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
 
-  notify_robothub:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: luxonis/robothub-apps
-          event-type: depthai-python-release
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   # notify_hil_workflow_linux_x86_64:
   #   needs: [build-linux-x86_64]

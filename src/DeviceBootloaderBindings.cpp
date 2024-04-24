@@ -161,6 +161,7 @@ void DeviceBootloaderBindings::bind(pybind11::module& m, void* pCallstack){
 
         //.def("flashCustom", &DeviceBootloader::flashCustom, py::arg("memory"), py::arg("offset"), py::arg("progressCallback"), py::arg("data"), DOC(dai, DeviceBootloader, flashCustom))
         .def("getVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getVersion(); }, DOC(dai, DeviceBootloader, getVersion))
+        .def("getFlashedVersion", [](DeviceBootloader& db) { py::gil_scoped_release release; return db.getFlashedVersion(); }, DOC(dai, DeviceBootloader, getFlashedVersion))
 
         .def("isEmbeddedVersion", &DeviceBootloader::isEmbeddedVersion, DOC(dai, DeviceBootloader, isEmbeddedVersion))
         .def("getType", &DeviceBootloader::getType, DOC(dai, DeviceBootloader, getType))

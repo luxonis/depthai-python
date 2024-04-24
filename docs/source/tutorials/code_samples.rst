@@ -23,6 +23,7 @@ Code Samples
    ../samples/Script/*
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
+   ../samples/Sync/*
    ../samples/SystemLogger/*
    ../samples/ToF/*
    ../samples/VideoEncoder/*
@@ -158,6 +159,15 @@ are presented with code.
 - :ref:`Stereo Depth from host` - Generates stereo depth frame from a set of mono images from the host
 - :ref:`Stereo Depth Video` - An extended version of **Depth Preview**
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
+
+
+.. rubric:: Sync Node
+
+- :ref:`Depth and Video Sync` - Synchronizes depth and video streams for real-time processing and display.
+- :ref:`IMU and Video Sync` - Aligns IMU data with video frames, showcasing real-time rotation vector display alongside video.
+- :ref:`Multiple Scripts Sync` - Demonstrates synchronization of data from two script nodes emitting data at different intervals.
+- :ref:`Demuxing Synchronized Script Outputs` - Features synchronization of script outputs followed by demultiplexing for distinct processing streams.
+
 
 .. rubric:: SystemLogger
 

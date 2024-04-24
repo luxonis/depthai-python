@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-import cv2
-import numpy as np
-import depthai as dai
-from time import sleep
-import datetime
 import argparse
-from pathlib import Path
+import datetime
 import math
-import os, re
+import os
+import re
+from pathlib import Path
+from time import sleep
+
+import cv2
+import depthai as dai
+import numpy as np
 
 datasetDefault = str((Path(__file__).parent / Path("../models/dataset")).resolve().absolute())
 parser = argparse.ArgumentParser()
@@ -45,7 +47,10 @@ if args.evaluate is not None and args.download and not Path(args.evaluate).exist
     os.makedirs(args.evaluate)
 
 def download_2014_middlebury(data_path):
-    import requests, zipfile, io
+    import io
+    import zipfile
+
+    import requests
     url = "https://vision.middlebury.edu/stereo/data/scenes2014/zip/"
     r = requests.get(url)
     c = r.content
@@ -646,10 +651,7 @@ baseline = 75
 fov = 71.86
 focal = width / (2 * math.tan(fov / 2 / 180 * math.pi))
 
-stereo.setBaseline(baseline/10)
-stereo.setFocalLength(focal)
-
-streams = ['left', 'right']
+streams = ["left", "right"]
 if outRectified:
     streams.extend(["rectified_left", "rectified_right"])
 streams.append("disparity")
@@ -713,7 +715,6 @@ class DatasetManager:
     def next(self):
         self.index = (self.index + 1) % len(self.names)
         return self.get()
-
     def prev(self):
         self.index = (self.index - 1) % len(self.names)
         return self.get()
@@ -721,7 +722,6 @@ class DatasetManager:
 
 def read_pfm(file):
     file = open(file, "rb")
-
     color = None
     width = None
     height = None
@@ -849,7 +849,6 @@ def show_debug_disparity(gt_img, oak_img):
         img[img == np.inf] = 0.
         img = cv2.resize(img, (1280, 800), interpolation=cv2.INTER_AREA)
         return img.astype(np.uint16)
-
     gt_img = rescale_img(gt_img)
     oak_img = rescale_img(oak_img)
     maxv = max(gt_img.max(), oak_img.max())

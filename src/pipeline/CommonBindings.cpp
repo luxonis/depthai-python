@@ -229,6 +229,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("hasAutofocusIC", &CameraFeatures::hasAutofocusIC)
         .def_readwrite("name", &CameraFeatures::name)
         .def_readwrite("configs", &CameraFeatures::configs)
+        .def_readwrite("calibrationResolution", &CameraFeatures::calibrationResolution)
         .def("__repr__", [](CameraFeatures& camera) {
             std::stringstream stream;
             stream << camera;
@@ -244,6 +245,12 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("minFps", &CameraSensorConfig::minFps)
         .def_readwrite("maxFps", &CameraSensorConfig::maxFps)
         .def_readwrite("type", &CameraSensorConfig::type)
+        .def_readwrite("fov", &CameraSensorConfig::fov)
+        .def("__repr__", [](CameraSensorConfig& config) {
+            std::stringstream stream;
+            stream << config;
+            return stream.str();
+        })
     ;
 
     // MemoryInfo

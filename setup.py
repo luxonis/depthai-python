@@ -14,6 +14,7 @@ from pathlib import Path
 
 ### NAME
 MODULE_NAME = 'depthai'
+DEPTHAI_CLI_MODULE_NAME = 'depthai_cli'
 
 ### VERSION
 here = os.path.abspath(os.path.dirname(__file__))
@@ -92,6 +93,20 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
+        if ext.name == DEPTHAI_CLI_MODULE_NAME:
+            # Copy cam_test.py and it's dependencies to depthai_cli/
+            cam_test_path = os.path.join(here, "utilities", "cam_test.py")
+            cam_test_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "cam_test.py")
+            cam_test_gui_path = os.path.join(here, "utilities", "cam_test_gui.py")
+            cam_test_gui_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "cam_test_gui.py")
+            stress_test_path = os.path.join(here, "utilities", "stress_test.py")
+            stress_test_dest = os.path.join(self.build_lib, DEPTHAI_CLI_MODULE_NAME, "stress_test.py")
+            files_to_copy = [(cam_test_path, cam_test_dest), (cam_test_gui_path, cam_test_gui_dest), (stress_test_path, stress_test_dest)]
+            for src, dst in files_to_copy:
+                with open(src, "r") as f:
+                    with open(dst, "w") as f2:
+                        f2.write(f.read())
+            return
 
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         # required for auto-detection of auxiliary "native" libs
@@ -205,11 +220,11 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/luxonis/depthai-python",
-    ext_modules=[CMakeExtension(MODULE_NAME)],
+    ext_modules=[CMakeExtension(MODULE_NAME), Extension(DEPTHAI_CLI_MODULE_NAME, sources=[])],
     cmdclass={
-        'build_ext': CMakeBuild
+        'build_ext': CMakeBuild,
     },
-    packages=["depthai_cli"],
+    packages=[DEPTHAI_CLI_MODULE_NAME],
     zip_safe=False,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -229,6 +244,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: C++",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
@@ -237,7 +253,7 @@ setup(
     python_requires='>=3.6',
     entry_points={
         "console_scripts": [
-            'depthai=depthai_cli.depthai:cli'
+            f'depthai={DEPTHAI_CLI_MODULE_NAME}.depthai_cli:cli'
         ]
     }
 )
