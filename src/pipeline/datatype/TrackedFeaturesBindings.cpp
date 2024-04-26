@@ -46,6 +46,7 @@ void bind_trackedfeatures(pybind11::module& m, void* pCallstack){
         .def_readwrite("age", &TrackedFeature::age, DOC(dai, TrackedFeature, age))
         .def_readwrite("harrisScore", &TrackedFeature::harrisScore, DOC(dai, TrackedFeature, harrisScore))
         .def_readwrite("trackingError", &TrackedFeature::trackingError, DOC(dai, TrackedFeature, trackingError))
+        .def_readwrite("descriptor", &TrackedFeature::descriptor, DOC(dai, TrackedFeature, descriptor))
         ;
 
 
