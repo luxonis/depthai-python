@@ -88,24 +88,21 @@ You can print sensor features to see how FOV is affected by the selected sensor 
             for cfg in cam.configs:
                 print("   ", cfg)
 
-    ```
-    Running on OAK-D-S2 will print:
-
-    {socket: CAM_A, sensorName: IMX378, width: 4056, height: 3040, orientation: AUTO, supportedTypes: [COLOR], hasAutofocus: 1, hasAutofocusIC: 1, name: color}
-        {width: 1920, height: 1080, minFps: 2.03, maxFps: 60, type: COLOR, fov: {x:108, y: 440, width: 3840, height: 2160}}
-        {width: 3840, height: 2160, minFps: 1.42, maxFps: 42, type: COLOR, fov: {x:108, y: 440, width: 3840, height: 2160}}
-        {width: 4056, height: 3040, minFps: 1.42, maxFps: 30, type: COLOR, fov: {x:0, y: 0, width: 4056, height: 3040}}
-        {width: 1352, height: 1012, minFps: 1.25, maxFps: 52, type: COLOR, fov: {x:0, y: 0, width: 4056, height: 3036}}
-        {width: 2024, height: 1520, minFps: 2.03, maxFps: 85, type: COLOR, fov: {x:4, y: 0, width: 4048, height: 3040}}
-    {socket: CAM_B, sensorName: OV9282, width: 1280, height: 800, orientation: AUTO, supportedTypes: [MONO], hasAutofocus: 0, hasAutofocusIC: 0, name: left}
-        {width: 1280, height: 720, minFps: 1.687, maxFps: 143.1, type: MONO, fov: {x:0, y: 40, width: 1280, height: 720}}
-        {width: 1280, height: 800, minFps: 1.687, maxFps: 129.6, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
-        {width: 640, height: 400, minFps: 1.687, maxFps: 255.7, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
-    {socket: CAM_C, sensorName: OV9282, width: 1280, height: 800, orientation: AUTO, supportedTypes: [MONO], hasAutofocus: 0, hasAutofocusIC: 0, name: right}
-        {width: 1280, height: 720, minFps: 1.687, maxFps: 143.1, type: MONO, fov: {x:0, y: 40, width: 1280, height: 720}}
-        {width: 1280, height: 800, minFps: 1.687, maxFps: 129.6, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
-        {width: 640, height: 400, minFps: 1.687, maxFps: 255.7, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
-    ```
+    # Running on OAK-D-S2 will print:
+    # {socket: CAM_A, sensorName: IMX378, width: 4056, height: 3040, orientation: AUTO, supportedTypes: [COLOR], hasAutofocus: 1, hasAutofocusIC: 1, name: color}
+    #     {width: 1920, height: 1080, minFps: 2.03, maxFps: 60, type: COLOR, fov: {x:108, y: 440, width: 3840, height: 2160}}
+    #     {width: 3840, height: 2160, minFps: 1.42, maxFps: 42, type: COLOR, fov: {x:108, y: 440, width: 3840, height: 2160}}
+    #     {width: 4056, height: 3040, minFps: 1.42, maxFps: 30, type: COLOR, fov: {x:0, y: 0, width: 4056, height: 3040}}
+    #     {width: 1352, height: 1012, minFps: 1.25, maxFps: 52, type: COLOR, fov: {x:0, y: 0, width: 4056, height: 3036}}
+    #     {width: 2024, height: 1520, minFps: 2.03, maxFps: 85, type: COLOR, fov: {x:4, y: 0, width: 4048, height: 3040}}
+    # {socket: CAM_B, sensorName: OV9282, width: 1280, height: 800, orientation: AUTO, supportedTypes: [MONO], hasAutofocus: 0, hasAutofocusIC: 0, name: left}
+    #     {width: 1280, height: 720, minFps: 1.687, maxFps: 143.1, type: MONO, fov: {x:0, y: 40, width: 1280, height: 720}}
+    #     {width: 1280, height: 800, minFps: 1.687, maxFps: 129.6, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
+    #     {width: 640, height: 400, minFps: 1.687, maxFps: 255.7, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
+    # {socket: CAM_C, sensorName: OV9282, width: 1280, height: 800, orientation: AUTO, supportedTypes: [MONO], hasAutofocus: 0, hasAutofocusIC: 0, name: right}
+    #     {width: 1280, height: 720, minFps: 1.687, maxFps: 143.1, type: MONO, fov: {x:0, y: 40, width: 1280, height: 720}}
+    #     {width: 1280, height: 800, minFps: 1.687, maxFps: 129.6, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
+    #     {width: 640, height: 400, minFps: 1.687, maxFps: 255.7, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
 
 So for IMX378, if we select 4K or 1080P resolution, FOV will be cropped ~5% horizontally and ~29% vertically. So we can either select ``THE_12_MP``,
 ``THE_1352X1012``, or ``THE_2024X1520`` resolution to get the full sensor FOV.
