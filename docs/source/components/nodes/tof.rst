@@ -30,31 +30,39 @@ Inputs and Outputs
 .. code-block::
 
               ┌───────────┐    depth
-  inputConfig |           ├────────►
-  ───────────►│           | amplitude
-     input    |    ToF    ├────────►
-  ───────────►│           │    error
+              │           ├────────►
+  inputConfig |           | amplitude
+  ───────────►│           ├────────►
+              │    ToF    │    error
+     input    |           ├────────►
+  ───────────►│           │ intensity
               │           ├────────►
               └───────────┘
+
+
 
 **Message types**
 
 - ``inputConfig`` - :ref:`ToFConfig`
 - ``input`` - :ref:`ImgFrame`
-- ``depth`` - :ref:`ImgFrame`
+- ``depth`` - :ref:`ImgFrame` - Decoded depth map
 - ``amplitude`` - :ref:`ImgFrame`
-- ``error`` - :ref:`ImgFrame`
+- ``intensity`` - :ref:`ImgFrame`
+- ``phase`` - :ref:`ImgFrame` Phase image, useful for debugging (FP32)
 
 ToF Settings
 ############
 
-In :ref:`ToF depth` example we allow users to quickly configure the following ToF settings:
+In :ref:`ToF depth` example we allow users to quickly configure ToF settings. These are mostly for debugging, and should be enabled:
 
-- FFPN Correction; It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. It's enabled by default for best performance.
+- FPPN Correction; It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. It's enabled by default for best performance.
 - Wiggle Correction: It's a process that corrects the wiggle effect of the ToF sensor. It's enabled by default for best performance.
 - Temperature Correction: It's a process that corrects the temperature effect of the ToF sensor. It's enabled by default for best performance.
+
+And these settings are up to the user:
+
 - Optical Correction: It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches :ref:`StereoDepth` depth reporting.
-- Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..4]. The higher the number, the longer the ToF range, but it also increases the noise.
+- Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise.
     - `0` - Disabled.
     - `1` - Up to 1.5 meters
     - `2` - Up to 3 meters
@@ -62,6 +70,24 @@ In :ref:`ToF depth` example we allow users to quickly configure the following To
     - `4` - Up to 6 meters
 
 .. image:: /_static/images/components/tof-optical-correction.png
+
+Max distance
+############
+
+Maximum ToF distance depends on the phase unwrapping level and modulation frequency. The formula for calculating the maximum distance is:
+
+.. math::
+  :nowrap:
+
+  \begin{align*}
+  c & = 299792458.0 \quad \text{//! speed of light in m/s} \\
+  MAX\_80MHZ\_MM & = \frac{c}{80000000 \times 2} \times 1000 \quad \text{//! convert speed of light to mm/160ns} \\
+  MAX\_MM\_80MHZ & = \text{round}(MAX\_80MHZ\_MM) \quad \text{// round(1873.7) -> 1874} \\
+  MAX\_DIST\_80MHZ & = 1874 \times (\text{phaseUnwrappingLevel} + 1) \quad \text{//! in mm for 80 MHz} \\
+  MAX\_100MHZ\_MM & = \frac{c}{100000000 \times 2} \times 1000 \quad \text{//! convert speed of light to mm/200ns} \\
+  MAX\_MM\_100MHZ & = \text{round}(MAX\_100MHZ\_MM) \quad \text{// round(1498.9636) -> 1499} \\
+  MAX\_DIST\_100MHZ & = 1499 \times (\text{phaseUnwrappingLevel} + 1) \quad \text{//! in mm for 100 MHz}
+  \end{align*}
 
 Usage
 #####
@@ -73,10 +99,19 @@ Usage
     pipeline = dai.Pipeline()
 
     tof_cam = pipeline.create(dai.node.Camera)
+    # Decoded depth FPS will be /2 due to shuffle/non-shuffle averaging
+    tof_cam.setFps(60)
     # We assume the ToF camera sensor is on port CAM_A
     tof_cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
     tof = pipeline.create(dai.node.ToF)
+
+    # Higher number => faster processing. 1 shave core can do 30FPS.
+    tof.setNumShaves(1)
+
+    # Median filter, kernel size 5x5
+    tof.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
+
     # ToF node converts raw sensor frames into depth
     tof_cam.raw.link(tof.input)
 
