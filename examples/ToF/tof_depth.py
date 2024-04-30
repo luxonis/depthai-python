@@ -7,6 +7,9 @@ import numpy as np
 
 print(dai.__version__)
 
+cvColorMap = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+cvColorMap[0] = [0, 0, 0]
+
 def create_pipeline():
     pipeline = dai.Pipeline()
 
@@ -91,6 +94,10 @@ if __name__ == '__main__':
                 tofConfig.enablePhaseUnwrapping = True
                 tofConfig.phaseUnwrappingLevel = 4
                 tofConfigInQueue.send(tofConfig)
+            elif key == ord('5'):
+                tofConfig.enablePhaseUnwrapping = True
+                tofConfig.phaseUnwrappingLevel = 5
+                tofConfigInQueue.send(tofConfig)
             elif key == ord('m'):
                 medianSettings = [dai.MedianFilter.MEDIAN_OFF, dai.MedianFilter.KERNEL_3x3, dai.MedianFilter.KERNEL_5x5,
                                   dai.MedianFilter.KERNEL_7x7]
@@ -116,8 +123,7 @@ if __name__ == '__main__':
                 min_depth = 200
                 max_depth = 6000
             depth_colorized = np.interp(depth_map, (min_depth, max_depth), (0, 255)).astype(np.uint8)
-            depth_colorized = cv2.applyColorMap(depth_colorized, cv2.COLORMAP_JET)
-
+            depth_colorized = cv2.applyColorMap(depth_colorized, cvColorMap)
 
             cv2.imshow("Colorized depth", depth_colorized)
             counter += 1

@@ -61,13 +61,14 @@ In :ref:`ToF depth` example we allow users to quickly configure ToF settings. Th
 
 And these settings are up to the user:
 
-- Optical Correction: It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches :ref:`StereoDepth` depth reporting.
+- Optical Correction: It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
 - Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise.
     - `0` - Disabled.
     - `1` - Up to 1.5 meters
     - `2` - Up to 3 meters
     - `3` - Up to 4.5 meters
     - `4` - Up to 6 meters
+    - `5` - Up to 7.5 meters (not recommended for most applications)
 
 .. image:: /_static/images/components/tof-optical-correction.png
 
