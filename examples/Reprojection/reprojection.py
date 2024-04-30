@@ -15,6 +15,9 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
         sign = -1
     for i in prange(0, height):
         for j in prange(0, width):
+            if sign == 1:
+                # Reverse the order of the pixels
+                j = width - j - 1
             d = depth_image[i][j]
             if(d == 0):
                 continue
@@ -34,7 +37,7 @@ def reprojection(depth_image, depth_camera_intrinsics, camera_extrinsics, color_
             int_v = round(v)
             if(int_v != i):
                 print(f'v -> {v} and i -> {i}') # This should never be printed
-            if int_u >= 0 and int_u < len(image[0]) and int_v >= 0 and int_v < len(image):
+            if int_u >= 0 and int_u < (len(image[0]) - 1) and int_v >= 0 and int_v < len(image):
                 if depth_image_show is not None:
                     image[int_v][int_u] = depth_image_show[i][j][0]
                     image[int_v][int_u + sign] = depth_image_show[i][j][0]
