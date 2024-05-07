@@ -27,6 +27,7 @@
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
 #include "depthai-shared/common/Interpolation.hpp"
+#include "depthai-shared/common/Tiny1c.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -69,6 +70,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
     py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
+    py::enum_<Tiny1cPropAutoShutterParam> tiny1cPropAutoShutterParam(m, "Tiny1cPropAutoShutterParam", DOC(dai, Tiny1cPropAutoShutterParam));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -431,5 +433,20 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("numBytesWritten", &ProfilingData::numBytesWritten, DOC(dai, ProfilingData, numBytesWritten))
         .def_readwrite("numBytesRead", &ProfilingData::numBytesRead, DOC(dai, ProfilingData, numBytesRead))
     ;
+
+    tiny1cPropAutoShutterParam
+        .value("SHUTTER_PROP_SWITCH", Tiny1cPropAutoShutterParam::SHUTTER_PROP_SWITCH)
+        .value("SHUTTER_PROP_MIN_INTERVAL", Tiny1cPropAutoShutterParam::SHUTTER_PROP_MIN_INTERVAL)
+        .value("SHUTTER_PROP_MAX_INTERVAL", Tiny1cPropAutoShutterParam::SHUTTER_PROP_MAX_INTERVAL)
+        .value("SHUTTER_PROP_TEMP_THRESHOLD_OOC", Tiny1cPropAutoShutterParam::SHUTTER_PROP_TEMP_THRESHOLD_OOC)
+        .value("SHUTTER_PROP_TEMP_THRESHOLD_B", Tiny1cPropAutoShutterParam::SHUTTER_PROP_TEMP_THRESHOLD_B)
+        .value("SHUTTER_PROP_PROTECT_SWITCH", Tiny1cPropAutoShutterParam::SHUTTER_PROP_PROTECT_SWITCH)
+        .value("SHUTTER_PROP_ANY_INTERVAL", Tiny1cPropAutoShutterParam::SHUTTER_PROP_ANY_INTERVAL)
+        .value("SHUTTER_PROTECT_THR_HIGH_GAIN", Tiny1cPropAutoShutterParam::SHUTTER_PROTECT_THR_HIGH_GAIN)
+        .value("SHUTTER_PROTECT_THR_LOW_GAIN", Tiny1cPropAutoShutterParam::SHUTTER_PROTECT_THR_LOW_GAIN)
+        .value("SHUTTER_PREVIEW_START_1ST_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_PREVIEW_START_1ST_DELAY)
+        .value("SHUTTER_PREVIEW_START_2ND_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_PREVIEW_START_2ND_DELAY)
+        .value("SHUTTER_CHANGE_GAIN_1ST_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_CHANGE_GAIN_1ST_DELAY)
+        .value("SHUTTER_CHANGE_GAIN_2ND_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_CHANGE_GAIN_2ND_DELAY);
 
 }

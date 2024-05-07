@@ -7,6 +7,7 @@
 #include "depthai/utility/Clock.hpp"
 #include "depthai/xlink/XLinkConnection.hpp"
 #include "depthai-shared/device/CrashDump.hpp"
+#include "depthai-shared/common/Tiny1c.hpp"
 #include "depthai/device/DeviceBootloader.hpp"
 
 // std::chrono bindings
@@ -693,6 +694,10 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getFlashMemorySize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getFlashMemorySize(); }, DOC(dai, DeviceBase, getFlashMemorySize))
         .def("flashBootloaderConfig", [](DeviceBase& d,  dai::DeviceBootloader::Config& config, dai::bootloader::Type type) { py::gil_scoped_release release; d.flashBootloaderConfig(config, type); }, DOC(dai, DeviceBase, flashBootloaderConfig))
         .def("getProductName", [](DeviceBase& d) { std::string name; { py::gil_scoped_release release; name = d.getProductName(); } return py::bytes(name).attr("decode")("utf-8", "replace"); }, DOC(dai, DeviceBase, getProductName))
+        .def("tiny1cSetPropAutoShutter", [](DeviceBase &d, Tiny1cPropAutoShutterParam shutterPropSwitch, uint16_t propValue) {py::gil_scoped_release release; return d.tiny1cSetPropAutoShutter(shutterPropSwitch, propValue);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
+        .def("tiny1cOOCBUpdate", [](DeviceBase &d, uint8_t update_type) {py::gil_scoped_release release; return d.tiny1cOOCBUpdate(update_type);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
+        .def("tiny1cRmCoverStsSwitch", [](DeviceBase &d, uint8_t mode) {py::gil_scoped_release release; return d.tiny1cRmCoverStsSwitch(mode);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
+        .def("tiny1cRmCoverAutoCalc", [](DeviceBase &d, uint8_t zoom_step) {py::gil_scoped_release release; return d.tiny1cRmCoverAutoCalc(zoom_step);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
     ;
 
 
