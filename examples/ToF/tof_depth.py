@@ -12,13 +12,6 @@ cam_a.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
 tof = pipeline.create(dai.node.ToF)
 
-# Configure the ToF node
-tofConfig = tof.initialConfig.get()
-# tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MAX
-tofConfig.depthParams.avgPhaseShuffle = False
-tofConfig.depthParams.minimumAmplitude = 3.0
-tof.initialConfig.set(tofConfig)
 # Link the ToF sensor to the ToF node
 cam_a.raw.link(tof.input)
 
