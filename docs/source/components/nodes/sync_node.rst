@@ -94,7 +94,7 @@ Usage
     camRgb.video.link(sync.inputs["input1"])
     stereo.depth.link(sync.inputs["input2"])
 
-    sync.output.link(xout.input)
+    sync.out.link(xout.input)
     # ...
 
   .. code-tab:: c++
