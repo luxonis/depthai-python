@@ -60,19 +60,16 @@ out.setStreamName("out")
 
 sync.setSyncThreshold(0.05)
 
-
-align.setAlignTo(RGB_SOCKET)
-align.setOutputSize(*rgbSize)
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])
 left.out.link(stereo.left)
 right.out.link(stereo.right)
 left.out.link(sync.inputs["left"])
 right.out.link(sync.inputs["right"])
-stereo.depth.link(align.inputDepth)
-align.outputAlignedDepth.link(sync.inputs["depth"])
+stereo.depth.link(align.input)
+align.outputAligned.link(sync.inputs["depth"])
+camRgb.isp.link(align.inputAlignTo)
 sync.out.link(out.input)
-
 
 
 def colorizeDepth(frameDepth, minDepth=MIN_DEPTH, maxDepth=MAX_DEPTH):

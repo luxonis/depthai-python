@@ -30,20 +30,17 @@ void bind_depthalign(pybind11::module& m, void* pCallstack){
     // Properties
     properties
         .def_readwrite("initialConfig", &DepthAlignProperties::initialConfig, DOC(dai, DepthAlignProperties, initialConfig))
-        .def_readwrite("alignFrom", &DepthAlignProperties::alignFrom, DOC(dai, DepthAlignProperties, alignFrom))
-        .def_readwrite("alignTo", &DepthAlignProperties::alignTo, DOC(dai, DepthAlignProperties, alignTo))
         .def_readwrite("alignWidth", &DepthAlignProperties::alignWidth, DOC(dai, DepthAlignProperties, alignWidth))
         .def_readwrite("alignHeight", &DepthAlignProperties::alignHeight, DOC(dai, DepthAlignProperties, alignHeight))
-        .def_readwrite("downscaleSource", &DepthAlignProperties::downscaleSource, DOC(dai, DepthAlignProperties, downscaleSource))
     ;
     // Node
     node
         .def_readonly("inputConfig", &DepthAlign::inputConfig, DOC(dai, node, DepthAlign, inputConfig))
-        .def_readonly("inputDepth", &DepthAlign::inputDepth, DOC(dai, node, DepthAlign, inputDepth))
-        .def_readonly("outputAlignedDepth", &DepthAlign::outputAlignedDepth, DOC(dai, node, DepthAlign, outputAlignedDepth))
-        .def_readonly("passthroughDepth", &DepthAlign::passthroughDepth, DOC(dai, node, DepthAlign, passthroughDepth))
+        .def_readonly("input", &DepthAlign::input, DOC(dai, node, DepthAlign, input))
+        .def_readonly("inputAlignTo", &DepthAlign::inputAlignTo, DOC(dai, node, DepthAlign, inputAlignTo))
+        .def_readonly("outputAligned", &DepthAlign::outputAligned, DOC(dai, node, DepthAlign, outputAligned))
+        .def_readonly("passthroughInput", &DepthAlign::passthroughInput, DOC(dai, node, DepthAlign, passthroughInput))
         .def_readonly("initialConfig", &DepthAlign::initialConfig, DOC(dai, node, DepthAlign, initialConfig))
-        .def("setAlignTo", &DepthAlign::setAlignTo, DOC(dai, node, DepthAlign, setAlignTo))
         .def("setOutputSize", &DepthAlign::setOutputSize, DOC(dai, node, DepthAlign, setOutputSize))
         ;
 	daiNodeModule.attr("DepthAlign").attr("Properties") = properties;
