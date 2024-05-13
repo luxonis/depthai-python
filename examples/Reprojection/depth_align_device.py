@@ -12,8 +12,8 @@ RIGHT_SOCKET = dai.CameraBoardSocket.RIGHT
 ALIGN_SOCKET = LEFT_SOCKET
 
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
-LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_800_P
-depthSize = (1280, 800)
+LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_480_P
+depthSize = (640, 400)
 rgbSize = (1920, 1080)
 # rgbSize = depthSize
 
@@ -32,7 +32,7 @@ right = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 sync = pipeline.create(dai.node.Sync)
 out = pipeline.create(dai.node.XLinkOut)
-align = pipeline.create(dai.node.DepthAlign)
+align = pipeline.create(dai.node.ImageAlign)
 
 left.setResolution(LEFT_RIGHT_RESOLUTION)
 left.setBoardSocket(LEFT_SOCKET)
