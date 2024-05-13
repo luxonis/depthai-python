@@ -6,7 +6,7 @@ disabled for these tests (:code:`pipeline.setXLinkChunkSize(0)`). For an example
 
 .. note::
 
-  To enable 10Gbps USB3 mode (when using a **USB 3.2 Gen 2** compliant cable), you has to explicitly set it in :code:`Device` constructor:
+  To enable 10Gbps USB3 mode (when using a **USB 3.2 Gen 2** compliant cable), you have to explicitly set it in :code:`Device` constructor:
 
   .. code-block:: python
 
