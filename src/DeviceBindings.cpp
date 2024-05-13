@@ -698,6 +698,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("tiny1cOOCBUpdate", [](DeviceBase &d, uint8_t update_type) {py::gil_scoped_release release; return d.tiny1cOOCBUpdate(update_type);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
         .def("tiny1cRmCoverStsSwitch", [](DeviceBase &d, uint8_t mode) {py::gil_scoped_release release; return d.tiny1cRmCoverStsSwitch(mode);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
         .def("tiny1cRmCoverAutoCalc", [](DeviceBase &d, uint8_t zoom_step) {py::gil_scoped_release release; return d.tiny1cRmCoverAutoCalc(zoom_step);}, DOC(dai, DeviceBase, tiny1cSetPropAutoShutter))
+        .def("tiny1cTpdKtbtRecal2Point", [](DeviceBase &d, uint8_t point_idx, uint16_t temp) {py::gil_scoped_release release; return d.tiny1cTpdKtbtRecal2Point(point_idx, temp);}, DOC(dai, DeviceBase, tiny1cTpdKtbtRecal2Point))
+        .def("tiny1cTpdKtbtRecal1Point", [](DeviceBase &d, uint16_t temp) {py::gil_scoped_release release; return d.tiny1cTpdKtbtRecal1Point(temp);}, DOC(dai, DeviceBase, tiny1cTpdKtbtRecal1Point))
     ;
 
 
