@@ -92,6 +92,8 @@ parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
 parser.add_argument('-tofraw', '--tof-raw', action='store_true',
                     help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofint', '--tof-intensity', action='store_true',
+                    help="Show also ToF intensity output alongside depth")
 parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
@@ -285,6 +287,7 @@ with dai.Device(*dai_device_args) as device:
     xout = {}
     xout_raw = {}
     xout_tof_amp = {}
+    xout_tof_int = {}
     streams = []
     yolo_passthrough_q_name = None
     for c in cam_list:
@@ -316,6 +319,12 @@ with dai.Device(*dai_device_args) as device:
                     xout_tof_amp[c].setStreamName(amp_name)
                     streams.append(amp_name)
                     tof[c].amplitude.link(xout_tof_amp[c].input)
+                if args.tof_intensity:
+                    int_name = 'tof_intensity_' + c
+                    xout_tof_int[c] = pipeline.create(dai.node.XLinkOut)
+                    xout_tof_int[c].setStreamName(int_name)
+                    streams.append(int_name)
+                    tof[c].intensity.link(xout_tof_int[c].input)
         elif cam_type_thermal[c]:
             cam[c] = pipeline.create(dai.node.Camera)
             cam[c].setBoardSocket(cam_socket_opts[c])
@@ -459,6 +468,8 @@ with dai.Device(*dai_device_args) as device:
             cam_name['raw_'+p.socket.name] = p.sensorName
         if args.tof_amplitude:
             cam_name['tof_amplitude_'+p.socket.name] = p.sensorName
+        if args.tof_intensity:
+            cam_name['tof_intensity_'+p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -570,7 +581,7 @@ with dai.Device(*dai_device_args) as device:
                     continue
                 
                 
-                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
@@ -606,7 +617,7 @@ with dai.Device(*dai_device_args) as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_'):
                     if capture:
                         filename = capture_file_info + '_10bit.bw'
                         print('Saving:', filename)
