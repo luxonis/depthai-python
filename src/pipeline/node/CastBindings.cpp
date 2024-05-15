@@ -33,6 +33,7 @@ void bind_cast(pybind11::module& m, void* pCallstack){
         .def_readwrite("numFramesPool", &CastProperties::numFramesPool, DOC(dai, CastProperties, numFramesPool))
         .def_readwrite("outputType", &CastProperties::outputType, DOC(dai, CastProperties, outputType))
         .def_readwrite("scale", &CastProperties::scale, DOC(dai, CastProperties, scale))
+        .def_readwrite("offset", &CastProperties::offset, DOC(dai, CastProperties, offset))
         ;
 
     // Node
@@ -43,6 +44,7 @@ void bind_cast(pybind11::module& m, void* pCallstack){
         .def("setNumFramesPool", &Cast::setNumFramesPool, DOC(dai, node, Cast, setNumFramesPool))
         .def("setOutputFrameType", &Cast::setOutputFrameType, DOC(dai, node, Cast, setOutputFrameType))
         .def("setScale", &Cast::setScale, DOC(dai, node, Cast, setScale))
+        .def("setOffset", &Cast::setOffset, DOC(dai, node, Cast, setOffset))
         ;
     daiNodeModule.attr("Cast").attr("Properties") = castProperties;
 

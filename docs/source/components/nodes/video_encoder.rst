@@ -28,17 +28,18 @@ Inputs and Outputs
 .. code-block::
 
             ┌──────────────┐
-            │              │
-   input    │              │bitstream
-  ─────────►│ VideoEncoder ├────────►
-            │              │
-            │              │
+            │              │   bitstream
+   input    │              ├────────► 
+  ─────────►│ VideoEncoder |
+            │              │     out
+            │              ├────────►
             └──────────────┘
 
 **Message types**
 
 - :code:`input` - :ref:`ImgFrame` (NV12/GRAY8)
 - :code:`bitstream` - :ref:`ImgFrame`
+- :code:`out` - :ref:`EncodedFrame`
 
 Usage
 #####
@@ -101,6 +102,7 @@ Examples of functionality
 - :ref:`RGB Encoding`
 - :ref:`Encoding Max Limit`
 - :ref:`RGB Encoding & MobilenetSSD`
+- :ref:`Video Encoded Frame Type`
 
 Reference
 #########
