@@ -72,7 +72,9 @@ jobs:
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
-
+      - name: Setup cmake
+        if: matrix.os == 'macos-latest'
+        uses: jwlawson/actions-setup-cmake@v1.13
       - name: Cache .hunter folder
         if: matrix.os != 'windows-latest'
         uses: actions/cache@v3
