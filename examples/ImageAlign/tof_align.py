@@ -3,15 +3,13 @@ import cv2
 import depthai as dai
 import time
 
+# This example is intended to run unchanged on an OAK-D-SR-PoE camera
+
 FPS = 30.0
 
-RGB_SOCKET = dai.CameraBoardSocket.CAM_A
-LEFT_SOCKET = dai.CameraBoardSocket.CAM_B
-RIGHT_SOCKET = dai.CameraBoardSocket.CAM_C
-ALIGN_SOCKET = LEFT_SOCKET
-
-COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
-LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_400_P
+RGB_SOCKET = dai.CameraBoardSocket.CAM_C
+TOF_SOCKET = dai.CameraBoardSocket.CAM_A
+ALIGN_SOCKET = RGB_SOCKET
 
 class FPSCounter:
     def __init__(self):
@@ -28,46 +26,38 @@ class FPSCounter:
         # Calculate the FPS
         return len(self.frameTimes) / (self.frameTimes[-1] - self.frameTimes[0])
 
-
 pipeline = dai.Pipeline()
-
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
-left = pipeline.create(dai.node.MonoCamera)
-right = pipeline.create(dai.node.MonoCamera)
-stereo = pipeline.create(dai.node.StereoDepth)
+tof = pipeline.create(dai.node.ToF)
+camTof = pipeline.create(dai.node.Camera)
 sync = pipeline.create(dai.node.Sync)
-out = pipeline.create(dai.node.XLinkOut)
 align = pipeline.create(dai.node.ImageAlign)
+out = pipeline.create(dai.node.XLinkOut)
 
-left.setResolution(LEFT_RIGHT_RESOLUTION)
-left.setBoardSocket(LEFT_SOCKET)
-left.setFps(FPS)
+# ToF settings
+camTof.setFps(FPS * 2) # In the default mode the TOF camera fps needs to be doubled
+camTof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+camTof.setBoardSocket(TOF_SOCKET)
 
-right.setResolution(LEFT_RIGHT_RESOLUTION)
-right.setBoardSocket(RIGHT_SOCKET)
-right.setFps(FPS)
-
+# rgb settings
 camRgb.setBoardSocket(RGB_SOCKET)
-camRgb.setResolution(COLOR_RESOLUTION)
-camRgb.setFps(FPS)
-camRgb.setIspScale(1, 3)
-
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
+camRgb.setFps(120)
+camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(1 / FPS)
+sync.setSyncThreshold(1.0)
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])
-left.out.link(stereo.left)
-right.out.link(stereo.right)
-stereo.depth.link(align.input)
+camTof.raw.link(tof.input)
+tof.depth.link(align.input)
 align.outputAligned.link(sync.inputs["depth_aligned"])
+sync.inputs["rgb"].setBlocking(False)
 camRgb.isp.link(align.inputAlignTo)
 sync.out.link(out.input)
-
 
 def colorizeDepth(frameDepth):
     invalidMask = frameDepth == 0
@@ -113,6 +103,7 @@ def updateBlendWeights(percentRgb):
     depthWeight = 1.0 - rgbWeight
 
 
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
     queue = device.getOutputQueue("out", 8, False)
@@ -155,7 +146,7 @@ with dai.Device(pipeline) as device:
                 (255, 255, 255),
                 2,
             )
-            cv2.imshow("depth aligned", alignedDepthColorized)
+            cv2.imshow("depth", alignedDepthColorized)
 
             blended = cv2.addWeighted(
                 cvFrame, rgbWeight, alignedDepthColorized, depthWeight, 0
