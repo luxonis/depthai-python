@@ -21,8 +21,11 @@ def create_pipeline():
     tofConfig.enableFPPNCorrection = True
     tofConfig.enableWiggleCorrection = True
     # tofConfig.enableTemperatureCorrection = True
-    # Optional:
+
+    # Optional. Best accuracy, but adds motion blur.
+    # see ToF node docs on how to reduce/eliminate motion blur.
     tofConfig.enableOpticalCorrection = True
+    tofConfig.enablePhaseShuffleTemporalFilter = True
     tofConfig.phaseUnwrappingLevel = 4
     tofConfig.phaseUnwrapErrorThreshold = 300
     xinTofConfig = pipeline.create(dai.node.XLinkIn)
