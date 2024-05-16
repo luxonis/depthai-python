@@ -22,7 +22,7 @@ class FPSCounter:
         self.frameTimes.append(now)
         self.frameTimes = self.frameTimes[-10:]
 
-    def get_fps(self):
+    def getFps(self):
         if len(self.frameTimes) <= 1:
             return 0
         # Calculate the FPS
@@ -118,12 +118,14 @@ with dai.Device(pipeline) as device:
     queue = device.getOutputQueue("out", 8, False)
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
-    rgbDepthWindowName = "rgb-depth"
+    windowName = "rgb-depth"
 
-    cv2.namedWindow(rgbDepthWindowName)
+    # Set the window to be resizable and the initial size
+    cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(windowName, 1280, 720)
     cv2.createTrackbar(
         "RGB Weight %",
-        rgbDepthWindowName,
+        windowName,
         int(rgbWeight * 100),
         100,
         updateBlendWeights,
@@ -146,21 +148,21 @@ with dai.Device(pipeline) as device:
             # Colorize the aligned depth
             alignedDepthColorized = colorizeDepth(frameDepth.getFrame())
             # Resize depth to match the rgb frame
+            cv2.imshow("Depth aligned", alignedDepthColorized)
+
+            blended = cv2.addWeighted(
+                cvFrame, rgbWeight, alignedDepthColorized, depthWeight, 0
+            )
             cv2.putText(
-                alignedDepthColorized,
-                f"FPS: {fpsCounter.get_fps():.2f}",
+                blended,
+                f"FPS: {fpsCounter.getFps():.2f}",
                 (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
                 (255, 255, 255),
                 2,
             )
-            cv2.imshow("depth aligned", alignedDepthColorized)
-
-            blended = cv2.addWeighted(
-                cvFrame, rgbWeight, alignedDepthColorized, depthWeight, 0
-            )
-            cv2.imshow(rgbDepthWindowName, blended)
+            cv2.imshow(windowName, blended)
 
         key = cv2.waitKey(1)
         if key == ord("q"):

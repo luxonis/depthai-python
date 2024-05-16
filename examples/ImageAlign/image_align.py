@@ -42,8 +42,6 @@ out.setStreamName("out")
 
 sync.setSyncThreshold(1/FPS)
 
-align.setOutputSize(1920, 1080)
-
 cfgIn.setStreamName("config")
 
 cfg = align.initialConfig.get()
@@ -62,7 +60,7 @@ rgbWeight = 0.4
 depthWeight = 0.6
 
 
-def updateBlendWeights(percent_rgb):
+def updateBlendWeights(percentRgb):
     """
     Update the rgb and depth weights used to blend depth/rgb image
 
@@ -70,7 +68,7 @@ def updateBlendWeights(percent_rgb):
     """
     global depthWeight
     global rgbWeight
-    rgbWeight = float(percent_rgb) / 100.0
+    rgbWeight = float(percentRgb) / 100.0
     depthWeight = 1.0 - rgbWeight
 
 def updateDepthPlane(depth):
@@ -84,21 +82,21 @@ with device:
     cfgQ = device.getInputQueue("config")
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
-    rgb_depth_window_name = "rgb-left"
+    windowName = "rgb-left"
 
     # Set the window to be resizable and the initial size
-    cv2.namedWindow(rgb_depth_window_name, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(rgb_depth_window_name, 1280, 720)
+    cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(windowName, 1280, 720)
     cv2.createTrackbar(
         "RGB Weight %",
-        rgb_depth_window_name,
+        windowName,
         int(rgbWeight * 100),
         100,
         updateBlendWeights,
     )
     cv2.createTrackbar(
         "Static Depth Plane",
-        rgb_depth_window_name,
+        windowName,
         0,
         2000,
         updateDepthPlane,
@@ -121,7 +119,7 @@ with device:
             left = cv2.resize(left, (frameRgb.shape[1], frameRgb.shape[0]))
 
         blended = cv2.addWeighted(frameRgb, rgbWeight, left, depthWeight, 0)
-        cv2.imshow(rgb_depth_window_name, blended)
+        cv2.imshow(windowName, blended)
 
         key = cv2.waitKey(1)
         if key == ord("q"):
