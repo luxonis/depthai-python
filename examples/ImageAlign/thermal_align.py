@@ -132,9 +132,14 @@ with device:
 
         # Colorize the aligned depth
         thermalFrame = thermalAligned.getCvFrame().astype(np.float32)
-
+        # Create a mask for nan values
+        mask = np.isnan(thermalFrame)
+        # Replace nan values with a mean for visualization
+        thermalFrame[mask] = np.nanmean(thermalFrame)
         thermalFrame = cv2.normalize(thermalFrame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
         colormappedFrame = cv2.applyColorMap(thermalFrame, cv2.COLORMAP_MAGMA)
+        # Apply the mask back with black pixels (0)
+        colormappedFrame[mask] = 0
 
         blended = cv2.addWeighted(frameRgb, rgbWeight, colormappedFrame, thermalWeight, 0)
 
