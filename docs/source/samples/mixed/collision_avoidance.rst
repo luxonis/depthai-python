@@ -34,9 +34,9 @@ Source code
 
     .. tab:: Python
 
-        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/collision_avoidance.py>`__
+        Also `available on GitHub <https://github.com/luxonis/depthai-python/blob/main/examples/mixed/collision_avoidance.py>`__
 
-        .. literalinclude:: ../../../../examples/collision_avoidance.py
+        .. literalinclude:: ../../../../examples/mixed/collision_avoidance.py
            :language: python
            :linenos:
 
