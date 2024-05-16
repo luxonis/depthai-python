@@ -69,13 +69,12 @@ For IMX378 (12MP), the **post-processing** works like this:
     │ ISP ├────────────────►│  video  ├───────────────►│ preview  │
     └─────┘  max 3840x2160  └─────────┘  and cropping  └──────────┘
 
-If resolution was set to 12MP, and we were to use ``video``, we'd get a 4K frame (3840x2160) cropped from the center of the 12MP frame.
+If the resolution is set to 12MP and video mode is used, a 4K frame (3840x2160) will be cropped from the center of the 12MP frame.
 
 Full FOV
 ########
 
-Some sensors (let's take IXM378 for an example) will, by default, have 1080P resolution set, which is a crop from the full sensor resolution.
-You can print sensor features to see how FOV is affected by the selected sensor resolution:
+Some sensors, such as the IXM378, default to a 1080P resolution, which is a crop from the full sensor resolution. You can print sensor features to see how the field of view (FOV) is affected by the selected sensor resolution:
 
 .. code-block:: python
 
@@ -104,8 +103,8 @@ You can print sensor features to see how FOV is affected by the selected sensor 
     #     {width: 1280, height: 800, minFps: 1.687, maxFps: 129.6, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
     #     {width: 640, height: 400, minFps: 1.687, maxFps: 255.7, type: MONO, fov: {x:0, y: 0, width: 1280, height: 800}}
 
-So for IMX378, if we select 4K or 1080P resolution, FOV will be cropped ~5% horizontally and ~29% vertically. So we can either select ``THE_12_MP``,
-``THE_1352X1012``, or ``THE_2024X1520`` resolution to get the full sensor FOV.
+For the IMX378 sensor, selecting a 4K or 1080P resolution results in approximately 5% horizontal and 29% vertical FOV cropping.
+To utilize the full sensor FOV, you should choose one of the following resolutions: ``THE_12_MP``, ``THE_1352X1012``, or ``THE_2024X1520``.
 
 Usage
 #####

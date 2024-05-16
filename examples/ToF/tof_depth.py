@@ -18,10 +18,12 @@ def create_pipeline():
 
     # Configure the ToF node
     tofConfig = tof.initialConfig.get()
+    # Disable for debugging:
     tofConfig.enableFPPNCorrection = True
-    tofConfig.enableOpticalCorrection = True
     tofConfig.enableWiggleCorrection = True
-    tofConfig.enableTemperatureCorrection = False
+    tofConfig.enableTemperatureCorrection = True
+    # Optional:
+    tofConfig.enableOpticalCorrection = True
     tofConfig.phaseUnwrappingLevel = 4
     tofConfig.phaseUnwrapErrorThreshold = 300
     xinTofConfig = pipeline.create(dai.node.XLinkIn)
@@ -32,7 +34,7 @@ def create_pipeline():
 
     cam_tof = pipeline.create(dai.node.Camera)
     cam_tof.properties.numFramesPoolRaw = 5
-    cam_tof.setFps(60)
+    cam_tof.setFps(60) # ToF node will produce depth frames at /2 of this rate
     cam_tof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam_tof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
     cam_tof.raw.link(tof.input)
@@ -40,7 +42,6 @@ def create_pipeline():
     xout = pipeline.create(dai.node.XLinkOut)
     xout.setStreamName("depth")
     tof.depth.link(xout.input)
-
 
     tofConfig = tof.initialConfig.get()
 
@@ -76,7 +77,7 @@ if __name__ == '__main__':
                 break
             elif key == ord('0'):
                 tofConfig.enablePhaseUnwrapping = False
-                tofConfig.phaseUnwrappingLevel = 4
+                tofConfig.phaseUnwrappingLevel = 0
                 tofConfigInQueue.send(tofConfig)
             elif key == ord('1'):
                 tofConfig.enablePhaseUnwrapping = True
@@ -114,15 +115,8 @@ if __name__ == '__main__':
 
             imgFrame = qDepth.get()  # blocking call, will wait until a new data has arrived
             depth_map = imgFrame.getFrame()
-
-            depth_downscaled = depth_map[::4]
-            non_zero_depth = depth_downscaled[depth_downscaled != 0]  # Remove invalid depth values
-            if len(non_zero_depth) == 0:
-                min_depth, max_depth = 0, 0
-            else:
-                min_depth = 200
-                max_depth = 6000
-            depth_colorized = np.interp(depth_map, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+            max_depth = (tofConfig.phaseUnwrappingLevel - 1) * 1874 # 80MHz modulation freq.
+            depth_colorized = np.interp(depth_map, (0, max_depth), (0, 255)).astype(np.uint8)
             depth_colorized = cv2.applyColorMap(depth_colorized, cvColorMap)
 
             cv2.imshow("Colorized depth", depth_colorized)
