@@ -32,6 +32,7 @@ void bind_ImageAlign(pybind11::module& m, void* pCallstack){
         .def_readwrite("initialConfig", &ImageAlignProperties::initialConfig, DOC(dai, ImageAlignProperties, initialConfig))
         .def_readwrite("alignWidth", &ImageAlignProperties::alignWidth, DOC(dai, ImageAlignProperties, alignWidth))
         .def_readwrite("alignHeight", &ImageAlignProperties::alignHeight, DOC(dai, ImageAlignProperties, alignHeight))
+        .def_readwrite("interpolation", &ImageAlignProperties::interpolation, DOC(dai, ImageAlignProperties, interpolation))
     ;
     // Node
     node
