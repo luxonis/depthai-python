@@ -26,7 +26,7 @@ class FPSCounter:
         if len(self.frameTimes) <= 1:
             return 0
         # Calculate the FPS
-        return len(self.frameTimes) / (self.frameTimes[-1] - self.frameTimes[0])
+        return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
 
 
 pipeline = dai.Pipeline()

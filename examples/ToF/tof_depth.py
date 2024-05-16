@@ -6,14 +6,16 @@ import numpy as np
 
 pipeline = dai.Pipeline()
 
-cam_a = pipeline.create(dai.node.Camera)
+camToF = pipeline.create(dai.node.Camera)
+
 # We assume the ToF camera sensor is on port CAM_A
-cam_a.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+camToF.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+camToF.setFps(60) # The actual FPS is /2
 
 tof = pipeline.create(dai.node.ToF)
 
 # Link the ToF sensor to the ToF node
-cam_a.raw.link(tof.input)
+camToF.raw.link(tof.input)
 
 xout = pipeline.create(dai.node.XLinkOut)
 xout.setStreamName("depth")
@@ -26,17 +28,17 @@ with dai.Device(pipeline) as device:
 
     while True:
         imgFrame = q.get()  # blocking call, will wait until a new data has arrived
-        depth_map = imgFrame.getFrame()
+        depthMap = imgFrame.getFrame()
 
         # Colorize the depth frame to jet colormap
-        depth_downscaled = depth_map[::4]
-        non_zero_depth = depth_downscaled[depth_downscaled != 0] # Remove invalid depth values
-        if len(non_zero_depth) == 0:
-            min_depth, max_depth = 0, 0
+        depthDownscaled = depthMap[::4]
+        nonZeroDepth = depthDownscaled[depthDownscaled != 0] # Remove invalid depth values
+        if len(nonZeroDepth) == 0:
+            minDepth, maxDepth = 0, 0
         else:
-            min_depth = np.percentile(non_zero_depth, 3)
-            max_depth = np.percentile(non_zero_depth, 97)
-        depth_colorized = np.interp(depth_map, (min_depth, max_depth), (0, 255)).astype(np.uint8)
+            minDepth = np.percentile(nonZeroDepth, 3)
+            maxDepth = np.percentile(nonZeroDepth, 97)
+        depth_colorized = np.interp(depthMap, (minDepth, maxDepth), (0, 255)).astype(np.uint8)
         depth_colorized = cv2.applyColorMap(depth_colorized, cv2.COLORMAP_JET)
 
         cv2.imshow("Colorized depth", depth_colorized)

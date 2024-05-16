@@ -5,7 +5,7 @@ import time
 
 # This example is intended to run unchanged on an OAK-D-SR-PoE camera
 
-FPS = 30.0
+FPS = 60.0
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_C
 TOF_SOCKET = dai.CameraBoardSocket.CAM_A
@@ -18,13 +18,13 @@ class FPSCounter:
     def tick(self):
         now = time.time()
         self.frameTimes.append(now)
-        self.frameTimes = self.frameTimes[-10:]
+        self.frameTimes = self.frameTimes[-100:]
 
     def get_fps(self):
         if len(self.frameTimes) <= 1:
             return 0
         # Calculate the FPS
-        return len(self.frameTimes) / (self.frameTimes[-1] - self.frameTimes[0])
+        return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
 
 pipeline = dai.Pipeline()
 # Define sources and outputs
@@ -36,14 +36,14 @@ align = pipeline.create(dai.node.ImageAlign)
 out = pipeline.create(dai.node.XLinkOut)
 
 # ToF settings
-camTof.setFps(FPS * 2) # In the default mode the TOF camera fps needs to be doubled
+camTof.setFps(FPS)
 camTof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 camTof.setBoardSocket(TOF_SOCKET)
 
 # rgb settings
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
-camRgb.setFps(120)
+camRgb.setFps(FPS)
 camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
