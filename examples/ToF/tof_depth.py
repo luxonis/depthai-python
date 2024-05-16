@@ -14,14 +14,13 @@ def create_pipeline():
     pipeline = dai.Pipeline()
 
     tof = pipeline.create(dai.node.ToF)
-    tof.setNumShaves(3)
 
     # Configure the ToF node
     tofConfig = tof.initialConfig.get()
     # Disable for debugging:
     tofConfig.enableFPPNCorrection = True
     tofConfig.enableWiggleCorrection = True
-    tofConfig.enableTemperatureCorrection = True
+    # tofConfig.enableTemperatureCorrection = True
     # Optional:
     tofConfig.enableOpticalCorrection = True
     tofConfig.phaseUnwrappingLevel = 4
@@ -33,9 +32,7 @@ def create_pipeline():
     tof.initialConfig.set(tofConfig)
 
     cam_tof = pipeline.create(dai.node.Camera)
-    cam_tof.properties.numFramesPoolRaw = 5
     cam_tof.setFps(60) # ToF node will produce depth frames at /2 of this rate
-    cam_tof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
     cam_tof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
     cam_tof.raw.link(tof.input)
 
@@ -107,15 +104,10 @@ if __name__ == '__main__':
                 print(f"Changing median to {nextMedian.name} from {currentMedian.name}")
                 tofConfig.median = nextMedian
                 tofConfigInQueue.send(tofConfig)
-            elif key == ord('l'):
-                treshold = input("Enter treshold: ")
-                treshold = int(treshold)
-                tofConfig.phaseUnwrapErrorThreshold = treshold
-                tofConfigInQueue.send(tofConfig)
 
             imgFrame = qDepth.get()  # blocking call, will wait until a new data has arrived
             depth_map = imgFrame.getFrame()
-            max_depth = (tofConfig.phaseUnwrappingLevel - 1) * 1874 # 80MHz modulation freq.
+            max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1874 # 80MHz modulation freq.
             depth_colorized = np.interp(depth_map, (0, max_depth), (0, 255)).astype(np.uint8)
             depth_colorized = cv2.applyColorMap(depth_colorized, cvColorMap)
 
