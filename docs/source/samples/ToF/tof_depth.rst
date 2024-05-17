@@ -17,17 +17,17 @@ on the ToF sensor.
 
 With keyboard you can configure ToF settings:
 
-- FPPN Correction; Turn on/off with `f`. It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. Should be enabled.
-- Wiggle Correction: Turn on/off with `w`. It's a process that corrects the wiggle effect of the ToF sensor. Should be enabled.
-- Temperature Correction: Turn on/off with `t`. It's a process that corrects the temperature effect of the ToF sensor. Should be enabled.
-- Optical Correction: Turn on/off with `o`. It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches stereo depth reporting.
-- Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. The higher the number, the longer the ToF range, but it also increases the noise.
-    - `0` - Disabled, up to ~1.5 meters
-    - `1` - Up to ~3 meters
-    - `2` - Up to ~4.5 meters
-    - `3` - Up to ~6 meters
-    - `4` - Up to ~7.5 meters
-    - `5` - Up to ~9 meters (increased noise - not recommended for most applications)
+* *FPPN Correction*; Turn on/off with `f`. It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. Should be enabled.
+* *Wiggle Correction*: Turn on/off with `w`. It's a process that corrects the wiggle effect of the ToF sensor. Should be enabled.
+* *Temperature Correction*: Turn on/off with `t`. It's a process that corrects the temperature effect of the ToF sensor. Should be enabled.
+* *Optical Correction*: Turn on/off with `o`. It's a process that corrects the optical effect (On -> ToF returns distance represented by Green Line), so it matches stereo depth reporting.
+* *Phase Unwrapping* - Process that corrects the phase wrapping effect of the ToF sensor. The higher the number, the longer the ToF range, but it also increases the noise.
+
+  * `0` - Disabled, up to ~1.87 meters
+  * `1` - Up to ~3.75 meters
+  * `2` - Up to ~5.62 meters
+  * `3` - Up to ~7.5 meters
+  * `4` - Up to ~9.37 meters
 
 .. image:: /_static/images/components/tof-optical-correction.png
 

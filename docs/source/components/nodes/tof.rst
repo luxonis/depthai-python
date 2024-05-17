@@ -33,12 +33,11 @@ Inputs and Outputs
               │           ├────────►
   inputConfig |           | amplitude
   ───────────►│           ├────────►
-              │    ToF    │    error
+              │    ToF    │    phase
      input    |           ├────────►
   ───────────►│           │ intensity
               │           ├────────►
               └───────────┘
-
 
 
 **Message types**
@@ -47,40 +46,44 @@ Inputs and Outputs
 - ``input`` - :ref:`ImgFrame`
 - ``depth`` - :ref:`ImgFrame` - Decoded depth map
 - ``amplitude`` - :ref:`ImgFrame`
-- ``intensity`` - :ref:`ImgFrame`
 - ``phase`` - :ref:`ImgFrame` Phase image, useful for debugging (FP32)
+- ``intensity`` - :ref:`ImgFrame`
 
 ToF Settings
 ############
 
-In :ref:`ToF depth` example we allow users to quickly configure ToF settings. These are mostly for debugging, and should be enabled:
+In :ref:`ToF depth` example we allow users to quickly configure ToF settings.
+
+Here are the most important settings:
+
+* Optical Correction: It's a process that corrects the optical effect. When enabled, the ToF returns depth map (represented by Green Line on graph below) instead of distance, so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
+* Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise. Approximate max distance (for exact value, see :ref:`Max distance` below):
+
+  * `0` - Disabled, up to ~1.87 meters
+  * `1` - Up to ~3.75 meters
+  * `2` - Up to ~5.62 meters
+  * `3` - Up to ~7.5 meters
+  * `4` - Up to ~9.37 meters
+
+* Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
+* Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
+
+These are mostly for debugging, and should be enabled:
 
 - FPPN Correction; It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. It's enabled by default for best performance.
 - Wiggle Correction: It's a process that corrects the wiggle effect of the ToF sensor. It's enabled by default for best performance.
 - Temperature Correction: It's a process that corrects the temperature effect of the ToF sensor. It's enabled by default for best performance.
 
-And these settings are up to the user:
-
-* Optical Correction: It's a process that corrects the optical effect. When enabled, the ToF returns depth map (represented by Green Line on graph below) instead of distance, so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
-* Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise.
-
-  * `0` - Disabled, up to ~1.5 meters
-  * `1` - Up to ~3 meters
-  * `2` - Up to ~4.5 meters
-  * `3` - Up to ~6 meters
-  * `4` - Up to ~7.5 meters
-
-* Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
-* Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
-
 .. image:: /_static/images/components/tof-optical-correction.png
+
+Here's the time diagram which showcases how ToF decoding gets done based on the settings.
 
 .. image:: /_static/images/components/tof-diagram.png
 
 Phase unwrapping
 ################
 
-If the time it takes for the light to travel from ToF sensor and back exceeds the period of the emitted wave (1.5m or 1.8m), the resulting measurement will "wrap" back to a lower value. This is called phase wrapping.
+If the time it takes for the light to travel from ToF sensor and back exceeds the period of the emitted wave (1.5m or 1.87m), the resulting measurement will "wrap" back to a lower value. This is called phase wrapping.
 It's similar to how a clock resets after 12 hours. Phase unwrapping is possible as our ToF has two different modulation frequencies (80Mhz and 100MHz).
 
 Phase unwrapping aims to correct this by allowing the sensor to interpret longer distances without confusion. It uses algorithms to keep track of how many cycles (round trips of the wave) have occurred,
@@ -93,25 +96,27 @@ To reduce motion blur, we recommend these settings:
 
 - Increase camera FPS. It goes up to 160 FPS, which causes frame capture to be the fastest (6.25ms between frames). This will reduce motion blur as ToF combines multiple frames to get the depth. Note that 160FPS will increase system load significantly (see :ref:`Debugging <Debugging DepthAI pipeline>`). Note also that higher FPS -> lower exposure times, which can increase noise.
 - Disable phase shuffle temporal filter. This will introduce more noise.
-- Disable phase unwrapping. This will reduce max distance to 1.5 meters, so about 1 cubic meter of space will be visible.
+- Disable phase unwrapping. This will reduce max distance to 1.87 meters, so about 1 cubic meter of space will be visible.
 - Enable burst mode. This is irrelevant if shuffle filter and phase unwrapping are disabled (see diagram above). When enabled, ToF node won't reuse frames (lower FPS).
+
+In the diagram above, the less frames are combined (bottom of the diagram), the less motion blur there is. The more frames are combined (top of the diagram), there's more filtering (better accuracy) but it results in more motion blur.
 
 Max distance
 ############
 
-Maximum ToF distance depends on the phase unwrapping level and modulation frequency. The formula for calculating the maximum distance is:
+Maximum ToF distance depends on the modulation frequency and the phase unwrapping level. If phase unwrapping is enabled,
+max distance is the larger of both modulation frequencies (so max distance at 80MHz). Here's the formula:
 
 .. math::
   :nowrap:
 
   \begin{align*}
   c & = 299792458.0 \quad \text{//! speed of light in m/s} \\
-  MAX\_80MHZ\_MM & = \frac{c}{80000000 \times 2} \times 1000 \quad \text{//! convert speed of light to mm/160ns} \\
-  MAX\_MM\_80MHZ & = \text{round}(MAX\_80MHZ\_MM) \quad \text{// round(1873.7) -> 1874} \\
-  MAX\_DIST\_80MHZ & = (\text{phaseUnwrappingLevel} + 1) \times 1.5 \times 1000 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \quad \text{//! corrected formula in mm for 80 MHz} \\
-  MAX\_100MHZ\_MM & = \frac{c}{100000000 \times 2} \times 1000 \quad \text{//! convert speed of light to mm/200ns} \\
-  MAX\_MM\_100MHZ & = \text{round}(MAX\_100MHZ\_MM) \quad \text{// round(1498.9636) -> 1499} \\
-  MAX\_DIST\_100MHZ & = (\text{phaseUnwrappingLevel} + 1) \times 1.5 \times 1000 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \quad \text{//! corrected formula in mm for 100 MHz} \\
+  MAX\_80MHZ\_M & = \frac{c}{80000000 \times 2} = 1.873 \, \text{m}
+  MAX\_100MHZ\_M & = \frac{c}{100000000 \times 2} = 1.498 \, \text{m}
+  MAX\_DIST\_80MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.873 + \frac{\text{phaseUnwrapErrorThreshold}}{2}
+  MAX\_DIST\_100MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.498 + \frac{\text{phaseUnwrapErrorThreshold}}{2}
+  MAX\_DIST\_PHASE\_UNWRAPPING\_M & = MAX\_DIST\_80MHZ\_M
   \end{align*}
 
 Usage
