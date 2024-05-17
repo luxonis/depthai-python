@@ -17,10 +17,6 @@ def create_pipeline():
 
     # Configure the ToF node
     tofConfig = tof.initialConfig.get()
-    # Disable for debugging:
-    tofConfig.enableFPPNCorrection = True
-    tofConfig.enableWiggleCorrection = True
-    # tofConfig.enableTemperatureCorrection = True
 
     # Optional. Best accuracy, but adds motion blur.
     # see ToF node docs on how to reduce/eliminate motion blur.
@@ -28,6 +24,9 @@ def create_pipeline():
     tofConfig.enablePhaseShuffleTemporalFilter = True
     tofConfig.phaseUnwrappingLevel = 4
     tofConfig.phaseUnwrapErrorThreshold = 300
+
+    tofConfig.enableTemperatureCorrection = False # Not yet supported
+
     xinTofConfig = pipeline.create(dai.node.XLinkIn)
     xinTofConfig.setStreamName("tofConfig")
     xinTofConfig.out.link(tof.inputConfig)

@@ -111,11 +111,11 @@ max distance is the larger of both modulation frequencies (so max distance at 80
   :nowrap:
 
   \begin{align*}
-  c & = 299792458.0 \quad \text{//! speed of light in m/s} \\
-  MAX\_80MHZ\_M & = \frac{c}{80000000 \times 2} = 1.873 \, \text{m}
-  MAX\_100MHZ\_M & = \frac{c}{100000000 \times 2} = 1.498 \, \text{m}
-  MAX\_DIST\_80MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.873 + \frac{\text{phaseUnwrapErrorThreshold}}{2}
-  MAX\_DIST\_100MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.498 + \frac{\text{phaseUnwrapErrorThreshold}}{2}
+  c & = 299792458.0 \quad \text{// speed of light in m/s} \\
+  MAX\_80MHZ\_M & = \frac{c}{80000000 \times 2} = 1.873 \, \text{m} \\
+  MAX\_100MHZ\_M & = \frac{c}{100000000 \times 2} = 1.498 \, \text{m} \\
+  MAX\_DIST\_80MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.873 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \\
+  MAX\_DIST\_100MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.498 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \\
   MAX\_DIST\_PHASE\_UNWRAPPING\_M & = MAX\_DIST\_80MHZ\_M
   \end{align*}
 
