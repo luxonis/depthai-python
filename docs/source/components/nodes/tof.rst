@@ -61,16 +61,17 @@ In :ref:`ToF depth` example we allow users to quickly configure ToF settings. Th
 
 And these settings are up to the user:
 
-(level+1)*1.5m + phaseUnwrapErrorThreshold/2
-- Optical Correction: It's a process that corrects the optical effect. When enabled, the ToF returns depth map (represented by Green Line on graph below) instead of distance, so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
-- Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise.
-    - `0` - Disabled, up to ~1.5 meters
-    - `1` - Up to ~3 meters
-    - `2` - Up to ~4.5 meters
-    - `3` - Up to ~6 meters
-    - `4` - Up to ~7.5 meters
-- Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
-- Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
+* Optical Correction: It's a process that corrects the optical effect. When enabled, the ToF returns depth map (represented by Green Line on graph below) instead of distance, so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
+* Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise.
+
+  * `0` - Disabled, up to ~1.5 meters
+  * `1` - Up to ~3 meters
+  * `2` - Up to ~4.5 meters
+  * `3` - Up to ~6 meters
+  * `4` - Up to ~7.5 meters
+
+* Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
+* Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
 
 .. image:: /_static/images/components/tof-optical-correction.png
 
