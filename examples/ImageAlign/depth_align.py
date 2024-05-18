@@ -57,7 +57,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(1 / FPS)
+sync.setSyncThreshold((1 / FPS) * 0.5)
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])

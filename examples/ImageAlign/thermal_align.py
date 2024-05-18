@@ -59,7 +59,7 @@ camRgb.setIspScale(1,3)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(1/FPS)
+sync.setSyncThreshold(1/FPS * 0.5)
 
 cfgIn.setStreamName("config")
 

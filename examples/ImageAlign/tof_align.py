@@ -48,7 +48,7 @@ camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(1.0)
+sync.setSyncThreshold((1 / FPS) * 0.5)
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])
