@@ -29,7 +29,10 @@ Level             Logging
 :code:`trace`     Trace will print out a :ref:`Message <components_messages>` whenever one is received from the device.
 ================  =======
 
-Debugging can be enabled either **in code**:
+Debugging can be enabled either:
+
+In code
+*******
 
 .. code-block:: python
 
@@ -42,7 +45,35 @@ Where :code:`setLogLevel` sets verbosity which filters messages that get sent fr
 verbosity which filters messages that get printed on the host (stdout). This difference allows to capture the log messages internally and
 not print them to stdout, and use those to eg. display them somewhere else or analyze them.
 
-You can also enable debugging using an **environmental variable DEPTHAI_LEVEL**:
+
+Using an environmental variable `DEPTHAI_LEVEL`
+***********************************************
+
+Using an environment variable to set the debugging level, rather than configuring it directly in code, provides additional detailed information. 
+This includes metrics such as CMX and SHAVE usage, and the time taken by each node in the pipeline to process a single frame.
+
+Example of a log message for :ref:`RGB Preview` in **INFO** mode:
+
+.. code-block:: bash
+
+    [184430102189660F00] [2.1] [0.675] [system] [info] SIPP (Signal Image Processing Pipeline) internal buffer size '18432'B, DMA buffer size: '16384'B
+    [184430102189660F00] [2.1] [0.711] [system] [info] ImageManip internal buffer size '285440'B, shave buffer size '34816'B
+    [184430102189660F00] [2.1] [0.711] [system] [info] ColorCamera allocated resources: no shaves; cmx slices: [13-15] 
+    ImageManip allocated resources: shaves: [15-15] no cmx slices. 
+
+
+Example of a log message for :ref:`Depth Preview` in **TRACE** mode:
+
+.. code-block:: bash 
+
+    [19443010513F4D1300] [0.1.2] [2.014] [MonoCamera(0)] [trace] Mono ISP took '0.866377' ms.
+    [19443010513F4D1300] [0.1.2] [2.016] [MonoCamera(1)] [trace] Mono ISP took '1.272838' ms.
+    [19443010513F4D1300] [0.1.2] [2.019] [StereoDepth(2)] [trace] Stereo rectification took '2.661958' ms.
+    [19443010513F4D1300] [0.1.2] [2.027] [StereoDepth(2)] [trace] Stereo took '7.144515' ms.
+    [19443010513F4D1300] [0.1.2] [2.028] [StereoDepth(2)] [trace] 'Median' pipeline took '0.772257' ms.
+    [19443010513F4D1300] [0.1.2] [2.028] [StereoDepth(2)] [trace] Stereo post processing (total) took '0.810216' ms.
+    [2024-05-16 14:27:51.294] [depthai] [trace] Received message from device (disparity) - parsing time: 11µs, data size: 256000
+
 
 .. tabs::
 
@@ -106,6 +137,10 @@ Code above will print the following values to the user:
 
 Resource Debugging
 ==================
+
+.. warning::
+
+    Resource debugging in only available when setting the debug level using environmental variable `DEPTHAI_LEVEL`. It's **not** available when setting the debug level in code.
 
 By enabling ``info`` log level (or lower), depthai will print usage of `hardware resources <https://docs.luxonis.com/projects/hardware/en/latest/pages/rvc/rvc2.html#hardware-blocks-and-accelerators>`__,
 specifically SHAVE core and CMX memory usage:
