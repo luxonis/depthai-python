@@ -68,12 +68,6 @@ Here are the most important settings:
 * Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
 * Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
 
-These are mostly for debugging, and should be enabled:
-
-- FPPN Correction; It's a process that corrects the fixed pattern noise (FPN) of the ToF sensor. It's enabled by default for best performance.
-- Wiggle Correction: It's a process that corrects the wiggle effect of the ToF sensor. It's enabled by default for best performance.
-- Temperature Correction: It's a process that corrects the temperature effect of the ToF sensor. It's enabled by default for best performance.
-
 .. image:: /_static/images/components/tof-optical-correction.png
 
 Here's the time diagram which showcases how ToF decoding gets done based on the settings.
@@ -96,7 +90,7 @@ To reduce motion blur, we recommend these settings:
 
 - Increase camera FPS. It goes up to 160 FPS, which causes frame capture to be the fastest (6.25ms between frames). This will reduce motion blur as ToF combines multiple frames to get the depth. Note that 160FPS will increase system load significantly (see :ref:`Debugging <Debugging DepthAI pipeline>`). Note also that higher FPS -> lower exposure times, which can increase noise.
 - Disable phase shuffle temporal filter. This will introduce more noise.
-- Disable phase unwrapping. This will reduce max distance to 1.87 meters (utilizing 80MHz modulation frequency), so about 1 cubic meter of space will be visible.
+- Disable phase unwrapping. This will reduce max distance to 1.87 meters (utilizing 80MHz modulation frequency), so about 1 cubic meter of space will be visible (very limited use-cases).
 - Enable burst mode. This is irrelevant if shuffle filter and phase unwrapping are disabled (see diagram above). When enabled, ToF node won't reuse frames (lower FPS).
 
 In the diagram above, the less frames are combined (bottom of the diagram), the less motion blur there is. The more frames are combined (top of the diagram), there's more filtering (better accuracy) but it results in more motion blur.
@@ -129,7 +123,6 @@ Usage
     pipeline = dai.Pipeline()
 
     tof_cam = pipeline.create(dai.node.Camera)
-    # Decoded depth FPS will be /2 due to shuffle/non-shuffle averaging
     tof_cam.setFps(60)
     # We assume the ToF camera sensor is on port CAM_A
     tof_cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
