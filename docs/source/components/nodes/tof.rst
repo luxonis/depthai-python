@@ -59,11 +59,11 @@ Here are the most important settings:
 * Optical Correction: It's a process that corrects the optical effect. When enabled, the ToF returns depth map (represented by Green Line on graph below) instead of distance, so it matches :ref:`StereoDepth` depth reporting. It does rectification and distance to depth conversion (Z-map).
 * Phase Unwrapping - Process that corrects the phase wrapping effect of the ToF sensor. You can set it to [0..5 are optimized]. The higher the number, the longer the ToF range, but it also increases the noise. Approximate max distance (for exact value, see :ref:`Max distance` below):
 
-  * `0` - Disabled, up to ~1.87 meters
-  * `1` - Up to ~3.75 meters
-  * `2` - Up to ~5.62 meters
-  * `3` - Up to ~7.5 meters
-  * `4` - Up to ~9.37 meters
+  * `0` - Disabled, up to ~1.87 meters (utilizing 80MHz modulation frequency)
+  * `1` - Up to ~3 meters
+  * `2` - Up to ~4.5 meters
+  * `3` - Up to ~6 meters
+  * `4` - Up to ~7.5 meters
 
 * Burst mode: When enabled, ToF node won't reuse frames, as shown on the graph below. It's related to post-processing of the ToF frames, not the actual sensor/projector. It's disabled by default.
 * Phase shuffle Temporal filter: Averages shuffled and non-shuffled frames of the same modulation frequency to reduce noise. It's enabled by default. You can disable it to reduce :ref:`ToF motion blur` and system load.
@@ -96,7 +96,7 @@ To reduce motion blur, we recommend these settings:
 
 - Increase camera FPS. It goes up to 160 FPS, which causes frame capture to be the fastest (6.25ms between frames). This will reduce motion blur as ToF combines multiple frames to get the depth. Note that 160FPS will increase system load significantly (see :ref:`Debugging <Debugging DepthAI pipeline>`). Note also that higher FPS -> lower exposure times, which can increase noise.
 - Disable phase shuffle temporal filter. This will introduce more noise.
-- Disable phase unwrapping. This will reduce max distance to 1.87 meters, so about 1 cubic meter of space will be visible.
+- Disable phase unwrapping. This will reduce max distance to 1.87 meters (utilizing 80MHz modulation frequency), so about 1 cubic meter of space will be visible.
 - Enable burst mode. This is irrelevant if shuffle filter and phase unwrapping are disabled (see diagram above). When enabled, ToF node won't reuse frames (lower FPS).
 
 In the diagram above, the less frames are combined (bottom of the diagram), the less motion blur there is. The more frames are combined (top of the diagram), there's more filtering (better accuracy) but it results in more motion blur.
@@ -105,7 +105,7 @@ Max distance
 ############
 
 Maximum ToF distance depends on the modulation frequency and the phase unwrapping level. If phase unwrapping is enabled,
-max distance is the larger of both modulation frequencies (so max distance at 80MHz). Here's the formula:
+max distance is the shorter of both modulation frequencies (so max distance at 100MHz). Here's the formula:
 
 .. math::
   :nowrap:
@@ -116,7 +116,7 @@ max distance is the larger of both modulation frequencies (so max distance at 80
   MAX\_100MHZ\_M & = \frac{c}{100000000 \times 2} = 1.498 \, \text{m} \\
   MAX\_DIST\_80MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.873 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \\
   MAX\_DIST\_100MHZ_M & = (\text{phaseUnwrappingLevel} + 1) \times 1.498 + \frac{\text{phaseUnwrapErrorThreshold}}{2} \\
-  MAX\_DIST\_PHASE\_UNWRAPPING\_M & = MAX\_DIST\_80MHZ\_M
+  MAX\_DIST\_PHASE\_UNWRAPPING\_M & = MAX\_DIST\_100MHZ\_M
   \end{align*}
 
 Usage

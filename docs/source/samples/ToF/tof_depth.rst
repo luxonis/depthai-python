@@ -24,10 +24,10 @@ With keyboard you can configure ToF settings:
 * *Phase Unwrapping* - Process that corrects the phase wrapping effect of the ToF sensor. The higher the number, the longer the ToF range, but it also increases the noise.
 
   * `0` - Disabled, up to ~1.87 meters
-  * `1` - Up to ~3.75 meters
-  * `2` - Up to ~5.62 meters
-  * `3` - Up to ~7.5 meters
-  * `4` - Up to ~9.37 meters
+  * `1` - Up to ~3 meters
+  * `2` - Up to ~4.5 meters
+  * `3` - Up to ~6 meters
+  * `4` - Up to ~7.5 meters
 
 .. image:: /_static/images/components/tof-optical-correction.png
 

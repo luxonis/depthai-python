@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
             imgFrame = qDepth.get()  # blocking call, will wait until a new data has arrived
             depth_map = imgFrame.getFrame()
-            max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1874 # 80MHz modulation freq.
+            max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1500 # 100MHz modulation freq.
             depth_colorized = np.interp(depth_map, (0, max_depth), (0, 255)).astype(np.uint8)
             depth_colorized = cv2.applyColorMap(depth_colorized, cvColorMap)
 
