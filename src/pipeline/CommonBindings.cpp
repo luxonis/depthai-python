@@ -71,6 +71,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
     py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
     py::enum_<Tiny1cPropAutoShutterParam> tiny1cPropAutoShutterParam(m, "Tiny1cPropAutoShutterParam", DOC(dai, Tiny1cPropAutoShutterParam));
+    py::enum_<Tiny1cPropDefaultCfg> tiny1cPropDefaultCfg(m, "Tiny1cPropDefaultCfg", DOC(dai, Tiny1cPropDefaultCfg));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -448,5 +449,13 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("SHUTTER_PREVIEW_START_2ND_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_PREVIEW_START_2ND_DELAY)
         .value("SHUTTER_CHANGE_GAIN_1ST_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_CHANGE_GAIN_1ST_DELAY)
         .value("SHUTTER_CHANGE_GAIN_2ND_DELAY", Tiny1cPropAutoShutterParam::SHUTTER_CHANGE_GAIN_2ND_DELAY);
+
+    tiny1cPropDefaultCfg
+        .value("DEF_CFG_ALL", Tiny1cPropDefaultCfg::DEF_CFG_ALL)
+        .value("DEF_CFG_TECLESS_K", Tiny1cPropDefaultCfg::DEF_CFG_TECLESS_K)
+        .value("DEF_CFG_TPD", Tiny1cPropDefaultCfg::DEF_CFG_TPD)
+        .value("DEF_CFG_PROP_PAGE", Tiny1cPropDefaultCfg::DEF_CFG_PROP_PAGE)
+        .value("DEF_CFG_USER_CFG", Tiny1cPropDefaultCfg::DEF_CFG_USER_CFG)
+        .value("DEF_CFG_DEAD_PIXEL", Tiny1cPropDefaultCfg::DEF_CFG_DEAD_PIXEL);
 
 }
