@@ -123,7 +123,7 @@ Usage
     pipeline = dai.Pipeline()
 
     tof_cam = pipeline.create(dai.node.Camera)
-    tof_cam.setFps(60)
+    tof_cam.setFps(30)
     # We assume the ToF camera sensor is on port CAM_A
     tof_cam.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
