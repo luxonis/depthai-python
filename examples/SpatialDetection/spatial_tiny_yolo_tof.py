@@ -54,9 +54,11 @@ pipeline = dai.Pipeline()
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
 spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
-monoLeft = pipeline.create(dai.node.MonoCamera)
-monoRight = pipeline.create(dai.node.MonoCamera)
-stereo = pipeline.create(dai.node.StereoDepth)
+# monoLeft = pipeline.create(dai.node.MonoCamera)
+# monoRight = pipeline.create(dai.node.MonoCamera)
+# stereo = pipeline.create(dai.node.StereoDepth)
+tof = pipeline.create(dai.node.ToF)
+camTof = pipeline.create(dai.node.Camera)
 imageAlign = pipeline.create(dai.node.ImageAlign)
 nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
@@ -71,29 +73,35 @@ nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
 camRgb.setPreviewSize(416, 416)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_C)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setCamera("left")
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setCamera("right")
+# monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+# monoLeft.setCamera("left")
+# monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+# monoRight.setCamera("right")
+# ToF settings
+camTof.setFps(60)
+camTof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
+camTof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
+
 
 # Image align
-imageAlign.setOutputSize(640, 360)
+imageAlign.setOutputSize(640, 400)
 
-# setting node configs
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-# Align depth map to the perspective of RGB camera, on which inference is done
-stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B) # Left camera
-stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
-stereo.setSubpixel(True)
+# # setting node configs
+# stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+# # Align depth map to the perspective of RGB camera, on which inference is done
+# stereo.setDepthAlign(dai.CameraBoardSocket.CAM_B) # Left camera
+# stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
+# stereo.setSubpixel(True)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
-spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
+# spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
@@ -103,10 +111,13 @@ spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
 spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
+spatialDetectionNetwork.setSpatialCalculationAlgorithm(dai.SpatialLocationCalculatorAlgorithm.MEAN) # Median for ToF not working yet
 
 # Linking
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+# monoLeft.out.link(stereo.left)
+# monoRight.out.link(stereo.right)
+camTof.raw.link(tof.input)
+tof.depth.link(imageAlign.input)
 
 camRgb.preview.link(spatialDetectionNetwork.input)
 if syncNN:
@@ -116,7 +127,7 @@ else:
 
 spatialDetectionNetwork.out.link(xoutNN.input)
 
-stereo.depth.link(imageAlign.input)
+# stereo.depth.link(imageAlign.input)
 camRgb.isp.link(imageAlign.inputAlignTo)
 imageAlign.outputAligned.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
