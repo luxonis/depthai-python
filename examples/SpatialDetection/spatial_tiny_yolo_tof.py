@@ -100,8 +100,6 @@ spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Linking
-# monoLeft.out.link(stereo.left)
-# monoRight.out.link(stereo.right)
 camTof.raw.link(tof.input)
 tof.depth.link(imageAlign.input)
 
