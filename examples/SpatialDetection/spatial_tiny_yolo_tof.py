@@ -83,12 +83,12 @@ camTof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
 
 # Image align
-imageAlign.setOutputSize(640, 400)
+imageAlign.setOutputSize(640, 480)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
-# spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
 spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
@@ -98,7 +98,6 @@ spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
 spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
-spatialDetectionNetwork.setSpatialCalculationAlgorithm(dai.SpatialLocationCalculatorAlgorithm.MEAN) # Median for ToF not working yet
 
 # Linking
 # monoLeft.out.link(stereo.left)
