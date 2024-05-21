@@ -119,6 +119,7 @@ void bind_tof(pybind11::module& m, void* pCallstack);
 void bind_pointcloud(pybind11::module& m, void* pCallstack);
 void bind_sync(pybind11::module& m, void* pCallstack);
 void bind_messagedemux(pybind11::module& m, void* pCallstack);
+void bind_cast(pybind11::module& m, void* pCallstack);
 void bind_ImageAlign(pybind11::module& m, void* pCallstack);
 
 void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
@@ -154,6 +155,7 @@ void NodeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_pointcloud);
     callstack.push_front(bind_sync);
     callstack.push_front(bind_messagedemux);
+    callstack.push_front(bind_cast);
     callstack.push_front(bind_ImageAlign);
 }
 
