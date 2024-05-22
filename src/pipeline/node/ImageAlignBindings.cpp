@@ -36,6 +36,7 @@ void bind_ImageAlign(pybind11::module& m, void* pCallstack){
         .def_readwrite("warpHwIds", &ImageAlignProperties::warpHwIds, DOC(dai, ImageAlignProperties, warpHwIds))
         .def_readwrite("interpolation", &ImageAlignProperties::interpolation, DOC(dai, ImageAlignProperties, interpolation))
         .def_readwrite("outKeepAspectRatio", &ImageAlignProperties::outKeepAspectRatio, DOC(dai, ImageAlignProperties, outKeepAspectRatio))
+        .def_readwrite("numShaves", &ImageAlignProperties::numShaves, DOC(dai, ImageAlignProperties, numShaves))
     ;
     // Node
     node
@@ -46,6 +47,10 @@ void bind_ImageAlign(pybind11::module& m, void* pCallstack){
         .def_readonly("passthroughInput", &ImageAlign::passthroughInput, DOC(dai, node, ImageAlign, passthroughInput))
         .def_readonly("initialConfig", &ImageAlign::initialConfig, DOC(dai, node, ImageAlign, initialConfig))
         .def("setOutputSize", &ImageAlign::setOutputSize, DOC(dai, node, ImageAlign, setOutputSize))
+        .def("setOutKeepAspectRatio", &ImageAlign::setOutKeepAspectRatio, DOC(dai, node, ImageAlign, setOutKeepAspectRatio))
+        .def("setInterpolation", &ImageAlign::setInterpolation, DOC(dai, node, ImageAlign, setInterpolation))
+        .def("setNumShaves", &ImageAlign::setNumShaves, DOC(dai, node, ImageAlign, setNumShaves))
+        .def("setNumFramesPool", &ImageAlign::setNumFramesPool, DOC(dai, node, ImageAlign, setNumFramesPool))
         ;
 	daiNodeModule.attr("ImageAlign").attr("Properties") = properties;
 
