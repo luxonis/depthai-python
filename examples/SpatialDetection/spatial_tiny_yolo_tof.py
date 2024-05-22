@@ -7,6 +7,8 @@ import depthai as dai
 import numpy as np
 import time
 
+FPS = 10
+
 '''
 Spatial Tiny-yolo example
   Performs inference on RGB camera and retrieves spatial location coordinates: x,y,z relative to the center of depth map.
@@ -75,15 +77,16 @@ camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_C)
+camRgb.setFps(FPS)
 
 # ToF settings
-camTof.setFps(60)
+camTof.setFps(FPS)
 camTof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 camTof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
 
 # Image align
-imageAlign.setOutputSize(640, 480)
+imageAlign.setOutputSize(640, 400)
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
