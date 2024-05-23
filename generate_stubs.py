@@ -67,6 +67,9 @@ try:
                 final_lines.append('    @overload')
                 final_lines.append('    def create(self, arg0: Type[T], *args, **kwargs) -> T: ...')
                 continue
+            if '    def getCvFrame(self) -> object: ...' in line:
+                final_lines.append('    def getCvFrame(self) -> numpy.ndarray: ...')
+                continue
             final_lines.append(line)
 
         final_stubs = '\n'.join(final_lines)
