@@ -4,8 +4,7 @@ import depthai as dai
 import time
 
 # This example is intended to run unchanged on an OAK-D-SR-PoE camera
-
-FPS = 60.0
+FPS = 30.0
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_C
 TOF_SOCKET = dai.CameraBoardSocket.CAM_A
@@ -25,6 +24,8 @@ class FPSCounter:
             return 0
         # Calculate the FPS
         return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
+
+
 
 pipeline = dai.Pipeline()
 # Define sources and outputs
@@ -48,7 +49,7 @@ camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold((1 / FPS) * 0.5)
+sync.setSyncThreshold((1 / FPS))
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])

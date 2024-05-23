@@ -7,7 +7,7 @@ import depthai as dai
 import numpy as np
 import time
 
-FPS = 10
+FPS = 15
 
 '''
 Spatial Tiny-yolo example
