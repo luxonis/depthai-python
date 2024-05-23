@@ -29,7 +29,18 @@ try:
         print(f'Could not import depthai: {ex}')
 
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
-    subprocess.check_call(['stubgen', '--include-docstrings', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
+    # Check if stubgen has the `--include-docstrings` flag
+    includeDocstrings = False
+    output = subprocess.check_output(['stubgen', '--help'], env=env)
+    if b'--include-docstrings' in output:
+        includeDocstrings = True
+        print("Will include docstrings in stubs")
+    else:
+        print("Will not include docstrings in stubs")
+    parameters = ['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}']
+    if includeDocstrings:
+        parameters.insert(1, '--include-docstrings')
+    subprocess.check_call(parameters, cwd=DIRECTORY, env=env)
 
     # Add py.typed
     open(f'{DIRECTORY}/depthai/py.typed', 'a').close()
@@ -67,8 +78,9 @@ try:
                 final_lines.append('    @overload')
                 final_lines.append('    def create(self, arg0: Type[T], *args, **kwargs) -> T: ...')
                 continue
-            if '    def getCvFrame(self) -> object: ...' in line:
-                final_lines.append('    def getCvFrame(self) -> numpy.ndarray: ...')
+            match = re.match(r'^(    def getCvFrame\(self\) -> )object(:.*)$', line)
+            if match:
+                final_lines.append(f"{match.group(1)}numpy.ndarray{match.group(2)}")
                 continue
             final_lines.append(line)
 
