@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import depthai as dai
 import time
-
+from datetime import timedelta
 FPS = 30.0
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_A
@@ -25,7 +25,6 @@ class FPSCounter:
     def getFps(self):
         if len(self.frameTimes) <= 1:
             return 0
-        # Calculate the FPS
         return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
 
 
@@ -57,7 +56,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold((1 / FPS) * 0.5)
+sync.setSyncThreshold(timedelta(seconds=(1 / FPS) * 0.5))
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])

@@ -23,19 +23,19 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 left.setCamera("left")
 left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 manipLeft.initialConfig.setResize(SHAPE, SHAPE)
-manipLeft.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manipLeft.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
 right.setCamera("right")
 right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 manipRight.initialConfig.setResize(SHAPE, SHAPE)
-manipRight.initialConfig.setFrameType(dai.RawImgFrame.Type.BGR888p)
+manipRight.initialConfig.setFrameType(dai.ImgFrame.Type.BGR888p)
 
 nnBlobPath = (Path(__file__).parent / Path('../models/concat_openvino_2021.4_6shave.blob')).resolve().absolute()
 nn.setBlobPath(nnBlobPath)
 nn.setNumInferenceThreads(2)
 
 castXout.setStreamName("cast")
-cast.setOutputFrameType(dai.RawImgFrame.Type.BGR888p)
+cast.setOutputFrameType(dai.ImgFrame.Type.BGR888p)
 
 # Linking
 left.out.link(manipLeft.inputImage)

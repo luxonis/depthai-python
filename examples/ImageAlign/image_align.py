@@ -1,8 +1,8 @@
 import cv2
 import depthai as dai
+from datetime import timedelta
 
 # This is an interactive example that shows how two frame sources without depth information.
-
 FPS = 30.0
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_A
@@ -40,7 +40,7 @@ camRgb.setIspScale(1, 3)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold((1 / FPS) * 0.5)
+sync.setSyncThreshold(timedelta(seconds=(1 / FPS) * 0.5))
 
 cfgIn.setStreamName("config")
 
@@ -109,16 +109,16 @@ with device:
         leftAligned = messageGroup["aligned"]
         assert isinstance(leftAligned, dai.ImgFrame)
 
-        frameRgb = frameRgb.getCvFrame()
+        frameRgbCv = frameRgb.getCvFrame()
         # Colorize the aligned depth
-        left = leftAligned.getCvFrame()
+        leftCv = leftAligned.getCvFrame()
 
-        if len(left.shape) == 2:
-            left = cv2.cvtColor(left, cv2.COLOR_GRAY2BGR)
-        if left.shape != frameRgb.shape:
-            left = cv2.resize(left, (frameRgb.shape[1], frameRgb.shape[0]))
+        if len(leftCv.shape) == 2:
+            leftCv = cv2.cvtColor(leftCv, cv2.COLOR_GRAY2BGR)
+        if leftCv.shape != frameRgbCv.shape:
+            leftCv = cv2.resize(leftCv, (frameRgbCv.shape[1], frameRgbCv.shape[0]))
 
-        blended = cv2.addWeighted(frameRgb, rgbWeight, left, depthWeight, 0)
+        blended = cv2.addWeighted(frameRgbCv, rgbWeight, leftCv, depthWeight, 0)
         cv2.imshow(windowName, blended)
 
         key = cv2.waitKey(1)

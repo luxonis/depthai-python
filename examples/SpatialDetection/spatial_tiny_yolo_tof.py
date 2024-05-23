@@ -16,15 +16,15 @@ Spatial Tiny-yolo example
 '''
 
 # Get argument first
-nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+nnBlobPath = (Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute()
 if 1 < len(sys.argv):
     arg = sys.argv[1]
     if arg == "yolo3":
-        nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+        nnBlobPath = (Path(__file__).parent / Path('../models/yolo-v3-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute()
     elif arg == "yolo4":
-        nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+        nnBlobPath = (Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute()
     else:
-        nnBlobPath = arg
+        nnBlobPath = Path(arg)
 else:
     print("Using Tiny YoloV4 model. If you wish to use Tiny YOLOv3, call 'tiny_yolo.py yolo3'")
 
@@ -60,7 +60,6 @@ spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
 tof = pipeline.create(dai.node.ToF)
 camTof = pipeline.create(dai.node.Camera)
 imageAlign = pipeline.create(dai.node.ImageAlign)
-nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutNN = pipeline.create(dai.node.XLinkOut)
@@ -69,14 +68,13 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
 xoutDepth.setStreamName("depth")
-nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
 camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_C)
+camRgb.setBoardSocket(dai.CameraBoardSocket.CAM_B)
 camRgb.setFps(FPS)
 
 # ToF settings
@@ -118,7 +116,6 @@ spatialDetectionNetwork.out.link(xoutNN.input)
 camRgb.isp.link(imageAlign.inputAlignTo)
 imageAlign.outputAligned.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -127,7 +124,6 @@ with dai.Device(pipeline) as device:
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-    networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
 
     startTime = time.monotonic()
     counter = 0
@@ -137,16 +133,12 @@ with dai.Device(pipeline) as device:
 
     while True:
         inPreview = previewQueue.get()
+        assert isinstance(inPreview, dai.ImgFrame)
         inDet = detectionNNQueue.get()
+        assert isinstance(inDet, dai.SpatialImgDetections)
         depth = depthQueue.get()
-        inNN = networkQueue.get()
+        assert isinstance(depth, dai.ImgFrame)
 
-        if printOutputLayersOnce:
-            toPrint = 'Output layer names:'
-            for ten in inNN.getAllLayerNames():
-                toPrint = f'{toPrint} {ten},'
-            print(toPrint)
-            printOutputLayersOnce = False
 
         frame = inPreview.getCvFrame()
         depthFrame = depth.getFrame() # depthFrame values are in millimeters

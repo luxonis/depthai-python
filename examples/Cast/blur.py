@@ -15,7 +15,7 @@ castXout = p.create(dai.node.XLinkOut)
 camRgb.setPreviewSize(SHAPE, SHAPE)
 camRgb.setInterleaved(False)
 
-nnBlobPath = str((Path(__file__).parent / Path('../models/blur_simplified_openvino_2021.4_6shave.blob')).resolve().absolute())
+nnBlobPath = (Path(__file__).parent / Path('../models/blur_simplified_openvino_2021.4_6shave.blob')).resolve().absolute()
 
 nn.setBlobPath(nnBlobPath)
 

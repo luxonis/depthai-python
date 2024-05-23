@@ -2,6 +2,7 @@ import cv2
 import depthai as dai
 import numpy as np
 import time
+from datetime import timedelta
 
 FPS = 25.0
 
@@ -59,7 +60,7 @@ camRgb.setIspScale(1,3)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(1/FPS * 0.5)
+sync.setSyncThreshold(timedelta(seconds=1/FPS * 0.5))
 
 cfgIn.setStreamName("config")
 
@@ -127,7 +128,7 @@ with device:
         assert isinstance(frameRgb, dai.ImgFrame)
         thermalAligned = messageGroup["aligned"]
         assert isinstance(thermalAligned, dai.ImgFrame)
-        frameRgb = frameRgb.getCvFrame()
+        frameRgbCv = frameRgb.getCvFrame()
         fpsCounter.tick()
 
         # Colorize the aligned depth
@@ -141,7 +142,7 @@ with device:
         # Apply the mask back with black pixels (0)
         colormappedFrame[mask] = 0
 
-        blended = cv2.addWeighted(frameRgb, rgbWeight, colormappedFrame, thermalWeight, 0)
+        blended = cv2.addWeighted(frameRgbCv, rgbWeight, colormappedFrame, thermalWeight, 0)
 
         cv2.putText(
             blended,

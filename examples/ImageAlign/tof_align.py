@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import depthai as dai
 import time
+from datetime import timedelta
 
 # This example is intended to run unchanged on an OAK-D-SR-PoE camera
 FPS = 30.0
@@ -49,7 +50,7 @@ camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold((1 / FPS))
+sync.setSyncThreshold(timedelta(seconds=(1 / FPS)))
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])

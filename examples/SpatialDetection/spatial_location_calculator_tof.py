@@ -23,7 +23,7 @@ xoutSpatialData.setStreamName("spatialData")
 xinSpatialCalcConfig.setStreamName("spatialCalcConfig")
 
 # ToF settings
-camTof.setFps(60)
+camTof.setFps(30)
 camTof.setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
 camTof.setBoardSocket(dai.CameraBoardSocket.CAM_A)
 
@@ -64,7 +64,7 @@ with dai.Device(pipeline) as device:
 
     while True:
         inDepth = depthQueue.get() # Blocking call, will wait until a new data has arrived
-
+        assert isinstance(inDepth, dai.ImgFrame)
         depthFrame = inDepth.getFrame() # depthFrame values are in millimeters
 
         depth_downscaled = depthFrame[::4]
@@ -76,7 +76,9 @@ with dai.Device(pipeline) as device:
         depthFrameColor = np.interp(depthFrame, (min_depth, max_depth), (0, 255)).astype(np.uint8)
         depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-        spatialData = spatialCalcQueue.get().getSpatialLocations()
+        spatialDataMsg = spatialCalcQueue.get()
+        assert isinstance(spatialDataMsg, dai.SpatialLocationCalculatorData)
+        spatialData = spatialDataMsg.getSpatialLocations()
         for depthData in spatialData:
             roi = depthData.config.roi
             roi = roi.denormalize(width=depthFrameColor.shape[1], height=depthFrameColor.shape[0])
