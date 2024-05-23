@@ -23,6 +23,7 @@ Code Samples
    ../samples/Script/*
    ../samples/SpatialDetection/*
    ../samples/StereoDepth/*
+   ../samples/PointCloud/*
    ../samples/Sync/*
    ../samples/SystemLogger/*
    ../samples/ToF/*
@@ -102,6 +103,7 @@ are presented with code.
 - :ref:`RGB Encoding & Mono & MobilenetSSD` - Runs MobileNetSSD on mono frames and displays detections on the frame + encodes RGB to :code:`.h265`
 - :ref:`RGB Encoding & Mono with MobilenetSSD & Depth` - A combination of **RGB Encoding** and **Mono & MobilenetSSD & Depth** code samples
 - :ref:`Spatial detections on rotated OAK` - Spatail detections on upside down OAK camera
+- :ref:`Collision avoidance` - Collision avoidance system using depth and RGB
 
 .. rubric:: MobileNet
 
@@ -161,6 +163,12 @@ are presented with code.
 - :ref:`RGB Depth alignment` - Displays RGB depth aligned frames
 
 
+.. rubric:: PointCloud
+
+- :ref:`PointCloud Visualization` - Creates point cloud from depth frames and displays it using Open3D
+- :ref:`PointCloud Control` - Demonstrates how to control point cloud from the host
+
+
 .. rubric:: Sync Node
 
 - :ref:`Depth and Video Sync` - Synchronizes depth and video streams for real-time processing and display.
@@ -184,6 +192,7 @@ are presented with code.
 - :ref:`RGB & Mono Encoding`- Encodes RGB (1080P, 30FPS) and both mono streams (720P, 30FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`Encoding Max Limit` - Encodes RGB (4k 25FPS) and both mono streams (720P, 25FPS) into :code:`.h265`/:code:`.h264` and saves them on the host
 - :ref:`RGB Full Resolution Saver` - Saves full resolution RGB images (4k) on the host (:code:`.jpeg`)
+- :ref:`Video Encoded Frame Type` - Demonstrates how to view frame type when using video encoding
 
 .. rubric:: Warp
 

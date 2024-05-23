@@ -49,7 +49,8 @@ try:
             import typing
             json = dict
             from pathlib import Path
-            from typing import Set
+            from typing import Set, Type, TypeVar
+            T = TypeVar('T')
         ''') + contents
 
         # Create 'create' overloads
@@ -59,6 +60,19 @@ try:
             overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
         final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
 
+        final_lines = []
+        for line in final_stubs.split('\n'):
+            if 'class Pipeline:' in line:
+                final_lines.append(line)
+                final_lines.append('    @overload')
+                final_lines.append('    def create(self, arg0: Type[T], *args, **kwargs) -> T: ...')
+                continue
+            if '    def getCvFrame(self) -> object: ...' in line:
+                final_lines.append('    def getCvFrame(self) -> numpy.ndarray: ...')
+                continue
+            final_lines.append(line)
+
+        final_stubs = '\n'.join(final_lines)
         # Writeout changes
         file.seek(0)
         file.truncate(0)
