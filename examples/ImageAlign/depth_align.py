@@ -13,6 +13,8 @@ ALIGN_SOCKET = LEFT_SOCKET
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
 LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_400_P
 
+ISP_SCALE = 3
+
 class FPSCounter:
     def __init__(self):
         self.frameTimes = []
@@ -27,6 +29,14 @@ class FPSCounter:
             return 0
         return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
 
+device = dai.Device()
+
+calibrationHandler = device.readCalibration()
+rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(1920 / ISP_SCALE), int(1080 / ISP_SCALE))
+rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
+distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
+if distortionModel != dai.CameraModel.Perspective:
+    raise RuntimeError("Unsupported distortion model for RGB camera. This example supports only Perspective model.")
 
 pipeline = dai.Pipeline()
 
@@ -50,9 +60,11 @@ right.setFps(FPS)
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
-camRgb.setIspScale(1, 3)
+camRgb.setIspScale(1, ISP_SCALE)
+
 
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+stereo.setDepthAlign(dai.CameraBoardSocket.LEFT)
 
 out.setStreamName("out")
 
@@ -113,7 +125,8 @@ def updateBlendWeights(percentRgb):
 
 
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
     queue = device.getOutputQueue("out", 8, False)
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
@@ -144,6 +157,13 @@ with dai.Device(pipeline) as device:
         # Blend when both received
         if frameDepth is not None:
             cvFrame = frameRgb.getCvFrame()
+
+            # Undistort the rgb frame
+            cvFrameUndistorted = cv2.undistort(
+                cvFrame,
+                np.array(rgbIntrinsics),
+                np.array(rgbDistortion),
+            )
             # Colorize the aligned depth
             alignedDepthColorized = colorizeDepth(frameDepth.getFrame())
             # Resize depth to match the rgb frame

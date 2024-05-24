@@ -95,7 +95,7 @@ with device:
         updateBlendWeights,
     )
     cv2.createTrackbar(
-        "Static Depth Plane",
+        "Static Depth Plane [mm]",
         windowName,
         0,
         2000,

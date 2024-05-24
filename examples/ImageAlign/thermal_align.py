@@ -38,7 +38,6 @@ if not thermalFound:
     raise RuntimeError("No thermal camera found!")
 
 
-
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
@@ -114,7 +113,7 @@ with device:
         updateBlendWeights,
     )
     cv2.createTrackbar(
-        "Static Depth Plane",
+        "Static Depth Plane [mm]",
         windowName,
         0,
         2000,
