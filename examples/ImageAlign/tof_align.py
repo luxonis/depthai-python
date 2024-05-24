@@ -20,7 +20,7 @@ class FPSCounter:
         self.frameTimes.append(now)
         self.frameTimes = self.frameTimes[-100:]
 
-    def get_fps(self):
+    def getFps(self):
         if len(self.frameTimes) <= 1:
             return 0
         # Calculate the FPS
@@ -141,7 +141,7 @@ with dai.Device(pipeline) as device:
             # Resize depth to match the rgb frame
             cv2.putText(
                 alignedDepthColorized,
-                f"FPS: {fpsCounter.get_fps():.2f}",
+                f"FPS: {fpsCounter.getFps():.2f}",
                 (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
