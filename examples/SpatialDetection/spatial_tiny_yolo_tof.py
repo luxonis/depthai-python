@@ -10,7 +10,7 @@ import time
 FPS = 15
 
 '''
-Spatial Tiny-yolo example
+Spatial Tiny-yolo example for ToF camera
   Performs inference on RGB camera and retrieves spatial location coordinates: x,y,z relative to the center of depth map.
   Can be used for tiny-yolo-v3 or tiny-yolo-v4 networks
 '''
