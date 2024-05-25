@@ -16,6 +16,7 @@ pipeline = dai.Pipeline()
 
 # Thermal camera
 thermalCam = pipeline.create(dai.node.Camera)
+thermalCam.setFps(25) # Limit to 25 to match what the sensor can do, capped even if left at default, but warns.
 width, height = -1, -1
 thermalFound = False
 for features in device.getConnectedCameraFeatures():
