@@ -234,11 +234,11 @@ jobs:
   # This job builds wheels for macOS x86_64 arch
   build-macos:
     needs: build-docstrings
-    runs-on: macos-latest
     strategy:
       matrix:
         python-version: [3.8, 3.9, '3.10', '3.11', '3.12']
         os: [macos-13, macos-14] # macos-13 is x64, macos-14 is arm64
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v3
