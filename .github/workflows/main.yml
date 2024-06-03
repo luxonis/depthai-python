@@ -154,7 +154,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheel
-        run: python3 -m pip wheel . -w ./wheelhouse/ --verbose
+        run: CMAKE_ARGS='-DDEPTHAI_ENABLE_CURL=OFF' python3 -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
         run: |
           # python3 -m pip install -U wheel auditwheel # Called once when setting up the runner
@@ -205,6 +205,8 @@ jobs:
       - name: Select Windows SDK
         run: echo "CMAKE_ARGS=-DCMAKE_SYSTEM_VERSION=${{ env.CMAKE_WINDOWS_SDK_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+      - name: Install dependencies
+        run: choco install strawberryperl
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -310,7 +312,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
@@ -372,7 +374,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
