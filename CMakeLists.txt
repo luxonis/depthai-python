@@ -23,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
-    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.5.tar.gz"
+    SHA1 "a20151e4c0740ee7d0f9994476856d813cdead29"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -132,7 +132,8 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/PointCloudBindings.cpp
     src/pipeline/node/SyncBindings.cpp
     src/pipeline/node/MessageDemuxBindings.cpp
-
+    src/pipeline/node/CastBindings.cpp
+    src/pipeline/node/ImageAlignBindings.cpp
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
     src/pipeline/datatype/AprilTagsBindings.cpp
@@ -157,6 +158,7 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/TrackletsBindings.cpp
     src/pipeline/datatype/PointCloudConfigBindings.cpp
     src/pipeline/datatype/PointCloudDataBindings.cpp
+    src/pipeline/datatype/ImageAlignConfigBindings.cpp
 )
 
 if(WIN32)

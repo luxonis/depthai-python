@@ -16,6 +16,12 @@ To align depth with **higher resolution color stream** (eg. 12MP), you need to l
 do that with ``stereo.setOutputSize(w,h)``. Code `example here <https://gist.github.com/Erol444/25f374fa18efa7939ec9bb848b39249a>`__.
 
 
+Host alignment
+--------------
+
+StereoDepth node aligns depth map to selected sensor (in this case, color sensor), on the OAK device itself. One can also do the same
+on the host side. We have developed a simple `demo script here <https://github.com/luxonis/depthai-python/commit/94b3177f5f4b28e562f637dcf77baa47826ef643>`__.
+
 Demo
 ####
 

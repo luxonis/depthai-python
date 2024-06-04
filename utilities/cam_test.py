@@ -92,6 +92,8 @@ parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
 parser.add_argument('-tofraw', '--tof-raw', action='store_true',
                     help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofint', '--tof-intensity', action='store_true',
+                    help="Show also ToF intensity output alongside depth")
 parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
@@ -285,8 +287,8 @@ with dai.Device(*dai_device_args) as device:
     xout = {}
     xout_raw = {}
     xout_tof_amp = {}
+    xout_tof_int = {}
     streams = []
-    tofConfig = {}
     yolo_passthrough_q_name = None
     for c in cam_list:
         print("CAM: ", c)
@@ -303,27 +305,27 @@ with dai.Device(*dai_device_args) as device:
                 cam[c].raw.link(tof[c].input)
                 tof[c].depth.link(xout[c].input)
                 xinTofConfig.out.link(tof[c].inputConfig)
-                tofConfig = tof[c].initialConfig.get()
-                tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-                tofConfig.depthParams.avgPhaseShuffle = False
-                tofConfig.depthParams.minimumAmplitude = 3.0
-                tof[c].initialConfig.set(tofConfig)
-
                 if args.tof_median == 0:
-                    tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.MEDIAN_OFF)
                 elif args.tof_median == 3:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_3x3)
                 elif args.tof_median == 5:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
                 elif args.tof_median == 7:
-                    tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
-                tof[c].initialConfig.set(tofConfig)
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
+                tofConfig = tof[c].initialConfig.get()  # TODO multiple instances
                 if args.tof_amplitude:
                     amp_name = 'tof_amplitude_' + c
                     xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
                     xout_tof_amp[c].setStreamName(amp_name)
                     streams.append(amp_name)
                     tof[c].amplitude.link(xout_tof_amp[c].input)
+                if args.tof_intensity:
+                    int_name = 'tof_intensity_' + c
+                    xout_tof_int[c] = pipeline.create(dai.node.XLinkOut)
+                    xout_tof_int[c].setStreamName(int_name)
+                    streams.append(int_name)
+                    tof[c].intensity.link(xout_tof_int[c].input)
         elif cam_type_thermal[c]:
             cam[c] = pipeline.create(dai.node.Camera)
             cam[c].setBoardSocket(cam_socket_opts[c])
@@ -467,6 +469,8 @@ with dai.Device(*dai_device_args) as device:
             cam_name['raw_'+p.socket.name] = p.sensorName
         if args.tof_amplitude:
             cam_name['tof_amplitude_'+p.socket.name] = p.sensorName
+        if args.tof_intensity:
+            cam_name['tof_intensity_'+p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -578,14 +582,13 @@ with dai.Device(*dai_device_args) as device:
                     continue
                 
                 
-                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
                     else:
-                        frame = (frame.view(np.int16).astype(float))
-                        frame = cv2.normalize(
-                            frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1874 # 80MHz modulation freq. TODO slider
+                        frame = np.interp(frame, (0, max_depth), (0, 255)).astype(np.uint8)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 elif cam_type_thermal[cam_skt] and c.startswith('cam'):
                     frame = frame.astype(np.float32)
@@ -614,7 +617,7 @@ with dai.Device(*dai_device_args) as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_'):
                     if capture:
                         filename = capture_file_info + '_10bit.bw'
                         print('Saving:', filename)
@@ -661,16 +664,6 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g') and tof:
-            f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            print("ToF toggling f_mod value to:", f_mod)
-            tofConfig.depthParams.freqModUsed = f_mod
-            tofCfgQueue.send(tofConfig)
-        elif key == ord('h') and tof:
-            tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
-            print("ToF toggling avgPhaseShuffle value to:",
-                  tofConfig.depthParams.avgPhaseShuffle)
-            tofCfgQueue.send(tofConfig)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -840,12 +833,6 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
-            elif control == 'tof_amplitude_min' and tof:
-                amp_min = clamp(
-                    tofConfig.depthParams.minimumAmplitude + change, 0, 50)
-                print("Setting min amplitude(confidence) to:", amp_min)
-                tofConfig.depthParams.minimumAmplitude = amp_min
-                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
 
     print()
