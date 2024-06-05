@@ -124,7 +124,14 @@ void bind_camera(pybind11::module& m, void* pCallstack){
         // .def("setResolution", &Camera::setResolution, py::arg("resolution"), DOC(dai, node, Camera, setResolution))
         // .def("getResolution", &Camera::getResolution, DOC(dai, node, Camera, getResolution))
         .def("setFps", &Camera::setFps, py::arg("fps"), DOC(dai, node, Camera, setFps))
-        .def("setIsp3aFps", &Camera::setIsp3aFps, DOC(dai, node, Camera, setIsp3aFps))
+        .def("setIsp3aFps", [&camera](Camera &c, int isp3aFps) {
+          PyErr_WarnEx(PyExc_DeprecationWarning,
+                       "setIsp3aFps is unstable", 1);
+          HEDLEY_DIAGNOSTIC_PUSH
+          HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+          c.setIsp3aFps(isp3aFps);
+          HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("isp3aFps"), DOC(dai, node, Camera, setIsp3aFps))
         .def("getFps", &Camera::getFps, DOC(dai, node, Camera, getFps))
         .def("getPreviewSize", &Camera::getPreviewSize, DOC(dai, node, Camera, getPreviewSize))
         .def("getPreviewWidth", &Camera::getPreviewWidth, DOC(dai, node, Camera, getPreviewWidth))
