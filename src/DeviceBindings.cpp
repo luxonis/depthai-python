@@ -683,12 +683,12 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     // Bind the rest
     device
         .def("__enter__", [](Device& d) -> Device& { return d; })
-        .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
-        .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
+        .def("getOutputQueue", py::overload_cast<const std::string&>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
+        .def("getOutputQueue", py::overload_cast<const std::string&, unsigned int, bool>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
         .def("getOutputQueueNames", &Device::getOutputQueueNames, DOC(dai, Device, getOutputQueueNames))
 
-        .def("getInputQueue", static_cast<std::shared_ptr<DataInputQueue>(Device::*)(const std::string&)>(&Device::getInputQueue), py::arg("name"), DOC(dai, Device, getInputQueue))
-        .def("getInputQueue", static_cast<std::shared_ptr<DataInputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getInputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getInputQueue, 2))
+        .def("getInputQueue", py::overload_cast<const std::string&>(&Device::getInputQueue), py::arg("name"), DOC(dai, Device, getInputQueue))
+        .def("getInputQueue", py::overload_cast<const std::string&, unsigned int, bool>(&Device::getInputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getInputQueue, 2))
         .def("getInputQueueNames", &Device::getInputQueueNames, DOC(dai, Device, getInputQueueNames))
 
         .def("getQueueEvents", [](Device& d, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
