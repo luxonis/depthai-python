@@ -322,16 +322,16 @@ with dai.Device() as device:
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
     ISO_STEP = 50
-    LENS_STEP = 3
+    LENS_STEP = 1 / 1024.0
     DOT_STEP = 100
     FLOOD_STEP = 100
     DOT_MAX = 1200
     FLOOD_MAX = 1500
 
     # Defaults and limits for manual focus/exposure controls
-    lensPos = 150
-    lensMin = 0
-    lensMax = 255
+    lensPos = 0.5
+    lensMin = 0.0
+    lensMax = 1.0
 
     expTime = 20000
     expMin = 1
@@ -469,7 +469,7 @@ with dai.Device() as device:
             lensPos = clamp(lensPos, lensMin, lensMax)
             print("Setting manual focus, lens position: ", lensPos)
             ctrl = dai.CameraControl()
-            ctrl.setManualFocus(lensPos)
+            ctrl.setManualFocusRaw(lensPos)
             controlQueue.send(ctrl)
         elif key in [ord('i'), ord('o'), ord('k'), ord('l')]:
             if key == ord('i'): expTime -= EXP_STEP
