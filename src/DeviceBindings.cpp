@@ -247,7 +247,10 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, pathToCmd);
     }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 8))
-
+    .def(py::init([](const Pipeline& pipeline, const dai::DeviceInfo info){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, info);
+    }), py::arg("pipeline"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 9))
     // DeviceBase constructor - OpenVINO version
     .def(py::init([](OpenVINO::Version version){
         auto dev = deviceSearchHelper<D>();
