@@ -255,8 +255,8 @@ WSL 2
 Steps below were performed on WSL 2 running Ubuntu 20.04, while host machine was running Win10 20H2 (OS build 19042.1586).
 Original tutorial `written here <https://discuss.luxonis.com/d/693-i-got-depthai-demo-to-run-in-wsl>`__ by SputTheBot.
 
-To get an OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (2.3.0)
-for that. Inside WSL 2 you also need to install :ref:`depthai dependencies <Ubuntu>` and `USB/IP client tool <https://github.com/dorssel/usbipd-win/wiki/WSL-support#usbip-client-tools>`__ (2 commands).
+To get an OAK running on WSL 2, you first need to attach USB device to WSL 2. We have used `usbipd-win <https://github.com/dorssel/usbipd-win/releases>`__ (4.0.0)
+for that. Inside WSL 2 you also need to install :ref:`depthai dependencies <Ubuntu>`.
 
 To attach the OAK camera to WSL 2, we have prepared a Python script below that you need to execute on the host computer (in Admin mode).
 
@@ -264,15 +264,20 @@ To attach the OAK camera to WSL 2, we have prepared a Python script below that y
 
   import time
   import os
+  import re
+
+  pattern = re.compile("[0-9]+\\-[0-9]+\\ +.+\\ +((Movidius MyriadX)|(Luxonis Device)).+Shared.*")
+
   while True:
-      output = os.popen('usbipd wsl list').read() # List all USB devices
+      output = os.popen('usbipd list').read() # List all USB devices
       rows = output.split('\n')
       for row in rows:
-          if ('Movidius MyriadX' in row or 'Luxonis Device' in row) and 'Not attached' in row: # Check for OAK cameras that aren't attached
-              busid = row.split(' ')[0]
-              out = os.popen(f'usbipd wsl attach --busid {busid}').read() # Attach an OAK camera
-              print(out)
-              print(f'Usbipd attached Myriad X on bus {busid}') # Log
+          if pattern.match(row) is None: # Check for OAK cameras that aren't attached
+              continue
+          busid = row.split(' ')[0]
+          out = os.popen(f'usbipd attach --wsl --busid {busid}').read() # Attach an OAK camera
+          print(out)
+          print(f'Usbipd attached Myriad X on bus {busid}') # Log
       time.sleep(.5)
 
 After that, you can check ``lsusb`` command inside the WLS 2 and you should be able to see ``Movidius MyriadX``.
