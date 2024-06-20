@@ -4,7 +4,31 @@ Messages
 ========
 
 Messages are sent between linked :ref:`Nodes`. The only way nodes communicate with each other is by sending messages from one to another. On the
-table of contents (left side of the page) **all DepthAI messages are listed** under the :code:`Messages` entry. You can click on them to find out more.
+table of contents (left side of the page) **all DepthAI messages are listed** under the :code:`Messages`. You can click on them to find out more.
+
+.. rubric:: Timestamps and sequence numbers
+
+All messages have a timestamp and sequence number. The timestamp is the time when the message was created, and the sequence number is the order
+in which the messages were created. Sequence numbers start at 0. Both of these values are used to synchronize messages (see :ref:`Message syncing`).
+
+
+.. code-block:: python
+
+   msg: dai.ImgFrame = queue.get() # Get message from the OutputQueue
+
+   # You can get the timestamp and sequence number from the message
+
+   # Timestamp synced with host time
+   msg.getTimestamp()
+
+   # Timestamp synced with device time (time from bootup)
+   msg.getTimestampDevice()
+
+   # Get the sequence number
+   msg.getSequenceNum()
+
+Host time is the time on the host computer (specifically it uses `std::chrono::steady_clock <https://en.cppreference.com/w/cpp/chrono/steady_clock>`__), and DepthAI library syncs host clock with the device. More information
+can be found at :ref:`Host clock syncing`.
 
 .. rubric:: Creating a message in Script node
 
@@ -47,10 +71,6 @@ that isn't relevant to showcase how a message can be created on the host and sen
       img.setHeight(300)
       qIn.send(img) # Send the message to the device
 
-.. rubric:: Creating a message on an external MCU
-
-A message can also be created on an external MCU and sent to the device via :ref:`SPIIn` node. An demo of such functionality is the
-`spi_in_landmark <https://github.com/luxonis/esp32-spi-message-demo/tree/main/spi_in_landmark>`__ example.
 
 .. toctree::
    :maxdepth: 0
