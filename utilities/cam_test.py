@@ -510,7 +510,15 @@ with dai.Device() as device:
             if key == ord(','): lensPos -= LENS_STEP
             if key == ord('.'): lensPos += LENS_STEP
             lensPos = clamp(lensPos, lensMin, lensMax)
-            print("Setting manual focus, lens position: ", lensPos)
+            print("Setting manual focus (coarse), lens position: ", lensPos)
+            ctrl = dai.CameraControl()
+            ctrl.setManualFocus(lensPos)
+            controlQueue.send(ctrl)
+        elif key in [ord('n'), ord('m')]:
+            if key == ord('n'): lensPos -= 1
+            if key == ord('m'): lensPos += 1
+            lensPos = clamp(lensPos, lensMin, lensMax)
+            print("Setting manual focus (fine),   lens position: ", lensPos)
             ctrl = dai.CameraControl()
             ctrl.setManualFocus(lensPos)
             controlQueue.send(ctrl)
