@@ -147,6 +147,11 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createCamera", &Pipeline::create<node::Camera>)
         .def("createWarp", &Pipeline::create<node::Warp>)
+        .def("createSync", &Pipeline::create<node::Sync>)
+        .def("createToF", &Pipeline::create<node::ToF>)
+        .def("createImageAlign", &Pipeline::create<node::ImageAlign>)
+        .def("createCast", &Pipeline::create<node::Cast>)
+        .def("createPointCloud", &Pipeline::create<node::PointCloud>)
         ;
 
 
