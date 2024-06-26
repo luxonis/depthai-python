@@ -81,7 +81,14 @@ void bind_monocamera(pybind11::module& m, void* pCallstack){
         .def("setFrameEventFilter", &MonoCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, MonoCamera, setFrameEventFilter))
         .def("getFrameEventFilter", &MonoCamera::getFrameEventFilter, DOC(dai, node, MonoCamera, getFrameEventFilter))
         .def("setFps",        &MonoCamera::setFps, py::arg("fps"), DOC(dai, node, MonoCamera, setFps))
-        .def("setIsp3aFps", &MonoCamera::setIsp3aFps, DOC(dai, node, MonoCamera, setIsp3aFps))
+        .def("setIsp3aFps", [&monoCamera](MonoCamera &c, int isp3aFps) {
+          PyErr_WarnEx(PyExc_DeprecationWarning,
+                       "setIsp3aFps is unstable", 1);
+          HEDLEY_DIAGNOSTIC_PUSH
+          HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+          c.setIsp3aFps(isp3aFps);
+          HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("isp3aFps"), DOC(dai, node, MonoCamera, setIsp3aFps))
         .def("getFps",        &MonoCamera::getFps, DOC(dai, node, MonoCamera, getFps))
         .def("getResolutionSize", &MonoCamera::getResolutionSize, DOC(dai, node, MonoCamera, getResolutionSize))
         .def("getResolutionWidth", &MonoCamera::getResolutionWidth, DOC(dai, node, MonoCamera, getResolutionWidth))
