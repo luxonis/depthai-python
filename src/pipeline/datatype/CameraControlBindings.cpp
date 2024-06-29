@@ -226,6 +226,7 @@ std::vector<const char *> camCtrlAttr;
         .def("setAutoExposureCompensation", &CameraControl::setAutoExposureCompensation, py::arg("compensation"), DOC(dai, CameraControl, setAutoExposureCompensation))
         .def("setAutoExposureLimit", py::overload_cast<uint32_t>(&CameraControl::setAutoExposureLimit), py::arg("maxExposureTimeUs"), DOC(dai, CameraControl, setAutoExposureLimit))
         .def("setAutoExposureLimit", py::overload_cast<std::chrono::microseconds>(&CameraControl::setAutoExposureLimit), py::arg("maxExposureTime"), DOC(dai, CameraControl, setAutoExposureLimit, 2))
+        .def("setFps", &CameraControl::setFps, py::arg("fps"), DOC(dai, CameraControl, setFps))
         .def("setAntiBandingMode", &CameraControl::setAntiBandingMode, py::arg("mode"), DOC(dai, CameraControl, setAntiBandingMode))
         .def("setManualExposure", py::overload_cast<uint32_t, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTimeUs"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure))
         .def("setManualExposure", py::overload_cast<std::chrono::microseconds, uint32_t>(&CameraControl::setManualExposure), py::arg("exposureTime"), py::arg("sensitivityIso"), DOC(dai, CameraControl, setManualExposure, 2))
