@@ -12,6 +12,7 @@ You can also calculate spatial coordiantes on host side, `demo here <https://git
 - :ref:`RGB & MobilenetSSD with spatial data`
 - :ref:`Mono & MobilenetSSD with spatial data`
 - :ref:`RGB & TinyYolo with spatial data`
+- :ref:`Collision avoidance`
 
 Demo
 ####

@@ -313,6 +313,7 @@ with dai.Device(*dai_device_args) as device:
                     tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
                 elif args.tof_median == 7:
                     tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
+                tofConfig = tof[c].initialConfig.get()  # TODO multiple instances
                 if args.tof_amplitude:
                     amp_name = 'tof_amplitude_' + c
                     xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
@@ -586,9 +587,8 @@ with dai.Device(*dai_device_args) as device:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
                     else:
-                        frame = (frame.view(np.int16).astype(float))
-                        frame = cv2.normalize(
-                            frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1874 # 80MHz modulation freq. TODO slider
+                        frame = np.interp(frame, (0, max_depth), (0, 255)).astype(np.uint8)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 elif cam_type_thermal[cam_skt] and c.startswith('cam'):
                     frame = frame.astype(np.float32)
