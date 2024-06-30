@@ -7,6 +7,7 @@ for manual exposure/focus:
   exposure time:     I   O      1..33000 [us]
   sensitivity iso:   K   L    100..1600
   focus:             ,   .      0..255 [far..near]
+  FPS:               N   M
 To go back to auto controls:
   'E' - autoexposure
   'F' - autofocus (continuous)
@@ -495,6 +496,7 @@ with dai.Device(*dai_device_args) as device:
     EXP_STEP = 500  # us
     ISO_STEP = 50
     LENS_STEP = 1 / 1024
+    FPS_STEP = 2.5
     DOT_STEP = 0.05
     FLOOD_STEP = 0.05
     DOT_MAX = 1
@@ -512,6 +514,10 @@ with dai.Device(*dai_device_args) as device:
     sensIso = 800
     sensMin = 100
     sensMax = 1600
+
+    fps = args.fps
+    fpsMin = 0.01
+    fpsMax = 120
 
     dotIntensity = 0
     floodIntensity = 0
@@ -599,7 +605,9 @@ with dai.Device(*dai_device_args) as device:
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
-                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    txt += f"Color temp: {pkt.getColorTemperature()} K "
+                    txt += f"Sensor: {pkt.getSensorTemperature()} degC "
+                    txt += f"Aux/VCSEL: {pkt.getAuxTemperature()} degC"
                     if needs_newline:
                         print()
                         needs_newline = False
@@ -680,6 +688,16 @@ with dai.Device(*dai_device_args) as device:
             print("Autoexposure enable")
             ctrl = dai.CameraControl()
             ctrl.setAutoExposureEnable()
+            controlQueue.send(ctrl)
+        elif key in [ord('n'), ord('m')]:
+            if key == ord('n'):
+                fps -= FPS_STEP
+            if key == ord('m'):
+                fps += FPS_STEP
+            fps = clamp(fps, fpsMin, fpsMax)
+            print("Setting FPS: ", fps)
+            ctrl = dai.CameraControl()
+            ctrl.setFps(fps)
             controlQueue.send(ctrl)
         elif key in [ord(','), ord('.')]:
             if key == ord(','):
