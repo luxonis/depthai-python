@@ -277,6 +277,30 @@ To attach the OAK camera to WSL 2, we have prepared a Python script below that y
 
 After that, you can check ``lsusb`` command inside the WLS 2 and you should be able to see ``Movidius MyriadX``.
 
+If instead you want to use `usbipd-win` >= 4.0, then the `usbipd wsl` command is not available anymore, so you need to use a different script, 
+originally `written here <https://discuss.luxonis.com/d/693-i-got-depthai-demo-to-run-in-wsl/5>`__ by kazuya.
+
+.. code-block:: python
+
+  import time
+  import subprocess
+  while True:
+      output = subprocess.run('usbipd list',capture_output=True,encoding="UTF-8")
+      rows = output.stdout.split('\n')
+      for row in rows:
+          if ('Movidius MyriadX' in row or 'Luxonis Device' in row) and 'Not shared' in row:
+              busid = row.split(' ')[0]
+              out = subprocess.run(f'usbipd bind -b {busid}',capture_output=True,encoding="UTF-8")
+              print(out.stdout)
+              print(f'Usbipd bind Myriad X')
+          if ('Movidius MyriadX' in row or 'Luxonis Device' in row) and 'Shared' in row:
+              busid = row.split(' ')[0]
+              out = subprocess.run(f'usbipd attach -w -b {busid}',capture_output=True,encoding="UTF-8")
+              print(out.stdout)
+              print(f'Usbipd attached Myriad X on bus {busid}')
+      time.sleep(.5)
+
+
 .. note::
   Examples that don't show any frames (eg. IMU example) should work. We haven't spent enough time to get OpenCV display frames inside WSL 2, but you could try it out yourself, some ideas `here <https://stackoverflow.com/questions/65453763/python3-9-on-wsl2-ubuntu-20-04-how-to-display-image-using-cv2-opencv-python-4>`__.
 
