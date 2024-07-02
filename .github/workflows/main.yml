@@ -296,7 +296,6 @@ jobs:
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
-    needs: build-docstrings
     runs-on: ubuntu-latest
     container:
       image: quay.io/pypa/manylinux2014_x86_64:2024-01-08-eb135ed
@@ -311,8 +310,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+      - name: Patching mirrorlist
+        run: |
+          sudo sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
+          sudo sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
+          sudo sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
       - name: Installing libusb1-devel dependency
-        run: dnf install -y --disableplugin=fastestmirror libusb1-devel perl-core
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
@@ -374,7 +378,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
-        run: dnf install -y --disableplugin=fastestmirror libusb1-devel perl-core
+        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
