@@ -378,6 +378,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+      - name: Patching mirrorlist
+        run: |
+          sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo
+          sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
+          sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
       - name: Installing libusb1-devel dependency
         run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
