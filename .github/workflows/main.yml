@@ -312,7 +312,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
+        run: dnf install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
@@ -374,7 +374,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
-        run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
+        run: dnf install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
           /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
