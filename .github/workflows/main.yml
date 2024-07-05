@@ -135,6 +135,10 @@ jobs:
       matrix:
         rpi-os: [rpi-buster, rpi-bullseye]
     runs-on: ${{ matrix.rpi-os }}
+    env:
+      # workaround required for cache@v3, https://github.com/actions/cache/issues/1428
+      # to be removed when upgrading the manylinux image
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
@@ -352,8 +356,12 @@ jobs:
   build-linux-x86_64:
     needs: build-docstrings
     runs-on: ubuntu-latest
+    env:
+      # workaround required for cache@v3, https://github.com/actions/cache/issues/1428
+      # to be removed when upgrading the manylinux image
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     container:
-      image: quay.io/pypa/manylinux2014_x86_64:2022-10-30-402504a
+      image: quay.io/pypa/manylinux2014_x86_64:latest
       env:
         PLAT: manylinux2014_x86_64
     steps:
@@ -416,8 +424,12 @@ jobs:
   build-linux-arm64:
     needs: build-docstrings
     runs-on: [self-hosted, linux, ARM64]
+    env:
+      # workaround required for cache@v3, https://github.com/actions/cache/issues/1428
+      # to be removed when upgrading the manylinux image
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     container:
-      image: quay.io/pypa/manylinux2014_aarch64:2022-10-30-402504a
+      image: quay.io/pypa/manylinux2014_aarch64:latest
       env:
         PLAT: manylinux2014_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
