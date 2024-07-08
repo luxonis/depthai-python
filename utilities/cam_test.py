@@ -402,7 +402,7 @@ with dai.Device() as device:
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
-                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}, lat:{(dai.Clock.now()-pkt.getTimestamp()).total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
