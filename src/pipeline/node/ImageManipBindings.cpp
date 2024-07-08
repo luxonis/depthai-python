@@ -30,6 +30,7 @@ void bind_imagemanip(pybind11::module& m, void* pCallstack){
     imageManip
         .def_readonly("inputConfig", &ImageManip::inputConfig, DOC(dai, node, ImageManip, inputConfig))
         .def_readonly("inputImage", &ImageManip::inputImage, DOC(dai, node, ImageManip, inputImage))
+        .def_readonly("passthroughInputImage", &ImageManip::passthroughInputImage, DOC(dai, node, ImageManip, passthroughInputImage))
         .def_readonly("out", &ImageManip::out, DOC(dai, node, ImageManip, out))
         .def_readonly("initialConfig", &ImageManip::initialConfig, DOC(dai, node, ImageManip, initialConfig))
         // setters
