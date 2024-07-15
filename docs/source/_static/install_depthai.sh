@@ -127,9 +127,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
   echo "Installing global dependencies."
   bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
-  echo "Upgrading brew."
-  brew update
-
   # clone depthai form git
   if [ -d "$DEPTHAI_DIR" ]; then
      echo "Demo app already downloaded. Checking out main and updating."
