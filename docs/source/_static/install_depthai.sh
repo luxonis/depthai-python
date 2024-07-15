@@ -146,11 +146,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
     python_executable=$(which python3.10)
   fi
 
-  # pip does not have pyqt5 for arm
-  if [[ $(uname -m) == 'arm64' ]]; then
-    echo "Installing pyqt5 with homebrew."
-    brew install pyqt@5
-  fi
 
   # create python virtual environment
   echo "Creating python virtual environment in $VENV_DIR"
@@ -161,18 +156,7 @@ if [[ $(uname -s) == "Darwin" ]]; then
   python -m pip install --upgrade pip
 
   # install launcher dependencies
-  # only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqt5 with pip
-  if [[ $(uname -m) == 'arm64' ]]; then
-    if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
-      echo "/opt/homebrew/lib/python$nr_1.$nr_2/site-packages already in PYTHONPATH"
-    else
-      export "PYTHONPATH=/opt/homebrew/lib/python$nr_1.$nr_2/site-packages:"$PYTHONPATH
-      echo "/opt/homebrew/lib/pythonv$nr_1.$nr_2/site-packages added to PYTHONPATH"
-    fi
-  else
-    pip install pyqt5
-  fi
-
+  pip install pyqt5
   pip install packaging
 
 elif [[ $(uname -s) == "Linux" ]]; then
