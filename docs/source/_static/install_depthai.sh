@@ -139,8 +139,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
   git checkout main
   git pull
 
-  # install python 3.10 and python dependencies
-  brew update
 
   if [ "$install_python" == "true" ]; then
     echo "installing python 3.10"
