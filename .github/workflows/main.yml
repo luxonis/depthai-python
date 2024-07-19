@@ -422,7 +422,7 @@ jobs:
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
     needs: build-docstrings
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: [self-hosted, Linux, ARM64]
     env:
       # workaround required for cache@v3, https://github.com/actions/cache/issues/1428
       # to be removed when upgrading the manylinux image
