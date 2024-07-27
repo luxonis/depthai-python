@@ -134,6 +134,7 @@ set(SOURCE_LIST
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
     src/pipeline/node/DepthEncoderBindings.cpp
+    src/pipeline/node/VisionHealthBindings.cpp
 
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
@@ -158,6 +159,8 @@ set(SOURCE_LIST
     src/pipeline/datatype/PointCloudConfigBindings.cpp
     src/pipeline/datatype/BenchmarkReportBindings.cpp
     src/pipeline/datatype/OccupancyPoolBindings.cpp
+    src/pipeline/datatype/VisionHealthMetricsBindings.cpp
+    src/pipeline/datatype/VisionHealthConfigBindings.cpp
 )
 
 # Add files for python module

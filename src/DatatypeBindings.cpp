@@ -27,6 +27,8 @@ void bind_tracklets(pybind11::module& m, void* pCallstack);
 void bind_benchmarkreport(pybind11::module& m, void* pCallstack);
 void bind_pointcloudconfig(pybind11::module& m, void* pCallstack);
 void bind_occupancypool(pybind11::module& m, void* pCallstack);
+void bind_visionhealthmetrics(pybind11::module& m, void* pCallstack);
+void bind_visionhealthconfig(pybind11::module& m, void* pCallstack);
 
 void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
      // Bind common datatypebindings
@@ -57,6 +59,8 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_benchmarkreport);
     callstack.push_front(bind_pointcloudconfig);
     callstack.push_front(bind_occupancypool);
+    callstack.push_front(bind_visionhealthmetrics);
+    callstack.push_front(bind_visionhealthconfig);
 }
 
 void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
