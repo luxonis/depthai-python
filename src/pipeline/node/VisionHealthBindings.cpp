@@ -31,7 +31,6 @@ void bind_visionhealth(pybind11::module& m, void* pCallstack){
     // VisionHealth properties
     properties
         .def_readwrite("initialConfig", &VisionHealthProperties::initialConfig, DOC(dai, VisionHealthProperties, initialConfig))
-        .def_readwrite("memory", &VisionHealthProperties::memory, DOC(dai, VisionHealthProperties, memory))
         .def_readwrite("bootThreshold", &VisionHealthProperties::bootThreshold, DOC(dai, VisionHealthProperties, bootThreshold))
         .def_readwrite("checkThreshold", &VisionHealthProperties::checkThreshold, DOC(dai, VisionHealthProperties, checkThreshold))
         ;

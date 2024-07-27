@@ -37,11 +37,13 @@ void bind_visionhealthconfig(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     _RawVisionHealthConfig
         .def(py::init<>())
-        .def_readwrite("relativeChangeFrameDistance", &RawVisionHealthConfig::relativeChangeFrameDistance, DOC(dai, RawVisionHealthConfig, relativeChangeFrameDistance))
-        .def_readwrite("relativeWindowSize", &RawVisionHealthConfig::relativeWindowSize, DOC(dai, RawVisionHealthConfig, relativeWindowSize))
+        .def_readwrite("depthVarianceRelativeWindowSize", &RawVisionHealthConfig::depthVarianceRelativeWindowSize, DOC(dai, RawVisionHealthConfig, depthVarianceRelativeWindowSize))
+        .def_readwrite("edgeHoleRateRelativeWindowSize", &RawVisionHealthConfig::edgeHoleRateRelativeWindowSize, DOC(dai, RawVisionHealthConfig, edgeHoleRateRelativeWindowSize))
         .def_readwrite("depthHoleRateThreshold", &RawVisionHealthConfig::depthHoleRateThreshold, DOC(dai, RawVisionHealthConfig, depthHoleRateThreshold))
         .def_readwrite("edgeStrengthThreshold", &RawVisionHealthConfig::edgeStrengthThreshold, DOC(dai, RawVisionHealthConfig, edgeStrengthThreshold))
         .def_readwrite("edgeHoleRateThreshold", &RawVisionHealthConfig::edgeHoleRateThreshold, DOC(dai, RawVisionHealthConfig, edgeHoleRateThreshold))
+        .def_readwrite("edgeHoleRateKernelSize", &RawVisionHealthConfig::edgeHoleRateKernelSize, DOC(dai, RawVisionHealthConfig, edgeHoleRateKernelSize))
+        .def_readwrite("depthtHoleRateCval", &RawVisionHealthConfig::depthtHoleRateCval, DOC(dai, RawVisionHealthConfig, depthtHoleRateCval))
         .def_readwrite("absoluteVisionHealthConfigs", &RawVisionHealthConfig::absoluteVisionHealthConfigs, DOC(dai, RawVisionHealthConfig, absoluteVisionHealthConfigs))
         .def_readwrite("relativeVisionHealthConfigs", &RawVisionHealthConfig::relativeVisionHealthConfigs, DOC(dai, RawVisionHealthConfig, relativeVisionHealthConfigs))
         ;

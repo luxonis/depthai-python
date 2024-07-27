@@ -427,7 +427,6 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     _VisionHealthMetricTypes
         .value("DepthVariance", VisionHealthMetricTypes::DepthVariance)
         .value("FillRate", VisionHealthMetricTypes::FillRate)
-        .value("PSNR", VisionHealthMetricTypes::PSNR)
         .value("EdgeHoleRate", VisionHealthMetricTypes::EdgeHoleRate)
         .value("Laplacian", VisionHealthMetricTypes::Laplacian)
     ;
