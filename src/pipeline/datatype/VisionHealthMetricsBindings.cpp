@@ -17,8 +17,7 @@ void bind_visionhealthmetrics(pybind11::module& m, void* pCallstack){
     using namespace dai;
 
     py::class_<RawVisionHealthMetrics, RawBuffer, std::shared_ptr<RawVisionHealthMetrics>> _RawVisionHealthMetrics(m, "RawVisionHealthMetrics", DOC(dai, RawVisionHealthMetrics));
-    py::class_<AbsoluteVisionHealthMetric> _AbsoluteVisionHealthMetric(m, "AbsoluteVisionHealthMetric", DOC(dai, AbsoluteVisionHealthMetric));
-    py::class_<RelativeVisionHealthMetric> _RelativeVisionHealthMetric(m, "RelativeVisionHealthMetric", DOC(dai, RelativeVisionHealthMetric));
+    py::class_<VisionHealthMetric> _VisionHealthMetric(m, "VisionHealthMetric", DOC(dai, VisionHealthMetric));
     py::class_<VisionHealthMetrics, Buffer, std::shared_ptr<VisionHealthMetrics>> _VisionHealthMetrics(m, "VisionHealthMetrics", DOC(dai, VisionHealthMetrics));
 
     ///////////////////////////////////////////////////////////////////////
@@ -37,28 +36,18 @@ void bind_visionhealthmetrics(pybind11::module& m, void* pCallstack){
     // Metadata / raw
     _RawVisionHealthMetrics
         .def(py::init<>())
-        .def_readwrite("absoluteVisionHealthMetrics", &RawVisionHealthMetrics::absoluteVisionHealthMetrics)
-        .def_readwrite("relativeVisionHealthMetrics", &RawVisionHealthMetrics::relativeVisionHealthMetrics)
+        .def_readwrite("visionHealthMetrics", &RawVisionHealthMetrics::visionHealthMetrics)
         ;
 
-    _AbsoluteVisionHealthMetric
+    _VisionHealthMetric
         .def(py::init<>())
-        .def_readwrite("value", &AbsoluteVisionHealthMetric::value, DOC(dai, AbsoluteVisionHealthMetric, value))
+        .def_readwrite("value", &VisionHealthMetric::value, DOC(dai, VisionHealthMetric, value))
         ;
-
-    _RelativeVisionHealthMetric
-        .def(py::init<>())
-        .def_readwrite("value", &RelativeVisionHealthMetric::value, DOC(dai, RelativeVisionHealthMetric, value))
-        .def_readwrite("mean", &RelativeVisionHealthMetric::mean, DOC(dai, RelativeVisionHealthMetric, mean))
-        .def_readwrite("variance", &RelativeVisionHealthMetric::variance, DOC(dai, RelativeVisionHealthMetric, variance))
-        ;
-
 
     // Message
     _VisionHealthMetrics
         .def(py::init<>())
-        .def_property("absoluteVisionHealthMetrics", [](VisionHealthMetrics& feat) { return &feat.absoluteVisionHealthMetrics; }, [](VisionHealthMetrics& feat, std::unordered_map<VisionHealthMetricTypes, AbsoluteVisionHealthMetric> val) { feat.absoluteVisionHealthMetrics = val; }, DOC(dai, VisionHealthMetrics, absoluteVisionHealthMetrics))
-        .def_property("relativeVisionHealthMetrics", [](VisionHealthMetrics& feat) { return &feat.relativeVisionHealthMetrics; }, [](VisionHealthMetrics& feat, std::unordered_map<VisionHealthMetricTypes, RelativeVisionHealthMetric> val) { feat.relativeVisionHealthMetrics = val; }, DOC(dai, VisionHealthMetrics, relativeVisionHealthMetrics))
+        .def_property("visionHealthMetrics", [](VisionHealthMetrics& feat) { return &feat.visionHealthMetrics; }, [](VisionHealthMetrics& feat, std::unordered_map<VisionHealthMetricTypes, VisionHealthMetric> val) { feat.visionHealthMetrics = val; }, DOC(dai, VisionHealthMetrics, visionHealthMetrics))
         .def("getTimestamp", &VisionHealthMetrics::Buffer::getTimestamp, DOC(dai, Buffer, getTimestamp))
         .def("getTimestampDevice", &VisionHealthMetrics::Buffer::getTimestampDevice, DOC(dai, Buffer, getTimestampDevice))
         .def("getSequenceNum", &VisionHealthMetrics::Buffer::getSequenceNum, DOC(dai, Buffer, getSequenceNum))

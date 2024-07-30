@@ -17,8 +17,6 @@ void bind_visionhealthconfig(pybind11::module& m, void* pCallstack){
     using namespace dai;
 
     py::class_<RawVisionHealthConfig, RawBuffer, std::shared_ptr<RawVisionHealthConfig>> _RawVisionHealthConfig(m, "RawVisionHealthConfig", DOC(dai, RawVisionHealthConfig));
-    py::class_<AbsoluteVisionHealthConfig> _AbsoluteVisionHealthConfig(m, "AbsoluteVisionHealthConfig", DOC(dai, AbsoluteVisionHealthConfig));
-    py::class_<RelativeVisionHealthConfig> _RelativeVisionHealthConfig(m, "RelativeVisionHealthConfig", DOC(dai, RelativeVisionHealthConfig));
     py::class_<VisionHealthConfig, Buffer, std::shared_ptr<VisionHealthConfig>> _VisionHealthConfig(m, "VisionHealthConfig", DOC(dai, VisionHealthConfig));
 
     ///////////////////////////////////////////////////////////////////////
@@ -44,23 +42,8 @@ void bind_visionhealthconfig(pybind11::module& m, void* pCallstack){
         .def_readwrite("edgeHoleRateThreshold", &RawVisionHealthConfig::edgeHoleRateThreshold, DOC(dai, RawVisionHealthConfig, edgeHoleRateThreshold))
         .def_readwrite("edgeHoleRateKernelSize", &RawVisionHealthConfig::edgeHoleRateKernelSize, DOC(dai, RawVisionHealthConfig, edgeHoleRateKernelSize))
         .def_readwrite("depthtHoleRateCval", &RawVisionHealthConfig::depthtHoleRateCval, DOC(dai, RawVisionHealthConfig, depthtHoleRateCval))
-        .def_readwrite("absoluteVisionHealthConfigs", &RawVisionHealthConfig::absoluteVisionHealthConfigs, DOC(dai, RawVisionHealthConfig, absoluteVisionHealthConfigs))
-        .def_readwrite("relativeVisionHealthConfigs", &RawVisionHealthConfig::relativeVisionHealthConfigs, DOC(dai, RawVisionHealthConfig, relativeVisionHealthConfigs))
+        .def_readwrite("visionHealthConfigs", &RawVisionHealthConfig::visionHealthConfigs, DOC(dai, RawVisionHealthConfig, visionHealthConfigs))
         ;
-
-    _AbsoluteVisionHealthConfig
-        .def(py::init<>())
-        .def_readwrite("threshold", &AbsoluteVisionHealthConfig::threshold, DOC(dai, AbsoluteVisionHealthConfig, threshold))
-        .def_readwrite("oper", &AbsoluteVisionHealthConfig::oper, DOC(dai, AbsoluteVisionHealthConfig, oper))
-        ;
-
-    _RelativeVisionHealthConfig
-        .def(py::init<>())
-        .def_readwrite("threshold", &RelativeVisionHealthConfig::threshold, DOC(dai, RelativeVisionHealthConfig, threshold))
-        .def_readwrite("oper", &RelativeVisionHealthConfig::oper, DOC(dai, RelativeVisionHealthConfig, oper))
-        .def_readwrite("sigmas", &RelativeVisionHealthConfig::sigmas, DOC(dai, RelativeVisionHealthConfig, sigmas))
-        ;
-
 
     // Message
     _VisionHealthConfig
@@ -69,8 +52,7 @@ void bind_visionhealthconfig(pybind11::module& m, void* pCallstack){
 
         .def("set", &VisionHealthConfig::set, py::arg("config"), DOC(dai, VisionHealthConfig, set))
         .def("get", &VisionHealthConfig::get, DOC(dai, VisionHealthConfig, get))
-        .def("addRelativeVisionHealthConfig", &VisionHealthConfig::addRelativeVisionHealthConfig, DOC(dai, VisionHealthConfig, addRelativeVisionHealthConfig))
-        .def("addAbsoluteVisionHealthConfig", &VisionHealthConfig::addAbsoluteVisionHealthConfig, DOC(dai, VisionHealthConfig, addAbsoluteVisionHealthConfig))
+        .def("addVisionHealthConfig", &VisionHealthConfig::addVisionHealthConfig, DOC(dai, VisionHealthConfig, addVisionHealthConfig))
         ;
 
 }
