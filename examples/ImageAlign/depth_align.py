@@ -68,7 +68,7 @@ stereo.setDepthAlign(dai.CameraBoardSocket.LEFT)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(timedelta(seconds=(1 / FPS) * 0.5))
+sync.setSyncThreshold(timedelta(seconds=0.5 / FPS))
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])
