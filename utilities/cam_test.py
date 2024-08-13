@@ -86,7 +86,7 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 parser.add_argument('-show', '--show-meta', action='store_true',
-                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `/`")
 parser.add_argument('-misc', '--misc-controls', type=string_pair, nargs='+',
                     default=[],
                     help="List of miscellaneous camera controls to set initially, "
@@ -406,7 +406,8 @@ with dai.Device() as device:
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
-                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    txt += f"Color temp: {pkt.getColorTemperature()} K, "
+                    txt += f"Sensor temp: {pkt.getSensorTemperature():.1f} degC"
                     txt += f", pix avg: {np.average(frame):.3f}"
                     if needs_newline:
                         print()
