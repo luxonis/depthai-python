@@ -5,5 +5,5 @@ opencv-contrib-python==4.5.5.62 # Last successful RPi build, also covers M1 with
 pyqt5>5,<5.15.6 ; platform_machine != "armv6l" and platform_machine != "armv7l" and platform_machine != "aarch64" and platform_machine != "arm64"
 --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/
 # Latest version (note - it's yanked)
-PySimpleGUI==4.60.5
+PySimpleGUI-4-foss==4.60.4.1 # Mirror of final open-source release.
 depthai
