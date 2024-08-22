@@ -112,7 +112,7 @@ ADD_ENTRYPOINT_TO_PATH='export PATH=$PATH'":$ENTRYPOINT_DIR"
 # Function to set crash reporting environment variable in shell configuration files
 set_crash_reporting_env() {
   local consent_value="$1"
-  local env_line="export DEPTHAI_ENABLE_FEEDBACK_CRASHDUMP=$consent_value"
+  local env_line="export DEPTHAI_ENABLE_ANALYTICS_COLLECTION=$consent_value"
   
   write_in_file "$env_line" "$BASHRC"
   if [ -f "$ZSHRC" ]; then
