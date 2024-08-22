@@ -29,7 +29,18 @@ try:
         print(f'Could not import depthai: {ex}')
 
     print(f'PYTHONPATH set to {env["PYTHONPATH"]}')
-    subprocess.check_call(['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}'], cwd=DIRECTORY, env=env)
+    # Check if stubgen has the `--include-docstrings` flag
+    includeDocstrings = False
+    output = subprocess.check_output(['stubgen', '--help'], env=env)
+    if b'--include-docstrings' in output:
+        includeDocstrings = True
+        print("Will include docstrings in stubs")
+    else:
+        print("Will not include docstrings in stubs")
+    parameters = ['stubgen', '-p', MODULE_NAME, '-o', f'{DIRECTORY}']
+    if includeDocstrings:
+        parameters.insert(1, '--include-docstrings')
+    subprocess.check_call(parameters, cwd=DIRECTORY, env=env)
 
     # Add py.typed
     open(f'{DIRECTORY}/depthai/py.typed', 'a').close()
@@ -49,7 +60,8 @@ try:
             import typing
             json = dict
             from pathlib import Path
-            from typing import Set
+            from typing import Set, Type, TypeVar
+            T = TypeVar('T')
         ''') + contents
 
         # Create 'create' overloads
@@ -59,6 +71,20 @@ try:
             overloads = overloads + f'\\1@overload\\1def create(self, arg0: typing.Type[node.{node}]) -> node.{node}: ...'
         final_stubs = re.sub(r"([\s]*)def create\(self, arg0: object\) -> Node: ...", f'{overloads}', stubs_import)
 
+        final_lines = []
+        for line in final_stubs.split('\n'):
+            if 'class Pipeline:' in line:
+                final_lines.append(line)
+                final_lines.append('    @overload')
+                final_lines.append('    def create(self, arg0: Type[T], *args, **kwargs) -> T: ...')
+                continue
+            match = re.match(r'^(    def getCvFrame\(self\) -> )object(:.*)$', line)
+            if match:
+                final_lines.append(f"{match.group(1)}numpy.ndarray{match.group(2)}")
+                continue
+            final_lines.append(line)
+
+        final_stubs = '\n'.join(final_lines)
         # Writeout changes
         file.seek(0)
         file.truncate(0)

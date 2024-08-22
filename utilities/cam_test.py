@@ -37,8 +37,9 @@ For the 'Select control: ...' options, use these keys to modify the value:
 '/' to toggle printing camera settings: exposure, ISO, lens position, color temperature
 """
 
+import depthai as dai
 import os
-#os.environ["DEPTHAI_LEVEL"] = "debug"
+# os.environ["DEPTHAI_LEVEL"] = "debug"
 
 import cv2
 import numpy as np
@@ -50,26 +51,30 @@ from pathlib import Path
 import sys
 import signal
 import math
+from stress_test import stress_test, YOLO_LABELS, create_yolo
+
+
+ALL_SOCKETS = ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd', 'came']
 
 def socket_type_pair(arg):
     socket, type = arg.split(',')
-    if not (socket in ['rgb', 'left', 'right', 'cama', 'camb', 'camc', 'camd']):
+    if not (socket in ALL_SOCKETS):
         raise ValueError("")
-    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof']):
+    if not (type in ['m', 'mono', 'c', 'color', 't', 'tof', 'th', 'thermal']):
         raise ValueError("")
     is_color = True if type in ['c', 'color'] else False
     is_tof = True if type in ['t', 'tof'] else False
-    return [socket, is_color, is_tof]
+    is_thermal = True if type in ['th', 'thermal'] else False
+    return [socket, is_color, is_tof, is_thermal]
 
 def string_pair(arg):
     return arg.split('=')
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
-                    default=[['rgb', True, False], ['left', False, False],
-                             ['right', False, False], ['camd', True, False]],
-                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of]. "
-                    "E.g: -cams rgb,m right,c . Default: rgb,c left,m right,m camd,c")
+                    default=[],
+                    help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of] / th[ermal]. "
+                    "E.g: -cams rgb,m right,c . If not specified, all connected cameras will be used.")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
 parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '4k', '5mp', '12mp', '13mp', '48mp'},
@@ -90,6 +95,8 @@ parser.add_argument('-raw', '--enable-raw', default=False, action="store_true",
                     help='Enable the RAW camera streams')
 parser.add_argument('-tofraw', '--tof-raw', action='store_true',
                     help="Show just ToF raw output instead of post-processed depth")
+parser.add_argument('-tofint', '--tof-intensity', action='store_true',
+                    help="Show also ToF intensity output alongside depth")
 parser.add_argument('-tofamp', '--tof-amplitude', action='store_true',
                     help="Show also ToF amplitude output alongside depth")
 parser.add_argument('-tofcm', '--tof-cm', action='store_true',
@@ -114,38 +121,50 @@ parser.add_argument('-ctimeout', '--connection-timeout', default=30000,
 parser.add_argument('-btimeout', '--boot-timeout', default=30000,
                     help="Boot timeout in ms. Default: %(default)s (sets DEPTHAI_BOOT_TIMEOUT environment variable)")
 
+parser.add_argument('-stress', action='store_true',
+                    help="Run stress test. This will override all other options (except -d/--device) and will run a heavy pipeline until the user stops it.")
+
+parser.add_argument("-stereo", action="store_true", default=False,
+                    help="Create a stereo depth node if the device has a stereo pair.")
+
+parser.add_argument("-yolo", type=str, default="",
+                    help=f"Create a yolo detection network on the specified camera. E.g: -yolo cama. Available cameras: {ALL_SOCKETS}")
+
+parser.add_argument("-gui", action="store_true",
+                    help="Use GUI instead of CLI")
+parser.add_argument("-h", "--help", action="store_true", default=False,
+                    help="Show this help message and exit") # So you can forward --help to stress test, without it being consumed by cam_test.py
+
 args = parser.parse_args()
 
 # Set timeouts before importing depthai
 os.environ["DEPTHAI_CONNECTION_TIMEOUT"] = str(args.connection_timeout)
 os.environ["DEPTHAI_BOOT_TIMEOUT"] = str(args.boot_timeout)
-import depthai as dai
 
-if len(sys.argv) == 1:
+if args.stress:
+    stress_test(args.device)
+    exit(0)
+
+if args.help:
+    parser.print_help()
+    exit(0)
+
+if args.gui:
     import cam_test_gui
     cam_test_gui.main()
-
-cam_list = []
-cam_type_color = {}
-cam_type_tof = {}
-print("Enabled cameras:")
-for socket, is_color, is_tof in args.cameras:
-    cam_list.append(socket)
-    cam_type_color[socket] = is_color
-    cam_type_tof[socket] = is_tof
-    print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'mono')
 
 print("DepthAI version:", dai.__version__)
 print("DepthAI path:", dai.__file__)
 
 cam_socket_opts = {
-    'rgb'  : dai.CameraBoardSocket.CAM_A,
-    'left' : dai.CameraBoardSocket.CAM_B,
+    'rgb': dai.CameraBoardSocket.CAM_A,
+    'left': dai.CameraBoardSocket.CAM_B,
     'right': dai.CameraBoardSocket.CAM_C,
-    'cama' : dai.CameraBoardSocket.CAM_A,
-    'camb' : dai.CameraBoardSocket.CAM_B,
-    'camc' : dai.CameraBoardSocket.CAM_C,
-    'camd' : dai.CameraBoardSocket.CAM_D,
+    'cama': dai.CameraBoardSocket.CAM_A,
+    'camb': dai.CameraBoardSocket.CAM_B,
+    'camc': dai.CameraBoardSocket.CAM_C,
+    'camd': dai.CameraBoardSocket.CAM_D,
+    'came': dai.CameraBoardSocket.CAM_E,
 }
 
 rotate = {
@@ -156,6 +175,7 @@ rotate = {
     'camb': args.rotate in ['all', 'mono'],
     'camc': args.rotate in ['all', 'mono'],
     'camd': args.rotate in ['all', 'rgb'],
+    'came': args.rotate in ['all', 'mono'],
 }
 
 mono_res_opts = {
@@ -179,6 +199,7 @@ color_res_opts = {
     '13mp': dai.ColorCameraProperties.SensorResolution.THE_13_MP,
     '48mp': dai.ColorCameraProperties.SensorResolution.THE_48_MP,
 }
+
 
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
@@ -216,123 +237,240 @@ class Cycle:
     def prev(self):
         return self.step(-1)
 
-# Start defining a pipeline
-pipeline = dai.Pipeline()
-# Uncomment to get better throughput
-# pipeline.setXLinkChunkSize(0)
-
-control = pipeline.createXLinkIn()
-control.setStreamName('control')
-
-xinTofConfig = pipeline.createXLinkIn()
-xinTofConfig.setStreamName('tofConfig')
-
-cam = {}
-tof = {}
-xout = {}
-xout_raw = {}
-xout_tof_amp = {}
-streams = []
-tofConfig = {}
-for c in cam_list:
-    tofEnableRaw = False
-    xout[c] = pipeline.createXLinkOut()
-    xout[c].setStreamName(c)
-    streams.append(c)
-    if cam_type_tof[c]:
-        cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
-        if args.tof_raw:
-            tofEnableRaw = True
-        else:
-            tof[c] = pipeline.create(dai.node.ToF)
-            cam[c].raw.link(tof[c].input)
-            tof[c].depth.link(xout[c].input)
-            xinTofConfig.out.link(tof[c].inputConfig)
-            tofConfig = tof[c].initialConfig.get()
-            tofConfig.depthParams.freqModUsed = dai.RawToFConfig.DepthParams.TypeFMod.MIN
-            tofConfig.depthParams.avgPhaseShuffle = False
-            tofConfig.depthParams.minimumAmplitude = 3.0
-
-            if args.tof_median == 0:
-                tofConfig.depthParams.median = dai.MedianFilter.MEDIAN_OFF
-            elif args.tof_median == 3:
-                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_3x3
-            elif args.tof_median == 5:
-                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_5x5
-            elif args.tof_median == 7:
-                tofConfig.depthParams.median = dai.MedianFilter.KERNEL_7x7
-
-            tof[c].initialConfig.set(tofConfig)
-            if args.tof_amplitude:
-                amp_name = 'tof_amplitude_' + c
-                xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
-                xout_tof_amp[c].setStreamName(amp_name)
-                streams.append(amp_name)
-                tof[c].amplitude.link(xout_tof_amp[c].input)
-    elif cam_type_color[c]:
-        cam[c] = pipeline.createColorCamera()
-        cam[c].setResolution(color_res_opts[args.color_resolution])
-        cam[c].setIspScale(1, args.isp_downscale)
-        # cam[c].initialControl.setManualFocus(85) # TODO
-        if args.rgb_preview:
-            cam[c].preview.link(xout[c].input)
-        else:
-            cam[c].isp.link(xout[c].input)
-    else:
-        cam[c] = pipeline.createMonoCamera()
-        cam[c].setResolution(mono_res_opts[args.mono_resolution])
-        cam[c].out.link(xout[c].input)
-    cam[c].setBoardSocket(cam_socket_opts[c])
-    # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
-    # cam[c].initialControl.setExternalTrigger(2, 1)
-    # cam[c].initialControl.setStrobeExternal(48, 1)
-    # cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
-
-    # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
-    # When set, takes effect after the first 2 frames
-    # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
-    # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
-    # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
-    # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
-    # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
-    # cam[c].initialControl.setMisc("hdr-exposure-ratio", 4)  # enables HDR when set `> 1`, current options: 2, 4, 8
-    # cam[c].initialControl.setMisc("hdr-local-tone-weight", 75)  # default 75, range 0..100
-    # cam[c].initialControl.setMisc("high-conversion-gain", 0)  # 1 to enable (default on supported sensors)
-    for kvPair in args.misc_controls:
-        cam[c].initialControl.setMisc(*kvPair)
-    control.out.link(cam[c].inputControl)
-    if rotate[c]:
-        cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
-    cam[c].setFps(args.fps)
-    if args.isp3afps:
-        cam[c].setIsp3aFps(args.isp3afps)
-
-    if args.enable_raw or tofEnableRaw:
-        raw_name = 'raw_' + c
-        xout_raw[c] = pipeline.create(dai.node.XLinkOut)
-        xout_raw[c].setStreamName(raw_name)
-        streams.append(raw_name)
-        cam[c].raw.link(xout_raw[c].input)
-        cam[c].setRawOutputPacked(False)
-
-if args.camera_tuning:
-    pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
-
 def exit_cleanly(signum, frame):
     print("Exiting cleanly")
     cv2.destroyAllWindows()
     sys.exit(0)
 
+
+def socket_to_socket_opt(socket: dai.CameraBoardSocket) -> str:
+    return str(socket).split('.')[-1].replace("_", "").lower()
+
+
 signal.signal(signal.SIGINT, exit_cleanly)
 
-
-# Pipeline is defined, now we can connect to the device
-device = dai.Device.getDeviceByMxId(args.device)
-dai_device_args = [pipeline]
-if device[0]:
-    dai_device_args.append(device[1])
+# Connect to device, so that we can get connected cameras in case of no args
+success, device = dai.Device.getDeviceByMxId(args.device)
+dai_device_args = []
+if success:
+    dai_device_args.append(device)
 with dai.Device(*dai_device_args) as device:
-    # print('Connected cameras:', [c.name for c in device.getConnectedCameras()])
+    cam_list = []
+    cam_type_color = {}
+    cam_type_tof = {}
+    cam_type_thermal = {}
+
+    if not args.cameras:
+        connected_cameras = device.getConnectedCameraFeatures()
+        args.cameras = [(socket_to_socket_opt(cam.socket), cam.supportedTypes[0] ==
+                         dai.CameraSensorType.COLOR, cam.supportedTypes[0] == dai.CameraSensorType.TOF, cam.supportedTypes[0] == dai.CameraSensorType.THERMAL) for cam in connected_cameras]
+        if not args.cameras:
+            print("No cameras found!")
+            exit(1)
+
+    print("Enabled cameras:")
+    for socket, is_color, is_tof, is_thermal in args.cameras:
+        cam_list.append(socket)
+        cam_type_color[socket] = is_color
+        cam_type_tof[socket] = is_tof
+        cam_type_thermal[socket] = is_thermal
+        print(socket.rjust(7), ':', 'tof' if is_tof else 'color' if is_color else 'thermal' if is_thermal else 'mono')
+
+    # Start defining a pipeline
+    pipeline = dai.Pipeline()
+    # Uncomment to get better throughput
+    # pipeline.setXLinkChunkSize(0)
+
+    control = pipeline.createXLinkIn()
+    control.setStreamName('control')
+
+    xinTofConfig = pipeline.createXLinkIn()
+    xinTofConfig.setStreamName('tofConfig')
+
+    cam = {}
+    tof = {}
+    xout = {}
+    xout_raw = {}
+    xout_tof_amp = {}
+    xout_tof_int = {}
+    streams = []
+    yolo_passthrough_q_name = None
+    for c in cam_list:
+        print("CAM: ", c)
+        tofEnableRaw = False
+        xout[c] = pipeline.createXLinkOut()
+        xout[c].setStreamName(c)
+        streams.append(c)
+        if cam_type_tof[c]:
+            cam[c] = pipeline.create(dai.node.ColorCamera)  # .Camera
+            if args.tof_raw:
+                tofEnableRaw = True
+            else:
+                tof[c] = pipeline.create(dai.node.ToF)
+                cam[c].raw.link(tof[c].input)
+                tof[c].depth.link(xout[c].input)
+                xinTofConfig.out.link(tof[c].inputConfig)
+                if args.tof_median == 0:
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.MEDIAN_OFF)
+                elif args.tof_median == 3:
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_3x3)
+                elif args.tof_median == 5:
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_5x5)
+                elif args.tof_median == 7:
+                    tof[c].initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
+                tofConfig = tof[c].initialConfig.get()  # TODO multiple instances
+                if args.tof_amplitude:
+                    amp_name = 'tof_amplitude_' + c
+                    xout_tof_amp[c] = pipeline.create(dai.node.XLinkOut)
+                    xout_tof_amp[c].setStreamName(amp_name)
+                    streams.append(amp_name)
+                    tof[c].amplitude.link(xout_tof_amp[c].input)
+                if args.tof_intensity:
+                    int_name = 'tof_intensity_' + c
+                    xout_tof_int[c] = pipeline.create(dai.node.XLinkOut)
+                    xout_tof_int[c].setStreamName(int_name)
+                    streams.append(int_name)
+                    tof[c].intensity.link(xout_tof_int[c].input)
+        elif cam_type_thermal[c]:
+            cam[c] = pipeline.create(dai.node.Camera)
+            cam[c].setBoardSocket(cam_socket_opts[c])
+            cam[c].setPreviewSize(256, 192)
+            cam[c].raw.link(xout[c].input)
+            xout_preview = pipeline.create(dai.node.XLinkOut)
+            xout_preview.setStreamName('preview_' + c)
+            cam[c].preview.link(xout_preview.input)
+            streams.append('preview_' + c)
+        elif cam_type_color[c]:
+            cam[c] = pipeline.createColorCamera()
+            cam[c].setResolution(color_res_opts[args.color_resolution])
+            cam[c].setIspScale(1, args.isp_downscale)
+            # cam[c].initialControl.setManualFocus(85) # TODO
+            if args.rgb_preview:
+                cam[c].preview.link(xout[c].input)
+            else:
+                cam[c].isp.link(xout[c].input)
+            if args.yolo == c:
+                yolo_passthrough_q_name, yolo_q_name = create_yolo(pipeline, cam[c])
+                streams.append(yolo_q_name)
+        else:
+            cam[c] = pipeline.createMonoCamera()
+            cam[c].setResolution(mono_res_opts[args.mono_resolution])
+            cam[c].out.link(xout[c].input)
+        cam[c].setBoardSocket(cam_socket_opts[c])
+        # Num frames to capture on trigger, with first to be discarded (due to degraded quality)
+        # cam[c].initialControl.setExternalTrigger(2, 1)
+        # cam[c].initialControl.setStrobeExternal(48, 1)
+        # cam[c].initialControl.setFrameSyncMode(dai.CameraControl.FrameSyncMode.INPUT)
+
+        # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
+        # When set, takes effect after the first 2 frames
+        # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
+        # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
+        # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
+        # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
+        # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
+        # cam[c].initialControl.setMisc("hdr-exposure-ratio", 4)  # enables HDR when set `> 1`, current options: 2, 4, 8
+        # cam[c].initialControl.setMisc("hdr-local-tone-weight", 75)  # default 75, range 0..100
+        # cam[c].initialControl.setMisc("high-conversion-gain", 0)  # 1 to enable (default on supported sensors)
+        for kvPair in args.misc_controls:
+            cam[c].initialControl.setMisc(*kvPair)
+        control.out.link(cam[c].inputControl)
+        if rotate[c]:
+            cam[c].setImageOrientation(
+                dai.CameraImageOrientation.ROTATE_180_DEG)
+        cam[c].setFps(args.fps)
+        if args.isp3afps:
+            cam[c].setIsp3aFps(args.isp3afps)
+
+        if args.enable_raw or tofEnableRaw:
+            raw_name = 'raw_' + c
+            xout_raw[c] = pipeline.create(dai.node.XLinkOut)
+            xout_raw[c].setStreamName(raw_name)
+            streams.append(raw_name)
+            cam[c].raw.link(xout_raw[c].input)
+            cam[c].setRawOutputPacked(False)
+
+    if args.camera_tuning:
+        pipeline.setCameraTuningBlobPath(str(args.camera_tuning))
+
+    stereo = None
+
+    if args.stereo:
+        try:
+            try:
+                calib = device.readCalibration2()
+            except:
+                raise Exception("Device is not calibrated.")
+            eeprom = calib.getEepromData()
+            left, right = eeprom.stereoRectificationData.leftCameraSocket, eeprom.stereoRectificationData.rightCameraSocket
+            # Get the actual camera nodes
+            # The cameras may have been specified with -cams rgb,c left,m right,m kind of names, so we need to handle these edge cases
+            left_sock_opt = socket_to_socket_opt(left)
+            right_sock_opt = socket_to_socket_opt(right)
+            left_cam = cam.get(left_sock_opt, None)
+            right_cam = cam.get(right_sock_opt, None)
+            if not left_cam:
+                if left == dai.CameraBoardSocket.CAM_A:
+                    left_sock_opt = "rgb"
+                elif left == dai.CameraBoardSocket.CAM_B:
+                    left_sock_opt = "left"
+                elif left == dai.CameraBoardSocket.CAM_C:
+                    left_sock_opt = "right"
+                left_cam = cam.get(left_sock_opt, None)
+            if not right_cam:
+                if right == dai.CameraBoardSocket.CAM_A:
+                    right_sock_opt = "rgb"
+                elif right == dai.CameraBoardSocket.CAM_B:
+                    right_sock_opt = "left"
+                elif right == dai.CameraBoardSocket.CAM_C:
+                    right_sock_opt = "right"
+                right_cam = cam.get(right_sock_opt, None)
+
+            if left_cam and right_cam:
+                cam_features = device.getConnectedCameraFeatures()
+                left_cam_features = next(
+                    filter(lambda c: c.socket == left, cam_features))
+                right_cam_features = next(
+                    filter(lambda c: c.socket == right, cam_features))
+                if left_cam_features.width > 1280:
+                    if args.isp_downscale == 1:
+                        raise Exception(
+                            "Can't create stereo depth with left cam width > 1280. Use --isp-downscale to downscale the image.")
+                if right_cam_features.width > 1280:
+                    if args.isp_downscale == 1:
+                        raise Exception(
+                            "Can't create stereo depth with right cam width > 1280. Use --isp-downscale to downscale the image.")
+                left_out = "out"
+                right_out = "out"
+                if cam_type_color[left_sock_opt]:
+                    left_out = "video"
+                if cam_type_color[right_sock_opt]:
+                    right_out = "video"
+
+                print(
+                    "Device is calibrated and has a stereo pair, creating StereoDepth node.")
+                stereo = pipeline.createStereoDepth()
+                stereo.setDefaultProfilePreset(
+                    dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+                stereo.initialConfig.setMedianFilter(dai.MedianFilter.KERNEL_7x7)
+                stereo.setLeftRightCheck(True)
+                stereo.setSubpixel(True)
+                stereo.setLeftRightCheck(True)
+                getattr(left_cam, left_out).link(stereo.left)
+                getattr(right_cam, right_out).link(stereo.right)
+                xout_stereo = pipeline.createXLinkOut()
+                depth_stream = "stereo_depth"
+                xout_stereo.setStreamName(depth_stream)
+                stereo.disparity.link(xout_stereo.input)
+                streams.append(depth_stream)
+            else:
+                print("Couldn't create stereo depth node. Device has invalid calibration.")
+        except Exception as e:
+            print("Couldn't create depth:", e)
+
+    # Pipeline is defined, now we can start it
+    device.startPipeline(pipeline)
+
     print('Connected cameras:')
     cam_name = {}
     for p in device.getConnectedCameraFeatures():
@@ -345,6 +483,8 @@ with dai.Device(*dai_device_args) as device:
             cam_name['raw_'+p.socket.name] = p.sensorName
         if args.tof_amplitude:
             cam_name['tof_amplitude_'+p.socket.name] = p.sensorName
+        if args.tof_intensity:
+            cam_name['tof_intensity_'+p.socket.name] = p.sensorName
 
     print('USB speed:', device.getUsbSpeed().name)
 
@@ -416,13 +556,17 @@ with dai.Device(*dai_device_args) as device:
     hdr_local_tone_weight = int(32 * float(args_misc_dict.get('hdr-local-tone-weight', 0.75)))
     hdr_on = (hdr_exp_ratio > 0)
 
-    jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
+    jet_custom = cv2.applyColorMap(
+        np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
 
     print("Cam:", *['     ' + c.ljust(8)
-          for c in cam_list], "[host | capture timestamp]")
+                    for c in cam_list], "[host | capture timestamp]")
 
     capture_list = []
+    yolo_passthrough_q = None
+    if yolo_passthrough_q_name is not None:
+        yolo_passthrough_q = device.getOutputQueue(yolo_passthrough_q_name, maxSize=1, blocking=False)
     while True:
         for c in streams:
             try:
@@ -433,17 +577,44 @@ with dai.Device(*dai_device_args) as device:
             if pkt is not None:
                 fps_host[c].update()
                 fps_capt[c].update(pkt.getTimestamp().total_seconds())
+                if args.yolo and isinstance(pkt, dai.ImgDetections):
+                    if yolo_passthrough_q is None:
+                        continue
+                    frame_pkt = yolo_passthrough_q.get()
+                    frame = frame_pkt.getCvFrame()
+                    if frame is None:
+                        continue # No frame to draw on
+                    for detection in pkt.detections:
+                        bbox = np.array([detection.xmin * frame.shape[1], detection.ymin * frame.shape[0], detection.xmax * frame.shape[1], detection.ymax * frame.shape[0]], dtype=np.int32)
+                        cv2.putText(frame, YOLO_LABELS[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                        cv2.putText(frame, f"{int(detection.confidence)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                        cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
+                    cv2.imshow(c, frame)
+                    continue
                 width, height = pkt.getWidth(), pkt.getHeight()
                 frame = pkt.getCvFrame()
                 cam_skt = c.split('_')[-1]
-                if cam_type_tof[cam_skt] and not (c.startswith('raw_') or c.startswith('tof_amplitude_')):
+
+                if c == "stereo_depth" and stereo is not None:
+                    maxDisp = stereo.initialConfig.getMaxDisparity()
+                    disp = (pkt.getCvFrame() * (255.0 / maxDisp)).astype(np.uint8)
+                    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+                    cv2.imshow(c, disp)
+                    continue
+                
+                
+                if cam_type_tof.get(cam_skt, None) and not (c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_')):
                     if args.tof_cm:
                         # pixels represent `cm`, capped to 255. Value can be checked hovering the mouse
                         frame = (frame // 10).clip(0, 255).astype(np.uint8)
                     else:
-                        frame = (frame.view(np.int16).astype(float))
-                        frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                        max_depth = (tofConfig.phaseUnwrappingLevel + 1) * 1874 # 80MHz modulation freq. TODO slider
+                        frame = np.interp(frame, (0, max_depth), (0, 255)).astype(np.uint8)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                elif cam_type_thermal[cam_skt] and c.startswith('cam'):
+                    frame = frame.astype(np.float32)
+                    frame = cv2.normalize(frame, frame, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+                    frame = cv2.applyColorMap(frame, cv2.COLORMAP_MAGMA)
                 if show:
                     txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
@@ -467,7 +638,7 @@ with dai.Device(*dai_device_args) as device:
                         )
                     capture_list.remove(c)
                     print()
-                if c.startswith('raw_') or c.startswith('tof_amplitude_'):
+                if c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_'):
                     if capture:
                         filename = capture_file_info + '_10bit.bw'
                         print('Saving:', filename)
@@ -475,8 +646,10 @@ with dai.Device(*dai_device_args) as device:
                     # Full range for display, use bits [15:6] of the 16-bit pixels
                     type = pkt.getType()
                     multiplier = 1
-                    if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
-                    if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
+                    if type == dai.ImgFrame.Type.RAW10:
+                        multiplier = (1 << (16-10))
+                    if type == dai.ImgFrame.Type.RAW12:
+                        multiplier = (1 << (16-4))
                     frame = frame * multiplier
                     # Debayer as color for preview/png
                     if cam_type_color[cam_skt]:
@@ -497,7 +670,8 @@ with dai.Device(*dai_device_args) as device:
                     cv2.imwrite(filename, frame)
                 cv2.imshow(c, frame)
         print("\rFPS:",
-              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
+              *["{:6.2f}|{:6.2f}".format(fps_host[c].get(),
+                                         fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
         needs_newline = True
 
@@ -511,29 +685,12 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
-        elif key == ord('g'):
-            if tof:
-                f_mod = dai.RawToFConfig.DepthParams.TypeFMod.MAX if tofConfig.depthParams.freqModUsed  == dai.RawToFConfig.DepthParams.TypeFMod.MIN else dai.RawToFConfig.DepthParams.TypeFMod.MIN
-                print("ToF toggling f_mod value to:", f_mod)
-                tofConfig.depthParams.freqModUsed = f_mod
-                tofCfgQueue.send(tofConfig)
-            else:
-                if hdr_on:
-                    control = 'hdr_local_tone_weight'
-                    print("Selected control:", control)
-                else:
-                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
         elif key == ord('h'):
-            if tof:
-                tofConfig.depthParams.avgPhaseShuffle = not tofConfig.depthParams.avgPhaseShuffle
-                print("ToF toggling avgPhaseShuffle value to:", tofConfig.depthParams.avgPhaseShuffle)
-                tofCfgQueue.send(tofConfig)
-            else:
-                high_conversion_gain = 1 - high_conversion_gain
-                print("High conversion gain:", high_conversion_gain)
-                ctrl = dai.CameraControl()
-                ctrl.setMisc("high-conversion-gain", high_conversion_gain)
-                controlQueue.send(ctrl)
+            high_conversion_gain = 1 - high_conversion_gain
+            print("High conversion gain:", high_conversion_gain)
+            ctrl = dai.CameraControl()
+            ctrl.setMisc("high-conversion-gain", high_conversion_gain)
+            controlQueue.send(ctrl)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -612,7 +769,7 @@ with dai.Device(*dai_device_args) as device:
                 floodIntensity = 0
             device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p\\;\'r':
+        elif key >= 0 and chr(key) in '34567890[]\\;\'rg':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -641,9 +798,9 @@ with dai.Device(*dai_device_args) as device:
                 control = 'chroma_denoise'
             elif key == ord('p'):
                 control = 'tof_amplitude_min'
-            elif key == ord('r'):
+            elif key == ord('r') or key == ord('g'):
                 if hdr_on:
-                    control = 'hdr_exp_ratio'
+                    control = 'hdr_exp_ratio' if key == ord('r') else 'hdr_local_tone_weight'
                 else:
                     print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
             print("Selected control:", control)
@@ -655,7 +812,7 @@ with dai.Device(*dai_device_args) as device:
                 change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ] \\ ; \' r g p")
+                print("Please select a control first using keys 3..9 0 [ ] \\ ; \' r g")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
@@ -718,11 +875,6 @@ with dai.Device(*dai_device_args) as device:
                 value = hdr_local_tone_weight / 32
                 print(f"HDR local tone weight (normalized): {value:.2f}")
                 ctrl.setMisc("hdr-local-tone-weight", value)
-            elif control == 'tof_amplitude_min' and tof:
-                amp_min = clamp(tofConfig.depthParams.minimumAmplitude + change, 0, 50)
-                print("Setting min amplitude(confidence) to:", amp_min)
-                tofConfig.depthParams.minimumAmplitude = amp_min
-                tofCfgQueue.send(tofConfig)
             controlQueue.send(ctrl)
 
     print()
