@@ -109,6 +109,32 @@ BASHRC="$HOME/.bashrc"
 ZSHRC="$HOME/.zshrc"
 ADD_ENTRYPOINT_TO_PATH='export PATH=$PATH'":$ENTRYPOINT_DIR"
 
+# Function to set crash reporting environment variable in shell configuration files
+set_crash_reporting_env() {
+  local consent_value="$1"
+  local env_line="export DEPTHAI_ENABLE_FEEDBACK_CRASHDUMP=$consent_value"
+  
+  write_in_file "$env_line" "$BASHRC"
+  if [ -f "$ZSHRC" ]; then
+    write_in_file "$env_line" "$ZSHRC"
+  fi
+}
+
+# Prompt for user consent to enable crash reporting
+echo ""
+echo "DepthAI can collect anonymous crash reports to help improve the software."
+echo "Do you agree to enable crash reporting? (y/n)"
+read -n 1 crash_report_consent < /dev/tty
+echo ""
+
+if [[ "$crash_report_consent" == "y" || "$crash_report_consent" == "Y" ]]; then
+  echo "Crash reporting enabled."
+  set_crash_reporting_env "1"
+else
+  echo "Crash reporting disabled."
+  set_crash_reporting_env "0"
+fi
+
 # add to .bashrc only if it is not in there already
 write_in_file "$COMMENT" "$BASHRC"
 write_in_file "$ADD_ENTRYPOINT_TO_PATH" "$BASHRC"
