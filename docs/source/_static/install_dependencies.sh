@@ -117,6 +117,12 @@ readonly fedora_pkgs=(
     #           libsm6 libxext6 libgl1-mesa-glx
 )
 
+# Check Bash version
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+    echo "This script requires Bash 4.0 or higher. You are using Bash ${BASH_VERSION}. Please upgrade your Bash version."
+    exit 1
+fi
+
 print_action () {
     green="\e[0;32m"
     reset="\e[0;0m"

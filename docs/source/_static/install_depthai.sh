@@ -159,6 +159,11 @@ if [[ $(uname -s) == "Darwin" ]]; then
   pip install pyqt5
   pip install packaging
 
+  # Inform macOS users about PATH changes
+  echo "DepthAI has been added to your PATH in .bashrc and .zshrc (if present)."
+  echo "If you prefer, you can manually add the following line to your .bash_profile for it to be recognized in login shells:"
+  echo "export PATH=\$PATH:$ENTRYPOINT_DIR"
+
 elif [[ $(uname -s) == "Linux" ]]; then
   echo _____________________________
   echo "Calling linux_installer.sh"
