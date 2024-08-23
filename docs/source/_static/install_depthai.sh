@@ -7,7 +7,7 @@ mkdir "$WORKING_DIR"
 install_path=""
 path_correct="false"
 
-trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing dependencies. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
+trap 'RET=$? ; echo -e >&2 "\n\x1b[31mFailed installing depthai. Could be a bug in the installer or unsupported platform. Open a bug report over at https://github.com/luxonis/depthai - exited with status $RET at line $LINENO \x1b[0m\n" ; exit $RET' ERR
 
 while [ "$path_correct" = "false" ]
 do
@@ -127,9 +127,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
   echo "Installing global dependencies."
   bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
 
-  echo "Upgrading brew."
-  brew update
-
   # clone depthai form git
   if [ -d "$DEPTHAI_DIR" ]; then
      echo "Demo app already downloaded. Checking out main and updating."
@@ -142,8 +139,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
   git checkout main
   git pull
 
-  # install python 3.10 and python dependencies
-  brew update
 
   if [ "$install_python" == "true" ]; then
     echo "installing python 3.10"
@@ -151,11 +146,6 @@ if [[ $(uname -s) == "Darwin" ]]; then
     python_executable=$(which python3.10)
   fi
 
-  # pip does not have pyqt5 for arm
-  if [[ $(uname -m) == 'arm64' ]]; then
-    echo "Installing pyqt5 with homebrew."
-    brew install pyqt@5
-  fi
 
   # create python virtual environment
   echo "Creating python virtual environment in $VENV_DIR"
@@ -166,19 +156,13 @@ if [[ $(uname -s) == "Darwin" ]]; then
   python -m pip install --upgrade pip
 
   # install launcher dependencies
-  # only on mac silicon point PYTHONPATH to pyqt5 installation via homebrew, otherwise install pyqt5 with pip
-  if [[ $(uname -m) == 'arm64' ]]; then
-    if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
-      echo "/opt/homebrew/lib/python$nr_1.$nr_2/site-packages already in PYTHONPATH"
-    else
-      export "PYTHONPATH=/opt/homebrew/lib/python$nr_1.$nr_2/site-packages:"$PYTHONPATH
-      echo "/opt/homebrew/lib/pythonv$nr_1.$nr_2/site-packages added to PYTHONPATH"
-    fi
-  else
-    pip install pyqt5
-  fi
-
+  pip install pyqt5
   pip install packaging
+
+  # Inform macOS users about PATH changes
+  echo "DepthAI has been added to your PATH in .bashrc and .zshrc (if present)."
+  echo "If you prefer, you can manually add the following line to your .bash_profile for it to be recognized in login shells:"
+  echo "export PATH=\$PATH:$ENTRYPOINT_DIR"
 
 elif [[ $(uname -s) == "Linux" ]]; then
   echo _____________________________

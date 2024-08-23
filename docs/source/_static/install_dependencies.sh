@@ -117,6 +117,12 @@ readonly fedora_pkgs=(
     #           libsm6 libxext6 libgl1-mesa-glx
 )
 
+# Check Bash version
+if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
+    echo "This script requires Bash 4.0 or higher. You are using Bash ${BASH_VERSION}. Please upgrade your Bash version."
+    exit 1
+fi
+
 print_action () {
     green="\e[0;32m"
     reset="\e[0;0m"
@@ -155,16 +161,26 @@ lookup_debian_version_number() {
 }
 
 if [[ $(uname) == "Darwin" ]]; then
-    echo "During Homebrew install, certain commands need 'sudo'. Requesting access..."
-    sudo true
-    homebrew_install_url="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
-    print_action "Installing Homebrew from $homebrew_install_url"
-    # CI=1 will skip some interactive prompts
-    CI=1 /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
-    print_and_exec brew install git
-    echo
-    echo "=== Installed successfully!  IMPORTANT: For changes to take effect,"
-    echo "please close and reopen the terminal window, or run:  exec \$SHELL"
+    if ! command -v brew &> /dev/null; then
+        echo "During Homebrew install, certain commands need 'sudo'. Requesting access..."
+        sudo true
+        homebrew_install_url="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
+        print_action "Installing Homebrew from $homebrew_install_url"
+        # CI=1 will skip some interactive prompts
+        CI=1 /bin/bash -c "$(curl -fsSL $homebrew_install_url)"
+        echo
+        echo "=== Installed successfully!  IMPORTANT: For changes to take effect,"
+        echo "please close and reopen the terminal window, or run:  exec \$SHELL"
+    else
+        echo "Homebrew is already installed."
+    fi
+
+    if ! command -v git &> /dev/null; then
+        echo "Git not found, installing using Homebrew..."
+        print_and_exec brew install git
+    else
+        echo "Git Already installed.."
+    fi
 
 elif [ -f /etc/os-release ]; then
     source /etc/os-release
