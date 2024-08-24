@@ -4,6 +4,9 @@ import sys, os, subprocess
 import argparse
 import re
 import platform
+from subprocess import CalledProcessError, DEVNULL
+import textwrap
+
 
 convert_default = "empty"
 parser = argparse.ArgumentParser()
@@ -46,18 +49,18 @@ if thisPlatform == "aarch64":
     # try to import opencv, numpy in a subprocess, since it might fail with illegal instruction
     # if it was previously installed w/ pip without setting OPENBLAS_CORE_TYPE=ARMV8 env variable
     try:
-        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"])
+        subprocess.check_call([sys.executable, "-c", "import numpy, cv2;"], stderr=DEVNULL)
         requireOpenCv = False
     except subprocess.CalledProcessError as ex:
         requireOpenCv = True
 
 if requireOpenCv:
-    DEPENDENCIES.append('numpy')
+    DEPENDENCIES.append('numpy<3.0')
     # 4.5.4.58 package is broken for python 3.9
     if sys.version_info[0] == 3 and sys.version_info[1] == 9:
         DEPENDENCIES.append('opencv-python!=4.5.4.58')
     else:
-        DEPENDENCIES.append('opencv-contrib-python==4.5.5.62') # same as in depthai requirementx.txt
+        DEPENDENCIES.append('opencv-python<5.0')
 
 
 
@@ -94,10 +97,38 @@ if not in_venv:
 
 # Update pip
 pip_update_cmd = [*pip_install, "pip"]
+
 if args.dry_run:
     prettyPrint(pip_update_cmd)
 else:
-    subprocess.check_call(pip_update_cmd)
+    try:
+        subprocess.check_call(pip_update_cmd)
+    except CalledProcessError as e:
+        print(f"\n\n\033[31m\033[1m[Warning]\033[0m An error occurred while trying to update pip: {e}\n")
+        print("This likely stems from the fact that you're not using a Python virtual environment.")
+        venv_creation_instructions = textwrap.dedent(f"""\
+            \033[94m\033[1m
+            Here's how you can create and activate a virtual environment:
+            
+            1. Create a virtual environment:
+               - For Linux or MacOS, use: python3 -m venv {parent_dir}/.env
+               - For Windows, use: python -m venv {parent_dir}/.env
+            
+            2. Activate the virtual environment:
+               - For Linux or MacOS, use: source {parent_dir}/.env/bin/activate
+               - For Windows, use: {parent_dir}/.env/Scripts/activate
+            
+            Once activated, you'll be working within the virtual environment. You can then attempt to re-run this script.
+            To exit the virtual environment when you're done, simply use the command: deactivate
+            
+            For more detailed instructions, please refer to the official Python documentation on virtual environments: https://docs.python.org/3/tutorial/venv.html
+            \033[0m
+            """)
+        
+        print(textwrap.indent(venv_creation_instructions, '    '))
+        exit(0)
+
+
 # Install python dependencies
 python_dependencies_cmd = [*pip_package_install, *DEPENDENCIES]
 if args.dry_run:
@@ -161,16 +192,51 @@ else:
     subprocess.check_call(downloader_cmd)
 
 if args.convert != convert_default:
-    nn_models_shaves = {
-        "mobilenet-ssd": [5, 6, 8],
-        "person-detection-retail-0013": [7],
-        "yolo-v4-tiny-tf": [6],
-        "yolo-v3-tiny-tf": [6],
+
+    nn_model_configs = {
+        "mobilenet-ssd": {
+            "shaves": [5, 6, 8],
+            "compile_params": ["-ip U8"],
+            "zoo_type": "intel",
+            "default_ov_version": "2021.4"
+        },
+        "person-detection-retail-0013": {
+            "shaves": [7],
+            "compile_params": ["-ip U8"],
+            "zoo_type": "intel",
+            "default_ov_version": "2021.4"
+        },
+        "yolo-v4-tiny-tf": {
+            "shaves": [6],
+            "compile_params": ["-ip U8"],
+            "zoo_type": "intel",
+            "default_ov_version": "2021.4"
+        },
+        "yolo-v3-tiny-tf": {
+            "shaves": [6],
+            "compile_params": ["-ip U8"],
+            "zoo_type": "intel",
+            "default_ov_version": "2021.4"
+        },
+        "yolov6n_thermal_people_256x192": {
+            "shaves": [6],
+            "compile_params": ["-ip FP16"],
+            "zoo_type": "depthai",
+            "default_ov_version": "2022.1"
+        },
     }
+
     blobconverter_cmds = [
-        [sys.executable, "-m", "blobconverter", "-zn", nn_name, "-sh", str(nn_shave), "-o", f"{examples_dir}/models", *(["-v", args.convert] if args.convert is not None else [])]
-        for nn_name in nn_models_shaves
-        for nn_shave in nn_models_shaves[nn_name]
+        [sys.executable, 
+        "-m", "blobconverter", 
+        "-zn", nn_name, 
+        "-sh", str(nn_shave), 
+        "-o", f"{examples_dir}/models", 
+        "-zt", nn_model_configs[nn_name]["zoo_type"],
+        *(["--compile-params", " ".join(nn_model_configs[nn_name]["compile_params"])] if nn_model_configs[nn_name]["compile_params"] else []),
+        *(["-v", args.convert] if args.convert != convert_default else ["-v", nn_model_configs[nn_name]["default_ov_version"]])]
+        for nn_name in nn_model_configs
+        for nn_shave in nn_model_configs[nn_name]["shaves"]
     ]
     install_blobconverter_cmd = [*pip_package_install, "blobconverter"]
     for cmd in [install_blobconverter_cmd] + blobconverter_cmds:

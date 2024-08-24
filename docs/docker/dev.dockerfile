@@ -8,6 +8,7 @@ ENV CC clang-10
 ENV CXX clang++-10
 WORKDIR /app
 ADD docs/requirements.txt docs/requirements.txt
+ADD docs/requirements_mkdoc.txt docs/requirements_mkdoc.txt
 RUN python3 -m pip install -r docs/requirements.txt
 ADD . .
 CMD docs/docker/docker_run.sh

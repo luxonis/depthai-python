@@ -23,8 +23,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hun
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.322.tar.gz"
-    SHA1 "cb0ea1f74f4a2c49a807de34885743495fccccbe"
+    URL "https://github.com/cpp-pm/hunter/archive/9d9242b60d5236269f894efd3ddd60a9ca83dd7f.tar.gz"
+    SHA1 "16cc954aa723bccd16ea45fc91a858d0c5246376"
     FILEPATH ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake # Combined config
 )
 
@@ -129,7 +129,11 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/node/WarpBindings.cpp
     src/pipeline/node/UVCBindings.cpp
     src/pipeline/node/ToFBindings.cpp
-
+    src/pipeline/node/PointCloudBindings.cpp
+    src/pipeline/node/SyncBindings.cpp
+    src/pipeline/node/MessageDemuxBindings.cpp
+    src/pipeline/node/CastBindings.cpp
+    src/pipeline/node/ImageAlignBindings.cpp
     src/pipeline/datatype/ADatatypeBindings.cpp
     src/pipeline/datatype/AprilTagConfigBindings.cpp
     src/pipeline/datatype/AprilTagsBindings.cpp
@@ -141,7 +145,9 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/ImageManipConfigBindings.cpp
     src/pipeline/datatype/ImgDetectionsBindings.cpp
     src/pipeline/datatype/ImgFrameBindings.cpp
+    src/pipeline/datatype/EncodedFrameBindings.cpp
     src/pipeline/datatype/IMUDataBindings.cpp
+    src/pipeline/datatype/MessageGroupBindings.cpp
     src/pipeline/datatype/NNDataBindings.cpp
     src/pipeline/datatype/SpatialImgDetectionsBindings.cpp
     src/pipeline/datatype/SpatialLocationCalculatorConfigBindings.cpp
@@ -150,7 +156,9 @@ pybind11_add_module(${TARGET_NAME}
     src/pipeline/datatype/SystemInformationBindings.cpp
     src/pipeline/datatype/TrackedFeaturesBindings.cpp
     src/pipeline/datatype/TrackletsBindings.cpp
-
+    src/pipeline/datatype/PointCloudConfigBindings.cpp
+    src/pipeline/datatype/PointCloudDataBindings.cpp
+    src/pipeline/datatype/ImageAlignConfigBindings.cpp
 )
 
 if(WIN32)
@@ -173,8 +181,8 @@ endif()
 
 # Add stubs (pyi) generation step after building bindings
 execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "from mypy import api" RESULT_VARIABLE error OUTPUT_QUIET ERROR_QUIET)
-if(error)
-    message(WARNING "Mypy not available - stubs won't be generated or checked")
+if(error OR CMAKE_CROSSCOMPILING)
+    message(WARNING "Mypy not available or cross compiling - stubs won't be generated or checked")
 else()
     get_target_property(bindings_directory ${TARGET_NAME} LIBRARY_OUTPUT_DIRECTORY)
     if(NOT bindings_directory)

@@ -22,7 +22,7 @@ depthai-core/build/
 
 # builds
 _builds/
-
+.cache/
 #git
 *.orig
 *_REMOTE_*

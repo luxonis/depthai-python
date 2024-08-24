@@ -28,17 +28,18 @@ Inputs and Outputs
 .. code-block::
 
             ┌──────────────┐
-            │              │
-   input    │              │bitstream
-  ─────────►│ VideoEncoder ├────────►
-            │              │
-            │              │
+            │              │   bitstream
+   input    │              ├────────► 
+  ─────────►│ VideoEncoder |
+            │              │     out
+            │              ├────────►
             └──────────────┘
 
 **Message types**
 
 - :code:`input` - :ref:`ImgFrame` (NV12/GRAY8)
 - :code:`bitstream` - :ref:`ImgFrame`
+- :code:`out` - :ref:`EncodedFrame`
 
 Usage
 #####
@@ -53,10 +54,13 @@ Usage
     # Set H265 encoding for the ColorCamera video output
     videoEncoder = pipeline.create(dai.node.VideoEncoder)
     videoEncoder.setDefaultProfilePreset(cam.getFps(), dai.VideoEncoderProperties.Profile.H265_MAIN)
+    videoEncoder.setBitrateKbps(500) # 0.5 Mbps
 
     # Create MJPEG encoding for still images
     stillEncoder = pipeline.create(dai.node.VideoEncoder)
     stillEncoder.setDefaultProfilePreset(1, dai.VideoEncoderProperties.Profile.MJPEG)
+    # stillEncoder.setLossless(True) # Lossless only for MJPEG
+    stillEncoder.setQuality(90) # 0-100, 100 being the best quality (not lossless though)
 
     cam.still.link(stillEncoder.input)
     cam.video.link(videoEncoder.input)
@@ -69,10 +73,13 @@ Usage
     // Set H265 encoding for the ColorCamera video output
     auto videoEncoder = pipeline.create<dai::node::VideoEncoder>();
     videoEncoder->setDefaultProfilePreset(cam->getFps(), dai::VideoEncoderProperties::Profile::H265_MAIN);
+    videoEncoder->setBitrateKbps(500); // 0.5 Mbps
 
     // Create MJPEG encoding for still images
     stillEncoder = pipeline.create(dai.node.VideoEncoder);
     stillEncoder->setDefaultProfilePreset(1, dai::VideoEncoderProperties::Profile::MJPEG);
+    // stillEncoder->setLossless(true); // Lossless only for MJPEG
+    stillEncoder->setQuality(90); // 0-100, 100 being the best quality (not lossless though)
 
     cam->still.link(stillEncoder->input);
     cam->video.link(videoEncoder->input);
@@ -95,6 +102,7 @@ Examples of functionality
 - :ref:`RGB Encoding`
 - :ref:`Encoding Max Limit`
 - :ref:`RGB Encoding & MobilenetSSD`
+- :ref:`Video Encoded Frame Type`
 
 Reference
 #########
