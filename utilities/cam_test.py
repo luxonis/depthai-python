@@ -414,6 +414,12 @@ with dai.Device() as device:
                     # Resize is done to skip the +50 black lines we get with RVC3.
                     # TODO: handle RAW10/RAW12 to work with getFrame/getCvFrame
                     payload = pkt.getData().view(np.uint16).copy()
+                    type = pkt.getType()
+                    if c.startswith('raw_'):
+                        # TMP override as getType() doesn't work for ColorCamera.raw
+                        type = dai.ImgFrame.Type.RAW10
+                        # Trim metadata for AR0234
+                        payload = payload[1920*5//2:].copy()
                     payload.resize(height, width)
                     if capture:
                         # TODO based on getType
@@ -421,7 +427,6 @@ with dai.Device() as device:
                         print('Saving:', filename)
                         payload.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
-                    type = pkt.getType()
                     multiplier = 1
                     if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
                     if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
