@@ -478,6 +478,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getCrashDump", [](DeviceBase& d, bool clearCrashDump) { py::gil_scoped_release release; return d.getCrashDump(clearCrashDump); }, py::arg("clearCrashDump") = true, DOC(dai, DeviceBase, getCrashDump))
         .def("hasCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.hasCrashDump(); }, DOC(dai, DeviceBase, hasCrashDump))
+        .def("getResetInfo", [](DeviceBase& d, bool log) { py::gil_scoped_release release; return d.getResetInfo(log); }, py::arg("alsoLogAsWarning") = false, DOC(dai, DeviceBase, getResetInfo))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
         .def("getConnectionInterfaces", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectionInterfaces(); }, DOC(dai, DeviceBase, getConnectionInterfaces))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
