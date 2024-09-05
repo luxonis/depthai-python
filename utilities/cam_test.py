@@ -82,6 +82,8 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
                     help="ToF median filter kernel size")
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
+parser.add_argument('-show', '--show-meta', action='store_true',
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `/`")
 args = parser.parse_args()
 
 cam_list = []
@@ -359,6 +361,7 @@ with dai.Device() as device:
     luma_denoise = 0
     chroma_denoise = 0
     control = 'none'
+    show = args.show_meta
 
     jet_custom = cv2.applyColorMap(np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
     jet_custom[0] = [0, 0, 0]
@@ -383,6 +386,18 @@ with dai.Device() as device:
                         frame = (frame.view(np.int16).astype(float))
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
+                if show:
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}, lat:{(dai.Clock.now()-pkt.getTimestamp()).total_seconds():.6f}] "
+                    txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
+                    txt += f"ISO: {pkt.getSensitivity():4}, "
+                    txt += f"Lens pos: {pkt.getLensPosition():3}, "
+                    txt += f"Color temp: {pkt.getColorTemperature()} K, "
+                    txt += f"Sensor temp: {pkt.getSensorTemperature():.1f} degC"
+                    txt += f", pix avg: {np.average(frame):.3f}"
+                    if needs_newline:
+                        print()
+                        needs_newline = False
+                    print(txt)
                 capture = c in capture_list
                 if capture:
                     capture_file_info = ('capture_' + c + '_' + cam_name[cam_socket_opts[cam_skt].name]
@@ -399,6 +414,12 @@ with dai.Device() as device:
                     # Resize is done to skip the +50 black lines we get with RVC3.
                     # TODO: handle RAW10/RAW12 to work with getFrame/getCvFrame
                     payload = pkt.getData().view(np.uint16).copy()
+                    type = pkt.getType()
+                    if c.startswith('raw_'):
+                        # TMP override as getType() doesn't work for ColorCamera.raw
+                        type = dai.ImgFrame.Type.RAW10
+                        # Trim metadata for AR0234
+                        payload = payload[1920*5//2:].copy()
                     payload.resize(height, width)
                     if capture:
                         # TODO based on getType
@@ -406,7 +427,6 @@ with dai.Device() as device:
                         print('Saving:', filename)
                         payload.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
-                    type = pkt.getType()
                     multiplier = 1
                     if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
                     if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))
@@ -432,10 +452,15 @@ with dai.Device() as device:
         print("\rFPS:",
               *["{:6.2f}|{:6.2f}".format(fps_host[c].get(), fps_capt[c].get()) for c in cam_list],
               end=' ', flush=True)
+        needs_newline = True
 
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
+        elif key == ord('/'):
+            show = not show
+            # Print empty string as FPS status new-line separator
+            print("" if show else "Printing camera settings: OFF")
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
