@@ -101,6 +101,21 @@ void bind_spatialdetectionnetwork(pybind11::module& m, void* pCallstack){
             [](const SpatialDetectionNetwork n) { return &n.neuralNetwork->passthrough; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, NeuralNetwork, passthrough))
+        .def_property_readonly(
+            "detectionParser",
+            [](const SpatialDetectionNetwork& n) { return *n.detectionParser; },
+            py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionNetwork, detectionParser))
+        .def_property_readonly(
+            "neuralNetwork",
+            [](const SpatialDetectionNetwork& n) { return *n.neuralNetwork; },
+            py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionNetwork, neuralNetwork))
+        .def_property_readonly(
+            "outSegmentation",
+            [](const SpatialDetectionNetwork n) { return &n.detectionParser->outSegmentation; },
+            py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionParser, outSegmentation))
 
         .def_readonly("inputDepth", &SpatialDetectionNetwork::inputDepth, DOC(dai, node, SpatialDetectionNetwork, inputDepth))
         .def_readonly("out", &SpatialDetectionNetwork::out, DOC(dai, node, SpatialDetectionNetwork, out))

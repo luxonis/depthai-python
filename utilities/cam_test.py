@@ -83,7 +83,7 @@ parser.add_argument('-tofmedian', '--tof-median', choices=[0,3,5,7], default=5, 
 parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 parser.add_argument('-show', '--show-meta', action='store_true',
-                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
+                    help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `/`")
 args = parser.parse_args()
 
 cam_list = []
@@ -267,6 +267,7 @@ for c in cam_list:
     #cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
     cam[c].initialControl.setMisc("stride-align", 1)
     cam[c].initialControl.setMisc("scanline-align", 1)
+    #cam[c].initialControl.setMisc("frame-timeout", 4.0)  # seconds, default 3.0
     control.out.link(cam[c].inputControl)
     if rotate[c]:
         cam[c].setImageOrientation(dai.CameraImageOrientation.ROTATE_180_DEG)
@@ -386,11 +387,12 @@ with dai.Device() as device:
                         frame = cv2.normalize(frame, frame, alpha=255, beta=0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
                         frame = cv2.applyColorMap(frame, jet_custom)
                 if show:
-                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}] "
+                    txt = f"[{c:5}, {pkt.getSequenceNum():4}, {pkt.getTimestamp().total_seconds():.6f}, lat:{(dai.Clock.now()-pkt.getTimestamp()).total_seconds():.6f}] "
                     txt += f"Exp: {pkt.getExposureTime().total_seconds()*1000:6.3f} ms, "
                     txt += f"ISO: {pkt.getSensitivity():4}, "
                     txt += f"Lens pos: {pkt.getLensPosition():3}, "
-                    txt += f"Color temp: {pkt.getColorTemperature()} K"
+                    txt += f"Color temp: {pkt.getColorTemperature()} K, "
+                    txt += f"Sensor temp: {pkt.getSensorTemperature():.1f} degC"
                     txt += f", pix avg: {np.average(frame):.3f}"
                     if needs_newline:
                         print()
@@ -413,6 +415,12 @@ with dai.Device() as device:
                     # Resize is done to skip the +50 black lines we get with RVC3.
                     # TODO: handle RAW10/RAW12 to work with getFrame/getCvFrame
                     payload = pkt.getData().view(np.uint16).copy()
+                    type = pkt.getType()
+                    if c.startswith('raw_'):
+                        # TMP override as getType() doesn't work for ColorCamera.raw
+                        type = dai.ImgFrame.Type.RAW10
+                        # Trim metadata for AR0234
+                        payload = payload[1920*5//2:].copy()
                     payload.resize(height, width)
                     if capture:
                         # TODO based on getType
@@ -420,7 +428,6 @@ with dai.Device() as device:
                         print('Saving:', filename)
                         payload.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
-                    type = pkt.getType()
                     multiplier = 1
                     if type == dai.ImgFrame.Type.RAW10: multiplier = (1 << (16-10))
                     if type == dai.ImgFrame.Type.RAW12: multiplier = (1 << (16-4))

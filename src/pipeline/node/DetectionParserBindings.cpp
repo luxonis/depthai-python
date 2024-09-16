@@ -36,6 +36,7 @@ void bind_detectionparser(pybind11::module& m, void* pCallstack){
     detectionParser
         .def_readonly("input", &DetectionParser::input, DOC(dai, node, DetectionParser, input))
         .def_readonly("out", &DetectionParser::out, DOC(dai, node, DetectionParser, out))
+        .def_readonly("outSegmentation", &DetectionParser::outSegmentation, DOC(dai, node, DetectionParser, outSegmentation))
         .def("setBlobPath", &DetectionParser::setBlobPath, py::arg("path"), DOC(dai, node, DetectionParser, setBlobPath))
         .def("setNumFramesPool", &DetectionParser::setNumFramesPool, py::arg("numFramesPool"), DOC(dai, node, DetectionParser, setNumFramesPool))
         .def("getNumFramesPool", &DetectionParser::getNumFramesPool, DOC(dai, node, DetectionParser, getNumFramesPool))

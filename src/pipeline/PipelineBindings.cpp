@@ -30,6 +30,7 @@
 #include "depthai/pipeline/node/FeatureTracker.hpp"
 #include "depthai/pipeline/node/AprilTag.hpp"
 #include "depthai/pipeline/node/DetectionParser.hpp"
+#include "depthai/pipeline/node/PointCloud.hpp"
 #include "depthai/pipeline/node/UVC.hpp"
 
 // depthai-shared
@@ -146,8 +147,11 @@ void PipelineBindings::bind(pybind11::module& m, void* pCallstack){
         .def("createFeatureTracker", &Pipeline::create<node::FeatureTracker>)
         .def("createAprilTag", &Pipeline::create<node::AprilTag>)
         .def("createDetectionParser", &Pipeline::create<node::DetectionParser>)
+        .def("createPointCloud", &Pipeline::create<node::PointCloud>)
         .def("createUVC", &Pipeline::create<node::UVC>)
         .def("createCamera", &Pipeline::create<node::Camera>)
+        .def("createBenchmarkOut", &Pipeline::create<node::BenchmarkOut>)
+        .def("createBenchmarkIn", &Pipeline::create<node::BenchmarkIn>)
         ;
 
 

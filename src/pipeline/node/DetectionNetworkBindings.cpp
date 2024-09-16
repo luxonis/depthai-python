@@ -68,11 +68,25 @@ void bind_detectionnetwork(pybind11::module& m, void* pCallstack) {
             [](const DetectionNetwork n) { return &n.neuralNetwork->passthrough; },
             py::return_value_policy::reference_internal,
             DOC(dai, node, NeuralNetwork, passthrough))
+        .def_property_readonly(
+            "outSegmentation",
+            [](const DetectionNetwork n) { return &n.detectionParser->outSegmentation; },
+            py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionParser, outSegmentation))
         .def("setConfidenceThreshold",
              &DetectionNetwork::setConfidenceThreshold,
              py::arg("thresh"),
              DOC(dai, node, DetectionNetwork, setConfidenceThreshold))
-        .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold));
+        .def("getConfidenceThreshold", &DetectionNetwork::getConfidenceThreshold, DOC(dai, node, DetectionNetwork, getConfidenceThreshold))
+        .def_property_readonly(
+            "detectionParser",
+            [](const DetectionNetwork& n) { return *n.detectionParser; }, py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionNetwork, detectionParser))
+        .def_property_readonly(
+            "neuralNetwork",
+            [](const DetectionNetwork& n) { return *n.neuralNetwork; }, py::return_value_policy::reference_internal,
+            DOC(dai, node, DetectionNetwork, neuralNetwork)
+        );
     // ALIAS
     // daiNodeModule.attr("DetectionNetwork").attr("Properties") = detectionNetworkProperties;
 

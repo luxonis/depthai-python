@@ -27,6 +27,7 @@
 #include "depthai-shared/common/Colormap.hpp"
 #include "depthai-shared/common/FrameEvent.hpp"
 #include "depthai-shared/common/Interpolation.hpp"
+#include "depthai-shared/common/VisionHealthMetricTypes.hpp"
 
 // depthai
 #include "depthai/common/CameraFeatures.hpp"
@@ -69,6 +70,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::enum_<FrameEvent> frameEvent(m, "FrameEvent", DOC(dai, FrameEvent));
     py::class_<ProfilingData> profilingData(m, "ProfilingData", DOC(dai, ProfilingData));
     py::enum_<Interpolation> interpolation(m, "Interpolation", DOC(dai, Interpolation));
+    py::enum_<VisionHealthMetricTypes> _VisionHealthMetricTypes(m, "VisionHealthMetricTypes", DOC(dai, VisionHealthMetricTypes));
 
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -420,6 +422,13 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .value("BYPASS", Interpolation::BYPASS)
         .value("DEFAULT", Interpolation::DEFAULT)
         .value("DEFAULT_DISPARITY_DEPTH", Interpolation::DEFAULT_DISPARITY_DEPTH)
+    ;
+
+    _VisionHealthMetricTypes
+        .value("DepthVariance", VisionHealthMetricTypes::DepthVariance)
+        .value("FillRate", VisionHealthMetricTypes::FillRate)
+        .value("EdgeHoleRate", VisionHealthMetricTypes::EdgeHoleRate)
+        .value("Laplacian", VisionHealthMetricTypes::Laplacian)
     ;
 
     //backward compatibility

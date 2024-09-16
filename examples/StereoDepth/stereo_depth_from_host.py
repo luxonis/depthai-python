@@ -530,14 +530,14 @@ class StereoConfigHandler:
 
 
 # StereoDepth initial config options.
-outDepth = False  # Disparity by default
+outDepth = True  # Disparity by default
 outConfidenceMap = False  # Output disparity confidence map
 outRectified = False   # Output and display rectified streams
-lrcheck = False   # Better handling for occlusions
+lrcheck = True   # Better handling for occlusions
 extended = False  # Closer-in minimum depth, disparity range is doubled. Unsupported for now.
 subpixel = True   # Better accuracy for longer distance, fractional disparity 32-levels
 
-enableDebugLrCheckIt1 = True
+enableDebugLrCheckIt1 = args.debug
 enableDebugLrCheckIt2 = args.debug
 enableDebugExtLrCheckIt1 = args.debug
 enableDebugExtLrCheckIt2 = args.debug

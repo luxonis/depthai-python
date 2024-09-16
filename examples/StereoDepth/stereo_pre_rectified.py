@@ -5,6 +5,7 @@ import depthai as dai
 import numpy as np
 from pathlib import Path
 import argparse
+import hashlib
 
 class StereoConfigHandler:
 
@@ -139,8 +140,8 @@ inH = 1200
 inW = 1280
 inH = 800
 
-left = "horizontal-rectified_left_screenshot_13.04.2023.png"
-right = "horizontal-rectified_right_screenshot_13.04.2023.png"
+# left = "horizontal-rectified_left_screenshot_13.04.2023.png"
+# right = "horizontal-rectified_right_screenshot_13.04.2023.png"
 
 leftImg = cv2.imread(left, cv2.IMREAD_GRAYSCALE)
 rightImg = cv2.imread(right, cv2.IMREAD_GRAYSCALE)
@@ -205,6 +206,8 @@ monoRight = pipeline.create(dai.node.XLinkIn)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutPcl = pipeline.create(dai.node.XLinkOut)
+xoutOccupancyPool = pipeline.create(dai.node.XLinkOut)
 stereo = pipeline.create(dai.node.StereoDepth)
 
 monoLeft.setStreamName("inLeft")
@@ -212,6 +215,8 @@ monoRight.setStreamName("inRight")
 xoutLeft.setStreamName("left")
 xoutRight.setStreamName("right")
 xoutDepth.setStreamName("depth")
+xoutPcl.setStreamName("pcl")
+xoutOccupancyPool.setStreamName("occupancyPool")
 
 leftDescriptors = pipeline.create(dai.node.XLinkIn)
 rightDescriptors = pipeline.create(dai.node.XLinkIn)
@@ -230,7 +235,7 @@ leftDescriptors.out.link(stereo.inputLeftPixelDescriptor)
 rightDescriptors.out.link(stereo.inputRightPixelDescriptor)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.rectifiedRight.link(xoutRight.input)
-stereo.disparity.link(xoutDepth.input)
+stereo.depth.link(xoutDepth.input)
 stereo.setInputResolution(width,height) # set input resolution specifically
 
 stereo.setRectification(False) #disable rectification, frames are pre-rectified
@@ -262,6 +267,16 @@ xinStereoDepthConfigName = "stereoDepthConfig"
 xinStereoDepthConfig.setStreamName(xinStereoDepthConfigName)
 xinStereoDepthConfig.out.link(stereo.inputConfig)
 
+enableOccupancyPool = False
+
+pcl = pipeline.create(dai.node.PointCloud)
+stereo.depth.link(pcl.inputDepth)
+pcl.outputPointCloud.link(xoutPcl.input)
+if enableOccupancyPool:
+    pcl.outputOccupancyPool.link(xoutOccupancyPool.input)
+pcl.setNumShaves(4)
+
+expectedHash = "107eee668e5d90a522d7a427150191be"
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -273,6 +288,8 @@ with dai.Device(pipeline) as device:
     qLeft = device.getOutputQueue("left", 4, False)
     qRight = device.getOutputQueue("right", 4, False)
     qDepth = device.getOutputQueue("depth", 4, False)
+    qPcl = device.getOutputQueue("pcl", 4, False)
+    qOccupancyPool = device.getOutputQueue("occupancyPool", 4, False)
 
     cnt = 0
 
@@ -342,6 +359,18 @@ with dai.Device(pipeline) as device:
 
         disp = (frameDepth / 32).astype(np.uint8)
         cv2.imshow("disp", disp)
+
+        inPcl = qPcl.get()
+        pclData = inPcl.getData()
+        print(len(pclData))
+        pclData.tofile('s.raw')
+        md5_hash = hashlib.md5(pclData).hexdigest()
+        print(f"MD5 Hash vs expected: {md5_hash} {expectedHash}")
+        # assert md5_hash == expectedHash, "MD5 Hash mismatch"
+
+        if enableOccupancyPool:
+            inOccupancyPool = qOccupancyPool.get()
+            print(inOccupancyPool.occupancyPool)
 
         cnt+=1
 

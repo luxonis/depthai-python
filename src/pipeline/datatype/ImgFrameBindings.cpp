@@ -60,6 +60,7 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
                 o.tsDevice.nsec = (ts - o.tsDevice.sec) * 1000000000.0;
             }
         )
+        .def_readwrite("disp2DepthMultiplier", &RawImgFrame::disp2DepthMultiplier)
         ;
 
 
@@ -138,6 +139,8 @@ void bind_imgframe(pybind11::module& m, void* pCallstack){
         .def("getColorTemperature", &ImgFrame::getColorTemperature, DOC(dai, ImgFrame, getColorTemperature))
         .def("getLensPosition", &ImgFrame::getLensPosition, DOC(dai, ImgFrame, getLensPosition))
         .def("get", &ImgFrame::get, DOC(dai, ImgFrame, get))
+        .def("getSensorTemperature", &ImgFrame::getSensorTemperature, DOC(dai, ImgFrame, getSensorTemperature))
+        .def("getAuxTemperature", &ImgFrame::getAuxTemperature, DOC(dai, ImgFrame, getAuxTemperature))
 
         // OpenCV Support section
         .def("setFrame", [](dai::ImgFrame& frm, py::array arr){
