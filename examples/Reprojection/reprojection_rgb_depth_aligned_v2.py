@@ -163,6 +163,10 @@ with device:
             cv2.imshow("depth", colorizeDepth(frameDepth.getCvFrame()))
 
             alignedDepth = getAlignedDepth(frameDepth.getFrame())
+            mapX, mapY = cv2.initUndistortRectifyMap(
+                M2, D2, None, M2, rgbSize, cv2.CV_32FC1
+            )
+            frameRgb = cv2.remap(frameRgb, mapX, mapY, cv2.INTER_LINEAR)
             pclDepth = alignedDepth.copy()
             rgb = cv2.cvtColor(frameRgb, cv2.COLOR_BGR2RGB)
             vis.rgbd_to_projection(pclDepth, rgb)
@@ -171,10 +175,6 @@ with device:
             alignedDepthColorized = colorizeDepth(alignedDepth)
 
             # Undistort the RGB frame
-            mapX, mapY = cv2.initUndistortRectifyMap(
-                M2, D2, None, M2, rgbSize, cv2.CV_32FC1
-            )
-            frameRgb = cv2.remap(frameRgb, mapX, mapY, cv2.INTER_LINEAR)
 
             blended = cv2.addWeighted(frameRgb, rgbWeight, alignedDepthColorized, depthWeight, 0)
             cv2.imshow(rgb_depth_window_name, blended)
