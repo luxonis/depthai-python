@@ -4,11 +4,11 @@
   workflow_dispatch:
   push:
     paths:
-      - 'docs/source/_static/install_dependencies.sh'
+      - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
   pull_request:
       paths:
-      - 'docs/source/_static/install_dependencies.sh'
+      - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
 
  jobs:
@@ -30,7 +30,7 @@
        - name: Install dependencies
          run: |
            ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone # Otherwise tzdata installer prompts for user input
-           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
+           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
            bash tmp_script.sh
        - name: Create a virtual environment
          if: endsWith(matrix.container_image, 'rolling') == true
@@ -54,7 +54,7 @@
        - uses: actions/checkout@v3
        - name: Install dependencies
          run: |
-           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh
+           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/install_dependencies.sh > tmp_script.sh
            bash tmp_script.sh
        - name: Create a virtual environment
          run: |
