@@ -119,6 +119,30 @@ with device:
         100,
         updateBlendWeights,
     )
+
+    try:
+        calibData = device.readCalibration2()
+        M1 = np.array(calibData.getCameraIntrinsics(ALIGN_SOCKET, *depthSize))
+        D1 = np.array(calibData.getDistortionCoefficients(ALIGN_SOCKET))
+        M2 = np.array(calibData.getCameraIntrinsics(RGB_SOCKET, *rgbSize))
+        D2 = np.array(calibData.getDistortionCoefficients(RGB_SOCKET))
+
+        T = (
+                np.array(calibData.getCameraTranslationVector(ALIGN_SOCKET, RGB_SOCKET, False))
+                * 10
+        )  # to mm for matching the depth
+        R = np.array(calibData.getCameraExtrinsics(ALIGN_SOCKET, RGB_SOCKET, False))[
+            0:3, 0:3
+            ]
+        TARGET_MATRIX = M1
+
+        lensPosition = calibData.getLensPosition(RGB_SOCKET)
+    except:
+        raise
+    mapX, mapY = cv2.initUndistortRectifyMap(
+        M2, D2, None, M2, rgbSize, cv2.CV_32FC1
+    )
+
     while True:
         messageGroup: dai.MessageGroup = queue.get()
         frameRgb: dai.ImgFrame = messageGroup["rgb"]
@@ -126,6 +150,8 @@ with device:
         # Blend when both received
         if frameRgb is not None and frameDepth is not None:
             frameRgb = frameRgb.getCvFrame()
+            # Undistort RGB frame
+            frameRgb = cv2.remap(frameRgb, mapX, mapY, cv2.INTER_LINEAR)
             # Colorize the aligned depth
             alignedDepthColorized = colorizeDepth(frameDepth.getFrame())
             cv2.imshow("depth", alignedDepthColorized)
