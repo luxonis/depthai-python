@@ -50,6 +50,7 @@ from itertools import cycle
 from pathlib import Path
 import sys
 import signal
+import math
 from stress_test import stress_test, YOLO_LABELS, create_yolo
 
 
@@ -66,6 +67,8 @@ def socket_type_pair(arg):
     is_thermal = True if type in ['th', 'thermal'] else False
     return [socket, is_color, is_tof, is_thermal]
 
+def string_pair(arg):
+    return arg.split('=')
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
@@ -104,6 +107,10 @@ parser.add_argument('-rgbprev', '--rgb-preview', action='store_true',
                     help="Show RGB `preview` stream instead of full size `isp`")
 parser.add_argument('-show', '--show-meta', action='store_true',
                     help="List frame metadata (seqno, timestamp, exp, iso etc). Can also toggle with `\`")
+parser.add_argument('-misc', '--misc-controls', type=string_pair, nargs='+',
+                    default=[],
+                    help="List of miscellaneous camera controls to set initially, "
+                    "as pairs: key1=value1 key2=value2 ...")
 
 parser.add_argument('-d', '--device', default="", type=str,
                     help="Optional MX ID of the device to connect to.")
@@ -198,8 +205,6 @@ def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
 # Calculates FPS over a moving window, configurable
-
-
 class FPS:
     def __init__(self, window_size=30):
         self.dq = collections.deque(maxlen=window_size)
@@ -360,6 +365,15 @@ with dai.Device(*dai_device_args) as device:
         # cam[c].initialControl.setManualExposure(15000, 400) # exposure [us], iso
         # When set, takes effect after the first 2 frames
         # cam[c].initialControl.setManualWhiteBalance(4000)  # light temperature in K, 1000..12000
+        # cam[c].initialControl.setAutoExposureLimit(5000)  # can also be updated at runtime
+        # cam[c].initialControl.setMisc("downsampling-mode", "binning")  # default: "scaling"
+        # cam[c].initialControl.setMisc("binning-mode", "sum")  # default: "avg"
+        # cam[c].initialControl.setMisc("manual-exposure-handling", "fast")  # default: "default"
+        # cam[c].initialControl.setMisc("hdr-exposure-ratio", 4)  # enables HDR when set `> 1`, current options: 2, 4, 8
+        # cam[c].initialControl.setMisc("hdr-local-tone-weight", 75)  # default 75, range 0..100
+        # cam[c].initialControl.setMisc("high-conversion-gain", 0)  # 1 to enable (default on supported sensors)
+        for kvPair in args.misc_controls:
+            cam[c].initialControl.setMisc(*kvPair)
         control.out.link(cam[c].inputControl)
         if rotate[c]:
             cam[c].setImageOrientation(
@@ -534,6 +548,13 @@ with dai.Device(*dai_device_args) as device:
     chroma_denoise = 0
     control = 'none'
     show = args.show_meta
+    high_conversion_gain = 1
+    print(args.misc_controls)
+    args_misc_dict = dict(args.misc_controls)
+    
+    hdr_exp_ratio = int(math.log2(float(args_misc_dict.get('hdr-exposure-ratio', 1))))
+    hdr_local_tone_weight = int(32 * float(args_misc_dict.get('hdr-local-tone-weight', 0.75)))
+    hdr_on = (hdr_exp_ratio > 0)
 
     jet_custom = cv2.applyColorMap(
         np.arange(256, dtype=np.uint8), cv2.COLORMAP_JET)
@@ -664,6 +685,12 @@ with dai.Device(*dai_device_args) as device:
         elif key == ord('c'):
             capture_list = streams.copy()
             capture_time = time.strftime('%Y%m%d_%H%M%S')
+        elif key == ord('h'):
+            high_conversion_gain = 1 - high_conversion_gain
+            print("High conversion gain:", high_conversion_gain)
+            ctrl = dai.CameraControl()
+            ctrl.setMisc("high-conversion-gain", high_conversion_gain)
+            controlQueue.send(ctrl)
         elif key == ord('t'):
             print("Autofocus trigger (and disable continuous)")
             ctrl = dai.CameraControl()
@@ -742,7 +769,7 @@ with dai.Device(*dai_device_args) as device:
                 floodIntensity = 0
             device.setIrFloodLightIntensity(floodIntensity)
             print(f'IR Flood intensity:', floodIntensity)
-        elif key >= 0 and chr(key) in '34567890[]p\\;\'':
+        elif key >= 0 and chr(key) in '34567890[]\\;\'rg':
             if key == ord('3'):
                 control = 'awb_mode'
             elif key == ord('4'):
@@ -771,6 +798,11 @@ with dai.Device(*dai_device_args) as device:
                 control = 'chroma_denoise'
             elif key == ord('p'):
                 control = 'tof_amplitude_min'
+            elif key == ord('r') or key == ord('g'):
+                if hdr_on:
+                    control = 'hdr_exp_ratio' if key == ord('r') else 'hdr_local_tone_weight'
+                else:
+                    print("HDR was not enabled, start with `-misc hdr-exposure-ratio=2` or higher to enable")
             print("Selected control:", control)
         elif key in [ord('-'), ord('_'), ord('+'), ord('=')]:
             change = 0
@@ -780,7 +812,7 @@ with dai.Device(*dai_device_args) as device:
                 change = 1
             ctrl = dai.CameraControl()
             if control == 'none':
-                print("Please select a control first using keys 3..9 0 [ ] \\ ; \'")
+                print("Please select a control first using keys 3..9 0 [ ] \\ ; \' r g")
             elif control == 'ae_comp':
                 ae_comp = clamp(ae_comp + change, -9, 9)
                 print("Auto exposure compensation:", ae_comp)
@@ -833,6 +865,16 @@ with dai.Device(*dai_device_args) as device:
                 chroma_denoise = clamp(chroma_denoise + change, 0, 4)
                 print("Chroma denoise:", chroma_denoise)
                 ctrl.setChromaDenoise(chroma_denoise)
+            elif control == 'hdr_exp_ratio':
+                hdr_exp_ratio = clamp(hdr_exp_ratio + change, 0, 3)
+                value = pow(2, hdr_exp_ratio)
+                print("HDR exposure ratio:", value)
+                ctrl.setMisc("hdr-exposure-ratio", value)
+            elif control == 'hdr_local_tone_weight':
+                hdr_local_tone_weight = clamp(hdr_local_tone_weight + change, 0, 32)
+                value = hdr_local_tone_weight / 32
+                print(f"HDR local tone weight (normalized): {value:.2f}")
+                ctrl.setMisc("hdr-local-tone-weight", value)
             controlQueue.send(ctrl)
 
     print()

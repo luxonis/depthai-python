@@ -126,7 +126,14 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .def("setResolution", &ColorCamera::setResolution, py::arg("resolution"), DOC(dai, node, ColorCamera, setResolution))
         .def("getResolution", &ColorCamera::getResolution, DOC(dai, node, ColorCamera, getResolution))
         .def("setFps", &ColorCamera::setFps, py::arg("fps"), DOC(dai, node, ColorCamera, setFps))
-        .def("setIsp3aFps", &ColorCamera::setIsp3aFps, DOC(dai, node, ColorCamera, setIsp3aFps))
+        .def("setIsp3aFps", [](ColorCamera& cam, int isp3aFps){
+            // Issue a deprecation warning
+            PyErr_WarnEx(PyExc_DeprecationWarning, "setIsp3aFps is unstable", 1);
+            HEDLEY_DIAGNOSTIC_PUSH
+            HEDLEY_DIAGNOSTIC_DISABLE_DEPRECATED
+            cam.setIsp3aFps(isp3aFps);
+            HEDLEY_DIAGNOSTIC_POP
+        }, py::arg("isp3aFps"), DOC(dai, node, ColorCamera, setIsp3aFps))
         .def("getFps", &ColorCamera::getFps, DOC(dai, node, ColorCamera, getFps))
         .def("setFrameEventFilter", &ColorCamera::setFrameEventFilter, py::arg("events"), DOC(dai, node, ColorCamera, setFrameEventFilter))
         .def("getFrameEventFilter", &ColorCamera::getFrameEventFilter, DOC(dai, node, ColorCamera, getFrameEventFilter))

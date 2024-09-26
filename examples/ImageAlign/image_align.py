@@ -7,7 +7,6 @@ FPS = 30.0
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_A
 LEFT_SOCKET = dai.CameraBoardSocket.CAM_B
-RIGHT_SOCKET = dai.CameraBoardSocket.CAM_C
 ALIGN_SOCKET = LEFT_SOCKET
 
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
@@ -19,7 +18,6 @@ pipeline = dai.Pipeline()
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
 left = pipeline.create(dai.node.MonoCamera)
-right = pipeline.create(dai.node.MonoCamera)
 sync = pipeline.create(dai.node.Sync)
 out = pipeline.create(dai.node.XLinkOut)
 align = pipeline.create(dai.node.ImageAlign)
@@ -29,10 +27,6 @@ left.setResolution(LEFT_RIGHT_RESOLUTION)
 left.setBoardSocket(LEFT_SOCKET)
 left.setFps(FPS)
 
-right.setResolution(LEFT_RIGHT_RESOLUTION)
-right.setBoardSocket(RIGHT_SOCKET)
-right.setFps(FPS)
-
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
@@ -40,7 +34,7 @@ camRgb.setIspScale(1, 3)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(timedelta(seconds=(1 / FPS) * 0.5))
+sync.setSyncThreshold(timedelta(seconds=0.5 / FPS))
 
 cfgIn.setStreamName("config")
 
@@ -57,19 +51,19 @@ cfgIn.out.link(align.inputConfig)
 
 
 rgbWeight = 0.4
-depthWeight = 0.6
+leftWeight = 0.6
 
 
 def updateBlendWeights(percentRgb):
     """
-    Update the rgb and depth weights used to blend depth/rgb image
+    Update the rgb and left weights used to blend rgb/left image
 
     @param[in] percent_rgb The rgb weight expressed as a percentage (0..100)
     """
-    global depthWeight
+    global leftWeight
     global rgbWeight
     rgbWeight = float(percentRgb) / 100.0
-    depthWeight = 1.0 - rgbWeight
+    leftWeight = 1.0 - rgbWeight
 
 def updateDepthPlane(depth):
     global staticDepthPlane
@@ -118,7 +112,7 @@ with device:
         if leftCv.shape != frameRgbCv.shape:
             leftCv = cv2.resize(leftCv, (frameRgbCv.shape[1], frameRgbCv.shape[0]))
 
-        blended = cv2.addWeighted(frameRgbCv, rgbWeight, leftCv, depthWeight, 0)
+        blended = cv2.addWeighted(frameRgbCv, rgbWeight, leftCv, leftWeight, 0)
         cv2.imshow(windowName, blended)
 
         key = cv2.waitKey(1)
