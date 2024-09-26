@@ -224,6 +224,12 @@ if args.convert != convert_default:
             "zoo_type": "depthai",
             "default_ov_version": "2022.1"
         },
+          "yolov8n_coco_640x352": {
+          "shaves": [6],
+          "compile_params": ["-ip U8"],
+          "zoo_type": "depthai",
+          "default_ov_version": "2021.4"
+        },
     }
 
     blobconverter_cmds = [
