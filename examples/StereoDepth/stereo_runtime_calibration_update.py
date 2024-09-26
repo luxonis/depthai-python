@@ -43,6 +43,8 @@ with dai.Device(pipeline) as device:
         print("Device is not calibrated!")
         exit()
 
+    print("Press 'u' to update distortion coefficients with random values")
+
     # Output queue will be used to get the disparity frames from the outputs defined above
     q = device.getOutputQueue(name="disparity", maxSize=4, blocking=False)
     qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
