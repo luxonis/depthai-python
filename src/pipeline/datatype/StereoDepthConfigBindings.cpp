@@ -137,6 +137,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
         .def(py::init<>())
         .def_readwrite("enable", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::enable, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, enable))
         .def_readwrite("speckleRange", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::speckleRange, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, speckleRange))
+        .def_readwrite("differenceThreshold", &RawStereoDepthConfig::PostProcessing::SpeckleFilter::differenceThreshold, DOC(dai, RawStereoDepthConfig, PostProcessing, SpeckleFilter, differenceThreshold))
         ;
 
     decimationMode
