@@ -22,6 +22,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
     py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthAlign> depthAlign(algorithmControl, "DepthAlign", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthAlign));
     py::enum_<RawStereoDepthConfig::AlgorithmControl::DepthUnit> depthUnit(algorithmControl, "DepthUnit", DOC(dai, RawStereoDepthConfig, AlgorithmControl, DepthUnit));
     py::class_<RawStereoDepthConfig::PostProcessing> postProcessing(rawStereoDepthConfig, "PostProcessing", DOC(dai, RawStereoDepthConfig, PostProcessing));
+    py::enum_<RawStereoDepthConfig::PostProcessing::Filter> filter(postProcessing, "Filter", DOC(dai, RawStereoDepthConfig, PostProcessing, Filter));
     py::class_<RawStereoDepthConfig::PostProcessing::SpatialFilter> spatialFilter(postProcessing, "SpatialFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, SpatialFilter));
     py::class_<RawStereoDepthConfig::PostProcessing::TemporalFilter> temporalFilter(postProcessing, "TemporalFilter", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter));
     py::enum_<RawStereoDepthConfig::PostProcessing::TemporalFilter::PersistencyMode> persistencyMode(temporalFilter, "PersistencyMode", DOC(dai, RawStereoDepthConfig, PostProcessing, TemporalFilter, PersistencyMode));
@@ -51,7 +52,15 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // Metadata / raw
+    filter
+        .value("DECIMATION", RawStereoDepthConfig::PostProcessing::Filter::DECIMATION, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, DECIMATION))
+        .value("SPECKLE", RawStereoDepthConfig::PostProcessing::Filter::SPECKLE, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, SPECKLE))
+        .value("MEDIAN", RawStereoDepthConfig::PostProcessing::Filter::MEDIAN, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, MEDIAN))
+        .value("TEMPORAL", RawStereoDepthConfig::PostProcessing::Filter::TEMPORAL, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, TEMPORAL))
+        .value("SPATIAL", RawStereoDepthConfig::PostProcessing::Filter::SPATIAL, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, SPATIAL))
+        .value("FILTER_COUNT", RawStereoDepthConfig::PostProcessing::Filter::FILTER_COUNT, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, FILTER_COUNT))
+        ;
+
     medianFilter
         .value("MEDIAN_OFF", MedianFilter::MEDIAN_OFF)
         .value("KERNEL_3x3", MedianFilter::KERNEL_3x3)
@@ -154,6 +163,7 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
 
     postProcessing
         .def(py::init<>())
+        .def_readwrite("filteringOrder", &RawStereoDepthConfig::PostProcessing::filteringOrder, DOC(dai, RawStereoDepthConfig, PostProcessing, filteringOrder))
         .def_readwrite("median", &RawStereoDepthConfig::PostProcessing::median, DOC(dai, RawStereoDepthConfig, PostProcessing, median))
         .def_readwrite("bilateralSigmaValue", &RawStereoDepthConfig::PostProcessing::bilateralSigmaValue, DOC(dai, RawStereoDepthConfig, PostProcessing, bilateralSigmaValue))
         .def_readwrite("spatialFilter", &RawStereoDepthConfig::PostProcessing::spatialFilter, DOC(dai, RawStereoDepthConfig, PostProcessing, spatialFilter))
