@@ -75,6 +75,8 @@ jobs:
       - name: Setup cmake
         if: matrix.os == 'macos-latest'
         uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.29.x'
       - name: Cache .hunter folder
         if: matrix.os != 'windows-latest'
         uses: actions/cache@v3

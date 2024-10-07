@@ -16,7 +16,7 @@
      runs-on: ubuntu-latest
      strategy:
        matrix:
-          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:rolling"]
+          container_image: ["fedora:34", "fedora:35", "fedora:36", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:24.04", "ubuntu:rolling"]
      container:
        image: ${{ matrix.container_image }}
      steps:
