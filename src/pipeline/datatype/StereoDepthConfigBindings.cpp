@@ -55,7 +55,6 @@ void bind_stereodepthconfig(pybind11::module& m, void* pCallstack){
     filter
         .value("DECIMATION", RawStereoDepthConfig::PostProcessing::Filter::DECIMATION, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, DECIMATION))
         .value("SPECKLE", RawStereoDepthConfig::PostProcessing::Filter::SPECKLE, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, SPECKLE))
-        .value("MEDIAN", RawStereoDepthConfig::PostProcessing::Filter::MEDIAN, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, MEDIAN))
         .value("TEMPORAL", RawStereoDepthConfig::PostProcessing::Filter::TEMPORAL, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, TEMPORAL))
         .value("SPATIAL", RawStereoDepthConfig::PostProcessing::Filter::SPATIAL, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, SPATIAL))
         .value("FILTER_COUNT", RawStereoDepthConfig::PostProcessing::Filter::FILTER_COUNT, DOC(dai, RawStereoDepthConfig, PostProcessing, Filter, FILTER_COUNT))
