@@ -20,141 +20,6 @@
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>);
 PYBIND11_MAKE_OPAQUE(std::unordered_map<std::int8_t, dai::BoardConfig::UART>);
 
-// Patch for bind_map naming
-// Remove if it gets mainlined in pybind11
-namespace pybind11 {
-
-template <typename Map, typename holder_type = std::unique_ptr<Map>, typename... Args>
-class_<Map, holder_type> bind_map_patched(handle scope, const std::string &name, Args &&...args) {
-    using KeyType = typename Map::key_type;
-    using MappedType = typename Map::mapped_type;
-    using KeysView = detail::keys_view<Map>;
-    using ValuesView = detail::values_view<Map>;
-    using ItemsView = detail::items_view<Map>;
-    using Class_ = class_<Map, holder_type>;
-
-    // If either type is a non-module-local bound type then make the map binding non-local as well;
-    // otherwise (e.g. both types are either module-local or converting) the map will be
-    // module-local.
-    auto *tinfo = detail::get_type_info(typeid(MappedType));
-    bool local = !tinfo || tinfo->module_local;
-    if (local) {
-        tinfo = detail::get_type_info(typeid(KeyType));
-        local = !tinfo || tinfo->module_local;
-    }
-
-    Class_ cl(scope, name.c_str(), pybind11::module_local(local), std::forward<Args>(args)...);
-    class_<KeysView> keys_view(
-        scope, ("KeysView_" + name).c_str(), pybind11::module_local(local));
-    class_<ValuesView> values_view(
-        scope, ("ValuesView_" + name).c_str(), pybind11::module_local(local));
-    class_<ItemsView> items_view(
-        scope, ("ItemsView_" + name).c_str(), pybind11::module_local(local));
-
-    cl.def(init<>());
-
-    // Register stream insertion operator (if possible)
-    detail::map_if_insertion_operator<Map, Class_>(cl, name);
-
-    cl.def(
-        "__bool__",
-        [](const Map &m) -> bool { return !m.empty(); },
-        "Check whether the map is nonempty");
-
-    cl.def(
-        "__iter__",
-        [](Map &m) { return make_key_iterator(m.begin(), m.end()); },
-        keep_alive<0, 1>() /* Essential: keep map alive while iterator exists */
-    );
-
-    cl.def(
-        "keys",
-        [](Map &m) { return KeysView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
-
-    cl.def(
-        "values",
-        [](Map &m) { return ValuesView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
-
-    cl.def(
-        "items",
-        [](Map &m) { return ItemsView{m}; },
-        keep_alive<0, 1>() /* Essential: keep map alive while view exists */
-    );
-
-    cl.def(
-        "__getitem__",
-        [](Map &m, const KeyType &k) -> MappedType & {
-            auto it = m.find(k);
-            if (it == m.end()) {
-                throw key_error();
-            }
-            return it->second;
-        },
-        return_value_policy::reference_internal // ref + keepalive
-    );
-
-    cl.def("__contains__", [](Map &m, const KeyType &k) -> bool {
-        auto it = m.find(k);
-        if (it == m.end()) {
-            return false;
-        }
-        return true;
-    });
-    // Fallback for when the object is not of the key type
-    cl.def("__contains__", [](Map &, const object &) -> bool { return false; });
-
-    // Assignment provided only if the type is copyable
-    detail::map_assignment<Map, Class_>(cl);
-
-    cl.def("__delitem__", [](Map &m, const KeyType &k) {
-        auto it = m.find(k);
-        if (it == m.end()) {
-            throw key_error();
-        }
-        m.erase(it);
-    });
-
-    cl.def("__len__", &Map::size);
-
-    keys_view.def("__len__", [](KeysView &view) { return view.map.size(); });
-    keys_view.def(
-        "__iter__",
-        [](KeysView &view) { return make_key_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
-    keys_view.def("__contains__", [](KeysView &view, const KeyType &k) -> bool {
-        auto it = view.map.find(k);
-        if (it == view.map.end()) {
-            return false;
-        }
-        return true;
-    });
-    // Fallback for when the object is not of the key type
-    keys_view.def("__contains__", [](KeysView &, const object &) -> bool { return false; });
-
-    values_view.def("__len__", [](ValuesView &view) { return view.map.size(); });
-    values_view.def(
-        "__iter__",
-        [](ValuesView &view) { return make_value_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
-
-    items_view.def("__len__", [](ItemsView &view) { return view.map.size(); });
-    items_view.def(
-        "__iter__",
-        [](ItemsView &view) { return make_iterator(view.map.begin(), view.map.end()); },
-        keep_alive<0, 1>() /* Essential: keep view alive while iterator exists */
-    );
-
-    return cl;
-}
-
-} // namespace pybind11
-
 
 // Searches for available devices (as Device constructor)
 // but pooling, to check for python interrupts, and releases GIL in between
@@ -247,7 +112,10 @@ static void bindConstructors(ARG& arg){
         py::gil_scoped_release release;
         return std::make_unique<D>(pipeline, deviceInfo, pathToCmd);
     }), py::arg("pipeline"), py::arg("devInfo"), py::arg("pathToCmd"), DOC(dai, DeviceBase, DeviceBase, 8))
-
+    .def(py::init([](const Pipeline& pipeline, const dai::DeviceInfo info){
+        py::gil_scoped_release release;
+        return std::make_unique<D>(pipeline, info);
+    }), py::arg("pipeline"), py::arg("deviceInfo"), DOC(dai, DeviceBase, DeviceBase, 9))
     // DeviceBase constructor - OpenVINO version
     .def(py::init([](OpenVINO::Version version){
         auto dev = deviceSearchHelper<D>();
@@ -348,8 +216,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<PyClock> clock(m, "Clock");
 
 
-    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
-    py::bind_map_patched<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::GPIO>>(boardConfig, "GPIOMap");
+    py::bind_map<std::unordered_map<std::int8_t, dai::BoardConfig::UART>>(boardConfig, "UARTMap");
 
 
     // pybind11 limitation of having actual classes as exceptions
@@ -614,6 +482,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getConnectionInterfaces", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectionInterfaces(); }, DOC(dai, DeviceBase, getConnectionInterfaces))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
+        .def("getStereoPairs", [](DeviceBase& d) { py::gil_scoped_release release; return d.getStereoPairs(); }, DOC(dai, DeviceBase, getStereoPairs))
+        .def("getAvailableStereoPairs", [](DeviceBase& d) { py::gil_scoped_release release; return d.getAvailableStereoPairs(); }, DOC(dai, DeviceBase, getAvailableStereoPairs))
         .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
         .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))
         .def("getEmbeddedIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getEmbeddedIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getEmbeddedIMUFirmwareVersion))
@@ -634,6 +504,8 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getProfilingData", [](DeviceBase& d) { py::gil_scoped_release release; return d.getProfilingData(); }, DOC(dai, DeviceBase, getProfilingData))
         .def("readCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.readCalibration(); }, DOC(dai, DeviceBase, readCalibration))
         .def("flashCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.flashCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, flashCalibration))
+        .def("setCalibration", [](DeviceBase& d, CalibrationHandler calibrationDataHandler) { py::gil_scoped_release release; return d.setCalibration(calibrationDataHandler); }, py::arg("calibrationDataHandler"), DOC(dai, DeviceBase, setCalibration))
+        .def("getCalibration", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCalibration(); }, DOC(dai, DeviceBase, getCalibration))
         .def("setXLinkChunkSize", [](DeviceBase& d, int s) { py::gil_scoped_release release; d.setXLinkChunkSize(s); }, py::arg("sizeBytes"), DOC(dai, DeviceBase, setXLinkChunkSize))
         .def("getXLinkChunkSize", [](DeviceBase& d) { py::gil_scoped_release release; return d.getXLinkChunkSize(); }, DOC(dai, DeviceBase, getXLinkChunkSize))
         .def("setIrLaserDotProjectorBrightness", [](DeviceBase& d, float mA, int mask) { 
@@ -680,12 +552,13 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
     bindConstructors<Device>(device);
     // Bind the rest
     device
-        .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&)>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
-        .def("getOutputQueue", static_cast<std::shared_ptr<DataOutputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
+        .def("__enter__", [](Device& d) -> Device& { return d; })
+        .def("getOutputQueue", py::overload_cast<const std::string&>(&Device::getOutputQueue), py::arg("name"), DOC(dai, Device, getOutputQueue))
+        .def("getOutputQueue", py::overload_cast<const std::string&, unsigned int, bool>(&Device::getOutputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getOutputQueue, 2))
         .def("getOutputQueueNames", &Device::getOutputQueueNames, DOC(dai, Device, getOutputQueueNames))
 
-        .def("getInputQueue", static_cast<std::shared_ptr<DataInputQueue>(Device::*)(const std::string&)>(&Device::getInputQueue), py::arg("name"), DOC(dai, Device, getInputQueue))
-        .def("getInputQueue", static_cast<std::shared_ptr<DataInputQueue>(Device::*)(const std::string&, unsigned int, bool)>(&Device::getInputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getInputQueue, 2))
+        .def("getInputQueue", py::overload_cast<const std::string&>(&Device::getInputQueue), py::arg("name"), DOC(dai, Device, getInputQueue))
+        .def("getInputQueue", py::overload_cast<const std::string&, unsigned int, bool>(&Device::getInputQueue), py::arg("name"), py::arg("maxSize"), py::arg("blocking") = true, DOC(dai, Device, getInputQueue, 2))
         .def("getInputQueueNames", &Device::getInputQueueNames, DOC(dai, Device, getInputQueueNames))
 
         .def("getQueueEvents", [](Device& d, const std::vector<std::string>& queueNames, std::size_t maxNumEvents, std::chrono::microseconds timeout) {
