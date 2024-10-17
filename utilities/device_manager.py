@@ -948,7 +948,7 @@ class DeviceManager:
             pass
 
         try:
-            if self.isPoE:
+            if self.isPoE():
                 if self.values['staticBut']:
                     if check_ip(self.window, values['ip']) and check_ip(self.window, values['mask']) and check_ip(self.window, values['gateway'], req=False):
                         conf.setStaticIPv4(values['ip'], values['mask'], values['gateway'])
