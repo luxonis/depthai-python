@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import cv2
 import depthai as dai
@@ -50,7 +52,7 @@ camRgb.setIspScale(1, 2)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(timedelta(seconds=(1 / FPS)))
+sync.setSyncThreshold(timedelta(seconds=0.5 / FPS))
 
 # Linking
 camRgb.isp.link(sync.inputs["rgb"])

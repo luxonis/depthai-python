@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import cv2
 import depthai as dai
 from datetime import timedelta
@@ -34,7 +36,7 @@ camRgb.setIspScale(1, 3)
 
 out.setStreamName("out")
 
-sync.setSyncThreshold(timedelta(seconds=(1 / FPS) * 0.5))
+sync.setSyncThreshold(timedelta(seconds=0.5 / FPS))
 
 cfgIn.setStreamName("config")
 
