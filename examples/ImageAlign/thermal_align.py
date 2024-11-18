@@ -40,6 +40,14 @@ if not thermalFound:
     raise RuntimeError("No thermal camera found!")
 
 
+ISP_SCALE = 3
+
+calibrationHandler = device.readCalibration()
+rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
+distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
+if distortionModel != dai.CameraModel.Perspective:
+    raise RuntimeError("Unsupported distortion model for RGB camera. This example supports only Perspective model.")
+
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
@@ -57,7 +65,7 @@ cfgIn = pipeline.create(dai.node.XLinkIn)
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
-camRgb.setIspScale(1,3)
+camRgb.setIspScale(1,ISP_SCALE)
 
 out.setStreamName("out")
 
@@ -132,6 +140,14 @@ with device:
         frameRgbCv = frameRgb.getCvFrame()
         fpsCounter.tick()
 
+        rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(frameRgbCv.shape[1]), int(frameRgbCv.shape[0]))
+
+        cvFrameUndistorted = cv2.undistort(
+            frameRgbCv,
+            np.array(rgbIntrinsics),
+            np.array(rgbDistortion),
+        )
+
         # Colorize the aligned depth
         thermalFrame = thermalAligned.getCvFrame().astype(np.float32)
         # Create a mask for nan values
@@ -143,7 +159,7 @@ with device:
         # Apply the mask back with black pixels (0)
         colormappedFrame[mask] = 0
 
-        blended = cv2.addWeighted(frameRgbCv, rgbWeight, colormappedFrame, thermalWeight, 0)
+        blended = cv2.addWeighted(cvFrameUndistorted, rgbWeight, colormappedFrame, thermalWeight, 0)
 
         cv2.putText(
             blended,
