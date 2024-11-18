@@ -45,7 +45,6 @@ ISP_SCALE = 3
 device = dai.Device()
 
 calibrationHandler = device.readCalibration()
-rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(1920 / ISP_SCALE), int(1080 / ISP_SCALE))
 rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
 distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
 if distortionModel != dai.CameraModel.Perspective:
@@ -142,6 +141,8 @@ with device:
         assert isinstance(thermalAligned, dai.ImgFrame)
         frameRgbCv = frameRgb.getCvFrame()
         fpsCounter.tick()
+
+        rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(frameRgbCv.shape[1]), int(frameRgbCv.shape[0]))
 
         cvFrameUndistorted = cv2.undistort(
             frameRgbCv,
