@@ -3,6 +3,7 @@
 import cv2
 import depthai as dai
 from datetime import timedelta
+import numpy as np
 
 # This is an interactive example that shows how two frame sources without depth information.
 FPS = 30.0
@@ -14,7 +15,17 @@ ALIGN_SOCKET = LEFT_SOCKET
 COLOR_RESOLUTION = dai.ColorCameraProperties.SensorResolution.THE_1080_P
 LEFT_RIGHT_RESOLUTION = dai.MonoCameraProperties.SensorResolution.THE_720_P
 
+ISP_SCALE = 3
+
 device = dai.Device()
+
+calibrationHandler = device.readCalibration()
+rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(1920 / ISP_SCALE), int(1080 / ISP_SCALE))
+rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
+distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
+if distortionModel != dai.CameraModel.Perspective:
+    raise RuntimeError("Unsupported distortion model for RGB camera. This example supports only Perspective model.")
+
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
@@ -32,7 +43,7 @@ left.setFps(FPS)
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
-camRgb.setIspScale(1, 3)
+camRgb.setIspScale(1, ISP_SCALE)
 
 out.setStreamName("out")
 
@@ -109,12 +120,18 @@ with device:
         # Colorize the aligned depth
         leftCv = leftAligned.getCvFrame()
 
+        cvFrameUndistorted = cv2.undistort(
+            frameRgbCv,
+            np.array(rgbIntrinsics),
+            np.array(rgbDistortion),
+        )
+
         if len(leftCv.shape) == 2:
             leftCv = cv2.cvtColor(leftCv, cv2.COLOR_GRAY2BGR)
-        if leftCv.shape != frameRgbCv.shape:
-            leftCv = cv2.resize(leftCv, (frameRgbCv.shape[1], frameRgbCv.shape[0]))
+        if leftCv.shape != cvFrameUndistorted.shape:
+            leftCv = cv2.resize(leftCv, (cvFrameUndistorted.shape[1], cvFrameUndistorted.shape[0]))
 
-        blended = cv2.addWeighted(frameRgbCv, rgbWeight, leftCv, leftWeight, 0)
+        blended = cv2.addWeighted(cvFrameUndistorted, rgbWeight, leftCv, leftWeight, 0)
         cv2.imshow(windowName, blended)
 
         key = cv2.waitKey(1)

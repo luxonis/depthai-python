@@ -172,7 +172,7 @@ with device:
             cv2.imshow("Depth aligned", alignedDepthColorized)
 
             blended = cv2.addWeighted(
-                cvFrame, rgbWeight, alignedDepthColorized, depthWeight, 0
+                cvFrameUndistorted, rgbWeight, alignedDepthColorized, depthWeight, 0
             )
             cv2.putText(
                 blended,
