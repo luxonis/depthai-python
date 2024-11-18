@@ -70,7 +70,6 @@ void bind_stereodepth(pybind11::module& m, void* pCallstack){
         .value("DEFAULT", StereoDepth::PresetMode::DEFAULT)
         .value("FACE", StereoDepth::PresetMode::FACE)
         .value("HIGH_DETAIL", StereoDepth::PresetMode::HIGH_DETAIL)
-        .value("HIGH_ACCURACY2", StereoDepth::PresetMode::HIGH_ACCURACY2)
         .value("ROBOTICS", StereoDepth::PresetMode::ROBOTICS)
 
         // Deprecated overriden
