@@ -42,8 +42,6 @@ if not thermalFound:
 
 ISP_SCALE = 3
 
-device = dai.Device()
-
 calibrationHandler = device.readCalibration()
 rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
 distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
