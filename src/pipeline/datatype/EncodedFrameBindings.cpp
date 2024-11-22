@@ -46,6 +46,8 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
       .def_readwrite("lossless", &RawEncodedFrame::lossless)
       .def_readwrite("type", &RawEncodedFrame::type)
       .def_readwrite("instanceNum", &RawEncodedFrame::instanceNum)
+      .def_readwrite("width", &RawEncodedFrame::width)
+      .def_readwrite("height", &RawEncodedFrame::height)
       .def_readwrite("sequenceNum", &RawEncodedFrame::sequenceNum)
       .def_property(
           "ts",
@@ -85,10 +87,15 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            py::overload_cast<>(&EncodedFrame::Buffer::getTimestamp, py::const_),
            DOC(dai, Buffer, getTimestamp))
       .def("getTimestampDevice",
-           py::overload_cast<>(&EncodedFrame::Buffer::getTimestampDevice, py::const_),
+           py::overload_cast<>(&EncodedFrame::Buffer::getTimestampDevice,
+                               py::const_),
            DOC(dai, Buffer, getTimestampDevice))
       .def("getInstanceNum", &EncodedFrame::getInstanceNum,
            DOC(dai, EncodedFrame, getInstanceNum))
+      .def("getWidth", &EncodedFrame::getWidth,
+           DOC(dai, EncodedFrame, getWidth))
+      .def("getHeight", &EncodedFrame::getHeight,
+           DOC(dai, EncodedFrame, getHeight))
       .def("getSequenceNum", &EncodedFrame::Buffer::getSequenceNum,
            DOC(dai, Buffer, getSequenceNum))
       .def("getExposureTime", &EncodedFrame::getExposureTime,
@@ -99,7 +106,7 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            DOC(dai, EncodedFrame, getColorTemperature))
       .def("getLensPosition", &EncodedFrame::getLensPosition,
            DOC(dai, EncodedFrame, getLensPosition))
-      .def("getLensPositionRaw", &EncodedFrame::getLensPositionRaw, 
+      .def("getLensPositionRaw", &EncodedFrame::getLensPositionRaw,
            DOC(dai, EncodedFrame, getLensPositionRaw))
       .def("getQuality", &EncodedFrame::getQuality,
            DOC(dai, EncodedFrame, getQuality))
@@ -119,6 +126,10 @@ void bind_encodedframe(pybind11::module &m, void *pCallstack) {
            DOC(dai, EncodedFrame, setTimestampDevice))
       .def("setSequenceNum", &EncodedFrame::setSequenceNum,
            DOC(dai, EncodedFrame, setSequenceNum))
+      .def("setWidth", &EncodedFrame::setWidth,
+           DOC(dai, EncodedFrame, setWidth))
+      .def("setHeight", &EncodedFrame::setHeight,
+           DOC(dai, EncodedFrame, setHeight))
       .def("setQuality", &EncodedFrame::setQuality,
            DOC(dai, EncodedFrame, getQuality))
       .def("setBitrate", &EncodedFrame::setBitrate,

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import depthai as dai
 from time import sleep
 import numpy as np

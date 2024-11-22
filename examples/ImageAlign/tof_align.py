@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import cv2
 import depthai as dai
@@ -27,8 +29,18 @@ class FPSCounter:
         return (len(self.frameTimes) - 1) / (self.frameTimes[-1] - self.frameTimes[0])
 
 
+ISP_SCALE = 2
+
+device = dai.Device()
+
+calibrationHandler = device.readCalibration()
+rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
+distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
+if distortionModel != dai.CameraModel.Perspective:
+    raise RuntimeError("Unsupported distortion model for RGB camera. This example supports only Perspective model.")
 
 pipeline = dai.Pipeline()
+
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
 tof = pipeline.create(dai.node.ToF)
@@ -46,7 +58,7 @@ camTof.setBoardSocket(TOF_SOCKET)
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_800_P)
 camRgb.setFps(FPS)
-camRgb.setIspScale(1, 2)
+camRgb.setIspScale(1, ISP_SCALE)
 
 out.setStreamName("out")
 
@@ -107,7 +119,8 @@ def updateBlendWeights(percentRgb):
 
 
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+with device:
+    device.startPipeline(pipeline)
     queue = device.getOutputQueue("out", 8, False)
 
     # Configure windows; trackbar adjusts blending ratio of rgb/depth
@@ -136,6 +149,12 @@ with dai.Device(pipeline) as device:
         # Blend when both received
         if frameDepth is not None:
             cvFrame = frameRgb.getCvFrame()
+            rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(cvFrame.shape[1]), int(cvFrame.shape[0]))
+            cvFrameUndistorted = cv2.undistort(
+                cvFrame,
+                np.array(rgbIntrinsics),
+                np.array(rgbDistortion),
+            )
             # Colorize the aligned depth
             alignedDepthColorized = colorizeDepth(frameDepth.getFrame())
             # Resize depth to match the rgb frame
@@ -151,7 +170,7 @@ with dai.Device(pipeline) as device:
             cv2.imshow("depth", alignedDepthColorized)
 
             blended = cv2.addWeighted(
-                cvFrame, rgbWeight, alignedDepthColorized, depthWeight, 0
+                cvFrameUndistorted, rgbWeight, alignedDepthColorized, depthWeight, 0
             )
             cv2.imshow(rgbDepthWindowName, blended)
 
