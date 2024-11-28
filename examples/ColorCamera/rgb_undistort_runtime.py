@@ -2,6 +2,8 @@ import cv2
 import depthai as dai
 import numpy as np
 
+np.set_printoptions(precision=2, suppress=True)
+
 camRes = dai.ColorCameraProperties.SensorResolution.THE_1200_P
 camSocket = dai.CameraBoardSocket.CAM_C
 
@@ -9,7 +11,8 @@ meshCellSize = 32
 
 def getMesh(calibData, size):
     M1 = np.array(calibData.getCameraIntrinsics(camSocket, size[0], size[1]))
-    mapX, mapY = cv2.initUndistortRectifyMap(M1, None, None, None, size, cv2.CV_32FC1)
+    d1 = np.array(calibData.getDistortionCoefficients(camSocket))
+    mapX, mapY = cv2.initUndistortRectifyMap(M1, d1, None, None, size, cv2.CV_32FC1)
 
     mesh0 = []
 
@@ -66,18 +69,26 @@ cam.loadMeshData(list(mesh.flatten().tobytes()))
 cam.setMeshSize(meshWidth, meshHeight)
 
 dist_xout = pipeline.create(dai.node.XLinkOut)
-dist_xout.setStreamName("WARPED")
+dist_xout.setStreamName('WARPED')
 cam.video.link(dist_xout.input)
 
 inmesh_xin = pipeline.create(dai.node.XLinkIn)
 inmesh_xin.setStreamName("inmesh")
 inmesh_xin.out.link(cam.inputMesh)
 
+xoutIsp = pipeline.create(dai.node.XLinkOut)
+xoutIsp.setStreamName('UNWARPED')
+
+xoutIsp.input.setBlocking(False)
+xoutIsp.input.setQueueSize(1)
+
+cam.isp.link(xoutIsp.input)
+
 with device:
 
     device.startPipeline(pipeline)
 
-    queues = [device.getOutputQueue(name, 4, False) for name in ['WARPED']]
+    queues = [device.getOutputQueue(name, 4, False) for name in ['WARPED', 'UNWARPED']]
 
     inWarpQ = device.getInputQueue("inmesh")
 
@@ -91,9 +102,28 @@ with device:
             break
         elif key == ord('x'):
 
-            mesh = np.random.rand(meshHeight, meshWidth, 2).astype(np.float32)
+            M1 = calibData.getCameraIntrinsics(camSocket, cam.getVideoSize()[0], cam.getVideoSize()[1])
+            M1[0][0] *= 1.1
+            M1[1][1] *= 1.1
+            M1 = np.array(M1)
 
-            print(mesh.shape)
+            print(f"Setting new intrinsics: {M1}")
+
+            calibData.setCameraIntrinsics(camSocket, M1, cam.getVideoSize()[0], cam.getVideoSize()[1])
+
+            mesh, meshWidth, meshHeight = getMesh(calibData, cam.getVideoSize())
+
+            runtimeMesh = dai.Buffer()
+            runtimeMesh.setData(list(mesh.flatten().tobytes()))
+
+            inWarpQ.send(runtimeMesh)
+        elif key == ord('d'):
+            d1 = calibData.getDistortionCoefficients(camSocket)
+            d1 = [d * 1.1 for d in d1]
+            print(f"Setting new distortion coefficients: {d1}")
+            calibData.setDistortionCoefficients(camSocket, d1)
+
+            mesh, meshWidth, meshHeight = getMesh(calibData, cam.getVideoSize())
 
             runtimeMesh = dai.Buffer()
             runtimeMesh.setData(list(mesh.flatten().tobytes()))
