@@ -62,6 +62,7 @@ pipeline = dai.Pipeline()
 cam = pipeline.create(dai.node.ColorCamera)
 cam.setBoardSocket(camSocket)
 cam.setResolution(camRes)
+cam.setVideoSize(1280, 800)
 
 mesh, meshWidth, meshHeight = getMesh(calibData, cam.getVideoSize())
 print(f"Mesh size: {meshWidth}x{meshHeight}")
