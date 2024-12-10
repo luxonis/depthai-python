@@ -324,14 +324,14 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
                     }
                     if(PyErr_CheckSignals() != 0) throw py::error_already_set();
                 }
-                {
+                if(timedout){
                     py::gil_scoped_release release;
                     d = obj.get(timeout, timedout);
                 }
                 if(PyErr_CheckSignals() != 0) throw py::error_already_set();
                 return d;
             },
-            py::arg("milliseconds_timeout"),
+            py::arg("timeout"),
             DOC(dai, Node, Input, get, 3))
         .def("has", static_cast<bool(Node::Input::*)()>(&Node::Input::has), DOC(dai, Node, Input, has, 2))
         .def("tryGet", static_cast<std::shared_ptr<ADatatype>(Node::Input::*)()>(&Node::Input::tryGet), DOC(dai, Node, Input, tryGet, 2))
