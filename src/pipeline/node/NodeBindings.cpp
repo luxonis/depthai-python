@@ -324,10 +324,6 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
                     }
                     if(PyErr_CheckSignals() != 0) throw py::error_already_set();
                 }
-                if(timedout){
-                    py::gil_scoped_release release;
-                    d = obj.get(timeout, timedout);
-                }
                 if(PyErr_CheckSignals() != 0) throw py::error_already_set();
                 return d;
             },
