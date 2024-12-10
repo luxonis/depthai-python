@@ -309,6 +309,30 @@ void NodeBindings::bind(pybind11::module& m, void* pCallstack){
 
             return d;
         }, DOC(dai, Node, Input, get, 2))
+        .def(
+            "get",
+            [](Node::Input& obj, milliseconds timeout) {
+                std::shared_ptr<ADatatype> d = nullptr;
+                bool timedout = true;
+                milliseconds timeoutLeft = timeout;
+                while(timedout && timeoutLeft.count() > 0) {
+                    {
+                        auto toSleep = std::min(milliseconds(100), timeoutLeft);
+                        py::gil_scoped_release release;
+                        d = obj.get(toSleep, timedout);
+                        timeoutLeft -= toSleep;
+                    }
+                    if(PyErr_CheckSignals() != 0) throw py::error_already_set();
+                }
+                {
+                    py::gil_scoped_release release;
+                    d = obj.get(timeout, timedout);
+                }
+                if(PyErr_CheckSignals() != 0) throw py::error_already_set();
+                return d;
+            },
+            py::arg("milliseconds_timeout"),
+            DOC(dai, Node, Input, get, 3))
         .def("has", static_cast<bool(Node::Input::*)()>(&Node::Input::has), DOC(dai, Node, Input, has, 2))
         .def("tryGet", static_cast<std::shared_ptr<ADatatype>(Node::Input::*)()>(&Node::Input::tryGet), DOC(dai, Node, Input, tryGet, 2))
         .def("tryGetAll", static_cast<std::vector<std::shared_ptr<ADatatype>>(Node::Input::*)()>(&Node::Input::tryGetAll), DOC(dai, Node, Input, tryGetAll, 2))
