@@ -32,13 +32,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cache .hunter folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.hunter
           key: hunter-ubuntu-latest
       - name: List .hunter cache directory
         run: ls -a -l ~/.hunter/_Base/ || true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Set up Python
@@ -79,22 +79,22 @@ jobs:
           cmake-version: '3.29.x'
       - name: Cache .hunter folder
         if: matrix.os != 'windows-latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.hunter/
           key: hunter-pytest-${{ matrix.os }}
       - name: Cache .hunter folder
         if: matrix.os == 'windows-latest'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: C:/.hunter/
           key: hunter-pytest-${{ matrix.os }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -141,11 +141,11 @@ jobs:
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -189,15 +189,15 @@ jobs:
       fail-fast: false
     steps:
       - name: Cache .hunter folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: C:/.hunter
           key: hunter-msvc
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -245,7 +245,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cache .hunter folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.hunter
           key: hunter-macos-latest
@@ -254,11 +254,11 @@ jobs:
           ls -a -l ~/.hunter/_Base/ || true
           echo "PATH=$PATH"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -306,11 +306,11 @@ jobs:
         PLAT: manylinux_2_28_x86_64
     steps:
       - name: Cache .hunter folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.hunter
           key: hunter-x86_64
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
@@ -322,7 +322,7 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -372,7 +372,7 @@ jobs:
       volumes:
         - /.hunter:/github/home/.hunter
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Installing libusb1-devel dependency
@@ -384,7 +384,7 @@ jobs:
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: 'docstrings'
           path: docstrings
@@ -423,7 +423,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -458,10 +458,10 @@ jobs:
     needs: [release]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: audited-wheels
           path: wheelhouse/audited/
