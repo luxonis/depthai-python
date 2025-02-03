@@ -2,7 +2,8 @@ FROM ubuntu:jammy
 
 WORKDIR /home/tester
 
-COPY /docs/install_depthai.sh /home/tester/install_depthai.sh
+
+COPY ../install_depthai.sh /home/tester/install_depthai.sh
 
 RUN chmod +x /home/tester/install_depthai.sh
 
