@@ -1,0 +1,35 @@
+name: Build and Test viewer on Linux
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container:
+          - docs/debian:bookworm
+          - docs/ubuntu:jammy
+          - docs/ubuntu:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build container
+        run: |
+          cd ${{ matrix.container }}
+          docker build -t test-${{ matrix.container }} -f Containerfile .
+
+      - name: Run container
+        run: |
+          docker run --rm test-${{ matrix.container }}
+
+      - name: Check exit status
+        run: echo "Container ${{ matrix.container }} exited successfully"
