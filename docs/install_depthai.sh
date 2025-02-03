@@ -91,7 +91,7 @@ elif [[ $(uname -s) == "Linux" ]]; then
   echo "Installing global dependencies."
   sudo apt-get install -y "${linux_pkgs[@]}"
 
-  echo "Creating python virtual environment in $VENV_DIR"
+  echo "Creating python virtual environment in $VENV_PATH"
 
 
 if [ ! -d "$VENV_PATH" ]; then
@@ -108,7 +108,7 @@ fi
   echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
   sudo udevadm control --reload-rules && sudo udevadm trigger
 
-  echo -e '#!/bin/bash\nsource /opt/depthai_venv/bin/activate\nexec depthai-viewer "$@"' | sudo tee /usr/local/bin/depthai-viewer > /dev/null
+  echo -e '#!/bin/bash\nsource .local/share/virtualenvs\nexec depthai-viewer "$@"' | sudo tee /usr/local/bin/depthai-viewer > /dev/null
   sudo chmod +x /usr/local/bin/depthai-viewer
 
 else
