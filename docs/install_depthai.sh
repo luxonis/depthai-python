@@ -129,4 +129,3 @@ fi
 echo "Installation complete successfully"
 echo -e '\n\n:::::::::::::::: INSTALATION COMPLETE ::::::::::::::::\n'
 echo -e '\nTo run demo app write **depthai-viewer** in terminal.'
-depthai-viewer
