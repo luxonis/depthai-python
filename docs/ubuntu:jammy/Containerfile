@@ -3,7 +3,7 @@ FROM ubuntu:jammy
 WORKDIR /home/tester
 
 # Copy script into the container
-COPY ../install_depthai.sh /home/tester/install_depthai.sh
+COPY docs/install_depthai.sh /home/tester/install_depthai.sh
 
 # Make script executable
 RUN chmod +x /home/tester/install_depthai.sh
