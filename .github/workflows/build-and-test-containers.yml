@@ -25,7 +25,7 @@ jobs:
       - name: Build container
         run: |
           cd ${{ matrix.container }}
-          docker build -t test-${{ matrix.container }} -f Containerfile .
+          docker build -t test-${{ matrix.container }} -f Containerfile ../
 
       - name: Run container
         run: |
