@@ -23,7 +23,7 @@ if [[ $(uname -s) == "Darwin" ]]; then
   echo "Running macOS installer."
 
   echo "Installing global dependencies."
-  bash -c "$(curl -fL https://docs.luxonis.com/install_dependencies.sh)"
+  bash -c "$(curl -fL https://raw.githubusercontent.com/luxonis/depthai-python/refs/heads/feat/install-rework/docs/install_dependencies.sh)"
 
   echo "Upgrading brew."
   brew update
