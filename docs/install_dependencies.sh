@@ -131,7 +131,12 @@ version_lte() {
     [[ "$1" == "$(echo -e "$1\n$2" | sort -V | head -n1)" ]]
 }
 
-declare -A debian_versions=(
+
+
+# Function to lookup and print Debian version number
+lookup_debian_version_number() {
+
+  declare -A debian_versions=(
   ["trixie/sid"]="13"
   ["bookworm/sid"]="12"
   ["bullseye/sid"]="11"
@@ -141,10 +146,7 @@ declare -A debian_versions=(
   ["wheezy/sid"]="7"
   ["squeeze/sid"]="6"
 )
-
-# Function to lookup and print Debian version number
-lookup_debian_version_number() {
-  debian_version_string="$1"
+debian_version_string="$1"
   version_number="${debian_versions[$debian_version_string]}"
   
   if [ -n "$version_number" ]; then
