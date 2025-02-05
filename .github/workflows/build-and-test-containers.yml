@@ -26,10 +26,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set execute permissions for install script
-        run: chmod +x install_depthai.sh
+        run: chmod +x docs/install_depthai.sh
 
       - name: Run installation script
-        run: ./install_depthai.sh
+        run: ./docs/install_depthai.sh
 
       - name: Verify installation success
         run: echo "Installation script executed successfully"
