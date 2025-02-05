@@ -6,10 +6,12 @@
     paths:
       - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
+      - 'docs/install_depthai.sh'
   pull_request:
       paths:
       - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
+      - 'docs/install_depthai.sh'
 
  jobs:
    test_linux:
