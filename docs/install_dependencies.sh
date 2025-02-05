@@ -28,6 +28,7 @@ readonly debian_pkgs=(
     libtiff-dev
     # https://stackoverflow.com/questions/55313610
     ffmpeg
+    python3-venv
     libsm6
     libxext6
     python3-pyqt5

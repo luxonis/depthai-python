@@ -68,7 +68,7 @@ if [[ $(uname -s) == "Darwin" ]]; then
 
 
 
-  "$VENV_PATH/bin/python" -m pip install --upgrade pip setuptools wheel
+  "$VENV_PATH/bin/python" -m pip install --upgrade pip setuptools wheel numpy
   # If on ARM, set the PYTHONPATH to include the Homebrew installation path
   if [[ $(uname -m) == 'arm64' ]]; then
     if [[ ":$PYTHONPATH:" == *":/opt/homebrew/lib/python3.10/site-packages:"* ]]; then
