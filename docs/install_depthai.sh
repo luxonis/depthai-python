@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VENV_PATH="$HOME/.local/share/virtualenvs"
+VENV_PATH="$HOME/.local/share/virtualenvs/depthai-viewer"
 
 echo "Installing viewer dependencies..."
 
@@ -18,12 +18,12 @@ readonly linux_pkgs=(
 PYTHONPATH=$(which python3)
 # Function to create virtual environment
 create_venv() {
-  echo "Creating python virtual environment in $VENV_PATH"
-  
   if [ ! -d "$VENV_PATH" ]; then
     echo "Creating virtual environment at $VENV_PATH"
     mkdir -p "$VENV_PATH"
     "$PYTHONPATH" -m venv "$VENV_PATH"
+  else
+    echo "Virtual environment already exists at $VENV_PATH"
   fi
 }
 
