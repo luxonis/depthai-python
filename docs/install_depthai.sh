@@ -115,5 +115,5 @@ echo -e '\n\n:::::::::::::::: INSTALLATION COMPLETE ::::::::::::::::\n'
 if [[ $(uname -s) == "Darwin" ]]; then
   echo -e '\nTo run demo app, write **depthai-viewer** in terminal.'
 elif [[ $DISPLAY != "" ]]; then
-  echo -e '\nTo run demo app, write **depthai-viewer** in terminal or run **depthai-viewer** from the terminal.'
+  echo -e '\nTo run demo app, write **depthai-viewer** in terminal.'
 fi
