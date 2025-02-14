@@ -112,4 +112,8 @@ fi
 # Final success message
 echo "Installation complete successfully"
 echo -e '\n\n:::::::::::::::: INSTALLATION COMPLETE ::::::::::::::::\n'
-echo -e '\nTo run demo app, write **depthai-viewer** in terminal.'
+if [[ $(uname -s) == "Darwin" ]]; then
+  echo -e '\nTo run demo app, write **depthai-viewer** in terminal.'
+elif [[ $DISPLAY != "" ]]; then
+  echo -e '\nTo run demo app, write **depthai-viewer** in terminal or run **depthai-viewer** from the terminal.'
+fi
