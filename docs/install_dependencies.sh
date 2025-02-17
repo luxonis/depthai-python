@@ -28,6 +28,7 @@ readonly debian_pkgs=(
     libtiff-dev
     # https://stackoverflow.com/questions/55313610
     ffmpeg
+    python3-venv
     libsm6
     libxext6
     python3-pyqt5
@@ -117,12 +118,6 @@ readonly fedora_pkgs=(
     #           libsm6 libxext6 libgl1-mesa-glx
 )
 
-# Check Bash version
-if [[ "${BASH_VERSINFO:-0}" -lt 4 ]]; then
-    echo "This script requires Bash 4.0 or higher. You are using Bash ${BASH_VERSION}. Please upgrade your Bash version."
-    exit 1
-fi
-
 print_action () {
     green="\e[0;32m"
     reset="\e[0;0m"
@@ -137,7 +132,12 @@ version_lte() {
     [[ "$1" == "$(echo -e "$1\n$2" | sort -V | head -n1)" ]]
 }
 
-declare -A debian_versions=(
+
+
+# Function to lookup and print Debian version number
+lookup_debian_version_number() {
+
+  declare -A debian_versions=(
   ["trixie/sid"]="13"
   ["bookworm/sid"]="12"
   ["bullseye/sid"]="11"
@@ -147,10 +147,7 @@ declare -A debian_versions=(
   ["wheezy/sid"]="7"
   ["squeeze/sid"]="6"
 )
-
-# Function to lookup and print Debian version number
-lookup_debian_version_number() {
-  debian_version_string="$1"
+debian_version_string="$1"
   version_number="${debian_versions[$debian_version_string]}"
   
   if [ -n "$version_number" ]; then

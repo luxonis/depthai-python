@@ -1,0 +1,35 @@
+name: Build and Test viewer on Linux and macOS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04
+          - ubuntu-22.04
+          - macos-latest
+          - macos-14
+          - macos-13
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set execute permissions for install script
+        run: chmod +x docs/install_depthai.sh
+
+      - name: Run installation script
+        run: ./docs/install_depthai.sh
+
+      - name: Verify installation success
+        run: echo "Installation script executed successfully"
