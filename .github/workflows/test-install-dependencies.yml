@@ -22,7 +22,7 @@
      container:
        image: ${{ matrix.container_image }}
      steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install sudo
          if: startsWith(matrix.container_image, 'fedora') == true
          run: yum update -y && yum install -y sudo
@@ -40,7 +40,7 @@
            sudo apt-get install -y python3-venv
            python3 -m venv .env
            . .env/bin/activate
-           pip install --upgrade pip 
+           pip install --upgrade pip
            python3 examples/install_requirements.py
          shell: bash
        - name: Install example requirements
@@ -53,7 +53,7 @@
           os: ["macos-12", "macos-13", "macos-14"]
       runs-on: ${{ matrix.os }}
       steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install dependencies
          run: |
            sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/install_dependencies.sh > tmp_script.sh
@@ -62,13 +62,13 @@
          run: |
            python3 -m venv .env
            . .env/bin/activate
-           pip install --upgrade pip 
+           pip install --upgrade pip
            python3 examples/install_requirements.py
          shell: bash
    test_windows:
       runs-on: windows-latest
       steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
            python-version: "3.10"
@@ -81,4 +81,4 @@
       - name: Install example requirements
         run: |
           python examples/install_requirements.py
-             
+
