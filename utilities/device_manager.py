@@ -312,16 +312,13 @@ def connectAndStartStreaming(dev):
                     break
         else:
             camRgb = pipeline.create(dai.node.ColorCamera)
-            camRgb.setIspScale(1,3)
-            firstSensor = d.getConnectedCameraFeatures()[0]
-            camRgb.setPreviewSize(firstSensor.width // 3, firstSensor.height // 3)
-            camRgb.setColorOrder(camRgb.Properties.ColorOrder.RGB)
+            camRgb.setIspScale(1,2)
 
             xout = pipeline.create(dai.node.XLinkOut)
             xout.input.setQueueSize(2)
             xout.input.setBlocking(False)
             xout.setStreamName("color")
-            camRgb.preview.link(xout.input)
+            camRgb.isp.link(xout.input)
 
             # Start pipeline
             d.startPipeline(pipeline)
@@ -343,7 +340,7 @@ def connectAndStartStreaming(dev):
             while not d.isClosed():
                 frame = d.getOutputQueue('color').get()
                 with io.BytesIO() as output:
-                    rgb = frame.getFrame()
+                    rgb = frame.getCvFrame()[:,:,::-1]
                     image = Image.fromarray(rgb, "RGB")
                     image.save(output, format="GIF")
                     contents = output.getvalue()
