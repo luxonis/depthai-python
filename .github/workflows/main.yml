@@ -31,6 +31,10 @@ jobs:
   build-docstrings:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
@@ -73,10 +77,9 @@ jobs:
       - name: Print home directory
         run: echo Home directory inside container $HOME
       - name: Setup cmake
-        if: matrix.os == 'macos-latest'
-        uses: jwlawson/actions-setup-cmake@v1.13
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.29.x'
+          cmake-version : '3.31.x'
       - name: Cache .hunter folder
         if: matrix.os != 'windows-latest'
         uses: actions/cache@v4
@@ -141,6 +144,10 @@ jobs:
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
@@ -188,6 +195,10 @@ jobs:
         python-architecture: [x64, x86]
       fail-fast: false
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
@@ -244,6 +255,10 @@ jobs:
         os: [macos-13, macos-14] # macos-13 is x64, macos-14 is arm64
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
@@ -305,6 +320,10 @@ jobs:
       env:
         PLAT: manylinux_2_28_x86_64
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
@@ -372,6 +391,10 @@ jobs:
       volumes:
         - /.hunter:/github/home/.hunter
     steps:
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version : '3.31.x'
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
