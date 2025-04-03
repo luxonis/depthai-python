@@ -77,7 +77,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     "E.g: -cams rgb,m right,c . If not specified, all connected cameras will be used.")
 parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
                     help="Select mono camera resolution (height). Default: %(default)s")
-parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '4k', '5mp', '12mp', '13mp', '48mp'},
+parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '1296', '2592', '4k', '5mp', '12mp', '13mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
 parser.add_argument('-rot', '--rotate', const='all', choices={'all', 'rgb', 'mono'}, nargs="?",
                     help="Which cameras to rotate 180 degrees. All if not filtered")
@@ -193,6 +193,8 @@ color_res_opts = {
     '1012': dai.ColorCameraProperties.SensorResolution.THE_1352X1012,
     '1200': dai.ColorCameraProperties.SensorResolution.THE_1200_P,
     '1520': dai.ColorCameraProperties.SensorResolution.THE_2024X1520,
+    '1296': dai.ColorCameraProperties.SensorResolution.THE_2304X1296,
+    '2592': dai.ColorCameraProperties.SensorResolution.THE_4608X2592,
     '4k':   dai.ColorCameraProperties.SensorResolution.THE_4_K,
     '5mp': dai.ColorCameraProperties.SensorResolution.THE_5_MP,
     '12mp': dai.ColorCameraProperties.SensorResolution.THE_12_MP,
@@ -519,11 +521,11 @@ with dai.Device(*dai_device_args) as device:
     lensMin = 0.0
     lensMax = 1.0
 
-    expTime = 20000
+    expTime = 1000
     expMin = 1
     expMax = 33000
 
-    sensIso = 800
+    sensIso = 400
     sensMin = 100
     sensMax = 1600
 

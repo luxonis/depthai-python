@@ -45,6 +45,8 @@ void bind_colorcamera(pybind11::module& m, void* pCallstack){
         .value("THE_1440X1080", ColorCameraProperties::SensorResolution::THE_1440X1080)
         .value("THE_1352X1012", ColorCameraProperties::SensorResolution::THE_1352X1012)
         .value("THE_2024X1520", ColorCameraProperties::SensorResolution::THE_2024X1520)
+        .value("THE_2304X1296", ColorCameraProperties::SensorResolution::THE_2304X1296)
+        .value("THE_4608X2592", ColorCameraProperties::SensorResolution::THE_4608X2592)
         ;
 
     colorCameraPropertiesColorOrder
