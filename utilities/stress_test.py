@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import signal
 import datetime
+import sys
 
 def on_exit(sig, frame):
     cv2.destroyAllWindows()
@@ -83,6 +84,7 @@ def print_system_information(info: dai.SystemInformation):
            * 100,
            info.leonMssCpuUsage.average * 100)
     )
+    sys.stdout.flush()
 
 
 def get_or_download_yolo_blob() -> str:
