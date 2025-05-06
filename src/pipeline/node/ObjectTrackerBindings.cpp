@@ -58,6 +58,7 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def_readonly("inputTrackerFrame", &ObjectTracker::inputTrackerFrame, DOC(dai, node, ObjectTracker, inputTrackerFrame))
         .def_readonly("inputDetectionFrame", &ObjectTracker::inputDetectionFrame, DOC(dai, node, ObjectTracker, inputDetectionFrame))
         .def_readonly("inputDetections", &ObjectTracker::inputDetections, DOC(dai, node, ObjectTracker, inputDetections))
+        .def_readonly("inputConfig", &ObjectTracker::inputConfig, DOC(dai, node, ObjectTracker, inputConfig))
         .def_readonly("out", &ObjectTracker::out, DOC(dai, node, ObjectTracker, out))
         .def_readonly("passthroughTrackerFrame", &ObjectTracker::passthroughTrackerFrame, DOC(dai, node, ObjectTracker, passthroughTrackerFrame))
         .def_readonly("passthroughDetectionFrame", &ObjectTracker::passthroughDetectionFrame, DOC(dai, node, ObjectTracker, passthroughDetectionFrame))
