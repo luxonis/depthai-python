@@ -50,7 +50,8 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def_readwrite("trackerIdAssignmentPolicy", &ObjectTrackerProperties::trackerIdAssignmentPolicy, DOC(dai, ObjectTrackerProperties, trackerIdAssignmentPolicy))
         .def_readwrite("trackingPerClass", &ObjectTrackerProperties::trackingPerClass, DOC(dai, ObjectTrackerProperties, trackingPerClass))
         .def_readwrite("occlusionRatioThreshold", &ObjectTrackerProperties::occlusionRatioThreshold, DOC(dai, ObjectTrackerProperties, occlusionRatioThreshold))
-        .def_readwrite("trackingPerClass", &ObjectTrackerProperties::trackingPerClass, DOC(dai, ObjectTrackerProperties, trackingPerClass))
+        .def_readwrite("trackletMaxLifespan", &ObjectTrackerProperties::trackletMaxLifespan, DOC(dai, ObjectTrackerProperties, trackletMaxLifespan))
+        .def_readwrite("trackletBirthThreshold", &ObjectTrackerProperties::trackletBirthThreshold, DOC(dai, ObjectTrackerProperties, trackletBirthThreshold))
         ;
 
     // Node
