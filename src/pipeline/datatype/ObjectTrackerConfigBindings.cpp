@@ -42,7 +42,7 @@ void bind_objecttrackerconfig(pybind11::module& m, void* pCallstack){
     config
         .def(py::init<>())
         .def(py::init<std::shared_ptr<RawObjectTrackerConfig>>())
-        
+
         .def("set", &ObjectTrackerConfig::set, py::arg("config"), DOC(dai, ObjectTrackerConfig, set))
         .def("get", &ObjectTrackerConfig::get, DOC(dai, ObjectTrackerConfig, get))
         .def("forceRemoveID", &ObjectTrackerConfig::forceRemoveID, DOC(dai, ObjectTrackerConfig, forceRemoveID))
