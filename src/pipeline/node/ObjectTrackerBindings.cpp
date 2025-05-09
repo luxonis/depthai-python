@@ -48,6 +48,10 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def_readwrite("detectionLabelsToTrack", &ObjectTrackerProperties::detectionLabelsToTrack, DOC(dai, ObjectTrackerProperties, detectionLabelsToTrack))
         .def_readwrite("trackerType", &ObjectTrackerProperties::trackerType, DOC(dai, ObjectTrackerProperties, trackerType))
         .def_readwrite("trackerIdAssignmentPolicy", &ObjectTrackerProperties::trackerIdAssignmentPolicy, DOC(dai, ObjectTrackerProperties, trackerIdAssignmentPolicy))
+        .def_readwrite("trackingPerClass", &ObjectTrackerProperties::trackingPerClass, DOC(dai, ObjectTrackerProperties, trackingPerClass))
+        .def_readwrite("occlusionRatioThreshold", &ObjectTrackerProperties::occlusionRatioThreshold, DOC(dai, ObjectTrackerProperties, occlusionRatioThreshold))
+        .def_readwrite("trackletMaxLifespan", &ObjectTrackerProperties::trackletMaxLifespan, DOC(dai, ObjectTrackerProperties, trackletMaxLifespan))
+        .def_readwrite("trackletBirthThreshold", &ObjectTrackerProperties::trackletBirthThreshold, DOC(dai, ObjectTrackerProperties, trackletBirthThreshold))
         ;
 
     // Node
@@ -55,6 +59,7 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def_readonly("inputTrackerFrame", &ObjectTracker::inputTrackerFrame, DOC(dai, node, ObjectTracker, inputTrackerFrame))
         .def_readonly("inputDetectionFrame", &ObjectTracker::inputDetectionFrame, DOC(dai, node, ObjectTracker, inputDetectionFrame))
         .def_readonly("inputDetections", &ObjectTracker::inputDetections, DOC(dai, node, ObjectTracker, inputDetections))
+        .def_readonly("inputConfig", &ObjectTracker::inputConfig, DOC(dai, node, ObjectTracker, inputConfig))
         .def_readonly("out", &ObjectTracker::out, DOC(dai, node, ObjectTracker, out))
         .def_readonly("passthroughTrackerFrame", &ObjectTracker::passthroughTrackerFrame, DOC(dai, node, ObjectTracker, passthroughTrackerFrame))
         .def_readonly("passthroughDetectionFrame", &ObjectTracker::passthroughDetectionFrame, DOC(dai, node, ObjectTracker, passthroughDetectionFrame))
@@ -66,6 +71,9 @@ void bind_objecttracker(pybind11::module& m, void* pCallstack){
         .def("setTrackerType", &ObjectTracker::setTrackerType, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerType))
         .def("setTrackerIdAssignmentPolicy", &ObjectTracker::setTrackerIdAssignmentPolicy, py::arg("type"), DOC(dai, node, ObjectTracker, setTrackerIdAssignmentPolicy))
         .def("setTrackingPerClass", &ObjectTracker::setTrackingPerClass, py::arg("trackingPerClass"), DOC(dai, node, ObjectTracker, setTrackingPerClass))
+        .def("setOcclusionRatioThreshold", &ObjectTracker::setOcclusionRatioThreshold, py::arg("occlusionRatioThreshold"), DOC(dai, node, ObjectTracker, setOcclusionRatioThreshold))
+        .def("setTrackletMaxLifespan", &ObjectTracker::setTrackletMaxLifespan, py::arg("lifespan"), DOC(dai, node, ObjectTracker, setTrackletMaxLifespan))
+        .def("setTrackletBirthThreshold", &ObjectTracker::setTrackletBirthThreshold, py::arg("threshold"), DOC(dai, node, ObjectTracker, setTrackletBirthThreshold))
         ;
     daiNodeModule.attr("ObjectTracker").attr("Properties") = objectTrackerProperties;
 
