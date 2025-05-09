@@ -68,7 +68,13 @@ if requireOpenCv:
 ARTIFACTORY_URL = 'https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local'
 
 # Check if in virtual environment
-in_venv = getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix)) != sys.prefix
+in_venv = any([
+    "VIRTUAL_ENV" in os.environ,      # Virtualenv
+    "PIPENV_ACTIVE" in os.environ,    # Pipenv
+    "CONDA_PREFIX" in os.environ,     # Conda/Mamba
+    getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix)) != sys.prefix  # Standard venv detection
+])
+
 pip_call = [sys.executable, "-m", "pip"]
 pip_installed = True
 pip_install = pip_call + ["install", "-U"]
