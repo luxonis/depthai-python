@@ -301,7 +301,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux_2_28_x86_64:latest
+      image: quay.io/pypa/manylinux_2_28_x86_64:2024.12.05-1
       env:
         PLAT: manylinux_2_28_x86_64
     steps:
@@ -363,9 +363,9 @@ jobs:
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
     needs: build-docstrings
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu-24.04-arm
     container:
-      image: quay.io/pypa/manylinux_2_28_aarch64:latest
+      image: quay.io/pypa/manylinux_2_28_aarch64:2024.12.05-1
       env:
         PLAT: manylinux_2_28_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
