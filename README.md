@@ -6,6 +6,9 @@
 
 Python bindings for C++ depthai-core library
 
+>  **Important — You’re viewing the `v2.x.y` branch.**
+> For the `v3.x.y` version which adds support for RVC4 devices the DepthAI Python bindings have been integrated directly into the [depthai-core](https://github.com/luxonis/depthai-core/tree/main) repository.
+
 ## Documentation
 
 Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.com/projects/api/en/latest/)
