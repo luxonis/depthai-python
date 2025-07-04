@@ -639,8 +639,19 @@ with dai.Device(*dai_device_args) as device:
                     capture_list.remove(c)
                     print()
                 if c.startswith('raw_') or c.startswith('tof_amplitude_') or c.startswith('tof_intensity_'):
+                    # Custom handling for IMX462 that has extra metadata and offset in RAW frame
+                    bits = 10
+                    order = cv2.COLOR_BayerGB2BGR
+                    if pkt.getData().size == 1920*2*(1080+15):
+                        full_raw = pkt.getData()
+                        extra_offset = 384*2
+                        actual_frame = full_raw[(1920*2*15+extra_offset):]
+                        missing_data = np.full(extra_offset, 0xAA, dtype=np.uint8) # FIXME
+                        frame = np.append(actual_frame, missing_data).view(np.uint16).reshape((1080, 1920))
+                        bits = 12
+                        order = cv2.COLOR_BayerGR2BGR
                     if capture:
-                        filename = capture_file_info + '_10bit.bw'
+                        filename = capture_file_info + f'_{bits}bit.bw'
                         print('Saving:', filename)
                         frame.tofile(filename)
                     # Full range for display, use bits [15:6] of the 16-bit pixels
@@ -649,14 +660,14 @@ with dai.Device(*dai_device_args) as device:
                     if type == dai.ImgFrame.Type.RAW10:
                         multiplier = (1 << (16-10))
                     if type == dai.ImgFrame.Type.RAW12:
-                        multiplier = (1 << (16-4))
+                        multiplier = (1 << (16-12))
                     frame = frame * multiplier
                     # Debayer as color for preview/png
                     if cam_type_color[cam_skt]:
                         # See this for the ordering, at the end of page:
                         # https://docs.opencv.org/4.5.1/de/d25/imgproc_color_conversions.html
                         # TODO add bayer order to ImgFrame getType()
-                        frame = cv2.cvtColor(frame, cv2.COLOR_BayerGB2BGR)
+                        frame = cv2.cvtColor(frame, order)
                 else:
                     # Save YUV too, but only when RAW is also enabled (for tuning purposes)
                     if capture and args.enable_raw:
