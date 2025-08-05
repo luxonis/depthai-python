@@ -4,12 +4,14 @@
   workflow_dispatch:
   push:
     paths:
-      - 'docs/source/_static/install_dependencies.sh'
+      - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
+      - 'docs/install_depthai.sh'
   pull_request:
       paths:
-      - 'docs/source/_static/install_dependencies.sh'
+      - 'docs/install_dependencies.sh'
       - 'examples/install_requirements.py'
+      - 'docs/install_depthai.sh'
 
  jobs:
    test_linux:
@@ -20,7 +22,7 @@
      container:
        image: ${{ matrix.container_image }}
      steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install sudo
          if: startsWith(matrix.container_image, 'fedora') == true
          run: yum update -y && yum install -y sudo
@@ -30,7 +32,7 @@
        - name: Install dependencies
          run: |
            ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone # Otherwise tzdata installer prompts for user input
-           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
+           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/install_dependencies.sh > tmp_script.sh # Doesn't work on docker
            bash tmp_script.sh
        - name: Create a virtual environment
          if: endsWith(matrix.container_image, 'rolling') == true
@@ -38,7 +40,7 @@
            sudo apt-get install -y python3-venv
            python3 -m venv .env
            . .env/bin/activate
-           pip install --upgrade pip 
+           pip install --upgrade pip
            python3 examples/install_requirements.py
          shell: bash
        - name: Install example requirements
@@ -51,22 +53,22 @@
           os: ["macos-12", "macos-13", "macos-14"]
       runs-on: ${{ matrix.os }}
       steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install dependencies
          run: |
-           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/source/_static/install_dependencies.sh > tmp_script.sh
+           sed '/udevadm control --reload-rules && sudo udevadm trigger/d' docs/install_dependencies.sh > tmp_script.sh
            bash tmp_script.sh
        - name: Create a virtual environment
          run: |
            python3 -m venv .env
            . .env/bin/activate
-           pip install --upgrade pip 
+           pip install --upgrade pip
            python3 examples/install_requirements.py
          shell: bash
    test_windows:
       runs-on: windows-latest
       steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
            python-version: "3.10"
@@ -79,4 +81,4 @@
       - name: Install example requirements
         run: |
           python examples/install_requirements.py
-             
+
