@@ -3,6 +3,8 @@ from typing import Any, List, Optional, Tuple, Dict
 import cv2
 import numpy as np
 import signal
+import datetime
+import sys
 
 def on_exit(sig, frame):
     cv2.destroyAllWindows()
@@ -82,6 +84,7 @@ def print_system_information(info: dai.SystemInformation):
            * 100,
            info.leonMssCpuUsage.average * 100)
     )
+    sys.stdout.flush()
 
 
 def get_or_download_yolo_blob() -> str:
@@ -137,6 +140,9 @@ jet_custom[0] = [0, 0, 0]
 def clamp(num, v0, v1):
     return max(v0, min(num, v1))
 
+DOT_STEP = 0.05
+FLOOD_STEP = 0.05
+
 class PipelineContext:
     q_name_yolo_passthrough: Optional[str] = None
     """The name of the queue that the YOLO spatial detection network passthrough is connected to."""
@@ -150,8 +156,8 @@ def stress_test(mxid: str = ""):
 
     # May have some unknown args
     args, _ = parser.parse_known_args()
-    dot_intensity = 500
-    flood_intensity = 500
+    dot_intensity = 0.5
+    flood_intensity = 0.5
     iso = 800
     exp_time = 20000
 
@@ -162,12 +168,11 @@ def stress_test(mxid: str = ""):
         cam_args.append(device_info)
     with dai.Device(*cam_args) as device:
         print("Setting default dot intensity to", dot_intensity)
-        device.setIrLaserDotProjectorBrightness(dot_intensity)
+        device.setIrLaserDotProjectorIntensity(dot_intensity)
         print("Setting default flood intensity to", flood_intensity)
-        device.setIrFloodLightBrightness(flood_intensity)
+        device.setIrFloodLightIntensity(flood_intensity)
         pipeline, outputs, pipeline_context = build_pipeline(device, args)
         device.startPipeline(pipeline)
-        start_time = time.time()
         queues = [device.getOutputQueue(name, size, False)
                   for name, size in outputs if name != "sys_log"]
         camera_control_q = device.getInputQueue("cam_control")
@@ -218,7 +223,7 @@ def stress_test(mxid: str = ""):
             sys_info: dai.SystemInformation = sys_info_q.tryGet()
             if sys_info:
                 print("----------------------------------------")
-                print(f"[{int(time.time() - start_time)}s] Usb speed {usb_speed}")
+                print(f"[{datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')}] Usb speed {usb_speed}")
                 print("----------------------------------------")
                 print_system_information(sys_info)
             for name, frame in last_frame.items():
@@ -230,21 +235,21 @@ def stress_test(mxid: str = ""):
                 print("Q Pressed, exiting stress test...")
                 break
             elif key == ord('a'):
-                dot_intensity = clamp(dot_intensity - 100, 0, 1200)
+                dot_intensity = clamp(dot_intensity - DOT_STEP, 0, 1.0)
                 print("Decreasing dot intensity by 100, new value:", dot_intensity)
-                device.setIrLaserDotProjectorBrightness(dot_intensity)
+                device.setIrLaserDotProjectorIntensity(dot_intensity)
             elif key == ord('d'):
-                dot_intensity = clamp(dot_intensity + 100, 0, 1200)
+                dot_intensity = clamp(dot_intensity + DOT_STEP, 0, 1.0)
                 print("Increasing dot intensity by 100, new value:", dot_intensity)
-                device.setIrLaserDotProjectorBrightness(dot_intensity)
+                device.setIrLaserDotProjectorIntensity(dot_intensity)
             elif key == ord('w'):
-                flood_intensity = clamp(flood_intensity + 100, 0, 1500)
+                flood_intensity = clamp(flood_intensity + FLOOD_STEP, 0, 1.0)
                 print("Increasing flood intensity by 100, new value:", flood_intensity)
-                device.setIrFloodLightBrightness(flood_intensity)
+                device.setIrFloodLightIntensity(flood_intensity)
             elif key == ord('s'):
-                flood_intensity = clamp(flood_intensity - 100, 0, 1500)
+                flood_intensity = clamp(flood_intensity - FLOOD_STEP, 0, 1.0)
                 print("Decreasing flood intensity by 100, new value:", flood_intensity)
-                device.setIrFloodLightBrightness(flood_intensity)
+                device.setIrFloodLightIntensity(flood_intensity)
             elif key == ord('k'):
                 iso = clamp(iso - 50, 0, 1600)
                 print("Decreasing iso by 50, new value:", iso)
