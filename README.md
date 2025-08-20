@@ -1,5 +1,8 @@
 # DepthAI Python Library
 
+[![Discord](https://img.shields.io/discord/790680891252932659?label=Discord)](https://discord.gg/luxonis)
+[![Forum](https://img.shields.io/badge/Forum-discuss-orange)](https://discuss.luxonis.com/)
+[![Docs](https://img.shields.io/badge/Docs-DepthAI_API-yellow)](https://docs.luxonis.com/projects/api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![](https://img.shields.io/pypi/v/depthai.svg)](https://pypi.org/project/depthai/)
 [![Python Wheel CI](https://github.com/luxonis/depthai-python/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/luxonis/depthai-python/actions/workflows/main.yml)
