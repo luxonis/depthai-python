@@ -75,7 +75,7 @@ parser.add_argument('-cams', '--cameras', type=socket_type_pair, nargs='+',
                     default=[],
                     help="Which camera sockets to enable, and type: c[olor] / m[ono] / t[of] / th[ermal]. "
                     "E.g: -cams rgb,m right,c . If not specified, all connected cameras will be used.")
-parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800},
+parser.add_argument('-mres', '--mono-resolution', type=int, default=800, choices={480, 400, 720, 800, 1200},
                     help="Select mono camera resolution (height). Default: %(default)s")
 parser.add_argument('-cres', '--color-resolution', default='1080', choices={'720', '800', '1080', '1012', '1200', '1520', '4k', '5mp', '12mp', '13mp', '48mp'},
                     help="Select color camera resolution / height. Default: %(default)s")
