@@ -517,6 +517,12 @@ with dai.Device(*dai_device_args) as device:
     controlQueue = device.getInputQueue('control')
     tofCfgQueue = device.getInputQueue('tofConfig')
 
+    # TMP workaround, send again HDR local tone weight which doesn't seem to take effect from initialControl
+    if hdr_on:
+        ctrl = dai.CameraControl()
+        ctrl.setMisc("hdr-local-tone-weight", hdr_local_tone_weight / 32)
+        controlQueue.send(ctrl)
+
     # Manual exposure/focus set step
     EXP_STEP = 500  # us
     ISO_STEP = 50
