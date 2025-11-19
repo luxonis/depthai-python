@@ -396,6 +396,7 @@ jobs:
 
       - name: Building source distribution
         run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install --upgrade setuptools wheel
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar
           mv dist/* wheelhouse/audited/
       - name: Build wheels
