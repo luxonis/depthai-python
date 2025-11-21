@@ -372,7 +372,7 @@ jobs:
         run: yum install -y --disableplugin=fastestmirror libusb1-devel
       - name: Installing cmake dependency
         run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install "cmake<4"
           ln -s /opt/python/cp38-cp38/bin/cmake /bin/
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
@@ -386,8 +386,8 @@ jobs:
 
       - name: Build and install depthai-core
         run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 4
+          /opt/python/cp38-cp38/bin/cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          /opt/python/cp38-cp38/bin/cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
@@ -418,7 +418,7 @@ jobs:
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
     needs: build-docstrings
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu-24.04-arm
     container:
       image: quay.io/pypa/manylinux_2_28_aarch64:latest
       env:
@@ -434,7 +434,7 @@ jobs:
         run: yum install -y --disableplugin=fastestmirror libusb1-devel
       - name: Installing cmake dependency
         run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install "cmake<4"
           ln -s /opt/python/cp38-cp38/bin/cmake /bin/
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
@@ -448,8 +448,8 @@ jobs:
 
       - name: Build and install depthai-core
         run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 1
+          /opt/python/cp38-cp38/bin/cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          /opt/python/cp38-cp38/bin/cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
