@@ -3,6 +3,8 @@ from typing import Any, List, Optional, Tuple, Dict
 import cv2
 import numpy as np
 import signal
+import datetime
+import sys
 
 def on_exit(sig, frame):
     cv2.destroyAllWindows()
@@ -82,6 +84,7 @@ def print_system_information(info: dai.SystemInformation):
            * 100,
            info.leonMssCpuUsage.average * 100)
     )
+    sys.stdout.flush()
 
 
 def get_or_download_yolo_blob() -> str:
@@ -170,7 +173,6 @@ def stress_test(mxid: str = ""):
         device.setIrFloodLightIntensity(flood_intensity)
         pipeline, outputs, pipeline_context = build_pipeline(device, args)
         device.startPipeline(pipeline)
-        start_time = time.time()
         queues = [device.getOutputQueue(name, size, False)
                   for name, size in outputs if name != "sys_log"]
         camera_control_q = device.getInputQueue("cam_control")
@@ -221,7 +223,7 @@ def stress_test(mxid: str = ""):
             sys_info: dai.SystemInformation = sys_info_q.tryGet()
             if sys_info:
                 print("----------------------------------------")
-                print(f"[{int(time.time() - start_time)}s] Usb speed {usb_speed}")
+                print(f"[{datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')}] Usb speed {usb_speed}")
                 print("----------------------------------------")
                 print_system_information(sys_info)
             for name, frame in last_frame.items():
