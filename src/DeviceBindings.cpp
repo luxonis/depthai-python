@@ -613,6 +613,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))
         .def("getCameraSensorNames", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraSensorNames(); }, DOC(dai, DeviceBase, getCameraSensorNames))
+        .def("getCameraStats", [](DeviceBase& d) { py::gil_scoped_release release; return d.getCameraStats(); }, DOC(dai, DeviceBase, getCameraStats))
         .def("getStereoPairs", [](DeviceBase& d) { py::gil_scoped_release release; return d.getStereoPairs(); }, DOC(dai, DeviceBase, getStereoPairs))
         .def("getConnectedIMU", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedIMU(); }, DOC(dai, DeviceBase, getConnectedIMU))
         .def("getIMUFirmwareVersion", [](DeviceBase& d) { py::gil_scoped_release release; return d.getIMUFirmwareVersion(); }, DOC(dai, DeviceBase, getIMUFirmwareVersion))

@@ -9,6 +9,7 @@
 #include "depthai-shared/common/CameraImageOrientation.hpp"
 #include "depthai-shared/common/CameraSensorType.hpp"
 #include "depthai-shared/common/CameraFeatures.hpp"
+#include "depthai-shared/common/CameraIspStats.hpp"
 #include "depthai-shared/common/MemoryInfo.hpp"
 #include "depthai-shared/common/ChipTemperature.hpp"
 #include "depthai-shared/common/ChipTemperatureS3.hpp"
@@ -48,6 +49,7 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
     py::class_<CameraSensorConfig> cameraSensorConfig(m, "CameraSensorConfig", DOC(dai, CameraSensorConfig));
     py::class_<CameraFeatures> cameraFeatures(m, "CameraFeatures", DOC(dai, CameraFeatures));
     py::class_<MemoryInfo> memoryInfo(m, "MemoryInfo", DOC(dai, MemoryInfo));
+    py::class_<CameraIspStats> cameraIspStats(m, "CameraIspStats");
     py::class_<ChipTemperature> chipTemperature(m, "ChipTemperature", DOC(dai, ChipTemperature));
     py::class_<ChipTemperatureS3> chipTemperatureS3(m, "ChipTemperatureS3", DOC(dai, ChipTemperatureS3));
     py::class_<CpuUsage> cpuUsage(m, "CpuUsage", DOC(dai, CpuUsage));
@@ -248,6 +250,27 @@ void CommonBindings::bind(pybind11::module& m, void* pCallstack){
         .def_readwrite("remaining", &MemoryInfo::remaining)
         .def_readwrite("used", &MemoryInfo::used)
         .def_readwrite("total", &MemoryInfo::total)
+    ;
+
+    cameraIspStats
+        .def(py::init<>())
+        .def_readwrite("socket", &CameraIspStats::socket)
+        .def_readwrite("cameraId", &CameraIspStats::cameraId)
+        .def_readwrite("chanNo", &CameraIspStats::chanNo)
+        .def_readwrite("seqNo", &CameraIspStats::seqNo)
+        .def_readwrite("srcConfigured", &CameraIspStats::srcConfigured)
+        .def_readwrite("srcStarted", &CameraIspStats::srcStarted)
+        .def_readwrite("srcReadStoped", &CameraIspStats::srcReadStoped)
+        .def_readwrite("srcReadStart", &CameraIspStats::srcReadStart)
+        .def_readwrite("srcReadEnd", &CameraIspStats::srcReadEnd)
+        .def_readwrite("ispStarts", &CameraIspStats::ispStarts)
+        .def_readwrite("ispEnds", &CameraIspStats::ispEnds)
+        .def_readwrite("ispStatsReady", &CameraIspStats::ispStatsReady)
+        .def_readwrite("errMipiNoOutBuf", &CameraIspStats::errMipiNoOutBuf)
+        .def_readwrite("errMipiCfgSkipped", &CameraIspStats::errMipiCfgSkipped)
+        .def_readwrite("errMipiCfgMiss", &CameraIspStats::errMipiCfgMiss)
+        .def_readwrite("errMipiWrongState", &CameraIspStats::errMipiWrongState)
+        .def_readwrite("errEventError", &CameraIspStats::errEventError)
     ;
 
     // ChipTemperature
