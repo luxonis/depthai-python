@@ -67,13 +67,13 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
       - name: Setup cmake
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-14'
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.29.x'
@@ -113,7 +113,7 @@ jobs:
           sudo apt install libusb-1.0-0-dev
 
       - name: Install dependencies (MacOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-14'
         run: |
           python -m pip install --upgrade pip
           brew install libusb
@@ -136,7 +136,7 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        rpi-os: [rpi-buster, rpi-bullseye, rpi-bookworm]
+        rpi-os: [rpi-bullseye, rpi-bookworm]
     runs-on: ${{ matrix.rpi-os }}
     steps:
       - name: Print home directory
@@ -184,7 +184,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
+        python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
         python-architecture: [x64, x86]
       fail-fast: false
     steps:
@@ -206,6 +206,11 @@ jobs:
 
       - name: Select Windows SDK
         run: echo "CMAKE_ARGS=-DCMAKE_SYSTEM_VERSION=${{ env.CMAKE_WINDOWS_SDK_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Set UTF-8 encoding
+        run: |
+          echo "PYTHONIOENCODING=utf-8" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PYTHONUTF8=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install dependencies
         run: choco install strawberryperl
@@ -240,8 +245,8 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12']
-        os: [macos-13, macos-14] # macos-13 is x64, macos-14 is arm64
+        python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
+        os: [macos-14] # macos-14 is arm64 (macos-15-intel could be added later, once compilation on clang that on that image is fixed))
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cache .hunter folder
@@ -286,7 +291,7 @@ jobs:
       - name: Archive wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: audited-wheels
+          name: audited-wheels-macos-${{ matrix.python-version }}-${{ matrix.os }}
           path: wheelhouse/audited/
       - name: Deploy wheels to artifactory (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
@@ -301,7 +306,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux_2_28_x86_64:2024.12.05-1
+      image: quay.io/pypa/manylinux_2_28_x86_64:2025.11.10-2
       env:
         PLAT: manylinux_2_28_x86_64
     steps:
@@ -317,7 +322,7 @@ jobs:
         run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install "cmake<4.0"
           ln -s /opt/python/cp38-cp38/bin/cmake /bin/
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
@@ -331,8 +336,8 @@ jobs:
 
       - name: Build and install depthai-core
         run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 4
+          /opt/python/cp38-cp38/bin/cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          /opt/python/cp38-cp38/bin/cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
@@ -341,10 +346,11 @@ jobs:
 
       - name: Building source distribution
         run: |
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install --upgrade setuptools wheel
           /opt/python/cp38-cp38/bin/python3.8 setup.py sdist --formats=gztar
           mv dist/* wheelhouse/audited/
       - name: Build wheels
-        run: for PYBIN in /opt/python/cp3{8..12}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+        run: for PYBIN in /opt/python/cp3{9..14}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Audit wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
@@ -365,7 +371,7 @@ jobs:
     needs: build-docstrings
     runs-on: ubuntu-24.04-arm
     container:
-      image: quay.io/pypa/manylinux_2_28_aarch64:2024.12.05-1
+      image: quay.io/pypa/manylinux_2_28_aarch64:2025.11.10-2
       env:
         PLAT: manylinux_2_28_aarch64
       # Mount local hunter cache directory, instead of transfering to Github and back
@@ -379,7 +385,7 @@ jobs:
         run: yum install -y --disableplugin=fastestmirror libusb1-devel perl-core
       - name: Installing cmake dependency
         run: |
-          /opt/python/cp38-cp38/bin/python3.8 -m pip install cmake
+          /opt/python/cp38-cp38/bin/python3.8 -m pip install "cmake<4"
           ln -s /opt/python/cp38-cp38/bin/cmake /bin/
       - name: Create folder structure
         run: mkdir -p wheelhouse/audited/
@@ -393,15 +399,15 @@ jobs:
 
       - name: Build and install depthai-core
         run: |
-          cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
-          cmake --build build_core --target install --parallel 4
+          /opt/python/cp38-cp38/bin/cmake -S depthai-core/ -B build_core -D CMAKE_BUILD_TYPE=Release -D CMAKE_TOOLCHAIN_FILE=$PWD/cmake/toolchain/pic.cmake
+          /opt/python/cp38-cp38/bin/cmake --build build_core --target install --parallel 4
           echo "DEPTHAI_INSTALLATION_DIR=$PWD/build_core/install/" >> $GITHUB_ENV
 
       - name: Append build hash if not a tagged commit
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
       - name: Building wheels
-        run: for PYBIN in /opt/python/cp3{7..12}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
+        run: for PYBIN in /opt/python/cp3{9..14}*/bin; do "${PYBIN}/pip" wheel . -w ./wheelhouse/ --verbose; done
       - name: Auditing wheels
         run: for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat $PLAT -w wheelhouse/audited/; done
       - name: Archive wheel artifacts
