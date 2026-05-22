@@ -360,7 +360,6 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
         eeprom = calib.getEepromData()
         left_socket = eeprom.stereoRectificationData.leftCameraSocket
         right_socket = eeprom.stereoRectificationData.rightCameraSocket
-        print(f"L: {left_socket} | R: {right_socket}")
         align_socket = [
             cam.socket
             for cam in camera_features
