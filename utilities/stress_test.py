@@ -119,7 +119,8 @@ def create_yolo(pipeline: dai.Pipeline, camera: dai.node.ColorCamera) -> Tuple[s
     yoloDet.input.setBlocking(False)
     camera.preview.link(yoloDet.input)
     xoutColor = pipeline.createXLinkOut()
-    passthrough_q_name = f"preview_{camera.getBoardSocket()}"
+    # Match the rest of this script's naming: "preview_<SOCKET_NAME>"
+    passthrough_q_name = "preview_" + camera.getBoardSocket().name
     xoutColor.setStreamName(passthrough_q_name)
     yoloDet.passthrough.link(xoutColor.input)
     xout_yolo = pipeline.createXLinkOut()
@@ -150,6 +151,12 @@ def stress_test(mxid: str = ""):
     parser = argparse.ArgumentParser()
     parser.add_argument("-ne", "--n-edge-detectors", default=0, type=int, help="Number of edge detectors to create.")
     parser.add_argument("--no-nnet", action="store_true", default=False, help="Don't create a neural network.")
+    parser.add_argument(
+        "--no-stereo",
+        action="store_true",
+        default=False,
+        help="Don't create stereo depth (even if a stereo pair is present).",
+    )
     parser.add_argument(
         "--slow-rampup",
         action="store_true",
@@ -495,7 +502,7 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
             edge_detector.outputImage.link(edge_detector_xlink.input)
             xlink_outs.append((stream_name, 5))
 
-    if left and right:
+    if left and right and not args.no_stereo:
         if left.getResolutionWidth() > 1280:
             print("Left camera width is greater than 1280, setting ISP scale to 2/3")
             left.setIspScale(2, 3)
@@ -506,18 +513,19 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
         output = "out" if hasattr(left, "out") else "video"
         getattr(left, output).link(stereo.left)
         getattr(right, output).link(stereo.right)
-        stereo.setDefaultProfilePreset(
-            dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-        stereo.setOutputSize(left.getResolutionWidth(),
-                             left.getResolutionHeight())
+        stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+        stereo.setOutputSize(left.getResolutionWidth(), left.getResolutionHeight())
         stereo.setLeftRightCheck(True)
         stereo.setSubpixel(True)
         stereo.setDepthAlign(align_socket)
     else:
-        print("Device doesn't have a stereo pair, skipping stereo depth creation...")
+        if args.no_stereo and left and right:
+            print("--no-stereo set, skipping stereo depth creation...")
+        else:
+            print("Device doesn't have a stereo pair, skipping stereo depth creation...")
     if color_cam is not None:
         if not args.no_nnet:
-            if left is not None and right is not None: # Create spatial detection net
+            if left is not None and right is not None and not args.no_stereo: # Create spatial detection net
                 print("Creating spatial detection network...")
                 yolo = pipeline.createYoloSpatialDetectionNetwork()
                 blob_path = get_or_download_yolo_blob()
@@ -535,6 +543,15 @@ def build_pipeline(device: dai.Device, args) -> Tuple[dai.Pipeline, List[Tuple[s
                 yolo.setIouThreshold(0.5)
                 color_cam.preview.link(yolo.input)
                 stereo.depth.link(yolo.inputDepth)
+
+                # Always export the color preview stream, even when the color cam is used by the spatial NN
+                # (otherwise CAM_C looks "missing" since only depth+yolo are published).
+                passthrough_q_name = "preview_" + color_cam.getBoardSocket().name
+                xout_color = pipeline.createXLinkOut()
+                xout_color.setStreamName(passthrough_q_name)
+                yolo.passthrough.link(xout_color.input)
+                xlink_outs.append((passthrough_q_name, 4))
+                context.q_name_yolo_passthrough = passthrough_q_name
 
                 xout_depth = pipeline.createXLinkOut()
                 depth_q_name = "stereo depth"
