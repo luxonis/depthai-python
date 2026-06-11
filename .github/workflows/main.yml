@@ -67,7 +67,7 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Print home directory
@@ -78,13 +78,13 @@ jobs:
         with:
           cmake-version: '3.29.x'
       - name: Cache .hunter folder
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2022'
         uses: actions/cache@v4
         with:
           path: ~/.hunter/
           key: hunter-pytest-${{ matrix.os }}
       - name: Cache .hunter folder
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2022'
         uses: actions/cache@v4
         with:
           path: C:/.hunter/
@@ -180,7 +180,7 @@ jobs:
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     needs: build-docstrings
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       matrix:
         python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
