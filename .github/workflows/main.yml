@@ -169,13 +169,12 @@ jobs:
         with:
           name: audited-wheels-${{ matrix.rpi-os }}
           path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
+      - name: Deploy wheels to Artifact Keeper (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
+        run: bash ./ci/upload-ak.sh --snapshot
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
 
   # This job builds wheels for Windows x86_64 arch
@@ -232,13 +231,12 @@ jobs:
         with:
           name: audited-wheels-windows-${{ matrix.python-version }}-${{ matrix.python-architecture }}
           path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
+      - name: Deploy wheels to Artifact Keeper (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
+        run: bash ./ci/upload-ak.sh --snapshot
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
   # This job builds wheels for macOS x86_64 arch
   build-macos:
@@ -293,13 +291,12 @@ jobs:
         with:
           name: audited-wheels-macos-${{ matrix.python-version }}-${{ matrix.os }}
           path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
+      - name: Deploy wheels to Artifact Keeper (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
+        run: bash ./ci/upload-ak.sh --snapshot
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
@@ -358,13 +355,12 @@ jobs:
         with:
           name: audited-wheels-linux-x86_64
           path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
+      - name: Deploy wheels to Artifact Keeper (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
+        run: bash ./ci/upload-ak.sh --snapshot
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
   # This job builds wheels for ARM64 arch
   build-linux-arm64:
@@ -415,13 +411,12 @@ jobs:
         with:
           name: audited-wheels-linux-arm64
           path: wheelhouse/audited/
-      - name: Deploy wheels to artifactory (if not a release)
+      - name: Deploy wheels to Artifact Keeper (if not a release)
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: bash ./ci/upload-artifactory.sh
+        run: bash ./ci/upload-ak.sh --snapshot
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -458,7 +453,7 @@ jobs:
 
         draft: true
 
-  # Deploy to PyPi and Artifactory. Only when a commit is tagged
+  # Deploy to PyPi and Artifact Keeper. Only when a commit is tagged
   deploy:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [release]
@@ -480,12 +475,11 @@ jobs:
           PYPI_SERVER: ${{ secrets.PYPI_SERVER }}
           PYPI_USER: ${{ secrets.PYPI_USER }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      - name: Run deploy to Artifactory
-        run: bash ./ci/upload-artifactory-release.sh
+      - name: Run deploy to Artifact Keeper
+        run: bash ./ci/upload-ak.sh --release
         env:
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASS: ${{ secrets.ARTIFACTORY_PASS }}
+          AK_URL: ${{ secrets.AK_URL }}
+          AK_TOKEN: ${{ secrets.AK_TOKEN }}
 
 
   # notify_hil_workflow_linux_x86_64:
