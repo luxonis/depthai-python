@@ -140,7 +140,7 @@ jobs:
           - rpi-os: rpi-bullseye
             auditwheel-plat: manylinux_2_31_armv7l
           - rpi-os: rpi-bookworm
-            auditwheel-plat: manylinux_2_36_armv7l
+            auditwheel-plat: linux_armv7l
     runs-on: ${{ matrix.rpi-os }}
     steps:
       - name: Print home directory
