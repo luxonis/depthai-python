@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+"""
+Due to an issue with our calibration, you might receive the following error when running this script on early release OAK Thermal devices:
+```bash
+[ImageAlign(4)] [error] Failed to get calibration data: Extrinsic connection between the requested cameraId's doesn't exist. Please recalibrate or modify your calibration data
+```
+If this happens, please download the calibration data + script from https://drive.google.com/drive/folders/1Q_MZMqWMKDC1eOqVHGPeDO-NJgFmnY5U,
+place them into the same folder, connect the camera to the computer and run the script. This will update the
+calibration and add required extrinsics between the camera sensors.
+"""
+
 import cv2
 import depthai as dai
 import numpy as np
@@ -40,6 +50,14 @@ if not thermalFound:
     raise RuntimeError("No thermal camera found!")
 
 
+ISP_SCALE = 3
+
+calibrationHandler = device.readCalibration()
+rgbDistortion = calibrationHandler.getDistortionCoefficients(RGB_SOCKET)
+distortionModel = calibrationHandler.getDistortionModel(RGB_SOCKET)
+if distortionModel != dai.CameraModel.Perspective:
+    raise RuntimeError("Unsupported distortion model for RGB camera. This example supports only Perspective model.")
+
 pipeline = dai.Pipeline()
 
 # Define sources and outputs
@@ -57,7 +75,7 @@ cfgIn = pipeline.create(dai.node.XLinkIn)
 camRgb.setBoardSocket(RGB_SOCKET)
 camRgb.setResolution(COLOR_RESOLUTION)
 camRgb.setFps(FPS)
-camRgb.setIspScale(1,3)
+camRgb.setIspScale(1,ISP_SCALE)
 
 out.setStreamName("out")
 
@@ -132,6 +150,14 @@ with device:
         frameRgbCv = frameRgb.getCvFrame()
         fpsCounter.tick()
 
+        rgbIntrinsics = calibrationHandler.getCameraIntrinsics(RGB_SOCKET, int(frameRgbCv.shape[1]), int(frameRgbCv.shape[0]))
+
+        cvFrameUndistorted = cv2.undistort(
+            frameRgbCv,
+            np.array(rgbIntrinsics),
+            np.array(rgbDistortion),
+        )
+
         # Colorize the aligned depth
         thermalFrame = thermalAligned.getCvFrame().astype(np.float32)
         # Create a mask for nan values
@@ -143,7 +169,7 @@ with device:
         # Apply the mask back with black pixels (0)
         colormappedFrame[mask] = 0
 
-        blended = cv2.addWeighted(frameRgbCv, rgbWeight, colormappedFrame, thermalWeight, 0)
+        blended = cv2.addWeighted(cvFrameUndistorted, rgbWeight, colormappedFrame, thermalWeight, 0)
 
         cv2.putText(
             blended,

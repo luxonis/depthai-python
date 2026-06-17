@@ -150,7 +150,7 @@ if not args.skip_depthai:
     # Install depthai depending on context
     if not git_context or git_branch == 'main':
         # Install latest pypi depthai release
-        depthai_install_cmd = [*pip_package_install, '-U', '--force-reinstall', 'depthai']
+        depthai_install_cmd = [*pip_package_install, '-U', '--force-reinstall', 'depthai~=2.0']
         if args.dry_run:
             prettyPrint(depthai_install_cmd)
         else:
@@ -223,6 +223,12 @@ if args.convert != convert_default:
             "compile_params": ["-ip FP16"],
             "zoo_type": "depthai",
             "default_ov_version": "2022.1"
+        },
+          "yolov8n_coco_640x352": {
+          "shaves": [6],
+          "compile_params": ["-ip U8"],
+          "zoo_type": "depthai",
+          "default_ov_version": "2021.4"
         },
     }
 

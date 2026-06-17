@@ -30,13 +30,20 @@ void bind_messagedemux(pybind11::module &m, void *pCallstack) {
   ///////////////////////////////////////////////////////////////////////
 
   // Properties
+  messageDemuxProperties
+      .def_readwrite("processor", &MessageDemuxProperties::processor,
+                     DOC(dai, MessageDemuxProperties, processor));
 
   // Node
   messageDemux
       .def_readonly("outputs", &MessageDemux::outputs,
                     DOC(dai, node, MessageDemux, outputs))
       .def_readonly("input", &MessageDemux::input,
-                    DOC(dai, node, MessageDemux, input));
+                    DOC(dai, node, MessageDemux, input))
+      .def("setProcessor", &MessageDemux::setProcessor,
+           DOC(dai, node, MessageDemux, setProcessor))
+      .def("getProcessor", &MessageDemux::getProcessor,
+           DOC(dai, node, MessageDemux, getProcessor));
   daiNodeModule.attr("MessageDemux").attr("Properties") =
       messageDemuxProperties;
 }

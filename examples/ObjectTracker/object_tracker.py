@@ -29,9 +29,11 @@ objectTracker = pipeline.create(dai.node.ObjectTracker)
 
 xlinkOut = pipeline.create(dai.node.XLinkOut)
 trackerOut = pipeline.create(dai.node.XLinkOut)
+xinTrackerConfig = pipeline.create(dai.node.XLinkIn)
 
 xlinkOut.setStreamName("preview")
 trackerOut.setStreamName("tracklets")
+xinTrackerConfig.setStreamName("trackerConfig")
 
 # Properties
 camRgb.setPreviewSize(300, 300)
@@ -64,11 +66,19 @@ detectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
 detectionNetwork.out.link(objectTracker.inputDetections)
 objectTracker.out.link(trackerOut.input)
 
+# set tracking parameters
+objectTracker.setOcclusionRatioThreshold(0.4)
+objectTracker.setTrackletMaxLifespan(120)
+objectTracker.setTrackletBirthThreshold(3)
+
+xinTrackerConfig.out.link(objectTracker.inputConfig)
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
     preview = device.getOutputQueue("preview", 4, False)
     tracklets = device.getOutputQueue("tracklets", 4, False)
+    trackerConfigQueue = device.getInputQueue("trackerConfig")
 
     startTime = time.monotonic()
     counter = 0
@@ -76,6 +86,7 @@ with dai.Device(pipeline) as device:
     frame = None
 
     while(True):
+        latestTrackedIds = []
         imgFrame = preview.get()
         track = tracklets.get()
 
@@ -106,9 +117,26 @@ with dai.Device(pipeline) as device:
             cv2.putText(frame, t.status.name, (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
 
+            if t.status == dai.Tracklet.TrackingStatus.TRACKED:
+                latestTrackedIds.append(t.id)
+
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
 
         cv2.imshow("tracker", frame)
 
-        if cv2.waitKey(1) == ord('q'):
+        key = cv2.waitKey(1)
+        if key == ord('q'):
             break
+        elif key == ord('g'):
+            # send tracker config to device
+            config = dai.ObjectTrackerConfig()
+
+            # take a random ID from the latest tracked IDs
+            if len(latestTrackedIds) > 0:
+                idToRemove = (np.random.choice(latestTrackedIds))
+                print(f"Force removing ID: {idToRemove}")
+                config.forceRemoveID(idToRemove)
+                trackerConfigQueue.send(config)
+            else:
+                print("No tracked IDs available to force remove")
+

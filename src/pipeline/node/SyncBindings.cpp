@@ -32,6 +32,7 @@ void bind_sync(pybind11::module& m, void* pCallstack){
     syncProperties
         .def_readwrite("syncThresholdNs", &SyncProperties::syncThresholdNs)
         .def_readwrite("syncAttempts", &SyncProperties::syncAttempts)
+        .def_readwrite("processor", &SyncProperties::processor, DOC(dai, SyncProperties, processor))
         ;
 
     // Node
@@ -40,6 +41,8 @@ void bind_sync(pybind11::module& m, void* pCallstack){
         .def_readonly("inputs", &Sync::inputs, DOC(dai, node, Sync, inputs))
         .def("setSyncThreshold", &Sync::setSyncThreshold, py::arg("syncThreshold"), DOC(dai, node, Sync, setSyncThreshold))
         .def("setSyncAttempts", &Sync::setSyncAttempts, py::arg("maxDataSize"), DOC(dai, node, Sync, setSyncAttempts))
+        .def("setProcessor", &Sync::setProcessor, DOC(dai, node, Sync, setProcessor))
+        .def("getProcessor", &Sync::getProcessor, DOC(dai, node, Sync, getProcessor))
         .def("getSyncThreshold", &Sync::getSyncThreshold, DOC(dai, node, Sync, getSyncThreshold))
         .def("getSyncAttempts", &Sync::getSyncAttempts, DOC(dai, node, Sync, getSyncAttempts))
         ;

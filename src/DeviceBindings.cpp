@@ -11,6 +11,7 @@
 #include "depthai/device/DeviceBootloader.hpp"
 
 // std::chrono bindings
+#include <XLink/XLinkPublicDefines.h>
 #include <pybind11/chrono.h>
 // py::detail
 #include <pybind11/detail/common.h>
@@ -43,8 +44,14 @@ static auto deviceSearchHelper(Args&&... args){
         auto numConnected = DEVICE::getAllAvailableDevices().size();
         if(numConnected > 0) {
             throw std::runtime_error("No available devices (" + std::to_string(numConnected) + " connected, but in use)");
-        } else {
-            throw std::runtime_error("No available devices");
+        }
+        auto numDevicesAnyPlatform = dai::XLinkConnection::getAllConnectedDevices(X_LINK_ANY_STATE, false, X_LINK_ANY_PLATFORM).size();
+        auto numDevicesRVC2 = dai::XLinkConnection::getAllConnectedDevices(
+                                     X_LINK_ANY_STATE, false, X_LINK_MYRIAD_X)
+                                     .size();
+        auto nonRVC2Devices = numDevicesAnyPlatform - numDevicesRVC2;
+        if(nonRVC2Devices > 0) {
+            throw std::runtime_error("No available RVC2 devices found, but found " + std::to_string(nonRVC2Devices) + " non RVC2 device[s]. To use RVC4 devices, please update DepthAI to version v3.x or newer.");
         }
     }
 
@@ -482,6 +489,7 @@ void DeviceBindings::bind(pybind11::module& m, void* pCallstack){
         .def("getSystemInformationLoggingRate", [](DeviceBase& d) { py::gil_scoped_release release; return d.getSystemInformationLoggingRate(); }, DOC(dai, DeviceBase, getSystemInformationLoggingRate))
         .def("getCrashDump", [](DeviceBase& d, bool clearCrashDump) { py::gil_scoped_release release; return d.getCrashDump(clearCrashDump); }, py::arg("clearCrashDump") = true, DOC(dai, DeviceBase, getCrashDump))
         .def("hasCrashDump", [](DeviceBase& d) { py::gil_scoped_release release; return d.hasCrashDump(); }, DOC(dai, DeviceBase, hasCrashDump))
+        .def("getState", [](DeviceBase& d) { py::gil_scoped_release release; return d.getState(); }, DOC(dai, DeviceBase, getState))
         .def("getConnectedCameras", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameras(); }, DOC(dai, DeviceBase, getConnectedCameras))
         .def("getConnectionInterfaces", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectionInterfaces(); }, DOC(dai, DeviceBase, getConnectionInterfaces))
         .def("getConnectedCameraFeatures", [](DeviceBase& d) { py::gil_scoped_release release; return d.getConnectedCameraFeatures(); }, DOC(dai, DeviceBase, getConnectedCameraFeatures))

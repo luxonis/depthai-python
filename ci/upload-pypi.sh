@@ -2,7 +2,7 @@
 
 python3 -m pip install -U pip
 python3 -m pip install -U setuptools
-python3 -m pip install -U twine
+python3 -m pip install -U twine==6.0.1
 
 # Uploads prebuilt binary distribution
 for file in wheelhouse/audited/*.whl; do

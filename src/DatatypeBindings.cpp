@@ -28,6 +28,7 @@ void bind_tracklets(pybind11::module& m, void* pCallstack);
 void bind_pointcloudconfig(pybind11::module& m, void* pCallstack);
 void bind_pointclouddata(pybind11::module& m, void* pCallstack);
 void bind_imagealignconfig(pybind11::module& m, void* pCallstack);
+void bind_objecttrackerconfig(pybind11::module& m, void* pCallstack);
 
 void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
      // Bind common datatypebindings
@@ -59,6 +60,7 @@ void DatatypeBindings::addToCallstack(std::deque<StackFunction>& callstack) {
     callstack.push_front(bind_pointcloudconfig);
     callstack.push_front(bind_pointclouddata);
     callstack.push_front(bind_imagealignconfig);
+    callstack.push_front(bind_objecttrackerconfig);
 }
 
 void DatatypeBindings::bind(pybind11::module& m, void* pCallstack){
