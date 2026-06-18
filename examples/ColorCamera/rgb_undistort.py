@@ -20,7 +20,7 @@ def getMesh(calibData, ispSize):
     for y in range(mapX.shape[0] + 1): # iterating over height of the image
         if y % meshCellSize == 0:
             rowLeft = []
-            for x in range(mapX.shape[1]): # iterating over width of the image
+            for x in range(mapX.shape[1] + 1): # iterating over width of the image
                 if x % meshCellSize == 0:
                     if y == mapX.shape[0] and x == mapX.shape[1]:
                         rowLeft.append(mapX[y - 1, x - 1])
