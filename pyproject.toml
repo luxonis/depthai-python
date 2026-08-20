@@ -1,2 +1,3 @@
 [build-system]
-requires = ["setuptools", "wheel", "mypy", "typing-extensions", "cmake==3.25"]
+# librt and ast-serialize are pinned due to python 3.13 free threading build
+requires = ["setuptools", "wheel", "mypy<2.4", "librt==0.13.0", "ast-serialize==0.6.0", "typing-extensions", "cmake==3.25"]
