@@ -131,48 +131,6 @@ jobs:
           cmake --build build --target pytest --config Release
 
 
-  # This job builds wheels for armhf arch (RPi)
-  build-linux-armhf:
-    needs: build-docstrings
-    strategy:
-      matrix:
-        include:
-          - rpi-os: rpi-bullseye
-            auditwheel-plat: manylinux_2_31_armv7l
-          - rpi-os: rpi-bookworm
-            auditwheel-plat: linux_armv7l
-    runs-on: ${{ matrix.rpi-os }}
-    steps:
-      - name: Print home directory
-        run: echo Home directory inside container $HOME
-      - uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: 'docstrings'
-          path: docstrings
-      - name: Specify docstring to use while building the wheel
-        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
-
-      - name: Append build hash if not a tagged commit
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
-      - name: Building wheel
-        run: CMAKE_ARGS='-DDEPTHAI_ENABLE_CURL=OFF' python3 -m pip wheel . -w ./wheelhouse/ --verbose
-      - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
-        run: |
-          # python3 -m pip install -U wheel auditwheel # Called once when setting up the runner
-          for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat ${{ matrix.auditwheel-plat }} -w wheelhouse/preaudited/; done
-          for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
-          mkdir -p wheelhouse/audited/
-          for whl in wheelhouse/preaudited/*linux_armv6l*.whl; do cp "$whl" wheelhouse/audited/$(basename $whl); done
-      - name: Archive wheel artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: audited-wheels-${{ matrix.rpi-os }}
-          path: wheelhouse/audited/
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     needs: build-docstrings
@@ -388,7 +346,7 @@ jobs:
           path: wheelhouse/audited/
   upload-wheels-to-ak:
     if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && !startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
+    needs: [build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -407,7 +365,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
+    needs: [pytest, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
     runs-on: ubuntu-latest
 
     steps:
@@ -482,7 +440,7 @@ jobs:
   #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   notify_hil_workflow:
-    needs: [build-linux-armhf, build-linux-x86_64]
+    needs: [build-linux-x86_64]
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch an action and get the run ID
