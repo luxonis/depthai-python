@@ -17,12 +17,12 @@ readonly ubuntu_pkgs=(
     libavcodec-dev
     libavformat-dev
     libswscale-dev
-    libtbb2
+    libtbb12
     libtbb-dev
     libjpeg-dev
     libpng-dev
     libtiff-dev
-    libdc1394-22-dev
+    libdc1394-dev
     # https://stackoverflow.com/questions/55313610
     ffmpeg
     libsm6
@@ -37,7 +37,7 @@ readonly ubuntu_arm_pkgs=(
     libhdf5-dev
     libatlas-base-dev
     # https://github.com/EdjeElectronics/TensorFlow-Object-Detection-on-the-Raspberry-Pi/issues/18#issuecomment-433953426
-    libilmbase-dev
+    libimath-dev
     libopenexr-dev
     libgstreamer1.0-dev
 )
