@@ -13,12 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, [Linux, ARM], ubuntu-24.04-arm]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
         include:
           - os: ubuntu-latest
             arch: amd64
-          - os: [Linux, ARM]
-            arch: armv7
           - os: ubuntu-24.04-arm
             arch: armv8
     steps:
@@ -77,7 +75,6 @@ jobs:
           docker manifest create \
           luxonis/depthai-library:${{ github.sha}} \
           --amend luxonis/depthai-library:${{ github.sha }}-amd64 \
-          --amend luxonis/depthai-library:${{ github.sha }}-armv7 \
           --amend luxonis/depthai-library:${{ github.sha }}-armv8
           # Push
           docker manifest push luxonis/depthai-library:${{ github.sha }}
@@ -88,7 +85,6 @@ jobs:
           docker manifest create \
           luxonis/depthai-library:${{ steps.vars.outputs.short_ref }} \
           --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-amd64 \
-          --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv7 \
           --amend luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}-armv8
           # Push
           docker manifest push luxonis/depthai-library:${{ steps.vars.outputs.short_ref }}
