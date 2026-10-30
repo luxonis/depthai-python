@@ -29,13 +29,13 @@ jobs:
 
   # Job which builds docstrings for the rest of the wheel builds
   build-docstrings:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
           path: ~/.hunter
-          key: hunter-ubuntu-latest
+          key: hunter-ubuntu-24.04
       - name: List .hunter cache directory
         run: ls -a -l ~/.hunter/_Base/ || true
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Print home directory
@@ -107,7 +107,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           python -m pip install --upgrade pip
           sudo apt install libusb-1.0-0-dev
@@ -283,7 +283,7 @@ jobs:
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
     needs: build-docstrings
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: quay.io/pypa/manylinux_2_28_x86_64:2025.11.10-2
       env:
@@ -389,7 +389,7 @@ jobs:
   upload-wheels-to-ak:
     if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && !startsWith(github.ref, 'refs/tags/v')
     needs: [build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -408,7 +408,7 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -444,7 +444,7 @@ jobs:
   deploy:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [release]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -471,7 +471,7 @@ jobs:
 
   # notify_hil_workflow_linux_x86_64:
   #   needs: [build-linux-x86_64]
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #   steps:
   #     - name: Repository Dispatch
   #       uses: peter-evans/repository-dispatch@v2
@@ -483,7 +483,7 @@ jobs:
 
   notify_hil_workflow:
     needs: [build-linux-armhf, build-linux-x86_64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v1
