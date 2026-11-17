@@ -117,6 +117,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          brew uninstall --ignore-dependencies libpsl || true
           # -Dfdopen=fdopen: zlib 1.2.11 defines fdopen() as a macro on macOS, which breaks the macOS 15 SDK.
           # -isysroot must come first: Hunter passes all C flags to OpenSSL Configure as one argument,
           # and an argument that starts with -D is used only to compile, so the dylib links lose the SDK
@@ -231,6 +232,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          brew uninstall --ignore-dependencies libpsl || true
           python -m pip install delocate wheel
       - name: Set macos deployment target
         run: |
