@@ -118,6 +118,7 @@ jobs:
           python -m pip install --upgrade pip
           brew install libusb
           echo "CFLAGS=-Dfdopen=fdopen" >> $GITHUB_ENV
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
 
       - name: Install pytest
         run: |
@@ -232,6 +233,7 @@ jobs:
         run: |
           echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
           echo "CFLAGS=-Dfdopen=fdopen" >> $GITHUB_ENV
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> $GITHUB_ENV
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels
