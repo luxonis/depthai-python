@@ -15,6 +15,8 @@ Documentation is available over at [Luxonis DepthAI API](https://docs.luxonis.co
 
 ## Installation
 
+Automated ARM32 (ARMv6/ARMv7) builds have been discontinued for DepthAI v2. Prebuilt ARM wheels and Docker images are provided for ARM64.
+
 Prebuilt wheels are available in [Luxonis repository](https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/)
 Make sure pip is upgraded
 ```

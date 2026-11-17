@@ -29,13 +29,13 @@ jobs:
 
   # Job which builds docstrings for the rest of the wheel builds
   build-docstrings:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Cache .hunter folder
         uses: actions/cache@v4
         with:
           path: ~/.hunter
-          key: hunter-ubuntu-latest
+          key: hunter-ubuntu-24.04
       - name: List .hunter cache directory
         run: ls -a -l ~/.hunter/_Base/ || true
       - uses: actions/checkout@v4
@@ -67,13 +67,13 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
       - name: Setup cmake
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-15'
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.29.x'
@@ -107,16 +107,22 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           python -m pip install --upgrade pip
           sudo apt install libusb-1.0-0-dev
 
       - name: Install dependencies (MacOS)
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-15'
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          brew uninstall --ignore-dependencies libpsl || true
+          # -Dfdopen=fdopen: zlib 1.2.11 defines fdopen() as a macro on macOS, which breaks the macOS 15 SDK.
+          # -isysroot must come first: Hunter passes all C flags to OpenSSL Configure as one argument,
+          # and an argument that starts with -D is used only to compile, so the dylib links lose the SDK
+          # (ld: library 'System' not found).
+          echo "CFLAGS=-isysroot $(xcrun --sdk macosx --show-sdk-path) -Dfdopen=fdopen" >> $GITHUB_ENV
 
       - name: Install pytest
         run: |
@@ -131,48 +137,6 @@ jobs:
           cmake --build build --target pytest --config Release
 
 
-  # This job builds wheels for armhf arch (RPi)
-  build-linux-armhf:
-    needs: build-docstrings
-    strategy:
-      matrix:
-        include:
-          - rpi-os: rpi-bullseye
-            auditwheel-plat: manylinux_2_31_armv7l
-          - rpi-os: rpi-bookworm
-            auditwheel-plat: linux_armv7l
-    runs-on: ${{ matrix.rpi-os }}
-    steps:
-      - name: Print home directory
-        run: echo Home directory inside container $HOME
-      - uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: 'docstrings'
-          path: docstrings
-      - name: Specify docstring to use while building the wheel
-        run: echo "DEPTHAI_PYTHON_DOCSTRINGS_INPUT=$PWD/docstrings/depthai_python_docstring.hpp" >> $GITHUB_ENV
-
-      - name: Append build hash if not a tagged commit
-        if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "BUILD_COMMIT_HASH=${{github.sha}}" >> $GITHUB_ENV
-      - name: Building wheel
-        run: CMAKE_ARGS='-DDEPTHAI_ENABLE_CURL=OFF' python3 -m pip wheel . -w ./wheelhouse/ --verbose
-      - name: Auditing wheels and adding armv6l tag (Running on RPi, binaries compiled as armv6l)
-        run: |
-          # python3 -m pip install -U wheel auditwheel # Called once when setting up the runner
-          for whl in wheelhouse/*.whl; do auditwheel repair "$whl" --plat ${{ matrix.auditwheel-plat }} -w wheelhouse/preaudited/; done
-          for whl in wheelhouse/preaudited/*.whl; do python3 -m wheel tags --platform-tag +linux_armv6l "$whl"; done
-          mkdir -p wheelhouse/audited/
-          for whl in wheelhouse/preaudited/*linux_armv6l*.whl; do cp "$whl" wheelhouse/audited/$(basename $whl); done
-      - name: Archive wheel artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: audited-wheels-${{ matrix.rpi-os }}
-          path: wheelhouse/audited/
   # This job builds wheels for Windows x86_64 arch
   build-windows-x86_64:
     needs: build-docstrings
@@ -233,7 +197,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
-        os: [macos-14] # macos-14 is arm64 (macos-15-intel could be added later, once compilation on clang that on that image is fixed))
+        os: [macos-15] # macos-15 is arm64 (macos-15-intel could be added later, once compilation on clang that on that image is fixed))
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cache .hunter folder
@@ -268,9 +232,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          brew uninstall --ignore-dependencies libpsl || true
           python -m pip install delocate wheel
       - name: Set macos deployment target
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+          # See the pytest job: -isysroot must come before -Dfdopen=fdopen (Hunter OpenSSL link).
+          echo "CFLAGS=-isysroot $(xcrun --sdk macosx --show-sdk-path) -Dfdopen=fdopen" >> $GITHUB_ENV
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels
@@ -283,7 +251,7 @@ jobs:
   # This job builds wheels for x86_64 arch
   build-linux-x86_64:
     needs: build-docstrings
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: quay.io/pypa/manylinux_2_28_x86_64:2025.11.10-2
       env:
@@ -388,8 +356,8 @@ jobs:
           path: wheelhouse/audited/
   upload-wheels-to-ak:
     if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && !startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
-    runs-on: ubuntu-latest
+    needs: [build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -407,8 +375,8 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [pytest, build-linux-armhf, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
-    runs-on: ubuntu-latest
+    needs: [pytest, build-windows-x86_64, build-macos, build-linux-x86_64, build-linux-arm64]
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -444,7 +412,7 @@ jobs:
   deploy:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [release]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -471,7 +439,7 @@ jobs:
 
   # notify_hil_workflow_linux_x86_64:
   #   needs: [build-linux-x86_64]
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #   steps:
   #     - name: Repository Dispatch
   #       uses: peter-evans/repository-dispatch@v2
@@ -482,8 +450,8 @@ jobs:
   #         client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 
   notify_hil_workflow:
-    needs: [build-linux-armhf, build-linux-x86_64]
-    runs-on: ubuntu-latest
+    needs: [build-linux-x86_64]
+    runs-on: ubuntu-24.04
     steps:
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v1
