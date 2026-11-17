@@ -117,6 +117,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          echo "CFLAGS=-Dfdopen=fdopen" >> $GITHUB_ENV
 
       - name: Install pytest
         run: |
@@ -228,7 +229,9 @@ jobs:
           brew install libusb
           python -m pip install delocate wheel
       - name: Set macos deployment target
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+          echo "CFLAGS=-Dfdopen=fdopen" >> $GITHUB_ENV
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels
