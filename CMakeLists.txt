@@ -20,6 +20,11 @@ file(READ depthai-core/cmake/Hunter/config.cmake depthai_core_hunter_config)
 file(READ cmake/Hunter/config.cmake hunter_config)
 string(CONCAT final_hunter_config ${depthai_core_hunter_config} "\n\n" ${hunter_config})
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/config.cmake ${final_hunter_config})
+# depthai-core's Hunter config loads its Windows libusb patch from the config's directory
+set(depthai_core_libusb_patch depthai-core/cmake/Hunter/libusb-windows-claim-interface.cmake)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${depthai_core_libusb_patch})
+    configure_file(${depthai_core_libusb_patch} ${CMAKE_CURRENT_BINARY_DIR}/generated/Hunter/libusb-windows-claim-interface.cmake COPYONLY)
+endif()
 
 include("cmake/HunterGate.cmake")
 HunterGate(
