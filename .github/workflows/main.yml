@@ -67,13 +67,13 @@ jobs:
     needs: build-docstrings
     strategy:
       matrix:
-        os: [ubuntu-24.04, windows-2022, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Print home directory
         run: echo Home directory inside container $HOME
       - name: Setup cmake
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-15'
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.29.x'
@@ -113,10 +113,16 @@ jobs:
           sudo apt install libusb-1.0-0-dev
 
       - name: Install dependencies (MacOS)
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-15'
         run: |
           python -m pip install --upgrade pip
           brew install libusb
+          brew uninstall --ignore-dependencies libpsl || true
+          # -Dfdopen=fdopen: zlib 1.2.11 defines fdopen() as a macro on macOS, which breaks the macOS 15 SDK.
+          # -isysroot must come first: Hunter passes all C flags to OpenSSL Configure as one argument,
+          # and an argument that starts with -D is used only to compile, so the dylib links lose the SDK
+          # (ld: library 'System' not found).
+          echo "CFLAGS=-isysroot $(xcrun --sdk macosx --show-sdk-path) -Dfdopen=fdopen" >> $GITHUB_ENV
 
       - name: Install pytest
         run: |
@@ -191,7 +197,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9, '3.10', '3.11', '3.12', '3.13', '3.14']
-        os: [macos-14] # macos-14 is arm64 (macos-15-intel could be added later, once compilation on clang that on that image is fixed))
+        os: [macos-15] # macos-15 is arm64 (macos-15-intel could be added later, once compilation on clang that on that image is fixed))
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cache .hunter folder
@@ -226,9 +232,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           brew install libusb
-          python -m pip install delocate
+          brew uninstall --ignore-dependencies libpsl || true
+          python -m pip install delocate wheel
       - name: Set macos deployment target
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+          # See the pytest job: -isysroot must come before -Dfdopen=fdopen (Hunter OpenSSL link).
+          echo "CFLAGS=-isysroot $(xcrun --sdk macosx --show-sdk-path) -Dfdopen=fdopen" >> $GITHUB_ENV
       - name: Building wheels
         run: python -m pip wheel . -w ./wheelhouse/ --verbose
       - name: Auditing wheels
